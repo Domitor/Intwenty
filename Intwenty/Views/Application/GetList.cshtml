@@ -58,21 +58,21 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th></th>
+                    <th style="width:10%"></th>
                     @{
                         foreach (var c in Model.UIStructure)
                         {
 
                             if (c.IsUITypeListViewField && c.IsDataConnected)
                             {
-                                <th>@c.Title</th>
+                                <th v-on:click="sort('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
                             }
 
                         }
                     }
                 </tr>
             </thead>
-            <tr v-for="item in datalist">
+            <tr v-for="item in sortedResults">
                 <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id">Open</a></td>
                 @{
                     foreach (var c in Model.UIStructure)
@@ -105,7 +105,9 @@
             data: {
                 datalist: []
                 ,model: { "filtervalue": "", "filterfield": "" }
-                , retrieveinfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                ,retrieveinfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                ,currentSort: ''
+                ,currentSortDir: 'asc'
             },
             methods: {
                 nextpage: function ()
@@ -161,6 +163,13 @@
                     }
 
                    
+                },
+                sort: function (s) {
+                    //if s == current sort, reverse
+                    if (s === this.currentSort) {
+                        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+                    }
+                    this.currentSort = s;
                 }
             },
             computed: {
@@ -179,6 +188,15 @@
 
                         return false;
                     })
+                },
+                sortedResults: function () {
+                    return this.datalist.sort((a, b) => {
+                        let modifier = 1;
+                        if (this.currentSortDir === 'desc') modifier = -1;
+                        if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+                        if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+                        return 0;
+                    });
                 },
                 isFirstPage: function () {
                     return this.retrieveinfo.currentRowNum <= 0;
