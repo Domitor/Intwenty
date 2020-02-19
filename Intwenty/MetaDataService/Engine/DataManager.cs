@@ -728,7 +728,7 @@ namespace Moley.MetaDataService.Engine
             foreach (var t in Meta.DataStructure)
             {
 
-                if (t.IsRoot && t.MetaType == "DATAVALUE")
+                if (t.IsRoot && t.IsMetaTypeDataValue)
                 {
                     var dv = data.FirstOrDefault(p => p.Key == t.MetaCode);
                     if (dv.Equals(default(KeyValuePair<string, object>)))
