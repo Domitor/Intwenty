@@ -1,0 +1,102 @@
+﻿@model Moley.Data.Dto.ApplicationDto
+
+@{
+    ViewData["Title"] = "Create New " + Model.Application.Title;
+}
+
+
+
+
+@await Html.PartialAsync("_DefaultAppUI", Model)
+
+
+
+@section Scripts
+{
+
+<script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalists: {},
+                model: {},
+                sendData: function () {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "Save";
+
+                    this.model.ApplicationId = @Model.Application.Id;
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response)
+                        {
+                            if (response.isSuccess) {
+                                context.model.Id = response.id;
+                                context.model.Version = response.version;
+                                endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
+                                window.location.href = endpointurl;
+                            }
+                            else
+                            {
+                                $("#msg_dlg_modal_text").text("");
+                                $("#msg_dlg_modal_text").text(response.messages[0].message);
+                                $("#msg_dlg_modal").modal();
+                             
+                                //alert(response.messages[0].message);
+                            }
+                        }
+                    });
+                },
+                setSelectedDataViewValue: function (item, lookupid)
+                {
+                    var context = this;
+                    $("div[data-lookupid]").each(function ()
+                    {
+                        var id = $(this).data('lookupid');
+                        if (id === lookupid)
+                        {
+                            var dbfield = $(this).data('dbfield');
+                            var viewfield = $(this).data('viewfield');
+                            context.model[dbfield] = item[viewfield];
+                        }
+                    });
+
+                    this.$forceUpdate();
+                },
+                openLookUp: function (modalid)
+                {
+                    $("#" + modalid).modal();
+                }
+
+
+
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/Application/")';
+                var endpointurl = baseurl + "GetDomains/@Model.Application.Id";
+                $.get(endpointurl, function (response)
+                {
+                    context.datalists = JSON.parse(response.data);
+                    endpointurl = baseurl + "GetNoSerieValues/@Model.Application.Id";
+                    $.get(endpointurl, function (response)
+                    {
+                        for (i = 0; i < response.length; i++)
+                        {
+                            var t = response[i];
+                            context.model[t.dataMetaCode] = t.newValue;
+                            context.$forceUpdate();
+                        }
+                    });
+                });
+            }
+        })
+</script>
+
+}

@@ -1,0 +1,47 @@
+﻿@model List<Moley.Data.Dto.ApplicationDescriptionDto>
+
+@{
+    ViewData["Title"] = "Application Registry";
+}
+
+
+
+@{
+
+
+    <h1>Application Registry</h1>
+
+    <a asp-action="Create" class="btn btn-primary">Add</a>
+
+    <br />
+    <br />
+
+    <table class="table table-responsive table-hover">
+        <tr>
+            <th></th>
+
+            <th>Application Id </th>
+            <th>Title</th>
+            <th>Abbreviation</th>
+            <th>Content Name</th>
+            <th></th>
+        </tr>
+        @foreach (var d in Model)
+        {
+        <tr>
+            <td>
+                <a asp-action="Edit"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color:black"></span></a>
+            </td>
+
+            <td>@d.Id</td>
+            <td>@d.Title</td>
+            <td>@d.MetaCode</td>
+            <td>
+                <a href="#" onclick="app.deleteMark(@Html.Raw(@d.Id));"><span class="glyphicon glyphicon-remove-sign" style="font-size: 20px; color:black"></span></a>
+            </td>
+
+        </tr>
+        }
+    </table>
+
+}

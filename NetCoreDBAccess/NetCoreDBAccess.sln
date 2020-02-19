@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreDBAccess", "NetCoreDBAccess.csproj", "{D828C0A7-2CFB-4F2A-8E73-455292260045}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D828C0A7-2CFB-4F2A-8E73-455292260045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D828C0A7-2CFB-4F2A-8E73-455292260045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D828C0A7-2CFB-4F2A-8E73-455292260045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D828C0A7-2CFB-4F2A-8E73-455292260045}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E3B5D219-E869-4D32-9AA7-EC49509FA174}
+	EndGlobalSection
+EndGlobal

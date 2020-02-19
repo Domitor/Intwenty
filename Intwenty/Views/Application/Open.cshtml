@@ -1,0 +1,78 @@
+﻿@model Moley.Data.Dto.ApplicationDto
+
+@{
+    ViewData["Title"] = "Edit "  + Model.Application.Title + " (" + ViewBag.SystemId + ")";
+}
+
+
+
+
+@await Html.PartialAsync("_DefaultAppUI", Model)
+
+
+
+@section Scripts
+    {
+<script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalists: [],
+                model: {},
+                sendData: function () {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "Save";
+
+                    this.model.ApplicationId = @Model.Application.Id;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response) {
+                            window.location.reload(true);
+                        }
+                    });
+                }, 
+                setSelectedDataViewValue: function (item, lookupid)
+                {
+                    var context = this;
+                    $("div[data-lookupid]").each(function ()
+                    {
+                        var id = $(this).data('lookupid');
+                        if (id === lookupid)
+                        {
+                            var dbfield = $(this).data('dbfield');
+                            var viewfield = $(this).data('viewfield');
+                            context.model[dbfield] = item[viewfield];
+                        }
+                    });
+
+                    this.$forceUpdate();
+                   
+                },
+                openLookUp: function (modalid)
+                {
+                    $("#" + modalid).modal();
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/Application/")';
+                var endpointurl = baseurl + "GetLatestVersion/@Model.Application.Id/@ViewBag.SystemId";
+
+                $.get(endpointurl, function (response) {
+                    context.model = JSON.parse(response.data);
+                     endpointurl = baseurl + "GetDomains/@Model.Application.Id";
+                    $.get(endpointurl, function (response) {
+                        context.datalists = JSON.parse(response.data);
+                    });
+                });
+            }
+        })
+</script>
+
+}

@@ -1,0 +1,204 @@
+﻿@model Moley.Data.Dto.ApplicationDto
+
+
+<br />
+<br/>
+
+<h2>@Model.Application.Title</h2>
+
+<div id="app">
+
+
+    @{
+
+        var pnls = Model.UIStructure.FindAll(p => p.IsUITypePanel && p.IsRoot).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder);
+    }
+
+    <div class="row">
+
+        @foreach (var pl in Model.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+        {
+            if (pl.IsUITypePanel && pl.IsRoot)
+            {
+
+                <div class="col-md-@(12/pnls.Count())">
+
+                    <fieldset style="border:solid 0px #DDD !important;padding: 10px 10px 10px 10px">
+                        <legend>@pl.Title</legend>
+
+                        @foreach (var t in Model.UIStructure.Where(k => k.ParentMetaCode == pl.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                        {
+                            if (t.IsUITypeTextBox && t.IsDataConnected)
+                            {
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @t.Title @{ if (t.DataInfo.Mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
+                                    <input type="text" class="form-control" v-model="model.@t.DataMetaCode" />
+                                </div>
+
+                            }
+
+                            if (t.IsUITypeNumBox && t.IsDataConnected)
+                            {
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @t.Title  @{ if (t.DataInfo.Mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
+                                    <input type="number" class="form-control" v-model="model.@t.DataMetaCode" />
+                                </div>
+
+                            }
+
+                            if (t.IsUITypeDatePicker && t.IsDataConnected)
+                            {
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @t.Title  @{ if (t.DataInfo.Mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
+                                    <input type="date" class="form-control" v-model="model.@t.DataMetaCode" />
+                                </div>
+
+                            }
+
+                            if (t.IsUITypeCheckBox && t.IsDataConnected)
+                            {
+                                <div class="form-group">
+                                    <input type="checkbox" v-model="model.@t.DataMetaCode" /> @t.Title
+                                </div>
+
+                            }
+
+                            if (t.IsUITypeTextArea && t.IsDataConnected)
+                            {
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @t.Title  @{ if (t.DataInfo.Mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
+                                    <textarea v-model="model.@t.DataMetaCode" rows="10" cols="50" class="form-control"></textarea>
+                                </div>
+
+                            }
+
+                            if (t.IsUITypeComboBox && t.IsDataConnected && t.HasValueDomain)
+                            {
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        @t.Title  @{ if (t.DataInfo.Mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
+                                    <select v-model="model.@t.DataMetaCode" class="form-control">
+                                        <option v-for="item in datalists.VALUEDOMAIN_@t.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
+                                    </select>
+                                </div>
+
+                            }
+
+
+                            if (t.IsUITypeLookUp && t.IsDataViewConnected)
+                            {
+                                <div>
+                                    <label>@t.Title</label>
+                                    <div style="text-align:left; margin-bottom:25px">
+
+                                        <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px"><button class="btn btn-default" style="margin-bottom:5px" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button></div>
+
+
+                                        @{
+                                            var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
+                                            if (keyfield != null)
+                                            {
+                                                <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode"><b>@keyfield.Title</b><br /><span>{{model.@keyfield.DataMetaCode}}</span></div>
+
+                                            }
+
+                                            foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
+                                            {
+                                                <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; margin-left:25px; padding:5px" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode"><b>@lf.Title</b><br /><span>{{model.@lf.DataMetaCode}}</span></div>
+                                            }
+                                        }
+                                    </div>
+                                    <br />
+                                    <hr />
+                                    <br />
+                                </div>
+                            }
+
+                        }  <!--FOR-->
+
+                    </fieldset>
+                </div> <!--COL-->
+
+            } <!--ROW-->
+        }
+
+        </div>
+
+        <button class="btn btn-default" type="button" v-on:click="sendData()">Spara</button>
+
+
+            @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))
+            {
+                if (t.IsUITypeLookUp && t.IsDataViewConnected)
+                {
+                    <!-- Modal -->
+                    <div class="modal fade" id="@t.ViewName" role="dialog">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">@t.ViewInfo.Title</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                {
+                                                    if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                    {
+                                                        <th>@lf.ViewInfo.Title</th>
+                                                    }
+                                                }
+                                                @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                {
+                                                    if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                    {
+                                                        <th>@lf.ViewInfo.Title</th>
+                                                    }
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tr v-for="item in datalists.DATAVIEW_@t.ViewName">
+                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                            {
+                                                if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                {
+                                                    <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.MetaCode')" data-dismiss="modal">{{item.@lf.ViewInfo.SQLQueryFieldName}}</a></td>
+                                                }
+                                            }
+                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                            {
+                                                if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                {
+                                                    <td>{{item.@lf.ViewInfo.SQLQueryFieldName}}</td>
+                                                }
+                                            }
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+
+    </div>

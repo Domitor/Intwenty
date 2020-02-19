@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DBScripts\**" />
+    <Compile Remove="MetaDataService\Models\**" />
+    <Content Remove="DBScripts\**" />
+    <Content Remove="MetaDataService\Models\**" />
+    <EmbeddedResource Remove="DBScripts\**" />
+    <EmbeddedResource Remove="MetaDataService\Models\**" />
+    <None Remove="DBScripts\**" />
+    <None Remove="MetaDataService\Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\ApplicationInfo\GenerateTestData.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\ValidateModel.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\ConfigureDatabase.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\Edit.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\Create.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\GetList.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\Open.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\Create.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap-theme.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap-theme.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\bootstrap.js" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\bootstrap.min.js" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\npm.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetCoreDBAccess\NetCoreDBAccess.csproj" />
+  </ItemGroup>
+
+</Project>

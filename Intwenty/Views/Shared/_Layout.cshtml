@@ -1,0 +1,148 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Intwenty</title>
+
+    <environment include="Development,Production">
+        <link rel="stylesheet" href="~/lib/bootstrap-3.4.1/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+   
+</head>
+
+@{
+    var menutitle = "Applications";
+    var menuobjects = Repository.GetMetaMenuItems();
+    var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
+    if (mainmenu != null)
+    {
+        menutitle = mainmenu.Title;
+    }
+
+    var currentpath = Context.Request.Path.ToUriComponent();
+    var ishomepath = string.IsNullOrEmpty(currentpath) || currentpath.Length < 5 || currentpath.Contains("Home/Index");
+}
+
+
+<body class="@(ishomepath ? "landingpage" : "")">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Intwenty</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label">@menutitle</span> <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            @{
+
+                                if (mainmenu == null)
+                                {
+                                    foreach (var a in Repository.GetApplicationDescriptions())
+                                    {
+                                        <li><a asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a></li>
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var mi in menuobjects)
+                                    {
+                                        if (mi.IsMetaTypeMenuItem && mi.ParentMetaCode == mainmenu.MetaCode && mi.Application != null)
+                                        {
+                                            <li><a asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a></li>
+                                        }
+                                    }
+                                }
+
+                            }
+                        </ul>
+                    </li>
+
+                    <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase">Configure Database</a></li>
+                    <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ValidateModel">Validate Meta Model</a></li>
+                    <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData">Generate Test Data</a></li>
+
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="msg_dlg_modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 id="msg_dlg_modal_hdr" class="modal-title">Information</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="msg_dlg_modal_text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tech_modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">About</h4>
+                </div>
+                <div class="modal-body">
+                    <p><b>Intwenty</b> is a meta driven webplatform....</p>
+                    <p><b>Technologies used</b></p>
+                    <ul>
+                        <li>Asp.Net Core 2.1.1</li>
+                        <li>Bootstrap 4.4.1</li>
+                        <li>Vue.js v2.6.11</li>
+                        <li>Vue Smart Table v2.5.0</li>
+                        <li>JQuery v3.3.1</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_CookieConsentPartial" />
+
+    <div class="container body-content">
+        @RenderBody()
+        @if (!ishomepath)
+        {
+            <hr />
+            <footer>
+                <p>&copy; 2020 - Intwenty</p>
+            </footer>
+        }
+    </div>
+
+    <environment include="Development,Production">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+        <script src="~/lib/vue/vue.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+
+    </environment>
+   
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

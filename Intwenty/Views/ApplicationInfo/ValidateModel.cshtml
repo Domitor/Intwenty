@@ -1,0 +1,48 @@
+﻿@model Moley.Models.OperationResult
+
+@{
+    ViewData["Title"] = "Validate System Meta Model";
+}
+
+
+<br />
+<br />
+
+<div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30%">Status</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+        @{
+
+            foreach (var x in Model.Messages)
+            {
+
+            <tr>
+                @if (x.Code == "ERROR")
+                {
+                    <td style="color:red">@x.Code</td>
+                }
+                else if (x.Code == "WARNING")
+                {
+                    <td style="color:orange">@x.Code</td>
+                }
+                else
+                {
+                    <td style="color: cornflowerblue">@x.Code</td>
+                }
+
+                <td>@x.Message</td>
+            </tr>
+
+            }
+        }
+        </tbody>
+    </table>
+
+</div>

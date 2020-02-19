@@ -1,0 +1,169 @@
+﻿@model Moley.Data.Dto.ApplicationDto
+
+<div id="app">
+    <div>
+
+        <br />
+        <br />
+
+        @{
+            var title = Model.Application.Title + " List";
+            var lv = Model.UIStructure.Find(p => p.IsUITypeListView);
+            if (lv != null)
+            {
+                title = lv.Title;
+            }
+        }
+
+        <h2>@title</h2>
+
+
+        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Create New @Model.Application.Title</a>
+
+        <br />
+        <br />
+
+        <div class="row">
+            <div class="col-lg-3"><button v-on:click="next()">Next</button></div>
+            <div class="col-lg-3"></div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label class="control-label">Value</label>
+                    <input type="text" class="form-control" v-model="model.filtervalue" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label class="control-label">Filter</label>
+                    <select v-model="model.filterfield" class="form-control">
+                        @{
+                            foreach (var c in Model.UIStructure)
+                            {
+
+                                if (c.IsUITypeListViewField && c.IsDataConnected)
+                                {
+                                    <option value="@c.DataInfo.DbName">@c.Title</option>
+                                }
+
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+       
+      
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    @{
+                        foreach (var c in Model.UIStructure)
+                        {
+
+                            if (c.IsUITypeListViewField && c.IsDataConnected)
+                            {
+                                <th>@c.Title</th>
+                            }
+
+                        }
+                    }
+                </tr>
+            </thead>
+            <tr v-for="item in filteredResults">
+                <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id">Open</a></td>
+                @{
+                    foreach (var c in Model.UIStructure)
+                    {
+
+                        if (c.IsUITypeListViewField && c.IsDataConnected)
+                        {
+                            <td>{{item.@c.DataInfo.DbName}}</td>
+                        }
+
+                    }
+                }
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts
+    {
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                , model: { "filtervalue": "", "filterfield": "" }
+                , retrieveinfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "batchSize": 100, "currentId": 0 }
+
+            },
+            methods: {
+                next: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "GetListData";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.retrieveinfo),
+                        success: function (response)
+                        {
+                            context.datalist = JSON.parse(response.data);
+                            context.retrieveinfo = response.retriveListArgs;
+                        }
+                    });
+                }
+            },
+            computed: {
+                filteredResults: function ()
+                {
+                    var context = this;
+                    return this.datalist.filter(function (item)
+                    {
+                        if (context.model.filtervalue == "" || context.model.filterfield == "")
+                            return true;
+
+                        if (item[context.model.filterfield].indexOf(context.model.filtervalue) > -1)
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    })
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/Application/")';
+                var endpointurl = baseurl + "GetListData";
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.retrieveinfo),
+                    success: function (response)
+                    {
+                        context.datalist = JSON.parse(response.data);
+                        context.retrieveinfo = response.retriveListArgs;
+                    }
+                });
+
+                /* GET
+                $.get(endpointurl, function (response)
+                {
+                    
+                });*/
+            }
+        })
+    </script>
+
+}

@@ -1,0 +1,27 @@
+﻿@model List<Moley.Models.OperationResult>
+
+@{
+    ViewData["Title"] = "Application Configuration Results";
+}
+
+
+<br />
+<br />
+
+<div>
+
+    @{
+        foreach(var t in Model)
+        {
+
+            foreach (var x in t.Messages)
+            {
+
+                <p>@x.Message</p>
+
+            }
+
+        }
+    }
+
+</div>
