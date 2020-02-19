@@ -8,7 +8,9 @@ using System;
 
 namespace Moley.Data
 {
-
+    /// <summary>
+    /// Interface for operations on meta data
+    /// </summary>
     public interface ISystemRepository
     {
         List<ApplicationDescriptionDto> GetApplicationDescriptions();
