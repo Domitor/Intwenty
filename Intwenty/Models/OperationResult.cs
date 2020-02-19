@@ -31,13 +31,17 @@ namespace Moley.Models
 
         public int MaxCount { get; set; }
 
-        public int CurrentId{ get; set; }
+        public int CurrentRowNum{ get; set; }
 
         public int BatchSize { get; set; }
 
+        public string FilterField { get; set; }
+
+        public string FilterValue { get; set; }
+
         public ListRetrivalArgs()
         {
-            BatchSize = 100;
+            BatchSize = 50;
         }
 
     }

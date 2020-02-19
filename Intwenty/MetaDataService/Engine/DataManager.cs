@@ -266,23 +266,25 @@ namespace Moley.MetaDataService.Engine
             if (args.MaxCount == 0)
             {
                 da.Open();
-                da.CreateCommand("select count(*) from sysdata_InformationStatus WHERE ApplicationId = " + this.Meta.Application.Id);
-                args.MaxCount = (int)da.ExecuteScalarQuery();
+                da.CreateCommand("select MAX(t1.RowNum) FROM (select ID, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id + ") t1");
+                args.MaxCount = Convert.ToInt32(da.ExecuteScalarQuery());
                 da.Close();
             }
 
             result.RetriveListArgs = new ListRetrivalArgs();
             result.RetriveListArgs.MaxCount = args.MaxCount;
             result.RetriveListArgs.BatchSize = args.BatchSize;
-            result.RetriveListArgs.CurrentId = args.CurrentId;
+            result.RetriveListArgs.CurrentRowNum = args.CurrentRowNum;
             result.RetriveListArgs.ApplicationId = args.ApplicationId;
             result.RetriveListArgs.ListMetaCode = args.ListMetaCode;
-            
+            result.RetriveListArgs.FilterField = args.FilterField;
+            result.RetriveListArgs.FilterValue = args.FilterValue;
+
 
             try
             {
                 var sql_list_stmt = new StringBuilder();
-                sql_list_stmt.Append("SELECT TOP " + result.RetriveListArgs.BatchSize + " t1.* ");
+                sql_list_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.UIStructure)
                 {
                     if (t.IsUITypeListViewField && t.IsDataConnected)
@@ -290,9 +292,17 @@ namespace Moley.MetaDataService.Engine
                         sql_list_stmt.Append(", t2." + t.DataInfo.DbName + " ");
                     }
                 }
-                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_list_stmt.Append("FROM (select *, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = "+ this.Meta.Application.Id + ") t1 ");
                 sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " AND t1.ID > "+ result.RetriveListArgs.CurrentId + " ORDER BY t1.ID");
+                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+
+                //sql_list_stmt.Append("AND t1.RowNum > " + result.RetriveListArgs.CurrentRowNum + " ");
+                //sql_list_stmt.Append("AND t1.RowNum < " + (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize) + " ");
+
+                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                    sql_list_stmt.Append("AND t2."+ args.FilterField + " LIKE '%"+ args.FilterValue + "%'  ");
+
+                sql_list_stmt.Append("ORDER BY t1.ID");
 
 
                 var ds = new DataSet();
@@ -302,36 +312,50 @@ namespace Moley.MetaDataService.Engine
                 da.ExecuteNonQuery();
                 da.Close();
 
-                if (ds.Tables[0].Rows.Count > 0) 
-                    result.RetriveListArgs.CurrentId = (int)ds.Tables[0].Rows[ds.Tables[0].Rows.Count - 1]["ID"];
-
-                var cindex = 0;
-                var rindex = 0;
+                var firstcol = true;
+                var firstrow = true;
+                var rindex = -1;
                 sb.Append("[");
                 foreach (DataRow r in ds.Tables[0].Rows)
                 {
-                    cindex = 0;
 
-                    if (rindex == 0)
+                    rindex += 1;
+                    if (!(result.RetriveListArgs.CurrentRowNum <= rindex &&
+                        (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize) > rindex))
+                        continue;
+
+                    if (firstrow)
+                    {
+                        firstrow = false;
                         sb.Append("{");
+                    }
                     else
+                    {
                         sb.Append(",{");
+                    }
+
+                    firstcol = true;
                     foreach (DataColumn dc in ds.Tables[0].Columns)
                     {
                         var val = GetJSONValue(r, dc);
                         if (string.IsNullOrEmpty(val))
                             continue;
 
-                        if (cindex == 0)
+                        if (firstcol)
+                        {
+                            firstcol = false;
                             sb.Append(val);
+                        }
                         else
+                        {
                             sb.Append("," + val);
-
-                        cindex += 1;
+                        }
                     }
+
                     sb.Append("}");
-                    rindex += 1;
+                     
                 }
+
                 sb.Append("]");
 
                 result.Data = sb.ToString();
