@@ -1,4 +1,5 @@
-﻿using Moley.Data;
+﻿using Microsoft.Extensions.Options;
+using Moley.Data;
 using Moley.Data.Dto;
 using Moley.MetaDataService.Custom;
 using Moley.MetaDataService.Engine;
@@ -32,13 +33,19 @@ namespace Moley.MetaDataService
 
     public class Server : IServiceEngine
     {
-       
+        
+        private IOptions<SystemSettings> SysSettings { get; }
+
+        public Server(IOptions<SystemSettings> sysconfig)
+        {
+            SysSettings = sysconfig;
+        }
+        
 
         public OperationResult ConfigureDatabase(ApplicationDto app)
         {
             var t = DataManager.GetDataManager(app);
             return t.ConfigureDatabase();
-            
         }
 
         public OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
@@ -56,7 +63,6 @@ namespace Moley.MetaDataService
             {
                 return validation;
             }
-
         }
 
 
@@ -65,8 +71,6 @@ namespace Moley.MetaDataService
             var t = DataManager.GetDataManager(app);
             return t.GetList(args);
         }
-
-
 
         public OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state)
         {
@@ -110,20 +114,14 @@ namespace Moley.MetaDataService
         {
             var res = new OperationResult();
 
-          
-
-
             if (apps.Count == 0)
             {
                 res.IsSuccess = false;
                 res.AddMessage("ERROR", "The model doesn't seem to exist");
             }
 
-          
-
             foreach (var a in apps)
             {
-
 
                 if (string.IsNullOrEmpty(a.Application.Title))
                 {
