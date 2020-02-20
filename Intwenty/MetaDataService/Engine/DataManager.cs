@@ -267,7 +267,12 @@ namespace Moley.MetaDataService.Engine
             {
                 da.Open();
                 da.CreateCommand("select MAX(t1.RowNum) FROM (select ID, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id + ") t1");
-                args.MaxCount = Convert.ToInt32(da.ExecuteScalarQuery());
+                var max = da.ExecuteScalarQuery();
+                if (max == DBNull.Value)
+                    args.MaxCount = 0;
+                else
+                    args.MaxCount = Convert.ToInt32(max);
+
                 da.Close();
             }
 

@@ -121,7 +121,7 @@ namespace Moley.Data
                     }
                 }
 
-                foreach (var item in uitems)
+                foreach (var item in uitems.OrderBy(p=> p.RowOrder).ThenBy(p=> p.ColumnOrder))
                 {
                     if (item.AppMetaCode == app.MetaCode)
                     {
@@ -172,7 +172,7 @@ namespace Moley.Data
         {
             var apps = AppDescription.Select(p => new ApplicationDescriptionDto(p)).ToList();
             var res = new List<MetaMenuItemDto>();
-            foreach (var m in MetaMenuItems)
+            foreach (var m in MetaMenuItems.OrderBy(p=> p.Order))
             {
                 var s = new MetaMenuItemDto(m);
 

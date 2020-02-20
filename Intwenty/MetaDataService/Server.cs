@@ -247,7 +247,22 @@ namespace Moley.MetaDataService
 
                     if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewField))
                         res.AddMessage("ERROR", string.Format("The view object: {0} in application {1} has no children with [MetaType]=DATAVIEWFIELD.", v.Title, a.Application.Title));
-                       
+
+                    if (v.IsMetaTypeDataViewField)
+                    {
+                        var view = viewinfo.Find(p => p.IsMetaTypeDataView && p.MetaCode == v.ParentMetaCode);
+                        if (view != null)
+                        {
+                            if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
+                                res.AddMessage("ERROR", string.Format("The viewfield {0} in application {1} has not a SQLQueryFieldName that is included in the SQLQuery of the parent view.", v.Title, a.Application.Title));
+                        }
+                        else
+                        {
+                            res.AddMessage("ERROR", string.Format("The view field {0} in application {1} has no parent with [MetaType]=DATAVIEW.", v.Title, a.Application.Title));
+                        }
+                    }
+                        
+
 
                 }
 

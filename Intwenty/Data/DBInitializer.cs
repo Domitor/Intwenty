@@ -10,39 +10,60 @@ namespace Moley.Data
         {
             var context = provider.GetRequiredService<ApplicationDbContext>();
 
-            
+
             if (context.Database.EnsureCreated())
             {
-                SeedApplicationDescriptions(context);
-                SeedSystemMenus(context);
-                SeedApplicationContent(context);
-                SeedValueDomains(context);
-                SeedNoSeries(context);
+                SeedApplicationDescriptions(context, false);
+                SeedSystemMenus(context, false);
+                SeedApplicationContent(context, false);
+                SeedValueDomains(context, false);
+                SeedNoSeries(context, false);
+            }
+            else
+            {
+                SeedApplicationDescriptions(context, true);
+                SeedSystemMenus(context, true);
+                SeedApplicationContent(context, true);
+                SeedValueDomains(context, true);
+                SeedNoSeries(context, true);
+
+
             }
 
            
         }
 
 
-        private static void SeedApplicationDescriptions(ApplicationDbContext context)
+        private static void SeedApplicationDescriptions(ApplicationDbContext context, bool isupdate)
         {
-            
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning=false, TestDataAmount = 100  });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 1000 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing item ledger", MetaCode = "ITEMLEDGER", Title = "Inventory Transactions", DbName = "ItemLedger", IsHierarchicalApplication = false, UseVersioning = false });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 10 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing locations", MetaCode = "LOCATION", Title = "Location", DbName = "Location", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 3 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing goods reciept", MetaCode = "GOODSRECEIPT", Title = "Goods Receipt", DbName = "GoodsReceipt", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 100 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing goods issue", MetaCode = "GOODSISSUE", Title = "Goods Issue", DbName = "GoodsIssue", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 200 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Description = "An app for managing goods transfer", MetaCode = "GOODSTRANSFER", Title = "Goods Transfer", DbName = "GoodsTransfer", IsHierarchicalApplication = false, UseVersioning = false });
+            if (isupdate)
+            {
+                context.Set<ApplicationDescription>().RemoveRange(context.Set<ApplicationDescription>());
+                context.SaveChanges();
+            }
+
+
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 1, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning=false, TestDataAmount = 0  });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 2, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 5 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 3, Description = "An app for managing item ledger", MetaCode = "ITEMLEDGER", Title = "Inventory Transactions", DbName = "ItemLedger", IsHierarchicalApplication = false, UseVersioning = false });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 4, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 10 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 5, Description = "An app for managing locations", MetaCode = "LOCATION", Title = "Location", DbName = "Location", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 3 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 6, Description = "An app for managing goods reciept", MetaCode = "GOODSRECEIPT", Title = "Goods Receipt", DbName = "GoodsReceipt", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 7, Description = "An app for managing goods issue", MetaCode = "GOODSISSUE", Title = "Goods Issue", DbName = "GoodsIssue", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 8, Description = "An app for managing goods transfer", MetaCode = "GOODSTRANSFER", Title = "Goods Transfer", DbName = "GoodsTransfer", IsHierarchicalApplication = false, UseVersioning = false });
 
 
             context.SaveChanges();
         }
 
 
-        private static void SeedSystemMenus(ApplicationDbContext context)
+        private static void SeedSystemMenus(ApplicationDbContext context, bool isupdate)
         {
+            if (isupdate)
+            {
+                context.Set<MetaMenuItem>().RemoveRange(context.Set<MetaMenuItem>());
+                context.SaveChanges();
+            }
 
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "WMS_MAINMENU", ParentMetaCode = "ROOT", Title = "Menu", Order = 1, Action = "", Controller = ""  });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "WMS_MAINMENU", Title = "Item", Order = 10, Action = "", Controller = "" });
@@ -56,14 +77,28 @@ namespace Moley.Data
         }
 
 
-        private static void SeedApplicationContent(ApplicationDbContext context)
+        private static void SeedApplicationContent(ApplicationDbContext context, bool isupdate)
         {
+
+            if (isupdate)
+            {
+                context.Set<MetaDataItem>().RemoveRange(context.Set<MetaDataItem>());
+                context.Set<MetaDataView>().RemoveRange(context.Set<MetaDataView>());
+                context.Set<MetaUIItem>().RemoveRange(context.Set<MetaUIItem>());
+                context.SaveChanges();
+            }
+
             //LOCATION
             //----------------------------------------------------
             //DATA
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONTYPE", DbName = "LocationType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
+
+            //VIEWS
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName  from Location order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCNAME", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "LocationName" });
 
             //UI
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "LOCATION", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
@@ -88,6 +123,27 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
+            //UI
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATEPICKER", MetaCode = "GR_DATE", DataMetaCode = "RECEIPTDATE", Title = "Receipt Date", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLITEM_CODE", DataMetaCode = "ITEMID", Title = "Item Id", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP.ITEMID" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPFIELD", MetaCode = "MLITEM_NAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.ITEMLOOKUP.ITEMNAME" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLLOCATION_CODE", DataMetaCode = "LOCATIONID", Title = "Location Id", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCID" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPFIELD", MetaCode = "MLLOCATION_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCNAME" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "NUMBOX", MetaCode = "NB_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL2", DataMetaCode = "", Title = "Info", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
+
+
+            //LISTVIEW
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Goods Receipts", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEWFIELD", MetaCode = "LV_GR_DATE", DataMetaCode = "RECEIPTDATE", Title = "Date", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEWFIELD", MetaCode = "LV_GR_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEWFIELD", MetaCode = "LV_GR_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 4 });
+
+
             //GOODSISSUE
             //----------------------------------------------------
             //DATA
@@ -97,6 +153,26 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
+
+            //UI
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATEPICKER", MetaCode = "ISSUE_DATE", DataMetaCode = "ISSUEDATE", Title = "Issue Date", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLITEM_CODE", DataMetaCode = "ITEMID", Title = "Item Id", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP.ITEMID" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPFIELD", MetaCode = "MLITEM_NAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.ITEMLOOKUP.ITEMNAME" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLLOCATION_CODE", DataMetaCode = "LOCATIONID", Title = "Location Id", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCID" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPFIELD", MetaCode = "MLLOCATION_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCNAME" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "NUMBOX", MetaCode = "NB_ISSUE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
+
+
+            //LISTVIEW
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Goods Receipts", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ISSUE_DATE", DataMetaCode = "ISSUEDATE", Title = "Date", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ISSUE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSISSUE", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ISSUE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 4 });
+
 
             //GOODSTRANSFER
             //----------------------------------------------------
@@ -146,17 +222,24 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORCODE", DbName = "VendorCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORID" });
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORTXT", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORNAME" });
 
+            //VIEWS
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName" });
+
+
             //UI
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITID", DataMetaCode = "ITEMID", Title = "Item ID", ParentMetaCode = "ITMPNL", RowOrder = 1, ColumnOrder = 1  });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITNAME", DataMetaCode = "NAME", Title = "Item Name", ParentMetaCode = "ITMPNL", RowOrder = 2, ColumnOrder = 1  });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "COMBOBOX", MetaCode = "CB_CATEGORY", DataMetaCode = "CATCODE", Title = "Category", ParentMetaCode = "ITMPNL", RowOrder = 3, ColumnOrder = 1 , Domain = "VALUEDOMAIN.ITEMCATEGORY" });
-            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "DATEPICKER", MetaCode = "DP_MOD", DataMetaCode = "MODIFIED", Title = "Modified Date", ParentMetaCode = "ITMPNL", RowOrder = 6, ColumnOrder = 1  });
-            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "CHECKBOX", MetaCode = "CB_ACTIVE", DataMetaCode = "ACTIVE", Title = "Is Active", ParentMetaCode = "ITMPNL", RowOrder = 7, ColumnOrder = 1  });
-            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "LOOKUP", MetaCode = "MLVENDOR", DataMetaCode = "", Title = "Default Vendor", ParentMetaCode = "ITMPNL", RowOrder = 8, ColumnOrder = 1 , Domain = "DATAVIEW.VENDORLOOKUP" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "NUMBOX", MetaCode = "NUMBOX_PURCHPRICE", DataMetaCode = "PURCHASEPRICE", Title = "Purchase Price", ParentMetaCode = "ITMPNL", RowOrder = 10, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "DATEPICKER", MetaCode = "DP_MOD", DataMetaCode = "MODIFIED", Title = "Modified Date", ParentMetaCode = "ITMPNL", RowOrder = 20, ColumnOrder = 1  });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "CHECKBOX", MetaCode = "CB_ACTIVE", DataMetaCode = "ACTIVE", Title = "Is Active", ParentMetaCode = "ITMPNL", RowOrder = 30, ColumnOrder = 1  });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "LOOKUP", MetaCode = "MLVENDOR", DataMetaCode = "", Title = "Default Vendor", ParentMetaCode = "ITMPNL", RowOrder = 40, ColumnOrder = 1 , Domain = "DATAVIEW.VENDORLOOKUP" });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLVENDOR_CODE", DataMetaCode = "VENDORCODE", Title = "Vendor Id", ParentMetaCode = "MLVENDOR", RowOrder = 0, ColumnOrder = 1 , Domain = "DATAVIEW.VENDORLOOKUP.VENDORID" });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "LOOKUPFIELD", MetaCode = "MLVENDOR_NAME", DataMetaCode = "VENDORTXT", Title = "Vendor Name", ParentMetaCode = "MLVENDOR", RowOrder = 0, ColumnOrder = 2 , Domain = "DATAVIEW.VENDORLOOKUP.VENDORNAME" });
-
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL_INFO", DataMetaCode = "", Title = "Info", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
 
 
             //LISTVIEW
@@ -202,8 +285,14 @@ namespace Moley.Data
             context.SaveChanges();
         }
 
-        private static void SeedValueDomains(ApplicationDbContext context)
+        private static void SeedValueDomains(ApplicationDbContext context, bool isupdate)
         {
+            if (isupdate)
+            {
+                context.Set<ValueDomain>().RemoveRange(context.Set<ValueDomain>());
+                context.SaveChanges();
+            }
+
             //ITEMCATEGORY
             context.Set<ValueDomain>().Add(new ValueDomain() { DomainName= "ITEMCATEGORY", Code = "A1", Value = "Primary" });
             context.Set<ValueDomain>().Add(new ValueDomain() { DomainName = "ITEMCATEGORY", Code = "A2", Value = "Secondary" });
@@ -215,8 +304,15 @@ namespace Moley.Data
             context.SaveChanges();
         }
 
-        private static void SeedNoSeries(ApplicationDbContext context)
+        private static void SeedNoSeries(ApplicationDbContext context, bool isupdate)
         {
+
+            if (isupdate)
+            {
+                context.Set<NoSerie>().RemoveRange(context.Set<NoSerie>());
+                context.SaveChanges();
+            }
+
             //NoSerie
             context.Set<NoSerie>().Add(new NoSerie() { AppMetaCode = "ITEM", MetaCode = "ITEMID_SERIE", DataMetaCode="ITEMID", Description= "No serie definition for Item Id", Prefix = "ITEM", StartValue = 10000, Counter = 0  });
             context.Set<NoSerie>().Add(new NoSerie() { AppMetaCode = "VENDOR", MetaCode = "VENDORID_SERIE", DataMetaCode = "VENDORID", Description = "No serie definition for Vendor Id", Prefix = "VEND", StartValue = 10000, Counter = 0 });

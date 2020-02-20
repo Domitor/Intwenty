@@ -12,7 +12,7 @@ namespace Moley.MetaDataService.Engine.Common
     public class DataAccessService : NetCoreDBClient   
 	{
  
-        public DataAccessService() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=MoleyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
+        public DataAccessService() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=IntwentyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
         {
 
 

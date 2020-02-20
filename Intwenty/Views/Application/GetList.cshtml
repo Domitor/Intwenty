@@ -65,7 +65,7 @@
 
                             if (c.IsUITypeListViewField && c.IsDataConnected)
                             {
-                                <th v-on:click="sort('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
+                                <th v-on:click="sortBycolumn('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
                             }
 
                         }
@@ -164,7 +164,7 @@
 
                    
                 },
-                sort: function (s) {
+                sortBycolumn: function (s) {
                     //if s == current sort, reverse
                     if (s === this.currentSort) {
                         this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
