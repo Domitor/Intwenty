@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace NetCoreDBAccess
 {
@@ -297,6 +297,54 @@ namespace NetCoreDBAccess
             catch { }
 
             return null;
+        }
+
+        public static string GetJSONValue(DataRow r, DataColumn c)
+        {
+            if (r == null || c == null)
+                return string.Empty;
+
+            if (r[c] == null)
+                return string.Empty;
+
+            if (r[c] == DBNull.Value)
+                return string.Empty;
+
+            if (IsNumeric(c))
+            {
+                return "\"" + c.ColumnName + "\":" + Convert.ToString(r[c]).Replace(",", ".");
+            }
+            else if (IsDateTime(c))
+            {
+                return "\"" + c.ColumnName + "\":" + "\"" + Convert.ToDateTime(r[c]).ToString("yyyy-MM-dd") + "\"";
+            }
+            else
+            {
+                return "\"" + c.ColumnName + "\":" + "\"" + Convert.ToString(r[c]) + "\"";
+            }
+        }
+
+
+        public static bool IsNumeric(DataColumn col)
+        {
+            if (col == null)
+                return false;
+
+            var numericTypes = new[] { typeof(byte), typeof(decimal), typeof(double),
+            typeof(short), typeof(int), typeof(long), typeof(sbyte),
+            typeof(float), typeof(ushort), typeof(uint), typeof(ulong)};
+
+            return numericTypes.Contains(col.DataType);
+        }
+
+        public static bool IsDateTime(DataColumn col)
+        {
+            if (col == null)
+                return false;
+
+            var dateTimeTypes = new[] { typeof(DateTime) };
+
+            return dateTimeTypes.Contains(col.DataType);
         }
 
 

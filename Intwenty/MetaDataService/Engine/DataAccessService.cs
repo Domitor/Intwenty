@@ -6,42 +6,45 @@ using System.Web;
 using System.Configuration;
 using NetCoreDBAccess;
 using Microsoft.Extensions.Options;
+using System.Text;
 
 namespace Moley.MetaDataService.Engine.Common
 {
 
 
-
-
-    public class DataAccessService : NetCoreDBClient   
+    public class DataAccessClient : NetCoreDBClient   
 	{
 
-        public DataAccessService() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=IntwentyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
+        public DataAccessClient() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=IntwentyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
         {
 
         }	
 	}
 
-    /*
 
-    interface IDPDataAccessService
+    interface IDataAccessService
     {
         void Open();
         void Close();
         void CreateCommand(string sqlcode);
         void CreateSPCommand(string procname);
-       
+        void AddParameter(string name, object value);
+        void FillDataset(DataSet ds, string srcTable);
+        object ExecuteScalarQuery();
+        int ExecuteNonQuery();
+        StringBuilder GetAsJSONArray();
+        StringBuilder GetAsJSONObject();
     }
 
 
-    public class DPDataAccessService : IDPDataAccessService
+    public class DataAccessService : IDataAccessService
     {
 
         private IOptions<SystemSettings> SysSettings { get; }
 
         private NetCoreDBClient DBClient { get; }
 
-        public DPDataAccessService(IOptions<SystemSettings> sysconfig)
+        public DataAccessService(IOptions<SystemSettings> sysconfig)
         {
             SysSettings = sysconfig;
             DBClient = new NetCoreDBClient(DBMS.MSSqlServer, SysSettings.Value.DBConn);
@@ -67,11 +70,38 @@ namespace Moley.MetaDataService.Engine.Common
             DBClient.CreateSPCommand(procname);
         }
 
-  
+        public void AddParameter(string name, object value)
+        {
+            DBClient.AddParameter(name, value);
+        }
 
+        public void FillDataset(DataSet ds, string srcTable)
+        {
+            DBClient.FillDataset(ds, srcTable);
+        }
+
+        public object ExecuteScalarQuery()
+        {
+            return DBClient.ExecuteScalarQuery();
+        }
+
+        public int ExecuteNonQuery()
+        {
+            return DBClient.ExecuteNonQuery();
+        }
+
+        public StringBuilder GetAsJSONArray()
+        {
+            return DBClient.GetAsJSONArray();
+        }
+
+        public StringBuilder GetAsJSONObject()
+        {
+            return DBClient.GetAsJSONObject();
+        }
     }
 
-      */
+      
 
 
 }

@@ -46,12 +46,12 @@ namespace Moley.MetaDataService.Custom
             base.BeforeSave(data);
         }
 
-        protected override void BeforeSaveNew(DataAccessService da, Dictionary<string, object> data)
+        protected override void BeforeSaveNew(DataAccessClient da, Dictionary<string, object> data)
         {
             base.BeforeSaveNew(da, data);
         }
 
-        protected override void BeforeSaveUpdate(DataAccessService da, Dictionary<string, object> data)
+        protected override void BeforeSaveUpdate(DataAccessClient da, Dictionary<string, object> data)
         {
             base.BeforeSaveUpdate(da, data);
         }

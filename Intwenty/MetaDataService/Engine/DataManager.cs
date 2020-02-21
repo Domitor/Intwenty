@@ -137,11 +137,11 @@ namespace Moley.MetaDataService.Engine
                 sql_list_stmt.Append("AND t1.Id = " + this.ClientState.Id);
 
                 var ds = new DataSet();
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
                 da.CreateCommand(sql_list_stmt.ToString());
                 da.FillDataset(ds, "App");
-                da.ExecuteNonQuery();
+                da.Close();
 
                 if (ds.Tables[0].Rows.Count == 0)
                 {
@@ -202,7 +202,7 @@ namespace Moley.MetaDataService.Engine
 
                 BeforeSave(data);
 
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
 
                 if (ClientState.Id < 1)
@@ -259,7 +259,7 @@ namespace Moley.MetaDataService.Engine
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             var sb = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Meta.Application.Title),0,0);
           
@@ -416,7 +416,7 @@ namespace Moley.MetaDataService.Engine
                 }
 
                 var ds = new DataSet();
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
 
                 foreach (var d in valuedomains)
@@ -549,12 +549,12 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        protected virtual void BeforeSaveNew(DataAccessService da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveNew(DataAccessClient da, Dictionary<string, object> data)
         {
 
         }
 
-        protected virtual void BeforeSaveUpdate(DataAccessService da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveUpdate(DataAccessClient da, Dictionary<string, object> data)
         {
 
         }
@@ -568,7 +568,7 @@ namespace Moley.MetaDataService.Engine
 
         #region Helpers
 
-        private void SetParameters(Dictionary<MetaDataItemDto, object> paramlist, DataAccessService da)
+        private void SetParameters(Dictionary<MetaDataItemDto, object> paramlist, DataAccessClient da)
         {
             foreach (var p in paramlist)
             {
@@ -673,7 +673,7 @@ namespace Moley.MetaDataService.Engine
 
             var output = new SqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DbType = DbType.Int32 };
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             da.Open();
             da.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate) Values (@ApplicationId, @MetaType, @MetaCode, getDate()) select @NewId = Scope_Identity()");
             da.AddParameter("@ApplicationId", this.Meta.Application.Id);
@@ -687,7 +687,7 @@ namespace Moley.MetaDataService.Engine
             return id;
         }
 
-        private void InsertMainTable(Dictionary<string, object> data, DataAccessService da)
+        private void InsertMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
             var paramlist = new Dictionary<MetaDataItemDto, object>();
 
@@ -744,7 +744,7 @@ namespace Moley.MetaDataService.Engine
         }
 
 
-        private void UpdateMainTable(Dictionary<string, object> data, DataAccessService da)
+        private void UpdateMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
             var paramlist = new Dictionary<MetaDataItemDto, object>();
 
@@ -784,7 +784,7 @@ namespace Moley.MetaDataService.Engine
         }
 
 
-        private int CreateVersionRecord(DataAccessService da)
+        private int CreateVersionRecord(DataAccessClient da)
         {
             int newversion = 0;
             String sql = String.Empty;
@@ -898,7 +898,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        private void InsertInformationStatus(DataAccessService da)
+        private void InsertInformationStatus(DataAccessClient da)
         {
             da.CreateCommand("insert into sysdata_InformationStatus (Id, Version, ApplicationId, MetaCode, PerformDate, OwnerId, CreatedBy) Values (@Id, @Version, @ApplicationId, @MetaCode, getDate(), @OwnerId, @CreatedBy)");
             da.AddParameter("@Id", this.ClientState.Id);
@@ -910,7 +910,7 @@ namespace Moley.MetaDataService.Engine
             da.ExecuteNonQuery();
         }
 
-        private void UpdateInformationStatus(DataAccessService da)
+        private void UpdateInformationStatus(DataAccessClient da)
         {
             da.CreateCommand("Update sysdata_InformationStatus set PerformDate=getDate(), CreatedBy = @CreatedBy, Version = @Version WHERE ID=@ID");
             da.AddParameter("@CreatedBy", "SYSTEM");
@@ -927,7 +927,7 @@ namespace Moley.MetaDataService.Engine
         private void CreateMainTable(OperationResult o)
         {
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.DbName + "'";
             var table_exist = false;
             da.Open();
@@ -955,7 +955,7 @@ namespace Moley.MetaDataService.Engine
         private void CreateApplicationVersioningTable(OperationResult o)
         {
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.VersioningTableName + "'";
             Boolean table_exist = false;
             da.Open();
@@ -991,7 +991,7 @@ namespace Moley.MetaDataService.Engine
 
 
             var ds = new DataSet();
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" + tablename + "' AND COLUMN_NAME='" + column.DbName + "'";
             bool column_exist = false;
 
@@ -1050,7 +1050,7 @@ namespace Moley.MetaDataService.Engine
                 return;
             }
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + table.DbName + "'";
             bool table_exist = false;
             da.Open();
@@ -1087,7 +1087,7 @@ namespace Moley.MetaDataService.Engine
         {
             string sql = string.Empty;
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             da.Open();
 
             try

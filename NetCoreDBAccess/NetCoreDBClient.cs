@@ -5,7 +5,7 @@ using System.Data.OleDb;
 using MySql.Data.MySqlClient;
 using Npgsql;
 using NpgsqlTypes;
-
+using System.Text;
 
 namespace NetCoreDBAccess
 {
@@ -359,6 +359,7 @@ namespace NetCoreDBAccess
 
         }
 
+        /*
         public void FillDataset(DataSet ds)
         {
 
@@ -387,8 +388,137 @@ namespace NetCoreDBAccess
                 adapt.Fill(ds);
             }
         }
+        */
 
-      
+        public StringBuilder GetAsJSONArray(int minrow=0, int maxrow=0)
+        {
+            var sb = new StringBuilder();
+            var ds = GetDataSet();
+
+            var firstcol = true;
+            var firstrow = true;
+            var rindex = -1;
+            sb.Append("[");
+            foreach (DataRow r in ds.Tables[0].Rows)
+            {
+
+                rindex += 1;
+                if (maxrow > minrow)
+                {
+                    if (!(minrow <= rindex && maxrow > rindex))
+                        continue;
+                }
+
+                if (firstrow)
+                {
+                    firstrow = false;
+                    sb.Append("{");
+                }
+                else
+                {
+                    sb.Append(",{");
+                }
+
+                firstcol = true;
+                foreach (DataColumn dc in ds.Tables[0].Columns)
+                {
+                    var val = DBHelpers.GetJSONValue(r, dc);
+                    if (string.IsNullOrEmpty(val))
+                        continue;
+
+                    if (firstcol)
+                    {
+                        firstcol = false;
+                        sb.Append(val);
+                    }
+                    else
+                    {
+                        sb.Append("," + val);
+                    }
+                }
+
+                sb.Append("}");
+
+            }
+
+            sb.Append("]");
+
+            return sb;
+        }
+
+        public StringBuilder GetAsJSONObject()
+        {
+            var sb = new StringBuilder();
+            var ds = GetDataSet();
+
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                sb.Append("{}");
+                return sb;
+            }
+
+            var firstcol = true;
+
+            sb.Append("{");
+
+            foreach (DataColumn dc in ds.Tables[0].Columns)
+            {
+                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
+                if (string.IsNullOrEmpty(val))
+                    continue;
+
+                if (firstcol)
+                {
+                    sb.Append(val);
+                    firstcol = false;
+                }
+                else
+                {
+                    sb.Append("," + val);
+                }
+            }
+
+            sb.Append("}");
+
+            return sb;
+
+
+        }
+
+        private DataSet GetDataSet()
+        {
+            var ds = new DataSet();
+
+            if (DBTYPE == 1)
+            {
+                var adapt = new SqlDataAdapter(sql_cmd);
+                adapt.FillSchema(ds, SchemaType.Mapped);
+                adapt.Fill(ds);
+            }
+            else if (DBTYPE == 2)
+            {
+                var adapt = new OleDbDataAdapter(oledb_cmd);
+                adapt.FillSchema(ds, SchemaType.Mapped);
+                adapt.Fill(ds);
+            }
+            else if (DBTYPE == 3)
+            {
+                var adapt = new NpgsqlDataAdapter(pgres_cmd);
+                adapt.FillSchema(ds, SchemaType.Mapped);
+                adapt.Fill(ds);
+            }
+            else if (DBTYPE == 4)
+            {
+                var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.FillSchema(ds, SchemaType.Mapped);
+                adapt.Fill(ds);
+            }
+
+            return ds;
+
+        }
+
+
 
 
 
