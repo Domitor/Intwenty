@@ -98,34 +98,72 @@
 
                             }
 
+                            /*
+                                                        if (t.IsUITypeLookUp && t.IsDataViewConnected)
+                                                        {
+                                                            <div>
+                                                                <label>@t.Title</label>
+                                                                <div style="text-align:left; margin-bottom:25px">
+
+                                                                    <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px"><button class="btn btn-default" style="margin-bottom:5px" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button></div>
+
+
+                                                                    @{
+                                                                        var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
+                                                                        if (keyfield != null)
+                                                                        {
+                                                                            <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode"><b>@keyfield.Title</b><br /><span>{{model.@keyfield.DataMetaCode}}</span></div>
+
+                                                                        }
+
+                                                                        foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
+                                                                        {
+                                                                            <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; margin-left:25px; padding:5px" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode"><b>@lf.Title</b><br /><span>{{model.@lf.DataMetaCode}}</span></div>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                                <br />
+                                                                <hr />
+                                                                <br />
+                                                            </div>
+                                                        }*/
 
                             if (t.IsUITypeLookUp && t.IsDataViewConnected)
                             {
+                                var mandatory = Model.UIStructure.Exists(x => x.ParentMetaCode == t.MetaCode && (x.IsUITypeLookUpKeyField || x.IsUITypeLookUpField) && x.IsDataViewConnected && x.IsDataConnected && x.DataInfo.Mandatory);
+
                                 <div>
-                                    <label>@t.Title</label>
-                                    <div style="text-align:left; margin-bottom:25px">
+                                    <label>
+                                        @t.Title  @{ if (mandatory)
+                                            { <span style="color: red"> *</span> }}
+                                    </label>
 
-                                        <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px"><button class="btn btn-default" style="margin-bottom:5px" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button></div>
 
-
-                                        @{
-                                            var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
-                                            if (keyfield != null)
-                                            {
-                                                <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode"><b>@keyfield.Title</b><br /><span>{{model.@keyfield.DataMetaCode}}</span></div>
-
-                                            }
-
-                                            foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
-                                            {
-                                                <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; margin-left:25px; padding:5px" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode"><b>@lf.Title</b><br /><span>{{model.@lf.DataMetaCode}}</span></div>
-                                            }
-                                        }
+                                    <div style="width:10%">
+                                        <button style="float:left" class="btn btn-primary" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button>
                                     </div>
-                                    <br />
-                                    <hr />
-                                    <br />
+                                    @{
+
+                                        var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
+                                        if (keyfield != null)
+                                        {
+                                            <div style="float:left; margin-left:5px; width:30%">
+                                                <input type="text" class="form-control" v-model="model.@keyfield.DataMetaCode" v-on:blur="getDataViewValue('@t.ViewName')" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode" />
+                                            </div>
+                                        }
+
+                                        foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
+                                        {
+                                            <div style="float:left; margin-left:5px; width:60%">
+                                                <input type="text" class="form-control" v-model="model.@lf.DataMetaCode" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode" readonly />
+                                            </div>
+                                        }
+
+                                    }
+
                                 </div>
+                                <br />
+                                <br />
                             }
 
                         }  <!--FOR-->

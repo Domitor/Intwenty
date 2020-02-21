@@ -21,7 +21,11 @@ namespace Moley.MetaDataService
 
         OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state);
 
+        OperationResult GetDomain(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname);
+
         OperationResult GetDomains(ApplicationDto app, List<MetaDataViewDto> viewinfo);
+
+        OperationResult GetDomainValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname, string searchvalue);
 
         OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
 
@@ -296,6 +300,16 @@ namespace Moley.MetaDataService
             }
 
             return new OperationResult(true,string.Format("Generated {0} test data applications.",counter),0,0);
+        }
+
+        public OperationResult GetDomain(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname)
+        {
+            throw new NotImplementedException();
+        }
+
+        public OperationResult GetDomainValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname, string searchvalue)
+        {
+            throw new NotImplementedException();
         }
     }
 }

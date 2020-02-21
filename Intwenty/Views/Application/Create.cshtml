@@ -55,7 +55,7 @@
                 setSelectedDataViewValue: function (item, lookupid)
                 {
                     var context = this;
-                    $("div[data-lookupid]").each(function ()
+                    $("input[data-lookupid]").each(function ()
                     {
                         var id = $(this).data('lookupid');
                         if (id === lookupid)
@@ -67,6 +67,28 @@
                     });
 
                     this.$forceUpdate();
+                },
+                getDataViewValue: function (viewname)
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "GetDomainValue";
+
+                    this.model.ApplicationId = @Model.Application.Id;
+
+                    
+                    $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.model),
+                    success: function (response)
+                    {
+                        
+                    }
+                });
+                    
+                  
                 },
                 openLookUp: function (modalid)
                 {
