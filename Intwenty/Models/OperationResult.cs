@@ -27,7 +27,9 @@ namespace Moley.Models
     {
         public int ApplicationId { get; set; }
 
-        public string ListMetaCode { get; set; }
+        public string ListViewMetaCode { get; set; }
+
+        public string DataViewMetaCode { get; set; }
 
         public int MaxCount { get; set; }
 

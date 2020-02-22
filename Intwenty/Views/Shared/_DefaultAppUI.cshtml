@@ -98,36 +98,7 @@
 
                             }
 
-                            /*
-                                                        if (t.IsUITypeLookUp && t.IsDataViewConnected)
-                                                        {
-                                                            <div>
-                                                                <label>@t.Title</label>
-                                                                <div style="text-align:left; margin-bottom:25px">
-
-                                                                    <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px"><button class="btn btn-default" style="margin-bottom:5px" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button></div>
-
-
-                                                                    @{
-                                                                        var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
-                                                                        if (keyfield != null)
-                                                                        {
-                                                                            <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; padding:5px" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode"><b>@keyfield.Title</b><br /><span>{{model.@keyfield.DataMetaCode}}</span></div>
-
-                                                                        }
-
-                                                                        foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
-                                                                        {
-                                                                            <div style="float: left; margin-top:5px; margin-right:5px; margin-bottom:5px; margin-left:25px; padding:5px" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode"><b>@lf.Title</b><br /><span>{{model.@lf.DataMetaCode}}</span></div>
-                                                                        }
-                                                                    }
-                                                                </div>
-                                                                <br />
-                                                                <hr />
-                                                                <br />
-                                                            </div>
-                                                        }*/
-
+                            //LOOKUP bound to DATAVIEW
                             if (t.IsUITypeLookUp && t.IsDataViewConnected)
                             {
                                 var mandatory = Model.UIStructure.Exists(x => x.ParentMetaCode == t.MetaCode && (x.IsUITypeLookUpKeyField || x.IsUITypeLookUpField) && x.IsDataViewConnected && x.IsDataConnected && x.DataInfo.Mandatory);
@@ -140,7 +111,7 @@
 
 
                                     <div style="width:10%">
-                                        <button style="float:left" class="btn btn-primary" v-on:click="openLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button>
+                                        <button style="float:left" class="btn btn-primary" v-on:click="openDataViewLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button>
                                     </div>
                                     @{
 
@@ -176,7 +147,7 @@
 
         </div>
 
-        <button class="btn btn-default" type="button" v-on:click="sendData()">Spara</button>
+        <button class="btn btn-default" type="button" v-on:click="saveApplication()">Spara</button>
 
 
             @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))

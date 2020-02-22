@@ -84,7 +84,8 @@ namespace Moley.Controllers
         }
 
         /// <summary>
-        /// Get a dataview record for a search value and a view name
+        /// Get a dataview record by a search value and a view name.
+        /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost]
         public JsonResult GetDataViewValue([FromBody] dynamic model)
@@ -93,6 +94,19 @@ namespace Moley.Controllers
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId.Value);
             var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model.ViewName.Value, model.SearchValue.Value);
             return new JsonResult(viewitem);
+        }
+
+        /// <summary>
+        /// Get a dataview record by a search value and a view name.
+        /// Used from the LOOKUP Control
+        /// </summary>
+        [HttpPost]
+        public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
+        {
+            var viewinfo = Repository.GetMetaDataViews();
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            //var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model.ViewName.Value, model.SearchValue.Value);
+            return new JsonResult("");
         }
 
         /// <summary>

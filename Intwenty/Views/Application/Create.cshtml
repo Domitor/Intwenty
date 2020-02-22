@@ -18,9 +18,13 @@
         var app = new Vue({
             el: '#app',
             data: {
+                dataview: [],
+                valuedomain: {},
                 datalists: {},
                 model: {},
-                sendData: function () {
+                dataviewretrieveinfo: { "applicationId":@Model.Application.Id, "dataViewMetaCode":"", "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" },
+                saveApplication: function ()
+                {
                     var context = this;
                     var baseurl = '@Url.Content("~/Application/")';
                     var endpointurl = baseurl + "Save";
@@ -65,13 +69,49 @@
 
                     var helper = new IntwentyHelper(this, endpointurl);
                     helper.getDataViewValue(keyfield, lookupid, senddata); 
-
-                  
                 },
-                openLookUp: function (modalid)
+                openDataViewLookUp: function (viewname)
                 {
-                    $("#" + modalid).modal();
-                }
+                    if (!viewname)
+                        return;
+
+                    this.dataviewretrieveinfo.dataViewMetaCode = viewname;
+                    this.getLookUpPage();
+                    $("#" + viewname).modal();
+                },
+                nextLDataViewookUpPage: function ()
+                {
+                    var context = this;
+                    context.dataviewretrieveinfo.currentRowNum += context.retrieveinfo.batchSize;
+                    context.getPage();
+                },
+                prevDataViewLookUpPage: function ()
+                {
+                    var context = this;
+                    context.dataviewretrieveinfo.currentRowNum -= context.retrieveinfo.batchSize;
+                    context.getPage();
+                } 
+                ,getDataViewLookUpPage: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "GetDataView";
+
+                 
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.dataviewretrieveinfo),
+                        success: function (response)
+                        {
+                            //DATA
+                            context.dataview = JSON.parse(response.data);
+
+                            //UPDATE CURRENT PAGE INFO
+                            context.dataviewretrieveinfo = response.retriveListArgs;
+                        }
+                    });
 
 
 
