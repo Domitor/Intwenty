@@ -14,12 +14,14 @@
     */
     getDataViewValue(keyfield, lookupid, senddata) {
 
+        var context = this.vuecontext;
+
         $("input[data-lookupid]").each(function () {
             var id = $(this).data('lookupid');
             if (id === lookupid) {
                 var dbfield = $(this).data('dbfield');
                 if (dbfield === keyfield) {
-                    senddata.SearchValue = this.vuecontext.model[dbfield];
+                    senddata.SearchValue = context.model[dbfield];
                 }
             }
         });
@@ -40,8 +42,8 @@
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
-                        this.vuecontext.model[dbfield] = dataviewitem[viewfield];
-                        this.vuecontext.$forceUpdate();
+                        context.model[dbfield] = dataviewitem[viewfield];
+                        context.$forceUpdate();
                     }
                 });
 
@@ -49,5 +51,27 @@
             }
         });
 
+    }
+
+    /*
+     * Function to set selected value from dataview to a application table
+     * Called from views: create/open
+     * 
+     */
+    setSelectedDataViewValue(item, lookupid)
+    {
+        var context = this.vuecontext;
+
+        $("input[data-lookupid]").each(function ()
+        {
+            var id = $(this).data('lookupid');
+            if (id === lookupid) {
+                var dbfield = $(this).data('dbfield');
+                var viewfield = $(this).data('viewfield');
+                context.model[dbfield] = item[viewfield];
+            }
+        });
+
+        context.$forceUpdate();
     }
 }

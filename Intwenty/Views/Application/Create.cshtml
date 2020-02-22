@@ -54,74 +54,19 @@
                 },
                 setSelectedDataViewValue: function (item, lookupid)
                 {
-                    var context = this;
-                    $("input[data-lookupid]").each(function ()
-                    {
-                        var id = $(this).data('lookupid');
-                        if (id === lookupid)
-                        {
-                            var dbfield = $(this).data('dbfield');
-                            var viewfield = $(this).data('viewfield');
-                            context.model[dbfield] = item[viewfield];
-                        }
-                    });
-
-                    this.$forceUpdate();
+                    var helper = new IntwentyHelper(this);
+                    helper.setSelectedDataViewValue(item, lookupid); 
                 },
                 getDataViewValue: function (viewname, keyfield, lookupid)
                 {
-                    var context = this;
                     var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
                     var baseurl = '@Url.Content("~/Application/")';
                     var endpointurl = baseurl + "GetDataViewValue";
 
-                    var helper = new IntwentyHelper(context, endpointurl);
+                    var helper = new IntwentyHelper(this, endpointurl);
                     helper.getDataViewValue(keyfield, lookupid, senddata); 
 
-                    /*
-                    var context = this;
-                    var baseurl = 'Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDataViewValue";
-                    var senddata = { "ViewName": viewname, "ApplicationId" : Model.Application.Id, "SearchValue": "" }
-
-                    $("input[data-lookupid]").each(function () {
-                        var id = $(this).data('lookupid');
-                        if (id === lookupid)
-                        {
-                            var dbfield = $(this).data('dbfield');
-                            if (dbfield === keyfield)
-                            {
-                                senddata.SearchValue = context.model[dbfield];
-                            }
-                        }
-                    });
-
-                    if (!senddata.SearchValue)
-                        return;
                   
-                    
-                    $.ajax({
-                    url: endpointurl,
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(senddata),
-                    success: function (response)
-                    {
-                        var dataviewitem = JSON.parse(response.data);
-                        $("input[data-lookupid]").each(function () {
-                            var id = $(this).data('lookupid');
-                            if (id === lookupid) {
-                                var dbfield = $(this).data('dbfield');
-                                var viewfield = $(this).data('viewfield');
-                                context.model[dbfield] = dataviewitem[viewfield];
-                                context.$forceUpdate();
-                            }
-                        });
-
-                        
-                    }
-                    });
-                  */
                 },
                 openLookUp: function (modalid)
                 {

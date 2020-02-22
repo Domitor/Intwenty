@@ -38,20 +38,17 @@
                 }, 
                 setSelectedDataViewValue: function (item, lookupid)
                 {
-                    var context = this;
-                    $("div[data-lookupid]").each(function ()
-                    {
-                        var id = $(this).data('lookupid');
-                        if (id === lookupid)
-                        {
-                            var dbfield = $(this).data('dbfield');
-                            var viewfield = $(this).data('viewfield');
-                            context.model[dbfield] = item[viewfield];
-                        }
-                    });
+                    var helper = new IntwentyHelper(this);
+                    helper.setSelectedDataViewValue(item, lookupid); 
+                },
+                getDataViewValue: function (viewname, keyfield, lookupid)
+                {
+                    var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
+                    var baseurl = '@Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "GetDataViewValue";
 
-                    this.$forceUpdate();
-                   
+                    var helper = new IntwentyHelper(this, endpointurl);
+                    helper.getDataViewValue(keyfield, lookupid, senddata); 
                 },
                 openLookUp: function (modalid)
                 {
