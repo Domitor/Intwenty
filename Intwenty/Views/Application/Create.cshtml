@@ -70,11 +70,19 @@
                 },
                 getDataViewValue: function (viewname, keyfield, lookupid)
                 {
-                  
                     var context = this;
+                    var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
                     var baseurl = '@Url.Content("~/Application/")';
                     var endpointurl = baseurl + "GetDataViewValue";
-                    var senddata = { "ViewName": viewname, "ApplicationId" : @Model.Application.Id, "SearchValue": "" }
+
+                    var helper = new IntwentyHelper(context, endpointurl);
+                    helper.getDataViewValue(keyfield, lookupid, senddata); 
+
+                    /*
+                    var context = this;
+                    var baseurl = 'Url.Content("~/Application/")';
+                    var endpointurl = baseurl + "GetDataViewValue";
+                    var senddata = { "ViewName": viewname, "ApplicationId" : Model.Application.Id, "SearchValue": "" }
 
                     $("input[data-lookupid]").each(function () {
                         var id = $(this).data('lookupid');
@@ -113,10 +121,7 @@
                         
                     }
                     });
-
-                   
-                    
-                  
+                  */
                 },
                 openLookUp: function (modalid)
                 {
