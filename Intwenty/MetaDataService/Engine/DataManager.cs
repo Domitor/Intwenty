@@ -39,6 +39,8 @@ namespace Moley.MetaDataService.Engine
 
         OperationResult GetDomains(List<MetaDataViewDto> viewinfo);
 
+        OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, string domainname, string searchvalue);
+
         OperationResult GenerateTestData(ISystemRepository repository, int gencount);
 
     }
@@ -433,7 +435,7 @@ namespace Moley.MetaDataService.Engine
                     if (view == null)
                         continue;
 
-                    da.CreateCommand(view.SQLQuery);
+                    da.CreateCommand(string.Format(view.SQLQuery,""));
                     da.FillDataset(ds, "DATAVIEW_" + view.MetaCode);
                 }
 
@@ -496,7 +498,54 @@ namespace Moley.MetaDataService.Engine
                 result.AddMessage("USERERROR", string.Format("Fetch list for application {0} failed", this.Meta.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
+ 
+            }
 
+            return result;
+
+        }
+
+        public OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, string viewname, string searchvalue)
+        {
+            var sql = "";
+            var result = new OperationResult(true, "Fetched dataview value", 0, 0);
+
+            try
+            {
+                foreach (var v in viewinfo)
+                {
+                    if (v.IsMetaTypeDataView && v.MetaCode == viewname)
+                    {
+                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyField && p.ParentMetaCode == v.MetaCode);
+                        if (keyfield == null)
+                            continue;
+
+                        sql = string.Format(v.SQLQuery, " WHERE " + keyfield.SQLQueryFieldName + " = @P1 ");
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(sql))
+                    throw new InvalidOperationException("Could not find view and key value in GetDataViewValue().");
+
+
+                var da = new DataAccessClient();
+                da.Open();
+                da.CreateCommand(sql);
+                da.AddParameter("@P1", searchvalue);
+                var data = da.GetAsJSONObject();
+                da.Close();
+
+                result.Data = data.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Fetch dataview value for view {0} failed", viewname));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
             }
 
             return result;

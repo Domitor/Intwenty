@@ -56,6 +56,16 @@ namespace Moley.Data.Dto
             get { return MetaType == MetaTypeDataViewField; }
         }
 
+        public string MetaTypeDataViewKeyField
+        {
+            get { return "DATAVIEWKEYFIELD"; }
+        }
+
+        public bool IsMetaTypeDataViewKeyField
+        {
+            get { return MetaType == MetaTypeDataViewKeyField; }
+        }
+
         public bool HasValidMetaType
         {
             get
@@ -79,6 +89,7 @@ namespace Moley.Data.Dto
             {
                 var t = new List<string>();
                 t.Add("DATAVIEW");
+                t.Add("DATAVIEWKEYFIELD");
                 t.Add("DATAVIEWFIELD");
                 return t;
             }

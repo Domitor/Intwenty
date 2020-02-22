@@ -135,17 +135,6 @@ namespace Moley.Data.Dto
 
       
 
-       
-
-       
-
-      
-
-       
-
-       
-
-      
 
         public string DataTypeBool
         {

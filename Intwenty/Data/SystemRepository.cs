@@ -102,7 +102,6 @@ namespace Moley.Data
                 t.Application = app;
                 t.DataStructure = new List<MetaDataItemDto>();
                 t.UIStructure = new List<MetaUIItemDto>();
-                t.ViewStructure = new List<MetaDataViewDto>();
                 t.NoSeries = new List<NoSerieDto>();
 
                 foreach (var item in ditems)

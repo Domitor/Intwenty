@@ -84,6 +84,18 @@ namespace Moley.Controllers
         }
 
         /// <summary>
+        /// Get a dataview record for a search value and a view name
+        /// </summary>
+        [HttpPost]
+        public JsonResult GetDataViewValue([FromBody] dynamic model)
+        {
+            var viewinfo = Repository.GetMetaDataViews();
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId.Value);
+            var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model.ViewName.Value, model.SearchValue.Value);
+            return new JsonResult(viewitem);
+        }
+
+        /// <summary>
         /// Get new NoSeries for fields in the application with Id.
         /// </summary>
         [HttpGet("/Application/GetNoSerieValues/{id}")]

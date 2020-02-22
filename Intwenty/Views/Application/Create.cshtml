@@ -68,25 +68,53 @@
 
                     this.$forceUpdate();
                 },
-                getDataViewValue: function (viewname)
+                getDataViewValue: function (viewname, keyfield, lookupid)
                 {
+                  
                     var context = this;
                     var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDomainValue";
+                    var endpointurl = baseurl + "GetDataViewValue";
+                    var senddata = { "ViewName": viewname, "ApplicationId" : @Model.Application.Id, "SearchValue": "" }
 
-                    this.model.ApplicationId = @Model.Application.Id;
+                    $("input[data-lookupid]").each(function () {
+                        var id = $(this).data('lookupid');
+                        if (id === lookupid)
+                        {
+                            var dbfield = $(this).data('dbfield');
+                            if (dbfield === keyfield)
+                            {
+                                senddata.SearchValue = context.model[dbfield];
+                            }
+                        }
+                    });
 
+                    if (!senddata.SearchValue)
+                        return;
+                  
                     
                     $.ajax({
                     url: endpointurl,
                     type: "POST",
                     contentType: "application/json",
-                    data: JSON.stringify(this.model),
+                    data: JSON.stringify(senddata),
                     success: function (response)
                     {
+                        var dataviewitem = JSON.parse(response.data);
+                        $("input[data-lookupid]").each(function () {
+                            var id = $(this).data('lookupid');
+                            if (id === lookupid) {
+                                var dbfield = $(this).data('dbfield');
+                                var viewfield = $(this).data('viewfield');
+                                context.model[dbfield] = dataviewitem[viewfield];
+                                context.$forceUpdate();
+                            }
+                        });
+
                         
                     }
-                });
+                    });
+
+                   
                     
                   
                 },

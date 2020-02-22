@@ -96,8 +96,8 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONTYPE", DbName = "LocationType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
 
             //VIEWS
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName  from Location order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName  from Location {0} order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
             context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCNAME", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "LocationName" });
 
             //UI
@@ -223,8 +223,8 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORTXT", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORNAME" });
 
             //VIEWS
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item {0} order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
             context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName" });
 
 
@@ -265,8 +265,8 @@ namespace Moley.Data
             context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "VENDOR", MetaType = "DATAVALUE", MetaCode = "VENDORNAME", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING" });
 
             //VIEWS
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country  from Vendor order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });
-            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "VENDORID", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Id", SQLQueryFieldName = "VendorId" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country  from Vendor{0} order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });
+            context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "VENDORID", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Id", SQLQueryFieldName = "VendorId" });
             context.Set<MetaDataView>().Add(new MetaDataView() { MetaType = "DATAVIEWFIELD", MetaCode = "VENDORNAME", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Name", SQLQueryFieldName = "VendorName" });
 
             //UI
