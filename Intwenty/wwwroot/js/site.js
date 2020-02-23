@@ -74,4 +74,26 @@
 
         context.$forceUpdate();
     }
+
+    getDataViewLookUpPage()
+    {
+        var context = this.vuecontext;
+
+        $.ajax({
+            url: this.endpoint,
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(context.viewretrieveinfo),
+            success: function (response)
+            {
+                //DATA
+                context.dataview = JSON.parse(response.data);
+
+                //UPDATE CURRENT PAGE INFO
+                context.viewretrieveinfo = response.retriveListArgs;
+            }
+        });
+    }
+
+
 }

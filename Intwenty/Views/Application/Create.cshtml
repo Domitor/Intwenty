@@ -19,8 +19,7 @@
         el: '#app',
         data: {
             dataview: [],
-            valuedomain: {},
-            datalists: {},
+            valuedomains: {},
             model: {},
             viewretrieveinfo: { "applicationId":@Model.Application.Id, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
         },
@@ -86,25 +85,13 @@
                 context.viewretrieveinfo.currentRowNum -= context.viewretrieveinfo.batchSize;
                 context.getDataViewLookUpPage();
             },
-            getDataViewLookUpPage: function () {
-                var context = this;
+            getDataViewLookUpPage: function ()
+            {
                 var baseurl = '@Url.Content("~/Application/")';
                 var endpointurl = baseurl + "GetDataView";
 
-
-                $.ajax({
-                    url: endpointurl,
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(context.viewretrieveinfo),
-                    success: function (response) {
-                        //DATA
-                        context.dataview = JSON.parse(response.data);
-
-                        //UPDATE CURRENT PAGE INFO
-                        context.viewretrieveinfo = response.retriveListArgs;
-                    }
-                });
+                var helper = new IntwentyHelper(this, endpointurl);
+                helper.getDataViewLookUpPage();
             },
             isFirstDataViewPage: function () {
                 return this.listRetrieveInfo.currentRowNum <= 0;
@@ -124,7 +111,7 @@
             var baseurl = '@Url.Content("~/Application/")';
             var endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
             $.get(endpointurl, function (response) {
-                context.datalists = JSON.parse(response.data);
+                context.valuedomains = JSON.parse(response.data);
                 endpointurl = baseurl + "GetNoSerieValues/@Model.Application.Id";
                 $.get(endpointurl, function (response) {
                     for (i = 0; i < response.length; i++) {
