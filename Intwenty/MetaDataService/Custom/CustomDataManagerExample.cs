@@ -16,9 +16,9 @@ namespace Moley.MetaDataService.Custom
         }
 
 
-        public override OperationResult GetDomains(List<MetaDataViewDto> viewinfo)
+        public override OperationResult GetValueDomains()
         {
-            return base.GetDomains(viewinfo);
+            return base.GetValueDomains();
         }
 
         public override OperationResult GetLatestVersion()
@@ -26,9 +26,9 @@ namespace Moley.MetaDataService.Custom
             return base.GetLatestVersion();
         }
 
-        public override OperationResult GetList(ListRetrivalArgs args)
+        public override OperationResult GetListView(ListRetrivalArgs args)
         {
-            return base.GetList(args);
+            return base.GetListView(args);
         }
 
         public override OperationResult GetVersion()

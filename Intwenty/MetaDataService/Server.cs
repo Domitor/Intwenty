@@ -17,15 +17,15 @@ namespace Moley.MetaDataService
 
         OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
 
-        OperationResult GetList(ApplicationDto app, ListRetrivalArgs args);
-
         OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state);
 
-        OperationResult GetDomain(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname);
+        OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args);
 
-        OperationResult GetDomains(ApplicationDto app, List<MetaDataViewDto> viewinfo);
+        OperationResult GetValueDomains(ApplicationDto app);
 
-        OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname, string searchvalue);
+        OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+
+        OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
 
         OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
 
@@ -70,10 +70,10 @@ namespace Moley.MetaDataService
         }
 
 
-        public OperationResult GetList(ApplicationDto app, ListRetrivalArgs args)
+        public OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
-            return t.GetList(args);
+            return t.GetListView(args);
         }
 
         public OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state)
@@ -83,10 +83,10 @@ namespace Moley.MetaDataService
             return t.GetLatestVersion();
         }
 
-        public OperationResult GetDomains(ApplicationDto app, List<MetaDataViewDto> viewinfo)
+        public OperationResult GetValueDomains(ApplicationDto app)
         {
             var t = DataManager.GetDataManager(app);
-            return t.GetDomains(viewinfo);
+            return t.GetValueDomains();
         }
 
         public OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
@@ -317,15 +317,18 @@ namespace Moley.MetaDataService
             return new OperationResult(true,string.Format("Generated {0} test data applications.",counter),0,0);
         }
 
-        public OperationResult GetDomain(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname)
-        {
-            throw new NotImplementedException();
-        }
+       
 
-        public OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, string domainname, string searchvalue)
+        public OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
-            return t.GetDataViewValue(viewinfo, domainname, searchvalue);
+            return t.GetDataView(viewinfo, args);
+        }
+
+        public OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        {
+            var t = DataManager.GetDataManager(app);
+            return t.GetDataViewValue(viewinfo, args);
         }
     }
 }

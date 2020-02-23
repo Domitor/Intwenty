@@ -52,6 +52,9 @@ namespace Moley.Controllers
 
         }
 
+        /*********************  API ***********************************************************/
+
+
         /// <summary>
         /// Generate UI based on UIStructure for the application with the supplied Id.
         /// </summary>
@@ -69,15 +72,24 @@ namespace Moley.Controllers
         }
 
         /// <summary>
+        /// Loads data for a listview for the application with supplied Id
+        /// </summary>
+        [HttpPost]
+        public JsonResult GetListView([FromBody] ListRetrivalArgs model)
+        {
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var listdata = MetaServer.GetListView(t, model);
+            return new JsonResult(listdata);
+        }
+
+        /// <summary>
         /// Get Domain data based on the meta model for application with Id.
         /// </summary>
-        [HttpGet("/Application/GetDomains/{id}")]
-        public JsonResult GetDomains(int id)
+        [HttpGet("/Application/GetValueDomains/{id}")]
+        public JsonResult GetValueDomains(int id)
         {
-            var viewinfo = Repository.GetMetaDataViews();
-            var systemmeta = Repository.GetApplicationMeta();
-            var t = systemmeta.Find(p => p.Application.Id == id);
-            var data = MetaServer.GetDomains(t, viewinfo);
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == id);
+            var data = MetaServer.GetValueDomains(t);
             var res = new JsonResult(data);
             return res;
 
@@ -88,11 +100,11 @@ namespace Moley.Controllers
         /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost]
-        public JsonResult GetDataViewValue([FromBody] dynamic model)
+        public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
             var viewinfo = Repository.GetMetaDataViews();
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId.Value);
-            var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model.ViewName.Value, model.SearchValue.Value);
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model);
             return new JsonResult(viewitem);
         }
 
@@ -105,8 +117,8 @@ namespace Moley.Controllers
         {
             var viewinfo = Repository.GetMetaDataViews();
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
-            //var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model.ViewName.Value, model.SearchValue.Value);
-            return new JsonResult("");
+            var dv = MetaServer.GetDataView(t, viewinfo, model);
+            return new JsonResult(dv);
         }
 
         /// <summary>
@@ -120,16 +132,7 @@ namespace Moley.Controllers
 
         }
 
-        /// <summary>
-        /// Loads data for a listview for the application with supplied Id
-        /// </summary>
-        [HttpPost]
-        public JsonResult GetListData([FromBody] ListRetrivalArgs model)
-        {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
-            var listdata = MetaServer.GetList(t, model);
-            return new JsonResult(listdata);
-        }
+       
 
         [HttpPost]
         public JsonResult Save([FromBody] dynamic model)

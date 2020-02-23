@@ -90,8 +90,8 @@
         </table>
 
         <ul class="pagination">
-            <li v-bind:class="{ disabled: isFirstPage }"><a href="#" v-on:click="prevpage()">Previous {{retrieveinfo.batchSize}}</a></li>
-            <li><a href="#" v-on:click="nextpage()">Next {{retrieveinfo.batchSize}}</a></li>
+            <li v-bind:class="{ disabled: isFirstPage }"><a href="#" v-on:click="prevpage()">Previous {{listRetrieveInfo.batchSize}}</a></li>
+            <li><a href="#" v-on:click="nextpage()">Next {{listRetrieveInfo.batchSize}}</a></li>
         </ul>
 
     </div>
@@ -105,7 +105,7 @@
             data: {
                 datalist: []
                 ,model: { "filtervalue": "", "filterfield": "" }
-                ,retrieveinfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                ,listRetrieveInfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "dataViewMetaCode":"", "listViewMetaCode":"", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
             },
@@ -113,34 +113,34 @@
                 nextpage: function ()
                 {
                     var context = this;
-                    context.retrieveinfo.currentRowNum += context.retrieveinfo.batchSize;
+                    context.listRetrieveInfo.currentRowNum += context.listRetrieveInfo.batchSize;
                     context.getPage();
                 },
                 prevpage: function ()
                 {
                     var context = this;
-                    context.retrieveinfo.currentRowNum -= context.retrieveinfo.batchSize;
+                    context.listRetrieveInfo.currentRowNum -= context.listRetrieveInfo.batchSize;
                     context.getPage();
                 } 
                 ,getPage: function ()
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetListData";
+                    var endpointurl = baseurl + "GetListView";
 
                  
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(this.retrieveinfo),
+                        data: JSON.stringify(this.listRetrieveInfo),
                         success: function (response)
                         {
                             //DATA
                             context.datalist = JSON.parse(response.data);
 
                             //UPDATE CURRENT PAGE INFO
-                            context.retrieveinfo = response.retriveListArgs;
+                            context.listRetrieveInfo = response.retriveListArgs;
                         }
                     });
                 },
@@ -154,11 +154,11 @@
                     if (context.model.filtervalue == "")
                         return;
 
-                    if (context.model.filtervalue != context.retrieveinfo.filterValue)
+                    if (context.model.filtervalue != context.listRetrieveInfo.filterValue)
                     {
-                        context.retrieveinfo.currentRowNum = 0;
-                        context.retrieveinfo.filterField = context.model.filterfield;
-                        context.retrieveinfo.filterValue = context.model.filtervalue;
+                        context.listRetrieveInfo.currentRowNum = 0;
+                        context.listRetrieveInfo.filterField = context.model.filterfield;
+                        context.listRetrieveInfo.filterValue = context.model.filtervalue;
                         context.getPage();
                     }
 
@@ -173,22 +173,7 @@
                 }
             },
             computed: {
-                filteredResults: function ()
-                {
-                    var context = this;
-                    return this.datalist.filter(function (item)
-                    {
-                        if (context.model.filtervalue == "" || context.model.filterfield == "")
-                            return true;
-
-                        if (item[context.model.filterfield].indexOf(context.model.filtervalue) > -1)
-                        {
-                            return true;
-                        }
-
-                        return false;
-                    })
-                },
+               
                 sortedResults: function () {
                     return this.datalist.sort((a, b) => {
                         let modifier = 1;
@@ -199,7 +184,7 @@
                     });
                 },
                 isFirstPage: function () {
-                    return this.retrieveinfo.currentRowNum <= 0;
+                    return this.listRetrieveInfo.currentRowNum <= 0;
                 }
             },
             mounted: function ()

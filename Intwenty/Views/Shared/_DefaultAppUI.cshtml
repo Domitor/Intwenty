@@ -163,42 +163,76 @@
                                     <h4 class="modal-title">@t.ViewInfo.Title</h4>
                                 </div>
                                 <div class="modal-body">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
-                                                {
-                                                    if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
-                                                    {
-                                                        <th>@lf.ViewInfo.Title</th>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Value</label>
+                                                <input type="text" class="form-control" v-model="viewretrieveinfo.filterValue" v-on:blur="handleDataViewFilter" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Filter</label>
+                                                <select v-model="viewretrieveinfo.filterField" class="form-control">
+                                                    @{
+                                                        foreach (var c in Model.UIStructure)
+                                                        {
+
+                                                            if ((c.IsUITypeLookUpField || c.IsUITypeLookUpKeyField) && c.IsDataConnected && c.IsDataViewConnected && c.ParentMetaCode == t.MetaCode)
+                                                            {
+                                                                <option value="@c.ViewInfo.SQLQueryFieldName">@c.Title</option>
+                                                            }
+
+                                                        }
                                                     }
-                                                }
-                                                @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
-                                                {
-                                                    if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
-                                                    {
-                                                        <th>@lf.ViewInfo.Title</th>
-                                                    }
-                                                }
-                                            </tr>
-                                        </thead>
-                                        <tr v-for="item in datalists.DATAVIEW_@t.ViewName">
-                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
-                                            {
-                                                if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
-                                                {
-                                                    <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.MetaCode')" data-dismiss="modal">{{item.@lf.ViewInfo.SQLQueryFieldName}}</a></td>
-                                                }
-                                            }
-                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
-                                            {
-                                                if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
-                                                {
-                                                    <td>{{item.@lf.ViewInfo.SQLQueryFieldName}}</td>
-                                                }
-                                            }
-                                        </tr>
-                                    </table>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                            {
+                                                                if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                                {
+                                                                    <th>@lf.ViewInfo.Title</th>
+                                                                }
+                                                            }
+                                                            @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                            {
+                                                                if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                                {
+                                                                    <th>@lf.ViewInfo.Title</th>
+                                                                }
+                                                            }
+                                                        </tr>
+                                                    </thead>
+                                                    <tr v-for="item in dataview">
+                                                        @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                        {
+                                                            if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                            {
+                                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.MetaCode')" data-dismiss="modal">{{item.@lf.ViewInfo.SQLQueryFieldName}}</a></td>
+                                                            }
+                                                        }
+                                                        @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
+                                                        {
+                                                            if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                            {
+                                                                <td>{{item.@lf.ViewInfo.SQLQueryFieldName}}</td>
+                                                            }
+                                                        }
+                                                    </tr>
+                                                </table>
+                                                <ul class="pagination">
+                                                    <li v-bind:class="{ disabled: isFirstDataViewPage }"><a href="#" v-on:click="prevDataViewLookUpPage()">Previous {{viewretrieveinfo.batchSize}}</a></li>
+                                                    <li><a href="#" v-on:click="nextDataViewLookUpPage()">Next {{viewretrieveinfo.batchSize}}</a></li>
+                                                </ul>
+                                            </div>
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

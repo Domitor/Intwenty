@@ -15,128 +15,127 @@
 {
 
 <script>
-        var app = new Vue({
-            el: '#app',
-            data: {
-                dataview: [],
-                valuedomain: {},
-                datalists: {},
-                model: {},
-                dataviewretrieveinfo: { "applicationId":@Model.Application.Id, "dataViewMetaCode":"", "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" },
-                saveApplication: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "Save";
-
-                    this.model.ApplicationId = @Model.Application.Id;
-
-
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.model),
-                        success: function (response)
-                        {
-                            if (response.isSuccess) {
-                                context.model.Id = response.id;
-                                context.model.Version = response.version;
-                                endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
-                                window.location.href = endpointurl;
-                            }
-                            else
-                            {
-                                $("#msg_dlg_modal_text").text("");
-                                $("#msg_dlg_modal_text").text(response.messages[0].message);
-                                $("#msg_dlg_modal").modal();
-                             
-                                //alert(response.messages[0].message);
-                            }
-                        }
-                    });
-                },
-                setSelectedDataViewValue: function (item, lookupid)
-                {
-                    var helper = new IntwentyHelper(this);
-                    helper.setSelectedDataViewValue(item, lookupid); 
-                },
-                getDataViewValue: function (viewname, keyfield, lookupid)
-                {
-                    var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDataViewValue";
-
-                    var helper = new IntwentyHelper(this, endpointurl);
-                    helper.getDataViewValue(keyfield, lookupid, senddata); 
-                },
-                openDataViewLookUp: function (viewname)
-                {
-                    if (!viewname)
-                        return;
-
-                    this.dataviewretrieveinfo.dataViewMetaCode = viewname;
-                    this.getLookUpPage();
-                    $("#" + viewname).modal();
-                },
-                nextLDataViewookUpPage: function ()
-                {
-                    var context = this;
-                    context.dataviewretrieveinfo.currentRowNum += context.retrieveinfo.batchSize;
-                    context.getPage();
-                },
-                prevDataViewLookUpPage: function ()
-                {
-                    var context = this;
-                    context.dataviewretrieveinfo.currentRowNum -= context.retrieveinfo.batchSize;
-                    context.getPage();
-                } 
-                ,getDataViewLookUpPage: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDataView";
-
-                 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(context.dataviewretrieveinfo),
-                        success: function (response)
-                        {
-                            //DATA
-                            context.dataview = JSON.parse(response.data);
-
-                            //UPDATE CURRENT PAGE INFO
-                            context.dataviewretrieveinfo = response.retriveListArgs;
-                        }
-                    });
-
-
-
-            },
-            mounted: function ()
-            {
+    var app = new Vue({
+        el: '#app',
+        data: {
+            dataview: [],
+            valuedomain: {},
+            datalists: {},
+            model: {},
+            viewretrieveinfo: { "applicationId":@Model.Application.Id, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+        },
+        methods:
+        {
+            saveApplication: function () {
                 var context = this;
                 var baseurl = '@Url.Content("~/Application/")';
-                var endpointurl = baseurl + "GetDomains/@Model.Application.Id";
-                $.get(endpointurl, function (response)
-                {
-                    context.datalists = JSON.parse(response.data);
-                    endpointurl = baseurl + "GetNoSerieValues/@Model.Application.Id";
-                    $.get(endpointurl, function (response)
-                    {
-                        for (i = 0; i < response.length; i++)
-                        {
-                            var t = response[i];
-                            context.model[t.dataMetaCode] = t.newValue;
-                            context.$forceUpdate();
+                var endpointurl = baseurl + "Save";
+
+                this.model.ApplicationId = @Model.Application.Id;
+
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.model),
+                    success: function (response) {
+                        if (response.isSuccess) {
+                            context.model.Id = response.id;
+                            context.model.Version = response.version;
+                            endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
+                            window.location.href = endpointurl;
                         }
-                    });
+                        else {
+                            $("#msg_dlg_modal_text").text("");
+                            $("#msg_dlg_modal_text").text(response.messages[0].message);
+                            $("#msg_dlg_modal").modal();
+
+                            //alert(response.messages[0].message);
+                        }
+                    }
                 });
+            },
+            setSelectedDataViewValue: function (item, lookupid) {
+                var helper = new IntwentyHelper(this);
+                helper.setSelectedDataViewValue(item, lookupid);
+            },
+            getDataViewValue: function (viewname, keyfield, lookupid) {
+                var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
+                var baseurl = '@Url.Content("~/Application/")';
+                var endpointurl = baseurl + "GetDataViewValue";
+
+                var helper = new IntwentyHelper(this, endpointurl);
+                helper.getDataViewValue(keyfield, lookupid, senddata);
+            },
+            openDataViewLookUp: function (viewname) {
+                if (!viewname)
+                    return;
+
+                this.viewretrieveinfo.dataViewMetaCode = viewname;
+                this.getDataViewLookUpPage();
+                $("#" + viewname).modal();
+            },
+            nextDataViewLookUpPage: function () {
+                var context = this;
+                context.viewretrieveinfo.currentRowNum += context.viewretrieveinfo.batchSize;
+                context.getDataViewLookUpPage();
+            },
+            prevDataViewLookUpPage: function () {
+                var context = this;
+                context.viewretrieveinfo.currentRowNum -= context.viewretrieveinfo.batchSize;
+                context.getDataViewLookUpPage();
+            },
+            getDataViewLookUpPage: function () {
+                var context = this;
+                var baseurl = '@Url.Content("~/Application/")';
+                var endpointurl = baseurl + "GetDataView";
+
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(context.viewretrieveinfo),
+                    success: function (response) {
+                        //DATA
+                        context.dataview = JSON.parse(response.data);
+
+                        //UPDATE CURRENT PAGE INFO
+                        context.viewretrieveinfo = response.retriveListArgs;
+                    }
+                });
+            },
+            isFirstDataViewPage: function () {
+                return this.listRetrieveInfo.currentRowNum <= 0;
+            },
+            handleDataViewFilter: function ()
+            {
+                var context = this;
+                context.viewretrieveinfo.currentRowNum = 0;
+                context.getDataViewLookUpPage();
+
             }
-        })
+
+
+        },
+        mounted: function () {
+            var context = this;
+            var baseurl = '@Url.Content("~/Application/")';
+            var endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
+            $.get(endpointurl, function (response) {
+                context.datalists = JSON.parse(response.data);
+                endpointurl = baseurl + "GetNoSerieValues/@Model.Application.Id";
+                $.get(endpointurl, function (response) {
+                    for (i = 0; i < response.length; i++) {
+                        var t = response[i];
+                        context.model[t.dataMetaCode] = t.newValue;
+                        context.$forceUpdate();
+                    }
+                });
+            });
+        }
+    });
 </script>
 
 }
