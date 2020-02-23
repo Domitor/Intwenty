@@ -23,3 +23,9 @@ body {
     color: white;
 
 }
+
+.requiredNotValid 
+{
+    border-color: red;
+    background: #FDD;
+}

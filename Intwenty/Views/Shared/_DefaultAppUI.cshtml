@@ -35,7 +35,7 @@
                                         @t.Title @{ if (t.DataInfo.Mandatory)
                                             { <span style="color: red"> *</span> }}
                                     </label>
-                                    <input type="text" class="form-control" v-model="model.@t.DataMetaCode" />
+                                    <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="text" class="form-control" v-model="model.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="TEXTBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                                 </div>
 
                             }
@@ -47,7 +47,7 @@
                                         @t.Title  @{ if (t.DataInfo.Mandatory)
                                             { <span style="color: red"> *</span> }}
                                     </label>
-                                    <input type="number" class="form-control" v-model="model.@t.DataMetaCode" />
+                                    <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="number" class="form-control" v-model="model.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="NUMBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                                 </div>
 
                             }
@@ -59,7 +59,7 @@
                                         @t.Title  @{ if (t.DataInfo.Mandatory)
                                             { <span style="color: red"> *</span> }}
                                     </label>
-                                    <input type="date" class="form-control" v-model="model.@t.DataMetaCode" />
+                                    <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="date" class="form-control" v-model="model.@t.DataMetaCode" v-on:change="onUserInput(event)" data-metatype="DATEPICKER" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                                 </div>
 
                             }
@@ -79,7 +79,7 @@
                                         @t.Title  @{ if (t.DataInfo.Mandatory)
                                             { <span style="color: red"> *</span> }}
                                     </label>
-                                    <textarea v-model="model.@t.DataMetaCode" rows="10" cols="50" class="form-control"></textarea>
+                                    <textarea id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@t.DataMetaCode" rows="10" cols="50" class="form-control" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory"></textarea>
                                 </div>
 
                             }
@@ -91,7 +91,7 @@
                                         @t.Title  @{ if (t.DataInfo.Mandatory)
                                             { <span style="color: red"> *</span> }}
                                     </label>
-                                    <select v-model="model.@t.DataMetaCode" class="form-control">
+                                    <select id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@t.DataMetaCode" class="form-control"  v-on:change="onUserInput(event)" data-metatype="COMBOBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory">
                                         <option v-for="item in valuedomains.VALUEDOMAIN_@t.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
                                     </select>
                                 </div>

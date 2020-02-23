@@ -25,13 +25,17 @@
         },
         methods:
         {
-            saveApplication: function () {
+            saveApplication: function ()
+            {
                 var context = this;
                 var baseurl = '@Url.Content("~/Application/")';
                 var endpointurl = baseurl + "Save";
 
                 this.model.ApplicationId = @Model.Application.Id;
 
+                if (!context.canSave())
+                    return;
+                
 
                 $.ajax({
                     url: endpointurl,
@@ -55,23 +59,40 @@
                     }
                 });
             },
+            canSave: function ()
+            {
+                var helper = new IntwentyHelper(this);
+                return helper.canSave();
+            },
+            onUserInput: function (event)
+            {
+                var helper = new IntwentyHelper(this);
+                helper.onUserInput(event);
+            },
             setSelectedDataViewValue: function (item, lookupid) {
                 var helper = new IntwentyHelper(this);
                 helper.setSelectedDataViewValue(item, lookupid);
             },
-            getDataViewValue: function (viewname, keyfield, lookupid) {
-                var senddata = { "ViewName": viewname, "ApplicationId": @Model.Application.Id, "SearchValue": "" }
+            getDataViewValue: function (viewname, keyfield, lookupid)
+            {
+                this.viewretrieveinfo.dataViewMetaCode = viewname;
                 var baseurl = '@Url.Content("~/Application/")';
                 var endpointurl = baseurl + "GetDataViewValue";
 
                 var helper = new IntwentyHelper(this, endpointurl);
-                helper.getDataViewValue(keyfield, lookupid, senddata);
+                helper.getDataViewValue(keyfield, lookupid);
             },
-            openDataViewLookUp: function (viewname) {
+            openDataViewLookUp: function (viewname)
+            {
                 if (!viewname)
                     return;
 
+                this.viewretrieveinfo.maxCount = 0;
+                this.viewretrieveinfo.currentRowNum = 0;
+                this.viewretrieveinfo.filterField = "";
+                this.viewretrieveinfo.filterValue = "";
                 this.viewretrieveinfo.dataViewMetaCode = viewname;
+
                 this.getDataViewLookUpPage();
                 $("#" + viewname).modal();
             },

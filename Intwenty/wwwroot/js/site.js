@@ -1,4 +1,8 @@
-﻿class IntwentyHelper
+﻿/*
+ * Helper for Intwenty javascript / vue 
+ */
+
+class IntwentyHelper
 {
 
     constructor(vuecontext, endpoint)
@@ -12,7 +16,7 @@
      * Called from views: create/open
      * Usage: Wxwcuted when a user tabs out of an input LOOKUPKEYFIELD included in a LOOKUP
     */
-    getDataViewValue(keyfield, lookupid, senddata) {
+    getDataViewValue(keyfield, lookupid) {
 
         var context = this.vuecontext;
 
@@ -20,13 +24,18 @@
             var id = $(this).data('lookupid');
             if (id === lookupid) {
                 var dbfield = $(this).data('dbfield');
-                if (dbfield === keyfield) {
-                    senddata.SearchValue = context.model[dbfield];
+                var viewfield = $(this).data('viewfield');
+                if (dbfield === keyfield)
+                {
+                    context.viewretrieveinfo.filterField = viewfield;
+                    context.viewretrieveinfo.filterValue = context.model[dbfield];
                 }
             }
         });
 
-        if (!senddata.SearchValue)
+        if (!context.viewretrieveinfo.filterValue)
+            return;
+        if (context.viewretrieveinfo.filterValue.length == 0)
             return;
 
 
@@ -34,7 +43,7 @@
             url: this.endpoint,
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify(senddata),
+            data: JSON.stringify(context.viewretrieveinfo),
             success: function (response) {
                 var dataviewitem = JSON.parse(response.data);
                 $("input[data-lookupid]").each(function () {
@@ -93,6 +102,66 @@
                 context.viewretrieveinfo = response.retriveListArgs;
             }
         });
+    }
+
+    /*
+     * Handles userinput
+     * 
+     */
+    onUserInput(event)
+    {
+
+        if (!event)
+            return;
+
+        var elementId = event.srcElement.id;
+        if (!elementId)
+            return;
+
+        //Remove requiredNotValid if the input is valid
+        $("[data-required]").each(function () {
+            var required = $(this).data('required');
+            var id = $(this).attr('id');
+            if (required === "True" && id === elementId) {
+                var val = event.srcElement.value;
+                if (val) {
+                    if (val.length > 0)
+                        $("#" + elementId).removeClass('requiredNotValid');
+                }
+            }
+        });
+
+
+    }
+
+    /*
+     * Client validation.
+     * Check if this application can be changed.
+     */ 
+    canSave()
+    {
+        var context = this.vuecontext;
+        var result = true;
+        $("[data-required]").each(function () {
+            var required = $(this).data('required');
+            if (required === "True") {
+                var dbfield = $(this).data('dbfield');
+                if (!context.model[dbfield]) {
+                    result = false;
+                    $(this).addClass('requiredNotValid');
+                }
+                else if (context.model[dbfield].length == 0) {
+                    result = false;
+                    $(this).addClass('requiredNotValid');
+                }
+                else {
+                    $(this).removeClass('requiredNotValid');
+                }
+            }
+        });
+
+
+        return result;
     }
 
 
