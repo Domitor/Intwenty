@@ -4,18 +4,12 @@ using System.Collections.Generic;
 
 namespace Moley.Data.Dto
 {
-    public class MetaDataViewDto
+    public class MetaDataViewDto : MetaModelDto
     {
 
         public int Id { get; set; }
 
-        public string MetaType { get; set; }
-
         public string Title { get; set; }
-
-        public string MetaCode { get; set; }
-
-        public string ParentMetaCode { get; set; }
 
         public string SQLQuery { get; set; }
 
@@ -30,6 +24,7 @@ namespace Moley.Data.Dto
             Title = entity.Title;
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;
+            Properties = "";
         }
 
         public MetaDataViewDto()
@@ -66,14 +61,14 @@ namespace Moley.Data.Dto
             get { return MetaType == MetaTypeDataViewKeyField; }
         }
 
-        public bool HasValidMetaType
+        public override bool HasValidMetaType
         {
             get
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (MetaTypes.Contains(MetaType))
+                if (ValidMetaTypes.Contains(MetaType))
                     return true;
 
                 return false;
@@ -81,9 +76,16 @@ namespace Moley.Data.Dto
             }
         }
 
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
 
-
-        public List<string> MetaTypes
+        protected override List<string> ValidMetaTypes
         {
             get
             {
@@ -95,11 +97,7 @@ namespace Moley.Data.Dto
             }
         }
 
-        public bool IsRoot
-        {
-            get { return this.ParentMetaCode == "" || this.ParentMetaCode == "ROOT"; }
-        }
-
+      
     }
 
   

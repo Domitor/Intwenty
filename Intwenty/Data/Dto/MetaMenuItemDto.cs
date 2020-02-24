@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Moley.Data.Dto
 {
-    public class MetaMenuItemDto
+    public class MetaMenuItemDto : MetaModelDto
     {
 
         public MetaMenuItemDto(MetaMenuItem entity)
@@ -25,20 +25,11 @@ namespace Moley.Data.Dto
 
         public string Title { get; set; }
 
-        public string MetaType { get; set; }
-
-        public string MetaCode { get; set; }
-
-        public string ParentMetaCode { get; set; }
-
         public int Order { get; set; }
 
         public string Controller { get; set; }
 
         public string Action { get; set; }
-
-        public string Properties { get; set; }
-
 
         public string MetaTypeMainMenu
         {
@@ -60,14 +51,14 @@ namespace Moley.Data.Dto
             get { return MetaType == MetaTypeMenuItem; }
         }
 
-        public bool HasValidMetaType
+        public override bool HasValidMetaType
         {
             get
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (MetaTypes.Contains(MetaType))
+                if (ValidMetaTypes.Contains(MetaType))
                     return true;
 
                 return false;
@@ -75,9 +66,18 @@ namespace Moley.Data.Dto
             }
         }
 
+      
 
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
 
-        public List<string> MetaTypes
+        protected override List<string> ValidMetaTypes
         {
             get
             {

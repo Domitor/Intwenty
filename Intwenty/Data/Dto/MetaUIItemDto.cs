@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Moley.Data.Dto
 {
 
-    public class MetaUIItemDto
+    public class MetaUIItemDto : MetaModelDto
     {
 
         public MetaUIItemDto()
@@ -27,13 +27,10 @@ namespace Moley.Data.Dto
             RowOrder = entity.RowOrder;
             DataMetaCode = entity.DataMetaCode;
             Domain = string.IsNullOrEmpty(entity.Domain) ? "" : entity.Domain;
-
-           
+            Properties = entity.Properties;
         }
 
         public int Id { get; set; }
-
-        private string MetaType { get; set; }
 
         public string Title { get; set; }
 
@@ -43,17 +40,11 @@ namespace Moley.Data.Dto
 
         public string DataMetaCode { get; set; }
 
-        public string MetaCode { get; set; }
-
-        public string ParentMetaCode { get; set; }
-
         public string CssClass { get; set; }
 
         public int ColumnOrder { get; set; }
 
         public int RowOrder { get; set; }
-
-        public string Properties { get; set; }
 
         public string Domain { get; set; }
 
@@ -61,11 +52,7 @@ namespace Moley.Data.Dto
 
         public MetaDataViewDto ViewInfo { get; set; }
 
-        public bool IsRoot
-        {
-            get { return this.ParentMetaCode == "" || this.ParentMetaCode == "ROOT"; }
-        }
-
+ 
         public bool IsDataConnected
         {
             get { return DataInfo != null && !string.IsNullOrEmpty(DataMetaCode); }
@@ -254,14 +241,14 @@ namespace Moley.Data.Dto
             get { return MetaType == UITypeDatePicker; }
         }
 
-        public bool HasValidUIType
+        public override bool HasValidMetaType
         {
             get
             {
                if (string.IsNullOrEmpty(MetaType))
                    return false;
 
-               if (MetaTypes.Contains(MetaType))
+               if (ValidMetaTypes.Contains(MetaType))
                    return true;
 
                 return false;
@@ -269,9 +256,34 @@ namespace Moley.Data.Dto
             }
         }
 
+        public override bool HasValidProperties
+        {
+            get
+            {
+                foreach (var s in GetProperties())
+                {
+                    if (!ValidProperties.Exists(p => p == s))
+                        return false;
+                }
 
+                return true;
+            }
+        }
 
-        public List<string> MetaTypes
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+
+                if (this.IsUITypeListView)
+                    t.Add("HIDEFILTER");
+
+                return t;
+            }
+        }
+
+        protected override List<string> ValidMetaTypes
         {
             get
             {

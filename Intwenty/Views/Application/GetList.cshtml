@@ -13,6 +13,10 @@
             {
                 title = lv.Title;
             }
+            else
+            {
+                throw new InvalidOperationException("No LISTVIEW meta data is defined for this application");
+            }
         }
 
         <h2>@title</h2>
@@ -23,182 +27,18 @@
         <br />
         <br />
 
-        <div class="row">
-            <div class="col-lg-3"></div>
-            <div class="col-lg-3"></div>
-            <div class="col-lg-2"></div>
-            <div class="col-lg-2">
-                <div class="form-group">
-                    <label class="control-label">Value</label>
-                    <input type="text" class="form-control" v-model="model.filtervalue" v-on:blur="handleFilterValue" />
-                </div>
-            </div>
-            <div class="col-lg-2">
-                <div class="form-group">
-                    <label class="control-label">Filter</label>
-                    <select v-model="model.filterfield" class="form-control">
-                        @{
-                            foreach (var c in Model.UIStructure)
-                            {
-
-                                if (c.IsUITypeListViewField && c.IsDataConnected)
-                                {
-                                    <option value="@c.DataInfo.DbName">@c.Title</option>
-                                }
-
-                            }
-                        }
-                    </select>
-                </div>
-            </div>
-        </div>
-
-
-
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th style="width:10%"></th>
-                    @{
-                        foreach (var c in Model.UIStructure)
-                        {
-
-                            if (c.IsUITypeListViewField && c.IsDataConnected)
-                            {
-                                <th v-on:click="sortBycolumn('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
-                            }
-
-                        }
-                    }
-                </tr>
-            </thead>
-            <tr v-for="item in sortedResults">
-                <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id">Open</a></td>
-                @{
-                    foreach (var c in Model.UIStructure)
-                    {
-
-                        if (c.IsUITypeListViewField && c.IsDataConnected)
-                        {
-                            <td>{{item.@c.DataInfo.DbName}}</td>
-                        }
-
-                    }
-                }
-            </tr>
-
-        </table>
-
-        <ul class="pagination">
-            <li v-bind:class="{ disabled: isFirstPage }"><a href="#" v-on:click="prevpage()">Previous {{listRetrieveInfo.batchSize}}</a></li>
-            <li><a href="#" v-on:click="nextpage()">Next {{listRetrieveInfo.batchSize}}</a></li>
-        </ul>
+        @await Html.PartialAsync("_DefaultListView", Model)
 
     </div>
 </div>
 
 @section Scripts
-    {
+{
+    <script src="~/js/getlist.js"></script>
     <script>
-        var app = new Vue({
-            el: '#app',
-            data: {
-                datalist: []
-                ,model: { "filtervalue": "", "filterfield": "" }
-                ,listRetrieveInfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "dataViewMetaCode":"", "listViewMetaCode":"", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-                ,currentSort: ''
-                ,currentSortDir: 'asc'
-            },
-            methods: {
-                nextpage: function ()
-                {
-                    var context = this;
-                    context.listRetrieveInfo.currentRowNum += context.listRetrieveInfo.batchSize;
-                    context.getPage();
-                },
-                prevpage: function ()
-                {
-                    var context = this;
-                    context.listRetrieveInfo.currentRowNum -= context.listRetrieveInfo.batchSize;
-                    context.getPage();
-                } 
-                ,getPage: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetListView";
-
-                 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.listRetrieveInfo),
-                        success: function (response)
-                        {
-                            //DATA
-                            context.datalist = JSON.parse(response.data);
-
-                            //UPDATE CURRENT PAGE INFO
-                            context.listRetrieveInfo = response.retriveListArgs;
-                        }
-                    });
-                },
-                handleFilterValue: function ()
-                {
-                    var context = this;
-
-                    if (!context.model.filterfield || context.model.filterfield == "")
-                        return;
-
-                    if (context.model.filtervalue == "")
-                        return;
-
-                    if (context.model.filtervalue != context.listRetrieveInfo.filterValue)
-                    {
-                        context.listRetrieveInfo.currentRowNum = 0;
-                        context.listRetrieveInfo.filterField = context.model.filterfield;
-                        context.listRetrieveInfo.filterValue = context.model.filtervalue;
-                        context.getPage();
-                    }
-
-                   
-                },
-                sortBycolumn: function (s) {
-                    //if s == current sort, reverse
-                    if (s === this.currentSort) {
-                        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
-                    }
-                    this.currentSort = s;
-                }
-            },
-            computed: {
-               
-                sortedResults: function () {
-                    return this.datalist.sort((a, b) => {
-                        let modifier = 1;
-                        if (this.currentSortDir === 'desc') modifier = -1;
-                        if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
-                        if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
-                        return 0;
-                    });
-                },
-                isFirstPage: function () {
-                    return this.listRetrieveInfo.currentRowNum <= 0;
-                }
-            },
-            mounted: function ()
-            {
-                var context = this;
-                context.getPage();
-
-                /* GET
-                $.get(endpointurl, function (response)
-                {
-                    
-                });*/
-            }
-        })
+        var app = createVue('#app',@Model.Application.Id,'@Url.Content("~/Application/")');
     </script>
+       
+   
 
 }

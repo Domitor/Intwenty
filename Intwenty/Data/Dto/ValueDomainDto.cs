@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Moley.Data.Entity;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Moley.Data.Entity
+namespace Moley.Data.Dto
 {
-    public class ValueDomainDto
+    public class ValueDomainDto : MetaModelDto
     {
 
         public ValueDomainDto(ValueDomain entity)
@@ -15,6 +17,9 @@ namespace Moley.Data.Entity
             Code = entity.Code;
             Value = entity.Value;
             Properties = entity.Properties;
+            MetaType = "VALUEDOMAIN";
+            MetaCode = DomainName;
+            ParentMetaCode = "ROOT";
         }
 
         public int Id { get; set; }
@@ -25,8 +30,29 @@ namespace Moley.Data.Entity
 
         public string Value { get; set; }
 
-        public string Properties { get; set; }
+        public override bool HasValidMetaType
+        {
+            get { return true;  }
+        }
 
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
+
+        protected override List<string> ValidMetaTypes
+        {
+            get
+            {
+                var t = new List<string>();
+                t.Add("VALUEDOMAIN");
+                return t;
+            }
+        }
     }
 
    

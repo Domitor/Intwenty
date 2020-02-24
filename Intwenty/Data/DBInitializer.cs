@@ -43,14 +43,15 @@ namespace Moley.Data
             }
 
 
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 1, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning=false, TestDataAmount = 0  });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 2, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 5 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 3, Description = "An app for managing item ledger", MetaCode = "ITEMLEDGER", Title = "Inventory Transactions", DbName = "ItemLedger", IsHierarchicalApplication = false, UseVersioning = false });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 4, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 10 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 5, Description = "An app for managing locations", MetaCode = "LOCATION", Title = "Location", DbName = "Location", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 3 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 6, Description = "An app for managing goods reciept", MetaCode = "GOODSRECEIPT", Title = "Goods Receipt", DbName = "GoodsReceipt", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 7, Description = "An app for managing goods issue", MetaCode = "GOODSISSUE", Title = "Goods Issue", DbName = "GoodsIssue", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
-            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 8, Description = "An app for managing goods transfer", MetaCode = "GOODSTRANSFER", Title = "Goods Transfer", DbName = "GoodsTransfer", IsHierarchicalApplication = false, UseVersioning = false });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 10, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning=false, TestDataAmount = 0  });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 20, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 5 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 30, Description = "An app for managing item ledger", MetaCode = "ITEMLEDGER", Title = "Inventory Transactions", DbName = "ItemLedger", IsHierarchicalApplication = false, UseVersioning = false });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 40, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 10 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 50, Description = "An app for managing locations", MetaCode = "LOCATION", Title = "Location", DbName = "Location", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 3 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 60, Description = "An app for managing goods reciept", MetaCode = "GOODSRECEIPT", Title = "Goods Receipt", DbName = "GoodsReceipt", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 70, Description = "An app for managing shipment files", MetaCode = "SHIPMENTFILES", Title = "Shipment files", DbName = "Shipments", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 80, Description = "An app for managing goods issue", MetaCode = "GOODSISSUE", Title = "Goods Issue", DbName = "GoodsIssue", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
+            context.Set<ApplicationDescription>().Add(new ApplicationDescription() { Id = 90, Description = "An app for managing goods transfer", MetaCode = "GOODSTRANSFER", Title = "Goods Transfer", DbName = "GoodsTransfer", IsHierarchicalApplication = false, UseVersioning = false });
 
 
             context.SaveChanges();
@@ -69,6 +70,7 @@ namespace Moley.Data
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "WMS_MAINMENU", Title = "Item", Order = 10, Action = "", Controller = "" });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VENDOR", ParentMetaCode = "WMS_MAINMENU", Title = "Vendor", Order = 20, Action = "", Controller = "" });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "LOCATION", MetaType = "MENUITEM", MetaCode = "M_LOC", ParentMetaCode = "WMS_MAINMENU", Title = "Location", Order = 30, Action = "", Controller = "" });
+            context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "MENUITEM", MetaCode = "M_SF", ParentMetaCode = "WMS_MAINMENU", Title = "Shipment files", Order = 32, Action = "ShipmentFiles", Controller = "Custom" });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "MENUITEM", MetaCode = "M_GR", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Receipt", Order = 40, Action = "", Controller = "" });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "GOODSISSUE", MetaType = "MENUITEM", MetaCode = "M_GI", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Issue", Order = 50, Action = "", Controller = "" });
             context.Set<MetaMenuItem>().Add(new MetaMenuItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "MENUITEM", MetaCode = "M_GT", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Transfer", Order = 60, Action = "", Controller = "" });
@@ -87,6 +89,20 @@ namespace Moley.Data
                 context.Set<MetaUIItem>().RemoveRange(context.Set<MetaUIItem>());
                 context.SaveChanges();
             }
+
+            //SHIPMENTFILES
+            //----------------------------------------------------
+            //DATA
+            context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "SHIPMENTID", DbName = "ShipmentId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "FILENAME", DbName = "FileName", ParentMetaCode = "ROOT", DataType = "STRING"});
+            context.Set<MetaDataItem>().Add(new MetaDataItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "IMPORTDATE", DbName = "ImportDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
+
+            //LISTVIEW
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Shipment files", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "HIDEFILTER=TRUE" });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "LISTVIEWFIELD", MetaCode = "LF_SHIPMENTID", DataMetaCode = "SHIPMENTID", Title = "Shipment ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "LISTVIEWFIELD", MetaCode = "LF_IMPORTDATE", DataMetaCode = "IMPORTDATE", Title = "Import Date", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+
 
             //LOCATION
             //----------------------------------------------------
@@ -134,7 +150,7 @@ namespace Moley.Data
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPFIELD", MetaCode = "MLLOCATION_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCNAME" });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "NUMBOX", MetaCode = "NB_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL2", DataMetaCode = "", Title = "Info", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
-
+            
 
             //LISTVIEW
             context.Set<MetaUIItem>().Add(new MetaUIItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Goods Receipts", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });

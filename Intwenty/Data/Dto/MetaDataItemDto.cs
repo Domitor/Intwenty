@@ -6,9 +6,8 @@ using System.Runtime.Serialization;
 namespace Moley.Data.Dto
 {
 
-    public class MetaDataItemDto
+    public class MetaDataItemDto : MetaModelDto
     {
-
 
         public MetaDataItemDto()
         {
@@ -26,24 +25,18 @@ namespace Moley.Data.Dto
             DataType = entity.DataType;
             Domain = entity.Domain;
             Mandatory = entity.Mandatory;
-
+            Properties = entity.Properties;
             if (Domain == null)
                 Domain = string.Empty;
         }
 
         public int Id { get; set; }
 
-        public string MetaType { get; set; }
-
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }
 
-        public string MetaCode { get; set; }
-
         public string DbName { get; set; }
-
-        public string ParentMetaCode { get; set; }
 
         public string TableName { get; set; }
 
@@ -52,8 +45,6 @@ namespace Moley.Data.Dto
         public string DataType { get; set; }
 
         public string Domain { get; set; }
-
-        public string Properties { get; set; }
 
         public bool Mandatory { get; set; }
 
@@ -253,14 +244,14 @@ namespace Moley.Data.Dto
             get { return MetaType == MetaTypeDataValueTable; }
         }
 
-        public bool HasValidMetaType
+        public override bool HasValidMetaType
         {
             get
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (MetaTypes.Contains(MetaType))
+                if (ValidMetaTypes.Contains(MetaType))
                     return true;
 
                 return false;
@@ -268,8 +259,17 @@ namespace Moley.Data.Dto
             }
         }
 
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
 
-        public List<string> MetaTypes
+
+        protected override List<string> ValidMetaTypes
         {
             get
             {
@@ -340,10 +340,7 @@ namespace Moley.Data.Dto
 
        
 
-        public bool IsRoot
-        {
-            get { return this.ParentMetaCode == "" || this.ParentMetaCode == "ROOT"; }
-        }
+      
 
         public bool HasDomain
         {

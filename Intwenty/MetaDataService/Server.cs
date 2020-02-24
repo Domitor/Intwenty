@@ -133,6 +133,8 @@ namespace Moley.MetaDataService
                     return res;
                 }
 
+                res.AddMessage("RESULT", string.Format("Validating the model for application {0}", a.Application.Title));
+
                 if (string.IsNullOrEmpty(a.Application.MetaCode))
                     res.AddMessage("ERROR", string.Format("The application: {0} has no [MetaCode].", a.Application.Title));
 
@@ -169,9 +171,9 @@ namespace Moley.MetaDataService
                         return res;
                     }
 
-                    if (!ui.HasValidUIType)
+                    if (!ui.HasValidMetaType)
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has no [MetaType].", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has not a valid [MetaType].", ui.Title, a.Application.Title));
                         return res;
                     }
 
@@ -200,6 +202,11 @@ namespace Moley.MetaDataService
 
                     if (!ui.IsDataConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
                         res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to MetaDataItem [DataMetaCode].", new object[] { ui.Title, a.Application.Title } ));
+
+                    if (!ui.HasValidProperties)
+                    {
+                        res.AddMessage("WARNING", string.Format("One or more properties on the UI object: {0} of type {1} in application {2} is not valid and may not be implemented.", new object[] { ui.Title, ui.MetaType, a.Application.Title }));
+                    }
 
                 }
 
