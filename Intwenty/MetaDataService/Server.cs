@@ -133,8 +133,6 @@ namespace Moley.MetaDataService
                     return res;
                 }
 
-                res.AddMessage("RESULT", string.Format("Validating the model for application {0}", a.Application.Title));
-
                 if (string.IsNullOrEmpty(a.Application.MetaCode))
                     res.AddMessage("ERROR", string.Format("The application: {0} has no [MetaCode].", a.Application.Title));
 

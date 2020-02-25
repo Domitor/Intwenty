@@ -76,6 +76,12 @@ namespace Moley.Controllers
             return View(res);
         }
 
+        public IActionResult ViewMetaModelDocumentation()
+        {
+            var l = Repository.GetApplicationMeta();
+            return View(l);
+        }
+
         public IActionResult GenerateTestData()
         {
             var l = Repository.GetApplicationMeta();
