@@ -20,6 +20,9 @@ Because it's boring writing the same type of code over and over again
 # Database
 - Intwenty targets MS Sql Server and MySql
 
+# How to get started
+<a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
+
 
 
 
