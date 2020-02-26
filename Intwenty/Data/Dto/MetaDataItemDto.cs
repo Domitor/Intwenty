@@ -13,6 +13,12 @@ namespace Moley.Data.Dto
         {
         }
 
+        public MetaDataItemDto(string metatype)
+        {
+            MetaType = metatype;
+            Domain = "";
+        }
+
         public MetaDataItemDto(MetaDataItem entity)
         {
             Id = entity.Id;
@@ -269,7 +275,7 @@ namespace Moley.Data.Dto
         }
 
 
-        protected override List<string> ValidMetaTypes
+        public override List<string> ValidMetaTypes
         {
             get
             {

@@ -56,8 +56,10 @@ namespace Moley.Controllers
 
 
         /// <summary>
-        /// Generate UI based on UIStructure for the application with the supplied Id.
+        /// Get the latest version data by id for an application with applicationid 
         /// </summary>
+        /// <param name="applicationid">The ID of the application in the meta model</param>
+        /// <param name="id">The data id</param>
         [HttpGet("/Application/GetLatestVersion/{applicationid}/{id}")]
         public JsonResult GetLatestVersion(int applicationid, int id)
         {

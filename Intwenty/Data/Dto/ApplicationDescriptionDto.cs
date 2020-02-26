@@ -80,7 +80,7 @@ namespace Moley.Data.Dto
             }
         }
 
-        protected override List<string> ValidMetaTypes
+        public override List<string> ValidMetaTypes
         {
             get
             {

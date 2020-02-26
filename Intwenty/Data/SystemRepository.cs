@@ -27,6 +27,7 @@ namespace Moley.Data
 
         List<NoSerieDto> GetNewNoSeriesValues(int applicationid );
 
+        ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model);
 
     }
 
@@ -109,6 +110,20 @@ namespace Moley.Data
                     if (item.AppMetaCode == app.MetaCode)
                     {
                         t.DataStructure.Add(item);
+                        if (item.IsMetaTypeDataValue)
+                        {
+                            item.ColumnName = item.DbName;
+                            if (item.IsRoot)
+                                item.TableName = app.DbName;
+                            else
+                            {
+                                var table = ditems.Find(p => p.MetaCode == item.ParentMetaCode && p.IsMetaTypeDataValueTable);
+                                if (table != null)
+                                    item.TableName = table.DbName;
+                            }
+                                
+
+                        }
                     }
                 }
 
@@ -234,5 +249,58 @@ namespace Moley.Data
             return res;
 
         }
+
+        public ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model)
+        {
+            var res = new ApplicationDescriptionDto();
+
+            if (model == null)
+                return null;
+
+            if (model.Id == 0)
+            {
+                var max = 10;
+                if (AppDescription.Count() > 0)
+                {
+                    max = AppDescription.Max(p => p.Id);
+                    max += 10;
+                }
+
+                var entity = new ApplicationDescription();
+                entity.Id = max;
+                entity.MetaCode = model.MetaCode;
+                entity.Title = model.Title;
+                entity.DbName = model.DbName;
+                entity.Description = model.Description;
+
+                AppDescription.Add(entity);
+
+                context.SaveChanges();
+
+                return new ApplicationDescriptionDto(entity);
+
+            }
+            else
+            {
+
+                var entity = AppDescription.FirstOrDefault(p => p.Id == model.Id);
+                if (entity == null)
+                    return model;
+
+                entity.MetaCode = model.MetaCode;
+                entity.Title = model.Title;
+                entity.DbName = model.DbName;
+                entity.Description = model.Description;
+
+                context.SaveChanges();
+
+                return new ApplicationDescriptionDto(entity);
+
+            }
+
+        }
+
+
     }
+
 }

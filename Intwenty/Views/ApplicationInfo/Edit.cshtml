@@ -1,0 +1,268 @@
+﻿
+
+@{
+    ViewData["Title"] = "Edit application";
+}
+
+
+
+<div id="app">
+
+    <br />
+    <br />
+
+    <h2>Edit application</h2>
+    <br />
+    <br />
+
+    @await Html.PartialAsync("_MetaAppDescription")
+
+    <button class="btn btn-default" type="button" v-on:click="saveApplication()">Spara</button>
+    <br />
+    <br />
+
+    <h4>Database tables</h4>
+
+    <div>
+        <div class="btn btn-primary" v-on:click="addDbTable">
+            <span class="glyphicon glyphicon-plus"></span> Add table
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:30%">Table name <span style="color: red"> *</span></th>
+                <th style="width:60%">Description <span style="color: red"> *</span></th>
+            </tr>
+        </thead>
+        <tr v-for="item in tables">
+            <td>{{item.id}}</td>
+            <td><input type="text" class="form-control" v-model="item.dbName" /></td>
+            <td><input type="text" class="form-control" v-model="item.description" /></td>
+        </tr>
+    </table>
+
+    <br />
+    <br />
+
+    <h4>Database columns</h4>
+
+    <div>
+        <div class="btn btn-primary" v-on:click="addDbColumn">
+            <span class="glyphicon glyphicon-plus"></span> Add column
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:20%">Table name <span style="color: red"> *</span></th>
+                <th style="width:20%">Column name <span style="color: red"> *</span></th>
+                <th style="width:20%">Data type <span style="color: red"> *</span></th>
+                <th style="width:30%">Description</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in columns">
+            <tr>
+                <td>{{item.id}}</td>
+                <td>
+                    <select v-model="item.tableName" class="form-control">
+                        <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" v-model="item.dbName" /></td>
+                <td>
+                    <select v-model="item.dataType" class="form-control">
+                        <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" v-model="item.description" /></td>
+            </tr>
+            <tr>
+                <td colspan="1"></td>
+                <td colspan="4">
+                    <div class="collapsible" v-if="item.tableName=='Location'">
+                        <i>Settings</i>
+                        <br />
+                        <input type="checkbox" v-model="item.mandatory" /> Mandatory
+                        <br />
+                        Domain <input type="text" class="form-control" v-model="item.domain" style="width:450px" />
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <br />
+    <br />
+
+    <h4>User Interface</h4>
+
+    <div>
+        <div class="btn btn-primary" v-on:click="addUIComponent">
+            <span class="glyphicon glyphicon-plus"></span> Add column
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:30%">Title <span style="color: red"> *</span></th>
+                <th style="width:20%">UI Type <span style="color: red"> *</span></th>
+                <th style="width:20%">Table DB Connection <span style="color: red"> *</span></th>
+                <th style="width:20%">Colum DB Connection <span style="color: red"> *</span></th>
+            </tr>
+        </thead>
+        <tbody v-for="item in uicomponents" v-if="item.metaType!='LISTVIEWFIELD'">
+            <tr>
+                <td>{{item.id}}</td>
+                <td><input type="text" class="form-control" v-model="item.title" /></td>
+                <td>
+                    <select v-model="item.metaType" class="form-control">
+                        <option v-for="uit in uitypes" v-if="uit!='LISTVIEWFIELD'" v-bind:value="uit">{{uit}}</option>
+                    </select>
+                </td>
+                <td>
+                    <select v-model="item.dataInfo.tableName" class="form-control">
+                        <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                    </select>
+                </td>
+                <td>
+                    <select v-model="item.dataInfo.columnName" class="form-control">
+                        <option v-for="col in columns" v-bind:value="col.dbName">{{col.dbName}}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="1"></td>
+                <td colspan="4">
+                    <div class="collapsible" v-if="item.metaType=='LISTVIEW'">
+                        
+                        <p>TODO: ADD LISTVIEW FILEDS</p>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+
+
+
+</div>
+
+@section Scripts
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: {},
+                tables: [],
+                datatypes: [],
+                columns: [],
+                uicomponents: [],
+                uitypes: []
+            },
+            methods:
+            {
+                saveApplication: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "Save";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response) {
+                            window.location.reload(true);
+                        }
+                    });
+                },
+                setCodes: function ()
+                {
+                   
+
+                },
+                addDbTable: function () {
+                    var context = this;
+                    context.tables.push({properties:"ISNEW=TRUE", metaType:"DATAVALUETABLE"});
+                },
+                addDbColumn: function () {
+                    var context = this;
+                    context.columns.push({ properties: "ISNEW=TRUE", metaType: "DATAVALUE" });
+                }
+                ,
+                addUIComponent: function () {
+                    var context = this;
+                    context.uicomponents.push({ properties: "ISNEW=TRUE", dataInfo: {} });
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetApplication/@ViewBag.SystemId";
+                //Application
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
+                });
+
+                //Tables
+                endpointurl = baseurl + "GetApplicationTables/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.tables = response;
+                });
+
+                //DataTypes
+                endpointurl = baseurl + "GetApplicationTableDataTypes";
+                $.get(endpointurl, function (response)
+                {
+                    context.datatypes = response;
+                });
+
+                 //Columns
+                endpointurl = baseurl + "GetApplicationTableColumns/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.columns = response;
+                });
+
+                //UI Types
+                endpointurl = baseurl + "GetApplicationUITypes";
+                $.get(endpointurl, function (response)
+                {
+                    context.uitypes = response;
+                });
+
+                 //UI
+                endpointurl = baseurl + "GetApplicationUIComponents/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.uicomponents = response;
+                    for (var i = 0; i < context.uicomponents.length; i++)
+                    {
+                        if (!context.uicomponents[i].dataInfo)
+                            context.uicomponents[i].dataInfo = {};
+
+                    }
+                });
+            }
+        })
+
+    </script>
+}

@@ -22,7 +22,7 @@ namespace Moley.Data.Dto
 
         protected string Properties { get; set; }
 
-        protected abstract List<string> ValidMetaTypes { get; }
+        public abstract List<string> ValidMetaTypes { get; }
 
         protected abstract List<string> ValidProperties { get; }
 
