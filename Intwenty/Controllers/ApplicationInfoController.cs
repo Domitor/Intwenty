@@ -22,28 +22,39 @@ namespace Moley.Controllers
             Repository = sr;
         }
 
-        public IActionResult Index()
-        {
-            var t = Repository.GetApplicationDescriptions();
-            return View(t);
-        }
-
         public IActionResult Create()
-        {
-            var t = new ApplicationDescriptionDto();
-            return View(t);
-        }
-
-        [HttpPost]
-        public IActionResult SaveNew(ApplicationDescriptionDto model)
-        {
-            return Ok();
-        }
-
-        public IActionResult Edit()
         {
             return View();
         }
+
+        public IActionResult Open()
+        {
+            return View();
+        }
+
+        public IActionResult GetList()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Loads meta data for all applications in this instance
+        /// </summary>
+        [HttpPost]
+        public JsonResult GetListView([FromBody] ListRetrivalArgs model)
+        {
+            var t = Repository.GetApplicationMeta();
+            var listdata = t.Select(p => p.Application).ToList();
+            return new JsonResult(listdata);
+        }
+
+        [HttpPost]
+        public JsonResult Save([FromBody] dynamic model)
+        {
+            var s = "";
+            return new JsonResult("");
+        }
+
 
         public IActionResult Get(int id)
         {

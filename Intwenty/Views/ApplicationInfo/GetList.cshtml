@@ -1,0 +1,79 @@
+﻿
+
+<div id="app">
+    <div>
+        <br />
+        <br />
+
+        <h2>Manage Applications</h2>
+
+
+        <a asp-action="Create" asp-controller="ApplicationInfo" role="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Create New Application</a>
+
+        <br />
+        <br />
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:10%">ID</th>
+                    <th style="width:30%">Title</th>
+                    <th style="width:60%">Description</th>
+                </tr>
+            </thead>
+            <tr v-for="item in datalist">
+                <td><a v-bind:href="'/ApplicationInfo/Open/' + item.id">Open</a></td>
+                <td>{{item.title}}</td>
+                <td>{{item.description}}</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+
+@section Scripts
+{
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+            },
+            methods: {
+               
+                getApplications: function () {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "GetListView";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.listRetrieveInfo),
+                        success: function (response) {
+                            //DATA
+                            context.datalist = response;
+                        }
+                    });
+                }
+            },
+            computed: {
+
+               
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                context.getApplications();
+
+            }
+        });
+    </script>
+       
+
+}
