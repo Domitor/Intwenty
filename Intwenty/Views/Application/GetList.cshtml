@@ -13,6 +13,10 @@
             {
                 title = lv.Title;
             }
+            else
+            {
+                throw new InvalidOperationException("No LISTVIEW meta data is defined for this application");
+            }
         }
 
         <h2>@title</h2>
@@ -23,179 +27,18 @@
         <br />
         <br />
 
-        <div class="row">
-            <div class="col-lg-3"></div>
-            <div class="col-lg-3"></div>
-            <div class="col-lg-2"></div>
-            <div class="col-lg-2">
-                <div class="form-group">
-                    <label class="control-label">Value</label>
-                    <input type="text" class="form-control" v-model="model.filtervalue" v-on:blur="handleFilterValue" />
-                </div>
-            </div>
-            <div class="col-lg-2">
-                <div class="form-group">
-                    <label class="control-label">Filter</label>
-                    <select v-model="model.filterfield" class="form-control">
-                        @{
-                            foreach (var c in Model.UIStructure)
-                            {
-
-                                if (c.IsUITypeListViewField && c.IsDataConnected)
-                                {
-                                    <option value="@c.DataInfo.DbName">@c.Title</option>
-                                }
-
-                            }
-                        }
-                    </select>
-                </div>
-            </div>
-        </div>
-
-
-
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th></th>
-                    @{
-                        foreach (var c in Model.UIStructure)
-                        {
-
-                            if (c.IsUITypeListViewField && c.IsDataConnected)
-                            {
-                                <th>@c.Title</th>
-                            }
-
-                        }
-                    }
-                </tr>
-            </thead>
-            <tr v-for="item in datalist">
-                <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id">Open</a></td>
-                @{
-                    foreach (var c in Model.UIStructure)
-                    {
-
-                        if (c.IsUITypeListViewField && c.IsDataConnected)
-                        {
-                            <td>{{item.@c.DataInfo.DbName}}</td>
-                        }
-
-                    }
-                }
-            </tr>
-
-        </table>
-
-        <ul class="pagination">
-            <li v-bind:class="{ disabled: isFirstPage }"><a href="#" v-on:click="prevpage()">Previous {{retrieveinfo.batchSize}}</a></li>
-            <li><a href="#" v-on:click="nextpage()">Next {{retrieveinfo.batchSize}}</a></li>
-        </ul>
+        @await Html.PartialAsync("_DefaultListView", Model)
 
     </div>
 </div>
 
 @section Scripts
-    {
+{
+    <script src="~/js/getlist.js"></script>
     <script>
-        var app = new Vue({
-            el: '#app',
-            data: {
-                datalist: []
-                ,model: { "filtervalue": "", "filterfield": "" }
-                , retrieveinfo: { "applicationId":@Model.Application.Id, "maxCount": 0, "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-            },
-            methods: {
-                nextpage: function ()
-                {
-                    var context = this;
-                    context.retrieveinfo.currentRowNum += context.retrieveinfo.batchSize;
-                    context.getPage();
-                },
-                prevpage: function ()
-                {
-                    var context = this;
-                    context.retrieveinfo.currentRowNum -= context.retrieveinfo.batchSize;
-                    context.getPage();
-                } 
-                ,getPage: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetListData";
-
-                 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.retrieveinfo),
-                        success: function (response)
-                        {
-                            //DATA
-                            context.datalist = JSON.parse(response.data);
-
-                            //UPDATE CURRENT PAGE INFO
-                            context.retrieveinfo = response.retriveListArgs;
-                        }
-                    });
-                },
-                handleFilterValue: function ()
-                {
-                    var context = this;
-
-                    if (!context.model.filterfield || context.model.filterfield == "")
-                        return;
-
-                    if (context.model.filtervalue == "")
-                        return;
-
-                    if (context.model.filtervalue != context.retrieveinfo.filterValue)
-                    {
-                        context.retrieveinfo.currentRowNum = 0;
-                        context.retrieveinfo.filterField = context.model.filterfield;
-                        context.retrieveinfo.filterValue = context.model.filtervalue;
-                        context.getPage();
-                    }
-
-                   
-                }
-            },
-            computed: {
-                filteredResults: function ()
-                {
-                    var context = this;
-                    return this.datalist.filter(function (item)
-                    {
-                        if (context.model.filtervalue == "" || context.model.filterfield == "")
-                            return true;
-
-                        if (item[context.model.filterfield].indexOf(context.model.filtervalue) > -1)
-                        {
-                            return true;
-                        }
-
-                        return false;
-                    })
-                },
-                isFirstPage: function () {
-                    return this.retrieveinfo.currentRowNum <= 0;
-                }
-            },
-            mounted: function ()
-            {
-                var context = this;
-                context.getPage();
-
-                /* GET
-                $.get(endpointurl, function (response)
-                {
-                    
-                });*/
-            }
-        })
+        var app = createVue('#app',@Model.Application.Id,'@Url.Content("~/Application/")');
     </script>
+       
+   
 
 }

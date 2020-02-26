@@ -1,0 +1,108 @@
+﻿@model List<Moley.Data.Dto.ApplicationDto>
+
+@{
+    ViewData["Title"] = "Meta model documentation";
+}
+
+
+<br />
+<br />
+
+<div>
+
+    <h1>Meta model documentation</h1>
+    <br />
+    <br />
+    <h2>Applications</h2>
+
+    @foreach (var app in Model)
+    {
+        <h3>@app.Application.Title</h3>
+        <h4>ID: @app.Application.Id, Description: @app.Application.Description</h4>
+        <hr />
+
+        <br />
+
+        <div style="margin-left:20px">
+            <h4>Database tables</h4>
+
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Table name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@app.Application.MainTableName</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Column name</th>
+                                        <th>Intwenty data type</th>
+                                        <th>Sql data type</th>
+                                        <th>Mandatory</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var data in app.DataStructure.Where(p => p.IsMetaTypeDataValue && p.IsRoot))
+                                    {
+                                        <tr>
+                                            <td>@data.DbName</td>
+                                            <td>@data.DataType</td>
+                                            <td>@data.SQLDataType</td>
+                                            <td>@data.Mandatory</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>UI Components</h4>
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Component Type</th>
+                        <th>Title</th>
+                        <th>Database field</th>
+                        <th>Domain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ui in app.UIStructure.Where(p => (p.IsDataConnected || p.IsUITypeLookUp) && !p.IsUITypeListViewField && !p.IsUITypeLookUpField && !p.IsUITypeLookUpKeyField).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    {
+                        <tr>
+                            <td>@ui.MetaType</td>
+                            <td>@ui.Title</td>
+
+                            @{
+                                if (ui.IsDataConnected)
+                                {
+                                    <td> @ui.DataInfo.DbName</td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            }
+
+                            <td>@ui.Domain</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+
+
+
+
+
+</div>

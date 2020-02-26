@@ -30,7 +30,7 @@ namespace Moley.Data.Dto
         /// <summary>
         /// Describes the data views for this application
         /// </summary>
-        public List<MetaDataViewDto> ViewStructure { get; set; }
+        //public List<MetaDataViewDto> ViewStructure { get; set; }
 
         /// <summary>
         /// No Series used in this application

@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace Moley.Data.Dto
 {
 
-   public class ApplicationDescriptionDto
+   public class ApplicationDescriptionDto : MetaModelDto
     {
         public ApplicationDescriptionDto()
         {
@@ -24,6 +24,9 @@ namespace Moley.Data.Dto
             UseVersioning = entity.UseVersioning;
             IsHierarchicalApplication = entity.IsHierarchicalApplication;
             TestDataAmount = entity.TestDataAmount;
+            MetaType = "APPLICATION";
+            ParentMetaCode = "ROOT";
+            Properties = "";
         }
 
         public int Id { get; set; }
@@ -31,8 +34,6 @@ namespace Moley.Data.Dto
         public string Title { get; set; }
 
         public string Description { get; set; }
-
-        public string MetaCode { get; set; }
 
         public string DbName { get; set; }
 
@@ -64,7 +65,31 @@ namespace Moley.Data.Dto
             get { return this.DbName + "_Versioning"; }
         }
 
-       
+
+        public override bool HasValidMetaType
+        {
+            get { return true; }
+        }
+
+        protected override List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
+
+        public override List<string> ValidMetaTypes
+        {
+            get
+            {
+                var t = new List<string>();
+                t.Add("APPLICATION");
+                return t;
+            }
+        }
+
 
 
     }

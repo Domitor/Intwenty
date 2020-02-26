@@ -1,4 +1,5 @@
-﻿using Moley.Data;
+﻿using Microsoft.Extensions.Options;
+using Moley.Data;
 using Moley.Data.Dto;
 using Moley.MetaDataService.Custom;
 using Moley.MetaDataService.Engine;
@@ -16,11 +17,15 @@ namespace Moley.MetaDataService
 
         OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
 
-        OperationResult GetList(ApplicationDto app, ListRetrivalArgs args);
-
         OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state);
 
-        OperationResult GetDomains(ApplicationDto app, List<MetaDataViewDto> viewinfo);
+        OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args);
+
+        OperationResult GetValueDomains(ApplicationDto app);
+
+        OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+
+        OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
 
         OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
 
@@ -32,13 +37,19 @@ namespace Moley.MetaDataService
 
     public class Server : IServiceEngine
     {
-       
+        
+        private IOptions<SystemSettings> SysSettings { get; }
+
+        public Server(IOptions<SystemSettings> sysconfig)
+        {
+            SysSettings = sysconfig;
+        }
+        
 
         public OperationResult ConfigureDatabase(ApplicationDto app)
         {
             var t = DataManager.GetDataManager(app);
             return t.ConfigureDatabase();
-            
         }
 
         public OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
@@ -56,17 +67,14 @@ namespace Moley.MetaDataService
             {
                 return validation;
             }
-
         }
 
 
-        public OperationResult GetList(ApplicationDto app, ListRetrivalArgs args)
+        public OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
-            return t.GetList(args);
+            return t.GetListView(args);
         }
-
-
 
         public OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state)
         {
@@ -75,10 +83,10 @@ namespace Moley.MetaDataService
             return t.GetLatestVersion();
         }
 
-        public OperationResult GetDomains(ApplicationDto app, List<MetaDataViewDto> viewinfo)
+        public OperationResult GetValueDomains(ApplicationDto app)
         {
             var t = DataManager.GetDataManager(app);
-            return t.GetDomains(viewinfo);
+            return t.GetValueDomains();
         }
 
         public OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
@@ -110,20 +118,14 @@ namespace Moley.MetaDataService
         {
             var res = new OperationResult();
 
-          
-
-
             if (apps.Count == 0)
             {
                 res.IsSuccess = false;
                 res.AddMessage("ERROR", "The model doesn't seem to exist");
             }
 
-          
-
             foreach (var a in apps)
             {
-
 
                 if (string.IsNullOrEmpty(a.Application.Title))
                 {
@@ -151,41 +153,58 @@ namespace Moley.MetaDataService
                 {
                     if (string.IsNullOrEmpty(ui.Title))
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object with Id: {0} in application {1} has no [Title].", ui.Id, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object with Id {0} in application {1} has no [Title].", ui.Id, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(ui.MetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application: {1} has no [MetaCode].", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has no [MetaCode].", ui.Title, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(ui.ParentMetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application: {1} has no [ParentMetaCode].", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has no [ParentMetaCode].", ui.Title, a.Application.Title));
                         return res;
                     }
 
-                    if (!ui.HasValidUIType)
+                    if (!ui.HasValidMetaType)
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application: {1} has no [MetaType].", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has not a valid [MetaType].", ui.Title, a.Application.Title));
                         return res;
                     }
 
                     if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
 
                     if (ui.IsUITypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeListViewField))
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
                     if (ui.IsUITypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeLookUpField))
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPFIELD.", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPFIELD.", ui.Title, a.Application.Title));
+
+                    if (ui.IsUITypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeLookUpKeyField))
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPKEYFIELD.", ui.Title, a.Application.Title));
+
+                    if (ui.IsUITypeLookUp && !ui.IsDataViewConnected)
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
+
+                    if (ui.IsUITypeLookUpKeyField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewKeyField)
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPKEYFIELD in application {1} is not connected to a DATAVIEWKEYFIELD, check domainname.", ui.Title, a.Application.Title));
+
+                    if (ui.IsUITypeLookUpField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewField)
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPFIELD in application {1} is not connected to a DATAVIEWFIELD, check domainname.", ui.Title, a.Application.Title));
 
 
                     if (!ui.IsDataConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
                         res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to MetaDataItem [DataMetaCode].", new object[] { ui.Title, a.Application.Title } ));
+
+                    if (!ui.HasValidProperties)
+                    {
+                        res.AddMessage("WARNING", string.Format("One or more properties on the UI object: {0} of type {1} in application {2} is not valid and may not be implemented.", new object[] { ui.Title, ui.MetaType, a.Application.Title }));
+                    }
 
                 }
 
@@ -247,7 +266,25 @@ namespace Moley.MetaDataService
 
                     if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewField))
                         res.AddMessage("ERROR", string.Format("The view object: {0} in application {1} has no children with [MetaType]=DATAVIEWFIELD.", v.Title, a.Application.Title));
-                       
+
+                    if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyField))
+                        res.AddMessage("ERROR", string.Format("The view object: {0} in application {1} has no children with [MetaType]=DATAVIEWKEYFIELD.", v.Title, a.Application.Title));
+
+                    if (v.IsMetaTypeDataViewField || v.IsMetaTypeDataViewKeyField)
+                    {
+                        var view = viewinfo.Find(p => p.IsMetaTypeDataView && p.MetaCode == v.ParentMetaCode);
+                        if (view != null)
+                        {
+                            if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
+                                res.AddMessage("ERROR", string.Format("The viewfield {0} in application {1} has not a SQLQueryFieldName that is included in the SQLQuery of the parent view.", v.Title, a.Application.Title));
+                        }
+                        else
+                        {
+                            res.AddMessage("ERROR", string.Format("The view field {0} in application {1} has no parent with [MetaType]=DATAVIEW.", v.Title, a.Application.Title));
+                        }
+                    }
+                        
+
 
                 }
 
@@ -283,6 +320,20 @@ namespace Moley.MetaDataService
             }
 
             return new OperationResult(true,string.Format("Generated {0} test data applications.",counter),0,0);
+        }
+
+       
+
+        public OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        {
+            var t = DataManager.GetDataManager(app);
+            return t.GetDataView(viewinfo, args);
+        }
+
+        public OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        {
+            var t = DataManager.GetDataManager(app);
+            return t.GetDataViewValue(viewinfo, args);
         }
     }
 }

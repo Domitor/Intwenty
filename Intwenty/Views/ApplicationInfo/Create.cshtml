@@ -1,44 +1,93 @@
-﻿@model Moley.Data.Dto.ApplicationDescriptionDto
+﻿
 
 @{
-    ViewData["Title"] = "Add new application";
+    ViewData["Title"] = "Create new application";
 }
 
 
-<br />
-<br />
 
-<div>
+<div id="app">
 
-    <form asp-action="Create">
+    <br />
+    <br />
 
-        <div class="form-group">
-            <label asp-for="Title" class="control-label"></label>
-            <input asp-for="Title" class="form-control" />
-            <span asp-validation-for="Title" class="text-danger"></span>
-        </div>
+    <h2>Create new application</h2>
+    <br />
+    <br />
 
-        <div class="form-group">
-            <label asp-for="MetaCode" class="control-label"></label>
-            <input asp-for="MetaCode" class="form-control" />
-            <span asp-validation-for="MetaCode" class="text-danger"></span>
-        </div>
-
-       
-
-        <div class="form-group">
-            <label asp-for="Description" class="control-label"></label>
-            <textarea asp-for="Description" class="form-control" rows="4" cols="50"></textarea>
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
+    @await Html.PartialAsync("_MetaAppDescription")
 
 
+    <button class="btn btn-default" type="button" v-on:click="createApplication()">Spara</button>
 
-        <br />
-        <br />
-        <br />
-        <div class="form-group">
-            <input type="submit" class="btn btn-primary" />
-        </div>
-    </form>
 </div>
+
+@section Scripts
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: {},
+            },
+            methods:
+            {
+                createApplication: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "Save";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response) {
+                            endpointurl = baseurl + "Edit/" + response.id;
+                            window.location.href = endpointurl;
+                        }
+                    });
+                },
+                setCodes: function ()
+                {
+                    var context = this;
+                    var str = context.model.title;
+
+                    if (!str)
+                        return;
+
+                    var metacode = "";
+                    for (var i = 0; i < str.length; i++)
+                    {
+                        if (str[i].toLowerCase() != str[i].toUpperCase())
+                        {
+                            metacode += str[i];
+                        }
+                    }
+
+                    if (metacode && metacode.length > 3)
+                        context.model.metaCode = metacode.toUpperCase().replace(' ', '');
+
+                 
+                    var dbname = context.model.metaCode;
+                    if (dbname && dbname.length > 3)
+                    {
+                        dbname = dbname[0].toUpperCase() + dbname.slice(1).toLowerCase();
+                        context.model.dbName = dbname;
+
+                    }
+                    
+
+                }
+            },
+            mounted: function ()
+            {
+
+            }
+        })
+
+    </script>
+}

@@ -33,11 +33,15 @@ namespace Moley.MetaDataService.Engine
 
         OperationResult GetVersion();
 
-        OperationResult GetList(ListRetrivalArgs args);
+        OperationResult GetListView(ListRetrivalArgs args);
 
         OperationResult Save(Dictionary<string, object> data);
 
-        OperationResult GetDomains(List<MetaDataViewDto> viewinfo);
+        OperationResult GetValueDomains();
+
+        OperationResult GetDataView(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+
+        OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
 
         OperationResult GenerateTestData(ISystemRepository repository, int gencount);
 
@@ -137,11 +141,11 @@ namespace Moley.MetaDataService.Engine
                 sql_list_stmt.Append("AND t1.Id = " + this.ClientState.Id);
 
                 var ds = new DataSet();
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
                 da.CreateCommand(sql_list_stmt.ToString());
                 da.FillDataset(ds, "App");
-                da.ExecuteNonQuery();
+                da.Close();
 
                 if (ds.Tables[0].Rows.Count == 0)
                 {
@@ -202,7 +206,7 @@ namespace Moley.MetaDataService.Engine
 
                 BeforeSave(data);
 
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
 
                 if (ClientState.Id < 1)
@@ -254,12 +258,12 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        public virtual OperationResult GetList(ListRetrivalArgs args)
+        public virtual OperationResult GetListView(ListRetrivalArgs args)
         {
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             var sb = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Meta.Application.Title),0,0);
           
@@ -267,18 +271,17 @@ namespace Moley.MetaDataService.Engine
             {
                 da.Open();
                 da.CreateCommand("select MAX(t1.RowNum) FROM (select ID, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id + ") t1");
-                args.MaxCount = Convert.ToInt32(da.ExecuteScalarQuery());
+                var max = da.ExecuteScalarQuery();
+                if (max == DBNull.Value)
+                    args.MaxCount = 0;
+                else
+                    args.MaxCount = Convert.ToInt32(max);
+
                 da.Close();
             }
 
             result.RetriveListArgs = new ListRetrivalArgs();
-            result.RetriveListArgs.MaxCount = args.MaxCount;
-            result.RetriveListArgs.BatchSize = args.BatchSize;
-            result.RetriveListArgs.CurrentRowNum = args.CurrentRowNum;
-            result.RetriveListArgs.ApplicationId = args.ApplicationId;
-            result.RetriveListArgs.ListMetaCode = args.ListMetaCode;
-            result.RetriveListArgs.FilterField = args.FilterField;
-            result.RetriveListArgs.FilterValue = args.FilterValue;
+            result.RetriveListArgs = args;
 
 
             try
@@ -296,8 +299,6 @@ namespace Moley.MetaDataService.Engine
                 sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
                 sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
 
-                //sql_list_stmt.Append("AND t1.RowNum > " + result.RetriveListArgs.CurrentRowNum + " ");
-                //sql_list_stmt.Append("AND t1.RowNum < " + (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize) + " ");
 
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                     sql_list_stmt.Append("AND t2."+ args.FilterField + " LIKE '%"+ args.FilterValue + "%'  ");
@@ -308,57 +309,10 @@ namespace Moley.MetaDataService.Engine
                 var ds = new DataSet();
                 da.Open();
                 da.CreateCommand(sql_list_stmt.ToString());
-                da.FillDataset(ds, "List");
-                da.ExecuteNonQuery();
+                var json = da.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 da.Close();
 
-                var firstcol = true;
-                var firstrow = true;
-                var rindex = -1;
-                sb.Append("[");
-                foreach (DataRow r in ds.Tables[0].Rows)
-                {
-
-                    rindex += 1;
-                    if (!(result.RetriveListArgs.CurrentRowNum <= rindex &&
-                        (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize) > rindex))
-                        continue;
-
-                    if (firstrow)
-                    {
-                        firstrow = false;
-                        sb.Append("{");
-                    }
-                    else
-                    {
-                        sb.Append(",{");
-                    }
-
-                    firstcol = true;
-                    foreach (DataColumn dc in ds.Tables[0].Columns)
-                    {
-                        var val = GetJSONValue(r, dc);
-                        if (string.IsNullOrEmpty(val))
-                            continue;
-
-                        if (firstcol)
-                        {
-                            firstcol = false;
-                            sb.Append(val);
-                        }
-                        else
-                        {
-                            sb.Append("," + val);
-                        }
-                    }
-
-                    sb.Append("}");
-                     
-                }
-
-                sb.Append("]");
-
-                result.Data = sb.ToString();
+                result.Data = json.ToString();
 
             }
             catch (Exception ex)
@@ -376,7 +330,10 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        public virtual OperationResult GetDomains(List<MetaDataViewDto> viewinfo)
+        /// <summary>
+        /// Creates a JSON object with all valuedomains (arrays) used in an application
+        /// </summary>
+        public virtual OperationResult GetValueDomains()
         {
             var sb = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Meta.Application.Title), 0, 0);
@@ -384,7 +341,7 @@ namespace Moley.MetaDataService.Engine
             try
             {
                 var valuedomains = new List<string>();
-                var dataviews = new List<string>();
+
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
                 foreach (var t in this.Meta.UIStructure)
@@ -398,20 +355,10 @@ namespace Moley.MetaDataService.Engine
                                 valuedomains.Add(domainparts[1]);
                         }
                     }
-
-                    if (t.IsDataViewConnected)
-                    {
-                        var domainparts = t.Domain.Split(".".ToCharArray()).ToList();
-                        if (domainparts.Count >= 2)
-                        {
-                            if (!dataviews.Exists(p => p == domainparts[1]))
-                                dataviews.Add(domainparts[1]);
-                        }
-                    }
                 }
 
                 var ds = new DataSet();
-                var da = new DataAccessService();
+                var da = new DataAccessClient();
                 da.Open();
 
                 foreach (var d in valuedomains)
@@ -422,20 +369,7 @@ namespace Moley.MetaDataService.Engine
                     da.FillDataset(ds, "VALUEDOMAIN_" + d);
                 }
 
-                foreach (var d in dataviews)
-                {
-                    var view = viewinfo.Find(p => p.MetaCode == d);
-                    if (view == null)
-                        continue;
-
-                    da.CreateCommand(view.SQLQuery);
-                    da.FillDataset(ds, "DATAVIEW_" + view.MetaCode);
-                }
-
                 da.Close();
-
-
-
 
                 var domainindex = 0;
                 var rowindex = 0;
@@ -488,10 +422,124 @@ namespace Moley.MetaDataService.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Fetch list for application {0} failed", this.Meta.Application.Title));
+                result.AddMessage("USERERROR", string.Format("Fetch valuedomains for application {0} failed", this.Meta.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
+ 
+            }
 
+            return result;
+
+        }
+
+        public OperationResult GetDataView(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        {
+            var result = new OperationResult();
+
+            try
+            {
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
+
+                result.IsSuccess = true;
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+                /*
+                result.RetriveListArgs.MaxCount = args.MaxCount;
+                result.RetriveListArgs.BatchSize = args.BatchSize;
+                result.RetriveListArgs.CurrentRowNum = args.CurrentRowNum;
+                result.RetriveListArgs.ApplicationId = args.ApplicationId;
+                result.RetriveListArgs.ListViewMetaCode = args.ListViewMetaCode;
+                result.RetriveListArgs.FilterField = args.FilterField;
+                result.RetriveListArgs.FilterValue = args.FilterValue;
+                result.RetriveListArgs.DataViewMetaCode = args.DataViewMetaCode;
+                */
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv== null)
+                    throw new InvalidOperationException("Could not find dataview to fetch");
+
+                result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
+
+
+                var sql = string.Format(dv.SQLQuery, " ");
+                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                {
+                    sql = string.Format(dv.SQLQuery, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
+                }
+
+                var da = new DataAccessClient();
+                da.Open();
+                da.CreateCommand(sql);
+                var json = da.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum,(result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                da.Close();
+
+                result.Data = json.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", "Fetch dataview failed");
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+            }
+
+            return result;
+
+        }
+
+        public OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        {
+            var sql = "";
+            var result = new OperationResult(true, "Fetched dataview value", 0, 0);
+            
+
+            try
+            {
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
+
+
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+            
+
+                foreach (var v in viewinfo)
+                {
+                    if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
+                    {
+                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyField && p.ParentMetaCode == v.MetaCode);
+                        if (keyfield == null)
+                            continue;
+
+                        sql = string.Format(v.SQLQuery, " WHERE " + keyfield.SQLQueryFieldName + " = @P1 ");
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(sql))
+                    throw new InvalidOperationException("Could not find view and key value in GetDataViewValue(viewinfo, args).");
+
+
+                var da = new DataAccessClient();
+                da.Open();
+                da.CreateCommand(sql);
+                da.AddParameter("@P1", args.FilterValue);
+                var data = da.GetAsJSONObject();
+                da.Close();
+
+                result.Data = data.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", "Fetch dataview failed");
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
             }
 
             return result;
@@ -544,12 +592,12 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        protected virtual void BeforeSaveNew(DataAccessService da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveNew(DataAccessClient da, Dictionary<string, object> data)
         {
 
         }
 
-        protected virtual void BeforeSaveUpdate(DataAccessService da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveUpdate(DataAccessClient da, Dictionary<string, object> data)
         {
 
         }
@@ -563,7 +611,7 @@ namespace Moley.MetaDataService.Engine
 
         #region Helpers
 
-        private void SetParameters(Dictionary<MetaDataItemDto, object> paramlist, DataAccessService da)
+        private void SetParameters(Dictionary<MetaDataItemDto, object> paramlist, DataAccessClient da)
         {
             foreach (var p in paramlist)
             {
@@ -668,7 +716,7 @@ namespace Moley.MetaDataService.Engine
 
             var output = new SqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DbType = DbType.Int32 };
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             da.Open();
             da.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate) Values (@ApplicationId, @MetaType, @MetaCode, getDate()) select @NewId = Scope_Identity()");
             da.AddParameter("@ApplicationId", this.Meta.Application.Id);
@@ -682,7 +730,7 @@ namespace Moley.MetaDataService.Engine
             return id;
         }
 
-        private void InsertMainTable(Dictionary<string, object> data, DataAccessService da)
+        private void InsertMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
             var paramlist = new Dictionary<MetaDataItemDto, object>();
 
@@ -739,7 +787,7 @@ namespace Moley.MetaDataService.Engine
         }
 
 
-        private void UpdateMainTable(Dictionary<string, object> data, DataAccessService da)
+        private void UpdateMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
             var paramlist = new Dictionary<MetaDataItemDto, object>();
 
@@ -779,7 +827,7 @@ namespace Moley.MetaDataService.Engine
         }
 
 
-        private int CreateVersionRecord(DataAccessService da)
+        private int CreateVersionRecord(DataAccessClient da)
         {
             int newversion = 0;
             String sql = String.Empty;
@@ -893,7 +941,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        private void InsertInformationStatus(DataAccessService da)
+        private void InsertInformationStatus(DataAccessClient da)
         {
             da.CreateCommand("insert into sysdata_InformationStatus (Id, Version, ApplicationId, MetaCode, PerformDate, OwnerId, CreatedBy) Values (@Id, @Version, @ApplicationId, @MetaCode, getDate(), @OwnerId, @CreatedBy)");
             da.AddParameter("@Id", this.ClientState.Id);
@@ -905,7 +953,7 @@ namespace Moley.MetaDataService.Engine
             da.ExecuteNonQuery();
         }
 
-        private void UpdateInformationStatus(DataAccessService da)
+        private void UpdateInformationStatus(DataAccessClient da)
         {
             da.CreateCommand("Update sysdata_InformationStatus set PerformDate=getDate(), CreatedBy = @CreatedBy, Version = @Version WHERE ID=@ID");
             da.AddParameter("@CreatedBy", "SYSTEM");
@@ -922,7 +970,7 @@ namespace Moley.MetaDataService.Engine
         private void CreateMainTable(OperationResult o)
         {
 
-            var da = new DataAccessService();
+            var da = new DataAccessClient();
             var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.DbName + "'";
             var table_exist = false;
             da.Open();
@@ -950,7 +998,7 @@ namespace Moley.MetaDataService.Engine
         private void CreateApplicationVersioningTable(OperationResult o)
         {
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.VersioningTableName + "'";
             Boolean table_exist = false;
             da.Open();
@@ -986,7 +1034,7 @@ namespace Moley.MetaDataService.Engine
 
 
             var ds = new DataSet();
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" + tablename + "' AND COLUMN_NAME='" + column.DbName + "'";
             bool column_exist = false;
 
@@ -1045,7 +1093,7 @@ namespace Moley.MetaDataService.Engine
                 return;
             }
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + table.DbName + "'";
             bool table_exist = false;
             da.Open();
@@ -1082,7 +1130,7 @@ namespace Moley.MetaDataService.Engine
         {
             string sql = string.Empty;
 
-            DataAccessService da = new DataAccessService();
+            var da = new DataAccessClient();
             da.Open();
 
             try
