@@ -100,11 +100,11 @@
     <br />
     <br />
 
-    <h4>User Interface</h4>
+    <h4>Input User Interface</h4>
 
     <div>
         <div class="btn btn-primary" v-on:click="addUIComponent">
-            <span class="glyphicon glyphicon-plus"></span> Add column
+            <span class="glyphicon glyphicon-plus"></span> Add input field
         </div>
     </div>
     <br />
@@ -112,38 +112,108 @@
         <thead>
             <tr>
                 <th style="width:5%">ID</th>
-                <th style="width:30%">Title <span style="color: red"> *</span></th>
-                <th style="width:20%">UI Type <span style="color: red"> *</span></th>
-                <th style="width:20%">Table DB Connection <span style="color: red"> *</span></th>
+                <th style="width:20%">Title <span style="color: red"> *</span></th>
+                <th style="width:15%">UI Type <span style="color: red"> *</span></th>
+                <th style="width:15%">Table DB Connection <span style="color: red"> *</span></th>
                 <th style="width:20%">Colum DB Connection <span style="color: red"> *</span></th>
+                <th style="width:20%">Domain</th>
             </tr>
         </thead>
-        <tbody v-for="item in uicomponents" v-if="item.metaType!='LISTVIEWFIELD'">
+        <tbody v-for="item in uicomponents" v-if="item.metaType!='LISTVIEWFIELD' && item.metaType!='LISTVIEW'">
             <tr>
                 <td>{{item.id}}</td>
                 <td><input type="text" class="form-control" v-model="item.title" /></td>
                 <td>
                     <select v-model="item.metaType" class="form-control">
-                        <option v-for="uit in uitypes" v-if="uit!='LISTVIEWFIELD'" v-bind:value="uit">{{uit}}</option>
+                        <option v-for="uit in uitypes" v-if="uit!='LISTVIEWFIELD' && uit!='LOOKUPKEYFIELD' && uit!='LOOKUPFIELD'" v-bind:value="uit">{{uit}}</option>
                     </select>
                 </td>
                 <td>
-                    <select v-model="item.dataInfo.tableName" class="form-control">
+                    <select v-model="item.dataInfo.tableName" class="form-control" :disabled="item.metaType=='LOOKUP'">
                         <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                     </select>
                 </td>
                 <td>
-                    <select v-model="item.dataInfo.columnName" class="form-control">
+                    <select v-model="item.dataInfo.columnName" class="form-control" :disabled="item.metaType=='LOOKUP'">
                         <option v-for="col in columns" v-bind:value="col.dbName">{{col.dbName}}</option>
                     </select>
+                </td>
+                <td>
+                    <div v-if="item.metaType=='COMBOBOX'">
+                        <select v-model="item.domain" class="form-control">
+                            <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
+                        </select>
+                    </div>
+                    <div v-if="item.metaType=='LOOKUP'">
+                        <select v-model="item.domain" class="form-control">
+                            <option v-for="dv in dataviews" v-bind:value="dv">{{dv}}</option>
+                        </select>
+                    </div>
                 </td>
             </tr>
             <tr>
                 <td colspan="1"></td>
-                <td colspan="4">
-                    <div class="collapsible" v-if="item.metaType=='LISTVIEW'">
-                        
-                        <p>TODO: ADD LISTVIEW FILEDS</p>
+                <td colspan="5">
+                    <div v-if="item.metaType=='LOOKUP'">
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Title <span style="color: red"> *</span></th>
+                                    <th>Table DB Connection <span style="color: red"> *</span></th>
+                                    <th>Colum DB Connection <span style="color: red"> *</span></th>
+                                    <th>Dataview field<span style="color: red"> *</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Key field</td>
+                                    <td>
+                                        <input type="text" class="form-control" v-model="item.lookUpKeyFieldTitle" />
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpKeyFieldTableName" class="form-control">
+                                            <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpKeyFieldColumnName" class="form-control">
+                                            <option v-for="col in columns" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpKeyFieldDataViewField" class="form-control">
+                                            <option v-for="dvf in dataviewfields" v-bind:value="dvf">{{dvf}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Look up field</td>
+                                    <td>
+                                        <input type="text" class="form-control" v-model="item.lookUpFieldTitle" />
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpFieldTableName" class="form-control">
+                                            <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpFieldColumnName" class="form-control">
+                                            <option v-for="col in columns" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select v-model="item.lookUpFieldDataViewField" class="form-control">
+                                            <option v-for="dvf in dataviewfields" v-bind:value="dvf">{{dvf}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                   
 
                     </div>
                 </td>
@@ -170,7 +240,10 @@
                 datatypes: [],
                 columns: [],
                 uicomponents: [],
-                uitypes: []
+                uitypes: [],
+                valuedomains: [],
+                dataviews: [],
+                dataviewfields: []
             },
             methods:
             {
@@ -207,7 +280,7 @@
                 ,
                 addUIComponent: function () {
                     var context = this;
-                    context.uicomponents.push({ properties: "ISNEW=TRUE", dataInfo: {} });
+                    context.uicomponents.push({ properties: "ISNEW=TRUE", dataInfo: {}, viewInfo: {} });
                 }
             },
             mounted: function ()
