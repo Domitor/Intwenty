@@ -1,0 +1,267 @@
+﻿
+
+@{
+    ViewData["Title"] = "Manage database";
+}
+
+
+
+<div id="app">
+
+    <br />
+    <br />
+
+    <h2>Manage database for application {{model.title}}</h2>
+    <br />
+    <br />
+
+
+    <h4>Database tables</h4>
+
+    <div>
+        <div class="btn btn-primary" v-on:click="addDbTable">
+            <span class="glyphicon glyphicon-plus"></span> Add table
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:30%">Table name <span style="color: red"> *</span></th>
+                <th style="width:60%">Description <span style="color: red"> *</span></th>
+            </tr>
+        </thead>
+        <tr v-for="item in tables">
+            <td>{{item.id}}</td>
+            <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+            <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+        </tr>
+    </table>
+
+    <br />
+    <br />
+
+    <h4>Database columns</h4>
+
+    <div>
+        <div class="btn btn-primary" v-on:click="addDbColumn">
+            <span class="glyphicon glyphicon-plus"></span> Add column
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:20%">Table name <span style="color: red"> *</span></th>
+                <th style="width:20%">Column name <span style="color: red"> *</span></th>
+                <th style="width:20%">Data type <span style="color: red"> *</span></th>
+                <th style="width:30%">Description</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in columns">
+            <tr>
+                <td>{{item.id}}</td>
+                <td>
+                    <select v-model="item.tableName" class="form-control">
+                        <option v-for="tbl in tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" v-model="item.dbName" /></td>
+                <td>
+                    <select v-model="item.dataType" class="form-control">
+                        <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" v-model="item.description" /></td>
+            </tr>
+            <tr>
+                <td colspan="1"></td>
+                <td colspan="4">
+                    <div class="collapsible" v-if="item.tableName=='Location'">
+                        <i>Settings</i>
+                        <br />
+                        <input type="checkbox" v-model="item.mandatory" /> Mandatory
+                        <br />
+                        Domain <input type="text" class="form-control" v-model="item.domain" style="width:450px" />
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <br />
+    <br />
+
+    <h4>Data views</h4>
+    <i>Note views are not application specific</i>
+    <br />
+    <br />
+    <div>
+        <div class="btn btn-primary" v-on:click="addDataView">
+            <span class="glyphicon glyphicon-plus"></span> Add data view
+        </div>
+    </div>
+
+    <br />
+
+    <div v-for="item in dataviews">
+
+        <div style="margin:15px">
+            <div style="padding: 5px; border:dotted 1px gray">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label class="control-label">Title <span style="color: red"> *</span></label>
+                            <input id="appdescr" type="text" class="form-control" v-model="item.title" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">SQL Query <span style="color: red"> *</span></label>
+                            <br />
+                            <textarea style="width:100%" rows="4" v-model="item.sqlQuery"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12" style="margin: 5px">
+                        <b>Fields</b>
+                        <br />
+                        <br />
+                        <div>
+                            <div class="btn btn-primary" v-on:click="addDataViewField(item)">
+                                <span class="glyphicon glyphicon-plus"></span> Add
+                            </div>
+                        </div>
+                        <br />
+                        <table class="table table">
+                            <thead>
+                                <tr>
+
+                                    <th style="width:30%">Title <span style="color: red"> *</span></th>
+                                    <th style="width:65%">SQL query field <span style="color: red"> *</span></th>
+                                </tr>
+                            </thead>
+                            <tbody v-for="field in item.fields">
+                                <tr>
+
+                                    <td><input type="text" class="form-control" v-model="field.title" /></td>
+                                    <td><input type="text" class="form-control" v-model="field.sqlQueryFieldName" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+@section Scripts
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: {},
+                tables: [],
+                datatypes: [],
+                columns: [],
+                valuedomains: [],
+                dataviews: []
+            },
+            methods:
+            {
+                saveApplication: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "Save";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response) {
+                            window.location.reload(true);
+                        }
+                    });
+                },
+                setCodes: function ()
+                {
+                   
+
+                },
+                addDbTable: function () {
+                    var context = this;
+                    context.tables.push({ properties: "ISNEW=TRUE", metaType: "DATAVALUETABLE", properties:"" });
+                },
+                addDbColumn: function () {
+                    var context = this;
+                    context.columns.push({ properties: "ISNEW=TRUE", metaType: "DATAVALUE" });
+                },
+                addDataView: function () {
+                    var context = this;
+                    context.dataviews.push({ properties: "ISNEW=TRUE", fields: [] });
+                },
+                addDataViewField: function (item) {
+                    item.fields.push({ properties: "ISNEW=TRUE" });
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetApplication/@ViewBag.SystemId";
+                //Application
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
+                });
+
+                //Tables
+                endpointurl = baseurl + "GetApplicationTables/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.tables = response;
+                });
+
+                //DataTypes
+                endpointurl = baseurl + "GetApplicationTableDataTypes";
+                $.get(endpointurl, function (response)
+                {
+                    context.datatypes = response;
+                });
+
+                 //Columns
+                endpointurl = baseurl + "GetApplicationTableColumns/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.columns = response;
+                });
+
+                 //DataViews
+                endpointurl = baseurl + "GetDataViews";
+                $.get(endpointurl, function (response)
+                {
+                    context.dataviews = response;
+                });
+
+              
+            }
+        })
+
+    </script>
+}

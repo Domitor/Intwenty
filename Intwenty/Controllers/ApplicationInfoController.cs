@@ -32,6 +32,20 @@ namespace Moley.Controllers
             return View();
         }
 
+        [HttpGet("/ApplicationInfo/EditDB/{applicationid}")]
+        public IActionResult EditDB(int applicationid)
+        {
+            ViewBag.SystemId = Convert.ToString(applicationid);
+            return View();
+        }
+
+        [HttpGet("/ApplicationInfo/EditUI/{applicationid}")]
+        public IActionResult EditUI(int applicationid)
+        {
+            ViewBag.SystemId = Convert.ToString(applicationid);
+            return View();
+        }
+
         public IActionResult GetList()
         {
             return View();
@@ -107,14 +121,14 @@ namespace Moley.Controllers
         }
 
         /// <summary>
-        /// Get meta data for application tables for with id
+        /// Get meta data for application tables for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationTables/{applicationid}")]
         public JsonResult GetApplicationTables(int applicationid)
         {
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
             var l = new List<MetaDataItemDto>();
-            l.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title });
+            l.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
             l.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValueTable));
             return new JsonResult(l);
 
@@ -147,13 +161,36 @@ namespace Moley.Controllers
         }
 
         /// <summary>
+        /// Get meta data for application tables for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
+        public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
+        {
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(UIDbTable.GetTables(t));
+
+        }
+
+
+        /// <summary>
+        /// Get meta data for data views
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetDataViews")]
+        public JsonResult GetDataViews()
+        {
+            var t = Repository.GetMetaDataViews();
+            return new JsonResult(DataViewVm.GetDataViews(t));
+
+        }
+
+        /// <summary>
         /// Get meta data for available ui types
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationUITypes")]
         public JsonResult GetApplicationUITypes()
         {
             var t = new MetaUIItemDto();
-            return new JsonResult(t.ValidMetaTypes);
+            return new JsonResult(t.ValidMetaTypes.Where(p=> p!=t.UITypeListView && p!= t.UITypeListViewField && p!= t.UITypeLookUpField && p!= t.UITypeLookUpKeyField));
 
         }
 
@@ -165,7 +202,7 @@ namespace Moley.Controllers
         public JsonResult GetApplicationUIComponents(int applicationid)
         {
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(t.UIStructure);
+            return new JsonResult(UIVm.GetInput(t));
 
         }
 

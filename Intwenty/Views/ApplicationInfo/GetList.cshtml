@@ -16,15 +16,19 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:10%">ID</th>
+                    <th style="width:10%"></th>
                     <th style="width:30%">Title</th>
-                    <th style="width:60%">Description</th>
+                    <th style="width:40%">Description</th>
+                    <th style="width:10%"></th>
+                    <th style="width:10%"></th>
                 </tr>
             </thead>
             <tr v-for="item in datalist">
-                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id">Edit</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-primary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
+                <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-primary">Manage database</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-primary">Manage UI</a></td>
             </tr>
         </table>
 
