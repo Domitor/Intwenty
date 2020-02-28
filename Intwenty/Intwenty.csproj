@@ -25,9 +25,6 @@
     <Content Update="Views\ApplicationInfo\EditDB.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditUI2.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
     <Content Update="Views\ApplicationInfo\EditUI.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

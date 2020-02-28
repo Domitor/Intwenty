@@ -25,6 +25,8 @@ namespace Moley.Data
 
         List<MetaMenuItemDto> GetMetaMenuItems();
 
+        List<ValueDomainDto> GetValueDomains();
+
         List<NoSerieDto> GetNewNoSeriesValues(int applicationid );
 
         ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model);
@@ -41,6 +43,7 @@ namespace Moley.Data
         private DbSet<MetaDataView> MetaDataViews;
         private DbSet<MetaMenuItem> MetaMenuItems;
         private DbSet<NoSerie> NoSeries;
+        private DbSet<ValueDomain> ValueDomains;
 
 
         public SystemRepository(ApplicationDbContext context)
@@ -52,6 +55,7 @@ namespace Moley.Data
             MetaDataViews = context.Set<MetaDataView>();
             MetaMenuItems = context.Set<MetaMenuItem>();
             NoSeries = context.Set<NoSerie>();
+            ValueDomains = context.Set<ValueDomain>();
         }
 
         public List<ApplicationDescriptionDto> GetApplicationDescriptions()
@@ -300,7 +304,11 @@ namespace Moley.Data
 
         }
 
-
+        public List<ValueDomainDto> GetValueDomains()
+        {
+            var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
+            return t;
+        }
     }
 
 }

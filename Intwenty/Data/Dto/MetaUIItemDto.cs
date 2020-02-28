@@ -13,6 +13,11 @@ namespace Moley.Data.Dto
         {
         }
 
+        public MetaUIItemDto(string metatype)
+        {
+            MetaType = metatype;
+        }
+
         public MetaUIItemDto(MetaUIItem entity)
         {
             Id = entity.Id;
@@ -303,6 +308,8 @@ namespace Moley.Data.Dto
                 return t;
             }
         }
+
+       
 
 
     }

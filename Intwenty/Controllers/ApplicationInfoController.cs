@@ -46,12 +46,7 @@ namespace Moley.Controllers
             return View();
         }
 
-        [HttpGet("/ApplicationInfo/EditUI2/{applicationid}")]
-        public IActionResult EditUI2(int applicationid)
-        {
-            ViewBag.SystemId = Convert.ToString(applicationid);
-            return View();
-        }
+    
 
         public IActionResult GetList()
         {
@@ -191,16 +186,15 @@ namespace Moley.Controllers
         }
 
         /// <summary>
-        /// Get meta data for available ui types
+        /// Get meta data for application ui declarations for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationUITypes")]
-        public JsonResult GetApplicationUITypes()
+        [HttpGet("/ApplicationInfo/GetValueDomains")]
+        public JsonResult GetValueDomains()
         {
-            var t = new MetaUIItemDto();
-            return new JsonResult(t.ValidMetaTypes.Where(p=> p!=t.UITypeListView && p!= t.UITypeListViewField && p!= t.UITypeLookUpField && p!= t.UITypeLookUpKeyField));
+            var t = Repository.GetValueDomains();
+            return new JsonResult(t.Select(p=> p.DomainName).Distinct());
 
         }
-
 
         /// <summary>
         /// Get meta data for application ui declarations for application with id
@@ -213,6 +207,27 @@ namespace Moley.Controllers
 
         }
 
-        
+        [HttpPost]
+        public JsonResult SaveUIComponent([FromBody] UIVm model)
+        {
+            if (model.ApplicationId < 1)
+                throw new InvalidOperationException("ApplicationId missing in model");
+
+
+            var views = Repository.GetMetaDataViews();
+            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            if (app == null)
+                throw new InvalidOperationException("Could not find application..");
+
+            var dtolist = model.GetDtoList(app, views);
+            
+
+
+            return new JsonResult("");
+        }
+
+       
+
+
     }
 }
