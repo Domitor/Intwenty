@@ -8,6 +8,7 @@ namespace Moley.Models
     {
         public int Id = 0;
         public string Title = "";
+        public string MetaCode = "";
         public string SQLQuery = "";
         public string Properties = "";
         public List<DataViewFieldVm> Fields = new List<DataViewFieldVm>();
@@ -20,7 +21,7 @@ namespace Moley.Models
             {
                 if (t.IsMetaTypeDataView)
                 {
-                    var dv = new DataViewVm() { Id = t.Id, Properties = t.Properties, SQLQuery = t.SQLQuery, Title = t.Title };
+                    var dv = new DataViewVm() { Id = t.Id, Properties = t.Properties, SQLQuery = t.SQLQuery, Title = t.Title, MetaCode = t.MetaCode };
                     foreach (var f in viewmeta)
                     {
                         if ((f.IsMetaTypeDataViewField || f.IsMetaTypeDataViewKeyField) && f.ParentMetaCode == t.MetaCode)

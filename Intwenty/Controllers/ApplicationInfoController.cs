@@ -46,6 +46,13 @@ namespace Moley.Controllers
             return View();
         }
 
+        [HttpGet("/ApplicationInfo/EditUI2/{applicationid}")]
+        public IActionResult EditUI2(int applicationid)
+        {
+            ViewBag.SystemId = Convert.ToString(applicationid);
+            return View();
+        }
+
         public IActionResult GetList()
         {
             return View();
