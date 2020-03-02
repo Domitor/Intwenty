@@ -38,9 +38,9 @@
     <br />
 
     <h4>Choose Layout</h4>
-    <input type="radio" name="panelcnt" v-model="uicolumns" value="1" /> 1 Panel
-    <input type="radio" name="panelcnt" v-model="uicolumns" value="2" /> 2 Panel
-    <input type="radio" name="panelcnt" v-model="uicolumns" value="3" /> 3 Panel
+    <input type="radio" name="panelcnt" v-model="uicolumns" value="1" v-on:change="pnlLayoutChanged" /> 1 Panel
+    <input type="radio" name="panelcnt" v-model="uicolumns" value="2" v-on:change="pnlLayoutChanged" /> 2 Panel
+    <input type="radio" name="panelcnt" v-model="uicolumns" value="3" v-on:change="pnlLayoutChanged" /> 3 Panel
 
     <div style="float:right">
         <div class="btn btn-primary" v-on:click="addUIRow">
@@ -50,9 +50,21 @@
 
     <hr />
     <div>
-        <div class="row" v-for="r in uirows">
+
+        <div class="row">
+            <div v-bind:class="pnlLayout" v-for="c in uicols">
+                <div class="form-group">
+                    <label class="control-label">Panel Title (Optional)</label>
+                    <input type="text" class="form-control" v-model="panel(c).title" />
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="row" v-for="r in bodyrows">
 
             <div v-bind:class="pnlLayout" v-for="c in uicols">
+
 
                 <div class="formpanel">
 
@@ -61,7 +73,7 @@
                             Select
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-left" v-if="!hasUI(r,c)">
+                        <ul class="dropdown-menu dropdown-menu-left">
                             <li><a href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a></li>
                             <li><a href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a></li>
                             <li><a href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a></li>
@@ -77,40 +89,40 @@
 
                     <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
 
-                        <label class="control-label" v-if="!current(r,c).showSettings"><i>{{current(r,c).title}}</i> <a href="#" v-on:click="current(r,c).showSettings=!current(r,c).showSettings">[Settings]</a></label>
-                        <label class="control-label" v-if="current(r,c).showSettings"><i>{{current(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
-                        <div v-if="current(r,c).metaType==='TEXTBOX'">
+                        <label class="control-label" v-if="!cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="cell(r,c).showSettings=!cell(r,c).showSettings">[Settings]</a></label>
+                        <label class="control-label" v-if="cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
+                        <div v-if="cell(r,c).metaType==='TEXTBOX'">
                             <div class="form-group">
                                 <input type="text" class="form-control" disabled />
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='NUMBOX'">
+                        <div v-if="cell(r,c).metaType==='NUMBOX'">
                             <div class="form-group">
                                 <input type="number" class="form-control" disabled />
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='CHECKBOX'">
+                        <div v-if="cell(r,c).metaType==='CHECKBOX'">
                             <div class="form-group">
                                 <br />
                                 <input type="checkbox" disabled />
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='TEXTAREA'">
+                        <div v-if="cell(r,c).metaType==='TEXTAREA'">
                             <div class="form-group">
                                 <textarea class="form-control" rows="5" cols="50" disabled></textarea>
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='DATEPICKER'">
+                        <div v-if="cell(r,c).metaType==='DATEPICKER'">
                             <div class="form-group">
                                 <input type="date" class="form-control" />
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='COMBOBOX'">
+                        <div v-if="cell(r,c).metaType==='COMBOBOX'">
                             <div class="form-group">
                                 <select class="form-control" disabled>
                                     <option>Example 1</option>
@@ -119,7 +131,7 @@
                             </div>
                         </div>
 
-                        <div v-if="current(r,c).metaType==='LOOKUP'">
+                        <div v-if="cell(r,c).metaType==='LOOKUP'">
                             <div>
                                 <div style="width:10%">
                                     <button style="float:left" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
@@ -139,67 +151,67 @@
                     </div>
 
 
-                    <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="current(r,c).showSettings">
+                    <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="cell(r,c).showSettings">
 
                         <span><b><i>Settings</i></b></span>
                         <span style="float:right"><a href="#" v-on:click="removeUI(r,c)">Remove</a></span>
                         <br />
                         <div class="form-group">
                             <label class="control-label">Title</label>
-                            <input type="text" class="form-control" v-model="current(r,c).title" />
+                            <input type="text" class="form-control" v-model="cell(r,c).title" />
                         </div>
 
                         <div class="form-group">
                             <label class="control-label">Set database table</label>
-                            <select v-model="current(r,c).tableName" class="form-control">
+                            <select v-model="cell(r,c).tableName" class="form-control">
                                 <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                             </select>
                         </div>
 
-                        <div class="form-group" v-if="current(r,c).metaType != 'LOOKUP'">
+                        <div class="form-group" v-if="cell(r,c).metaType != 'LOOKUP'">
                             <label class="control-label">Set database column</label>
-                            <select v-model="current(r,c).columnName" class="form-control">
-                                <option v-for="col in dbcolumns(current(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="cell(r,c).columnName" class="form-control">
+                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='COMBOBOX'">
+                        <div v-if="cell(r,c).metaType=='COMBOBOX'">
                             <label class="control-label">Set value domain</label>
-                            <select v-model="current(r,c).domain" class="form-control">
+                            <select v-model="cell(r,c).domain" class="form-control">
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='LOOKUP'">
+                        <div v-if="cell(r,c).metaType=='LOOKUP'">
                             <label class="control-label">Set data view</label>
-                            <select v-model="current(r,c).domain" class="form-control">
+                            <select v-model="cell(r,c).domain" class="form-control">
                                 <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='LOOKUP'">
+                        <div v-if="cell(r,c).metaType=='LOOKUP'">
                             <label class="control-label">Set key field database column</label>
-                            <select v-model="current(r,c).lookUpKeyFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(current(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="cell(r,c).lookUpKeyFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='LOOKUP'">
+                        <div v-if="cell(r,c).metaType=='LOOKUP'">
                             <label class="control-label">Set key field data view column</label>
-                            <select v-model="current(r,c).lookUpKeyFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(current(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="cell(r,c).lookUpKeyFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='LOOKUP'">
+                        <div v-if="cell(r,c).metaType=='LOOKUP'">
                             <label class="control-label">(optional) Set look up field database column</label>
-                            <select v-model="current(r,c).lookUpFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(current(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="cell(r,c).lookUpFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="current(r,c).metaType=='LOOKUP'">
+                        <div v-if="cell(r,c).metaType=='LOOKUP'">
                             <label class="control-label">Set look up field data view column</label>
-                            <select v-model="current(r,c).lookUpFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(current(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="cell(r,c).lookUpFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
                     </div>
-                    
+
                 </div>
 
             </div>
@@ -232,33 +244,56 @@
                
                 createUI: function (row, col, metatype)
                 {
-                    this.inputs.push({ id:-1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode:"", parentMetaCode:"" });
+                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "PNL_" + col.id }
+                    this.inputs.push(t);
+                    return t;
                 },
                 removeUI: function (row, col)
                 {
 
                     for (var i = 0; i < this.inputs.length; i++)
                     {
-                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id)
+                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id && this.inputs[i].metaType != "PANEL")
                         {
                             this.inputs.splice(i, 1);
                             break;
                         }   
                     }
                 },
-                current: function (row, col) {
+                cell: function (row, col) {
 
                     for (var i = 0; i < this.inputs.length; i++) {
-                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id)
+                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id && this.inputs[i].metaType != "PANEL")
                             return this.inputs[i];
                     }
 
                     return {};
                 },
-                hasUI: function (row, col) {
+                panel: function (col) {
 
                     for (var i = 0; i < this.inputs.length; i++) {
-                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id)
+                        if (this.inputs[i].rowid === this.uirows[0].id && this.inputs[i].colid === col.id && this.inputs[i].metaType === "PANEL")
+                            return this.inputs[i];
+                    }
+
+                    return {};
+                },
+                hasUI: function (row, col)
+                {
+
+
+                    for (var i = 0; i < this.inputs.length; i++) {
+                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id && this.inputs[i].metaType != "PANEL")
+                            return true;
+                    }
+
+                    return false;
+                },
+                hasPanel: function (row, col)
+                {
+                    for (var i = 0; i < this.inputs.length; i++)
+                    {
+                        if (this.inputs[i].rowid === row.id && this.inputs[i].colid === col.id && this.inputs[i].metaType == "PANEL")
                             return true;
                     }
 
@@ -280,12 +315,55 @@
                 },
                 addUIRow: function ()
                 {
-                    this.uirows.push({ id: this.uirows.length+1 });
+                    this.uirows.push({ id: this.uirows.length });
+                },
+                pnlLayoutChanged: function ()
+                {
+                    if (this.uirows.length === 0)
+                        return;
+
+                    //IF 1 remove all on 2  and 3
+                    //IF 2 remove all on 3
+
+                    var cnt = 0;
+                    var tot = this.inputs.length;
+                    while (cnt < tot)
+                    {
+                        cnt += 1;
+
+                        for (var i = 0; i < this.inputs.length; i++) {
+                            if (this.uicolumns === "1" && (this.inputs[i].colid === 2 || this.inputs[i].colid === 3))
+                                this.inputs.splice(i, 1);
+                            if (this.uicolumns === "2" && this.inputs[i].colid === 3)
+                                this.inputs.splice(i, 1);
+                        }
+                    }
+
+                    this.addTopPanels();
+
+
+                },
+                addTopPanels()
+                {
+                    if (this.uirows.length === 0)
+                    {
+                        var r = { id: 1 };
+                        this.uirows.push(r);
+                    }
+
+                    for (var i = 0; i < this.uicols.length; i++)
+                    {
+                        if (!this.hasPanel(this.uirows[0], this.uicols[i])) {
+                            var t = this.createUI(this.uirows[0], this.uicols[i], "PANEL");
+                            t.metaCode = "PNL_" + this.uicols[i].id;
+                            t.parentMetaCode = "ROOT";
+                        }
+                    }
                 },
                 closeAndSave: function (row, col)
                 {
                     var context = this;
-                    var item = context.current(row, col);
+                    var item = context.cell(row, col);
                     if (!item)
                     {
                         alert('error: ui component not found !');
@@ -331,6 +409,19 @@
                         if (this.uicolumns === "3")
                             return [{ id: 1 }, { id: 2 }, { id: 3 }];
                     
+                },
+                bodyrows : function ()
+                {
+                    var arr = [];
+                    for (var i = 0; i < this.uirows.length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            arr.push(this.uirows[i]);
+                        }
+                    }
+                    return arr;
+
                 }
              
                 
@@ -349,8 +440,10 @@
                     context.model = response;
                 });
 
-                for (var i = 1; i < 4; i++)
-                    this.uirows.push({ id: i });
+                //for (var i = 1; i < 4; i++)
+                //    this.uirows.push({ id: i });
+
+                this.addTopPanels();
 
                 //Tables
                 endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
