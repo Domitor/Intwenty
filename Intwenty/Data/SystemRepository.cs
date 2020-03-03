@@ -33,6 +33,16 @@ namespace Moley.Data
 
         void SaveApplicationUI(List<MetaUIItemDto> model);
 
+        void SaveApplicationDB(List<MetaDataItemDto> model, int applicationid);
+
+        void SaveDataView(List<MetaDataViewDto> model);
+
+        void DeleteApplicationUI(int id);
+
+        void DeleteApplicationDB(int id);
+
+        void DeleteDataView(int id);
+
     }
 
     public class SystemRepository : ISystemRepository
@@ -352,6 +362,235 @@ namespace Moley.Data
 
             return res;
 
+        }
+
+        public void DeleteApplicationUI(int id)
+        {
+            var existing = MetaUIItem.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                var dto = new MetaUIItemDto(existing);
+                if (dto.IsUITypeLookUp)
+                {
+                    var childlist = MetaUIItem.Where(p => (p.MetaType == "LOOKUPKEYFIELD" || p.MetaType == "LOOKUPFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    MetaUIItem.Remove(existing);
+                    MetaUIItem.RemoveRange(childlist);
+                }
+                else
+                {
+                    MetaUIItem.Remove(existing);
+
+                }
+              
+                context.SaveChanges();
+            }
+        }
+
+        public void SaveApplicationDB(List<MetaDataItemDto> model, int applicationid)
+        {
+
+            var app = GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            if (app == null)
+                return;
+
+            foreach (var dbi in model)
+            {
+                dbi.AppMetaCode = app.Application.MetaCode;
+
+                if (dbi.IsMetaTypeDataValueTable)
+                    dbi.ParentMetaCode = "ROOT";
+
+                if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValueTable)
+                    dbi.MetaCode = "TBL_" + MetaModelDto.GetRandomUniqueString();
+                else if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValue)
+                    dbi.MetaCode = "DVL_" + MetaModelDto.GetRandomUniqueString();
+
+                if (dbi.IsMetaTypeDataValue && dbi.TableName == app.Application.DbName)
+                {
+                    dbi.ParentMetaCode = "ROOT";
+                }
+               
+
+            }
+
+            foreach (var dbi in model)
+            {
+                if (dbi.Id < 1)
+                {
+                    var t = CreateMetaDataItem(dbi);
+
+                    //SET PARENT META CODE
+                    if (dbi.IsMetaTypeDataValue && dbi.TableName != app.Application.DbName)
+                    {
+                        var tbl = model.Find(p => p.IsMetaTypeDataValueTable && p.DbName == dbi.TableName);
+                        if (tbl != null)
+                            t.ParentMetaCode = tbl.MetaCode;
+                    }
+
+                    MetaDBItem.Add(t);
+                }
+                else
+                {
+                    var existing = MetaDBItem.FirstOrDefault(p => p.Id == dbi.Id);
+                    if (existing != null)
+                    {
+                        existing.DataType = dbi.DataType;
+                        existing.Domain = dbi.Domain;
+                        existing.MetaType = dbi.MetaType;
+                        existing.MetaCode = dbi.MetaCode;
+                        existing.Description = dbi.Description;
+                        existing.ParentMetaCode = dbi.ParentMetaCode;
+                        existing.DbName = dbi.DbName;
+                        existing.Mandatory = dbi.Mandatory;
+                       
+                    }
+
+                }
+
+            }
+
+            context.SaveChanges();
+        
+        }
+
+        private MetaDataItem CreateMetaDataItem(MetaDataItemDto dto)
+        {
+            var res = new MetaDataItem()
+            {
+                AppMetaCode = dto.AppMetaCode,
+                Description = dto.Description,
+                Domain = dto.Domain,
+                MetaCode = dto.MetaCode,
+                MetaType = dto.MetaType,
+                ParentMetaCode = dto.ParentMetaCode,
+                DbName = dto.DbName,
+                DataType = dto.DataType,
+                Mandatory = dto.Mandatory
+            };
+
+
+            return res;
+
+        }
+
+        public void SaveDataView(List<MetaDataViewDto> model)
+        {
+            foreach (var dv in model)
+            {
+
+                if (dv.IsMetaTypeDataView)
+                    dv.ParentMetaCode = "ROOT";
+
+                if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataView)
+                    dv.MetaCode = "DV_" + MetaModelDto.GetRandomUniqueString();
+                else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewKeyField)
+                    dv.MetaCode = "DVKF_" + MetaModelDto.GetRandomUniqueString();
+                else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewField)
+                    dv.MetaCode = "DVLF_" + MetaModelDto.GetRandomUniqueString();
+
+            }
+
+            foreach (var dv in model)
+            {
+                if (dv.Id < 1)
+                {
+                    var t = CreateMetaDataView(dv);
+
+                    if ((dv.IsMetaTypeDataViewField || dv.IsMetaTypeDataViewKeyField) && string.IsNullOrEmpty(dv.ParentMetaCode))
+                    {
+                        //var dv = model.Find(p => p.IsMetaTypeDataView && p.DbName == dbi.TableName);
+                        //if (tbl != null)
+                        //    dbi.ParentMetaCode = tbl.MetaCode;
+                    }
+
+                    MetaDataViews.Add(t);
+                }
+                else
+                {
+                    var existing = MetaDataViews.FirstOrDefault(p => p.Id == dv.Id);
+                    if (existing != null)
+                    {
+
+                        existing.MetaType = dv.MetaType;
+                        existing.MetaCode = dv.MetaCode;
+                        existing.ParentMetaCode = dv.ParentMetaCode;
+                        existing.SQLQuery = dv.SQLQuery;
+                        existing.SQLQueryFieldName = dv.SQLQueryFieldName;
+                        existing.Title = dv.Title;
+
+
+                    }
+
+                }
+
+            }
+
+            context.SaveChanges();
+        }
+
+
+        private MetaDataView CreateMetaDataView(MetaDataViewDto dto)
+        {
+            var res = new MetaDataView()
+            {
+
+                MetaCode = dto.MetaCode,
+                MetaType = dto.MetaType,
+                ParentMetaCode = dto.ParentMetaCode,
+                Title = dto.Title,
+                SQLQuery = dto.SQLQuery,
+                SQLQueryFieldName = dto.SQLQueryFieldName
+
+            };
+
+            return res;
+
+        }
+
+      
+
+        public void DeleteApplicationDB(int id)
+        {
+            var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                var dto = new MetaDataItemDto(existing);
+                var app = GetApplicationMeta().Find(p => p.Application.MetaCode == dto.AppMetaCode);
+                if (app == null)
+                    return;
+
+                if (dto.IsMetaTypeDataValueTable && dto.DbName != app.Application.DbName)
+                {
+                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATAVALUE") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    MetaDBItem.Remove(existing);
+                    MetaDBItem.RemoveRange(childlist);
+                }
+                else
+                {
+                    MetaDBItem.Remove(existing);
+                }
+                context.SaveChanges();
+            }
+        }
+
+        public void DeleteDataView(int id)
+        {
+            var existing = MetaDataViews.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                var dto = new MetaDataViewDto(existing);
+                if (dto.IsMetaTypeDataView)
+                {
+                    var childlist = MetaDataViews.Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    MetaDataViews.Remove(existing);
+                    MetaDataViews.RemoveRange(childlist);
+                }
+                else
+                {
+                    MetaDataViews.Remove(existing);
+                }
+                context.SaveChanges();
+            }
         }
     }
 

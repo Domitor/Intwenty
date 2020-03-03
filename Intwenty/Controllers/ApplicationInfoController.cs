@@ -237,8 +237,43 @@ namespace Moley.Controllers
             
             return new JsonResult("");
         }
-        
-       
+
+        [HttpPost]
+        public JsonResult RemoveApplicationUI([FromBody] UserInput model)
+        {
+            if (model.Id < 1)
+                throw new InvalidOperationException("Id is missing");
+
+
+            Repository.DeleteApplicationUI(model.Id);
+
+            return new JsonResult("");
+        }
+
+        [HttpPost]
+        public JsonResult SaveApplicationDB([FromBody] DBVm model)
+        {
+            if (model.Id < 1)
+                throw new InvalidOperationException("ApplicationId missing in model");
+
+            var savelist = new List<MetaDataItemDto>();
+            savelist.AddRange(model.Tables);
+            savelist.AddRange(model.Columns);
+
+
+            return new JsonResult("");
+        }
+
+        [HttpPost]
+        public JsonResult SaveDataViews([FromBody] DataViewVm model)
+        {
+            if (model.Id < 1)
+                throw new InvalidOperationException("ApplicationId missing in model");
+
+            return new JsonResult("");
+        }
+
+
 
 
     }

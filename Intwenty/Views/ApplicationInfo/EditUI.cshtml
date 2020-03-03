@@ -256,6 +256,7 @@
                     {
                         if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
                         {
+                            this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
                         }   
@@ -380,6 +381,22 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(this.model),
+                        success: function (response)
+                        {
+                            var s = "";
+                        }
+                    });
+                },
+                removeApplicationUI: function (item)
+                {
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "RemoveApplicationUI";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(item),
                         success: function (response)
                         {
                             var s = "";
