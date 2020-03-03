@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Moley.Models;
+using Moley.Models.MetaDesigner;
 using Moley.Data;
 using Moley.Data.Dto;
 using Moley.MetaDataService;
@@ -136,14 +137,22 @@ namespace Moley.Controllers
         /// <summary>
         /// Get meta data for application tables for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationTables/{applicationid}")]
-        public JsonResult GetApplicationTables(int applicationid)
+        [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
+        public JsonResult GetApplicationDB(int applicationid)
         {
+            var res = new DBVm();
+            
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            var l = new List<MetaDataItemDto>();
-            l.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
-            l.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValueTable));
-            return new JsonResult(l);
+            if (t==null)
+                throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
+
+            res.Id = t.Application.Id;
+            res.Title = t.Application.Title;
+            res.Tables.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
+            res.Tables.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValueTable));
+            res.Columns.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValue));
+
+            return new JsonResult(res);
 
         }
 
@@ -163,19 +172,6 @@ namespace Moley.Controllers
         /// <summary>
         /// Get meta data for application tables for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationTableColumns/{applicationid}")]
-        public JsonResult GetApplicationTableColumns(int applicationid)
-        {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            var l = new List<MetaDataItemDto>();
-            l.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValue));
-            return new JsonResult(l);
-
-        }
-
-        /// <summary>
-        /// Get meta data for application tables for application with id
-        /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
         public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
@@ -183,7 +179,6 @@ namespace Moley.Controllers
             return new JsonResult(UIDbTable.GetTables(t));
 
         }
-
 
         /// <summary>
         /// Get meta data for data views
@@ -207,17 +202,7 @@ namespace Moley.Controllers
 
         }
 
-        /// <summary>
-        /// Get meta data for application ui declarations for application with id
-        /// </summary>
-        /*
-        [HttpGet("/ApplicationInfo/GetApplicationUIComponents/{applicationid}")]
-        public JsonResult GetApplicationUIComponents(int applicationid)
-        {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(UIVm.GetInput(t));
-
-        }*/
+      
 
         [HttpPost]
         public JsonResult SaveApplicationUI([FromBody] UIVm model)
@@ -257,19 +242,19 @@ namespace Moley.Controllers
                 throw new InvalidOperationException("ApplicationId missing in model");
 
             var savelist = new List<MetaDataItemDto>();
-            savelist.AddRange(model.Tables);
-            savelist.AddRange(model.Columns);
+            savelist.AddRange(model.Tables.Select(p=> new MetaDataItemDto(p.MetaType) { DbName = p.DbName, Description = p.Description }));
+            savelist.AddRange(model.Columns.Select(p => new MetaDataItemDto(p.MetaType) { DbName = p.DbName, Description = p.Description, Domain= p.Domain, DataType = p.DataType }));
 
+            Repository.SaveApplicationDB(savelist, model.Id);
 
-            return new JsonResult("");
+            return new JsonResult(GetApplicationDB(model.Id));
         }
 
         [HttpPost]
-        public JsonResult SaveDataViews([FromBody] DataViewVm model)
+        public JsonResult SaveDataView([FromBody] DataViewVm model)
         {
-            if (model.Id < 1)
-                throw new InvalidOperationException("ApplicationId missing in model");
-
+            var dtolist = MataDataViewCreator.GetMetaDataView(model);
+            Repository.SaveDataView(dtolist);
             return new JsonResult("");
         }
 

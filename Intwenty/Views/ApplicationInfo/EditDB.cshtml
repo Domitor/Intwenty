@@ -180,7 +180,7 @@
                         </div>
                         <br />
                         <div>
-                            <div class="btn btn-primary" v-on:click="saveDataViews">
+                            <div class="btn btn-primary" v-on:click="saveDataView(item)">
                                 <span class="glyphicon glyphicon-save"></span> Save
                             </div>
                         </div>
@@ -219,10 +219,10 @@
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "SaveApplicationDB";
                     var data = {};
-                    data.id = model.id;
-                    data.title = model.title;
-                    data.tables = model.tables;
-                    data.columns = model.columns;
+                    data.id = this.model.id;
+                    data.title = this.model.title;
+                    data.tables = this.model.tables;
+                    data.columns = this.model.columns;
 
                     $.ajax({
                         url: endpointurl,
@@ -236,20 +236,17 @@
                     });
 
                 },
-                saveDataViews: function ()
+                saveDataView: function (item)
                 {
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "SaveDataViews";
-                    var data = {};
-                    data.id = model.id;
-                    data.title = model.title;
-                    data.dataviews = model.dataviews;
+
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(data),
+                        data: JSON.stringify(item),
                         success: function (response)
                         {
                             var s = "";
@@ -290,29 +287,13 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/ApplicationInfo/")';
-                var endpointurl = baseurl + "GetApplication/@ViewBag.SystemId";
+                var endpointurl = baseurl + "GetApplicationDB/@ViewBag.SystemId";
                 //Application
                 $.get(endpointurl, function (response)
                 {
-                    context.model.id = response.id;
-                    context.model.title = response.title;
+                    context.model = response;
                 });
 
-                //Tables
-                endpointurl = baseurl + "GetApplicationTables/@ViewBag.SystemId";
-                $.get(endpointurl, function (response)
-                {
-                    context.model.tables = response;
-                });
-
-                 //Columns
-                endpointurl = baseurl + "GetApplicationTableColumns/@ViewBag.SystemId";
-                $.get(endpointurl, function (response)
-                {
-                    context.model.columns = response;
-                    for (var i = 0; i < context.model.columns.length; i++)
-                        context.model.columns[i].showSettings = false;
-                });
 
                  //DataViews
                 endpointurl = baseurl + "GetDataViews";

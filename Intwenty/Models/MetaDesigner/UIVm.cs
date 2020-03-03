@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Moley.Models
+namespace Moley.Models.MetaDesigner
 {
 
     public static class UIVmCreator

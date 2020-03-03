@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Moley.Models
+namespace Moley.Models.MetaDesigner
 {
     public class DBVm
     {

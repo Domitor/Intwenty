@@ -273,7 +273,7 @@ namespace Moley.Data
             if (model == null)
                 return null;
 
-            if (model.Id == 0)
+            if (model.Id < 1)
             {
                 var max = 10;
                 if (AppDescription.Count() > 0)
@@ -495,14 +495,6 @@ namespace Moley.Data
                 if (dv.Id < 1)
                 {
                     var t = CreateMetaDataView(dv);
-
-                    if ((dv.IsMetaTypeDataViewField || dv.IsMetaTypeDataViewKeyField) && string.IsNullOrEmpty(dv.ParentMetaCode))
-                    {
-                        //var dv = model.Find(p => p.IsMetaTypeDataView && p.DbName == dbi.TableName);
-                        //if (tbl != null)
-                        //    dbi.ParentMetaCode = tbl.MetaCode;
-                    }
-
                     MetaDataViews.Add(t);
                 }
                 else
@@ -517,8 +509,6 @@ namespace Moley.Data
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
-
-
                     }
 
                 }

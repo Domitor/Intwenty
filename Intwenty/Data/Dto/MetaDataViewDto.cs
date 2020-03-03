@@ -27,6 +27,11 @@ namespace Moley.Data.Dto
             Properties = "";
         }
 
+        public MetaDataViewDto(string metatype)
+        {
+            MetaType = metatype;
+        }
+
         public MetaDataViewDto()
         {
         }
