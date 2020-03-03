@@ -372,7 +372,6 @@
                 },
                 SaveApplicationUI: function ()
                 {
-                    var context = this;
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "SaveApplicationUI";
 
@@ -380,7 +379,7 @@
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(model),
+                        data: JSON.stringify(this.model),
                         success: function (response)
                         {
                             var s = "";
