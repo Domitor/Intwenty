@@ -31,6 +31,8 @@ namespace Moley.Data
 
         ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model);
 
+        void SaveApplicationUI(List<MetaUIItemDto> model);
+
     }
 
     public class SystemRepository : ISystemRepository
@@ -308,6 +310,48 @@ namespace Moley.Data
         {
             var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
             return t;
+        }
+
+        public void SaveApplicationUI(List<MetaUIItemDto> model)
+        {
+
+            foreach (var uic in model)
+            {
+                if (uic.Id < 1)
+                {
+                    MetaUIItem.Add(CreateMetaUIItem(uic));
+
+                }
+                else
+                {
+                    var existing = MetaUIItem.FirstOrDefault(p => p.Id == uic.Id);
+                    if (existing != null)
+                    {
+                        existing.Title = uic.Title;
+                        existing.RowOrder = uic.RowOrder;
+                        existing.ColumnOrder = uic.ColumnOrder;
+                        existing.DataMetaCode = uic.DataMetaCode;
+                        existing.Domain = uic.Domain;
+                        existing.MetaType = uic.MetaType;
+                        existing.MetaCode = uic.MetaCode;
+                        existing.Description = uic.Description;
+                    }
+
+                }
+
+            }
+
+            context.SaveChanges();
+        }
+
+        private MetaUIItem CreateMetaUIItem(MetaUIItemDto dto)
+        {
+            var res = new MetaUIItem() { AppMetaCode = dto.AppMetaCode, ColumnOrder = dto.ColumnOrder, DataMetaCode = dto.DataMetaCode,
+                                         Description = dto.Description, Domain = dto.Domain, MetaCode = dto.MetaCode, MetaType = dto.MetaType,
+                                         ParentMetaCode = dto.ParentMetaCode, RowOrder = dto.RowOrder, Title = dto.Title };
+
+            return res;
+
         }
     }
 

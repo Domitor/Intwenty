@@ -123,6 +123,17 @@ namespace Moley.Controllers
         }
 
         /// <summary>
+        /// Get meta data for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplicationUI/{applicationid}")]
+        public JsonResult GetApplicationUI(int applicationid)
+        {
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(UIVmCreator.GetUIVm(t));
+
+        }
+
+        /// <summary>
         /// Get meta data for application tables for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationTables/{applicationid}")]
@@ -199,33 +210,34 @@ namespace Moley.Controllers
         /// <summary>
         /// Get meta data for application ui declarations for application with id
         /// </summary>
+        /*
         [HttpGet("/ApplicationInfo/GetApplicationUIComponents/{applicationid}")]
         public JsonResult GetApplicationUIComponents(int applicationid)
         {
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
             return new JsonResult(UIVm.GetInput(t));
 
-        }
+        }*/
 
         [HttpPost]
-        public JsonResult SaveUIComponent([FromBody] UIVm model)
+        public JsonResult SaveApplicationUI([FromBody] UIVm model)
         {
-            if (model.ApplicationId < 1)
+            if (model.Id < 1)
                 throw new InvalidOperationException("ApplicationId missing in model");
 
 
             var views = Repository.GetMetaDataViews();
-            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.Id);
             if (app == null)
-                throw new InvalidOperationException("Could not find application..");
+                throw new InvalidOperationException("Could not find application");
 
-            var dtolist = model.GetDtoList(app, views);
+            var dtolist = MetaUIItemCreator.GetMetaUI(model, app, views);
+
+            Repository.SaveApplicationUI(dtolist);
             
-
-
             return new JsonResult("");
         }
-
+        
        
 
 
