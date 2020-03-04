@@ -140,19 +140,15 @@ namespace Moley.Controllers
         [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
         public JsonResult GetApplicationDB(int applicationid)
         {
-            var res = new DBVm();
+            
             
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
             if (t==null)
                 throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
-            res.Id = t.Application.Id;
-            res.Title = t.Application.Title;
-            res.Tables.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
-            res.Tables.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValueTable));
-            res.Columns.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValue));
+            var dbvm = DBVmCreator.GetDBVm(t);
 
-            return new JsonResult(res);
+            return new JsonResult(dbvm);
 
         }
 
@@ -238,24 +234,48 @@ namespace Moley.Controllers
         [HttpPost]
         public JsonResult SaveApplicationDB([FromBody] DBVm model)
         {
-            if (model.Id < 1)
-                throw new InvalidOperationException("ApplicationId missing in model");
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
 
-            var savelist = new List<MetaDataItemDto>();
-            savelist.AddRange(model.Tables.Select(p=> new MetaDataItemDto(p.MetaType) { DbName = p.DbName, Description = p.Description }));
-            savelist.AddRange(model.Columns.Select(p => new MetaDataItemDto(p.MetaType) { DbName = p.DbName, Description = p.Description, Domain= p.Domain, DataType = p.DataType }));
+                var list = MetaDataItemCreator.GetMetaDataItems(model);
 
-            Repository.SaveApplicationDB(savelist, model.Id);
+                Repository.SaveApplicationDB(list, model.Id);
 
-            return new JsonResult(GetApplicationDB(model.Id));
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationDB(model.Id);
         }
 
         [HttpPost]
         public JsonResult SaveDataView([FromBody] DataViewVm model)
         {
-            var dtolist = MataDataViewCreator.GetMetaDataView(model);
-            Repository.SaveDataView(dtolist);
-            return new JsonResult("");
+            try
+            {
+
+                var dtolist = MataDataViewCreator.GetMetaDataView(model);
+                Repository.SaveDataView(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDataViews();
         }
 
 

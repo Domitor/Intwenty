@@ -124,7 +124,7 @@
 
     <br />
 
-    <div v-for="item in model.dataviews">
+    <div v-for="item in dataviews">
 
         <div style="margin:15px">
             <div style="padding: 5px; border:dotted 1px gray">
@@ -202,7 +202,8 @@
         var app = new Vue({
             el: '#app',
             data: {
-                model: { tables: [], columns: [], dataviews: [] },
+                model: { tables: [], columns: [] },
+                dataviews: [],
                 datatypes: [],
                 valuedomains: []
             },
@@ -216,22 +217,23 @@
                 },
                 saveApplicationDB: function ()
                 {
+                    var context = this;
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "SaveApplicationDB";
-                    var data = {};
-                    data.id = this.model.id;
-                    data.title = this.model.title;
-                    data.tables = this.model.tables;
-                    data.columns = this.model.columns;
+                  
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(data),
+                        data: JSON.stringify(context.model),
                         success: function (response)
                         {
-                            var s = "";
+                            context.model = response;
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
                         }
                     });
 
@@ -239,7 +241,7 @@
                 saveDataView: function (item)
                 {
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
-                    var endpointurl = baseurl + "SaveDataViews";
+                    var endpointurl = baseurl + "SaveDataView";
 
 
                     $.ajax({
@@ -249,25 +251,31 @@
                         data: JSON.stringify(item),
                         success: function (response)
                         {
-                            var s = "";
+                            context.dataviews = response;
+                            for (var i = 0; i < context.dataviews.length; i++)
+                                context.dataviews[i].showSettings = false;
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
                         }
                     });
 
                 },
                 addDbTable: function () {
                     var context = this;
-                    context.model.tables.unshift({ properties: "ISNEW=TRUE", metaType: "DATAVALUETABLE", properties: "", id: -1 });
+                    context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: -1 });
                 },
                 addDbColumn: function () {
                     var context = this;
-                    context.model.columns.unshift({ properties: "ISNEW=TRUE", metaType: "DATAVALUE", id: -1, showSettings:false });
+                    context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: -1, showSettings:false, mandatory: false, domain:"" });
                 },
                 addDataView: function () {
                     var context = this;
-                    context.model.dataviews.unshift({ properties: "ISNEW=TRUE", fields: [], id: -1, showSettings: false });
+                    context.dataviews.unshift({ properties: "", fields: [], id: -1, showSettings: false });
                 },
                 addDataViewField: function (item) {
-                    item.fields.unshift({ properties: "ISNEW=TRUE", id: -1 });
+                    item.fields.unshift({ properties: "", id: -1 });
                 },
                 getViewFieldsString: function (item)
                 {
@@ -299,9 +307,9 @@
                 endpointurl = baseurl + "GetDataViews";
                 $.get(endpointurl, function (response)
                 {
-                    context.model.dataviews = response;
-                    for (var i = 0; i < context.model.dataviews.length; i++)
-                        context.model.dataviews[i].showSettings = false;
+                    context.dataviews = response;
+                    for (var i = 0; i < context.dataviews.length; i++)
+                        context.dataviews[i].showSettings = false;
                 });
 
                 //DataTypes

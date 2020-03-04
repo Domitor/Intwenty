@@ -11,12 +11,14 @@ namespace Moley.Data.Dto
 
         public MetaDataItemDto()
         {
+            SetEmptyStrings();
         }
 
         public MetaDataItemDto(string metatype)
         {
             MetaType = metatype;
-            Domain = "";
+            SetEmptyStrings();
+
         }
 
         public MetaDataItemDto(MetaDataItem entity)
@@ -32,8 +34,21 @@ namespace Moley.Data.Dto
             Domain = entity.Domain;
             Mandatory = entity.Mandatory;
             Properties = entity.Properties;
-            if (Domain == null)
-                Domain = string.Empty;
+            SetEmptyStrings();
+        }
+
+        private void SetEmptyStrings()
+        {
+            if (string.IsNullOrEmpty(Description)) Description = string.Empty;
+            if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DbName)) DbName = string.Empty;
+            if (string.IsNullOrEmpty(DataType)) DataType = string.Empty;
+            if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
+            if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
+            if (string.IsNullOrEmpty(TableName)) TableName = string.Empty;
+            if (string.IsNullOrEmpty(ColumnName)) ColumnName = string.Empty;
         }
 
         public int Id { get; set; }
@@ -227,6 +242,21 @@ namespace Moley.Data.Dto
                 t.Add(DataTypeText);
                 t.Add(DataTypeDateTime);
                 return t;
+            }
+        }
+
+        public bool HasValidDataType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(DataType))
+                    return false;
+
+                if (DataTypes.Contains(DataType))
+                    return true;
+
+                return false;
+
             }
         }
 

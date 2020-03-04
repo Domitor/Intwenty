@@ -391,14 +391,17 @@ namespace Moley.Data
 
             var app = GetApplicationMeta().Find(p => p.Application.Id == applicationid);
             if (app == null)
-                return;
+                throw new InvalidOperationException("Could not find application when saving application db meta.");
 
             foreach (var dbi in model)
             {
                 dbi.AppMetaCode = app.Application.MetaCode;
 
-                if (dbi.IsMetaTypeDataValueTable)
-                    dbi.ParentMetaCode = "ROOT";
+                //ASSUME ALL IS ROOT, CORRECT LATER
+                dbi.ParentMetaCode = "ROOT";
+
+                if (dbi.IsMetaTypeDataValue && string.IsNullOrEmpty(dbi.TableName))
+                    throw new InvalidOperationException("Could not identify parent table when saving application db meta.");
 
                 if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValueTable)
                     dbi.MetaCode = "TBL_" + MetaModelDto.GetRandomUniqueString();
@@ -409,7 +412,16 @@ namespace Moley.Data
                 {
                     dbi.ParentMetaCode = "ROOT";
                 }
-               
+
+                if (!string.IsNullOrEmpty(dbi.DbName))
+                    dbi.DbName = dbi.DbName.Replace(" ", "");
+
+                if (!dbi.HasValidMetaType)
+                    throw new InvalidOperationException("Invalid meta type when saving application db meta.");
+
+                if (dbi.IsMetaTypeDataValue && !dbi.HasValidDataType)
+                    throw new InvalidOperationException("Invalid datatype type when saving application db meta.");
+
 
             }
 
@@ -419,6 +431,7 @@ namespace Moley.Data
                 {
                     var t = CreateMetaDataItem(dbi);
 
+
                     //SET PARENT META CODE
                     if (dbi.IsMetaTypeDataValue && dbi.TableName != app.Application.DbName)
                     {
@@ -427,7 +440,12 @@ namespace Moley.Data
                             t.ParentMetaCode = tbl.MetaCode;
                     }
 
+                    //Don't save main table, it's implicit for application
+                    if (dbi.IsMetaTypeDataValueTable && dbi.DbName == app.Application.DbName)
+                        continue;
+
                     MetaDBItem.Add(t);
+
                 }
                 else
                 {
