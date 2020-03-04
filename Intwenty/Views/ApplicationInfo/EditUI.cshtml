@@ -26,216 +26,230 @@
 </style>
 
 
+
 <div id="app">
 
     <br />
     <br />
-
-
-
     <h2>Manage UI for application {{model.title}}</h2>
     <br />
     <br />
 
-    <h4>Choose Layout</h4>
-    <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="1" v-on:change="layoutClassChanged" /> 1 Panel
-    <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="2" v-on:change="layoutClassChanged" /> 2 Panel
-    <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="3" v-on:change="layoutClassChanged" /> 3 Panel
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#userinput"><b>User Inputs</b></a></li>
+        <li><a data-toggle="tab" href="#listview"><b>Listview</b></a></li>
+    </ul>
 
-    <br />
-    <br />
+    <div class="tab-content">
+
+        <div id="userinput" class="tab-pane fade in active">
+            <br />
+            <br />
+            <h4>Choose Layout</h4>
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="1" v-on:change="layoutClassChanged" /> 1 Panel
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="2" v-on:change="layoutClassChanged" /> 2 Panel
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="3" v-on:change="layoutClassChanged" /> 3 Panel
+
+            <br />
+            <br />
 
 
-        <div class="btn btn-default" v-on:click="addUserInputRow">
-            <span class="glyphicon glyphicon-plus"></span> Add row
-        </div>
-
-
-        <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
-            <span class="glyphicon glyphicon-plus"></span> Save changes
-        </div>
-
-
-    <hr />
-    <div>
-
-        <div class="row">
-            <div v-bind:class="layoutClass" v-for="c in layoutColumns">
-                <div class="form-group">
-                    <label class="control-label">Panel Title (Optional)</label>
-                    <input type="text" class="form-control" v-model="userInputPanels(c).title" />
-                </div>
+            <div class="btn btn-default" v-on:click="addUserInputRow">
+                <span class="glyphicon glyphicon-plus"></span> Add row
             </div>
-        </div>
 
 
-        <div class="row" v-for="r in bodyRows">
+            <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
+                <span class="glyphicon glyphicon-plus"></span> Save changes
+            </div>
 
-            <div v-bind:class="layoutClass" v-for="c in layoutColumns">
 
+            <hr />
+            <div>
 
-                <div class="formpanel">
-
-                    <div class="dropdown" v-if="!hasUI(r,c)">
-                        <p>#</p>
-                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                            Select
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-left">
-                            <li><a href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'CHECKBOX')">Checkbox</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'COMBOBOX')">Combobox</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'DATEPICKER')">Datepicker</a></li>
-                            <li><a href="#" v-on:click="createUI(r,c,'LOOKUP')">Lookup</a></li>
-                        </ul>
-
+                <div class="row">
+                    <div v-bind:class="layoutClass" v-for="c in layoutColumns">
+                        <div class="form-group">
+                            <label class="control-label">Panel Title (Optional)</label>
+                            <input type="text" class="form-control" v-model="userInputPanels(c).title" />
+                        </div>
                     </div>
+                </div>
 
 
+                <div class="row" v-for="r in bodyRows">
 
-                    <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
+                    <div v-bind:class="layoutClass" v-for="c in layoutColumns">
 
-                        <label class="control-label" v-if="!cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="cell(r,c).showSettings=!cell(r,c).showSettings">[Settings]</a></label>
-                        <label class="control-label" v-if="cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
-                        <div v-if="cell(r,c).metaType==='TEXTBOX'">
-                            <div class="form-group">
-                                <input type="text" class="form-control" disabled />
+
+                        <div class="formpanel">
+
+                            <div class="dropdown" v-if="!hasUI(r,c)">
+                                <p>#</p>
+                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-left">
+                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'CHECKBOX')">Checkbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'COMBOBOX')">Combobox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'DATEPICKER')">Datepicker</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'LOOKUP')">Lookup</a></li>
+                                </ul>
+
                             </div>
-                        </div>
 
-                        <div v-if="cell(r,c).metaType==='NUMBOX'">
-                            <div class="form-group">
-                                <input type="number" class="form-control" disabled />
+
+
+                            <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
+
+                                <label class="control-label" v-if="!cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="cell(r,c).showSettings=!cell(r,c).showSettings">[Settings]</a></label>
+                                <label class="control-label" v-if="cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
+                                <div v-if="cell(r,c).metaType==='TEXTBOX'">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='NUMBOX'">
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='CHECKBOX'">
+                                    <div class="form-group">
+                                        <br />
+                                        <input type="checkbox" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='TEXTAREA'">
+                                    <div class="form-group">
+                                        <textarea class="form-control" rows="5" cols="50" disabled></textarea>
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='DATEPICKER'">
+                                    <div class="form-group">
+                                        <input type="date" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='COMBOBOX'">
+                                    <div class="form-group">
+                                        <select class="form-control" disabled>
+                                            <option>Example 1</option>
+                                            <option>Example 2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='LOOKUP'">
+                                    <div>
+                                        <div style="width:10%">
+                                            <button style="float:left" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                        </div>
+                                        <div style="float:left; margin-left:5px; width:20%">
+                                            <input type="text" class="form-control" disabled />
+                                        </div>
+                                        <div style="float:left; margin-left:5px; width:60%">
+                                            <input type="text" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                </div>
+
+
                             </div>
-                        </div>
 
-                        <div v-if="cell(r,c).metaType==='CHECKBOX'">
-                            <div class="form-group">
+
+                            <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="cell(r,c).showSettings">
+
+                                <span><b><i>Settings</i></b></span>
+                                <span style="float:right"><a href="#" v-on:click="removeUI(r,c)">Remove</a></span>
                                 <br />
-                                <input type="checkbox" disabled />
-                            </div>
-                        </div>
-
-                        <div v-if="cell(r,c).metaType==='TEXTAREA'">
-                            <div class="form-group">
-                                <textarea class="form-control" rows="5" cols="50" disabled></textarea>
-                            </div>
-                        </div>
-
-                        <div v-if="cell(r,c).metaType==='DATEPICKER'">
-                            <div class="form-group">
-                                <input type="date" class="form-control" />
-                            </div>
-                        </div>
-
-                        <div v-if="cell(r,c).metaType==='COMBOBOX'">
-                            <div class="form-group">
-                                <select class="form-control" disabled>
-                                    <option>Example 1</option>
-                                    <option>Example 2</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div v-if="cell(r,c).metaType==='LOOKUP'">
-                            <div>
-                                <div style="width:10%">
-                                    <button style="float:left" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                <div class="form-group">
+                                    <label class="control-label">Title</label>
+                                    <input type="text" class="form-control" v-model="cell(r,c).title" />
                                 </div>
-                                <div style="float:left; margin-left:5px; width:20%">
-                                    <input type="text" class="form-control" disabled />
+
+                                <div class="form-group">
+                                    <label class="control-label">Set database table</label>
+                                    <select v-model="cell(r,c).tableName" class="form-control">
+                                        <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                                    </select>
                                 </div>
-                                <div style="float:left; margin-left:5px; width:60%">
-                                    <input type="text" class="form-control" readonly />
+
+                                <div class="form-group" v-if="cell(r,c).metaType != 'LOOKUP'">
+                                    <label class="control-label">Set database column</label>
+                                    <select v-model="cell(r,c).columnName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='COMBOBOX'">
+                                    <label class="control-label">Set value domain</label>
+                                    <select v-model="cell(r,c).domain" class="form-control">
+                                        <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set data view</label>
+                                    <select v-model="cell(r,c).domain" class="form-control">
+                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set key field database column</label>
+                                    <select v-model="cell(r,c).lookUpKeyFieldDbName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set key field data view column</label>
+                                    <select v-model="cell(r,c).lookUpKeyFieldViewDbName" class="form-control">
+                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">(optional) Set look up field database column</label>
+                                    <select v-model="cell(r,c).lookUpFieldDbName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set look up field data view column</label>
+                                    <select v-model="cell(r,c).lookUpFieldViewDbName" class="form-control">
+                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
                                 </div>
                             </div>
-                            <br />
-                            <br />
-                        </div>
 
+                        </div>
 
                     </div>
-
-
-                    <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="cell(r,c).showSettings">
-
-                        <span><b><i>Settings</i></b></span>
-                        <span style="float:right"><a href="#" v-on:click="removeUI(r,c)">Remove</a></span>
-                        <br />
-                        <div class="form-group">
-                            <label class="control-label">Title</label>
-                            <input type="text" class="form-control" v-model="cell(r,c).title" />
-                        </div>
-
-                        <div class="form-group">
-                            <label class="control-label">Set database table</label>
-                            <select v-model="cell(r,c).tableName" class="form-control">
-                                <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="cell(r,c).metaType != 'LOOKUP'">
-                            <label class="control-label">Set database column</label>
-                            <select v-model="cell(r,c).columnName" class="form-control">
-                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='COMBOBOX'">
-                            <label class="control-label">Set value domain</label>
-                            <select v-model="cell(r,c).domain" class="form-control">
-                                <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='LOOKUP'">
-                            <label class="control-label">Set data view</label>
-                            <select v-model="cell(r,c).domain" class="form-control">
-                                <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='LOOKUP'">
-                            <label class="control-label">Set key field database column</label>
-                            <select v-model="cell(r,c).lookUpKeyFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='LOOKUP'">
-                            <label class="control-label">Set key field data view column</label>
-                            <select v-model="cell(r,c).lookUpKeyFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='LOOKUP'">
-                            <label class="control-label">(optional) Set look up field database column</label>
-                            <select v-model="cell(r,c).lookUpFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-                        <div v-if="cell(r,c).metaType=='LOOKUP'">
-                            <label class="control-label">Set look up field data view column</label>
-                            <select v-model="cell(r,c).lookUpFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                            </select>
-                        </div>
-                    </div>
-
                 </div>
+
+
 
             </div>
         </div>
 
+        <div id="listview" class="tab-pane fade">
+            <p>LISTWIEVS</p>
+        </div>
 
-
+        </div>
     </div>
 
-</div>
+    @section Scripts
+        {
+        <script>
 
-@section Scripts
-    {
-    <script>
-       
         var app = new Vue({
             el: '#app',
             data: {
@@ -267,7 +281,7 @@
                             this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
-                        }   
+                        }
                     }
                 },
                 cell: function (row, col) {
@@ -409,7 +423,7 @@
                         }
                     });
                 }
-              
+
             },
             computed:
             {
@@ -421,14 +435,14 @@
                     }
                 },
                 layoutColumns: function () {
-                    
+
                         if (this.model.layoutPanels === "1")
                             return [{ id: 1 }];
                         if (this.model.layoutPanels === "2")
                             return [{ id: 1 }, { id: 2 }];
                         if (this.model.layoutPanels === "3")
                             return [{ id: 1 }, { id: 2 }, { id: 3 }];
-                    
+
                 },
                 bodyRows : function ()
                 {
@@ -443,8 +457,8 @@
                     return arr;
 
                 }
-             
-                
+
+
 
 
             },
@@ -461,8 +475,8 @@
                     context.addHeaderPanels();
                 });
 
-             
-               
+
+
 
                 //Tables
                 endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
@@ -482,9 +496,9 @@
                 $.get(endpointurl, function (response) {
                     context.valuedomains = response;
                 });
-               
+
             }
         })
 
-    </script>
-}
+        </script>
+    }

@@ -73,6 +73,14 @@ namespace Moley.Data
         public List<ApplicationDescriptionDto> GetApplicationDescriptions()
         {
             var t = AppDescription.Select(p=> new ApplicationDescriptionDto(p)).ToList();
+            var menu = GetMetaMenuItems();
+            foreach (var app in t)
+            {
+                var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
+                if (mi != null)
+                    app.MainMenuItem = mi;
+            }
+
             return t;
         }
 
@@ -106,7 +114,7 @@ namespace Moley.Data
         public List<ApplicationDto> GetApplicationMeta()
         {
             var res = new List<ApplicationDto>();
-            var apps = AppDescription.Select(p => new ApplicationDescriptionDto(p)).ToList();
+            var apps =  GetApplicationDescriptions();
             var ditems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
             var uitems = MetaUIItem.Select(p => new MetaUIItemDto(p)).ToList();
             var views = MetaDataViews.Select(p => new MetaDataViewDto(p)).ToList();
@@ -291,7 +299,11 @@ namespace Moley.Data
 
                 AppDescription.Add(entity);
 
+                CreateApplicationMenuItem(model);
+
                 context.SaveChanges();
+
+               
 
                 return new ApplicationDescriptionDto(entity);
 
@@ -308,9 +320,50 @@ namespace Moley.Data
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
+                var menuitem = MetaMenuItems.FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == "MENUITEM");
+                if (menuitem != null)
+                {
+                    menuitem.Action = model.MainMenuItem.Action;
+                    menuitem.Controller = model.MainMenuItem.Controller;
+                    menuitem.Title = model.MainMenuItem.Title;
+                }
+                else
+                {
+                    CreateApplicationMenuItem(model);
+                }
+
                 context.SaveChanges();
 
                 return new ApplicationDescriptionDto(entity);
+
+            }
+
+        }
+
+        private void CreateApplicationMenuItem(ApplicationDescriptionDto model)
+        {
+
+            if (!string.IsNullOrEmpty(model.MainMenuItem.Title))
+            {
+                var max = 0;
+                var menu = GetMetaMenuItems();
+                var root = menu.Find(p => p.IsMetaTypeMainMenu);
+                if (root == null)
+                {
+                    var main = new MetaMenuItem() { AppMetaCode = "", MetaType = "MAINMENU", Order = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
+                    MetaMenuItems.Add(main);
+                    max = 1;
+                }
+                else
+                {
+                    max = menu.Max(p => p.Order);
+                }
+
+                var appmi = new MetaMenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
+                appmi.Action = model.MainMenuItem.Action;
+                appmi.Controller = model.MainMenuItem.Controller;
+                appmi.MetaCode = "MI_" + MetaModelDto.GetRandomUniqueString();
+                MetaMenuItems.Add(appmi);
 
             }
 
