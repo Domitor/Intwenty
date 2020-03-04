@@ -20,7 +20,7 @@ namespace Moley.Models.MetaDesigner
                 if (uic.IsUITypePanel)
                 {
                     if (res.LayoutRows.Count == 0)
-                        res.LayoutRows.Add(new LayoutRow() { Id = 1 });
+                        res.LayoutRows.Add(new LayoutRow() { Id = uic.RowOrder });
 
                     var pnl = new UserInput() { Id=uic.Id, ApplicationId = app.Application.Id, Colid = uic.ColumnOrder, Rowid = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = "ROOT" };
                     res.UserInputs.Add(pnl);
@@ -39,10 +39,10 @@ namespace Moley.Models.MetaDesigner
                     //SIMPLE INPUTS
                     if (uic.IsUITypeCheckBox || uic.IsUITypeComboBox || uic.IsUITypeDatePicker || uic.IsUITypeNumBox || uic.IsUITypeTextArea || uic.IsUITypeTextBox)
                     {
-                        if (res.LayoutRows.Count < uic.RowOrder)
-                        {
+                        var lr = res.LayoutRows.Find(p => p.Id == uic.RowOrder);
+                        if (lr == null)
                             res.LayoutRows.Add(new LayoutRow() { Id = uic.RowOrder });
-                        }
+                  
 
                         var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, Colid = uic.ColumnOrder, Rowid = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName };
                         if (uic.IsDataConnected)
@@ -108,10 +108,10 @@ namespace Moley.Models.MetaDesigner
             var res = new List<MetaUIItemDto>();
             foreach (var input in model.UserInputs)
             {
-                var dto = new MetaUIItemDto(input.MetaType) { Id=input.Id, AppMetaCode = app.Application.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+                var dto = new MetaUIItemDto(input.MetaType) { Id=input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
 
                 if (string.IsNullOrEmpty(dto.MetaCode))
-                    dto.MetaCode = dto.MetaType + MetaModelDto.GetRandomUniqueString();
+                    dto.MetaCode = dto.MetaType + "_" + MetaModelDto.GetRandomUniqueString();
 
                 if (dto.IsUITypeCheckBox || dto.IsUITypeComboBox || dto.IsUITypeDatePicker || dto.IsUITypeNumBox || dto.IsUITypeTextArea || dto.IsUITypeTextBox)
                 {

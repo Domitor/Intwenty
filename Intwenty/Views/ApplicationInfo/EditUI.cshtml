@@ -240,7 +240,78 @@
         </div>
 
         <div id="listview" class="tab-pane fade">
-            <p>LISTWIEVS</p>
+            <br />
+            <br />
+
+            <h4>Define the application listview</h4>
+
+            <br />
+            <br />
+           
+
+            <div>
+
+                <div style="margin:15px">
+                    <div style="padding: 5px; border:dotted 1px gray">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">Title <span style="color: red"> *</span></label>
+                                    <input type="text" class="form-control" v-model="listview.title" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="margin: 5px">
+                                <b>Fields: </b> 
+                                <br />
+                                <br />
+                                <div>
+                                    <div>
+                                        <div class="btn btn-default" v-on:click="addListViewField">
+                                            <span class="glyphicon glyphicon-plus"></span> Add list view field
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <table class="table table">
+                                        <thead>
+                                            <tr>
+
+                                                <th style="width:30%">Title <span style="color: red"> *</span></th>
+                                                <th style="width:65%">Column name <span style="color: red"> *</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody v-for="field in listview.fields">
+                                            <tr>
+
+                                                <td><input type="text" class="form-control" v-model="field.title" /></td>
+                                                <td>
+                                                    <select v-model="field.dbName" class="form-control">
+                                                        <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                                    </select>
+                                                 
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br />
+                                <div>
+                                    <div class="btn btn-primary" v-on:click="saveListView">
+                                        <span class="glyphicon glyphicon-save"></span> Save
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
         </div>
 
         </div>
@@ -256,7 +327,8 @@
                 model: { layoutPanels: "2", layoutRows: [], userInputs: [] },
                 dbtables: [],
                 valuedomains: [],
-                dataviews: []
+                dataviews: [],
+                listview: {}
             },
             methods:
             {
@@ -264,10 +336,13 @@
                 {
                     this.model.layoutRows.push({ id: this.model.layoutRows.length * 10 });
                 },
+                addListViewField: function () {
+                    this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWFIELD" });
+                },
                 createUI: function (row, col, metatype)
                 {
                     var pnl = this.userInputPanels(col);
-                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: pnl.metaCode, applicationId: this.model.id }
+                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "", applicationId: this.model.id }
                     this.model.userInputs.push(t);
                     return t;
                 },
@@ -376,7 +451,6 @@
                     {
                         if (!this.hasPanel(this.model.layoutRows[0], this.layoutColumns[i])) {
                             var t = this.createUI(this.model.layoutRows[0], this.layoutColumns[i], "PANEL");
-                            t.metaCode = "PNL_" + this.layoutColumns[i].id;
                             t.parentMetaCode = "ROOT";
                         }
                     }
@@ -420,6 +494,23 @@
                         success: function (response)
                         {
                             context.model = response;
+                        }
+                    });
+                },
+                saveListView: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "SaveApplicationListView";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.listview),
+                        success: function (response)
+                        {
+                            context.listview = response;
                         }
                     });
                 }
@@ -475,9 +566,6 @@
                     context.addHeaderPanels();
                 });
 
-
-
-
                 //Tables
                 endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
                 $.get(endpointurl, function (response)
@@ -495,6 +583,12 @@
                 endpointurl = baseurl + "GetValueDomains";
                 $.get(endpointurl, function (response) {
                     context.valuedomains = response;
+                });
+
+                //ListView
+                endpointurl = baseurl + "GetApplicationListView/@ViewBag.SystemId";
+                $.get(endpointurl, function (response) {
+                    context.listview = response;
                 });
 
             }

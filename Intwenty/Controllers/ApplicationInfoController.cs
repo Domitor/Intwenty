@@ -161,6 +161,17 @@ namespace Moley.Controllers
 
         }
 
+        /// <summary>
+        /// Get meta data for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplicationListView/{applicationid}")]
+        public JsonResult GetApplicationListView(int applicationid)
+        {
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(ListViewVm.GetListView(t));
+
+        }
+
 
         /// <summary>
         /// Get meta data for available datatypes
@@ -286,6 +297,35 @@ namespace Moley.Controllers
             }
 
             return GetDataViews();
+        }
+
+        [HttpPost]
+        public JsonResult SaveApplicationListView([FromBody] ListViewVm model)
+        {
+            try
+            {
+
+                if (model.ApplicationId < 1)
+                    throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
+
+                var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application");
+
+                var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
+                Repository.SaveApplicationUI(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationListView(model.ApplicationId);
         }
 
 
