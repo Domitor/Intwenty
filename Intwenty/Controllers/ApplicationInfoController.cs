@@ -140,15 +140,24 @@ namespace Moley.Controllers
         [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
         public JsonResult GetApplicationDB(int applicationid)
         {
-            
-            
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            if (t==null)
-                throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
-            var dbvm = DBVmCreator.GetDBVm(t);
+            try
+            {
+                var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+                if (t == null)
+                    throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
-            return new JsonResult(dbvm);
+                var dbvm = DBVmCreator.GetDBVm(t);
+                return new JsonResult(dbvm);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when fetching application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
 
         }
 
@@ -215,20 +224,21 @@ namespace Moley.Controllers
             var dtolist = MetaUIItemCreator.GetMetaUI(model, app, views);
 
             Repository.SaveApplicationUI(dtolist);
-            
-            return new JsonResult("");
+
+            return GetApplicationUI(model.Id);
         }
 
         [HttpPost]
         public JsonResult RemoveApplicationUI([FromBody] UserInput model)
         {
             if (model.Id < 1)
-                throw new InvalidOperationException("Id is missing");
-
+                throw new InvalidOperationException("Id is missing in model when removing UI");
+            if (model.ApplicationId < 1)
+                throw new InvalidOperationException("ApplicationId is missing in model when removing UI");
 
             Repository.DeleteApplicationUI(model.Id);
 
-            return new JsonResult("");
+            return GetApplicationUI(model.ApplicationId);
         }
 
         [HttpPost]

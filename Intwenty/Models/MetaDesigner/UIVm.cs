@@ -175,6 +175,17 @@ namespace Moley.Models.MetaDesigner
 
             }
 
+            //SET PARENT META CODE
+            foreach (var t in res)
+            {
+                if (!t.IsUITypePanel && !t.IsUITypeLookUpField && !t.IsUITypeLookUpKeyField && !t.IsUITypeListView && !t.IsUITypeListViewField)
+                {
+                    var pnl = res.Find(p => p.IsUITypePanel && p.ColumnOrder == t.ColumnOrder && p.IsRoot);
+                    if (pnl != null)
+                        t.ParentMetaCode = pnl.MetaCode; 
+                }
+            }
+
 
             return res;
 

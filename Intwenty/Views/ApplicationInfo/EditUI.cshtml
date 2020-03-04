@@ -42,11 +42,19 @@
     <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="2" v-on:change="layoutClassChanged" /> 2 Panel
     <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="3" v-on:change="layoutClassChanged" /> 3 Panel
 
-    <div style="float:right">
-        <div class="btn btn-primary" v-on:click="addUserInputRow">
+    <br />
+    <br />
+
+
+        <div class="btn btn-default" v-on:click="addUserInputRow">
             <span class="glyphicon glyphicon-plus"></span> Add row
         </div>
-    </div>
+
+
+        <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
+            <span class="glyphicon glyphicon-plus"></span> Save changes
+        </div>
+
 
     <hr />
     <div>
@@ -59,7 +67,7 @@
                 </div>
             </div>
         </div>
-        
+
 
         <div class="row" v-for="r in bodyRows">
 
@@ -245,7 +253,7 @@
                 createUI: function (row, col, metatype)
                 {
                     var pnl = this.userInputPanels(col);
-                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: pnl.metaCode }
+                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: pnl.metaCode, applicationId: this.model.id }
                     this.model.userInputs.push(t);
                     return t;
                 },
@@ -363,11 +371,6 @@
                 {
                     var context = this;
                     var item = context.cell(row, col);
-                    if (!item)
-                    {
-                        alert('error: ui component not found !');
-                        return;
-                    }
                     context.SaveApplicationUI();
                     item.showSettings = !item.showSettings;
                 },
@@ -383,12 +386,15 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
-                            var s = "";
+                            context.model = response;
                         }
                     });
                 },
                 removeApplicationUI: function (item)
                 {
+                    if (item.id < 1)
+                        return;
+
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "RemoveApplicationUI";
 
@@ -399,7 +405,7 @@
                         data: JSON.stringify(item),
                         success: function (response)
                         {
-                            var s = "";
+                            context.model = response;
                         }
                     });
                 }

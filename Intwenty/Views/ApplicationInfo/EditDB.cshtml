@@ -297,9 +297,10 @@
                 var baseurl = '@Url.Content("~/ApplicationInfo/")';
                 var endpointurl = baseurl + "GetApplicationDB/@ViewBag.SystemId";
                 //Application
-                $.get(endpointurl, function (response)
-                {
+                $.get(endpointurl, function (response){
                     context.model = response;
+                }).fail(function (response){
+                    raiseErrorModal(response.responseJSON);
                 });
 
 
@@ -310,12 +311,16 @@
                     context.dataviews = response;
                     for (var i = 0; i < context.dataviews.length; i++)
                         context.dataviews[i].showSettings = false;
+                }).fail(function (response) {
+                    raiseErrorModal(response.responseJSON);
                 });
 
                 //DataTypes
                 endpointurl = baseurl + "GetApplicationTableDataTypes";
                 $.get(endpointurl, function (response) {
                     context.datatypes = response;
+                }).fail(function (response) {
+                    raiseErrorModal(response.responseJSON);
                 });
 
               

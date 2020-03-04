@@ -1,7 +1,6 @@
 ﻿using Moley.Data.Entity;
-using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+
 
 namespace Moley.Data.Dto
 {
@@ -11,11 +10,13 @@ namespace Moley.Data.Dto
 
         public MetaUIItemDto()
         {
+            SetEmptyStrings();
         }
 
         public MetaUIItemDto(string metatype)
         {
             MetaType = metatype;
+            SetEmptyStrings();
         }
 
         public MetaUIItemDto(MetaUIItem entity)
@@ -31,8 +32,22 @@ namespace Moley.Data.Dto
             ColumnOrder = entity.ColumnOrder;
             RowOrder = entity.RowOrder;
             DataMetaCode = entity.DataMetaCode;
-            Domain = string.IsNullOrEmpty(entity.Domain) ? "" : entity.Domain;
+            Domain = entity.Domain;
             Properties = entity.Properties;
+            SetEmptyStrings();
+        }
+
+        private void SetEmptyStrings()
+        {
+            if (string.IsNullOrEmpty(Description)) Description = string.Empty;
+            if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(CssClass)) CssClass = string.Empty;
+            if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
+            if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
+            if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
 
         public int Id { get; set; }
