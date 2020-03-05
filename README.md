@@ -2,8 +2,8 @@
 A meta data based web application platform, a tool for developers or for users that want to build quick applications without coding
 
 # Why
-To minimize coding by running the same code with different sets of meta data.
-To quickly produce web applications.
+- To minimize coding by running the same code with different sets of meta data.
+- To quickly produce web applications.
 
 # In short, this software intends to
 1. Let the user or developer describe applications, UI, data structures, and static data by inputing meta data.
