@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Moley.Models;
+using Moley.Models.MetaDesigner;
 using Moley.Data;
 using Moley.Data.Dto;
 using Moley.MetaDataService;
@@ -32,21 +33,48 @@ namespace Moley.Controllers
             return View();
         }
 
+        [HttpGet("/ApplicationInfo/EditDB/{applicationid}")]
+        public IActionResult EditDB(int applicationid)
+        {
+            ViewBag.SystemId = Convert.ToString(applicationid);
+            return View();
+        }
+
+        [HttpGet("/ApplicationInfo/EditUI/{applicationid}")]
+        public IActionResult EditUI(int applicationid)
+        {
+            ViewBag.SystemId = Convert.ToString(applicationid);
+            return View();
+        }
+
+        public IActionResult EditDataviews()
+        {
+            return View();
+        }
+
+        public IActionResult EditValueDomains()
+        {
+            return View();
+        }
+
+
+        public IActionResult EditNoSeries()
+        {
+            return View();
+        }
+
+        public IActionResult EditMainMenu()
+        {
+            return View();
+        }
+
+
+
         public IActionResult GetList()
         {
             return View();
         }
 
-        /// <summary>
-        /// Loads meta data for all applications in this instance
-        /// </summary>
-        [HttpPost]
-        public JsonResult GetListView([FromBody] ListRetrivalArgs model)
-        {
-            var t = Repository.GetApplicationMeta();
-            var listdata = t.Select(p => p.Application).ToList();
-            return new JsonResult(listdata);
-        }
 
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationDescriptionDto model)
@@ -94,6 +122,16 @@ namespace Moley.Controllers
 
         /*********************  API ***********************************************************/
 
+        /// <summary>
+        /// Get meta data for applicationa
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplications")]
+        public JsonResult GetApplications()
+        {
+            var t = Repository.GetApplicationDescriptions();
+            return new JsonResult(t);
+
+        }
 
         /// <summary>
         /// Get meta data for application with id
@@ -107,16 +145,51 @@ namespace Moley.Controllers
         }
 
         /// <summary>
-        /// Get meta data for application tables for with id
+        /// Get meta data for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationTables/{applicationid}")]
-        public JsonResult GetApplicationTables(int applicationid)
+        [HttpGet("/ApplicationInfo/GetApplicationUI/{applicationid}")]
+        public JsonResult GetApplicationUI(int applicationid)
         {
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            var l = new List<MetaDataItemDto>();
-            l.Add(new MetaDataItemDto("DATAVALUETABLE") {Id = 0, DbName = t.Application.MainTableName, Description = "Main table for " + t.Application.Title });
-            l.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValueTable));
-            return new JsonResult(l);
+            return new JsonResult(UIVmCreator.GetUIVm(t));
+
+        }
+
+        /// <summary>
+        /// Get meta data for application tables for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
+        public JsonResult GetApplicationDB(int applicationid)
+        {
+
+            try
+            {
+                var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+                if (t == null)
+                    throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
+
+                var dbvm = DBVmCreator.GetDBVm(t);
+                return new JsonResult(dbvm);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when fetching application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
+        /// <summary>
+        /// Get meta data for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplicationListView/{applicationid}")]
+        public JsonResult GetApplicationListView(int applicationid)
+        {
+            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(ListViewVm.GetListView(t));
 
         }
 
@@ -132,43 +205,202 @@ namespace Moley.Controllers
 
         }
 
+        /// <summary>
+        /// Get meta data for all application tables
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetListOfDatabaseTables/")]
+        public JsonResult GetListOfDatabaseTables()
+        {
+            var res = new List<UIDbTable>();
+            var apps = Repository.GetApplicationMeta();
+            foreach (var t in apps)
+            {
+                res.AddRange(UIDbTable.GetTables(t));
+            }
+            return new JsonResult(res);
+
+        }
+
 
         /// <summary>
         /// Get meta data for application tables for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationTableColumns/{applicationid}")]
-        public JsonResult GetApplicationTableColumns(int applicationid)
+        [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
+        public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
             var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            var l = new List<MetaDataItemDto>();
-            l.AddRange(t.DataStructure.Where(p => p.IsMetaTypeDataValue));
-            return new JsonResult(l);
+            return new JsonResult(UIDbTable.GetTables(t));
 
         }
 
         /// <summary>
-        /// Get meta data for available ui types
+        /// Get meta data for data views
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationUITypes")]
-        public JsonResult GetApplicationUITypes()
+        [HttpGet("/ApplicationInfo/GetDataViews")]
+        public JsonResult GetDataViews()
         {
-            var t = new MetaUIItemDto();
-            return new JsonResult(t.ValidMetaTypes);
+            var t = Repository.GetMetaDataViews();
+            return new JsonResult(DataViewVm.GetDataViews(t));
 
         }
-
 
         /// <summary>
         /// Get meta data for application ui declarations for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationUIComponents/{applicationid}")]
-        public JsonResult GetApplicationUIComponents(int applicationid)
+        [HttpGet("/ApplicationInfo/GetValueDomains")]
+        public JsonResult GetValueDomains()
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(t.UIStructure);
+            var t = Repository.GetValueDomains();
+            return new JsonResult(t);
 
         }
 
-        
+        /// <summary>
+        /// Get meta data for application ui declarations for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetValueDomainNames")]
+        public JsonResult GetValueDomainNames()
+        {
+            var t = Repository.GetValueDomains();
+            return new JsonResult(t.Select(p => p.DomainName).Distinct());
+
+        }
+
+        /// <summary>
+        /// Get meta data for number series
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetNoSeries")]
+        public JsonResult GetNoSeries()
+        {
+            var t = Repository.GetNoSeries();
+            return new JsonResult(NoSeriesVmCreator.GetNoSeriesVm(t));
+
+        }
+
+
+        /// <summary>
+        /// Get meta data for number series
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetMainMenuItems")]
+        public JsonResult GetMainMenuItems()
+        {
+            var t = Repository.GetMetaMenuItems();
+            return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
+
+        }
+
+
+
+        [HttpPost]
+        public JsonResult SaveApplicationUI([FromBody] UIVm model)
+        {
+            if (model.Id < 1)
+                throw new InvalidOperationException("ApplicationId missing in model");
+
+
+            var views = Repository.GetMetaDataViews();
+            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.Id);
+            if (app == null)
+                throw new InvalidOperationException("Could not find application");
+
+            var dtolist = MetaUIItemCreator.GetMetaUI(model, app, views);
+
+            Repository.SaveApplicationUI(dtolist);
+
+            return GetApplicationUI(model.Id);
+        }
+
+        [HttpPost]
+        public JsonResult RemoveApplicationUI([FromBody] UserInput model)
+        {
+            if (model.Id < 1)
+                throw new InvalidOperationException("Id is missing in model when removing UI");
+            if (model.ApplicationId < 1)
+                throw new InvalidOperationException("ApplicationId is missing in model when removing UI");
+
+            Repository.DeleteApplicationUI(model.Id);
+
+            return GetApplicationUI(model.ApplicationId);
+        }
+
+        [HttpPost]
+        public JsonResult SaveApplicationDB([FromBody] DBVm model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
+
+                var list = MetaDataItemCreator.GetMetaDataItems(model);
+
+                Repository.SaveApplicationDB(list, model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationDB(model.Id);
+        }
+
+        [HttpPost]
+        public JsonResult SaveDataView([FromBody] DataViewVm model)
+        {
+            try
+            {
+
+                var dtolist = MataDataViewCreator.GetMetaDataView(model);
+                Repository.SaveDataView(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDataViews();
+        }
+
+        [HttpPost]
+        public JsonResult SaveApplicationListView([FromBody] ListViewVm model)
+        {
+            try
+            {
+
+                if (model.ApplicationId < 1)
+                    throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
+
+                var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application");
+
+                var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
+                Repository.SaveApplicationUI(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationListView(model.ApplicationId);
+        }
+
+
+
+
     }
 }

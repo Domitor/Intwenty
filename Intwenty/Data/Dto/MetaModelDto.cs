@@ -20,7 +20,7 @@ namespace Moley.Data.Dto
             get { return false; }
         }
 
-        protected string Properties { get; set; }
+        public string Properties { get; set; }
 
         public abstract List<string> ValidMetaTypes { get; }
 
@@ -127,6 +127,28 @@ namespace Moley.Data.Dto
             catch { }
 
             return res;
+        }
+
+
+        public static string GetRandomUniqueString()
+        {
+            Guid g = Guid.NewGuid();
+            var str = Convert.ToBase64String(g.ToByteArray());
+            var t = DateTime.Now.ToLongTimeString().Replace(":", "").Replace(" ", "");
+
+            if (str.Length > 4)
+                str = str.Insert(3, t);
+
+            char[] arr = str.ToCharArray();
+            arr = Array.FindAll(arr, (c => (char.IsLetterOrDigit(c))));
+            str = new string(arr);
+
+            if (str.Length > 20)
+                str = str.Substring(0, 20);
+
+
+            return str;
+
         }
 
     }

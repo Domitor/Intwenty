@@ -22,6 +22,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Views\ApplicationInfo\EditMainMenu.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\EditNoSeries.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\EditValueDomains.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\EditDataviews.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\EditDB.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ApplicationInfo\EditUI.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\ApplicationInfo\Edit.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

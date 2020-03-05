@@ -1,0 +1,603 @@
+﻿
+
+@{
+    ViewData["Title"] = "Edit application";
+}
+
+<style>
+    .formpanel 
+    {
+        border-left: 1px dotted black;
+        margin: 5px;
+        padding: 5px;
+    }
+
+    .settingpnl {
+        border: 1px dotted black;
+        margin-left: 5px;
+        margin-top: 10px;
+        margin-right: 30px;
+        padding: 15px;
+    }
+
+    .uipnl {
+        margin-top: 10px;
+    }
+</style>
+
+
+
+<div id="app">
+
+    <br />
+    <br />
+
+    <div class="panel panel-default">
+        <div class="panel-heading"> <h2>Manage UI for application {{model.title}}</h2></div>
+        <div class="panel-body">Design application UI and connect it to the database.</div>
+    </div>
+
+    <br />
+    <br />
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#userinput"><b>User Inputs</b></a></li>
+        <li><a data-toggle="tab" href="#listview"><b>Listview</b></a></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div id="userinput" class="tab-pane fade in active">
+            <br />
+            <br />
+            <h4>Choose Layout</h4>
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="1" v-on:change="layoutClassChanged" /> 1 Panel
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="2" v-on:change="layoutClassChanged" /> 2 Panel
+            <input type="radio" name="panelcnt" v-model="model.layoutPanels" value="3" v-on:change="layoutClassChanged" /> 3 Panel
+
+            <br />
+            <br />
+
+
+            <div class="btn btn-default" v-on:click="addUserInputRow">
+                <span class="glyphicon glyphicon-plus"></span> Add row
+            </div>
+
+
+            <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
+                <span class="glyphicon glyphicon-plus"></span> Save changes
+            </div>
+
+
+            <hr />
+            <div>
+
+                <div class="row">
+                    <div v-bind:class="layoutClass" v-for="c in layoutColumns">
+                        <div class="form-group">
+                            <label class="control-label">Panel Title (Optional)</label>
+                            <input type="text" class="form-control" v-model="userInputPanels(c).title" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row" v-for="r in bodyRows">
+
+                    <div v-bind:class="layoutClass" v-for="c in layoutColumns">
+
+
+                        <div class="formpanel">
+
+                            <div class="dropdown" v-if="!hasUI(r,c)">
+                                <p>#</p>
+                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-left">
+                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'CHECKBOX')">Checkbox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'COMBOBOX')">Combobox</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'DATEPICKER')">Datepicker</a></li>
+                                    <li><a href="#" v-on:click="createUI(r,c,'LOOKUP')">Lookup</a></li>
+                                </ul>
+
+                            </div>
+
+
+
+                            <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
+
+                                <label class="control-label" v-if="!cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="cell(r,c).showSettings=!cell(r,c).showSettings">[Settings]</a></label>
+                                <label class="control-label" v-if="cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
+                                <div v-if="cell(r,c).metaType==='TEXTBOX'">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='NUMBOX'">
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='CHECKBOX'">
+                                    <div class="form-group">
+                                        <br />
+                                        <input type="checkbox" disabled />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='TEXTAREA'">
+                                    <div class="form-group">
+                                        <textarea class="form-control" rows="5" cols="50" disabled></textarea>
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='DATEPICKER'">
+                                    <div class="form-group">
+                                        <input type="date" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='COMBOBOX'">
+                                    <div class="form-group">
+                                        <select class="form-control" disabled>
+                                            <option>Example 1</option>
+                                            <option>Example 2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div v-if="cell(r,c).metaType==='LOOKUP'">
+                                    <div>
+                                        <div style="width:10%">
+                                            <button style="float:left" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                        </div>
+                                        <div style="float:left; margin-left:5px; width:20%">
+                                            <input type="text" class="form-control" disabled />
+                                        </div>
+                                        <div style="float:left; margin-left:5px; width:60%">
+                                            <input type="text" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                </div>
+
+
+                            </div>
+
+
+                            <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="cell(r,c).showSettings">
+
+                                <span><b><i>Settings</i></b></span>
+                                <span style="float:right"><a href="#" v-on:click="removeUI(r,c)">Remove</a></span>
+                                <br />
+                                <div class="form-group">
+                                    <label class="control-label">Title</label>
+                                    <input type="text" class="form-control" v-model="cell(r,c).title" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Set database table</label>
+                                    <select v-model="cell(r,c).tableName" class="form-control">
+                                        <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="cell(r,c).metaType != 'LOOKUP'">
+                                    <label class="control-label">Set database column</label>
+                                    <select v-model="cell(r,c).columnName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='COMBOBOX'">
+                                    <label class="control-label">Set value domain</label>
+                                    <select v-model="cell(r,c).domain" class="form-control">
+                                        <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set data view</label>
+                                    <select v-model="cell(r,c).domain" class="form-control">
+                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set key field database column</label>
+                                    <select v-model="cell(r,c).lookUpKeyFieldDbName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set key field data view column</label>
+                                    <select v-model="cell(r,c).lookUpKeyFieldViewDbName" class="form-control">
+                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">(optional) Set look up field database column</label>
+                                    <select v-model="cell(r,c).lookUpFieldDbName" class="form-control">
+                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div v-if="cell(r,c).metaType=='LOOKUP'">
+                                    <label class="control-label">Set look up field data view column</label>
+                                    <select v-model="cell(r,c).lookUpFieldViewDbName" class="form-control">
+                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+
+        <div id="listview" class="tab-pane fade">
+            <br />
+            <br />
+
+            <h4>Define the application listview</h4>
+
+            <br />
+            <br />
+
+
+            <div>
+
+                <div style="margin:15px">
+                    <div style="padding: 5px; border:dotted 1px gray">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">Title <span style="color: red"> *</span></label>
+                                    <input type="text" class="form-control" v-model="listview.title" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="margin: 5px">
+                                <b>Fields: </b>
+                                <br />
+                                <br />
+                                <div>
+                                    <div>
+                                        <div class="btn btn-default" v-on:click="addListViewField">
+                                            <span class="glyphicon glyphicon-plus"></span> Add list view field
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <table class="table table">
+                                        <thead>
+                                            <tr>
+
+                                                <th style="width:30%">Title <span style="color: red"> *</span></th>
+                                                <th style="width:65%">Column name <span style="color: red"> *</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody v-for="field in listview.fields">
+                                            <tr>
+
+                                                <td><input type="text" class="form-control" v-model="field.title" /></td>
+                                                <td>
+                                                    <select v-model="field.dbName" class="form-control">
+                                                        <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                                    </select>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br />
+                                <div>
+                                    <div class="btn btn-primary" v-on:click="saveListView">
+                                        <span class="glyphicon glyphicon-save"></span> Save
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+    @section Scripts
+        {
+        <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: { layoutPanels: "2", layoutRows: [], userInputs: [] },
+                dbtables: [],
+                valuedomains: [],
+                dataviews: [],
+                listview: {}
+            },
+            methods:
+            {
+                addUserInputRow: function ()
+                {
+                    this.model.layoutRows.push({ id: this.model.layoutRows.length * 10 });
+                },
+                addListViewField: function () {
+                    this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWFIELD" });
+                },
+                createUI: function (row, col, metatype)
+                {
+                    var pnl = this.userInputPanels(col);
+                    var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "", applicationId: this.model.id }
+                    this.model.userInputs.push(t);
+                    return t;
+                },
+                removeUI: function (row, col)
+                {
+
+                    for (var i = 0; i < this.model.userInputs.length; i++)
+                    {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
+                        {
+                            this.removeApplicationUI(this.model.userInputs[i]);
+                            this.model.userInputs.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+                cell: function (row, col) {
+
+                    for (var i = 0; i < this.model.userInputs.length; i++) {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
+                            return this.model.userInputs[i];
+                    }
+
+                    return {};
+                },
+                userInputPanels: function (col) {
+
+                    for (var i = 0; i < this.model.userInputs.length; i++) {
+                        if (this.model.userInputs[i].rowid === this.model.layoutRows[0].id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType === "PANEL")
+                            return this.model.userInputs[i];
+                    }
+
+                    return {};
+                },
+                hasUI: function (row, col)
+                {
+
+
+                    for (var i = 0; i < this.model.userInputs.length; i++) {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
+                            return true;
+                    }
+
+                    return false;
+                },
+                hasPanel: function (row, col)
+                {
+                    for (var i = 0; i < this.model.userInputs.length; i++)
+                    {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType == "PANEL")
+                            return true;
+                    }
+
+                    return false;
+                },
+                dbcolumns: function (tablename)
+                {
+                    for (var i = 0; i < this.dbtables.length; i++)
+                        if (this.dbtables[i].dbName == tablename)
+                            return this.dbtables[i].columns;
+
+                    return [];
+                },
+                viewcolumns: function (viewname) {
+                    for (var i = 0; i < this.dataviews.length; i++)
+                        if (this.dataviews[i].metaCode == viewname)
+                            return this.dataviews[i].fields;
+
+                    return [];
+                },
+                layoutClassChanged: function ()
+                {
+                    if (this.model.layoutRows.length === 0)
+                        return;
+
+                    //IF 1 remove all on 2  and 3
+                    //IF 2 remove all on 3
+
+                    var cnt = 0;
+                    var tot = this.model.userInputs.length;
+                    while (cnt < tot)
+                    {
+                        cnt += 1;
+
+                        for (var i = 0; i < this.model.userInputs.length; i++) {
+                            if (this.model.layoutPanels === "1" && (this.model.userInputs[i].colid === 2 || this.model.userInputs[i].colid === 3))
+                                this.model.userInputs.splice(i, 1);
+                            if (this.model.layoutPanels === "2" && this.model.userInputs[i].colid === 3)
+                                this.model.userInputs.splice(i, 1);
+                        }
+                    }
+
+                    this.addHeaderPanels();
+
+
+                },
+                addHeaderPanels: function()
+                {
+                    if (this.model.layoutRows.length === 0)
+                    {
+                        var r = { id: 1 };
+                        this.model.layoutRows.push(r);
+                    }
+
+                    for (var i = 0; i < this.layoutColumns.length; i++)
+                    {
+                        if (!this.hasPanel(this.model.layoutRows[0], this.layoutColumns[i])) {
+                            var t = this.createUI(this.model.layoutRows[0], this.layoutColumns[i], "PANEL");
+                            t.parentMetaCode = "ROOT";
+                        }
+                    }
+                },
+                closeAndSave: function (row, col)
+                {
+                    var context = this;
+                    var item = context.cell(row, col);
+                    context.SaveApplicationUI();
+                    item.showSettings = !item.showSettings;
+                },
+                SaveApplicationUI: function ()
+                {
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "SaveApplicationUI";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response)
+                        {
+                            context.model = response;
+                        }
+                    });
+                },
+                removeApplicationUI: function (item)
+                {
+                    if (item.id < 1)
+                        return;
+
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "RemoveApplicationUI";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(item),
+                        success: function (response)
+                        {
+                            context.model = response;
+                        }
+                    });
+                },
+                saveListView: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "SaveApplicationListView";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.listview),
+                        success: function (response)
+                        {
+                            context.listview = response;
+                        }
+                    });
+                }
+
+            },
+            computed:
+            {
+                layoutClass: function () {
+                    return {
+                        'col-lg-12': this.model.layoutPanels ==="1",
+                        'col-lg-6': this.model.layoutPanels === "2",
+                        'col-lg-4': this.model.layoutPanels === "3",
+                    }
+                },
+                layoutColumns: function () {
+
+                        if (this.model.layoutPanels === "1")
+                            return [{ id: 1 }];
+                        if (this.model.layoutPanels === "2")
+                            return [{ id: 1 }, { id: 2 }];
+                        if (this.model.layoutPanels === "3")
+                            return [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+                },
+                bodyRows : function ()
+                {
+                    var arr = [];
+                    for (var i = 0; i < this.model.layoutRows.length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            arr.push(this.model.layoutRows[i]);
+                        }
+                    }
+                    return arr;
+
+                }
+
+
+
+
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
+
+                //Application
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
+                    context.addHeaderPanels();
+                });
+
+                //Tables
+                endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
+                $.get(endpointurl, function (response)
+                {
+                    context.dbtables = response;
+                });
+
+                //DataViews
+                endpointurl = baseurl + "GetDataViews";
+                $.get(endpointurl, function (response) {
+                    context.dataviews = response;
+                });
+
+                //Valuedomains
+                endpointurl = baseurl + "GetValueDomainNames";
+                $.get(endpointurl, function (response) {
+                    context.valuedomains = response;
+                });
+
+                //ListView
+                endpointurl = baseurl + "GetApplicationListView/@ViewBag.SystemId";
+                $.get(endpointurl, function (response) {
+                    context.listview = response;
+                });
+
+            }
+        })
+
+        </script>
+    }

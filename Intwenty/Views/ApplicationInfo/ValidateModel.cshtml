@@ -7,6 +7,12 @@
 
 <br />
 <br />
+<div class="panel panel-default">
+    <div class="panel-heading"><h2>Meta model validation results</h2></div>
+    <div class="panel-body">Checks the status of the meta data registry.</div>
+</div>
+<br />
+<br />
 
 <div>
 
@@ -18,30 +24,30 @@
             </tr>
         </thead>
         <tbody>
-        @{
+            @{
 
-            foreach (var x in Model.Messages)
-            {
-
-            <tr>
-                @if (x.Code == "ERROR")
+                foreach (var x in Model.Messages)
                 {
-                    <td style="color:red">@x.Code</td>
-                }
-                else if (x.Code == "WARNING")
-                {
-                    <td style="color:orange">@x.Code</td>
-                }
-                else
-                {
-                    <td style="color: cornflowerblue">@x.Code</td>
-                }
 
-                <td>@x.Message</td>
-            </tr>
+                    <tr>
+                        @if (x.Code == "ERROR")
+                        {
+                            <td style="color:red">@x.Code</td>
+                        }
+                        else if (x.Code == "WARNING")
+                        {
+                            <td style="color:orange">@x.Code</td>
+                        }
+                        else
+                        {
+                            <td style="color: cornflowerblue">@x.Code</td>
+                        }
 
+                        <td>@x.Message</td>
+                    </tr>
+
+                }
             }
-        }
         </tbody>
     </table>
 

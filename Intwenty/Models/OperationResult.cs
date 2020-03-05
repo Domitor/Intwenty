@@ -86,6 +86,24 @@ namespace Moley.Models
         {
             Messages.Add(new OperationMessage(code, message));
         }
+
+        public void SetError(string systemmsg, string usermsg)
+        {
+            IsSuccess = false;
+            Messages.Add(new OperationMessage("SYSTEMERROR", systemmsg));
+            Messages.Add(new OperationMessage("USERERROR", usermsg));
+        }
+
+        public string UserError
+        {
+            get {
+                var msg = Messages.Find(p => p.Code == "USERERROR");
+                if (msg != null)
+                    return msg.Message;
+
+                return string.Empty;
+            }
+        }
     }
 
    

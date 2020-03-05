@@ -9,6 +9,11 @@ namespace Moley.Data.Dto
     public class NoSerieDto
     {
 
+        public NoSerieDto()
+        {
+            SetEmptyStrings();
+        }
+
         public NoSerieDto(NoSerie entity)
         {
             Id = entity.Id;
@@ -20,6 +25,18 @@ namespace Moley.Data.Dto
             StartValue = entity.StartValue;
             Prefix = entity.Prefix;
             Properties = entity.Properties;
+            SetEmptyStrings();
+        }
+
+
+        private void SetEmptyStrings()
+        {
+            if (string.IsNullOrEmpty(Description)) Description = string.Empty;
+            if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
+            if (string.IsNullOrEmpty(Description)) Description = string.Empty;
         }
 
         public int Id { get; set; }
@@ -41,6 +58,15 @@ namespace Moley.Data.Dto
         public string Properties { get; set; }
 
         public string NewValue { get; set; }
+
+        public bool IsDataConnected
+        {
+            get { return DataInfo != null && !string.IsNullOrEmpty(DataMetaCode); }
+        }
+
+        public MetaDataItemDto DataInfo { get; set; }
+
+        public ApplicationDescriptionDto Application { get; set; }
 
 
     }

@@ -5,6 +5,10 @@ namespace Moley.Data.Dto
 {
     public class MetaMenuItemDto : MetaModelDto
     {
+        public MetaMenuItemDto(string metatype)
+        {
+            MetaType = metatype;
+        }
 
         public MetaMenuItemDto(MetaMenuItem entity)
         {

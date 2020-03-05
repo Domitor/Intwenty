@@ -1,0 +1,191 @@
+﻿
+
+@{
+    ViewData["Title"] = "Manage database";
+}
+
+
+
+<div id="app">
+
+
+    <br />
+    <br />
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Manage database for application {{model.title}}</h2></div>
+        <div class="panel-body">Define the application data structure.</div>
+    </div>
+   
+    <br />
+    <br />
+
+
+    <h4>Database tables</h4>
+
+    <div>
+        <div class="btn btn-default" v-on:click="addDbTable">
+            <span class="glyphicon glyphicon-plus"></span> Add table
+        </div>
+        <div class="btn btn-primary" v-on:click="saveApplicationDB" style="float:right">
+            <span class="glyphicon glyphicon-save"></span> Save changes
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:27%">Table name <span style="color: red"> *</span></th>
+                <th style="width:55%">Description <span style="color: red"> *</span></th>
+                <th style="width:8%">ID</th>
+            </tr>
+        </thead>
+        <tr v-for="item in model.tables">
+            <td>{{item.id}}</td>
+            <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+            <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <br />
+    <br />
+
+    <h4>Database columns</h4>
+
+    <div>
+        <div class="btn btn-default" v-on:click="addDbColumn">
+            <span class="glyphicon glyphicon-plus"></span> Add column
+        </div>
+    </div>
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:18%">Table name <span style="color: red"> *</span></th>
+                <th style="width:18%">Column name <span style="color: red"> *</span></th>
+                <th style="width:18%">Data type <span style="color: red"> *</span></th>
+                <th style="width:28%">Description</th>
+                <th style="width:8%"></th>
+            </tr>
+        </thead>
+        <tbody v-for="col in model.columns">
+            <tr>
+                <td>{{col.id}}</td>
+                <td>
+                    <select v-model="col.tableName" class="form-control">
+                        <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" v-model="col.dbName" /></td>
+                <td>
+                    <select v-model="col.dataType" class="form-control">
+                        <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control" v-model="col.description" />
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="1"></td>
+                <td colspan="5">
+                    <label class="control-label" v-if="!col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Settings]</a></label>
+                    <label class="control-label" v-if="col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Close]</a></label>
+                    <div v-if="col.showSettings">
+                        <i>Settings</i>
+                        <br />
+                        <input type="checkbox" v-model="col.mandatory" /> Mandatory
+                        <br />
+                        Domain <input type="text" class="form-control" v-model="col.domain" style="width:450px" />
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+</div>
+
+@section Scripts
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: { tables: [], columns: [] },
+                datatypes: [],
+                valuedomains: []
+            },
+            methods:
+            {
+                handleSettings: function (item)
+                {
+                    item.showSettings = !item.showSettings;
+                    this.$forceUpdate();
+                    return false;
+                },
+                saveApplicationDB: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var endpointurl = baseurl + "SaveApplicationDB";
+                  
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response)
+                        {
+                            context.model = response;
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
+                        }
+                    });
+
+                },
+                addDbTable: function () {
+                    var context = this;
+                    context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: -1 });
+                },
+                addDbColumn: function () {
+                    var context = this;
+                    context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: -1, showSettings:false, mandatory: false, domain:"" });
+                }
+               
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetApplicationDB/@ViewBag.SystemId";
+                //Application
+                $.get(endpointurl, function (response){
+                    context.model = response;
+                }).fail(function (response){
+                    raiseErrorModal(response.responseJSON);
+                });
+
+
+                //DataTypes
+                endpointurl = baseurl + "GetApplicationTableDataTypes";
+                $.get(endpointurl, function (response) {
+                    context.datatypes = response;
+                }).fail(function (response) {
+                    raiseErrorModal(response.responseJSON);
+                });
+
+              
+            }
+        })
+
+    </script>
+}

@@ -166,3 +166,11 @@ class IntwentyHelper
 
 
 }
+
+function raiseErrorModal(operationresult)
+{
+    $('#msg_dlg_modal_hdr').text('Error');
+    $('#msg_dlg_modal_text').text(operationresult.userError);
+    $('#msg_dlg_modal').modal();
+
+}

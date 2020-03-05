@@ -11,7 +11,8 @@ namespace Moley.Data.Dto
     {
         public ApplicationDescriptionDto()
         {
-           
+            MainMenuItem = new MetaMenuItemDto("MENUITEM");
+            SetEmptyStrings();
         }
 
         public ApplicationDescriptionDto(ApplicationDescription entity)
@@ -26,7 +27,17 @@ namespace Moley.Data.Dto
             TestDataAmount = entity.TestDataAmount;
             MetaType = "APPLICATION";
             ParentMetaCode = "ROOT";
-            Properties = "";
+            MainMenuItem = new MetaMenuItemDto("MENUITEM");
+            SetEmptyStrings();
+        }
+
+        private void SetEmptyStrings()
+        {
+            if (string.IsNullOrEmpty(Description)) Description = string.Empty;
+            if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
+            if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
 
         public int Id { get; set; }
@@ -54,6 +65,8 @@ namespace Moley.Data.Dto
         public bool UseRowValueVersioning { get; set; }
 
         public int TestDataAmount { get; set; }
+
+        public MetaMenuItemDto MainMenuItem { get; set; }
 
         public string MainTableName
         {

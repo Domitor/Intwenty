@@ -12,13 +12,28 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Sugested database name<span style="color: red"> *</span></label>
-            <input id="appdbname" type="text" class="form-control" v-model="model.dbName" />
+            <label class="control-label">Database name<span style="color: red"> *</span></label>
+            <input id="appdbname" type="text" class="form-control" v-model="model.dbName" :disabled="model.id > 0" />
         </div>
 
         <div class="form-group">
-            <label class="control-label">Sugested meta code<span style="color: red"> *</span></label>
-            <input id="appmetacode" type="text" class="form-control" v-model="model.metaCode" />
+            <label class="control-label">Code<span style="color: red"> *</span></label>
+            <input id="appmetacode" type="text" class="form-control" v-model="model.metaCode" :disabled="model.id > 0" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Menu Title (The text to use in the main menu for this application)</label>
+            <input id="menutitle" type="text" class="form-control" v-model="model.mainMenuItem.title" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Action name (Leave blank to use standard logic)</label>
+            <input id="actionname" type="text" class="form-control" v-model="model.mainMenuItem.action" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Controller name (Leave blank to use standard logic)</label>
+            <input id="controllername" type="text" class="form-control" v-model="model.mainMenuItem.controller" />
         </div>
     </div>
 

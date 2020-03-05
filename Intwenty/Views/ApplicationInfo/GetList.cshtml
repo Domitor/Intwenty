@@ -5,8 +5,13 @@
         <br />
         <br />
 
-        <h2>Manage Applications</h2>
+        <div class="panel panel-default">
+            <div class="panel-heading"><h2>Manage applications</h2></div>
+            <div class="panel-body">Create and manage application meta data used to describe UI and database</div>
+        </div>
 
+        <br />
+        <br />
 
         <a asp-action="Create" asp-controller="ApplicationInfo" role="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Create New Application</a>
 
@@ -16,15 +21,21 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:10%">ID</th>
+                    <th style="width:10%"></th>
                     <th style="width:30%">Title</th>
-                    <th style="width:60%">Description</th>
+                    <th style="width:30%">Description</th>
+                    <th style="width:10%"></th>
+                    <th style="width:10%"></th>
+                    <th style="width:10%"></th>
                 </tr>
             </thead>
             <tr v-for="item in datalist">
-                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id">Edit</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-default">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
+                <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-default">Manage database</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-default">Manage UI</a></td>
+                <td><a href="#" role="button" class="btn btn-danger">Delete</a></td>
             </tr>
         </table>
 
@@ -47,18 +58,15 @@
                 getApplications: function () {
                     var context = this;
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
-                    var endpointurl = baseurl + "GetListView";
+                    var endpointurl = baseurl + "GetApplications";
 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.listRetrieveInfo),
-                        success: function (response) {
-                            //DATA
-                            context.datalist = response;
-                        }
+
+                    $.get(endpointurl, function (response)
+                    {
+                        context.datalist = response;
                     });
+
+                  
                 }
             },
             computed: {
