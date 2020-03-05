@@ -28,7 +28,7 @@
     <Content Update="Views\ApplicationInfo\EditNoSeries.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditValuedomains.cshtml">
+    <Content Update="Views\ApplicationInfo\EditValueDomains.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\ApplicationInfo\EditDataviews.cshtml">

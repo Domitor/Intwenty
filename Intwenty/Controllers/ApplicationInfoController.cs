@@ -235,11 +235,22 @@ namespace Moley.Controllers
         public JsonResult GetValueDomains()
         {
             var t = Repository.GetValueDomains();
-            return new JsonResult(t.Select(p=> p.DomainName).Distinct());
+            return new JsonResult(t);
 
         }
 
-      
+        /// <summary>
+        /// Get meta data for application ui declarations for application with id
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetValueDomainNames")]
+        public JsonResult GetValueDomainNames()
+        {
+            var t = Repository.GetValueDomains();
+            return new JsonResult(t.Select(p => p.DomainName).Distinct());
+
+        }
+
+
 
         [HttpPost]
         public JsonResult SaveApplicationUI([FromBody] UIVm model)

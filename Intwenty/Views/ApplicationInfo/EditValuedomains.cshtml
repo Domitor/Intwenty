@@ -1,7 +1,7 @@
 ﻿
 
 @{
-    ViewData["Title"] = "";
+    ViewData["Title"] = "Add / Edit Value Domains";
 }
 
 
@@ -17,17 +17,193 @@
     <br />
     <br />
 
-    <div>
-        <div class="btn btn-default" v-on:click="addDomain">
-            <span class="glyphicon glyphicon-plus"></span> Add value domain
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="btn btn-default" v-on:click="model.showNew=!model.showNew">
+                <span class="glyphicon glyphicon-plus"></span> Create new value domain
+            </div>
+        </div>
+        <div class="col-lg-6">
+           
         </div>
     </div>
+       
+      
 
+    <br />
+    <br />
+
+    <div class="row">
+        <div class="col-lg-4">
+
+            <div v-if="model.showNew">
+                <div class="form-group">
+                    <label class="control-label">New domain name<span style="color: red"> *</span></label>
+                    <input type="text" class="form-control" v-model="model.newDomainName" style="text-transform:uppercase" />
+                </div>
+            </div>
+
+            <div class="form-group" v-if="!model.showNew">
+                <label class="control-label">Domain name<span style="color: red"> *</span></label>
+                <select v-model="model.domainName" class="form-control" id="CB">
+                    <option v-for="dom in uniquedomains" v-bind:value="dom.domainName">{{dom.domainName}}</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="col-lg-4">
+            <div class="btn btn-primary" v-on:click="saveChanges" style="margin-top:23px">
+                <span class="glyphicon glyphicon-save"></span> Save changes
+            </div>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+   
+
+    <br />
+    <br />
+    <div>
+        <div class="btn btn-default" v-on:click="addDomainValue">
+            <span class="glyphicon glyphicon-plus"></span> Add domain value
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:30%">Code <span style="color: red"> *</span></th>
+                <th style="width:65%">Value <span style="color: red"> *</span></th>
+                <th style="width:5%"></th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in filtereddomains">
+            <tr>
+
+                <td><input type="text" class="form-control" v-model="entry.code" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control" v-model="entry.value" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-danger" v-on:click="deleteDomainValue(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+            </tr>
+        </tbody>
+    </table>
 
 </div>
 
 @section Scripts
-{
-   
- 
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: { showNew:false, newDomainName: "" },
+                valuedomains: []
+            },
+            methods: {
+
+                addDomain: function ()
+                {
+                    if (!this.model.newDomainName)
+                        return;
+                    if (this.model.newDomainName == "")
+                        return;
+
+                    this.valuedomains.unshift({ id: -1, domainName: this.model.newDomainName.toUpperCase(), value: "", code: "", metaType: "VALUEDOMAIN", properties: "" });
+
+
+                    this.model.showNew = !this.model.showNew;
+                    this.model.newDomainName = "";
+                 
+                },
+                addDomainValue: function ()
+                {
+                    this.valuedomains.unshift({ id: -1, domainName: this.model.domainName, value: "", code: "", metaType: "VALUEDOMAIN", properties: ""  });
+                },
+                deleteDomainValue: function (entry)
+                {
+                   
+
+                },
+                markChanged: function (entry)
+                {
+                    entry.properties = "CHANGED=TRUE";
+
+                },
+                saveChanges: function ()
+                {
+                    if (this.model.showNew)
+                    {
+                        this.addDomain();
+                    }
+                    else
+                    {
+
+                    }
+                }
+            },
+            computed:
+            {
+                filtereddomains: function ()
+                {
+                    var context = this;
+                    if (!context.model.domainName)
+                        return [];
+                    if (context.model.domainName == "")
+                        return [];
+
+                    var arr = [];
+                    for (var i = 0; i < context.valuedomains.length; i++)
+                    {
+                        if (context.valuedomains[i].domainName === context.model.domainName ) {
+                            arr.push(context.valuedomains[i]);
+                        }
+                    }
+                    
+                    return arr;
+
+                },
+                uniquedomains: function ()
+                {
+                 
+                    var context = this;
+                    var arr = [];
+                    for (var i = 0; i < context.valuedomains.length; i++)
+                    {
+                        var found = false;
+                        for (var z = 0; z < arr.length; z++)
+                        {
+                          
+                            if (arr[z].domainName === context.valuedomains[i].domainName)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                            arr.push(context.valuedomains[i]);
+                    }
+
+                    return arr;
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                //Valuedomains
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetValueDomains";
+                $.get(endpointurl, function (response) {
+                    context.valuedomains = response;
+                });
+
+            }
+        });
+    </script>
+
 }
