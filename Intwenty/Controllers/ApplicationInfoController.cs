@@ -75,16 +75,6 @@ namespace Moley.Controllers
             return View();
         }
 
-        /// <summary>
-        /// Loads meta data for all applications in this instance
-        /// </summary>
-        [HttpPost]
-        public JsonResult GetListView([FromBody] ListRetrivalArgs model)
-        {
-            var t = Repository.GetApplicationMeta();
-            var listdata = t.Select(p => p.Application).ToList();
-            return new JsonResult(listdata);
-        }
 
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationDescriptionDto model)
@@ -132,6 +122,16 @@ namespace Moley.Controllers
 
         /*********************  API ***********************************************************/
 
+        /// <summary>
+        /// Get meta data for applicationa
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetApplications")]
+        public JsonResult GetApplications()
+        {
+            var t = Repository.GetApplicationDescriptions();
+            return new JsonResult(t);
+
+        }
 
         /// <summary>
         /// Get meta data for application with id
@@ -205,6 +205,22 @@ namespace Moley.Controllers
 
         }
 
+        /// <summary>
+        /// Get meta data for all application tables
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetListOfDatabaseTables/")]
+        public JsonResult GetListOfDatabaseTables()
+        {
+            var res = new List<UIDbTable>();
+            var apps = Repository.GetApplicationMeta();
+            foreach (var t in apps)
+            {
+                res.AddRange(UIDbTable.GetTables(t));
+            }
+            return new JsonResult(res);
+
+        }
+
 
         /// <summary>
         /// Get meta data for application tables for application with id
@@ -247,6 +263,29 @@ namespace Moley.Controllers
         {
             var t = Repository.GetValueDomains();
             return new JsonResult(t.Select(p => p.DomainName).Distinct());
+
+        }
+
+        /// <summary>
+        /// Get meta data for number series
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetNoSeries")]
+        public JsonResult GetNoSeries()
+        {
+            var t = Repository.GetNoSeries();
+            return new JsonResult(NoSeriesVmCreator.GetNoSeriesVm(t));
+
+        }
+
+
+        /// <summary>
+        /// Get meta data for number series
+        /// </summary>
+        [HttpGet("/ApplicationInfo/GetMainMenuItems")]
+        public JsonResult GetMainMenuItems()
+        {
+            var t = Repository.GetMetaMenuItems();
+            return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
 
         }
 

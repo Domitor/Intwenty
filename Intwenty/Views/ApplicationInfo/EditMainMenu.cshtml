@@ -1,7 +1,7 @@
 ﻿
 
 @{
-    ViewData["Title"] = "";
+    ViewData["Title"] = "Add / Edit Main Menu";
 }
 
 
@@ -11,14 +11,123 @@
     <br />
     <br />
 
-    <h2></h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Main Menu</h2></div>
+        <div class="panel-body">Organize main menu item and which controllers / actions that should to be used when using the menu.</div>
+    </div>
+
+    <br />
+    <br />
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="btn btn-default" v-on:click="addMenuItem">
+                <span class="glyphicon glyphicon-plus"></span> Create new menu item
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn btn-primary" v-on:click="saveChanges" style="float:right">
+                <span class="glyphicon glyphicon-save"></span> Save changes
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:20%">Title <span style="color: red"> *</span></th>
+                <th style="width:20%">Application <span style="color: red"> *</span></th>
+                <th style="width:20%">Controller <span style="color: red"> *</span></th>
+                <th style="width:15%">Action <span style="color: red"> *</span></th>
+                <th style="width:5%"></th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in menuitems">
+            <tr>
+
+                <td><input type="text" class="form-control" v-model="entry.title" v-on:input="markChanged(entry)" /></td>
+                <td>
+                    <select v-model="entry.application.metaCode" class="form-control" v-on:change="tableChanged(entry)">
+                        <option v-for="app in applications" v-bind:value="app.metaCode">{{app.title}}</option>
+                    </select>
+                </td>
+              
+                <td><input type="text" class="form-control" v-model="entry.controller" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-danger" v-on:click="deleteMenuItem(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+            </tr>
+        </tbody>
+    </table>
+
 
 
 
 </div>
 
 @section Scripts
-{
-   
- 
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                menuitems: [],
+                applications: []
+            },
+            methods: {
+               
+                addMenuItem: function ()
+                {
+                    this.menuitems.push({ id: -1, action: "", controller: "", title: "", application: {} });
+                },
+                deleteMenuItem: function (entry)
+                {
+
+
+                },
+                markChanged: function (entry)
+                {
+
+
+                },
+                saveChanges: function ()
+                {
+
+                }
+            },
+            computed:
+            {
+
+
+
+            },
+            mounted: function ()
+            {
+
+                //MenuItems
+                var context = this;
+                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var endpointurl = baseurl + "GetMainMenuItems";
+                $.get(endpointurl, function (response)
+                {
+                    context.menuitems = response;
+                });
+
+                var endpointurl = baseurl + "GetApplications";
+                $.get(endpointurl, function (response) {
+                    context.applications = response;
+                });
+
+              
+
+
+            }
+        });
+    </script>
+
 }

@@ -62,6 +62,7 @@ namespace Moley.Models.MetaDesigner
     public class UIDbTable
     {
         public int Id = 0;
+        public int ApplicationId = 0;
         public string DbName = "";
         public string MetaCode = "";
         public string ParentMetaCode = "";
@@ -74,23 +75,23 @@ namespace Moley.Models.MetaDesigner
         {
             var res = new List<UIDbTable>();
 
-            res.Add(new UIDbTable() { Id = 0, DbName = app.Application.MainTableName, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATAVALUETABLE", Description = "Main table for " + app.Application.Title, Properties= "DEFAULTTABLE=TRUE" });
+            res.Add(new UIDbTable() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATAVALUETABLE", Description = "Main table for " + app.Application.Title, Properties= "DEFAULTTABLE=TRUE" });
 
             foreach (var t in app.DataStructure)
             {
                 if (t.IsMetaTypeDataValue && t.IsRoot)
                 {
-                    res[0].Columns.Add(new UIDbTableField() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory });
+                    res[0].Columns.Add(new UIDbTableField() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id });
                 }
 
                 if (t.IsMetaTypeDataValueTable)
                 {
-                    var tbl = new UIDbTable() { Id = 0, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description };
+                    var tbl = new UIDbTable() { Id = 0, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description, ApplicationId = app.Application.Id };
                     foreach (var col in app.DataStructure)
                     {
                         if (col.IsMetaTypeDataValue && col.ParentMetaCode == t.MetaCode)
                         {
-                            tbl.Columns.Add(new UIDbTableField() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName });
+                            tbl.Columns.Add(new UIDbTableField() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName, ApplicationId = app.Application.Id });
                         }
                     }
                     res.Add(tbl);
@@ -104,6 +105,7 @@ namespace Moley.Models.MetaDesigner
     public class UIDbTableField
     {
         public int Id = 0;
+        public int ApplicationId = 0;
         public string DbName = "";
         public string MetaCode = "";
         public string ParentMetaCode = "";

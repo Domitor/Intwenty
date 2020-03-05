@@ -29,6 +29,8 @@ namespace Moley.Data
 
         List<NoSerieDto> GetNewNoSeriesValues(int applicationid );
 
+        List<NoSerieDto> GetNoSeries();
+
         ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model);
 
         void SaveApplicationUI(List<MetaUIItemDto> model);
@@ -249,6 +251,8 @@ namespace Moley.Data
 
             foreach (var item in appseries)
             {
+                item.Application = new ApplicationDescriptionDto(app);
+
                 if (item.Counter < 1)
                     item.Counter = item.StartValue;
 
@@ -272,6 +276,36 @@ namespace Moley.Data
 
             return res;
 
+        }
+
+        public List<NoSerieDto> GetNoSeries()
+        {
+            var res = NoSeries.Select(p => new NoSerieDto(p)).ToList();
+            var ditems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
+
+            foreach (var item in res)
+            {
+
+
+
+                if (!string.IsNullOrEmpty(item.AppMetaCode))
+                {
+                    var app = AppDescription.FirstOrDefault(p => p.MetaCode == item.AppMetaCode);
+                    if (app != null)
+                    {
+                        item.Application = new ApplicationDescriptionDto(app);
+                        if (!string.IsNullOrEmpty(item.DataMetaCode))
+                        {
+                            var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
+                            if (dinf != null)
+                                item.DataInfo = dinf;
+                        }
+                    }
+                }
+
+            }
+
+            return res;
         }
 
         public ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model)

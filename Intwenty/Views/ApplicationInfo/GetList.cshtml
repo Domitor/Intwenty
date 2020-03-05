@@ -58,18 +58,15 @@
                 getApplications: function () {
                     var context = this;
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
-                    var endpointurl = baseurl + "GetListView";
+                    var endpointurl = baseurl + "GetApplications";
 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.listRetrieveInfo),
-                        success: function (response) {
-                            //DATA
-                            context.datalist = response;
-                        }
+
+                    $.get(endpointurl, function (response)
+                    {
+                        context.datalist = response;
                     });
+
+                  
                 }
             },
             computed: {
