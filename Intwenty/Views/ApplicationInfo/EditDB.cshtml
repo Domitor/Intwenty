@@ -108,90 +108,6 @@
     </table>
 
 
-    <br />
-    <br />
-
-    <h4>Data views</h4>
-    <i>Note views are not application specific</i>
-    <br />
-    <br />
-    <div>
-    
-        <div class="btn btn-default" v-on:click="addDataView">
-            <span class="glyphicon glyphicon-plus"></span> Add data view
-        </div>
-    </div>
-
-    <br />
-
-    <div v-for="item in dataviews">
-
-        <div style="margin:15px">
-            <div style="padding: 5px; border:dotted 1px gray">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label class="control-label">Title <span style="color: red"> *</span></label>
-                            <input type="text" class="form-control" v-model="item.title" />
-                        </div>
-
-                        <div class="form-group">
-                            <label class="control-label">SQL Query <span style="color: red"> *</span></label>
-                            <br />
-                            <textarea style="width:100%" rows="4" v-model="item.sqlQuery"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-
-                       
-
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12" style="margin: 5px">
-                        <b>Fields: </b> {{getViewFieldsString(item)}}
-                        <br />
-                        <label class="control-label" v-if="!item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Show field definitions]</a></label>
-                        <label class="control-label" v-if="item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Close]</a></label>
-                        <br />
-                        <div v-if="item.showSettings">
-                            <div>
-                                <div class="btn btn-default" v-on:click="addDataViewField(item)">
-                                    <span class="glyphicon glyphicon-plus"></span> Add view field
-                                </div>
-                            </div>
-                            <br />
-                            <table class="table table">
-                                <thead>
-                                    <tr>
-
-                                        <th style="width:30%">Title <span style="color: red"> *</span></th>
-                                        <th style="width:65%">SQL query field <span style="color: red"> *</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody v-for="field in item.fields">
-                                    <tr>
-
-                                        <td><input type="text" class="form-control" v-model="field.title" /></td>
-                                        <td><input type="text" class="form-control" v-model="field.sqlQueryFieldName" /></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <br />
-                        <div>
-                            <div class="btn btn-primary" v-on:click="saveDataView(item)">
-                                <span class="glyphicon glyphicon-save"></span> Save
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
 
 </div>
 
@@ -203,7 +119,6 @@
             el: '#app',
             data: {
                 model: { tables: [], columns: [] },
-                dataviews: [],
                 datatypes: [],
                 valuedomains: []
             },
@@ -238,30 +153,6 @@
                     });
 
                 },
-                saveDataView: function (item)
-                {
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
-                    var endpointurl = baseurl + "SaveDataView";
-
-
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(item),
-                        success: function (response)
-                        {
-                            context.dataviews = response;
-                            for (var i = 0; i < context.dataviews.length; i++)
-                                context.dataviews[i].showSettings = false;
-                        },
-                        error: function (response)
-                        {
-                            raiseErrorModal(response.responseJSON);
-                        }
-                    });
-
-                },
                 addDbTable: function () {
                     var context = this;
                     context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: -1 });
@@ -269,27 +160,8 @@
                 addDbColumn: function () {
                     var context = this;
                     context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: -1, showSettings:false, mandatory: false, domain:"" });
-                },
-                addDataView: function () {
-                    var context = this;
-                    context.dataviews.unshift({ properties: "", fields: [], id: -1, showSettings: false });
-                },
-                addDataViewField: function (item) {
-                    item.fields.unshift({ properties: "", id: -1 });
-                },
-                getViewFieldsString: function (item)
-                {
-                    var str = "";
-                    for (var i = 0; i < item.fields.length; i++)
-                    {
-                        if (str == "")
-                            str += item.fields[i].title;
-                        else
-                            str += ", " + item.fields[i].title;
-                    }
-
-                    return str;
                 }
+               
             },
             mounted: function ()
             {
@@ -303,17 +175,6 @@
                     raiseErrorModal(response.responseJSON);
                 });
 
-
-                 //DataViews
-                endpointurl = baseurl + "GetDataViews";
-                $.get(endpointurl, function (response)
-                {
-                    context.dataviews = response;
-                    for (var i = 0; i < context.dataviews.length; i++)
-                        context.dataviews[i].showSettings = false;
-                }).fail(function (response) {
-                    raiseErrorModal(response.responseJSON);
-                });
 
                 //DataTypes
                 endpointurl = baseurl + "GetApplicationTableDataTypes";

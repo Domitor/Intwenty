@@ -31,7 +31,12 @@
 
     <br />
     <br />
-    <h2>Manage UI for application {{model.title}}</h2>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"> <h2>Manage UI for application {{model.title}}</h2></div>
+        <div class="panel-body">Design application UI and connect it to the database.</div>
+    </div>
+
     <br />
     <br />
 
@@ -247,7 +252,7 @@
 
             <br />
             <br />
-           
+
 
             <div>
 
@@ -266,7 +271,7 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-12" style="margin: 5px">
-                                <b>Fields: </b> 
+                                <b>Fields: </b>
                                 <br />
                                 <br />
                                 <div>
@@ -292,7 +297,7 @@
                                                     <select v-model="field.dbName" class="form-control">
                                                         <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                                     </select>
-                                                 
+
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -314,8 +319,8 @@
 
         </div>
 
-        </div>
     </div>
+</div>
 
     @section Scripts
         {

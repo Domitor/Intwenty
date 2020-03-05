@@ -240,56 +240,57 @@ namespace Moley.MetaDataService
 
                 }
 
-                foreach (var v in viewinfo)
+            }
+
+
+            foreach (var v in viewinfo)
+            {
+                if (string.IsNullOrEmpty(v.Title))
                 {
-                    if (string.IsNullOrEmpty(v.Title))
+                    res.AddMessage("ERROR", string.Format("The view with Id: {0} has no [Title].", v.Id));
+                    return res;
+                }
+
+                if (!v.HasValidMetaType)
+                {
+                    res.AddMessage("ERROR", string.Format("The view object: {0} has no [MetaType].", v.Title));
+                    return res;
+                }
+
+                if (!string.IsNullOrEmpty(v.SQLQueryFieldName) && v.IsMetaTypeDataView)
+                {
+                    res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query field on the ROOT level.", v.Title));
+                }
+
+                if (!string.IsNullOrEmpty(v.SQLQuery) && v.IsMetaTypeDataViewField)
+                {
+                    res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query specified. (DATAVIEWFIELD can't have queries)", v.Title));
+                }
+
+                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewField))
+                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWFIELD.", v.Title));
+
+                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyField))
+                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWKEYFIELD.", v.Title));
+
+                if (v.IsMetaTypeDataViewField || v.IsMetaTypeDataViewKeyField)
+                {
+                    var view = viewinfo.Find(p => p.IsMetaTypeDataView && p.MetaCode == v.ParentMetaCode);
+                    if (view != null)
                     {
-                        res.AddMessage("ERROR", string.Format("The view with Id: {0} has no [Title].", v.Id));
-                        return res;
+                        if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
+                            res.AddMessage("ERROR", string.Format("The viewfield {0} has no SQLQueryFieldName that is included in the SQL Query of the parent view.", v.Title));
                     }
-
-                    if (!v.HasValidMetaType)
+                    else
                     {
-                        res.AddMessage("ERROR", string.Format("The view object: {0} in application: {1} has no [MetaType].", v.Title, a.Application.Title));
-                        return res;
+                        res.AddMessage("ERROR", string.Format("The view field {0} has no parent with [MetaType]=DATAVIEW.", v.Title));
                     }
-
-                    if (!string.IsNullOrEmpty(v.SQLQueryFieldName) && v.IsMetaTypeDataView)
-                    {
-                        res.AddMessage("WARNING", string.Format("The view object: {0} in application {1} has a sqlquery field on the ROOT level.", v.Title, a.Application.Title));
-                    }
-
-                    if (!string.IsNullOrEmpty(v.SQLQuery) && v.IsMetaTypeDataViewField)
-                    {
-                        res.AddMessage("WARNING", string.Format("The view object: {0} in application {1} has a sqlquery specified. (DATAVIEWFIELD can't have queries)", v.Title, a.Application.Title));
-                    }
-
-                    if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewField))
-                        res.AddMessage("ERROR", string.Format("The view object: {0} in application {1} has no children with [MetaType]=DATAVIEWFIELD.", v.Title, a.Application.Title));
-
-                    if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyField))
-                        res.AddMessage("ERROR", string.Format("The view object: {0} in application {1} has no children with [MetaType]=DATAVIEWKEYFIELD.", v.Title, a.Application.Title));
-
-                    if (v.IsMetaTypeDataViewField || v.IsMetaTypeDataViewKeyField)
-                    {
-                        var view = viewinfo.Find(p => p.IsMetaTypeDataView && p.MetaCode == v.ParentMetaCode);
-                        if (view != null)
-                        {
-                            if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
-                                res.AddMessage("ERROR", string.Format("The viewfield {0} in application {1} has not a SQLQueryFieldName that is included in the SQLQuery of the parent view.", v.Title, a.Application.Title));
-                        }
-                        else
-                        {
-                            res.AddMessage("ERROR", string.Format("The view field {0} in application {1} has no parent with [MetaType]=DATAVIEW.", v.Title, a.Application.Title));
-                        }
-                    }
-                        
-
-
                 }
 
 
+
             }
+
 
             if (res.Messages.Exists(p => p.Code == "ERROR"))
             {

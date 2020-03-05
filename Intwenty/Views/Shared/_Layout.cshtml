@@ -71,10 +71,14 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label">System Administration</span> <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GetList">Manage applications</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditDataviews">Data views</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditValueDomains">Value domains</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditNoSeries">Number series</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditMainMenu">Main menu</a></li>
                             <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ValidateModel">Validate meta model</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation">View meta model documenation</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData">Generate testdata</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase">Configure the database</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation">Meta model documentation</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase">Configure database</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData">Generate testdata batch</a></li>
                         </ul>
                     </li>
                 </ul>

@@ -47,7 +47,28 @@ namespace Moley.Controllers
             return View();
         }
 
-    
+        public IActionResult EditDataviews()
+        {
+            return View();
+        }
+
+        public IActionResult EditValueDomains()
+        {
+            return View();
+        }
+
+
+        public IActionResult EditNoSeries()
+        {
+            return View();
+        }
+
+        public IActionResult EditMainMenu()
+        {
+            return View();
+        }
+
+
 
         public IActionResult GetList()
         {
