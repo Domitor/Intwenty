@@ -5,19 +5,22 @@
 }
 
 
-<br />
-<br />
+
 
 <div>
+    <br />
+    <br />
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Meta model documentation</h2></div>
+        <div class="panel-body"></div>
+    </div>
+    <br />
+    <br />
 
-    <h1>Meta model documentation</h1>
-    <br />
-    <br />
-    <h2>Applications</h2>
 
     @foreach (var app in Model)
     {
-        <h3>@app.Application.Title</h3>
+        <h4>@app.Application.Title</h4>
         <h4>ID: @app.Application.Id, Description: @app.Application.Description</h4>
         <hr />
 

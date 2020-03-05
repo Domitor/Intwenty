@@ -11,8 +11,11 @@
 
     <br />
     <br />
-
-    <h2>Manage database for application {{model.title}}</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Manage database for application {{model.title}}</h2></div>
+        <div class="panel-body">Define the application data structure.</div>
+    </div>
+   
     <br />
     <br />
 
@@ -41,9 +44,7 @@
             <td>{{item.id}}</td>
             <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
             <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
-            <td>
-                
-            </td>
+            <td></td>
         </tr>
     </table>
 
@@ -86,9 +87,7 @@
                 <td>
                     <input type="text" class="form-control" v-model="col.description" />
                 </td>
-                <td>
-                   
-                </td>
+                <td></td>
             </tr>
             <tr>
                 <td colspan="1"></td>
