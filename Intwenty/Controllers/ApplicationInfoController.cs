@@ -285,6 +285,29 @@ namespace Moley.Controllers
             return GetValueDomains();
         }
 
+
+        [HttpPost]
+        public JsonResult RemoveValueDomain([FromBody] ValueDomainDto model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("Id is missing in model when removing value domain value");
+
+                Repository.DeleteValueDomain(model.Id);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting value domain meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetValueDomains();
+        }
+
         /// <summary>
         /// Get meta data for number series
         /// </summary>

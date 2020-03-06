@@ -4,6 +4,11 @@
     ViewData["Title"] = "Meta model documentation";
 }
 
+<style>
+    th {
+        width: 25%;
+    }
+</style>
 
 
 
@@ -20,9 +25,10 @@
 
     @foreach (var app in Model)
     {
-        <h4>@app.Application.Title</h4>
-        <h4>ID: @app.Application.Id, Description: @app.Application.Description</h4>
-        <hr />
+        <div class="panel panel-default">
+            <div class="panel-heading"><h4>(@app.Application.Id) @app.Application.Title</h4></div>
+            <div class="panel-body">@app.Application.Description</div>
+        </div>
 
         <br />
 

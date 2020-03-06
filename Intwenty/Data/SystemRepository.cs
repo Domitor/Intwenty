@@ -47,6 +47,8 @@ namespace Moley.Data
 
         void DeleteDataView(int id);
 
+        void DeleteValueDomain(int id);
+
     }
 
     public class SystemRepository : ISystemRepository
@@ -74,46 +76,7 @@ namespace Moley.Data
             ValueDomains = context.Set<ValueDomain>();
         }
 
-        public List<ApplicationDescriptionDto> GetApplicationDescriptions()
-        {
-            var t = AppDescription.Select(p=> new ApplicationDescriptionDto(p)).ToList();
-            var menu = GetMetaMenuItems();
-            foreach (var app in t)
-            {
-                var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
-                if (mi != null)
-                    app.MainMenuItem = mi;
-            }
 
-            return t;
-        }
-
-
-
-        public List<MetaDataItemDto> GetMetaDataItems()
-        {
-            return MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
-        }
-
-        public List<MetaUIItemDto> GetMetaUIItems()
-        {
-            var dataitems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
-            var res = MetaUIItem.Select(p => new MetaUIItemDto(p)).ToList();
-
-            foreach (var item in res)
-            {
-               
-                if (!string.IsNullOrEmpty(item.DataMetaCode))
-                {
-                    var dinf = dataitems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == item.AppMetaCode);
-                    if (dinf != null)
-                        item.DataInfo = dinf;
-                }
-                
-            }
-
-            return res;
-        }
 
         public List<ApplicationDto> GetApplicationMeta()
         {
@@ -205,10 +168,7 @@ namespace Moley.Data
 
         }
 
-        public List<MetaDataViewDto> GetMetaDataViews()
-        {
-            return MetaDataViews.Select(p => new MetaDataViewDto(p)).ToList();
-        }
+       
 
         public List<MetaMenuItemDto> GetMetaMenuItems()
         {
@@ -310,6 +270,21 @@ namespace Moley.Data
             return res;
         }
 
+        #region Application
+        public List<ApplicationDescriptionDto> GetApplicationDescriptions()
+        {
+            var t = AppDescription.Select(p => new ApplicationDescriptionDto(p)).ToList();
+            var menu = GetMetaMenuItems();
+            foreach (var app in t)
+            {
+                var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
+                if (mi != null)
+                    app.MainMenuItem = mi;
+            }
+
+            return t;
+        }
+
         public ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model)
         {
             var res = new ApplicationDescriptionDto();
@@ -404,40 +379,27 @@ namespace Moley.Data
             }
 
         }
+        #endregion
 
-        public void SaveValueDomains(List<ValueDomainDto> model)
+        #region UI
+        public List<MetaUIItemDto> GetMetaUIItems()
         {
-           
-            foreach (var vd in model)
-            {
-                if (!vd.IsValid)
-                    throw new InvalidOperationException("Missing required information on value domain, can't save.");
-                
-                if (vd.Id < 1)
-                {
-                    ValueDomains.Add(new ValueDomain() { DomainName= vd.DomainName, Value = vd.Value, Code = vd.Code });
-                }
-                else
-                {
-                    var existing = ValueDomains.FirstOrDefault(p => p.Id == vd.Id);
-                    if (existing != null)
-                    {
-                        existing.Code = vd.Code;
-                        existing.Value = vd.Value;
-                        existing.DomainName = vd.DomainName;
-                    }
+            var dataitems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
+            var res = MetaUIItem.Select(p => new MetaUIItemDto(p)).ToList();
 
+            foreach (var item in res)
+            {
+
+                if (!string.IsNullOrEmpty(item.DataMetaCode))
+                {
+                    var dinf = dataitems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == item.AppMetaCode);
+                    if (dinf != null)
+                        item.DataInfo = dinf;
                 }
 
             }
 
-            context.SaveChanges();
-        }
-
-        public List<ValueDomainDto> GetValueDomains()
-        {
-            var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
-            return t;
+            return res;
         }
 
         public void SaveApplicationUI(List<MetaUIItemDto> model)
@@ -472,15 +434,7 @@ namespace Moley.Data
             context.SaveChanges();
         }
 
-        private MetaUIItem CreateMetaUIItem(MetaUIItemDto dto)
-        {
-            var res = new MetaUIItem() { AppMetaCode = dto.AppMetaCode, ColumnOrder = dto.ColumnOrder, DataMetaCode = dto.DataMetaCode,
-                                         Description = dto.Description, Domain = dto.Domain, MetaCode = dto.MetaCode, MetaType = dto.MetaType,
-                                         ParentMetaCode = dto.ParentMetaCode, RowOrder = dto.RowOrder, Title = dto.Title };
-
-            return res;
-
-        }
+      
 
         public void DeleteApplicationUI(int id)
         {
@@ -502,6 +456,35 @@ namespace Moley.Data
               
                 context.SaveChanges();
             }
+        }
+
+
+        private MetaUIItem CreateMetaUIItem(MetaUIItemDto dto)
+        {
+            var res = new MetaUIItem()
+            {
+                AppMetaCode = dto.AppMetaCode,
+                ColumnOrder = dto.ColumnOrder,
+                DataMetaCode = dto.DataMetaCode,
+                Description = dto.Description,
+                Domain = dto.Domain,
+                MetaCode = dto.MetaCode,
+                MetaType = dto.MetaType,
+                ParentMetaCode = dto.ParentMetaCode,
+                RowOrder = dto.RowOrder,
+                Title = dto.Title
+            };
+
+            return res;
+
+        }
+        #endregion
+
+        #region Database
+
+        public List<MetaDataItemDto> GetMetaDataItems()
+        {
+            return MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
         }
 
         public void SaveApplicationDB(List<MetaDataItemDto> model, int applicationid)
@@ -589,6 +572,30 @@ namespace Moley.Data
         
         }
 
+        public void DeleteApplicationDB(int id)
+        {
+            var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                var dto = new MetaDataItemDto(existing);
+                var app = GetApplicationMeta().Find(p => p.Application.MetaCode == dto.AppMetaCode);
+                if (app == null)
+                    return;
+
+                if (dto.IsMetaTypeDataValueTable && dto.DbName != app.Application.DbName)
+                {
+                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATAVALUE") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    MetaDBItem.Remove(existing);
+                    MetaDBItem.RemoveRange(childlist);
+                }
+                else
+                {
+                    MetaDBItem.Remove(existing);
+                }
+                context.SaveChanges();
+            }
+        }
+
         private MetaDataItem CreateMetaDataItem(MetaDataItemDto dto)
         {
             var res = new MetaDataItem()
@@ -607,6 +614,13 @@ namespace Moley.Data
 
             return res;
 
+        }
+        #endregion
+
+        #region Data Views
+        public List<MetaDataViewDto> GetMetaDataViews()
+        {
+            return MetaDataViews.Select(p => new MetaDataViewDto(p)).ToList();
         }
 
         public void SaveDataView(List<MetaDataViewDto> model)
@@ -675,29 +689,7 @@ namespace Moley.Data
 
       
 
-        public void DeleteApplicationDB(int id)
-        {
-            var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
-            if (existing != null)
-            {
-                var dto = new MetaDataItemDto(existing);
-                var app = GetApplicationMeta().Find(p => p.Application.MetaCode == dto.AppMetaCode);
-                if (app == null)
-                    return;
-
-                if (dto.IsMetaTypeDataValueTable && dto.DbName != app.Application.DbName)
-                {
-                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATAVALUE") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    MetaDBItem.Remove(existing);
-                    MetaDBItem.RemoveRange(childlist);
-                }
-                else
-                {
-                    MetaDBItem.Remove(existing);
-                }
-                context.SaveChanges();
-            }
-        }
+      
 
         public void DeleteDataView(int id)
         {
@@ -718,8 +710,56 @@ namespace Moley.Data
                 context.SaveChanges();
             }
         }
+        #endregion
 
-    
+        #region Value Domains
+
+        public void SaveValueDomains(List<ValueDomainDto> model)
+        {
+
+            foreach (var vd in model)
+            {
+                if (!vd.IsValid)
+                    throw new InvalidOperationException("Missing required information on value domain, can't save.");
+
+                if (vd.Id < 1)
+                {
+                    ValueDomains.Add(new ValueDomain() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                }
+                else
+                {
+                    var existing = ValueDomains.FirstOrDefault(p => p.Id == vd.Id);
+                    if (existing != null)
+                    {
+                        existing.Code = vd.Code;
+                        existing.Value = vd.Value;
+                        existing.DomainName = vd.DomainName;
+                    }
+
+                }
+
+            }
+
+            context.SaveChanges();
+        }
+
+        public List<ValueDomainDto> GetValueDomains()
+        {
+            var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
+            return t;
+        }
+
+        public void DeleteValueDomain(int id)
+        {
+            var existing = ValueDomains.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                ValueDomains.Remove(existing);
+                context.SaveChanges();
+            }
+        }
+
+        #endregion
     }
 
 }

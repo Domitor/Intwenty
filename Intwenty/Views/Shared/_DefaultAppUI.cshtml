@@ -147,7 +147,9 @@
 
         </div>
 
-        <button class="btn btn-default" type="button" v-on:click="saveApplication()">Spara</button>
+        <br />
+
+        <button class="btn btn-primary" type="button" v-on:click="saveApplication()"><span class="glyphicon glyphicon-save"></span> Save</button>
 
 
             @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))

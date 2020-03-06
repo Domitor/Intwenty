@@ -100,7 +100,8 @@
             data:
             {
                 model: { showNew:false, newDomainName: "" },
-                valuedomains: []
+                valuedomains: [],
+                idgen: -1
             },
             methods: {
 
@@ -111,7 +112,8 @@
                     if (this.model.newDomainName == "")
                         return;
 
-                    this.valuedomains.unshift({ id: -1, domainName: this.model.newDomainName.toUpperCase(), value: "", code: "", metaType: "VALUEDOMAIN", properties: "" });
+                    this.idgen -= 1;
+                    this.valuedomains.unshift({ id: this.idgen, domainName: this.model.newDomainName.toUpperCase(), value: "", code: "", metaType: "VALUEDOMAIN", properties: "" });
 
 
                     this.model.showNew = !this.model.showNew;
@@ -124,11 +126,49 @@
                         return;
                     if (this.model.domainName==="")
                         return;
-                    this.valuedomains.unshift({ id: -1, domainName: this.model.domainName, value: "", code: "", metaType: "VALUEDOMAIN", properties: ""  });
+
+                    this.idgen -= 1;
+                    this.valuedomains.unshift({ id: this.idgen, domainName: this.model.domainName, value: "", code: "", metaType: "VALUEDOMAIN", properties: ""  });
                 },
                 deleteDomainValue: function (entry)
                 {
-                   
+                    var context = this;
+                 
+                    if (entry.id < 1)
+                    {
+                        for (var i = 0; i < context.valuedomains.length; i++)
+                        {
+                            if (context.valuedomains[i].id === entry.id)
+                            {
+                                context.valuedomains.splice(i, 1);
+                                break;
+                            }
+                        }
+                        return;
+                    }
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var endpointurl = baseurl + "RemoveValueDomain";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.valuedomains = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete domain value ?", "Warning if this is the only value in the value domain the entire value domain will be deleted. Continue ?", yesfunc);
 
                 },
                 markChanged: function (entry)
