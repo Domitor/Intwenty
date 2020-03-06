@@ -15,8 +15,9 @@ A meta data based web application platform, a tool for developers or for users t
 
 # Technologies Used
 - Asp.Net Core
-- Vue.js
 - JQuery
+- Vue.js
+- alasql.js
 
 # Database
 - Intwenty targets MS Sql Server and MySql
