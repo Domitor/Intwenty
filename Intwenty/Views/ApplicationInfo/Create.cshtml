@@ -11,7 +11,12 @@
     <br />
     <br />
 
-    <h2>Create new application</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Create new application</h2></div>
+        <div class="panel-body">
+            Create basic meta data for a new application.
+        </div>
+    </div>
     <br />
     <br />
 
@@ -29,7 +34,8 @@
         var app = new Vue({
             el: '#app',
             data: {
-                model: { id: 0},
+                model: {
+                    id: -1, title: "", dbName: "", mainMenuItem: {}},
             },
             methods:
             {

@@ -11,13 +11,24 @@
     <br />
     <br />
 
-    <h2>Edit application {{model.title}}</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Modify <i>{{model.title}}</i></h2></div>
+        <div class="panel-body">
+            Modify basic application meta data for {{model.title}}
+        </div>
+    </div>
+
+    <br />
+
+    <a asp-action="GetList" asp-controller="ApplicationInfo" role="button" class="btn btn-default"><span class="glyphicon glyphicon-backward"></span> Back</a>
+    <button class="btn btn-primary" type="button" v-on:click="saveApplication()" style="float:right"><span class="glyphicon glyphicon-save"></span> Save changes</button>
+
     <br />
     <br />
 
     @await Html.PartialAsync("_MetaAppDescription")
 
-    <button class="btn btn-default" type="button" v-on:click="saveApplication()">Spara</button>
+
     <br />
     <br />
 
