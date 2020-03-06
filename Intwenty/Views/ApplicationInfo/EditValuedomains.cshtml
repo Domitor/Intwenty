@@ -120,6 +120,10 @@
                 },
                 addDomainValue: function ()
                 {
+                    if (!this.model.domainName)
+                        return;
+                    if (this.model.domainName==="")
+                        return;
                     this.valuedomains.unshift({ id: -1, domainName: this.model.domainName, value: "", code: "", metaType: "VALUEDOMAIN", properties: ""  });
                 },
                 deleteDomainValue: function (entry)
@@ -140,7 +144,33 @@
                     }
                     else
                     {
+                        var list = [];
+                        var context = this;
 
+                        for (var i = 0; i < this.valuedomains.length; i++)
+                        {
+                            if (context.valuedomains[i].id < 1 || context.valuedomains[i].properties.indexOf("CHANGED=TRUE") > -1)
+                                list.push(context.valuedomains[i]);
+                        }
+
+                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var endpointurl = baseurl + "SaveValueDomains";
+                  
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(list),
+                            success: function (response)
+                            {
+                                context.valuedomains = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
                     }
                 }
             },

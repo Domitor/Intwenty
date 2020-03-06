@@ -87,7 +87,7 @@
                 <td>
                     <input type="text" class="form-control" v-model="col.description" />
                 </td>
-                <td></td>
+                <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
             </tr>
             <tr>
                 <td colspan="1"></td>
@@ -119,7 +119,8 @@
             data: {
                 model: { tables: [], columns: [] },
                 datatypes: [],
-                valuedomains: []
+                valuedomains: [],
+                idgen:-1
             },
             methods:
             {
@@ -152,13 +153,58 @@
                     });
 
                 },
-                addDbTable: function () {
+                addDbTable: function ()
+                {
                     var context = this;
-                    context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: -1 });
+                    context.idgen -= 1;
+                    context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: context.idgen });
                 },
                 addDbColumn: function () {
                     var context = this;
-                    context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: -1, showSettings:false, mandatory: false, domain:"" });
+                    context.idgen -= 1;
+                    context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: context.idgen, showSettings:false, mandatory: false, domain:"" });
+                }
+                ,
+                deleteDbColumn: function (col)
+                {
+                    var context = this;
+                 
+                    if (col.id < 1)
+                    {
+                        for (var i = 0; i < context.model.columns.length; i++)
+                        {
+                            if (context.model.columns[i].id === col.id)
+                            {
+                                context.model.columns.splice(i, 1);
+                                break;
+                            }
+                        }
+                        return;
+                    }
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var endpointurl = baseurl + "RemoveFromApplicationDB";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(col),
+                            success: function (response) {
+                                context.model = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete column ?", "Warning if this column is bound to an UI component, you might break the application. Delete anyway ?", yesfunc);
+                   
                 }
                
             },

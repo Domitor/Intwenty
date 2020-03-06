@@ -39,6 +39,8 @@ namespace Moley.Data
 
         void SaveDataView(List<MetaDataViewDto> model);
 
+        void SaveValueDomains(List<ValueDomainDto> model);
+
         void DeleteApplicationUI(int id);
 
         void DeleteApplicationDB(int id);
@@ -403,6 +405,35 @@ namespace Moley.Data
 
         }
 
+        public void SaveValueDomains(List<ValueDomainDto> model)
+        {
+           
+            foreach (var vd in model)
+            {
+                if (!vd.IsValid)
+                    throw new InvalidOperationException("Missing required information on value domain, can't save.");
+                
+                if (vd.Id < 1)
+                {
+                    ValueDomains.Add(new ValueDomain() { DomainName= vd.DomainName, Value = vd.Value, Code = vd.Code });
+                }
+                else
+                {
+                    var existing = ValueDomains.FirstOrDefault(p => p.Id == vd.Id);
+                    if (existing != null)
+                    {
+                        existing.Code = vd.Code;
+                        existing.Value = vd.Value;
+                        existing.DomainName = vd.DomainName;
+                    }
+
+                }
+
+            }
+
+            context.SaveChanges();
+        }
+
         public List<ValueDomainDto> GetValueDomains()
         {
             var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
@@ -687,6 +718,8 @@ namespace Moley.Data
                 context.SaveChanges();
             }
         }
+
+    
     }
 
 }

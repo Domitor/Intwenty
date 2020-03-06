@@ -266,6 +266,25 @@ namespace Moley.Controllers
 
         }
 
+        [HttpPost]
+        public JsonResult SaveValueDomains([FromBody] List<ValueDomainDto> model)
+        {
+            try
+            {
+                Repository.SaveValueDomains(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving value domain meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetValueDomains();
+        }
+
         /// <summary>
         /// Get meta data for number series
         /// </summary>
@@ -310,8 +329,11 @@ namespace Moley.Controllers
             return GetApplicationUI(model.Id);
         }
 
+        /// <summary>
+        /// Removes one input control from the UI meta data collection
+        /// </summary>
         [HttpPost]
-        public JsonResult RemoveApplicationUI([FromBody] UserInput model)
+        public JsonResult RemoveFromApplicationUI([FromBody] UserInput model)
         {
             if (model.Id < 1)
                 throw new InvalidOperationException("Id is missing in model when removing UI");
@@ -346,6 +368,36 @@ namespace Moley.Controllers
             }
 
             return GetApplicationDB(model.Id);
+        }
+
+
+
+        /// <summary>
+        /// Removes one database object (column / table) from the UI meta data collection
+        /// </summary>
+        [HttpPost]
+        public JsonResult RemoveFromApplicationDB([FromBody] UIDbTableField model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("Id is missing in model when removing db object");
+                if (model.ApplicationId < 1)
+                    throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
+
+                Repository.DeleteApplicationDB(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationDB(model.ApplicationId);
         }
 
         [HttpPost]

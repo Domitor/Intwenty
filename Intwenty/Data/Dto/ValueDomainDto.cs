@@ -10,6 +10,13 @@ namespace Moley.Data.Dto
     public class ValueDomainDto : MetaModelDto
     {
 
+        public ValueDomainDto()
+        {
+            MetaType = "VALUEDOMAIN";
+            ParentMetaCode = "ROOT";
+            SetEmptyStrings();
+        }
+
         public ValueDomainDto(ValueDomain entity)
         {
             Id = entity.Id;
@@ -20,6 +27,15 @@ namespace Moley.Data.Dto
             MetaType = "VALUEDOMAIN";
             MetaCode = DomainName;
             ParentMetaCode = "ROOT";
+            SetEmptyStrings();
+        }
+
+        private void SetEmptyStrings()
+        {
+            if (string.IsNullOrEmpty(DomainName)) DomainName = string.Empty;
+            if (string.IsNullOrEmpty(Code)) Code = string.Empty;
+            if (string.IsNullOrEmpty(Value)) Value = string.Empty;
+            if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
         }
 
         public int Id { get; set; }
@@ -51,6 +67,18 @@ namespace Moley.Data.Dto
                 var t = new List<string>();
                 t.Add("VALUEDOMAIN");
                 return t;
+            }
+        }
+
+
+        public override bool IsValid
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(DomainName) || string.IsNullOrEmpty(Code) || string.IsNullOrEmpty(Value))
+                    return false;
+
+                return true;
             }
         }
     }

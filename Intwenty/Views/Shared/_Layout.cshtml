@@ -68,23 +68,24 @@
                         </ul>
                     </li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label">System Administration</span> <span class="caret"></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="glyphicon glyphicon-cog"></span> System Administration</span> <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Manage users</a></li>
+
                             <li class="divider"></li>
                             <li class="dropdown-header">Meta model</li>
                             <li class="divider"></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GetList"><span class="glyphicon glyphicon-thumbs-up"></span> Manage applications</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="glyphicon glyphicon-thumbs-up"></span> Data views</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="glyphicon glyphicon-thumbs-up"></span> Value domains</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="glyphicon glyphicon-thumbs-up"></span> Number series</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="glyphicon glyphicon-thumbs-up"></span> Main menu</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="glyphicon glyphicon-thumbs-up"></span> Validate meta model</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="glyphicon glyphicon-thumbs-up"></span> Meta model documentation</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="glyphicon glyphicon-thumbs-up"></span> Configure database</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData"><span class="glyphicon glyphicon-thumbs-up"></span> Generate testdata batch</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GetList"><span class="glyphicon glyphicon-th"></span> Manage applications</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="glyphicon glyphicon-th"></span> Data views</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="glyphicon glyphicon-th"></span> Value domains</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="glyphicon glyphicon-th"></span> Number series</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="glyphicon glyphicon-th"></span> Main menu</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="glyphicon glyphicon-th"></span> Validate meta model</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="glyphicon glyphicon-th"></span> Meta model documentation</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="glyphicon glyphicon-th"></span> Configure database</a></li>
+                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData"><span class="glyphicon glyphicon-th"></span> Generate testdata batch</a></li>
                         </ul>
                     </li>
+                    <li><a href="#"><span class="glyphicon glyphicon-user"></span> Users and security</a></li>
                 </ul>
             </div>
         </div>
@@ -107,6 +108,24 @@
         </div>
     </div>
 
+    <div class="modal fade" id="yesno_dlg_modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 id="yesno_dlg_modal_hdr" class="modal-title">Information</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="yesno_dlg_modal_text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="yesno_dlg_modal_yesbtn" type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="tech_modal" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -115,14 +134,14 @@
                     <h4 class="modal-title">About</h4>
                 </div>
                 <div class="modal-body">
-                    <p><b>Intwenty</b> is a meta driven webplatform....</p>
+                    <p><b>Intwenty</b></p>
                     <p><b>Technologies used</b></p>
                     <ul>
                         <li>Asp.Net Core 2.1.1</li>
-                        <li>Bootstrap 4.4.1</li>
+                        <li>Bootstrap 3.3.7</li>
                         <li>Vue.js v2.6.11</li>
-                        <li>Vue Smart Table v2.5.0</li>
                         <li>JQuery v3.3.1</li>
+                        <li>alasql.js v???</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -152,7 +171,7 @@
         <script src="~/js/site.js" asp-append-version="true"></script>
 
     </environment>
-   
+
 
     @RenderSection("Scripts", required: false)
 </body>

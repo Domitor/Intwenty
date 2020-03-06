@@ -7,6 +7,11 @@ namespace Moley.Data.Dto
 {
     public abstract class MetaModelDto
     {
+        public virtual bool IsValid
+        {
+            get { return false; }
+        }
+
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
