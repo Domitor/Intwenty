@@ -81,7 +81,7 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public override List<string> ValidMetaTypes
+        public List<string> ValidMetaTypes
         {
             get
             {

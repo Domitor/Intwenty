@@ -40,6 +40,8 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
 
+        public static string MetaTypeApplication = "APPLICATION";
+
         public int Id { get; set; }
 
         public string Title { get; set; }
@@ -93,12 +95,12 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public override List<string> ValidMetaTypes
+        public static List<string> ValidMetaTypes
         {
             get
             {
                 var t = new List<string>();
-                t.Add("APPLICATION");
+                t.Add(MetaTypeApplication);
                 return t;
             }
         }

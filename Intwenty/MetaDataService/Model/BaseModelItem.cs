@@ -27,8 +27,6 @@ namespace Intwenty.MetaDataService.Model
 
         public string Properties { get; set; }
 
-        public abstract List<string> ValidMetaTypes { get; }
-
         protected abstract List<string> ValidProperties { get; }
 
         public bool IsRoot
