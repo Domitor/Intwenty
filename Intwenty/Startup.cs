@@ -37,8 +37,6 @@ namespace Moley
             });
 
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
             services.AddSingleton<MetaDataService.IServiceEngine, MetaDataService.Server>();
 
             // Add framework services.
@@ -68,12 +66,8 @@ namespace Moley
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseRouting();
+            app.UseEndpoints(p => p.MapControllers());
         }
     }
 }
