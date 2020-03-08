@@ -1,9 +1,9 @@
-﻿using Moley.MetaDataService.Model;
+﻿using Intwenty.MetaDataService.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Moley.Models.MetaDesigner
+namespace Intwenty.Models.MetaDesigner
 {
 
     public static class UIVmCreator

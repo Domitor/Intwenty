@@ -1,10 +1,10 @@
-﻿using Moley.Data.Entity;
+﻿using Intwenty.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace Moley.MetaDataService.Model
+namespace Intwenty.MetaDataService.Model
 {
 
    public class ApplicationModelItem : BaseModelItem

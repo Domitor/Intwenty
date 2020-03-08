@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Moley.Models;
-using Moley.MetaDataService.Engine;
-using Moley.MetaDataService.Engine.Common;
-using Moley.MetaDataService.Model;
+using Intwenty.Models;
+using Intwenty.MetaDataService.Engine;
+using Intwenty.MetaDataService.Engine.Common;
+using Intwenty.MetaDataService.Model;
 
-namespace Moley.MetaDataService.Custom
+namespace Intwenty.MetaDataService.Custom
 {
 
 

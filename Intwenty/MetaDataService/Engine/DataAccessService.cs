@@ -8,7 +8,7 @@ using NetCoreDBAccess;
 using Microsoft.Extensions.Options;
 using System.Text;
 
-namespace Moley.MetaDataService.Engine.Common
+namespace Intwenty.MetaDataService.Engine.Common
 {
 
 

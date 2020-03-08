@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
-using Moley.Data;
-using Moley.MetaDataService.Engine;
-using Moley.MetaDataService.Model;
-using Moley.Models;
+using Intwenty.Data;
+using Intwenty.MetaDataService.Engine;
+using Intwenty.MetaDataService.Model;
+using Intwenty.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Moley.MetaDataService
+namespace Intwenty.MetaDataService
 {
     public interface IServiceEngine
     {

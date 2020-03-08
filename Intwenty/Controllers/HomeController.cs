@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Moley.Data;
-using Moley.Data.Dto;
-using Moley.Models;
+using Intwenty.Data;
+using Intwenty.Data.Dto;
+using Intwenty.Models;
 
-namespace Moley.Controllers
+namespace Intwenty.Controllers
 {
     public class HomeController : Controller
     {

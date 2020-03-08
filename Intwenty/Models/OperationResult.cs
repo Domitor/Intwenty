@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Moley.Models
+namespace Intwenty.Models
 {
 
     public class OperationMessage

@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Moley.Data.Entity;
+using Intwenty.Data.Entity;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Moley.MetaDataService.Model
+namespace Intwenty.MetaDataService.Model
 {
     public class NoSerieModelItem
     {

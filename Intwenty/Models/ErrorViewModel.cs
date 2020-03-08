@@ -1,6 +1,6 @@
 using System;
 
-namespace Moley.Models
+namespace Intwenty.Models
 {
     public class ErrorViewModel
     {

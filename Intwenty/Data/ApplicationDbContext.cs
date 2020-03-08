@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
-using Moley.Data.Entity;
+using Intwenty.Data.Entity;
 
-namespace Moley.Data
+namespace Intwenty.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, String>
     {

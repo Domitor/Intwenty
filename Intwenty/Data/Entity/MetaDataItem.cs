@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace Moley.Data.Entity
+namespace Intwenty.Data.Entity
 {
 
     public class MetaDataItem

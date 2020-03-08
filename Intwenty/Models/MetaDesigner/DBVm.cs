@@ -1,10 +1,10 @@
 ﻿using System;
-using Moley.MetaDataService.Model;
+using Intwenty.MetaDataService.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Moley.Models.MetaDesigner
+namespace Intwenty.Models.MetaDesigner
 {
 
     public static class DBVmCreator

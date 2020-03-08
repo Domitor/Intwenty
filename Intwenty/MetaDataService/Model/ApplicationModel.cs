@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Moley.MetaDataService.Model
+namespace Intwenty.MetaDataService.Model
 {
 
     public class ApplicationModel

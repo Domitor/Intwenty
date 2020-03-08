@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Moley.Data.Entity
+namespace Intwenty.Data.Entity
 {
     public class InformationStatus
     {

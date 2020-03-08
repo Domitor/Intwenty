@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Moley.Data.Entity;
+using Intwenty.Data.Entity;
 
-namespace Moley.Data
+namespace Intwenty.Data
 {
     public class DBInitializer
     {

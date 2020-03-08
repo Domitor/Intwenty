@@ -1,8 +1,8 @@
-﻿using Moley.Data.Entity;
+﻿using Intwenty.Data.Entity;
 using System.Collections.Generic;
 
 
-namespace Moley.MetaDataService.Model
+namespace Intwenty.MetaDataService.Model
 {
 
     public class UserInterfaceModelItem : BaseModelItem

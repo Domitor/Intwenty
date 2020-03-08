@@ -1,8 +1,8 @@
-﻿using Moley.Data.Dto;
-using Moley.MetaDataService.Model;
+﻿using Intwenty.Data.Dto;
+using Intwenty.MetaDataService.Model;
 using System.Runtime.Serialization;
 
-namespace Moley.Models
+namespace Intwenty.Models
 {
     public enum TimeScopeDefinition
     {

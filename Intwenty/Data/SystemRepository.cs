@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using Moley.Data.Entity;
-using Moley.MetaDataService.Model;
-namespace Moley.Data
+using Intwenty.Data.Entity;
+using Intwenty.MetaDataService.Model;
+
+
+namespace Intwenty.Data
 {
     /// <summary>
     /// Interface for operations on meta data

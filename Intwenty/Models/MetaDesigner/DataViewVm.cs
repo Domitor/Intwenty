@@ -1,8 +1,8 @@
-﻿using Moley.MetaDataService.Model;
+﻿using Intwenty.MetaDataService.Model;
 using System.Collections.Generic;
 
 
-namespace Moley.Models.MetaDesigner
+namespace Intwenty.Models.MetaDesigner
 {
     public static class MataDataViewCreator
     {

@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Moley.Data.Entity
+namespace Intwenty.Data.Entity
 {
     public class SystemID
     {

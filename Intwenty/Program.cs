@@ -3,9 +3,9 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moley.Data;
+using Intwenty.Data;
 
-namespace Moley
+namespace Intwenty
 {
     public class Program
     {

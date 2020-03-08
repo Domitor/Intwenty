@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Moley.MetaDataService.Model
+namespace Intwenty.MetaDataService.Model
 {
     public abstract class BaseModelItem
     {

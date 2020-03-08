@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Moley.Models;
-using Moley.Data;
-using Moley.MetaDataService;
+using Intwenty.Models;
+using Intwenty.Data;
+using Intwenty.MetaDataService;
 using System.Globalization;
 
-namespace Moley.Controllers
+namespace Intwenty.Controllers
 {
     public class ApplicationController : Controller
     {

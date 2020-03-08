@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Moley.Models;
-using Moley.Models.MetaDesigner;
-using Moley.Data;
-using Moley.MetaDataService;
-using Moley.MetaDataService.Model;
+using Intwenty.Models;
+using Intwenty.Models.MetaDesigner;
+using Intwenty.Data;
+using Intwenty.MetaDataService;
+using Intwenty.MetaDataService.Model;
 
-namespace Moley.Controllers
+namespace Intwenty.Controllers
 {
     public class ApplicationInfoController : Controller
     {

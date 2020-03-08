@@ -1,7 +1,7 @@
-﻿using Moley.Data;
-using Moley.MetaDataService.Engine.Common;
-using Moley.MetaDataService.Model;
-using Moley.Models;
+﻿using Intwenty.Data;
+using Intwenty.MetaDataService.Engine.Common;
+using Intwenty.MetaDataService.Model;
+using Intwenty.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace Moley.MetaDataService.Engine
+namespace Intwenty.MetaDataService.Engine
 {
     public enum LifecycleStatus
     {

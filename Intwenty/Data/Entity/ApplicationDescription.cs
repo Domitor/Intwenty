@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
-namespace Moley.Data.Entity
+namespace Intwenty.Data.Entity
 {
 
    public class ApplicationDescription
