@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moley.Models;
 using Moley.Models.MetaDesigner;
 using Moley.Data;
-using Moley.Data.Dto;
 using Moley.MetaDataService;
+using Moley.MetaDataService.Model;
 
 namespace Moley.Controllers
 {
@@ -77,7 +77,7 @@ namespace Moley.Controllers
 
 
         [HttpPost]
-        public JsonResult Save([FromBody] ApplicationDescriptionDto model)
+        public JsonResult Save([FromBody] ApplicationModelItem model)
         {
             var res = Repository.SaveApplication(model);
             return new JsonResult(res);
@@ -200,7 +200,7 @@ namespace Moley.Controllers
         [HttpGet("/ApplicationInfo/GetApplicationTableDataTypes")]
         public JsonResult GetApplicationTableDataTypes()
         {
-            var t = new MetaDataItemDto();
+            var t = new DatabaseModelItem();
             return new JsonResult(t.DataTypes);
 
         }
@@ -267,7 +267,7 @@ namespace Moley.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveValueDomains([FromBody] List<ValueDomainDto> model)
+        public JsonResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)
         {
             try
             {
@@ -287,7 +287,7 @@ namespace Moley.Controllers
 
 
         [HttpPost]
-        public JsonResult RemoveValueDomain([FromBody] ValueDomainDto model)
+        public JsonResult RemoveValueDomain([FromBody] ValueDomainModelItem model)
         {
             try
             {

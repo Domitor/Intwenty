@@ -2,24 +2,24 @@
 using System.Collections.Generic;
 
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
 
-    public class MetaUIItemDto : MetaModelDto
+    public class UserInterfaceModelItem : BaseModelItem
     {
 
-        public MetaUIItemDto()
+        public UserInterfaceModelItem()
         {
             SetEmptyStrings();
         }
 
-        public MetaUIItemDto(string metatype)
+        public UserInterfaceModelItem(string metatype)
         {
             MetaType = metatype;
             SetEmptyStrings();
         }
 
-        public MetaUIItemDto(MetaUIItem entity)
+        public UserInterfaceModelItem(Data.Entity.MetaUIItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
@@ -68,9 +68,9 @@ namespace Moley.Data.Dto
 
         public string Domain { get; set; }
 
-        public MetaDataItemDto DataInfo { get; set; }
+        public DatabaseModelItem DataInfo { get; set; }
 
-        public MetaDataViewDto ViewInfo { get; set; }
+        public DataViewModelItem ViewInfo { get; set; }
 
  
         public bool IsDataConnected

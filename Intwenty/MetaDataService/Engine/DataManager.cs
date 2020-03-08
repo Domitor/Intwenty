@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Moley.Data;
-using Moley.Data.Dto;
+﻿using Moley.Data;
 using Moley.MetaDataService.Engine.Common;
+using Moley.MetaDataService.Model;
 using Moley.Models;
 using System;
 using System.Collections.Generic;
@@ -39,9 +38,9 @@ namespace Moley.MetaDataService.Engine
 
         OperationResult GetValueDomains();
 
-        OperationResult GetDataView(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
         OperationResult GenerateTestData(ISystemRepository repository, int gencount);
 
@@ -51,7 +50,7 @@ namespace Moley.MetaDataService.Engine
 
     public class DataManager : IDataManager
     {
-        protected ApplicationDto Meta { get; set; }
+        protected ApplicationModel Meta { get; set; }
 
         public ClientStateInfo ClientState { get; set; }
 
@@ -61,13 +60,13 @@ namespace Moley.MetaDataService.Engine
 
         protected DateTime ApplicationSaveTimeStamp { get; set; }
 
-        protected DataManager(ApplicationDto application)
+        protected DataManager(ApplicationModel application)
         {
             Meta = application;
             ApplicationSaveTimeStamp = DateTime.Now;
         }
 
-        public static DataManager GetDataManager(ApplicationDto application)
+        public static DataManager GetDataManager(ApplicationModel application)
         {
 
             if (application.Application.MetaCode == "XXXXX")
@@ -432,7 +431,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        public OperationResult GetDataView(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
             var result = new OperationResult();
 
@@ -490,7 +489,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        public OperationResult GetDataViewValue(List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
             var sql = "";
             var result = new OperationResult(true, "Fetched dataview value", 0, 0);
@@ -611,7 +610,7 @@ namespace Moley.MetaDataService.Engine
 
         #region Helpers
 
-        private void SetParameters(Dictionary<MetaDataItemDto, object> paramlist, DataAccessClient da)
+        private void SetParameters(Dictionary<DatabaseModelItem, object> paramlist, DataAccessClient da)
         {
             foreach (var p in paramlist)
             {
@@ -732,7 +731,7 @@ namespace Moley.MetaDataService.Engine
 
         private void InsertMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
-            var paramlist = new Dictionary<MetaDataItemDto, object>();
+            var paramlist = new Dictionary<DatabaseModelItem, object>();
 
             if (this.ClientState.Id < 1)
                 throw new InvalidOperationException("Invalid systemid");
@@ -789,7 +788,7 @@ namespace Moley.MetaDataService.Engine
 
         private void UpdateMainTable(Dictionary<string, object> data, DataAccessClient da)
         {
-            var paramlist = new Dictionary<MetaDataItemDto, object>();
+            var paramlist = new Dictionary<DatabaseModelItem, object>();
 
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + this.Meta.Application.MainTableName);
@@ -1024,7 +1023,7 @@ namespace Moley.MetaDataService.Engine
             }
         }
 
-        private void CreateDBColumn(OperationResult o, MetaDataItemDto column, string tablename)
+        private void CreateDBColumn(OperationResult o, DatabaseModelItem column, string tablename)
         {
             if (!column.IsMetaTypeDataValue)
             {
@@ -1084,7 +1083,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        private void CreateDBTable(OperationResult o, MetaDataItemDto table)
+        private void CreateDBTable(OperationResult o, DatabaseModelItem table)
         {
 
             if (table.MetaType != "DATAVALUETABLE")
@@ -1201,7 +1200,7 @@ namespace Moley.MetaDataService.Engine
 
         #region Test Data
 
-        private object GetSemanticValue(MetaDataItemDto t, Random rnd, int gencount)
+        private object GetSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
         {
             var val = GetCustomSemanticValue(t, rnd, gencount);
             if (val == null)
@@ -1210,7 +1209,7 @@ namespace Moley.MetaDataService.Engine
             return val;
         }
 
-        private object GetCustomSemanticValue(MetaDataItemDto t, Random rnd, int gencount)
+        private object GetCustomSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
         {
             if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 1)
                 return "Anderssons AB";
@@ -1244,7 +1243,7 @@ namespace Moley.MetaDataService.Engine
 
         }
 
-        private object GetStandardSemanticValue(MetaDataItemDto t, Random rnd, int gencount)
+        private object GetStandardSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
         {
 
             if (t.IsDataType1Decimal)

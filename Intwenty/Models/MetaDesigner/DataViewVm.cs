@@ -1,4 +1,4 @@
-﻿using Moley.Data.Dto;
+﻿using Moley.MetaDataService.Model;
 using System.Collections.Generic;
 
 
@@ -6,12 +6,12 @@ namespace Moley.Models.MetaDesigner
 {
     public static class MataDataViewCreator
     {
-        public static List<MetaDataViewDto> GetMetaDataView(DataViewVm model)
+        public static List<DataViewModelItem> GetMetaDataView(DataViewVm model)
         {
-            var res = new List<MetaDataViewDto>();
-            var t = new MetaDataViewDto("DATAVIEW") { SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
+            var res = new List<DataViewModelItem>();
+            var t = new DataViewModelItem("DATAVIEW") { SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
             if (string.IsNullOrEmpty(model.MetaCode))
-                t.MetaCode = "DV_" + MetaModelDto.GetRandomUniqueString();
+                t.MetaCode = "DV_" + BaseModelItem.GetRandomUniqueString();
 
             res.Add(t);
 
@@ -21,17 +21,17 @@ namespace Moley.Models.MetaDesigner
                 cnt += 1;
                 if (cnt == 1)
                 {
-                    var kf = new MetaDataViewDto("DATAVIEWKEYFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
+                    var kf = new DataViewModelItem("DATAVIEWKEYFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
                     if (string.IsNullOrEmpty(kf.MetaCode))
-                        kf.MetaCode = "DVKF_" + MetaModelDto.GetRandomUniqueString();
+                        kf.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
 
                     res.Add(kf);
                 }
                 else
                 {
-                    var lf = new MetaDataViewDto("DATAVIEWFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
+                    var lf = new DataViewModelItem("DATAVIEWFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
                     if (string.IsNullOrEmpty(lf.MetaCode))
-                        lf.MetaCode = "DVKF_" + MetaModelDto.GetRandomUniqueString();
+                        lf.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
 
                     res.Add(lf);
                 }
@@ -51,7 +51,7 @@ namespace Moley.Models.MetaDesigner
         public string Properties = "";
         public List<DataViewFieldVm> Fields = new List<DataViewFieldVm>();
 
-        public static List<DataViewVm> GetDataViews(List<MetaDataViewDto> viewmeta)
+        public static List<DataViewVm> GetDataViews(List<DataViewModelItem> viewmeta)
         {
             var res = new List<DataViewVm>();
 

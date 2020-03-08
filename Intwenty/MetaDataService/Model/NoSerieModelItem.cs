@@ -4,17 +4,17 @@ using System;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
-    public class NoSerieDto
+    public class NoSerieModelItem
     {
 
-        public NoSerieDto()
+        public NoSerieModelItem()
         {
             SetEmptyStrings();
         }
 
-        public NoSerieDto(NoSerie entity)
+        public NoSerieModelItem(Data.Entity.NoSerie entity)
         {
             Id = entity.Id;
             AppMetaCode = entity.AppMetaCode;
@@ -64,9 +64,9 @@ namespace Moley.Data.Dto
             get { return DataInfo != null && !string.IsNullOrEmpty(DataMetaCode); }
         }
 
-        public MetaDataItemDto DataInfo { get; set; }
+        public DatabaseModelItem DataInfo { get; set; }
 
-        public ApplicationDescriptionDto Application { get; set; }
+        public ApplicationModelItem Application { get; set; }
 
 
     }

@@ -1,5 +1,5 @@
-﻿using Moley.Data.Dto;
-using System;
+﻿using System;
+using Moley.MetaDataService.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace Moley.Models.MetaDesigner
     public static class DBVmCreator
     {
 
-        public static DBVm GetDBVm(ApplicationDto app)
+        public static DBVm GetDBVm(ApplicationModel app)
         {
             var res = new DBVm();
             res.Id = app.Application.Id;
@@ -39,11 +39,11 @@ namespace Moley.Models.MetaDesigner
 
     public static class MetaDataItemCreator
     {
-        public static List<MetaDataItemDto> GetMetaDataItems(DBVm model)
+        public static List<DatabaseModelItem> GetMetaDataItems(DBVm model)
         {
-            var res = new List<MetaDataItemDto>();
-            res.AddRange(model.Tables.Select(p => new MetaDataItemDto(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.Properties, DataType = "" }));
-            res.AddRange(model.Columns.Select(p => new MetaDataItemDto(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Domain = p.Domain, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.Properties, TableName = p.TableName }));
+            var res = new List<DatabaseModelItem>();
+            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.Properties, DataType = "" }));
+            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Domain = p.Domain, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.Properties, TableName = p.TableName }));
             return res;
         }
     }
@@ -71,7 +71,7 @@ namespace Moley.Models.MetaDesigner
         public string Description = "";
         public List<UIDbTableField> Columns = new List<UIDbTableField>();
 
-        public static List<UIDbTable> GetTables(ApplicationDto app)
+        public static List<UIDbTable> GetTables(ApplicationModel app)
         {
             var res = new List<UIDbTable>();
 

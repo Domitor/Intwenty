@@ -1,4 +1,5 @@
 ﻿using Moley.Data.Dto;
+using Moley.MetaDataService.Model;
 using System.Runtime.Serialization;
 
 namespace Moley.Models
@@ -32,7 +33,7 @@ namespace Moley.Models
 
     public class ClientStateInfo 
     {
-        public ApplicationDescriptionDto  Application { get; set; }
+        public ApplicationModelItem  Application { get; set; }
 
         public int Version { get; set; }
 

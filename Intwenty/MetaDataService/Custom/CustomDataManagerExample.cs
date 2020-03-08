@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Moley.Data.Dto;
 using Moley.Models;
 using Moley.MetaDataService.Engine;
 using Moley.MetaDataService.Engine.Common;
+using Moley.MetaDataService.Model;
 
 namespace Moley.MetaDataService.Custom
 {
@@ -11,7 +11,7 @@ namespace Moley.MetaDataService.Custom
     public class AppDataManagerExample : DataManager
     {
 
-        public AppDataManagerExample(ApplicationDto application) : base(application)
+        public AppDataManagerExample(ApplicationModel application) : base(application)
         {
         }
 

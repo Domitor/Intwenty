@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace Moley.Data.Dto
+
+namespace Moley.MetaDataService.Model
 {
-    public abstract class MetaModelDto
+    public abstract class BaseModelItem
     {
         public virtual bool IsValid
         {

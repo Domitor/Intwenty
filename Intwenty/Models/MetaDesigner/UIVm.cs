@@ -1,4 +1,4 @@
-﻿using Moley.Data.Dto;
+﻿using Moley.MetaDataService.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ namespace Moley.Models.MetaDesigner
 
     public static class UIVmCreator
     {
-        public static UIVm GetUIVm(ApplicationDto app)
+        public static UIVm GetUIVm(ApplicationModel app)
         {
             var res = new UIVm();
             res.Id = app.Application.Id;
@@ -103,15 +103,15 @@ namespace Moley.Models.MetaDesigner
     public static class MetaUIItemCreator
     {
 
-        public static List<MetaUIItemDto> GetMetaUI(UIVm model, ApplicationDto app, List<MetaDataViewDto> views)
+        public static List<UserInterfaceModelItem> GetMetaUI(UIVm model, ApplicationModel app, List<DataViewModelItem> views)
         {
-            var res = new List<MetaUIItemDto>();
+            var res = new List<UserInterfaceModelItem>();
             foreach (var input in model.UserInputs)
             {
-                var dto = new MetaUIItemDto(input.MetaType) { Id=input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+                var dto = new UserInterfaceModelItem(input.MetaType) { Id=input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
 
                 if (string.IsNullOrEmpty(dto.MetaCode))
-                    dto.MetaCode = dto.MetaType + "_" + MetaModelDto.GetRandomUniqueString();
+                    dto.MetaCode = dto.MetaType + "_" + BaseModelItem.GetRandomUniqueString();
 
                 if (dto.IsUITypeCheckBox || dto.IsUITypeComboBox || dto.IsUITypeDatePicker || dto.IsUITypeNumBox || dto.IsUITypeTextArea || dto.IsUITypeTextBox)
                 {
@@ -137,7 +137,7 @@ namespace Moley.Models.MetaDesigner
                         dto.Domain = "DATAVIEW." + input.Domain;
                     }
 
-                    var keyfield = new MetaUIItemDto(dto.UITypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                    var keyfield = new UserInterfaceModelItem(dto.UITypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
                     if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
                     {
                         var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName);
@@ -152,7 +152,7 @@ namespace Moley.Models.MetaDesigner
                     }
                     res.Add(keyfield);
 
-                    var lookupfield = new MetaUIItemDto(dto.UITypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                    var lookupfield = new UserInterfaceModelItem(dto.UITypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
                     if (!string.IsNullOrEmpty(input.LookUpFieldDbName))
                     {
                         var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpFieldDbName);

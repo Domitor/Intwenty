@@ -1,37 +1,35 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
 using Moley.Data;
-using Moley.Data.Dto;
-using Moley.MetaDataService.Custom;
 using Moley.MetaDataService.Engine;
+using Moley.MetaDataService.Model;
 using Moley.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Moley.MetaDataService
 {
     public interface IServiceEngine
     {
-        OperationResult ConfigureDatabase(ApplicationDto app);
+        OperationResult ConfigureDatabase(ApplicationModel app);
 
-        OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
+        OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
 
-        OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state);
+        OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state);
 
-        OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args);
+        OperationResult GetListView(ApplicationModel app, ListRetrivalArgs args);
 
-        OperationResult GetValueDomains(ApplicationDto app);
+        OperationResult GetValueDomains(ApplicationModel app);
 
-        OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataView(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data);
+        OperationResult Validate(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
 
-        OperationResult ValidateModel(List<ApplicationDto> apps, List<MetaDataViewDto> viewinfo);
+        OperationResult ValidateModel(List<ApplicationModel> apps, List<DataViewModelItem> viewinfo);
 
-        OperationResult GenerateTestData(List<ApplicationDto> apps, ISystemRepository repository);
+        OperationResult GenerateTestData(List<ApplicationModel> apps, ISystemRepository repository);
 
     }
 
@@ -46,13 +44,13 @@ namespace Moley.MetaDataService
         }
         
 
-        public OperationResult ConfigureDatabase(ApplicationDto app)
+        public OperationResult ConfigureDatabase(ApplicationModel app)
         {
             var t = DataManager.GetDataManager(app);
             return t.ConfigureDatabase();
         }
 
-        public OperationResult Save(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
+        public OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data)
         {
 
             var validation = Validate(app, state, data);
@@ -70,26 +68,26 @@ namespace Moley.MetaDataService
         }
 
 
-        public OperationResult GetListView(ApplicationDto app, ListRetrivalArgs args)
+        public OperationResult GetListView(ApplicationModel app, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
             return t.GetListView(args);
         }
 
-        public OperationResult GetLatestVersion(ApplicationDto app, ClientStateInfo state)
+        public OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state)
         {
             var t = DataManager.GetDataManager(app);
             t.ClientState = state;
             return t.GetLatestVersion();
         }
 
-        public OperationResult GetValueDomains(ApplicationDto app)
+        public OperationResult GetValueDomains(ApplicationModel app)
         {
             var t = DataManager.GetDataManager(app);
             return t.GetValueDomains();
         }
 
-        public OperationResult Validate(ApplicationDto app, ClientStateInfo state, Dictionary<string, object> data)
+        public OperationResult Validate(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data)
         {
 
             foreach (var t in app.UIStructure)
@@ -114,7 +112,7 @@ namespace Moley.MetaDataService
             return new OperationResult(true, "Successfully validated", state.Id, state.Version);
         }
 
-        public OperationResult ValidateModel(List<ApplicationDto> apps, List<MetaDataViewDto> viewinfo)
+        public OperationResult ValidateModel(List<ApplicationModel> apps, List<DataViewModelItem> viewinfo)
         {
             var res = new OperationResult();
 
@@ -305,7 +303,7 @@ namespace Moley.MetaDataService
             return res;
         }
 
-        public OperationResult GenerateTestData(List<ApplicationDto> apps, ISystemRepository repository)
+        public OperationResult GenerateTestData(List<ApplicationModel> apps, ISystemRepository repository)
         {
             var counter = 0;
             foreach (var app in apps)
@@ -325,13 +323,13 @@ namespace Moley.MetaDataService
 
        
 
-        public OperationResult GetDataView(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataView(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
             return t.GetDataView(viewinfo, args);
         }
 
-        public OperationResult GetDataViewValue(ApplicationDto app, List<MetaDataViewDto> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
             return t.GetDataViewValue(viewinfo, args);

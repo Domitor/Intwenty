@@ -1,16 +1,16 @@
 ﻿using Moley.Data.Entity;
 using System.Collections.Generic;
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
-    public class MetaMenuItemDto : MetaModelDto
+    public class MenuModelItem : BaseModelItem
     {
-        public MetaMenuItemDto(string metatype)
+        public MenuModelItem(string metatype)
         {
             MetaType = metatype;
         }
 
-        public MetaMenuItemDto(MetaMenuItem entity)
+        public MenuModelItem(Data.Entity.MetaMenuItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;
@@ -25,7 +25,7 @@ namespace Moley.Data.Dto
 
         public int Id { get; set; }
 
-        public ApplicationDescriptionDto Application { get; set; }
+        public ApplicationModelItem Application { get; set; }
 
         public string Title { get; set; }
 

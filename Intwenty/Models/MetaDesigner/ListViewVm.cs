@@ -1,4 +1,4 @@
-﻿using Moley.Data.Dto;
+﻿using Moley.MetaDataService.Model;
 using System.Collections.Generic;
 
 
@@ -6,21 +6,21 @@ namespace Moley.Models.MetaDesigner
 {
     public static class MetaDataListViewCreator
     {
-        public static List<MetaUIItemDto> GetMetaUIListView(ListViewVm model, ApplicationDto app)
+        public static List<UserInterfaceModelItem> GetMetaUIListView(ListViewVm model, ApplicationModel app)
         {
-            var res = new List<MetaUIItemDto>();
-            var t = new MetaUIItemDto("LISTVIEW") { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode  };
+            var res = new List<UserInterfaceModelItem>();
+            var t = new UserInterfaceModelItem("LISTVIEW") { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode  };
             if (string.IsNullOrEmpty(model.MetaCode))
-                t.MetaCode = "LV_" + MetaModelDto.GetRandomUniqueString();
+                t.MetaCode = "LV_" + BaseModelItem.GetRandomUniqueString();
 
             res.Add(t);
 
            
             foreach (var f in model.Fields)
             {
-                var lf = new MetaUIItemDto(t.UITypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
+                var lf = new UserInterfaceModelItem(t.UITypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
                 if (string.IsNullOrEmpty(lf.MetaCode))
-                    lf.MetaCode = "LVFLD_" + MetaModelDto.GetRandomUniqueString();
+                    lf.MetaCode = "LVFLD_" + BaseModelItem.GetRandomUniqueString();
 
                 if (!string.IsNullOrEmpty(f.DbName))
                 {
@@ -45,7 +45,7 @@ namespace Moley.Models.MetaDesigner
         public string Properties = "";
         public List<ListViewFieldVm> Fields = new List<ListViewFieldVm>();
 
-        public static ListViewVm GetListView(ApplicationDto app)
+        public static ListViewVm GetListView(ApplicationModel app)
         {
             var res = new ListViewVm();
             res.ApplicationId = app.Application.Id;

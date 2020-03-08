@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
 
-   public class ApplicationDescriptionDto : MetaModelDto
+   public class ApplicationModelItem : BaseModelItem
     {
-        public ApplicationDescriptionDto()
+        public ApplicationModelItem()
         {
-            MainMenuItem = new MetaMenuItemDto("MENUITEM");
+            MainMenuItem = new MenuModelItem("MENUITEM");
             SetEmptyStrings();
         }
 
-        public ApplicationDescriptionDto(ApplicationDescription entity)
+        public ApplicationModelItem(Data.Entity.ApplicationDescription entity)
         {
             Id = entity.Id;
             Title = entity.Title;
@@ -27,7 +27,7 @@ namespace Moley.Data.Dto
             TestDataAmount = entity.TestDataAmount;
             MetaType = "APPLICATION";
             ParentMetaCode = "ROOT";
-            MainMenuItem = new MetaMenuItemDto("MENUITEM");
+            MainMenuItem = new MenuModelItem("MENUITEM");
             SetEmptyStrings();
         }
 
@@ -66,7 +66,7 @@ namespace Moley.Data.Dto
 
         public int TestDataAmount { get; set; }
 
-        public MetaMenuItemDto MainMenuItem { get; set; }
+        public MenuModelItem MainMenuItem { get; set; }
 
         public string MainTableName
         {

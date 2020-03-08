@@ -2,9 +2,9 @@
 using Moley.Data.Entity;
 using System.Collections.Generic;
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
-    public class MetaDataViewDto : MetaModelDto
+    public class DataViewModelItem : BaseModelItem
     {
 
         public int Id { get; set; }
@@ -15,7 +15,7 @@ namespace Moley.Data.Dto
 
         public string SQLQueryFieldName { get; set; }
 
-        public MetaDataViewDto(MetaDataView entity)
+        public DataViewModelItem(Data.Entity.MetaDataView entity)
         {
             Id = entity.Id;
             SQLQuery = entity.SQLQuery;
@@ -27,12 +27,12 @@ namespace Moley.Data.Dto
             Properties = "";
         }
 
-        public MetaDataViewDto(string metatype)
+        public DataViewModelItem(string metatype)
         {
             MetaType = metatype;
         }
 
-        public MetaDataViewDto()
+        public DataViewModelItem()
         {
         }
 

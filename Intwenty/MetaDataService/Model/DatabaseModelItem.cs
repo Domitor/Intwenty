@@ -3,25 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
-
-    public class MetaDataItemDto : MetaModelDto
+    public class DatabaseModelItem : BaseModelItem
     {
 
-        public MetaDataItemDto()
+        public DatabaseModelItem()
         {
             SetEmptyStrings();
         }
 
-        public MetaDataItemDto(string metatype)
+        public DatabaseModelItem(string metatype)
         {
             MetaType = metatype;
             SetEmptyStrings();
 
         }
 
-        public MetaDataItemDto(MetaDataItem entity)
+        public DatabaseModelItem(MetaDataItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;

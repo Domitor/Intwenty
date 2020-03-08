@@ -1,11 +1,9 @@
-﻿
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using Moley.Data.Entity;
-using Moley.Data.Dto;
-using System;
-
+using Moley.MetaDataService.Model;
 namespace Moley.Data
 {
     /// <summary>
@@ -13,33 +11,33 @@ namespace Moley.Data
     /// </summary>
     public interface ISystemRepository
     {
-        List<ApplicationDescriptionDto> GetApplicationDescriptions();
+        List<ApplicationModelItem> GetApplicationDescriptions();
 
-        List<MetaDataItemDto> GetMetaDataItems();
+        List<DatabaseModelItem> GetMetaDataItems();
 
-        List<MetaUIItemDto> GetMetaUIItems();
+        List<UserInterfaceModelItem> GetMetaUIItems();
 
-        List<MetaDataViewDto> GetMetaDataViews();
+        List<DataViewModelItem> GetMetaDataViews();
 
-        List<ApplicationDto> GetApplicationMeta();
+        List<ApplicationModel> GetApplicationMeta();
 
-        List<MetaMenuItemDto> GetMetaMenuItems();
+        List<MenuModelItem> GetMetaMenuItems();
 
-        List<ValueDomainDto> GetValueDomains();
+        List<ValueDomainModelItem> GetValueDomains();
 
-        List<NoSerieDto> GetNewNoSeriesValues(int applicationid );
+        List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid );
 
-        List<NoSerieDto> GetNoSeries();
+        List<NoSerieModelItem> GetNoSeries();
 
-        ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model);
+        ApplicationModelItem SaveApplication(ApplicationModelItem model);
 
-        void SaveApplicationUI(List<MetaUIItemDto> model);
+        void SaveApplicationUI(List<UserInterfaceModelItem> model);
 
-        void SaveApplicationDB(List<MetaDataItemDto> model, int applicationid);
+        void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid);
 
-        void SaveDataView(List<MetaDataViewDto> model);
+        void SaveDataView(List<DataViewModelItem> model);
 
-        void SaveValueDomains(List<ValueDomainDto> model);
+        void SaveValueDomains(List<ValueDomainModelItem> model);
 
         void DeleteApplicationUI(int id);
 
@@ -61,7 +59,7 @@ namespace Moley.Data
         private DbSet<MetaDataView> MetaDataViews;
         private DbSet<MetaMenuItem> MetaMenuItems;
         private DbSet<NoSerie> NoSeries;
-        private DbSet<ValueDomain> ValueDomains;
+        private DbSet<Entity.ValueDomain> ValueDomains;
 
 
         public SystemRepository(ApplicationDbContext context)
@@ -73,28 +71,28 @@ namespace Moley.Data
             MetaDataViews = context.Set<MetaDataView>();
             MetaMenuItems = context.Set<MetaMenuItem>();
             NoSeries = context.Set<NoSerie>();
-            ValueDomains = context.Set<ValueDomain>();
+            ValueDomains = context.Set<Entity.ValueDomain>();
         }
 
 
 
-        public List<ApplicationDto> GetApplicationMeta()
+        public List<ApplicationModel> GetApplicationMeta()
         {
-            var res = new List<ApplicationDto>();
+            var res = new List<ApplicationModel>();
             var apps =  GetApplicationDescriptions();
-            var ditems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
-            var uitems = MetaUIItem.Select(p => new MetaUIItemDto(p)).ToList();
-            var views = MetaDataViews.Select(p => new MetaDataViewDto(p)).ToList();
-            var noseries = NoSeries.Select(p => new NoSerieDto(p)).ToList();
+            var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
+            var uitems = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
+            var views = MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
+            var noseries = NoSeries.Select(p => new NoSerieModelItem(p)).ToList();
 
 
             foreach (var app in apps)
             {
-                var t = new ApplicationDto();
+                var t = new ApplicationModel();
                 t.Application = app;
-                t.DataStructure = new List<MetaDataItemDto>();
-                t.UIStructure = new List<MetaUIItemDto>();
-                t.NoSeries = new List<NoSerieDto>();
+                t.DataStructure = new List<DatabaseModelItem>();
+                t.UIStructure = new List<UserInterfaceModelItem>();
+                t.NoSeries = new List<NoSerieModelItem>();
 
                 foreach (var item in ditems)
                 {
@@ -170,13 +168,13 @@ namespace Moley.Data
 
        
 
-        public List<MetaMenuItemDto> GetMetaMenuItems()
+        public List<MenuModelItem> GetMetaMenuItems()
         {
-            var apps = AppDescription.Select(p => new ApplicationDescriptionDto(p)).ToList();
-            var res = new List<MetaMenuItemDto>();
+            var apps = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
+            var res = new List<MenuModelItem>();
             foreach (var m in MetaMenuItems.OrderBy(p=> p.Order))
             {
-                var s = new MetaMenuItemDto(m);
+                var s = new MenuModelItem(m);
 
                 //DEFAULTS
                 if (!string.IsNullOrEmpty(m.AppMetaCode) && s.IsMetaTypeMenuItem)
@@ -201,19 +199,19 @@ namespace Moley.Data
             return res;
         }
 
-        public List<NoSerieDto> GetNewNoSeriesValues(int applicationid)
+        public List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid)
         {
-            var res = new List<NoSerieDto>();
+            var res = new List<NoSerieModelItem>();
 
             var app = AppDescription.FirstOrDefault(p => p.Id == applicationid);
             if (app == null)
-                return new List<NoSerieDto>();
+                return new List<NoSerieModelItem>();
 
-            var appseries = NoSeries.Select(p => new NoSerieDto(p)).Where(p=> p.AppMetaCode == app.MetaCode).ToList();
+            var appseries = NoSeries.Select(p => new NoSerieModelItem(p)).Where(p=> p.AppMetaCode == app.MetaCode).ToList();
 
             foreach (var item in appseries)
             {
-                item.Application = new ApplicationDescriptionDto(app);
+                item.Application = new ApplicationModelItem(app);
 
                 if (item.Counter < 1)
                     item.Counter = item.StartValue;
@@ -240,10 +238,10 @@ namespace Moley.Data
 
         }
 
-        public List<NoSerieDto> GetNoSeries()
+        public List<NoSerieModelItem> GetNoSeries()
         {
-            var res = NoSeries.Select(p => new NoSerieDto(p)).ToList();
-            var ditems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
+            var res = NoSeries.Select(p => new NoSerieModelItem(p)).ToList();
+            var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
 
             foreach (var item in res)
             {
@@ -255,7 +253,7 @@ namespace Moley.Data
                     var app = AppDescription.FirstOrDefault(p => p.MetaCode == item.AppMetaCode);
                     if (app != null)
                     {
-                        item.Application = new ApplicationDescriptionDto(app);
+                        item.Application = new ApplicationModelItem(app);
                         if (!string.IsNullOrEmpty(item.DataMetaCode))
                         {
                             var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
@@ -271,9 +269,9 @@ namespace Moley.Data
         }
 
         #region Application
-        public List<ApplicationDescriptionDto> GetApplicationDescriptions()
+        public List<ApplicationModelItem> GetApplicationDescriptions()
         {
-            var t = AppDescription.Select(p => new ApplicationDescriptionDto(p)).ToList();
+            var t = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
             var menu = GetMetaMenuItems();
             foreach (var app in t)
             {
@@ -285,9 +283,9 @@ namespace Moley.Data
             return t;
         }
 
-        public ApplicationDescriptionDto SaveApplication(ApplicationDescriptionDto model)
+        public ApplicationModelItem SaveApplication(ApplicationModelItem model)
         {
-            var res = new ApplicationDescriptionDto();
+            var res = new ApplicationModelItem();
 
             if (model == null)
                 return null;
@@ -316,7 +314,7 @@ namespace Moley.Data
 
                
 
-                return new ApplicationDescriptionDto(entity);
+                return new ApplicationModelItem(entity);
 
             }
             else
@@ -345,13 +343,13 @@ namespace Moley.Data
 
                 context.SaveChanges();
 
-                return new ApplicationDescriptionDto(entity);
+                return new ApplicationModelItem(entity);
 
             }
 
         }
 
-        private void CreateApplicationMenuItem(ApplicationDescriptionDto model)
+        private void CreateApplicationMenuItem(ApplicationModelItem model)
         {
 
             if (!string.IsNullOrEmpty(model.MainMenuItem.Title))
@@ -373,7 +371,7 @@ namespace Moley.Data
                 var appmi = new MetaMenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
-                appmi.MetaCode = "MI_" + MetaModelDto.GetRandomUniqueString();
+                appmi.MetaCode = "MI_" + BaseModelItem.GetRandomUniqueString();
                 MetaMenuItems.Add(appmi);
 
             }
@@ -382,10 +380,10 @@ namespace Moley.Data
         #endregion
 
         #region UI
-        public List<MetaUIItemDto> GetMetaUIItems()
+        public List<UserInterfaceModelItem> GetMetaUIItems()
         {
-            var dataitems = MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
-            var res = MetaUIItem.Select(p => new MetaUIItemDto(p)).ToList();
+            var dataitems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
+            var res = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
 
             foreach (var item in res)
             {
@@ -402,7 +400,7 @@ namespace Moley.Data
             return res;
         }
 
-        public void SaveApplicationUI(List<MetaUIItemDto> model)
+        public void SaveApplicationUI(List<UserInterfaceModelItem> model)
         {
 
             foreach (var uic in model)
@@ -441,7 +439,7 @@ namespace Moley.Data
             var existing = MetaUIItem.FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                var dto = new MetaUIItemDto(existing);
+                var dto = new UserInterfaceModelItem(existing);
                 if (dto.IsUITypeLookUp)
                 {
                     var childlist = MetaUIItem.Where(p => (p.MetaType == "LOOKUPKEYFIELD" || p.MetaType == "LOOKUPFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
@@ -459,7 +457,7 @@ namespace Moley.Data
         }
 
 
-        private MetaUIItem CreateMetaUIItem(MetaUIItemDto dto)
+        private MetaUIItem CreateMetaUIItem(UserInterfaceModelItem dto)
         {
             var res = new MetaUIItem()
             {
@@ -482,12 +480,12 @@ namespace Moley.Data
 
         #region Database
 
-        public List<MetaDataItemDto> GetMetaDataItems()
+        public List<DatabaseModelItem> GetMetaDataItems()
         {
-            return MetaDBItem.Select(p => new MetaDataItemDto(p)).ToList();
+            return MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
         }
 
-        public void SaveApplicationDB(List<MetaDataItemDto> model, int applicationid)
+        public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid)
         {
 
             var app = GetApplicationMeta().Find(p => p.Application.Id == applicationid);
@@ -505,9 +503,9 @@ namespace Moley.Data
                     throw new InvalidOperationException("Could not identify parent table when saving application db meta.");
 
                 if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValueTable)
-                    dbi.MetaCode = "TBL_" + MetaModelDto.GetRandomUniqueString();
+                    dbi.MetaCode = "TBL_" + BaseModelItem.GetRandomUniqueString();
                 else if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValue)
-                    dbi.MetaCode = "DVL_" + MetaModelDto.GetRandomUniqueString();
+                    dbi.MetaCode = "DVL_" + BaseModelItem.GetRandomUniqueString();
 
                 if (dbi.IsMetaTypeDataValue && dbi.TableName == app.Application.DbName)
                 {
@@ -577,7 +575,7 @@ namespace Moley.Data
             var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                var dto = new MetaDataItemDto(existing);
+                var dto = new DatabaseModelItem(existing);
                 var app = GetApplicationMeta().Find(p => p.Application.MetaCode == dto.AppMetaCode);
                 if (app == null)
                     return;
@@ -596,7 +594,7 @@ namespace Moley.Data
             }
         }
 
-        private MetaDataItem CreateMetaDataItem(MetaDataItemDto dto)
+        private MetaDataItem CreateMetaDataItem(DatabaseModelItem dto)
         {
             var res = new MetaDataItem()
             {
@@ -618,12 +616,12 @@ namespace Moley.Data
         #endregion
 
         #region Data Views
-        public List<MetaDataViewDto> GetMetaDataViews()
+        public List<DataViewModelItem> GetMetaDataViews()
         {
-            return MetaDataViews.Select(p => new MetaDataViewDto(p)).ToList();
+            return MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
         }
 
-        public void SaveDataView(List<MetaDataViewDto> model)
+        public void SaveDataView(List<DataViewModelItem> model)
         {
             foreach (var dv in model)
             {
@@ -632,11 +630,11 @@ namespace Moley.Data
                     dv.ParentMetaCode = "ROOT";
 
                 if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataView)
-                    dv.MetaCode = "DV_" + MetaModelDto.GetRandomUniqueString();
+                    dv.MetaCode = "DV_" + BaseModelItem.GetRandomUniqueString();
                 else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewKeyField)
-                    dv.MetaCode = "DVKF_" + MetaModelDto.GetRandomUniqueString();
+                    dv.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
                 else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewField)
-                    dv.MetaCode = "DVLF_" + MetaModelDto.GetRandomUniqueString();
+                    dv.MetaCode = "DVLF_" + BaseModelItem.GetRandomUniqueString();
 
             }
 
@@ -669,7 +667,7 @@ namespace Moley.Data
         }
 
 
-        private MetaDataView CreateMetaDataView(MetaDataViewDto dto)
+        private MetaDataView CreateMetaDataView(DataViewModelItem dto)
         {
             var res = new MetaDataView()
             {
@@ -696,7 +694,7 @@ namespace Moley.Data
             var existing = MetaDataViews.FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                var dto = new MetaDataViewDto(existing);
+                var dto = new DataViewModelItem(existing);
                 if (dto.IsMetaTypeDataView)
                 {
                     var childlist = MetaDataViews.Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
@@ -714,7 +712,7 @@ namespace Moley.Data
 
         #region Value Domains
 
-        public void SaveValueDomains(List<ValueDomainDto> model)
+        public void SaveValueDomains(List<ValueDomainModelItem> model)
         {
 
             foreach (var vd in model)
@@ -724,7 +722,7 @@ namespace Moley.Data
 
                 if (vd.Id < 1)
                 {
-                    ValueDomains.Add(new ValueDomain() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    ValueDomains.Add(new Entity.ValueDomain() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {
@@ -743,9 +741,9 @@ namespace Moley.Data
             context.SaveChanges();
         }
 
-        public List<ValueDomainDto> GetValueDomains()
+        public List<ValueDomainModelItem> GetValueDomains()
         {
-            var t = ValueDomains.Select(p => new ValueDomainDto(p)).ToList();
+            var t = ValueDomains.Select(p => new ValueDomainModelItem(p)).ToList();
             return t;
         }
 

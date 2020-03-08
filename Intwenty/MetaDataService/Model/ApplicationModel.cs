@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
 
-    public class ApplicationDto
+    public class ApplicationModel
     {
-        public ApplicationDto()
+        public ApplicationModel()
         {
 
         }
@@ -15,17 +15,17 @@ namespace Moley.Data.Dto
         /// <summary>
         /// Describes an application
         /// </summary>
-        public ApplicationDescriptionDto Application { get; set; }
+        public ApplicationModelItem Application { get; set; }
 
         /// <summary>
         /// Describes the database for this application
         /// </summary>
-        public List<MetaDataItemDto> DataStructure { get; set; }
+        public List<DatabaseModelItem> DataStructure { get; set; }
 
         /// <summary>
         /// Describes the UI for this application
         /// </summary>
-        public List<MetaUIItemDto> UIStructure { get; set; }
+        public List<UserInterfaceModelItem> UIStructure { get; set; }
 
         /// <summary>
         /// Describes the data views for this application
@@ -35,7 +35,7 @@ namespace Moley.Data.Dto
         /// <summary>
         /// No Series used in this application
         /// </summary>
-        public List<NoSerieDto> NoSeries { get; set; }
+        public List<NoSerieModelItem> NoSeries { get; set; }
 
     }
 

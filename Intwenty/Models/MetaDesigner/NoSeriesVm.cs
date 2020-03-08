@@ -1,14 +1,12 @@
-﻿using Moley.Data.Dto;
-using System;
+﻿using System;
+using Moley.MetaDataService.Model;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Moley.Models.MetaDesigner
 {
     public static class NoSeriesVmCreator
     {
-        public static List<NoSeriesVm> GetNoSeriesVm(List<NoSerieDto> list)
+        public static List<NoSeriesVm> GetNoSeriesVm(List<NoSerieModelItem> list)
         {
             var res = new List<NoSeriesVm>();
             foreach (var t in list)
@@ -31,12 +29,12 @@ namespace Moley.Models.MetaDesigner
 
     public static class NoSeriesDtoCreator
     {
-        public static List<NoSerieDto> GetNoSeriesDto(List<NoSeriesVm> list)
+        public static List<NoSerieModelItem> GetNoSeriesDto(List<NoSeriesVm> list)
         {
-            var res = new List<NoSerieDto>();
+            var res = new List<NoSerieModelItem>();
             foreach (var t in list)
             {
-                var s = new NoSerieDto() { Id = t.Id, Description = t.Description, Prefix = t.Prefix, StartValue = t.StartValue };
+                var s = new NoSerieModelItem() { Id = t.Id, Description = t.Description, Prefix = t.Prefix, StartValue = t.StartValue };
 
                 throw new NotImplementedException();
 

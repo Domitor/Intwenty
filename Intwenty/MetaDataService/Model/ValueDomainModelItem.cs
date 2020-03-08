@@ -1,23 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Moley.Data.Entity;
-using System;
+﻿using Moley.Data.Entity;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 
-namespace Moley.Data.Dto
+namespace Moley.MetaDataService.Model
 {
-    public class ValueDomainDto : MetaModelDto
+    public class ValueDomainModelItem : BaseModelItem
     {
 
-        public ValueDomainDto()
+        public ValueDomainModelItem()
         {
             MetaType = "VALUEDOMAIN";
             ParentMetaCode = "ROOT";
             SetEmptyStrings();
         }
 
-        public ValueDomainDto(ValueDomain entity)
+        public ValueDomainModelItem(ValueDomain entity)
         {
             Id = entity.Id;
             DomainName = entity.DomainName;
