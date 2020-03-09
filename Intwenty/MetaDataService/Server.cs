@@ -176,23 +176,23 @@ namespace Intwenty.MetaDataService
                     if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
                         res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
 
-                    if (ui.IsUITypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeListViewField))
+                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewField))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
-                    if (ui.IsUITypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeLookUpField))
+                    if (ui.IsMetaTypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeLookUpField))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPFIELD.", ui.Title, a.Application.Title));
 
-                    if (ui.IsUITypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsUITypeLookUpKeyField))
+                    if (ui.IsMetaTypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeLookUpKeyField))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPKEYFIELD.", ui.Title, a.Application.Title));
 
-                    if (ui.IsUITypeLookUp && !ui.IsDataViewConnected)
+                    if (ui.IsMetaTypeLookUp && !ui.IsDataViewConnected)
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
 
-                    if (ui.IsUITypeLookUpKeyField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewKeyField)
+                    if (ui.IsMetaTypeLookUpKeyField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewKeyField)
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPKEYFIELD in application {1} is not connected to a DATAVIEWKEYFIELD, check domainname.", ui.Title, a.Application.Title));
 
-                    if (ui.IsUITypeLookUpField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewField)
+                    if (ui.IsMetaTypeLookUpField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewField)
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPFIELD in application {1} is not connected to a DATAVIEWFIELD, check domainname.", ui.Title, a.Application.Title));
 
 

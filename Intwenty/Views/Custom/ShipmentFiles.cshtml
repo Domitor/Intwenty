@@ -5,7 +5,7 @@
 
 @{
     var title = Model.Application.Title + " List";
-    var lv = Model.UIStructure.Find(p => p.IsUITypeListView);
+    var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
     if (lv != null)
     {
         title = lv.Title;

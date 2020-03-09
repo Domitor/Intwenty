@@ -11,14 +11,14 @@
 
     @{
 
-        var pnls = Model.UIStructure.FindAll(p => p.IsUITypePanel && p.IsRoot).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder);
+        var pnls = Model.UIStructure.FindAll(p => p.IsMetaTypePanel && p.IsRoot).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder);
     }
 
     <div class="row">
 
         @foreach (var pl in Model.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
         {
-            if (pl.IsUITypePanel && pl.IsRoot)
+            if (pl.IsMetaTypePanel && pl.IsRoot)
             {
 
                 <div class="col-md-@(12/pnls.Count())">
@@ -28,7 +28,7 @@
 
                         @foreach (var t in Model.UIStructure.Where(k => k.ParentMetaCode == pl.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                         {
-                            if (t.IsUITypeTextBox && t.IsDataConnected)
+                            if (t.IsMetaTypeTextBox && t.IsDataConnected)
                             {
                                 <div class="form-group">
                                     <label class="control-label">
@@ -40,7 +40,7 @@
 
                             }
 
-                            if (t.IsUITypeNumBox && t.IsDataConnected)
+                            if (t.IsMetaTypeNumBox && t.IsDataConnected)
                             {
                                 <div class="form-group">
                                     <label class="control-label">
@@ -52,7 +52,7 @@
 
                             }
 
-                            if (t.IsUITypeDatePicker && t.IsDataConnected)
+                            if (t.IsMetaTypeDatePicker && t.IsDataConnected)
                             {
                                 <div class="form-group">
                                     <label class="control-label">
@@ -64,7 +64,7 @@
 
                             }
 
-                            if (t.IsUITypeCheckBox && t.IsDataConnected)
+                            if (t.IsMetaTypeCheckBox && t.IsDataConnected)
                             {
                                 <div class="form-group">
                                     <input type="checkbox" v-model="model.@t.DataMetaCode" /> @t.Title
@@ -72,7 +72,7 @@
 
                             }
 
-                            if (t.IsUITypeTextArea && t.IsDataConnected)
+                            if (t.IsMetaTypeTextArea && t.IsDataConnected)
                             {
                                 <div class="form-group">
                                     <label class="control-label">
@@ -84,7 +84,7 @@
 
                             }
 
-                            if (t.IsUITypeComboBox && t.IsDataConnected && t.HasValueDomain)
+                            if (t.IsMetaTypeComboBox && t.IsDataConnected && t.HasValueDomain)
                             {
                                 <div class="form-group">
                                     <label class="control-label">
@@ -99,9 +99,9 @@
                             }
 
                             //LOOKUP bound to DATAVIEW
-                            if (t.IsUITypeLookUp && t.IsDataViewConnected)
+                            if (t.IsMetaTypeLookUp && t.IsDataViewConnected)
                             {
-                                var mandatory = Model.UIStructure.Exists(x => x.ParentMetaCode == t.MetaCode && (x.IsUITypeLookUpKeyField || x.IsUITypeLookUpField) && x.IsDataViewConnected && x.IsDataConnected && x.DataInfo.Mandatory);
+                                var mandatory = Model.UIStructure.Exists(x => x.ParentMetaCode == t.MetaCode && (x.IsMetaTypeLookUpKeyField || x.IsMetaTypeLookUpField) && x.IsDataViewConnected && x.IsDataConnected && x.DataInfo.Mandatory);
 
                                 <div>
                                     <label>
@@ -115,7 +115,7 @@
                                     </div>
                                     @{
 
-                                        var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
+                                        var keyfield = Model.UIStructure.Find(x => x.ParentMetaCode == t.MetaCode && x.IsMetaTypeLookUpKeyField && x.IsDataViewConnected && x.IsDataConnected);
                                         if (keyfield != null)
                                         {
                                             <div style="float:left; margin-left:5px; width:30%">
@@ -123,7 +123,7 @@
                                             </div>
                                         }
 
-                                        foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsUITypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
+                                        foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsMetaTypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
                                         {
                                             <div style="float:left; margin-left:5px; width:60%">
                                                 <input type="text" class="form-control" v-model="model.@lf.DataMetaCode" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode" readonly />
@@ -154,7 +154,7 @@
 
             @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))
             {
-                if (t.IsUITypeLookUp && t.IsDataViewConnected)
+                if (t.IsMetaTypeLookUp && t.IsDataViewConnected)
                 {
                     <!-- Modal -->
                     <div class="modal fade" id="@t.ViewName" role="dialog">
@@ -180,7 +180,7 @@
                                                         foreach (var c in Model.UIStructure)
                                                         {
 
-                                                            if ((c.IsUITypeLookUpField || c.IsUITypeLookUpKeyField) && c.IsDataConnected && c.IsDataViewConnected && c.ParentMetaCode == t.MetaCode)
+                                                            if ((c.IsMetaTypeLookUpField || c.IsMetaTypeLookUpKeyField) && c.IsDataConnected && c.IsDataViewConnected && c.ParentMetaCode == t.MetaCode)
                                                             {
                                                                 <option value="@c.ViewInfo.SQLQueryFieldName">@c.Title</option>
                                                             }
@@ -198,14 +198,14 @@
                                                         <tr>
                                                             @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
                                                             {
-                                                                if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                                if (lf.IsMetaTypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
                                                                 {
                                                                     <th>@lf.ViewInfo.Title</th>
                                                                 }
                                                             }
                                                             @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
                                                             {
-                                                                if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                                if (lf.IsMetaTypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
                                                                 {
                                                                     <th>@lf.ViewInfo.Title</th>
                                                                 }
@@ -215,14 +215,14 @@
                                                     <tr v-for="item in dataview">
                                                         @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
                                                         {
-                                                            if (lf.IsUITypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                            if (lf.IsMetaTypeLookUpKeyField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
                                                             {
                                                                 <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.MetaCode')" data-dismiss="modal">{{item.@lf.ViewInfo.SQLQueryFieldName}}</a></td>
                                                             }
                                                         }
                                                         @foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder))
                                                         {
-                                                            if (lf.IsUITypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
+                                                            if (lf.IsMetaTypeLookUpField && lf.IsDataViewConnected && lf.ParentMetaCode == t.MetaCode)
                                                             {
                                                                 <td>{{item.@lf.ViewInfo.SQLQueryFieldName}}</td>
                                                             }

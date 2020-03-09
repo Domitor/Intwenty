@@ -201,7 +201,7 @@ namespace Intwenty.Controllers
         public JsonResult GetApplicationTableDataTypes()
         {
             var t = new DatabaseModelItem();
-            return new JsonResult(t.DataTypes);
+            return new JsonResult(DatabaseModelItem.DataTypes);
 
         }
 

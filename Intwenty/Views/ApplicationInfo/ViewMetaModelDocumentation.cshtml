@@ -84,7 +84,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var ui in app.UIStructure.Where(p => (p.IsDataConnected || p.IsUITypeLookUp) && !p.IsUITypeListViewField && !p.IsUITypeLookUpField && !p.IsUITypeLookUpKeyField).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    @foreach (var ui in app.UIStructure.Where(p => (p.IsDataConnected || p.IsMetaTypeLookUp) && !p.IsMetaTypeListViewField && !p.IsMetaTypeLookUpField && !p.IsMetaTypeLookUpKeyField).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
                         <tr>
                             <td>@ui.MetaType</td>

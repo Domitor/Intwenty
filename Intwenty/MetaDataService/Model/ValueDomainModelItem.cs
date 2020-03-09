@@ -9,8 +9,8 @@ namespace Intwenty.MetaDataService.Model
 
         public ValueDomainModelItem()
         {
-            MetaType = "VALUEDOMAIN";
-            ParentMetaCode = "ROOT";
+            MetaType = MetaTypeValueDomain;
+            ParentMetaCode = MetaTypeRoot;
             SetEmptyStrings();
         }
 
@@ -21,9 +21,9 @@ namespace Intwenty.MetaDataService.Model
             Code = entity.Code;
             Value = entity.Value;
             Properties = entity.Properties;
-            MetaType = "VALUEDOMAIN";
+            MetaType = MetaTypeValueDomain;
             MetaCode = DomainName;
-            ParentMetaCode = "ROOT";
+            ParentMetaCode = MetaTypeRoot;
             SetEmptyStrings();
         }
 
@@ -34,6 +34,29 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(Value)) Value = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
         }
+
+        public static readonly string MetaTypeValueDomain = "VALUEDOMAIN";
+
+        public static List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
+
+        public static List<string> ValidMetaTypes
+        {
+            get
+            {
+                var t = new List<string>();
+                t.Add(MetaTypeValueDomain);
+                return t;
+            }
+        }
+
+
 
         public int Id { get; set; }
 
@@ -46,25 +69,6 @@ namespace Intwenty.MetaDataService.Model
         public override bool HasValidMetaType
         {
             get { return true;  }
-        }
-
-        protected override List<string> ValidProperties
-        {
-            get
-            {
-                var t = new List<string>();
-                return t;
-            }
-        }
-
-        public List<string> ValidMetaTypes
-        {
-            get
-            {
-                var t = new List<string>();
-                t.Add("VALUEDOMAIN");
-                return t;
-            }
         }
 
 

@@ -289,7 +289,7 @@ namespace Intwenty.MetaDataService.Engine
                 sql_list_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.UIStructure)
                 {
-                    if (t.IsUITypeListViewField && t.IsDataConnected)
+                    if (t.IsMetaTypeListViewField && t.IsDataConnected)
                     {
                         sql_list_stmt.Append(", t2." + t.DataInfo.DbName + " ");
                     }

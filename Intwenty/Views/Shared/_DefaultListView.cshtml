@@ -20,7 +20,7 @@
                     foreach (var c in Model.UIStructure)
                     {
 
-                        if (c.IsUITypeListViewField && c.IsDataConnected)
+                        if (c.IsMetaTypeListViewField && c.IsDataConnected)
                         {
                             <option value="@c.DataInfo.DbName">@c.Title</option>
                         }
@@ -43,7 +43,7 @@
                 foreach (var c in Model.UIStructure)
                 {
 
-                    if (c.IsUITypeListViewField && c.IsDataConnected)
+                    if (c.IsMetaTypeListViewField && c.IsDataConnected)
                     {
                         <th v-on:click="sortBycolumn('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
                     }
@@ -58,7 +58,7 @@
             foreach (var c in Model.UIStructure)
             {
 
-                if (c.IsUITypeListViewField && c.IsDataConnected)
+                if (c.IsMetaTypeListViewField && c.IsDataConnected)
                 {
                     <td>{{item.@c.DataInfo.DbName}}</td>
                 }

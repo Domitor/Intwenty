@@ -5,6 +5,11 @@ namespace Intwenty.MetaDataService.Model
 {
     public class MenuModelItem : BaseModelItem
     {
+
+        //META TYPES
+        public static readonly string MetaTypeMainMenu = "MAINMENU";
+        public static readonly string MetaTypeMenuItem = "MENUITEM";
+
         public MenuModelItem(string metatype)
         {
             MetaType = metatype;
@@ -23,6 +28,7 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
+
         public int Id { get; set; }
 
         public ApplicationModelItem Application { get; set; }
@@ -35,19 +41,9 @@ namespace Intwenty.MetaDataService.Model
 
         public string Action { get; set; }
 
-        public string MetaTypeMainMenu
-        {
-            get { return "MAINMENU"; }
-        }
-
         public bool IsMetaTypeMainMenu
         {
             get { return MetaType == MetaTypeMainMenu; }
-        }
-
-        public string MetaTypeMenuItem
-        {
-            get { return "MENUITEM"; }
         }
 
         public bool IsMetaTypeMenuItem
@@ -72,7 +68,7 @@ namespace Intwenty.MetaDataService.Model
 
       
 
-        protected override List<string> ValidProperties
+        public static List<string> ValidProperties
         {
             get
             {
@@ -81,13 +77,13 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public List<string> ValidMetaTypes
+        public static List<string> ValidMetaTypes
         {
             get
             {
                 var t = new List<string>();
-                t.Add("MAINMENU");
-                t.Add("MENUITEM");
+                t.Add(MetaTypeMainMenu);
+                t.Add(MetaTypeMenuItem);
                 return t;
             }
         }

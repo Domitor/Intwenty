@@ -7,6 +7,9 @@ namespace Intwenty.MetaDataService.Model
 {
     public abstract class BaseModelItem
     {
+        public static readonly string MetaTypeRoot = "ROOT";
+
+
         public virtual bool IsValid
         {
             get { return false; }
@@ -27,8 +30,7 @@ namespace Intwenty.MetaDataService.Model
 
         public string Properties { get; set; }
 
-        protected abstract List<string> ValidProperties { get; }
-
+     
         public bool IsRoot
         {
             get

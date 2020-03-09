@@ -7,6 +7,20 @@ namespace Intwenty.MetaDataService.Model
 {
     public class DatabaseModelItem : BaseModelItem
     {
+        //DATATYPES
+        public static readonly string DataTypeBool = "BOOLEAN";
+        public static readonly string DataTypeString = "STRING";
+        public static readonly string DataTypeText = "TEXT";
+        public static readonly string DataTypeInt = "INTEGER";
+        public static readonly string DataTypeDateTime = "DATETIME";
+        public static readonly string DataType1Decimal = "1DECIMAL";
+        public static readonly string DataType2Decimal = "2DECIMAL";
+        public static readonly string DataType3Decimal = "3DECIMAL";
+
+
+        //META TYPES
+        public static readonly string MetaTypeDataValue = "DATAVALUE";
+        public static readonly string MetaTypeDataValueTable = "DATAVALUETABLE";
 
         public DatabaseModelItem()
         {
@@ -69,17 +83,14 @@ namespace Intwenty.MetaDataService.Model
         public bool Mandatory { get; set; }
 
 
+
         public int? GetInteger(object value)
         {
             try
             {
                 return Convert.ToInt32(value);
             }
-            catch
-            {
-
-            }
-
+            catch{}
             return null;
         }
 
@@ -89,11 +100,7 @@ namespace Intwenty.MetaDataService.Model
             {
                 return Convert.ToDecimal(value);
             }
-            catch
-            {
-
-            }
-
+            catch{}
             return null;
         }
 
@@ -103,11 +110,7 @@ namespace Intwenty.MetaDataService.Model
             {
                 return Convert.ToDateTime(value);
             }
-            catch
-            {
-
-            }
-
+            catch{}
             return null;
         }
 
@@ -117,11 +120,7 @@ namespace Intwenty.MetaDataService.Model
             {
                 return Convert.ToString(value);
             }
-            catch
-            {
-
-            }
-
+            catch{}
             return null;
         }
 
@@ -136,98 +135,13 @@ namespace Intwenty.MetaDataService.Model
 
                 return val;
             }
-            catch
-            {
-
-            }
-
+            catch{}
             return null;
         }
 
       
 
-
-        public string DataTypeBool
-        {
-            get { return "BOOLEAN"; }
-        }
-
-        public bool IsDataTypeBool
-        {
-            get { return DataType == DataTypeBool; }
-        }
-
-        public string DataTypeString
-        {
-            get { return "STRING"; }
-        }
-
-        public bool IsDataTypeString
-        {
-            get { return DataType == DataTypeString; }
-        }
-
-        public string DataTypeText
-        {
-            get { return "TEXT"; }
-        }
-
-        public bool IsDataTypeText
-        {
-            get { return DataType == DataTypeText; }
-        }
-
-        public string DataTypeInt
-        {
-            get { return "INTEGER"; }
-        }
-
-        public bool IsDataTypeInt
-        {
-            get { return DataType == DataTypeInt; }
-        }
-
-        public string DataTypeDateTime
-        {
-            get { return "DATETIME"; }
-        }
-
-        public bool IsDataTypeDateTime
-        {
-            get { return DataType == DataTypeDateTime; }
-        }
-
-        public string DataType1Decimal
-        {
-            get { return "1DECIMAL"; }
-        }
-
-        public bool IsDataType1Decimal
-        {
-            get { return DataType == DataType1Decimal; }
-        }
-
-        public string DataType2Decimal
-        {
-            get { return "2DECIMAL"; }
-        }
-
-        public bool IsDataType2Decimal
-        {
-            get { return DataType == DataType2Decimal; }
-        }
-
-        public string DataType3Decimal
-        {
-            get { return "3DECIMAL"; }
-        }
-
-        public bool IsDataType3Decimal
-        {
-            get { return DataType == DataType3Decimal; }
-        }
-
-        public List<string> DataTypes
+        public static List<string> DataTypes
         {
             get
             {
@@ -244,6 +158,73 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
+        public static List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+                return t;
+            }
+        }
+
+        public static List<string> ValidMetaTypes
+        {
+            get
+            {
+                var t = new List<string>();
+                t.Add(MetaTypeDataValue);
+                t.Add(MetaTypeDataValueTable);
+                return t;
+            }
+        }
+
+
+        public bool IsDataTypeBool
+        {
+            get { return DataType == DataTypeBool; }
+        }
+
+        public bool IsDataTypeString
+        {
+            get { return DataType == DataTypeString; }
+        }
+
+
+        public bool IsDataTypeText
+        {
+            get { return DataType == DataTypeText; }
+        }
+
+        public bool IsDataTypeInt
+        {
+            get { return DataType == DataTypeInt; }
+        }
+
+
+        public bool IsDataTypeDateTime
+        {
+            get { return DataType == DataTypeDateTime; }
+        }
+
+      
+        public bool IsDataType1Decimal
+        {
+            get { return DataType == DataType1Decimal; }
+        }
+
+
+        public bool IsDataType2Decimal
+        {
+            get { return DataType == DataType2Decimal; }
+        }
+
+
+        public bool IsDataType3Decimal
+        {
+            get { return DataType == DataType3Decimal; }
+        }
+
+       
         public bool HasValidDataType
         {
             get
@@ -258,21 +239,12 @@ namespace Intwenty.MetaDataService.Model
 
             }
         }
-
-        public string MetaTypeDataValue
-        {
-            get { return "DATAVALUE"; }
-        }
-
+      
         public bool IsMetaTypeDataValue
         {
             get { return MetaType == MetaTypeDataValue; }
         }
 
-        public string MetaTypeDataValueTable
-        {
-            get { return "DATAVALUETABLE"; }
-        }
 
         public bool IsMetaTypeDataValueTable
         {
@@ -294,26 +266,6 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        protected override List<string> ValidProperties
-        {
-            get
-            {
-                var t = new List<string>();
-                return t;
-            }
-        }
-
-
-        public List<string> ValidMetaTypes
-        {
-            get
-            {
-                var t = new List<string>();
-                t.Add("DATAVALUE");
-                t.Add("DATAVALUETABLE");
-                return t;
-            }
-        }
 
         public string SQLDataType
         {
@@ -373,13 +325,9 @@ namespace Intwenty.MetaDataService.Model
             return false;
         }
 
-       
-
-      
-
         public bool HasDomain
         {
-            get { return Domain.Contains("APP"); }
+            get { return Domain.Contains("APP."); }
         }
 
 

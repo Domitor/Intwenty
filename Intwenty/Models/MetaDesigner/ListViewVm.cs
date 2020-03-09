@@ -9,7 +9,7 @@ namespace Intwenty.Models.MetaDesigner
         public static List<UserInterfaceModelItem> GetMetaUIListView(ListViewVm model, ApplicationModel app)
         {
             var res = new List<UserInterfaceModelItem>();
-            var t = new UserInterfaceModelItem("LISTVIEW") { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode  };
+            var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode  };
             if (string.IsNullOrEmpty(model.MetaCode))
                 t.MetaCode = "LV_" + BaseModelItem.GetRandomUniqueString();
 
@@ -18,7 +18,7 @@ namespace Intwenty.Models.MetaDesigner
            
             foreach (var f in model.Fields)
             {
-                var lf = new UserInterfaceModelItem(t.UITypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
+                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
                 if (string.IsNullOrEmpty(lf.MetaCode))
                     lf.MetaCode = "LVFLD_" + BaseModelItem.GetRandomUniqueString();
 
@@ -52,7 +52,7 @@ namespace Intwenty.Models.MetaDesigner
 
             foreach (var t in app.UIStructure)
             {
-                if (t.IsUITypeListView)
+                if (t.IsMetaTypeListView)
                 {
                     res.Id = t.Id;
                     res.Title = t.Title;
@@ -60,7 +60,7 @@ namespace Intwenty.Models.MetaDesigner
 
                     foreach (var f in app.UIStructure)
                     {
-                        if (f.IsUITypeListViewField && f.ParentMetaCode == t.MetaCode)
+                        if (f.IsMetaTypeListViewField && f.ParentMetaCode == t.MetaCode)
                         {
                             if (f.IsDataConnected)
                                 res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataInfo.DbName });

@@ -17,7 +17,7 @@ namespace Intwenty.Models.MetaDesigner
             var layoutpnls = 0;
             foreach (var uic in app.UIStructure.OrderBy(p=> p.RowOrder).ThenBy(p=> p.ColumnOrder))
             {
-                if (uic.IsUITypePanel)
+                if (uic.IsMetaTypePanel)
                 {
                     if (res.LayoutRows.Count == 0)
                         res.LayoutRows.Add(new LayoutRow() { Id = uic.RowOrder });
@@ -37,7 +37,7 @@ namespace Intwenty.Models.MetaDesigner
             {
                
                     //SIMPLE INPUTS
-                    if (uic.IsUITypeCheckBox || uic.IsUITypeComboBox || uic.IsUITypeDatePicker || uic.IsUITypeNumBox || uic.IsUITypeTextArea || uic.IsUITypeTextBox)
+                    if (uic.IsMetaTypeCheckBox || uic.IsMetaTypeComboBox || uic.IsMetaTypeDatePicker || uic.IsMetaTypeNumBox || uic.IsMetaTypeTextArea || uic.IsMetaTypeTextBox)
                     {
                         var lr = res.LayoutRows.Find(p => p.Id == uic.RowOrder);
                         if (lr == null)
@@ -54,15 +54,15 @@ namespace Intwenty.Models.MetaDesigner
                     }
 
                 //LOOK UP
-                if (uic.IsUITypeLookUp)
+                if (uic.IsMetaTypeLookUp)
                 {
                     if (res.LayoutRows.Count < uic.RowOrder)
                     {
                         res.LayoutRows.Add(new LayoutRow() { Id = uic.RowOrder });
                     }
 
-                    var keyfield = app.UIStructure.Find(p => p.IsUITypeLookUpKeyField && p.ParentMetaCode == uic.MetaCode);
-                    var lookupfield = app.UIStructure.Find(p => p.IsUITypeLookUpField && p.ParentMetaCode == uic.MetaCode);
+                    var keyfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.ParentMetaCode == uic.MetaCode);
+                    var lookupfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.ParentMetaCode == uic.MetaCode);
 
                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, Colid = uic.ColumnOrder, Rowid = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName};
                     if (keyfield != null)
@@ -113,7 +113,7 @@ namespace Intwenty.Models.MetaDesigner
                 if (string.IsNullOrEmpty(dto.MetaCode))
                     dto.MetaCode = dto.MetaType + "_" + BaseModelItem.GetRandomUniqueString();
 
-                if (dto.IsUITypeCheckBox || dto.IsUITypeComboBox || dto.IsUITypeDatePicker || dto.IsUITypeNumBox || dto.IsUITypeTextArea || dto.IsUITypeTextBox)
+                if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
                 {
                     if (!string.IsNullOrEmpty(input.ColumnName))
                     {
@@ -121,7 +121,7 @@ namespace Intwenty.Models.MetaDesigner
                         if (dmc != null)
                             dto.DataMetaCode = dmc.MetaCode;
                     }
-                    if (dto.IsUITypeComboBox)
+                    if (dto.IsMetaTypeComboBox)
                     {
                         if (!string.IsNullOrEmpty(input.Domain))
                         {
@@ -130,14 +130,14 @@ namespace Intwenty.Models.MetaDesigner
                     }
                 }
 
-                if (dto.IsUITypeLookUp)
+                if (dto.IsMetaTypeLookUp)
                 {
                     if (!string.IsNullOrEmpty(input.Domain))
                     {
                         dto.Domain = "DATAVIEW." + input.Domain;
                     }
 
-                    var keyfield = new UserInterfaceModelItem(dto.UITypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                    var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
                     if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
                     {
                         var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName);
@@ -152,7 +152,7 @@ namespace Intwenty.Models.MetaDesigner
                     }
                     res.Add(keyfield);
 
-                    var lookupfield = new UserInterfaceModelItem(dto.UITypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                    var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
                     if (!string.IsNullOrEmpty(input.LookUpFieldDbName))
                     {
                         var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpFieldDbName);
@@ -178,9 +178,9 @@ namespace Intwenty.Models.MetaDesigner
             //SET PARENT META CODE
             foreach (var t in res)
             {
-                if (!t.IsUITypePanel && !t.IsUITypeLookUpField && !t.IsUITypeLookUpKeyField && !t.IsUITypeListView && !t.IsUITypeListViewField)
+                if (!t.IsMetaTypePanel && !t.IsMetaTypeLookUpField && !t.IsMetaTypeLookUpKeyField && !t.IsMetaTypeListView && !t.IsMetaTypeListViewField)
                 {
-                    var pnl = res.Find(p => p.IsUITypePanel && p.ColumnOrder == t.ColumnOrder && p.IsRoot);
+                    var pnl = res.Find(p => p.IsMetaTypePanel && p.ColumnOrder == t.ColumnOrder && p.IsRoot);
                     if (pnl != null)
                         t.ParentMetaCode = pnl.MetaCode; 
                 }

@@ -9,9 +9,11 @@ namespace Intwenty.MetaDataService.Model
 
    public class ApplicationModelItem : BaseModelItem
     {
+        public static readonly string MetaTypeApplication = "APPLICATION";
+
         public ApplicationModelItem()
         {
-            MainMenuItem = new MenuModelItem("MENUITEM");
+            MainMenuItem = new MenuModelItem(MenuModelItem.MetaTypeMenuItem);
             SetEmptyStrings();
         }
 
@@ -25,9 +27,9 @@ namespace Intwenty.MetaDataService.Model
             UseVersioning = entity.UseVersioning;
             IsHierarchicalApplication = entity.IsHierarchicalApplication;
             TestDataAmount = entity.TestDataAmount;
-            MetaType = "APPLICATION";
-            ParentMetaCode = "ROOT";
-            MainMenuItem = new MenuModelItem("MENUITEM");
+            MetaType = MetaTypeApplication;
+            ParentMetaCode = BaseModelItem.MetaTypeRoot;
+            MainMenuItem = new MenuModelItem(MenuModelItem.MetaTypeMenuItem);
             SetEmptyStrings();
         }
 
@@ -39,8 +41,6 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
-
-        public static string MetaTypeApplication = "APPLICATION";
 
         public int Id { get; set; }
 
@@ -86,7 +86,7 @@ namespace Intwenty.MetaDataService.Model
             get { return true; }
         }
 
-        protected override List<string> ValidProperties
+        public static List<string> ValidProperties
         {
             get
             {

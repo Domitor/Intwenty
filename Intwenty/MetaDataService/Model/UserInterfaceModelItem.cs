@@ -7,6 +7,20 @@ namespace Intwenty.MetaDataService.Model
 
     public class UserInterfaceModelItem : BaseModelItem
     {
+        //META TYPES
+        public static readonly string MetaTypeTextBox = "TEXTBOX";
+        public static readonly string MetaTypeTextArea = "TEXTAREA";
+        public static readonly string MetaTypeLookUp = "LOOKUP";
+        public static readonly string MetaTypeLookUpKeyField = "LOOKUPKEYFIELD";
+        public static readonly string MetaTypeLookUpField = "LOOKUPFIELD";
+        public static readonly string MetaTypeNumBox = "NUMBOX";
+        public static readonly string MetaTypeCheckBox = "CHECKBOX";
+        public static readonly string MetaTypeComboBox = "COMBOBOX";
+        public static readonly string MetaTypeListView = "LISTVIEW";
+        public static readonly string MetaTypeListViewField = "LISTVIEWFIELD";
+        public static readonly string MetaTypePanel = "PANEL";
+        public static readonly string MetaTypeDatePicker = "DATEPICKER";
+
 
         public UserInterfaceModelItem()
         {
@@ -72,7 +86,40 @@ namespace Intwenty.MetaDataService.Model
 
         public DataViewModelItem ViewInfo { get; set; }
 
- 
+        public List<string> ValidProperties
+        {
+            get
+            {
+                var t = new List<string>();
+
+                if (this.IsMetaTypeListView)
+                    t.Add("HIDEFILTER");
+
+                return t;
+            }
+        }
+
+        public static List<string> ValidMetaTypes
+        {
+            get
+            {
+                var t = new List<string>();
+                t.Add(MetaTypeTextBox);
+                t.Add(MetaTypeTextArea);
+                t.Add(MetaTypeLookUp);
+                t.Add(MetaTypeLookUpKeyField);
+                t.Add(MetaTypeLookUpField);
+                t.Add(MetaTypeNumBox);
+                t.Add(MetaTypeCheckBox);
+                t.Add(MetaTypeComboBox);
+                t.Add(MetaTypeListView);
+                t.Add(MetaTypeListViewField);
+                t.Add(MetaTypePanel);
+                t.Add(MetaTypeDatePicker);
+                return t;
+            }
+        }
+
         public bool IsDataConnected
         {
             get { return DataInfo != null && !string.IsNullOrEmpty(DataMetaCode); }
@@ -80,24 +127,24 @@ namespace Intwenty.MetaDataService.Model
 
         public bool IsDataViewConnected
         {
-            get { return Domain.Contains("DATAVIEW") && ViewInfo != null; }
+            get { return Domain.Contains(DataViewModelItem.MetaTypeDataView) && ViewInfo != null; }
         }
 
         public bool HasValueDomain
         {
-            get { return Domain.Contains("VALUEDOMAIN"); }
+            get { return Domain.Contains(ValueDomainModelItem.MetaTypeValueDomain + "."); }
         }
 
         public bool HasDataViewDomain
         {
-            get { return Domain.Contains("DATAVIEW"); }
+            get { return Domain.Contains(DataViewModelItem.MetaTypeDataView + "."); }
         }
 
         public string ViewName
         {
             get
             {
-                if (!Domain.Contains("DATAVIEW"))
+                if (!HasDataViewDomain)
                     return string.Empty;
 
                 var splits = Domain.Split(".".ToCharArray());
@@ -113,7 +160,7 @@ namespace Intwenty.MetaDataService.Model
         {
             get
             {
-                if (!Domain.Contains("VALUEDOMAIN"))
+                if (!HasValueDomain)
                     return string.Empty;
 
                 var splits = Domain.Split(".".ToCharArray());
@@ -129,7 +176,7 @@ namespace Intwenty.MetaDataService.Model
         {
             get
             {
-                if (!Domain.Contains("DATAVIEW"))
+                if (!HasDataViewDomain)
                     return string.Empty;
 
                 var splits = Domain.Split(".".ToCharArray());
@@ -141,124 +188,79 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public string UITypeTextBox
+
+        public bool IsMetaTypeTextBox
         {
-            get { return "TEXTBOX"; }
+            get { return MetaType == MetaTypeTextBox; }
         }
 
-        public bool IsUITypeTextBox
+
+        public bool IsMetaTypeTextArea
         {
-            get { return MetaType == UITypeTextBox; }
+            get { return MetaType == MetaTypeTextArea; }
         }
 
-        public string UITypeTextArea
+ 
+        public bool IsMetaTypeLookUp
         {
-            get { return "TEXTAREA"; }
+            get { return MetaType == MetaTypeLookUp; }
         }
 
-        public bool IsUITypeTextArea
+    
+
+        public bool IsMetaTypeLookUpKeyField
         {
-            get { return MetaType == UITypeTextArea; }
+            get { return MetaType == MetaTypeLookUpKeyField; }
         }
 
-        public string UITypeLookUp
+ 
+        public bool IsMetaTypeLookUpField
         {
-            get { return "LOOKUP"; }
+            get { return MetaType == MetaTypeLookUpField; }
         }
 
-        public bool IsUITypeLookUp
+
+        public bool IsMetaTypeNumBox
         {
-            get { return MetaType == UITypeLookUp; }
+            get { return MetaType == MetaTypeNumBox; }
         }
 
-        public string UITypeLookUpKeyField
+       
+        public bool IsMetaTypeCheckBox
         {
-            get { return "LOOKUPKEYFIELD"; }
+            get { return MetaType == MetaTypeCheckBox; }
         }
 
-        public bool IsUITypeLookUpKeyField
+
+        public bool IsMetaTypeComboBox
         {
-            get { return MetaType == UITypeLookUpKeyField; }
+            get { return MetaType == MetaTypeComboBox; }
         }
 
-        public string UITypeLookUpField
+       
+
+        public bool IsMetaTypeListView
         {
-            get { return "LOOKUPFIELD"; }
+            get { return MetaType == MetaTypeListView; }
         }
 
-        public bool IsUITypeLookUpField
+
+        public bool IsMetaTypeListViewField
         {
-            get { return MetaType == UITypeLookUpField; }
+            get { return MetaType == MetaTypeListViewField; }
         }
 
-        public string UITypeNumBox
+       
+
+        public bool IsMetaTypePanel
         {
-            get { return "NUMBOX"; }
+            get { return MetaType == MetaTypePanel; }
         }
 
-        public bool IsUITypeNumBox
-        {
-            get { return MetaType == UITypeNumBox; }
-        }
 
-        public string UITypeCheckBox
+        public bool IsMetaTypeDatePicker
         {
-            get { return "CHECKBOX"; }
-        }
-
-        public bool IsUITypeCheckBox
-        {
-            get { return MetaType == UITypeCheckBox; }
-        }
-
-        public string UITypeComboBox
-        {
-            get { return "COMBOBOX"; }
-        }
-
-        public bool IsUITypeComboBox
-        {
-            get { return MetaType == UITypeComboBox; }
-        }
-
-        public string UITypeListView
-        {
-            get { return "LISTVIEW"; }
-        }
-
-        public bool IsUITypeListView
-        {
-            get { return MetaType == UITypeListView; }
-        }
-
-        public string UITypeListViewField
-        {
-            get { return "LISTVIEWFIELD"; }
-        }
-
-        public bool IsUITypeListViewField
-        {
-            get { return MetaType == UITypeListViewField; }
-        }
-
-        public string UITypePanel
-        {
-            get { return "PANEL"; }
-        }
-
-        public bool IsUITypePanel
-        {
-            get { return MetaType == UITypePanel; }
-        }
-
-        public string UITypeDatePicker
-        {
-            get { return "DATEPICKER"; }
-        }
-
-        public bool IsUITypeDatePicker
-        {
-            get { return MetaType == UITypeDatePicker; }
+            get { return MetaType == MetaTypeDatePicker; }
         }
 
         public override bool HasValidMetaType
@@ -289,42 +291,6 @@ namespace Intwenty.MetaDataService.Model
                 return true;
             }
         }
-
-        protected override List<string> ValidProperties
-        {
-            get
-            {
-                var t = new List<string>();
-
-                if (this.IsUITypeListView)
-                    t.Add("HIDEFILTER");
-
-                return t;
-            }
-        }
-
-        public List<string> ValidMetaTypes
-        {
-            get
-            {
-                var t = new List<string>();
-                t.Add("TEXTBOX");
-                t.Add("TEXTAREA");
-                t.Add("LOOKUP");
-                t.Add("LOOKUPKEYFIELD");
-                t.Add("LOOKUPFIELD");
-                t.Add("NUMBOX");
-                t.Add("CHECKBOX"); 
-                t.Add("COMBOBOX"); 
-                t.Add("LISTVIEW");
-                t.Add("LISTVIEWFIELD");
-                t.Add("PANEL");
-                t.Add("DATEPICKER");
-                return t;
-            }
-        }
-
-       
 
 
     }

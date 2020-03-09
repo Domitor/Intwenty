@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Create New " + Model.Application.Title;
 
-    if (!Model.UIStructure.Exists(p => p.IsRoot && p.IsUITypePanel))
+    if (!Model.UIStructure.Exists(p => p.IsRoot && p.IsMetaTypePanel))
     {
         <h1><span class="label label-warning btn-lg">There's no UI meta data defined for this application yet.</span></h1>
         return;

@@ -138,21 +138,21 @@ namespace Intwenty.Data
                                 item.DataInfo = dinf;
                         }
 
-                        if (item.HasDataViewDomain && item.IsUITypeLookUp)
+                        if (item.HasDataViewDomain && item.IsMetaTypeLookUp)
                         {
                             var vinf = views.Find(p => p.MetaCode == item.ViewName && p.IsRoot);
                             if (vinf != null)
                                 item.ViewInfo = vinf;
                         }
 
-                        if (item.HasDataViewDomain && item.IsUITypeLookUpKeyField)
+                        if (item.HasDataViewDomain && item.IsMetaTypeLookUpKeyField)
                         {
                             var vinf = views.Find(p => p.MetaCode == item.ViewField && p.ParentMetaCode == item.ViewName && !p.IsRoot && !item.IsRoot);
                             if (vinf != null)
                                 item.ViewInfo = vinf;
                         }
 
-                        if (item.HasDataViewDomain && item.IsUITypeLookUpField)
+                        if (item.HasDataViewDomain && item.IsMetaTypeLookUpField)
                         {
                             var vinf = views.Find(p => p.MetaCode == item.ViewField && p.ParentMetaCode == item.ViewName && !p.IsRoot && !item.IsRoot);
                             if (vinf != null)
@@ -442,9 +442,9 @@ namespace Intwenty.Data
             if (existing != null)
             {
                 var dto = new UserInterfaceModelItem(existing);
-                if (dto.IsUITypeLookUp)
+                if (dto.IsMetaTypeLookUp)
                 {
-                    var childlist = MetaUIItem.Where(p => (p.MetaType == "LOOKUPKEYFIELD" || p.MetaType == "LOOKUPFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField || p.MetaType == UserInterfaceModelItem.MetaTypeLookUpField) && p.ParentMetaCode == existing.MetaCode).ToList();
                     MetaUIItem.Remove(existing);
                     MetaUIItem.RemoveRange(childlist);
                 }
