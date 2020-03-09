@@ -37,10 +37,14 @@ namespace Intwenty.MetaDataService
     {
         
         private IOptions<SystemSettings> SysSettings { get; }
+        private ISystemRepository ModelRepository { get; }
+        private IDataAccessService DataRepository { get; }
 
-        public Server(IOptions<SystemSettings> sysconfig)
+        public Server(IOptions<SystemSettings> sysconfig, ISystemRepository mr, IDataAccessService dr)
         {
             SysSettings = sysconfig;
+            ModelRepository = mr;
+            DataRepository = dr;
         }
         
 
@@ -71,12 +75,16 @@ namespace Intwenty.MetaDataService
         public OperationResult GetListView(ApplicationModel app, ListRetrivalArgs args)
         {
             var t = DataManager.GetDataManager(app);
+            t.DataRepository = DataRepository;
+            t.ModelRepository = ModelRepository;
             return t.GetListView(args);
         }
 
         public OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state)
         {
             var t = DataManager.GetDataManager(app);
+            t.DataRepository = DataRepository;
+            t.ModelRepository = ModelRepository;
             t.ClientState = state;
             return t.GetLatestVersion();
         }

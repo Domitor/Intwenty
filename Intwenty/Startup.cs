@@ -33,7 +33,9 @@ namespace Intwenty
             });
 
 
-            services.AddSingleton<MetaDataService.IServiceEngine, MetaDataService.Server>();
+            services.AddTransient<ISystemRepository, SystemRepository>();
+            services.AddTransient<MetaDataService.IServiceEngine, MetaDataService.Server>();
+            services.AddTransient<MetaDataService.Engine.IDataAccessService, MetaDataService.Engine.DataAccessService>();
 
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -42,7 +44,7 @@ namespace Intwenty
 
             });
 
-            services.AddTransient<ISystemRepository, SystemRepository>();
+           
 
             services.AddControllersWithViews();
             services.AddRazorPages();

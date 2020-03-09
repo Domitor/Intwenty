@@ -1,5 +1,4 @@
 ﻿using Intwenty.Data;
-using Intwenty.MetaDataService.Engine.Common;
 using Intwenty.MetaDataService.Model;
 using Intwenty.Models;
 using System;
@@ -50,6 +49,10 @@ namespace Intwenty.MetaDataService.Engine
 
     public class DataManager : IDataManager
     {
+        public ISystemRepository ModelRepository { get; set; }
+
+        public IDataAccessService DataRepository { get; set; }
+
         protected ApplicationModel Meta { get; set; }
 
         public ClientStateInfo ClientState { get; set; }
@@ -140,11 +143,10 @@ namespace Intwenty.MetaDataService.Engine
                 sql_list_stmt.Append("AND t1.Id = " + this.ClientState.Id);
 
                 var ds = new DataSet();
-                var da = new DataAccessClient();
-                da.Open();
-                da.CreateCommand(sql_list_stmt.ToString());
-                da.FillDataset(ds, "App");
-                da.Close();
+                DataRepository.Open();
+                DataRepository.CreateCommand(sql_list_stmt.ToString());
+                DataRepository.FillDataset(ds, "App");
+                DataRepository.Close();
 
                 if (ds.Tables[0].Rows.Count == 0)
                 {

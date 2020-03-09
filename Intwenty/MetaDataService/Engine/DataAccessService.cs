@@ -8,7 +8,7 @@ using NetCoreDBAccess;
 using Microsoft.Extensions.Options;
 using System.Text;
 
-namespace Intwenty.MetaDataService.Engine.Common
+namespace Intwenty.MetaDataService.Engine
 {
 
 
@@ -22,7 +22,7 @@ namespace Intwenty.MetaDataService.Engine.Common
 	}
 
 
-    interface IDataAccessService
+    public interface IDataAccessService
     {
         void Open();
         void Close();
