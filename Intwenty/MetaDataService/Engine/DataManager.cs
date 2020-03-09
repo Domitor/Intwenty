@@ -158,7 +158,7 @@ namespace Intwenty.MetaDataService.Engine
 
                 foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
-                    var val = GetJSONValue(ds.Tables[0].Rows[0], dc);
+                    var val = NetCoreDBAccess.DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
                     if (string.IsNullOrEmpty(val))
                         continue;
 
@@ -658,6 +658,7 @@ namespace Intwenty.MetaDataService.Engine
 
         }
 
+        
         private string GetJSONValue(DataRow r, DataColumn c)
         {
             if (r == null || c == null)

@@ -148,7 +148,10 @@ namespace Intwenty.Controllers
 
             foreach (var j in jsonarr)
             {
-                appvalues.Add(j.Name, j.Value);
+                if (j.Value.ValueKind== System.Text.Json.JsonValueKind.Number)
+                    appvalues.Add(j.Name, j.Value.GetDecimal());
+                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.String || j.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                    appvalues.Add(j.Name, j.Value.GetString());
             }
 
             if (!appvalues.ContainsKey("ApplicationId"))

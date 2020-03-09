@@ -301,6 +301,7 @@ namespace NetCoreDBAccess
 
         public static string GetJSONValue(DataRow r, DataColumn c)
         {
+
             if (r == null || c == null)
                 return string.Empty;
 
@@ -316,11 +317,11 @@ namespace NetCoreDBAccess
             }
             else if (IsDateTime(c))
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + Convert.ToDateTime(r[c]).ToString("yyyy-MM-dd") + "\"";
+                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[c]).ToString("yyyy-MM-dd")).ToString() + "\"";
             }
             else
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + Convert.ToString(r[c]) + "\"";
+                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[c])).ToString() + "\"";
             }
         }
 
