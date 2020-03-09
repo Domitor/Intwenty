@@ -137,15 +137,18 @@ namespace Intwenty.Controllers
        
 
         [HttpPost]
-        public JsonResult Save([FromBody] dynamic model)
+        public JsonResult Save([FromBody] System.Text.Json.JsonElement model)
         {
+
+
+            var jsonarr = model.EnumerateObject();
             var appvalues = new Dictionary<string, object>();
-            if (model.Count < 1)
+            if (jsonarr.Count() < 1)
                 return new JsonResult("{}");
 
-            foreach (var j in model)
+            foreach (var j in jsonarr)
             {
-                appvalues.Add(j.Name, j.Value.Value);
+                appvalues.Add(j.Name, j.Value);
             }
 
             if (!appvalues.ContainsKey("ApplicationId"))
