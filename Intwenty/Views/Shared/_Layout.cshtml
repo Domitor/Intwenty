@@ -5,12 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Intwenty</title>
-
-    <environment include="Development,Production">
-        <link rel="stylesheet" href="~/lib/bootstrap-3.4.1/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
-    </environment>
-   
+    <link rel="stylesheet" href="~/css/site.min.css" />
+    <link rel="stylesheet" href="~/lib/fontawesome-free-5.12.1-web/css/all.min.css" />
 </head>
 
 @{
@@ -29,29 +25,25 @@
 
 <body class="@(ishomepath ? "landingpage" : "")">
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Intwenty</a>
-            </div>
-            <div class="navbar-collapse collapse">
+            <a class="navbar-brand" href="#">Intwenty</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="nav navbar-nav">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label">@menutitle</span> <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-procedures"></span> @menutitle</span> <span class="caret"></span></a>
+                        <div class="dropdown-menu">
                             @{
+
 
                                 if (mainmenu == null)
                                 {
                                     foreach (var a in Repository.GetApplicationDescriptions())
                                     {
-                                        <li><a asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a></li>
+                                        <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
                                     }
                                 }
                                 else
@@ -60,32 +52,30 @@
                                     {
                                         if (mi.IsMetaTypeMenuItem && mi.ParentMetaCode == mainmenu.MetaCode && mi.Application != null)
                                         {
-                                            <li><a asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a></li>
+                                            <a class="dropdown-item" asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a>
                                         }
                                     }
                                 }
                             }
-                        </ul>
+                        </div>
                     </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="glyphicon glyphicon-cog"></span> System Administration</span> <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cogs"></span> System Administration</span> <span class="caret"></span></a>
+                        <div class="dropdown-menu">
 
-                            <li class="divider"></li>
-                            <li class="dropdown-header">Meta model</li>
-                            <li class="divider"></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GetList"><span class="glyphicon glyphicon-th"></span> Manage applications</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="glyphicon glyphicon-th"></span> Data views</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="glyphicon glyphicon-th"></span> Value domains</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="glyphicon glyphicon-th"></span> Number series</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="glyphicon glyphicon-th"></span> Main menu</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="glyphicon glyphicon-th"></span> Validate meta model</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="glyphicon glyphicon-th"></span> Meta model documentation</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="glyphicon glyphicon-th"></span> Configure database</a></li>
-                            <li><a asp-area="" asp-controller="ApplicationInfo" asp-action="GenerateTestData"><span class="glyphicon glyphicon-th"></span> Generate testdata batch</a></li>
-                        </ul>
+                  
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="GetList"><span class="fa fa-meteor"></span> Manage applications</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="fa fa-database"></span> Number series</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="fa fa-uikit"></span> Main menu</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="fa fa-meteor"></span> Validate meta model</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="fa fa-meteor"></span> Meta model documentation</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="fa fa-meteor"></span> Configure database</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="GenerateTestData"><span class="fa fa-meteor"></span> Generate testdata batch</a>
+                        </div>
                     </li>
-                    <li><a href="#"><span class="glyphicon glyphicon-user"></span> Users and security</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><span class="fa fa-user"></span> Users and security</a></li>
                 </ul>
             </div>
         </div>
@@ -164,15 +154,14 @@
         }
     </div>
 
-    <environment include="Development,Production">
-        <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/bootstrap-3.4.1/js/bootstrap.min.js"></script>
-        <script src="~/lib/vue/vue.min.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
 
-    </environment>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap-4.4.1/dist/js/bootstrap.min.js"></script>
+    <script src="~/lib/vue/vue.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
 
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

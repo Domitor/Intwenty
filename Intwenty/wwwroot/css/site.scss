@@ -1,0 +1,39 @@
+﻿@import "../lib/bootstrap-4.4.1/scss/bootstrap.scss";
+
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+.landingpage {
+    background: url(../images/landscape-4895931_1920.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 100%;
+    color: white;
+}
+
+
+.requiredNotValid {
+    border-color: red;
+    background: #FDD;
+}
+
+.uploadInput {
+    position: absolute;
+    font-size: 50px;
+    opacity: 0;
+    right: 0;
+    top: 0;
+}
+
+
