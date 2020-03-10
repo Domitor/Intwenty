@@ -11,7 +11,7 @@
 
 @{
     var menutitle = "Applications";
-    var menuobjects = Repository.GetMetaMenuItems();
+    var menuobjects = Repository.GetMenuModelItems();
     var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
     if (mainmenu != null)
     {
@@ -25,9 +25,9 @@
 
 <body class="@(ishomepath ? "landingpage" : "")">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="#">Intwenty</a>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">Intwenty</a>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="nav navbar-nav">
                     <li class="nav-item dropdown">
@@ -38,7 +38,7 @@
 
                                 if (mainmenu == null)
                                 {
-                                    foreach (var a in Repository.GetApplicationDescriptions())
+                                    foreach (var a in Repository.GetApplicationModelItems())
                                     {
                                         <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
                                     }
@@ -65,7 +65,7 @@
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="fa fa-database"></span> Number series</a>
-                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="fa fa-meteor"></span> Main menu</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="fa fa-book"></span> Main menu</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="fa fa-meteor"></span> Validate meta model</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="fa fa-meteor"></span> Meta model documentation</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="fa fa-meteor"></span> Configure database</a>
@@ -76,8 +76,10 @@
                     <li class="nav-item"><a class="nav-link" href="#" onclick="techModal()"><span class="fa fa-question"></span> Technology</a></li>
                 </ul>
             </div>
-        </div>
-    </nav>
+
+        </nav>
+    </div>
+
 
     <div class="modal" id="msg_dlg_modal" role="dialog">
         <div class="modal-dialog">
@@ -97,6 +99,7 @@
             </div>
         </div>
     </div>
+
 
     <div class="modal" id="yesno_dlg_modal" role="dialog">
         <div class="modal-dialog">
@@ -118,6 +121,7 @@
         </div>
     </div>
 
+
     <div class="modal" id="tech_modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -130,11 +134,11 @@
                 <div class="modal-body">
                     <h5>Technologies</h5>
                     <ul>
-                        <li>Asp.Net Core 3.1</li>
-                        <li>Bootstrap 4.3.7</li>
-                        <li>Vue.js v2.6.11</li>
-                        <li>JQuery v3.3.1</li>
-                        <li>alasql v0.5.5</li>
+                        <li>asp.net core 3.1</li>
+                        <li>bootstrap 4.3.7</li>
+                        <li>vue.js 2.6.11</li>
+                        <li>jquery 3.3.1</li>
+                        <li>alasql 0.5.5</li>
                     </ul>
                     <h5>Licence</h5>
                     <p>Massachusetts Institute of Technology</p>

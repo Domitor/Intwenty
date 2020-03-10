@@ -24,7 +24,7 @@ namespace Intwenty.Controllers
       
         public IActionResult ShipmentFiles()
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == 70);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
             return View(t);
         }
 
@@ -35,7 +35,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetShipmentFiles([FromBody] ListRetrivalArgs model)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == 70);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
             var listdata = MetaServer.GetListView(t, model);
             return new JsonResult(listdata);
         }
@@ -43,7 +43,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public async Task<JsonResult> UploadDocument(IFormFile file)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == 70);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
             var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
 
             var fileandpath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\USERDOC", uniquefilename);

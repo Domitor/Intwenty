@@ -86,7 +86,7 @@ namespace Intwenty.Controllers
 
         public IActionResult ValidateModel()
         {
-            var apps = Repository.GetApplicationMeta();
+            var apps = Repository.GetApplicationModels();
             var views = Repository.GetMetaDataViews();
             var res = MetaServer.ValidateModel(apps, views);
             return View(res);
@@ -97,7 +97,7 @@ namespace Intwenty.Controllers
         public IActionResult ConfigureDatabase()
         {
             var res = new List<OperationResult>();
-            var l = Repository.GetApplicationMeta();
+            var l = Repository.GetApplicationModels();
             foreach (var t in l)
             {
                 res.Add(MetaServer.ConfigureDatabase(t));
@@ -108,13 +108,13 @@ namespace Intwenty.Controllers
 
         public IActionResult ViewMetaModelDocumentation()
         {
-            var l = Repository.GetApplicationMeta();
+            var l = Repository.GetApplicationModels();
             return View(l);
         }
 
         public IActionResult GenerateTestData()
         {
-            var l = Repository.GetApplicationMeta();
+            var l = Repository.GetApplicationModels();
             var res = MetaServer.GenerateTestData(l, Repository);
             return View(res);
         }
@@ -123,40 +123,62 @@ namespace Intwenty.Controllers
         /*********************  API ***********************************************************/
 
         /// <summary>
-        /// Get meta data for applicationa
+        /// Get model data for applications
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplications")]
         public JsonResult GetApplications()
         {
-            var t = Repository.GetApplicationDescriptions();
+            var t = Repository.GetApplicationModelItems();
             return new JsonResult(t);
 
         }
 
         /// <summary>
-        /// Get meta data for application with id
+        /// Get full model data for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplication/{applicationid}")]
         public JsonResult GetApplication(int applicationid)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(t.Application);
 
         }
 
         /// <summary>
-        /// Get meta data for application with id
+        /// Delete model data for application
+        /// </summary>
+        [HttpPost]
+        public JsonResult DeleteApplicationModel([FromBody] ApplicationModelItem model)
+        {
+            try
+            {
+                Repository.DeleteApplicationModel(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application model data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplications();
+        }
+
+        /// <summary>
+        /// Get UI model for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationUI/{applicationid}")]
         public JsonResult GetApplicationUI(int applicationid)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(UIVmCreator.GetUIVm(t));
 
         }
 
         /// <summary>
-        /// Get meta data for application tables for application with id
+        /// Get database model for application tables for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
         public JsonResult GetApplicationDB(int applicationid)
@@ -164,7 +186,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+                var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
                 if (t == null)
                     throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
@@ -188,7 +210,7 @@ namespace Intwenty.Controllers
         [HttpGet("/ApplicationInfo/GetApplicationListView/{applicationid}")]
         public JsonResult GetApplicationListView(int applicationid)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(ListViewVm.GetListView(t));
 
         }
@@ -212,7 +234,7 @@ namespace Intwenty.Controllers
         public JsonResult GetListOfDatabaseTables()
         {
             var res = new List<UIDbTable>();
-            var apps = Repository.GetApplicationMeta();
+            var apps = Repository.GetApplicationModels();
             foreach (var t in apps)
             {
                 res.AddRange(UIDbTable.GetTables(t));
@@ -228,7 +250,7 @@ namespace Intwenty.Controllers
         [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
         public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(UIDbTable.GetTables(t));
 
         }
@@ -325,10 +347,10 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for number series
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetMainMenuItems")]
-        public JsonResult GetMainMenuItems()
+        [HttpGet("/ApplicationInfo/GetMenuModelItems")]
+        public JsonResult GetMenuModelItems()
         {
-            var t = Repository.GetMetaMenuItems();
+            var t = Repository.GetMenuModelItems();
             return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
 
         }
@@ -343,7 +365,7 @@ namespace Intwenty.Controllers
 
 
             var views = Repository.GetMetaDataViews();
-            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.Id);
+            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
             if (app == null)
                 throw new InvalidOperationException("Could not find application");
 
@@ -456,7 +478,7 @@ namespace Intwenty.Controllers
                 if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
 
-                var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+                var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
                 if (app == null)
                     throw new InvalidOperationException("Could not find application");
 

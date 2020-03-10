@@ -21,11 +21,11 @@ namespace Intwenty.Data
             }
             else
             {
-                //SeedApplicationDescriptions(context, true);
-                //SeedSystemMenus(context, true);
-                //SeedApplicationContent(context, true);
-                //SeedValueDomains(context, true);
-                //SeedNoSeries(context, true);
+                SeedApplicationDescriptions(context, true);
+                SeedSystemMenus(context, true);
+                SeedApplicationContent(context, true);
+                SeedValueDomains(context, true);
+                SeedNoSeries(context, true);
 
 
             }

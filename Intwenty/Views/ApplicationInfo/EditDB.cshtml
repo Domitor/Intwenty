@@ -11,9 +11,9 @@
 
     <br />
     <br />
-    <div class="panel panel-default">
-        <div class="panel-heading"><h2>Manage database for application {{model.title}}</h2></div>
-        <div class="panel-body">Define the application data structure.</div>
+    <div class="card">
+        <div class="card-header"><h2>Manage database for application {{model.title}}</h2></div>
+        <div class="card-body">Define the application data structure.</div>
     </div>
    
     <br />
@@ -23,11 +23,11 @@
     <h4>Database tables</h4>
 
     <div>
-        <div class="btn btn-default" v-on:click="addDbTable">
-            <span class="glyphicon glyphicon-plus"></span> Add table
+        <div class="btn btn-secondary" v-on:click="addDbTable">
+            <span class="fa fa-plus"></span> Add table
         </div>
         <div class="btn btn-primary" v-on:click="saveApplicationDB" style="float:right">
-            <span class="glyphicon glyphicon-save"></span> Save changes
+            <span class="fa fa-save"></span> Save changes
         </div>
     </div>
     <br />

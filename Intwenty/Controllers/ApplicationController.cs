@@ -27,7 +27,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public IActionResult Create(int id)
         {
-            var t = Repository.GetApplicationMeta().Find(p=> p.Application.Id == id);
+            var t = Repository.GetApplicationModels().Find(p=> p.Application.Id == id);
             return View(t);
         }
 
@@ -36,7 +36,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public IActionResult GetList(int id)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == id);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == id);
             return View(t);
         }
 
@@ -47,7 +47,7 @@ namespace Intwenty.Controllers
         public IActionResult Open(int applicationid, int id)
         {
             ViewBag.SystemId = Convert.ToString(id);
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return View(t);
 
         }
@@ -63,7 +63,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetLatestVersion/{applicationid}/{id}")]
         public JsonResult GetLatestVersion(int applicationid, int id)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             var state = new ClientStateInfo() { Id = id };
             var data = MetaServer.GetLatestVersion(t, state);
             //var settings = new Newtonsoft.Json.JsonSerializerSettings();
@@ -79,7 +79,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetListView([FromBody] ListRetrivalArgs model)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
             var listdata = MetaServer.GetListView(t, model);
             return new JsonResult(listdata);
         }
@@ -90,7 +90,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetValueDomains/{id}")]
         public JsonResult GetValueDomains(int id)
         {
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == id);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == id);
             var data = MetaServer.GetValueDomains(t);
             var res = new JsonResult(data);
             return res;
@@ -105,7 +105,7 @@ namespace Intwenty.Controllers
         public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
             var viewinfo = Repository.GetMetaDataViews();
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
             var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model);
             return new JsonResult(viewitem);
         }
@@ -118,7 +118,7 @@ namespace Intwenty.Controllers
         public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
         {
             var viewinfo = Repository.GetMetaDataViews();
-            var t = Repository.GetApplicationMeta().Find(p => p.Application.Id == model.ApplicationId);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
             var dv = MetaServer.GetDataView(t, viewinfo, model);
             return new JsonResult(dv);
         }
@@ -159,7 +159,7 @@ namespace Intwenty.Controllers
 
             var appid = Convert.ToInt32(appvalues.First(p => p.Key == "ApplicationId").Value);
 
-            var app = Repository.GetApplicationMeta().Find(p => p.Application.Id == appid);
+            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == appid);
 
             var state = new ClientStateInfo();
             state.Application = app.Application;

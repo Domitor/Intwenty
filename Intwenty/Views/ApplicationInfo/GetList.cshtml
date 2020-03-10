@@ -35,7 +35,7 @@
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-secondary">Manage database</a></td>
                 <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-secondary">Manage UI</a></td>
-                <td><a href="#" role="button" class="btn btn-danger">Delete</a></td>
+                <td><a href="#" role="button" class="btn btn-danger" v-on:click="deleteApplication(item)">Delete</a></td>
             </tr>
         </table>
 
@@ -65,6 +65,35 @@
                     {
                         context.datalist = response;
                     });
+
+                  
+                },
+                deleteApplication: function (item)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var endpointurl = baseurl + "DeleteApplicationModel";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete the entire application ?", "Warning all configurations including the data model and UI model will be deleted. Continue ?", yesfunc);
 
                   
                 }

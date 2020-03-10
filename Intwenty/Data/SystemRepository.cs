@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Entity;
 using Intwenty.MetaDataService.Model;
-
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Intwenty.Data
 {
@@ -13,17 +13,21 @@ namespace Intwenty.Data
     /// </summary>
     public interface ISystemRepository
     {
-        List<ApplicationModelItem> GetApplicationDescriptions();
+        List<ApplicationModelItem> GetApplicationModelItems();
 
-        List<DatabaseModelItem> GetMetaDataItems();
+        ApplicationModelItem SaveApplication(ApplicationModelItem model);
 
-        List<UserInterfaceModelItem> GetMetaUIItems();
+        void DeleteApplicationModel(ApplicationModelItem model);
+
+        List<DatabaseModelItem> GetDatabaseModelItems();
+
+        List<UserInterfaceModelItem> GetUserInterfaceModelItems();
 
         List<DataViewModelItem> GetMetaDataViews();
 
-        List<ApplicationModel> GetApplicationMeta();
+        List<ApplicationModel> GetApplicationModels();
 
-        List<MenuModelItem> GetMetaMenuItems();
+        List<MenuModelItem> GetMenuModelItems();
 
         List<ValueDomainModelItem> GetValueDomains();
 
@@ -31,7 +35,7 @@ namespace Intwenty.Data
 
         List<NoSerieModelItem> GetNoSeries();
 
-        ApplicationModelItem SaveApplication(ApplicationModelItem model);
+       
 
         void SaveApplicationUI(List<UserInterfaceModelItem> model);
 
@@ -62,9 +66,12 @@ namespace Intwenty.Data
         private DbSet<MetaMenuItem> MetaMenuItems;
         private DbSet<NoSerie> NoSeries;
         private DbSet<Entity.ValueDomain> ValueDomains;
+        private IMemoryCache ModelCache;
+
+        private static readonly string AppModelCacheKey = "APPMODELS";
 
 
-        public SystemRepository(ApplicationDbContext context)
+        public SystemRepository(ApplicationDbContext context, IMemoryCache cache)
         {
             this.context = context;
             AppDescription = context.Set<ApplicationDescription>();
@@ -74,14 +81,23 @@ namespace Intwenty.Data
             MetaMenuItems = context.Set<MetaMenuItem>();
             NoSeries = context.Set<NoSerie>();
             ValueDomains = context.Set<Entity.ValueDomain>();
-        }
+            ModelCache = cache;
+    }
 
 
 
-        public List<ApplicationModel> GetApplicationMeta()
+        public List<ApplicationModel> GetApplicationModels()
         {
-            var res = new List<ApplicationModel>();
-            var apps =  GetApplicationDescriptions();
+            List<ApplicationModel> res = null;
+
+            if (ModelCache.TryGetValue(AppModelCacheKey, out res))
+            {
+                if (res != null)
+                    return res;
+            }
+
+            res = new List<ApplicationModel>();
+            var apps =  GetApplicationModelItems();
             var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
             var uitems = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
             var views = MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
@@ -164,13 +180,15 @@ namespace Intwenty.Data
                 res.Add(t);
             }
 
+            ModelCache.Set(AppModelCacheKey, res);
+           
             return res;
 
         }
 
        
 
-        public List<MenuModelItem> GetMetaMenuItems()
+        public List<MenuModelItem> GetMenuModelItems()
         {
             var apps = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
             var res = new List<MenuModelItem>();
@@ -271,10 +289,10 @@ namespace Intwenty.Data
         }
 
         #region Application
-        public List<ApplicationModelItem> GetApplicationDescriptions()
+        public List<ApplicationModelItem> GetApplicationModelItems()
         {
             var t = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
-            var menu = GetMetaMenuItems();
+            var menu = GetMenuModelItems();
             foreach (var app in t)
             {
                 var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
@@ -285,8 +303,43 @@ namespace Intwenty.Data
             return t;
         }
 
+        public void DeleteApplicationModel(ApplicationModelItem model)
+        {
+           
+            if (model==null)
+                throw new InvalidOperationException("Missing required information when deleting application model.");
+
+            if (model.Id < 1 || string.IsNullOrEmpty(model.MetaCode))
+                throw new InvalidOperationException("Missing required information when deleting application model.");
+
+            var existing = AppDescription.FirstOrDefault(p => p.Id == model.Id);
+            if (existing == null)
+                return; //throw new InvalidOperationException("Could not find application model when deleting application model.");
+
+            var dbitems = MetaDBItem.Where(p => p.AppMetaCode == existing.MetaCode);
+            if (dbitems != null && dbitems.Count() > 0)
+                MetaDBItem.RemoveRange(dbitems);
+
+            var uiitems = MetaUIItem.Where(p => p.AppMetaCode == existing.MetaCode);
+            if (uiitems != null && uiitems.Count() > 0)
+                MetaUIItem.RemoveRange(uiitems);
+
+            var menuitems = MetaMenuItems.Where(p => p.AppMetaCode == existing.MetaCode);
+            if (menuitems != null && menuitems.Count() > 0)
+                MetaMenuItems.RemoveRange(menuitems);
+
+            AppDescription.Remove(existing);
+
+            context.SaveChanges();
+
+            ModelCache.Remove(AppModelCacheKey);
+
+        }
+
         public ApplicationModelItem SaveApplication(ApplicationModelItem model)
         {
+            ModelCache.Remove(AppModelCacheKey);
+
             var res = new ApplicationModelItem();
 
             if (model == null)
@@ -331,7 +384,7 @@ namespace Intwenty.Data
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                var menuitem = MetaMenuItems.FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == "MENUITEM");
+                var menuitem = MetaMenuItems.FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
                 if (menuitem != null)
                 {
                     menuitem.Action = model.MainMenuItem.Action;
@@ -357,7 +410,7 @@ namespace Intwenty.Data
             if (!string.IsNullOrEmpty(model.MainMenuItem.Title))
             {
                 var max = 0;
-                var menu = GetMetaMenuItems();
+                var menu = GetMenuModelItems();
                 var root = menu.Find(p => p.IsMetaTypeMainMenu);
                 if (root == null)
                 {
@@ -382,7 +435,7 @@ namespace Intwenty.Data
         #endregion
 
         #region UI
-        public List<UserInterfaceModelItem> GetMetaUIItems()
+        public List<UserInterfaceModelItem> GetUserInterfaceModelItems()
         {
             var dataitems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
             var res = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
@@ -404,6 +457,7 @@ namespace Intwenty.Data
 
         public void SaveApplicationUI(List<UserInterfaceModelItem> model)
         {
+            ModelCache.Remove(AppModelCacheKey);
 
             foreach (var uic in model)
             {
@@ -438,6 +492,8 @@ namespace Intwenty.Data
 
         public void DeleteApplicationUI(int id)
         {
+           
+
             var existing = MetaUIItem.FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
@@ -455,6 +511,8 @@ namespace Intwenty.Data
                 }
               
                 context.SaveChanges();
+
+                ModelCache.Remove(AppModelCacheKey);
             }
         }
 
@@ -482,15 +540,16 @@ namespace Intwenty.Data
 
         #region Database
 
-        public List<DatabaseModelItem> GetMetaDataItems()
+        public List<DatabaseModelItem> GetDatabaseModelItems()
         {
             return MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
         }
 
         public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid)
         {
+          
 
-            var app = GetApplicationMeta().Find(p => p.Application.Id == applicationid);
+            var app = GetApplicationModels().Find(p => p.Application.Id == applicationid);
             if (app == null)
                 throw new InvalidOperationException("Could not find application when saving application db meta.");
 
@@ -569,16 +628,20 @@ namespace Intwenty.Data
             }
 
             context.SaveChanges();
-        
+
+            ModelCache.Remove(AppModelCacheKey);
+
         }
 
         public void DeleteApplicationDB(int id)
         {
+           
+
             var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DatabaseModelItem(existing);
-                var app = GetApplicationMeta().Find(p => p.Application.MetaCode == dto.AppMetaCode);
+                var app = GetApplicationModels().Find(p => p.Application.MetaCode == dto.AppMetaCode);
                 if (app == null)
                     return;
 
@@ -593,6 +656,8 @@ namespace Intwenty.Data
                     MetaDBItem.Remove(existing);
                 }
                 context.SaveChanges();
+
+                ModelCache.Remove(AppModelCacheKey);
             }
         }
 
@@ -758,6 +823,8 @@ namespace Intwenty.Data
                 context.SaveChanges();
             }
         }
+
+       
 
         #endregion
     }
