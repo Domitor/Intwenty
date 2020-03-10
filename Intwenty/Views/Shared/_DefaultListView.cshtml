@@ -45,7 +45,7 @@
 
                     if (c.IsMetaTypeListViewField && c.IsDataConnected)
                     {
-                        <th v-on:click="sortBycolumn('@c.DataInfo.DbName')">@c.Title <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th>
+                        <th v-on:click="sortBycolumn('@c.DataInfo.DbName')">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
                     }
 
                 }
@@ -53,7 +53,7 @@
         </tr>
     </thead>
     <tr v-for="item in sortedResults">
-        <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id">Open</a></td>
+        <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn-link">Open</a></td>
         @{
             foreach (var c in Model.UIStructure)
             {
@@ -68,10 +68,10 @@
     </tr>
 
 </table>
-
-<ul class="pagination">
-    <li v-bind:class="{ disabled: isFirstPage }"><a href="#" v-on:click="prevpage()">Previous {{listRetrieveInfo.batchSize}}</a></li>
-    <li><a href="#" v-on:click="nextpage()">Next {{listRetrieveInfo.batchSize}}</a></li>
-</ul>
-
+<nav>
+    <ul class="pagination">
+        <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{listRetrieveInfo.batchSize}}</a></li>
+        <li class="page-item"><a class="page-link" href="#" v-on:click="nextpage()">Next {{listRetrieveInfo.batchSize}}</a></li>
+    </ul>
+</nav>
 

@@ -9,6 +9,15 @@
     {
       "library": "vue@2.6.11",
       "destination": "wwwroot/lib/vue/"
+    },
+    {
+      "library": "popper.js@1.16.1",
+      "destination": "wwwroot/lib/popper.js/"
     }
+  ,
+{
+  "library": "alasql@0.5.5",
+  "destination": "wwwroot/lib/alasql/"
+}
 ]
 }

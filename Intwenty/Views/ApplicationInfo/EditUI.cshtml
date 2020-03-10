@@ -32,22 +32,22 @@
     <br />
     <br />
 
-    <div class="panel panel-default">
-        <div class="panel-heading"> <h2>Manage UI for application {{model.title}}</h2></div>
-        <div class="panel-body">Design application UI and connect it to the database.</div>
+    <div class="card">
+        <div class="card-header"> <h2>Manage UI for application {{model.title}}</h2></div>
+        <div class="card-body">Design application UI and connect it to the database.</div>
     </div>
 
     <br />
     <br />
 
-    <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#userinput"><b>User Inputs</b></a></li>
-        <li><a data-toggle="tab" href="#listview"><b>Listview</b></a></li>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item"><a class="nav-link active" href="#userinput" id="userinput-tab" data-toggle="tab" aria-selected="true"><b>User Inputs</b></a></li>
+        <li class="nav-item"><a class="nav-link" href="#listview" id="listview-tab" data-toggle="tab" aria-selected="false"><b>Listview</b></a></li>
     </ul>
 
     <div class="tab-content">
 
-        <div id="userinput" class="tab-pane fade in active">
+        <div id="userinput" class="tab-pane fade show active">
             <br />
             <br />
             <h4>Choose Layout</h4>
@@ -59,13 +59,13 @@
             <br />
 
 
-            <div class="btn btn-default" v-on:click="addUserInputRow">
-                <span class="glyphicon glyphicon-plus"></span> Add row
+            <div class="btn btn-secondary" v-on:click="addUserInputRow">
+                <span class="fa fa-plus"></span> Add row
             </div>
 
 
             <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
-                <span class="glyphicon glyphicon-plus"></span> Save changes
+                <span class="fa fa-plus"></span> Save changes
             </div>
 
 
@@ -91,19 +91,18 @@
 
                             <div class="dropdown" v-if="!hasUI(r,c)">
                                 <p>#</p>
-                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                                    Select
-                                    <span class="caret"></span>
+                                <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select<span class="caret"></span>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-left">
-                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'CHECKBOX')">Checkbox</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'COMBOBOX')">Combobox</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'DATEPICKER')">Datepicker</a></li>
-                                    <li><a href="#" v-on:click="createUI(r,c,'LOOKUP')">Lookup</a></li>
-                                </ul>
+                                <div class="dropdown-menu dropdown-menu-left">
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'CHECKBOX')">Checkbox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'COMBOBOX')">Combobox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'DATEPICKER')">Datepicker</a>
+                                    <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'LOOKUP')">Lookup</a>
+                                </div>
 
                             </div>
 
@@ -156,7 +155,7 @@
                                 <div v-if="cell(r,c).metaType==='LOOKUP'">
                                     <div>
                                         <div style="width:10%">
-                                            <button style="float:left" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                            <button style="float:left" class="btn btn-primary"><span class="fa fa-plus"></span></button>
                                         </div>
                                         <div style="float:left; margin-left:5px; width:20%">
                                             <input type="text" class="form-control" disabled />
@@ -276,8 +275,8 @@
                                 <br />
                                 <div>
                                     <div>
-                                        <div class="btn btn-default" v-on:click="addListViewField">
-                                            <span class="glyphicon glyphicon-plus"></span> Add list view field
+                                        <div class="btn btn-secondary" v-on:click="addListViewField">
+                                            <span class="fa fa-plus"></span> Add list view field
                                         </div>
                                     </div>
                                     <br />
@@ -306,7 +305,7 @@
                                 <br />
                                 <div>
                                     <div class="btn btn-primary" v-on:click="saveListView">
-                                        <span class="glyphicon glyphicon-save"></span> Save
+                                        <span class="fa fa-save"></span> Save
                                     </div>
                                 </div>
                             </div>

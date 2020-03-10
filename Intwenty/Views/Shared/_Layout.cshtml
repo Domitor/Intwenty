@@ -134,7 +134,7 @@
                         <li>Bootstrap 4.3.7</li>
                         <li>Vue.js v2.6.11</li>
                         <li>JQuery v3.3.1</li>
-                        <li>alasql.js v???</li>
+                        <li>alasql v0.5.5</li>
                     </ul>
                     <h5>Licence</h5>
                     <p>Massachusetts Institute of Technology</p>
@@ -148,7 +148,7 @@
         </div>
     </div>
 
-   
+
 
     <div class="container body-content">
         @RenderBody()
@@ -163,13 +163,14 @@
 
 
     <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/alasql/alasql.min.js"></script>
+    <script src="~/lib/popper.js/umd/popper.min.js"></script>
     <script src="~/lib/bootstrap-4.4.1/dist/js/bootstrap.min.js"></script>
     <script src="~/lib/vue/vue.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        function techModal()
-        {
+        function techModal() {
             $("#tech_modal").modal();
         }
     </script>

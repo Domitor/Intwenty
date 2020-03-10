@@ -5,9 +5,9 @@
         <br />
         <br />
 
-        <div class="panel panel-default">
-            <div class="panel-heading"><h2>Manage applications</h2></div>
-            <div class="panel-body">Create and manage application meta data used to describe UI and database</div>
+        <div class="card">
+            <div class="card-header"><h2>Manage applications</h2></div>
+            <div class="card-body">Create and manage application meta data used to describe UI and database</div>
         </div>
 
         <br />
@@ -22,10 +22,10 @@
             <thead>
                 <tr>
                     <th style="width:10%"></th>
-                    <th style="width:30%">Title</th>
-                    <th style="width:30%">Description</th>
-                    <th style="width:10%"></th>
-                    <th style="width:10%"></th>
+                    <th style="width:20%">Title</th>
+                    <th style="width:25%">Description</th>
+                    <th style="width:20%"></th>
+                    <th style="width:15%"></th>
                     <th style="width:10%"></th>
                 </tr>
             </thead>
@@ -33,8 +33,8 @@
                 <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-secondary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
-                <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-default">Manage database</a></td>
-                <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-default">Manage UI</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-secondary">Manage database</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-secondary">Manage UI</a></td>
                 <td><a href="#" role="button" class="btn btn-danger">Delete</a></td>
             </tr>
         </table>

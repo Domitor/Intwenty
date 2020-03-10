@@ -15,9 +15,9 @@
 <div>
     <br />
     <br />
-    <div class="panel panel-default">
-        <div class="panel-heading"><h2>Meta model documentation</h2></div>
-        <div class="panel-body"></div>
+    <div class="card">
+        <div class="card-header"><h2>Meta model documentation</h2></div>
+        <div class="card-body"></div>
     </div>
     <br />
     <br />
@@ -25,9 +25,9 @@
 
     @foreach (var app in Model)
     {
-        <div class="panel panel-default">
-            <div class="panel-heading"><h4>(@app.Application.Id) @app.Application.Title</h4></div>
-            <div class="panel-body">@app.Application.Description</div>
+        <div class="card">
+            <div class="card-header"><h4>(@app.Application.Id) @app.Application.Title</h4></div>
+            <div class="card-body">@app.Application.Description</div>
         </div>
 
         <br />

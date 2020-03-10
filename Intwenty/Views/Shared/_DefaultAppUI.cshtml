@@ -111,7 +111,7 @@
 
 
                                     <div style="width:10%">
-                                        <button style="float:left" class="btn btn-primary" v-on:click="openDataViewLookUp('@t.ViewName')"><span class="glyphicon glyphicon-plus"></span></button>
+                                        <button style="float:left" class="btn btn-secondary" v-on:click="openDataViewLookUp('@t.ViewName')"><span class="fa fa-plus"></span></button>
                                     </div>
                                     @{
 
@@ -149,7 +149,7 @@
 
         <br />
 
-        <button class="btn btn-primary" type="button" v-on:click="saveApplication()"><span class="glyphicon glyphicon-save"></span> Save</button>
+        <button class="btn btn-primary" type="button" v-on:click="saveApplication()"><span class="fa fa-save"></span> Save</button>
 
 
             @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))
@@ -158,11 +158,11 @@
                 {
                     <!-- Modal -->
                     <div class="modal fade" id="@t.ViewName" role="dialog">
-                        <div class="modal-dialog modal-sm">
+                        <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
+                                    <h5 class="modal-title">@t.ViewInfo.Title</h5>
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title">@t.ViewInfo.Title</h4>
                                 </div>
                                 <div class="modal-body">
                                     <div class="row">
@@ -229,15 +229,17 @@
                                                         }
                                                     </tr>
                                                 </table>
-                                                <ul class="pagination">
-                                                    <li v-bind:class="{ disabled: isFirstDataViewPage }"><a href="#" v-on:click="prevDataViewLookUpPage()">Previous {{viewretrieveinfo.batchSize}}</a></li>
-                                                    <li><a href="#" v-on:click="nextDataViewLookUpPage()">Next {{viewretrieveinfo.batchSize}}</a></li>
-                                                </ul>
+                                                <nav>
+                                                    <ul class="pagination">
+                                                        <li class="page-item" v-bind:class="{ disabled: isFirstDataViewPage }"><a class="page-link" href="#" v-on:click="prevDataViewLookUpPage()">Previous {{viewretrieveinfo.batchSize}}</a></li>
+                                                        <li class="page-item"><a class="page-link" href="#" v-on:click="nextDataViewLookUpPage()">Next {{viewretrieveinfo.batchSize}}</a></li>
+                                                    </ul>
+                                                </nav>
                                             </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>
