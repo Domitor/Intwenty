@@ -195,42 +195,73 @@ namespace Intwenty.Models.MetaDesigner
 
     public class UIVm
     {
-        public int Id = 0;
-        public string Title = "";
-        public string LayoutPanels = "2";
-        public List<LayoutRow> LayoutRows = new List<LayoutRow>();
-        public List<UserInput> UserInputs = new List<UserInput>();
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string LayoutPanels { get; set; }
+        public List<LayoutRow> LayoutRows { get; set; }
+        public List<UserInput> UserInputs { get; set; }
+
+        public UIVm()
+        {
+            Title = "";
+            LayoutPanels = "2";
+            LayoutRows = new List<LayoutRow>();
+            UserInputs = new List<UserInput>();
+        }
 
     }
 
     public class LayoutRow
     {
-        public int Id = 0;
+        public int Id { get; set; }
+        public LayoutRow()
+        {
 
+        }
     }
 
     public class UserInput
     {
-        public int Id = 0;
-        public int ApplicationId = 0;
-        public string Title = "";
-        public int Rowid = 0;
-        public int Colid = 0;
-        public string Description = "";
-        public string Properties = "";
-        public string TableName = "";
-        public string ColumnName = "";
-        public string MetaType = "";
-        public string MetaCode = "";
-        public string ParentMetaCode = "";
-        public string LookUpKeyFieldDbName = "";
-        public string LookUpKeyFieldViewDbName = "";
-        public string LookUpKeyFieldTitle = "";
-        public string LookUpFieldDbName = "";
-        public string LookUpFieldViewDbName = "";
-        public string LookUpFieldTitle = "";
-        public string Domain = "";
-        public bool ShowSettings = false;
+        public int Id { get; set; }
+        public int ApplicationId { get; set; }
+        public string Title { get; set; }
+        public int Rowid { get; set; }
+        public int Colid { get; set; }
+        public string Description { get; set; }
+        public string Properties { get; set; }
+        public string TableName { get; set; }
+        public string ColumnName { get; set; }
+        public string MetaType { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
+        public string LookUpKeyFieldDbName { get; set; }
+        public string LookUpKeyFieldViewDbName { get; set; }
+        public string LookUpKeyFieldTitle { get; set; }
+        public string LookUpFieldDbName { get; set; }
+        public string LookUpFieldViewDbName { get; set; }
+        public string LookUpFieldTitle { get; set; }
+        public string Domain { get; set; }
+        public bool ShowSettings { get; set; }
+
+        public UserInput()
+        {
+            Title = "";
+            Description = "";
+            Properties = "";
+            TableName = "";
+            ColumnName = "";
+            MetaType = "";
+            MetaCode = "";
+            ParentMetaCode = "";
+            LookUpKeyFieldDbName = "";
+            LookUpKeyFieldViewDbName = "";
+            LookUpKeyFieldTitle = "";
+            LookUpFieldDbName = "";
+            LookUpFieldViewDbName = "";
+            LookUpFieldTitle = "";
+            Domain = "";
+
+        }
 
     }
 

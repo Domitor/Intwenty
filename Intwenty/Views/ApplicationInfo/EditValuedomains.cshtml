@@ -10,17 +10,17 @@
 
     <br />
     <br />
-    <div class="panel panel-default">
-        <div class="panel-heading"><h2>Value domains</h2></div>
-        <div class="panel-body">Value domain meta data describes simple lists of static value pairs. Value domains are used in UI controls such as Comboboxes where the user selects one or more values.</div>
+    <div class="card">
+        <div class="card-header"><h2>Value domains</h2></div>
+        <div class="card-body">Value domain meta data describes simple lists of static value pairs. Value domains are used in UI controls such as Comboboxes where the user selects one or more values.</div>
     </div>
     <br />
     <br />
 
     <div class="row">
         <div class="col-lg-6">
-            <div class="btn btn-default" v-on:click="model.showNew=!model.showNew">
-                <span class="glyphicon glyphicon-plus"></span> Create new value domain
+            <div class="btn btn-secondary" v-on:click="model.showNew=!model.showNew">
+                <span class="fa fa-plus"></span> Create new value domain
             </div>
         </div>
         <div class="col-lg-6">
@@ -52,7 +52,7 @@
 
         </div>
         <div class="col-lg-4">
-            <div class="btn btn-primary" v-on:click="saveChanges" style="margin-top:23px">
+            <div class="btn btn-primary" v-on:click="saveChanges" style="margin-top:28px">
                 <span class="glyphicon glyphicon-save"></span> Save changes
             </div>
         </div>
@@ -63,8 +63,8 @@
     <br />
     <br />
     <div>
-        <div class="btn btn-default" v-on:click="addDomainValue">
-            <span class="glyphicon glyphicon-plus"></span> Add domain value
+        <div class="btn btn-secondary" v-on:click="addDomainValue">
+            <span class="fa fa-plus"></span> Add domain value
         </div>
     </div>
     <br />
@@ -74,8 +74,8 @@
             <tr>
 
                 <th style="width:30%">Code <span style="color: red"> *</span></th>
-                <th style="width:65%">Value <span style="color: red"> *</span></th>
-                <th style="width:5%"></th>
+                <th style="width:60%">Value <span style="color: red"> *</span></th>
+                <th style="width:10%"></th>
             </tr>
         </thead>
         <tbody v-for="entry in filtereddomains">
@@ -83,7 +83,7 @@
 
                 <td><input type="text" class="form-control" v-model="entry.code" v-on:input="markChanged(entry)" /></td>
                 <td><input type="text" class="form-control" v-model="entry.value" v-on:input="markChanged(entry)" /></td>
-                <td><div class="btn btn-danger" v-on:click="deleteDomainValue(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+                <td><div class="btn btn-danger" v-on:click="deleteDomainValue(entry)"><span class="fa fa-remove"></span> Delete</div></td>
             </tr>
         </tbody>
     </table>

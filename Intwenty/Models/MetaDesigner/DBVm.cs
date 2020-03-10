@@ -51,25 +51,41 @@ namespace Intwenty.Models.MetaDesigner
 
     public class DBVm
     {
-        public int Id = 0;
-        public string Title = "";
-        public List<UIDbTable> Tables = new List<UIDbTable>();
-        public List<UIDbTableField> Columns = new List<UIDbTableField>();
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public List<UIDbTable> Tables { get; set; }
+        public List<UIDbTableField> Columns { get; set; } 
 
+        public DBVm()
+        {
+            Title = "";
+            Tables = new List<UIDbTable>();
+            Columns = new List<UIDbTableField>();
+        }
     }
 
 
     public class UIDbTable
     {
-        public int Id = 0;
-        public int ApplicationId = 0;
-        public string DbName = "";
-        public string MetaCode = "";
-        public string ParentMetaCode = "";
-        public string MetaType = "";
-        public string Properties = "";
-        public string Description = "";
-        public List<UIDbTableField> Columns = new List<UIDbTableField>();
+        public int Id { get; set; }
+        public int ApplicationId { get; set; }
+        public string DbName { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
+        public string MetaType { get; set; }
+        public string Properties { get; set; }
+        public string Description { get; set; }
+        public List<UIDbTableField> Columns { get; set; } 
+
+        public UIDbTable()
+        {
+            DbName = "";
+            MetaCode = "";
+            ParentMetaCode = "";
+            MetaType = "";
+            Description = "";
+            Columns= new List<UIDbTableField>();
+        }
 
         public static List<UIDbTable> GetTables(ApplicationModel app)
         {
@@ -104,18 +120,33 @@ namespace Intwenty.Models.MetaDesigner
 
     public class UIDbTableField
     {
-        public int Id = 0;
-        public int ApplicationId = 0;
-        public string DbName = "";
-        public string MetaCode = "";
-        public string ParentMetaCode = "";
-        public bool Mandatory = false;
-        public string MetaType = "";
-        public string Properties = "";
-        public string DataType = "";
-        public string Description = "";
-        public string Domain = "";
-        public string TableName = "";
+        public int Id { get; set; }
+        public int ApplicationId { get; set; }
+        public string DbName { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
+        public bool Mandatory { get; set; }
+        public string MetaType { get; set; }
+        public string Properties { get; set; }
+        public string DataType { get; set; }
+        public string Description { get; set; }
+        public string Domain { get; set; }
+
+        public string TableName { get; set; }
+
+        public UIDbTableField()
+        {
+            DbName = "";
+            MetaCode = "";
+            ParentMetaCode = "";
+            MetaType = "";
+            Properties = "";
+            DataType = "";
+            Description = "";
+            Domain = "";
+            TableName = "";
+
+        }
     }
 
 }

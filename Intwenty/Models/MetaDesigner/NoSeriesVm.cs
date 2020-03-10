@@ -48,14 +48,23 @@ namespace Intwenty.Models.MetaDesigner
 
     public class NoSeriesVm
     {
-        public int Id = 0;
-        public int ApplicationId = 0;
-        public int StartValue = 1000;
-        public string TableName = "";
-        public string ColumnName = "";
-        public string Prefix = "";
-        public string Description = "";
-      
+        public int Id { get; set; }
+        public int ApplicationId { get; set; }
+        public int StartValue { get; set; }
+        public string TableName { get; set; }
+        public string ColumnName { get; set; }
+        public string Prefix { get; set; }
+        public string Description { get; set; }
+
+        public NoSeriesVm()
+        {
+            StartValue = 1000;
+            TableName = "";
+            ColumnName = "";
+            Prefix = "";
+            Description = "";
+        }
+
 
     }
 }

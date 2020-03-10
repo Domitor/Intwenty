@@ -11,17 +11,17 @@
     <br />
     <br />
 
-    <div class="panel panel-default">
-        <div class="panel-heading"><h2>Data views</h2></div>
-        <div class="panel-body">Data views are used to create on the fly list queries from database tables or views. They can be used together with custom UI:s or together with the 'Look Up' UI Control. A data view description includes an sql query and a list of fields that the query is expected to generate.</div>
+    <div class="card">
+        <div class="card-header"><h2>Data views</h2></div>
+        <div class="card-body">Data views are used to create on the fly list queries from database tables or views. They can be used together with custom UI:s or together with the 'Look Up' UI Control. A data view description includes an sql query and a list of fields that the query is expected to generate.</div>
     </div>
 
     <br />
     <br />
 
     <div>
-        <div class="btn btn-default" v-on:click="addDataView">
-            <span class="glyphicon glyphicon-plus"></span> Add data view
+        <div class="btn btn-secondary" v-on:click="addDataView">
+            <span class="fa fa-plus"></span> Add data view
         </div>
     </div>
 
@@ -47,7 +47,7 @@
                     <div class="col-lg-6">
 
                         <div class="btn btn-primary" v-on:click="saveDataView(item)" style="margin-top:23px">
-                            <span class="glyphicon glyphicon-save"></span> Save
+                            <span class="fa fa-save"></span> Save
                         </div>
 
 
@@ -58,7 +58,7 @@
                         <b>Fields: </b> {{getViewFieldsString(item)}}
                         <br />
                         <label class="control-label" v-if="!item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Show field definitions]</a></label>
-                        <label class="control-label" v-if="item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Close]</a></label>
+                        <label class="control-label" v-if="item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Close field definitions]</a></label>
                         <br />
                         <div v-if="item.showSettings">
                             <div>
@@ -116,6 +116,7 @@
                 },
                 saveDataView: function (item)
                 {
+                    var context = this;
                     var baseurl = '@Url.Content("~/ApplicationInfo/")';
                     var endpointurl = baseurl + "SaveDataView";
 

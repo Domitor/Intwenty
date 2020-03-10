@@ -75,7 +75,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-
+        
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationModelItem model)
         {
@@ -240,7 +240,9 @@ namespace Intwenty.Controllers
         public JsonResult GetDataViews()
         {
             var t = Repository.GetMetaDataViews();
-            return new JsonResult(DataViewVm.GetDataViews(t));
+            var views = DataViewVm.GetDataViews(t);
+            var res = new JsonResult(views);
+            return res;
 
         }
 

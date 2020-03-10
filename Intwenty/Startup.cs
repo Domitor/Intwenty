@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Intwenty.Data;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Intwenty
 {
@@ -44,9 +46,16 @@ namespace Intwenty
 
             });
 
-           
+         
 
-            services.AddControllersWithViews();
+
+            services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.WriteIndented = false;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+            }); 
             services.AddRazorPages().AddRazorRuntimeCompilation();
         }
 

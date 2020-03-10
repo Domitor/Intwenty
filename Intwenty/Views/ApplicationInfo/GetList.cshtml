@@ -13,7 +13,7 @@
         <br />
         <br />
 
-        <a asp-action="Create" asp-controller="ApplicationInfo" role="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Create New Application</a>
+        <a asp-action="Create" asp-controller="ApplicationInfo" role="button" class="btn btn-primary"><span class="fa fa-plus"></span> Create New Application</a>
 
         <br />
         <br />
@@ -30,7 +30,7 @@
                 </tr>
             </thead>
             <tr v-for="item in datalist">
-                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-default">Edit</a></td>
+                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-secondary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-default">Manage database</a></td>

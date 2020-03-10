@@ -44,12 +44,21 @@ namespace Intwenty.Models.MetaDesigner
 
     public class DataViewVm
     {
-        public int Id = 0;
-        public string Title = "";
-        public string MetaCode = "";
-        public string SQLQuery = "";
-        public string Properties = "";
-        public List<DataViewFieldVm> Fields = new List<DataViewFieldVm>();
+        public int Id { get; set; }
+        public string Title  { get; set; }
+        public string MetaCode { get; set; }
+        public string SQLQuery { get; set; }
+        public string Properties { get; set; }
+        public List<DataViewFieldVm> Fields { get; set; }
+
+        public DataViewVm()
+        {
+            Fields = new List<DataViewFieldVm>();
+            Title = "";
+            MetaCode = "";
+            SQLQuery = "";
+            Properties = "";
+        }
 
         public static List<DataViewVm> GetDataViews(List<DataViewModelItem> viewmeta)
         {
@@ -79,10 +88,17 @@ namespace Intwenty.Models.MetaDesigner
 
     public class DataViewFieldVm
     {
-        public int Id = 0;
-        public string Title = "";
-        public string SQLQueryFieldName = "";
-        public string Properties = "";
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string SQLQueryFieldName { get; set; }
+        public string Properties { get; set; }
+
+        public DataViewFieldVm()
+        {
+            Title = "";
+            SQLQueryFieldName = "";
+            Properties = "";
+        }
     }
 
   

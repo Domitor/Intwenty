@@ -10,6 +10,11 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypeMainMenu = "MAINMENU";
         public static readonly string MetaTypeMenuItem = "MENUITEM";
 
+        public MenuModelItem()
+        {
+            MetaType = MetaTypeMenuItem;
+        }
+
         public MenuModelItem(string metatype)
         {
             MetaType = metatype;

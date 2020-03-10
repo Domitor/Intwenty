@@ -28,13 +28,10 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="#">Intwenty</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="nav navbar-nav">
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-procedures"></span> @menutitle</span> <span class="caret"></span></a>
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
                         <div class="dropdown-menu">
                             @{
 
@@ -60,15 +57,15 @@
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cogs"></span> System Administration</span> <span class="caret"></span></a>
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> System Administration</span> <span class="caret"></span></a>
                         <div class="dropdown-menu">
 
-                  
+
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="GetList"><span class="fa fa-meteor"></span> Manage applications</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditNoSeries"><span class="fa fa-database"></span> Number series</a>
-                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="fa fa-uikit"></span> Main menu</a>
+                            <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="EditMainMenu"><span class="fa fa-meteor"></span> Main menu</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ValidateModel"><span class="fa fa-meteor"></span> Validate meta model</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ViewMetaModelDocumentation"><span class="fa fa-meteor"></span> Meta model documentation</a>
                             <a class="dropdown-item" asp-controller="ApplicationInfo" asp-action="ConfigureDatabase"><span class="fa fa-meteor"></span> Configure database</a>
@@ -76,72 +73,82 @@
                         </div>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="#"><span class="fa fa-user"></span> Users and security</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="techModal()"><span class="fa fa-question"></span> Technology</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="modal fade" id="msg_dlg_modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal" id="msg_dlg_modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 id="msg_dlg_modal_hdr" class="modal-title">Information</h4>
+                    <h5 id="msg_dlg_modal_hdr" class="modal-title">Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p id="msg_dlg_modal_text"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="yesno_dlg_modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal" id="yesno_dlg_modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 id="yesno_dlg_modal_hdr" class="modal-title">Information</h4>
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p id="yesno_dlg_modal_text"></p>
                 </div>
                 <div class="modal-footer">
                     <button id="yesno_dlg_modal_yesbtn" type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="tech_modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal" id="tech_modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">About</h4>
+                    <h5 class="modal-title">About Intwenty</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <p><b>Intwenty</b></p>
-                    <p><b>Technologies used</b></p>
+                    <h5>Technologies</h5>
                     <ul>
-                        <li>Asp.Net Core 2.1.1</li>
-                        <li>Bootstrap 3.3.7</li>
+                        <li>Asp.Net Core 3.1</li>
+                        <li>Bootstrap 4.3.7</li>
                         <li>Vue.js v2.6.11</li>
                         <li>JQuery v3.3.1</li>
                         <li>alasql.js v???</li>
                     </ul>
+                    <h5>Licence</h5>
+                    <p>Massachusetts Institute of Technology</p>
+                    <h5>Author</h5>
+                    <p>Johan Filipsson</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <partial name="_CookieConsentPartial" />
+   
 
     <div class="container body-content">
         @RenderBody()
@@ -160,6 +167,12 @@
     <script src="~/lib/vue/vue.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <script>
+        function techModal()
+        {
+            $("#tech_modal").modal();
+        }
+    </script>
 
     @RenderSection("Scripts", required: false)
 

@@ -11,16 +11,16 @@
     <br />
     <br />
 
-    <div class="panel panel-default">
-        <div class="panel-heading"><h2>Modify <i>{{model.title}}</i></h2></div>
-        <div class="panel-body">
+    <div class="card">
+        <div class="card-header"><h2>Modify <i>{{model.title}}</i></h2></div>
+        <div class="card-body">
             Modify basic application meta data for {{model.title}}
         </div>
     </div>
 
     <br />
 
-    <a asp-action="GetList" asp-controller="ApplicationInfo" role="button" class="btn btn-default"><span class="glyphicon glyphicon-backward"></span> Back to list</a>
+    <a asp-action="GetList" asp-controller="ApplicationInfo" role="button" class="btn btn-default"><span class="fa fa-backward"></span> Back to list</a>
 
 
     <br />
@@ -32,7 +32,7 @@
     <br />
     <br />
 
-    <button class="btn btn-primary" type="button" v-on:click="saveApplication()"><span class="glyphicon glyphicon-save"></span> Save changes</button>
+    <button class="btn btn-primary" type="button" v-on:click="saveApplication()"><span class="fa fa-save"></span> Save changes</button>
 
 </div>
 
@@ -43,15 +43,9 @@
         var app = new Vue({
             el: '#app',
             data: {
-                model: {},
-                tables: [],
-                datatypes: [],
-                columns: [],
-                uicomponents: [],
-                uitypes: [],
-                valuedomains: [],
-                dataviews: [],
-                dataviewfields: []
+                model: {
+                    mainMenuItem: {} 
+                    }
             },
             methods:
             {
@@ -76,19 +70,6 @@
                 {
                    
 
-                },
-                addDbTable: function () {
-                    var context = this;
-                    context.tables.push({properties:"ISNEW=TRUE", metaType:"DATAVALUETABLE"});
-                },
-                addDbColumn: function () {
-                    var context = this;
-                    context.columns.push({ properties: "ISNEW=TRUE", metaType: "DATAVALUE" });
-                }
-                ,
-                addUIComponent: function () {
-                    var context = this;
-                    context.uicomponents.push({ properties: "ISNEW=TRUE", dataInfo: {}, viewInfo: {} });
                 }
             },
             mounted: function ()

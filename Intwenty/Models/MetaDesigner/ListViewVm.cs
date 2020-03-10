@@ -38,12 +38,20 @@ namespace Intwenty.Models.MetaDesigner
 
     public class ListViewVm
     {
-        public int Id = 0;
-        public int ApplicationId = 0;
-        public string Title = "";
-        public string MetaCode = "";
-        public string Properties = "";
+        public int Id { get; set; }
+        public int ApplicationId { get; set; }
+        public string Title { get; set; }
+        public string MetaCode { get; set; }
+        public string Properties { get; set; }
         public List<ListViewFieldVm> Fields = new List<ListViewFieldVm>();
+
+        public ListViewVm()
+        {
+            Title = "";
+            MetaCode = "";
+            Properties = "";
+            Fields = new List<ListViewFieldVm>();
+        }
 
         public static ListViewVm GetListView(ApplicationModel app)
         {
@@ -77,10 +85,17 @@ namespace Intwenty.Models.MetaDesigner
 
     public class ListViewFieldVm
     {
-        public int Id = 0;
-        public string Title = "";
-        public string DbName = "";
-        public string Properties = "";
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string DbName { get; set; }
+        public string Properties { get; set; }
+
+        public ListViewFieldVm()
+        {
+            Title = "";
+            DbName = "";
+            Properties = "";
+        }
     }
 
   
