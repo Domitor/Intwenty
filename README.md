@@ -16,9 +16,14 @@ Create meta data driven applications with java script and ASP.NET Core, a tool f
 5. Let Intwenty generate standard logic for I/O operations against the database based on meta data
 6. Let the user easily override all the above when necessary
 
+# How
+- Intwenty does not work with strongly typed models, except for the meta model itself. It uses entity framework to store and retrive the meta model and it uses a custom service to store data based on the model.
+- Users/Developers can input meta data (create / update applications) via a graphical UI, which allows for handling both the data model and the UI model. For inputing the UI model Jquery form builder is used. 
+
 # Technologies Used
-- Asp.Net Core
-- JQuery
+- Asp.Net Core 3.1
+- Jquery
+- Jquery form builder
 - Vue.js
 - alasql.js
 
