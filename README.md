@@ -1,3 +1,6 @@
+![alt text](https://github.com/Domitor/Intwenty/blob/master/Intwenty/wwwroot/images/intwenty_loggo_small.png)
+
+
 # Intwenty
 Create meta data driven applications with java script and ASP.NET Core, a tool for developers or for people who wants to build quick business applications without or with minimal coding
 
