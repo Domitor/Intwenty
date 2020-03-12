@@ -5,11 +5,11 @@
 }
 
 <style>
-    .formpanel 
-    {
-        border-left: 1px dotted black;
+    .formpanel {
+        border: 1px dotted black;
         margin: 5px;
         padding: 5px;
+        min-height:120px;
     }
 
     .settingpnl {
@@ -48,6 +48,9 @@
     <div class="tab-content">
 
         <div id="userinput" class="tab-pane fade show active">
+
+
+
             <br />
             <br />
             <h4>Choose Layout</h4>
@@ -89,12 +92,10 @@
 
                         <div class="formpanel">
 
-                            <div class="dropdown" v-if="!hasUI(r,c)">
-                                <p>#</p>
-                                <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Select<span class="caret"></span>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-left">
+                            <div class="dropdown" v-if="!hasUI(r,c)" style="text-align:center; margin-top:40px">
+
+                                <button class="btn btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><span class="fa fa-plus"></span></button>
+                                <div class="dropdown-menu dropdown-menu-lg-right">
                                     <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'TEXTBOX')">Textbox</a>
                                     <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'NUMBOX')">Numbox</a>
                                     <a class="dropdown-item" href="#" v-on:click="createUI(r,c,'TEXTAREA')">Textarea</a>
@@ -110,8 +111,10 @@
 
                             <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
 
-                                <label class="control-label" v-if="!cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="cell(r,c).showSettings=!cell(r,c).showSettings">[Settings]</a></label>
-                                <label class="control-label" v-if="cell(r,c).showSettings"><i>{{cell(r,c).title}}</i> <a href="#" v-on:click="closeAndSave(r,c)">[Close and save]</a></label>
+                                <label class="control-label"><i>{{cell(r,c).title}}</i></label>
+                                <span class="fa fa-trash" v-on:click="removeUI(r,c)" style="float:right; margin:5px"></span>
+                                <span class="fa fa-cog" v-on:click="openSettingsDlg(r,c)" style="float:right; margin:5px"></span>
+
                                 <div v-if="cell(r,c).metaType==='TEXTBOX'">
                                     <div class="form-group">
                                         <input type="text" class="form-control" disabled />
@@ -172,66 +175,7 @@
                             </div>
 
 
-                            <div v-bind:id="'settingpnl_' + r.id +'_'+c.id" class="settingpnl" v-if="cell(r,c).showSettings">
-
-                                <span><b><i>Settings</i></b></span>
-                                <span style="float:right"><a href="#" v-on:click="removeUI(r,c)">Remove</a></span>
-                                <br />
-                                <div class="form-group">
-                                    <label class="control-label">Title</label>
-                                    <input type="text" class="form-control" v-model="cell(r,c).title" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="control-label">Set database table</label>
-                                    <select v-model="cell(r,c).tableName" class="form-control">
-                                        <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="cell(r,c).metaType != 'LOOKUP'">
-                                    <label class="control-label">Set database column</label>
-                                    <select v-model="cell(r,c).columnName" class="form-control">
-                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='COMBOBOX'">
-                                    <label class="control-label">Set value domain</label>
-                                    <select v-model="cell(r,c).domain" class="form-control">
-                                        <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='LOOKUP'">
-                                    <label class="control-label">Set data view</label>
-                                    <select v-model="cell(r,c).domain" class="form-control">
-                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='LOOKUP'">
-                                    <label class="control-label">Set key field database column</label>
-                                    <select v-model="cell(r,c).lookUpKeyFieldDbName" class="form-control">
-                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='LOOKUP'">
-                                    <label class="control-label">Set key field data view column</label>
-                                    <select v-model="cell(r,c).lookUpKeyFieldViewDbName" class="form-control">
-                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='LOOKUP'">
-                                    <label class="control-label">(optional) Set look up field database column</label>
-                                    <select v-model="cell(r,c).lookUpFieldDbName" class="form-control">
-                                        <option v-for="col in dbcolumns(cell(r,c).tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                    </select>
-                                </div>
-                                <div v-if="cell(r,c).metaType=='LOOKUP'">
-                                    <label class="control-label">Set look up field data view column</label>
-                                    <select v-model="cell(r,c).lookUpFieldViewDbName" class="form-control">
-                                        <option v-for="col in viewcolumns(cell(r,c).domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
-                            </div>
+                           
 
                         </div>
 
@@ -241,6 +185,7 @@
 
 
             </div>
+
         </div>
 
         <div id="listview" class="tab-pane fade">
@@ -319,16 +264,100 @@
         </div>
 
     </div>
+
+
+    <!-- STTING MODAL-->
+    <div class="modal" id="ui_setting_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">UI {{model.active_setting_input.metaType}} Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="ui_setting_modal_body">
+                    <div class="settingpnl">
+                        <div class="form-group">
+                            <label class="control-label">Title</label>
+                            <input type="text" class="form-control" v-model="model.active_setting_input.title" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Set database table</label>
+                            <select v-model="model.active_setting_input.tableName" class="form-control">
+                                <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" v-if="model.active_setting_input.metaType != 'LOOKUP'">
+                            <label class="control-label">Set database column</label>
+                            <select v-model="model.active_setting_input.columnName" class="form-control">
+                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='COMBOBOX'">
+                            <label class="control-label">Set value domain</label>
+                            <select v-model="model.active_setting_input.domain" class="form-control">
+                                <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">Set data view</label>
+                            <select v-model="model.active_setting_input.domain" class="form-control">
+                                <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">Set key field database column</label>
+                            <select v-model="model.active_setting_input.lookUpKeyFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                            <label class="model.control-label">Set key field data view column</label>
+                            <select v-model="model.active_setting_input.lookUpKeyFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumns(model.active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">(optional) Set look up field database column</label>
+                            <select v-model="model.active_setting_input.lookUpFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            </select>
+                        </div>
+                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">Set look up field data view column</label>
+                            <select v-model="model.active_setting_input.lookUpFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumns(model.active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
-    @section Scripts
+@section Scripts
         {
-        <script>
+
+
+    
+
+
+    <script>
 
         var app = new Vue({
             el: '#app',
             data: {
-                model: { layoutPanels: "2", layoutRows: [], userInputs: [] },
+                model: {
+                    layoutPanels: "2", layoutRows: [], userInputs: [], active_setting_input: {} },
                 dbtables: [],
                 valuedomains: [],
                 dataviews: [],
@@ -336,6 +365,26 @@
             },
             methods:
             {
+                openSettingsDlg(row,col)
+                {
+                    /*
+                    var ui = this.cell(row, col);
+                    this.model.active_setting_input = {};
+                    this.model.active_setting_input.metaType = ui.metaType;
+                    this.model.active_setting_input.tableName = ui.tableName;
+                    this.model.active_setting_input.columnName = ui.columnName;
+                    this.model.active_setting_input.title = ui.title;
+                    this.model.active_setting_input.lookUpFieldViewDbName = ui.lookUpFieldViewDbName;
+                    this.model.active_setting_input.lookUpFieldDbName = ui.lookUpFieldDbName;
+                    this.model.active_setting_input.lookUpKeyFieldViewDbName = ui.lookUpKeyFieldViewDbName;
+                    this.model.active_setting_input.lookUpKeyFieldDbName = ui.lookUpKeyFieldDbName;
+                    this.model.active_setting_input.domain = ui.domain;
+                    */
+                    var ui = this.cell(row, col);
+                    this.model.active_setting_input = ui;
+                    this.$forceUpdate();
+                    $("#ui_setting_modal").modal();
+                },
                 addUserInputRow: function ()
                 {
                     this.model.layoutRows.push({ id: this.model.layoutRows.length * 10 });
@@ -357,13 +406,16 @@
                     {
                         if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
                         {
-                            this.removeApplicationUI(this.model.userInputs[i]);
+                            //this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
                         }
                     }
                 },
                 cell: function (row, col) {
+
+                    if (!row || !col)
+                        return {};
 
                     for (var i = 0; i < this.model.userInputs.length; i++) {
                         if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
@@ -559,6 +611,7 @@
             },
             mounted: function ()
             {
+
                 var context = this;
                 var baseurl = '@Url.Content("~/ApplicationInfo/")';
                 var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
@@ -568,6 +621,7 @@
                 {
                     context.model = response;
                     context.addHeaderPanels();
+                    context.model.active_setting_input={};
                 });
 
                 //Tables
@@ -598,5 +652,5 @@
             }
         })
 
-        </script>
-    }
+    </script>
+}

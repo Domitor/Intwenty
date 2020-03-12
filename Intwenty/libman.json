@@ -13,11 +13,10 @@
     {
       "library": "popper.js@1.16.1",
       "destination": "wwwroot/lib/popper.js/"
+    },
+    {
+      "library": "alasql@0.5.5",
+      "destination": "wwwroot/lib/alasql/"
     }
-  ,
-{
-  "library": "alasql@0.5.5",
-  "destination": "wwwroot/lib/alasql/"
-}
-]
+  ]
 }
