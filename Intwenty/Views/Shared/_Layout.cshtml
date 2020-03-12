@@ -11,7 +11,7 @@
 
 @{
     var menutitle = "Applications";
-    var menuobjects = Repository.GetMenuModelItems();
+    var menuobjects = ModelRepository.GetMenuModelItems();
     var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
     if (mainmenu != null)
     {
@@ -38,7 +38,7 @@
 
                                 if (mainmenu == null)
                                 {
-                                    foreach (var a in Repository.GetApplicationModelItems())
+                                    foreach (var a in ModelRepository.GetApplicationModelItems())
                                     {
                                         <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
                                     }

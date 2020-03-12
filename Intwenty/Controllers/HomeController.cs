@@ -13,13 +13,8 @@ namespace Intwenty.Controllers
     public class HomeController : Controller
     {
 
-        private ISystemRepository Repository { get; }
-
-        public HomeController(ISystemRepository sr)
+        public HomeController()
         {
-            Repository = sr;
-            
-
         }
 
         public IActionResult Index()

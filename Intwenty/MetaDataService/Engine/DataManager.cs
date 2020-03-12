@@ -41,7 +41,7 @@ namespace Intwenty.MetaDataService.Engine
 
         OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult GenerateTestData(ISystemRepository repository, int gencount);
+        OperationResult GenerateTestData(IModelRepository repository, int gencount);
 
     }
 
@@ -49,7 +49,7 @@ namespace Intwenty.MetaDataService.Engine
 
     public class DataManager : IDataManager
     {
-        public ISystemRepository ModelRepository { get; set; }
+        public IModelRepository ModelRepository { get; set; }
 
         public IDataAccessService DataRepository { get; set; }
 
@@ -547,7 +547,7 @@ namespace Intwenty.MetaDataService.Engine
 
         }
 
-        public OperationResult GenerateTestData(ISystemRepository repository, int gencount)
+        public OperationResult GenerateTestData(IModelRepository repository, int gencount)
         {
             var rnd = new Random(9999999);
             var data = new Dictionary<string, object>();

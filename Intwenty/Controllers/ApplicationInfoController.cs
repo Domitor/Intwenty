@@ -13,9 +13,9 @@ namespace Intwenty.Controllers
     public class ApplicationInfoController : Controller
     {
         public IServiceEngine MetaServer { get; }
-        public ISystemRepository Repository { get; }
+        public IModelRepository Repository { get; }
 
-        public ApplicationInfoController(IServiceEngine ms, ISystemRepository sr)
+        public ApplicationInfoController(IServiceEngine ms, IModelRepository sr)
         {
             MetaServer = ms;
             Repository = sr;
@@ -173,7 +173,7 @@ namespace Intwenty.Controllers
         public JsonResult GetApplicationUI(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(UIVmCreator.GetUIVm(t));
+            return new JsonResult(UIModelCreator.GetUIVm(t));
 
         }
 
@@ -190,7 +190,7 @@ namespace Intwenty.Controllers
                 if (t == null)
                     throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
-                var dbvm = DBVmCreator.GetDBVm(t);
+                var dbvm = DatabaseModelCreator.GetDatabaseVm(t);
                 return new JsonResult(dbvm);
             }
             catch (Exception ex)
@@ -228,16 +228,16 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
-        /// Get meta data for all application tables
+        /// Get model data for all application tables
         /// </summary>
         [HttpGet("/ApplicationInfo/GetListOfDatabaseTables/")]
         public JsonResult GetListOfDatabaseTables()
         {
-            var res = new List<UIDbTable>();
+            var res = new List<DatabaseTableVm>();
             var apps = Repository.GetApplicationModels();
             foreach (var t in apps)
             {
-                res.AddRange(UIDbTable.GetTables(t));
+                res.AddRange(DatabaseModelCreator.GetDatabaseTableVm(t));
             }
             return new JsonResult(res);
 
@@ -245,13 +245,13 @@ namespace Intwenty.Controllers
 
 
         /// <summary>
-        /// Get meta data for application tables for application with id
+        /// Get model data for application tables for application with id
         /// </summary>
         [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
         public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(UIDbTable.GetTables(t));
+            return new JsonResult(DatabaseModelCreator.GetDatabaseTableVm(t));
 
         }
 
@@ -262,7 +262,7 @@ namespace Intwenty.Controllers
         public JsonResult GetDataViews()
         {
             var t = Repository.GetMetaDataViews();
-            var views = DataViewVm.GetDataViews(t);
+            var views = DataViewModelCreator.GetDataViewVm(t);
             var res = new JsonResult(views);
             return res;
 
@@ -369,7 +369,7 @@ namespace Intwenty.Controllers
             if (app == null)
                 throw new InvalidOperationException("Could not find application");
 
-            var dtolist = MetaUIItemCreator.GetMetaUI(model, app, views);
+            var dtolist = UIModelCreator.GetUIModel(model, app, views);
 
             Repository.SaveApplicationUI(dtolist);
 
@@ -400,7 +400,7 @@ namespace Intwenty.Controllers
                 if (model.Id < 1)
                     throw new InvalidOperationException("ApplicationId missing in model");
 
-                var list = MetaDataItemCreator.GetMetaDataItems(model);
+                var list = DatabaseModelCreator.GetDatabaseModel(model);
 
                 Repository.SaveApplicationDB(list, model.Id);
 
@@ -423,7 +423,7 @@ namespace Intwenty.Controllers
         /// Removes one database object (column / table) from the UI meta data collection
         /// </summary>
         [HttpPost]
-        public JsonResult RemoveFromApplicationDB([FromBody] UIDbTableField model)
+        public JsonResult RemoveFromApplicationDB([FromBody] DatabaseTableFieldVm model)
         {
             try
             {
@@ -453,7 +453,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var dtolist = MataDataViewCreator.GetMetaDataView(model);
+                var dtolist = DataViewModelCreator.GetDataViewModel(model);
                 Repository.SaveDataView(dtolist);
 
             }

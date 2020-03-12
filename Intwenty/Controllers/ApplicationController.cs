@@ -14,9 +14,9 @@ namespace Intwenty.Controllers
     public class ApplicationController : Controller
     {
         private IServiceEngine MetaServer { get; }
-        private ISystemRepository Repository { get; }
+        private IModelRepository Repository { get; }
 
-        public ApplicationController(IServiceEngine ms, ISystemRepository sr)
+        public ApplicationController(IServiceEngine ms, IModelRepository sr)
         {
             MetaServer = ms;
             Repository = sr;

@@ -35,7 +35,7 @@ namespace Intwenty
             });
 
 
-            services.AddTransient<ISystemRepository, SystemRepository>();
+            services.AddTransient<IModelRepository, ModelRepository>();
             services.AddTransient<MetaDataService.IServiceEngine, MetaDataService.Server>();
             services.AddTransient<MetaDataService.Engine.IDataAccessService, MetaDataService.Engine.DataAccessService>();
 

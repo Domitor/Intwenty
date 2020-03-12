@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Intwenty.Models.MetaDesigner
 {
-    public static class MataDataViewCreator
+    public static class DataViewModelCreator
     {
-        public static List<DataViewModelItem> GetMetaDataView(DataViewVm model)
+        public static List<DataViewModelItem> GetDataViewModel(DataViewVm model)
         {
             var res = new List<DataViewModelItem>();
             var t = new DataViewModelItem("DATAVIEW") { SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
@@ -40,27 +40,8 @@ namespace Intwenty.Models.MetaDesigner
 
             return res;
         }
-    }
 
-    public class DataViewVm
-    {
-        public int Id { get; set; }
-        public string Title  { get; set; }
-        public string MetaCode { get; set; }
-        public string SQLQuery { get; set; }
-        public string Properties { get; set; }
-        public List<DataViewFieldVm> Fields { get; set; }
-
-        public DataViewVm()
-        {
-            Fields = new List<DataViewFieldVm>();
-            Title = "";
-            MetaCode = "";
-            SQLQuery = "";
-            Properties = "";
-        }
-
-        public static List<DataViewVm> GetDataViews(List<DataViewModelItem> viewmeta)
+        public static List<DataViewVm> GetDataViewVm(List<DataViewModelItem> viewmeta)
         {
             var res = new List<DataViewVm>();
 
@@ -84,6 +65,27 @@ namespace Intwenty.Models.MetaDesigner
 
             return res;
         }
+    }
+
+    public class DataViewVm
+    {
+        public int Id { get; set; }
+        public string Title  { get; set; }
+        public string MetaCode { get; set; }
+        public string SQLQuery { get; set; }
+        public string Properties { get; set; }
+        public List<DataViewFieldVm> Fields { get; set; }
+
+        public DataViewVm()
+        {
+            Fields = new List<DataViewFieldVm>();
+            Title = "";
+            MetaCode = "";
+            SQLQuery = "";
+            Properties = "";
+        }
+
+       
     }
 
     public class DataViewFieldVm

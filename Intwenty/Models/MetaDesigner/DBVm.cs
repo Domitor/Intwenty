@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 namespace Intwenty.Models.MetaDesigner
 {
 
-    public static class DBVmCreator
+    public static class DatabaseModelCreator
     {
 
-        public static DBVm GetDBVm(ApplicationModel app)
+        public static List<DatabaseModelItem> GetDatabaseModel(DBVm model)
+        {
+            var res = new List<DatabaseModelItem>();
+            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.Properties, DataType = "" }));
+            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Domain = p.Domain, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.Properties, TableName = p.TableName }));
+            return res;
+        }
+
+        public static DBVm GetDatabaseVm(ApplicationModel app)
         {
             var res = new DBVm();
             res.Id = app.Application.Id;
             res.Title = app.Application.Title;
 
-            var tables = UIDbTable.GetTables(app);
+            var tables = GetDatabaseTableVm(app);
             res.Tables = tables;
             foreach (var t in tables)
             {
@@ -35,37 +43,57 @@ namespace Intwenty.Models.MetaDesigner
 
         }
 
-    }
-
-    public static class MetaDataItemCreator
-    {
-        public static List<DatabaseModelItem> GetMetaDataItems(DBVm model)
+        public static List<DatabaseTableVm> GetDatabaseTableVm(ApplicationModel app)
         {
-            var res = new List<DatabaseModelItem>();
-            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.Properties, DataType = "" }));
-            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Domain = p.Domain, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.Properties, TableName = p.TableName }));
+            var res = new List<DatabaseTableVm>();
+
+            res.Add(new DatabaseTableVm() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATAVALUETABLE", Description = "Main table for " + app.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
+
+            foreach (var t in app.DataStructure)
+            {
+                if (t.IsMetaTypeDataValue && t.IsRoot)
+                {
+                    res[0].Columns.Add(new DatabaseTableFieldVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id });
+                }
+
+                if (t.IsMetaTypeDataValueTable)
+                {
+                    var tbl = new DatabaseTableVm() { Id = 0, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description, ApplicationId = app.Application.Id };
+                    foreach (var col in app.DataStructure)
+                    {
+                        if (col.IsMetaTypeDataValue && col.ParentMetaCode == t.MetaCode)
+                        {
+                            tbl.Columns.Add(new DatabaseTableFieldVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName, ApplicationId = app.Application.Id });
+                        }
+                    }
+                    res.Add(tbl);
+                }
+            }
+
             return res;
         }
+
     }
 
+   
 
     public class DBVm
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public List<UIDbTable> Tables { get; set; }
-        public List<UIDbTableField> Columns { get; set; } 
+        public List<DatabaseTableVm> Tables { get; set; }
+        public List<DatabaseTableFieldVm> Columns { get; set; } 
 
         public DBVm()
         {
             Title = "";
-            Tables = new List<UIDbTable>();
-            Columns = new List<UIDbTableField>();
+            Tables = new List<DatabaseTableVm>();
+            Columns = new List<DatabaseTableFieldVm>();
         }
     }
 
 
-    public class UIDbTable
+    public class DatabaseTableVm
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -75,50 +103,22 @@ namespace Intwenty.Models.MetaDesigner
         public string MetaType { get; set; }
         public string Properties { get; set; }
         public string Description { get; set; }
-        public List<UIDbTableField> Columns { get; set; } 
+        public List<DatabaseTableFieldVm> Columns { get; set; } 
 
-        public UIDbTable()
+        public DatabaseTableVm()
         {
             DbName = "";
             MetaCode = "";
             ParentMetaCode = "";
             MetaType = "";
             Description = "";
-            Columns= new List<UIDbTableField>();
+            Columns= new List<DatabaseTableFieldVm>();
         }
 
-        public static List<UIDbTable> GetTables(ApplicationModel app)
-        {
-            var res = new List<UIDbTable>();
-
-            res.Add(new UIDbTable() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATAVALUETABLE", Description = "Main table for " + app.Application.Title, Properties= "DEFAULTTABLE=TRUE" });
-
-            foreach (var t in app.DataStructure)
-            {
-                if (t.IsMetaTypeDataValue && t.IsRoot)
-                {
-                    res[0].Columns.Add(new UIDbTableField() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id });
-                }
-
-                if (t.IsMetaTypeDataValueTable)
-                {
-                    var tbl = new UIDbTable() { Id = 0, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description, ApplicationId = app.Application.Id };
-                    foreach (var col in app.DataStructure)
-                    {
-                        if (col.IsMetaTypeDataValue && col.ParentMetaCode == t.MetaCode)
-                        {
-                            tbl.Columns.Add(new UIDbTableField() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName, ApplicationId = app.Application.Id });
-                        }
-                    }
-                    res.Add(tbl);
-                }
-            }
-
-            return res;
-        }
+       
     }
 
-    public class UIDbTableField
+    public class DatabaseTableFieldVm
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -134,7 +134,7 @@ namespace Intwenty.Models.MetaDesigner
 
         public string TableName { get; set; }
 
-        public UIDbTableField()
+        public DatabaseTableFieldVm()
         {
             DbName = "";
             MetaCode = "";

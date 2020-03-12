@@ -11,7 +11,7 @@ namespace Intwenty.Data
     /// <summary>
     /// Interface for operations on meta data
     /// </summary>
-    public interface ISystemRepository
+    public interface IModelRepository
     {
         List<ApplicationModelItem> GetApplicationModelItems();
 
@@ -55,7 +55,7 @@ namespace Intwenty.Data
 
     }
 
-    public class SystemRepository : ISystemRepository
+    public class ModelRepository : IModelRepository
     {
 
         private ApplicationDbContext context;
@@ -71,7 +71,7 @@ namespace Intwenty.Data
         private static readonly string AppModelCacheKey = "APPMODELS";
 
 
-        public SystemRepository(ApplicationDbContext context, IMemoryCache cache)
+        public ModelRepository(ApplicationDbContext context, IMemoryCache cache)
         {
             this.context = context;
             AppDescription = context.Set<ApplicationDescription>();

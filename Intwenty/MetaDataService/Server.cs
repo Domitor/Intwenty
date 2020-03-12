@@ -29,7 +29,7 @@ namespace Intwenty.MetaDataService
 
         OperationResult ValidateModel(List<ApplicationModel> apps, List<DataViewModelItem> viewinfo);
 
-        OperationResult GenerateTestData(List<ApplicationModel> apps, ISystemRepository repository);
+        OperationResult GenerateTestData(List<ApplicationModel> apps, IModelRepository repository);
 
     }
 
@@ -37,10 +37,10 @@ namespace Intwenty.MetaDataService
     {
         
         private IOptions<SystemSettings> SysSettings { get; }
-        private ISystemRepository ModelRepository { get; }
+        private IModelRepository ModelRepository { get; }
         private IDataAccessService DataRepository { get; }
 
-        public Server(IOptions<SystemSettings> sysconfig, ISystemRepository mr, IDataAccessService dr)
+        public Server(IOptions<SystemSettings> sysconfig, IModelRepository mr, IDataAccessService dr)
         {
             SysSettings = sysconfig;
             ModelRepository = mr;
@@ -311,7 +311,7 @@ namespace Intwenty.MetaDataService
             return res;
         }
 
-        public OperationResult GenerateTestData(List<ApplicationModel> apps, ISystemRepository repository)
+        public OperationResult GenerateTestData(List<ApplicationModel> apps, IModelRepository repository)
         {
             var counter = 0;
             foreach (var app in apps)

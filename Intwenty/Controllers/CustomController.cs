@@ -13,9 +13,9 @@ namespace Intwenty.Controllers
     public class CustomController : Controller
     {
         private IServiceEngine MetaServer { get; }
-        private ISystemRepository Repository { get; }
+        private IModelRepository Repository { get; }
 
-        public CustomController(IServiceEngine ms, ISystemRepository sr)
+        public CustomController(IServiceEngine ms, IModelRepository sr)
         {
             MetaServer = ms;
             Repository = sr;

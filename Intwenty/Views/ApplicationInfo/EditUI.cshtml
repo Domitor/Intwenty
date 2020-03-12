@@ -68,7 +68,7 @@
 
 
             <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
-                <span class="fa fa-plus"></span> Save changes
+                <span class="fa fa-save"></span> Save changes
             </div>
 
 
@@ -394,7 +394,6 @@
                 },
                 createUI: function (row, col, metatype)
                 {
-                    var pnl = this.userInputPanels(col);
                     var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "", applicationId: this.model.id }
                     this.model.userInputs.push(t);
                     return t;
@@ -406,7 +405,7 @@
                     {
                         if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
                         {
-                            //this.removeApplicationUI(this.model.userInputs[i]);
+                            this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
                         }
