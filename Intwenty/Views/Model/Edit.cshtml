@@ -20,7 +20,7 @@
 
     <br />
 
-    <a asp-action="GetList" asp-controller="ApplicationInfo" role="button" class="btn btn-default"><span class="fa fa-backward"></span> Back to list</a>
+    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-default"><span class="fa fa-backward"></span> Back to list</a>
 
 
     <br />
@@ -52,7 +52,7 @@
                 saveApplication: function ()
                 {
                     var context = this;
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "Save";
 
 
@@ -75,7 +75,7 @@
             mounted: function ()
             {
                 var context = this;
-                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var baseurl = '@Url.Content("~/Model/")';
                 var endpointurl = baseurl + "GetApplication/@ViewBag.SystemId";
                 $.get(endpointurl, function (response)
                 {

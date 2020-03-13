@@ -8,9 +8,9 @@ using System.Runtime.Serialization;
 namespace Intwenty.Data.Entity
 {
 
-   public class ApplicationDescription
+   public class ApplicationItem
    {
-        public ApplicationDescription()
+        public ApplicationItem()
         {
 
         }
@@ -82,9 +82,9 @@ namespace Intwenty.Data.Entity
 
     }
 
-    public class ApplicationDescriptionMap
+    public class ApplicationItemMap
     {
-        public ApplicationDescriptionMap(EntityTypeBuilder<ApplicationDescription> entityBuilder)
+        public ApplicationItemMap(EntityTypeBuilder<ApplicationItem> entityBuilder)
         {
 
         }

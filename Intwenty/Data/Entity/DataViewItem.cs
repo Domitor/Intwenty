@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Intwenty.Data.Entity
 {
-    public class MetaDataView
+    public class DataViewItem
     {
         [Key]
         public int Id { get; set; }
@@ -26,9 +26,9 @@ namespace Intwenty.Data.Entity
 
     }
 
-    public class MetaDataViewMap
+    public class DataViewItemMap
     {
-        public MetaDataViewMap(EntityTypeBuilder<MetaDataView> entityBuilder)
+        public DataViewItemMap(EntityTypeBuilder<DataViewItem> entityBuilder)
         {
             entityBuilder.HasIndex(p => new {  p.MetaCode, p.ParentMetaCode }).IsUnique(true);
         }

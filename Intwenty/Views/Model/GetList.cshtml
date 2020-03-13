@@ -13,7 +13,7 @@
         <br />
         <br />
 
-        <a asp-action="Create" asp-controller="ApplicationInfo" role="button" class="btn btn-primary"><span class="fa fa-plus"></span> Create New Application</a>
+        <a asp-action="Create" asp-controller="Model" role="button" class="btn btn-primary"><span class="fa fa-plus"></span> Create New Application</a>
 
         <br />
         <br />
@@ -30,11 +30,11 @@
                 </tr>
             </thead>
             <tr v-for="item in datalist">
-                <td><a v-bind:href="'/ApplicationInfo/Edit/' + item.id" role="button" class="btn btn-secondary">Edit</a></td>
+                <td><a v-bind:href="'/Model/Edit/' + item.id" role="button" class="btn btn-secondary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
-                <td><a v-bind:href="'/ApplicationInfo/EditDB/' + item.id" role="button" class="btn btn-secondary">Manage database</a></td>
-                <td><a v-bind:href="'/ApplicationInfo/EditUI/' + item.id" role="button" class="btn btn-secondary">Manage UI</a></td>
+                <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-secondary">Manage database</a></td>
+                <td><a v-bind:href="'/Model/EditUI/' + item.id" role="button" class="btn btn-secondary">Manage UI</a></td>
                 <td><a href="#" role="button" class="btn btn-danger" v-on:click="deleteApplication(item)">Delete</a></td>
             </tr>
         </table>
@@ -57,7 +57,7 @@
                
                 getApplications: function () {
                     var context = this;
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "GetApplications";
 
 
@@ -75,7 +75,7 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var baseurl = '@Url.Content("~/Model/")';
                         var endpointurl = baseurl + "DeleteApplicationModel";
 
 

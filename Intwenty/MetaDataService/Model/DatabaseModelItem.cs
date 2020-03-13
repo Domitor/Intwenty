@@ -34,7 +34,7 @@ namespace Intwenty.MetaDataService.Model
 
         }
 
-        public DatabaseModelItem(MetaDataItem entity)
+        public DatabaseModelItem(DatabaseItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
@@ -310,13 +310,13 @@ namespace Intwenty.MetaDataService.Model
             if (DataType == DataTypeDateTime && sqltype.ToUpper() == "DATETIME")
                 return true;
 
-            if ((DataType == DataType1Decimal) && sqltype.ToUpper() == "DECIMAL(18,1)")
+            if ((DataType == DataType1Decimal) && sqltype.ToUpper() == "DECIMAL")
                 return true;
 
-            if ((DataType == DataType2Decimal) && sqltype.ToUpper() == "DECIMAL(18,2)")
+            if ((DataType == DataType2Decimal) && sqltype.ToUpper() == "DECIMAL")
                 return true;
 
-            if ((DataType == DataType3Decimal) && sqltype.ToUpper() == "DECIMAL(18,3)")
+            if ((DataType == DataType3Decimal) && sqltype.ToUpper() == "DECIMAL")
                 return true;
 
             if ((DataType == DataTypeInt || DataType == DataTypeBool) && sqltype.ToUpper() == "INT")

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Intwenty.Data.Entity
 {
-    public class ApplicationRole : IdentityRole
+    public class SystemRole : IdentityRole
     {
        
     }

@@ -7,12 +7,10 @@ using System.Runtime.Serialization;
 namespace Intwenty.Data.Entity
 {
 
-    public class MetaDataItem
+    public class UserInterfaceItem
     {
-        public MetaDataItem()
+        public UserInterfaceItem()
         {
-
-
         }
 
         [Key]
@@ -20,28 +18,35 @@ namespace Intwenty.Data.Entity
 
         public string MetaType { get; set; }
 
+        public string Title { get; set; }
+
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }
+
+        /// <summary>
+        /// Reference to a MataDataItem
+        /// </summary>
+        public string DataMetaCode { get; set; }
 
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
 
-        public string DbName { get; set; }
+        public string CssClass { get; set; }
 
-        public string DataType { get; set; }
+        public int ColumnOrder { get; set; }
+
+        public int RowOrder { get; set; }
 
         public string Domain { get; set; }
 
         public string Properties { get; set; }
-
-        public bool Mandatory { get; set; }
     }
 
-    public class MetaDataItemMap
+    public class UserInterfaceItemMap
     {
-        public MetaDataItemMap(EntityTypeBuilder<MetaDataItem> entityBuilder)
+        public UserInterfaceItemMap(EntityTypeBuilder<UserInterfaceItem> entityBuilder)
         {
             entityBuilder.HasIndex(p => new { p.AppMetaCode, p.MetaCode }).IsUnique(true);
         }

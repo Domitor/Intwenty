@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace Intwenty.Data.Entity
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : IdentityUser
+    public class SystemUser : IdentityUser
     {
 
         public string FirstName { get; set;  }

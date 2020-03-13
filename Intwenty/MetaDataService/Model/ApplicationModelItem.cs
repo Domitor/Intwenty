@@ -17,7 +17,7 @@ namespace Intwenty.MetaDataService.Model
             SetEmptyStrings();
         }
 
-        public ApplicationModelItem(Data.Entity.ApplicationDescription entity)
+        public ApplicationModelItem(Data.Entity.ApplicationItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;

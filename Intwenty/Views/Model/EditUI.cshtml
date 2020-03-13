@@ -519,7 +519,7 @@
                 },
                 SaveApplicationUI: function ()
                 {
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationUI";
 
                     $.ajax({
@@ -538,7 +538,7 @@
                     if (item.id < 1)
                         return;
 
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "RemoveFromApplicationUI";
 
                     $.ajax({
@@ -555,7 +555,7 @@
                 saveListView: function ()
                 {
                     var context = this;
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationListView";
 
                     $.ajax({
@@ -612,7 +612,7 @@
             {
 
                 var context = this;
-                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var baseurl = '@Url.Content("~/Model/")';
                 var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
 
                 //Application

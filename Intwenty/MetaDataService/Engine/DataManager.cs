@@ -981,7 +981,7 @@ namespace Intwenty.MetaDataService.Engine
             da.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Found main table (" + this.Meta.Application.DbName + ") for application:" + this.Meta.Application.Title);
+                o.AddMessage("DBCONFIG", "Main table " + this.Meta.Application.DbName + " for application:" + this.Meta.Application.Title + " is already present");
             }
             else
             {
@@ -992,7 +992,7 @@ namespace Intwenty.MetaDataService.Engine
                 da.ExecuteScalarQuery();
                 da.Close();
 
-                o.AddMessage("DBCONFIG", "Main table: " + this.Meta.Application.DbName + " was created successfully");
+                o.AddMessage("DBCONFIG", "Main table: " + this.Meta.Application.DbName + " for application:" + this.Meta.Application.Title + "  was created successfully");
 
             }
         }
@@ -1009,7 +1009,7 @@ namespace Intwenty.MetaDataService.Engine
             da.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Found versioning table (" + this.Meta.Application.VersioningTableName + ") for application:" + this.Meta.Application.Title);
+                //o.AddMessage("DBCONFIG", "Found versioning table (" + this.Meta.Application.VersioningTableName + ") for application:" + this.Meta.Application.Title);
             }
             else
             {
@@ -1021,7 +1021,7 @@ namespace Intwenty.MetaDataService.Engine
                 da.ExecuteScalarQuery();
                 da.Close();
 
-                o.AddMessage("DBCONFIG", "Versioning table: " + this.Meta.Application.VersioningTableName + " was created successfully");
+                //o.AddMessage("DBCONFIG", "Versioning table: " + this.Meta.Application.VersioningTableName + " was created successfully");
 
             }
         }
@@ -1047,7 +1047,7 @@ namespace Intwenty.MetaDataService.Engine
             column_exist = (ds.Tables[0].Rows.Count > 0);
             if (column_exist)
             {
-                o.AddMessage("DBCONFIG", "Found column: " + column.DbName + " for table: " + tablename + ")");
+               
                 string currenttype = (string)ds.Tables[0].Rows[0]["DATA_TYPE"];
 
                 if (!column.IsValidSQLDataType(currenttype))
@@ -1063,9 +1063,11 @@ namespace Intwenty.MetaDataService.Engine
                     da.ExecuteScalarQuery();
                     da.Close();
 
-                    o.AddMessage("DBCONFIG", "Column: " + column.DbName + " was created successfully in table: " + tablename);
-
-                    //MoveSystemDataAfterDataTypeChange(old_sql_server_datatype);
+                    o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is present but it's data type were updated to " + column.SQLDataType);
+                }
+                else
+                {
+                    o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is already present, no changes.");
                 }
 
             }
@@ -1162,7 +1164,7 @@ namespace Intwenty.MetaDataService.Engine
                 //Create index on subtables
                 foreach (var t in this.Meta.DataStructure)
                 {
-                    if (t.MetaType == "DATAVALUETABLE")
+                    if (t.IsMetaTypeDataValueTable)
                     {
 
 

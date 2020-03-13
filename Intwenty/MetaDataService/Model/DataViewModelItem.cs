@@ -22,7 +22,7 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
-        public DataViewModelItem(Data.Entity.MetaDataView entity)
+        public DataViewModelItem(Data.Entity.DataViewItem entity)
         {
             Id = entity.Id;
             SQLQuery = entity.SQLQuery;

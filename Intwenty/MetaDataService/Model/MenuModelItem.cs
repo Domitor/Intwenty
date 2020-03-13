@@ -20,7 +20,7 @@ namespace Intwenty.MetaDataService.Model
             MetaType = metatype;
         }
 
-        public MenuModelItem(Data.Entity.MetaMenuItem entity)
+        public MenuModelItem(Data.Entity.MenuItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;

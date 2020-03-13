@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
 
-namespace Intwenty.Controllers
+namespace Intwenty.Controllers.Custom
 {
     public class CustomController : Controller
     {

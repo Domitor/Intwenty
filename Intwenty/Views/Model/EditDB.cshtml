@@ -133,7 +133,7 @@
                 saveApplicationDB: function ()
                 {
                     var context = this;
-                    var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                    var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationDB";
                   
 
@@ -185,7 +185,7 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                        var baseurl = '@Url.Content("~/Model/")';
                         var endpointurl = baseurl + "RemoveFromApplicationDB";
 
 
@@ -211,7 +211,7 @@
             mounted: function ()
             {
                 var context = this;
-                var baseurl = '@Url.Content("~/ApplicationInfo/")';
+                var baseurl = '@Url.Content("~/Model/")';
                 var endpointurl = baseurl + "GetApplicationDB/@ViewBag.SystemId";
                 //Application
                 $.get(endpointurl, function (response){

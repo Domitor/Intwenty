@@ -29,43 +29,43 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\ApplicationInfo\EditMainMenu.cshtml">
+    <Content Update="Views\Model\EditMainMenu.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditNoSeries.cshtml">
+    <Content Update="Views\Model\EditNoSeries.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditValueDomains.cshtml">
+    <Content Update="Views\Model\EditValuedomains.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditDataviews.cshtml">
+    <Content Update="Views\Model\EditDataviews.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditDB.cshtml">
+    <Content Update="Views\Model\EditDB.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\EditUI.cshtml">
+    <Content Update="Views\Model\EditUI.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\Edit.cshtml">
+    <Content Update="Views\Model\Edit.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\GetList.cshtml">
+    <Content Update="Views\Model\GetList.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\ViewMetaModelDocumentation.cshtml">
+    <Content Update="Views\Model\ViewMetaModelDocumentation.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\GenerateTestData.cshtml">
+    <Content Update="Views\Model\GenerateTestData.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\ValidateModel.cshtml">
+    <Content Update="Views\Model\ValidateModel.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\ConfigureDatabase.cshtml">
+    <Content Update="Views\Model\ConfigureDatabase.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\ApplicationInfo\Create.cshtml">
+    <Content Update="Views\Model\Create.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\Application\GetList.cshtml">

@@ -10,12 +10,12 @@ using Intwenty.MetaDataService.Model;
 
 namespace Intwenty.Controllers
 {
-    public class ApplicationInfoController : Controller
+    public class ModelController : Controller
     {
         public IServiceEngine MetaServer { get; }
         public IModelRepository Repository { get; }
 
-        public ApplicationInfoController(IServiceEngine ms, IModelRepository sr)
+        public ModelController(IServiceEngine ms, IModelRepository sr)
         {
             MetaServer = ms;
             Repository = sr;
@@ -26,21 +26,21 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/ApplicationInfo/Edit/{applicationid}")]
+        [HttpGet("/Model/Edit/{applicationid}")]
         public IActionResult Edit(int applicationid)
         {
             ViewBag.SystemId = Convert.ToString(applicationid);
             return View();
         }
 
-        [HttpGet("/ApplicationInfo/EditDB/{applicationid}")]
+        [HttpGet("/Model/EditDB/{applicationid}")]
         public IActionResult EditDB(int applicationid)
         {
             ViewBag.SystemId = Convert.ToString(applicationid);
             return View();
         }
 
-        [HttpGet("/ApplicationInfo/EditUI/{applicationid}")]
+        [HttpGet("/Model/EditUI/{applicationid}")]
         public IActionResult EditUI(int applicationid)
         {
             ViewBag.SystemId = Convert.ToString(applicationid);
@@ -75,7 +75,12 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        
+        public IActionResult ConfigureDatabase()
+        {
+            return View();
+        }
+
+
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationModelItem model)
         {
@@ -92,19 +97,7 @@ namespace Intwenty.Controllers
             return View(res);
         }
 
-      
 
-        public IActionResult ConfigureDatabase()
-        {
-            var res = new List<OperationResult>();
-            var l = Repository.GetApplicationModels();
-            foreach (var t in l)
-            {
-                res.Add(MetaServer.ConfigureDatabase(t));
-            }
-
-            return View(res);
-        }
 
         public IActionResult ViewMetaModelDocumentation()
         {
@@ -123,9 +116,19 @@ namespace Intwenty.Controllers
         /*********************  API ***********************************************************/
 
         /// <summary>
+        /// Configure the database according to the model
+        /// </summary>
+        [HttpPost]
+        public JsonResult RunDatabaseConfiguration()
+        {
+            var res = MetaServer.ConfigureDatabase();
+            return new JsonResult(res); 
+        }
+
+        /// <summary>
         /// Get model data for applications
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplications")]
+        [HttpGet("/Model/GetApplications")]
         public JsonResult GetApplications()
         {
             var t = Repository.GetApplicationModelItems();
@@ -136,7 +139,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get full model data for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplication/{applicationid}")]
+        [HttpGet("/Model/GetApplication/{applicationid}")]
         public JsonResult GetApplication(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -169,7 +172,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get UI model for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationUI/{applicationid}")]
+        [HttpGet("/Model/GetApplicationUI/{applicationid}")]
         public JsonResult GetApplicationUI(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -180,7 +183,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get database model for application tables for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationDB/{applicationid}")]
+        [HttpGet("/Model/GetApplicationDB/{applicationid}")]
         public JsonResult GetApplicationDB(int applicationid)
         {
 
@@ -207,7 +210,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationListView/{applicationid}")]
+        [HttpGet("/Model/GetApplicationListView/{applicationid}")]
         public JsonResult GetApplicationListView(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -219,7 +222,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for available datatypes
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationTableDataTypes")]
+        [HttpGet("/Model/GetApplicationTableDataTypes")]
         public JsonResult GetApplicationTableDataTypes()
         {
             var t = new DatabaseModelItem();
@@ -230,7 +233,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get model data for all application tables
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetListOfDatabaseTables/")]
+        [HttpGet("/Model/GetListOfDatabaseTables/")]
         public JsonResult GetListOfDatabaseTables()
         {
             var res = new List<DatabaseTableVm>();
@@ -247,7 +250,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get model data for application tables for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetApplicationListOfDatabaseTables/{applicationid}")]
+        [HttpGet("/Model/GetApplicationListOfDatabaseTables/{applicationid}")]
         public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -258,7 +261,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for data views
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetDataViews")]
+        [HttpGet("/Model/GetDataViews")]
         public JsonResult GetDataViews()
         {
             var t = Repository.GetMetaDataViews();
@@ -271,7 +274,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for application ui declarations for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetValueDomains")]
+        [HttpGet("/Model/GetValueDomains")]
         public JsonResult GetValueDomains()
         {
             var t = Repository.GetValueDomains();
@@ -282,7 +285,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for application ui declarations for application with id
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetValueDomainNames")]
+        [HttpGet("/Model/GetValueDomainNames")]
         public JsonResult GetValueDomainNames()
         {
             var t = Repository.GetValueDomains();
@@ -335,7 +338,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for number series
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetNoSeries")]
+        [HttpGet("/Model/GetNoSeries")]
         public JsonResult GetNoSeries()
         {
             var t = Repository.GetNoSeries();
@@ -347,7 +350,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for number series
         /// </summary>
-        [HttpGet("/ApplicationInfo/GetMenuModelItems")]
+        [HttpGet("/Model/GetMenuModelItems")]
         public JsonResult GetMenuModelItems()
         {
             var t = Repository.GetMenuModelItems();

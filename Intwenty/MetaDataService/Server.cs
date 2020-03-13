@@ -11,7 +11,7 @@ namespace Intwenty.MetaDataService
 {
     public interface IServiceEngine
     {
-        OperationResult ConfigureDatabase(ApplicationModel app);
+        List<OperationResult> ConfigureDatabase();
 
         OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
 
@@ -48,10 +48,17 @@ namespace Intwenty.MetaDataService
         }
         
 
-        public OperationResult ConfigureDatabase(ApplicationModel app)
+        public List<OperationResult> ConfigureDatabase()
         {
-            var t = DataManager.GetDataManager(app);
-            return t.ConfigureDatabase();
+            var res = new List<OperationResult>();
+            var l = ModelRepository.GetApplicationModels();
+            foreach (var app in l)
+            {
+                var t = DataManager.GetDataManager(app);
+                res.Add(t.ConfigureDatabase());
+            }
+
+            return res;
         }
 
         public OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data)

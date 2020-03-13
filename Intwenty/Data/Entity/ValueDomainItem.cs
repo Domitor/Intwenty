@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Intwenty.Data.Entity
 {
-    public class ValueDomain
+    public class ValueDomainItem
     {
         [Key]
         public int Id { get; set; }
@@ -22,9 +22,9 @@ namespace Intwenty.Data.Entity
 
     }
 
-    public class ValueDomainMap
+    public class ValueDomainItemMap
     {
-        public ValueDomainMap(EntityTypeBuilder<ValueDomain> entityBuilder)
+        public ValueDomainItemMap(EntityTypeBuilder<ValueDomainItem> entityBuilder)
         {
 
         }

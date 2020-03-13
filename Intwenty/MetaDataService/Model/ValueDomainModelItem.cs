@@ -14,7 +14,7 @@ namespace Intwenty.MetaDataService.Model
             SetEmptyStrings();
         }
 
-        public ValueDomainModelItem(ValueDomain entity)
+        public ValueDomainModelItem(ValueDomainItem entity)
         {
             Id = entity.Id;
             DomainName = entity.DomainName;

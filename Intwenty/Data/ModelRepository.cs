@@ -59,13 +59,13 @@ namespace Intwenty.Data
     {
 
         private ApplicationDbContext context;
-        private DbSet<ApplicationDescription> AppDescription;
-        private DbSet<MetaDataItem> MetaDBItem;
-        private DbSet<MetaUIItem> MetaUIItem;
-        private DbSet<MetaDataView> MetaDataViews;
-        private DbSet<MetaMenuItem> MetaMenuItems;
+        private DbSet<ApplicationItem> AppDescription;
+        private DbSet<DatabaseItem> MetaDBItem;
+        private DbSet<UserInterfaceItem> MetaUIItem;
+        private DbSet<DataViewItem> MetaDataViews;
+        private DbSet<MenuItem> MetaMenuItems;
         private DbSet<NoSerie> NoSeries;
-        private DbSet<Entity.ValueDomain> ValueDomains;
+        private DbSet<Entity.ValueDomainItem> ValueDomains;
         private IMemoryCache ModelCache;
 
         private static readonly string AppModelCacheKey = "APPMODELS";
@@ -74,13 +74,13 @@ namespace Intwenty.Data
         public ModelRepository(ApplicationDbContext context, IMemoryCache cache)
         {
             this.context = context;
-            AppDescription = context.Set<ApplicationDescription>();
-            MetaDBItem = context.Set<MetaDataItem>();
-            MetaUIItem = context.Set<MetaUIItem>();
-            MetaDataViews = context.Set<MetaDataView>();
-            MetaMenuItems = context.Set<MetaMenuItem>();
+            AppDescription = context.Set<ApplicationItem>();
+            MetaDBItem = context.Set<DatabaseItem>();
+            MetaUIItem = context.Set<UserInterfaceItem>();
+            MetaDataViews = context.Set<DataViewItem>();
+            MetaMenuItems = context.Set<MenuItem>();
             NoSeries = context.Set<NoSerie>();
-            ValueDomains = context.Set<Entity.ValueDomain>();
+            ValueDomains = context.Set<Entity.ValueDomainItem>();
             ModelCache = cache;
     }
 
@@ -354,7 +354,7 @@ namespace Intwenty.Data
                     max += 10;
                 }
 
-                var entity = new ApplicationDescription();
+                var entity = new ApplicationItem();
                 entity.Id = max;
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
@@ -414,7 +414,7 @@ namespace Intwenty.Data
                 var root = menu.Find(p => p.IsMetaTypeMainMenu);
                 if (root == null)
                 {
-                    var main = new MetaMenuItem() { AppMetaCode = "", MetaType = "MAINMENU", Order = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
+                    var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", Order = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
                     MetaMenuItems.Add(main);
                     max = 1;
                 }
@@ -423,7 +423,7 @@ namespace Intwenty.Data
                     max = menu.Max(p => p.Order);
                 }
 
-                var appmi = new MetaMenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
+                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = "MI_" + BaseModelItem.GetRandomUniqueString();
@@ -517,9 +517,9 @@ namespace Intwenty.Data
         }
 
 
-        private MetaUIItem CreateMetaUIItem(UserInterfaceModelItem dto)
+        private UserInterfaceItem CreateMetaUIItem(UserInterfaceModelItem dto)
         {
-            var res = new MetaUIItem()
+            var res = new UserInterfaceItem()
             {
                 AppMetaCode = dto.AppMetaCode,
                 ColumnOrder = dto.ColumnOrder,
@@ -661,9 +661,9 @@ namespace Intwenty.Data
             }
         }
 
-        private MetaDataItem CreateMetaDataItem(DatabaseModelItem dto)
+        private DatabaseItem CreateMetaDataItem(DatabaseModelItem dto)
         {
-            var res = new MetaDataItem()
+            var res = new DatabaseItem()
             {
                 AppMetaCode = dto.AppMetaCode,
                 Description = dto.Description,
@@ -734,9 +734,9 @@ namespace Intwenty.Data
         }
 
 
-        private MetaDataView CreateMetaDataView(DataViewModelItem dto)
+        private DataViewItem CreateMetaDataView(DataViewModelItem dto)
         {
-            var res = new MetaDataView()
+            var res = new DataViewItem()
             {
 
                 MetaCode = dto.MetaCode,
@@ -789,7 +789,7 @@ namespace Intwenty.Data
 
                 if (vd.Id < 1)
                 {
-                    ValueDomains.Add(new Entity.ValueDomain() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    ValueDomains.Add(new Entity.ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {

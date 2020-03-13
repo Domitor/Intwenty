@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Intwenty.Data.Entity
 {
-    public class MetaMenuItem
+    public class MenuItem
     {
         [Key]
         public int Id { get; set; }
@@ -31,9 +31,9 @@ namespace Intwenty.Data.Entity
 
    
 
-    public class MetaMenuItemMap
+    public class MenuItemMap
     {
-        public MetaMenuItemMap(EntityTypeBuilder<MetaMenuItem> entityBuilder)
+        public MenuItemMap(EntityTypeBuilder<MenuItem> entityBuilder)
         {
 
         }

@@ -33,7 +33,7 @@ namespace Intwenty.MetaDataService.Model
             SetEmptyStrings();
         }
 
-        public UserInterfaceModelItem(Data.Entity.MetaUIItem entity)
+        public UserInterfaceModelItem(Data.Entity.UserInterfaceItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
