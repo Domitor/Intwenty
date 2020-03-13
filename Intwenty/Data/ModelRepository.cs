@@ -53,6 +53,54 @@ namespace Intwenty.Data
 
     }
 
+    /*
+
+    public interface IMemCache
+    {
+        bool Get<T>(string key, out T cachedval);
+        void Set(string key, object value);
+        void Remove(string key);
+    }
+
+    public class MemCache : IMemCache
+    {
+        public MemoryCache Cache { get; set; }
+        public MemCache()
+        {
+            Cache = new MemoryCache(new MemoryCacheOptions
+            {
+               
+            });
+        }
+
+        public bool Get<T>(string key, out T cachedval)
+        {
+            object value = null;
+            if (Cache.TryGetValue(key, out value))
+            {
+                if (value != null)
+                {
+                    cachedval = (T)value;
+                    return true;
+                }
+            }
+
+            cachedval = default(T);
+            return false;
+        }
+
+        public void Set(string key, object value) 
+        {
+            Cache.Set(key, value);
+        }
+
+        public void Remove(string key)
+        {
+            Cache.Remove(key);
+        }
+    }
+    */
+
     public class ModelRepository : IModelRepository
     {
 
@@ -67,6 +115,7 @@ namespace Intwenty.Data
         private IMemoryCache ModelCache;
 
         private static readonly string AppModelCacheKey = "APPMODELS";
+
 
 
         public ModelRepository(ApplicationDbContext context, IMemoryCache cache)
@@ -463,7 +512,7 @@ namespace Intwenty.Data
         public void SaveApplicationUI(List<UserInterfaceModelItem> model)
         {
             ModelCache.Remove(AppModelCacheKey);
-
+            
             foreach (var uic in model)
             {
                 if (uic.Id < 1)

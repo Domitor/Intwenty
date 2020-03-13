@@ -529,7 +529,7 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
-                            context.model = response;
+                            this.model = response;
                         }
                     });
                 },
@@ -538,6 +538,7 @@
                     if (item.id < 1)
                         return;
 
+                    var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "RemoveFromApplicationUI";
 
@@ -549,6 +550,7 @@
                         success: function (response)
                         {
                             context.model = response;
+                            context.model.active_setting_input={};
                         }
                     });
                 },

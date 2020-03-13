@@ -35,9 +35,11 @@ namespace Intwenty
             });
 
 
+            //services.AddSingleton<IMemCache,MemCache>();
             services.AddTransient<IModelRepository, ModelRepository>();
             services.AddTransient<MetaDataService.IServiceEngine, MetaDataService.Server>();
             services.AddTransient<MetaDataService.Engine.IDataAccessService, MetaDataService.Engine.DataAccessService>();
+
 
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -46,7 +48,7 @@ namespace Intwenty
 
             });
 
-         
+
 
 
             services.AddControllersWithViews().AddJsonOptions(options =>

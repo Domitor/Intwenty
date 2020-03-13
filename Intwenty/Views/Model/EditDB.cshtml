@@ -54,8 +54,8 @@
     <h4>Database columns</h4>
 
     <div>
-        <div class="btn btn-default" v-on:click="addDbColumn">
-            <span class="glyphicon glyphicon-plus"></span> Add column
+        <div class="btn btn-secondary" v-on:click="addDbColumn">
+            <span class="fa fa-plus"></span> Add column
         </div>
     </div>
     <br />
@@ -87,7 +87,7 @@
                 <td>
                     <input type="text" class="form-control" v-model="col.description" />
                 </td>
-                <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+                <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="fa fa-remove"></span> Delete</div></td>
             </tr>
             <tr>
                 <td colspan="1"></td>
@@ -135,7 +135,14 @@
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationDB";
-                  
+
+
+                    if (!hasRequiredValues(context.model.tables, ["dbName"]) ||
+                       !hasRequiredValues(context.model.columns, ["tableName","dbName","dataType"]))
+                    {
+                        raiseValidationErrorModal("Can't save since some required fields are missing.");
+                        return;
+                    }
 
                     $.ajax({
                         url: endpointurl,

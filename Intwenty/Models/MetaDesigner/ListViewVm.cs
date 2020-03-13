@@ -43,7 +43,8 @@ namespace Intwenty.Models.MetaDesigner
         public string Title { get; set; }
         public string MetaCode { get; set; }
         public string Properties { get; set; }
-        public List<ListViewFieldVm> Fields = new List<ListViewFieldVm>();
+
+        public List<ListViewFieldVm> Fields { get; set; }
 
         public ListViewVm()
         {

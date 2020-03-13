@@ -373,7 +373,9 @@ namespace Intwenty.Controllers
 
             Repository.SaveApplicationUI(dtolist);
 
-            return GetApplicationUI(model.Id);
+            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+            return new JsonResult(UIModelCreator.GetUIVm(t));
+
         }
 
         /// <summary>

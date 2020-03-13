@@ -143,16 +143,34 @@ namespace Intwenty.MetaDataService.Model
                 return GetUniqueString();
 
             var res = "";
-            if (item.Title.Length > 4)
-                res += item.Title.Substring(0, 4);
+            if (item.Title.Length > 6)
+                res += item.Title.Substring(0, 6);
+            else
+            {
+                if (item.MetaType.Length > 5)
+                    res += item.MetaType.Substring(0, 6);
+                else
+                    res += "META_";
 
-            if (item.MetaType.Length > 4)
-                res += item.MetaType.Substring(0, 4);
+            }
+
 
             res += "_" + DateTime.Now.Day;
-            res += "_" + DateTime.Now.Hour;
-            res += "_" + DateTime.Now.Minute;
-            res += "_" + DateTime.Now.Second;
+            res +=  + DateTime.Now.Hour;
+            res +=  + DateTime.Now.Minute;
+            res +=  + DateTime.Now.Second;
+
+            Guid g = Guid.NewGuid();
+            var str = Convert.ToBase64String(g.ToByteArray());
+            char[] arr = str.ToCharArray();
+            arr = Array.FindAll(arr, (c => (char.IsLetterOrDigit(c))));
+            str = new string(arr);
+
+            if (str.Length > 20)
+            {
+                res += "_" + str.Substring(0, 2).ToUpper();
+                res += str.Substring(18, 2).ToUpper();
+            }
 
             return res;
         }
@@ -172,7 +190,7 @@ namespace Intwenty.MetaDataService.Model
             str = new string(arr);
 
             if (str.Length > 20)
-                str = str.Substring(0, 20);
+                str = str.Substring(0, 20).ToUpper();
 
 
             return str;
