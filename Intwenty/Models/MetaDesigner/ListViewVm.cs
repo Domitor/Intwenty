@@ -11,7 +11,7 @@ namespace Intwenty.Models.MetaDesigner
             var res = new List<UserInterfaceModelItem>();
             var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode  };
             if (string.IsNullOrEmpty(model.MetaCode))
-                t.MetaCode = "LV_" + BaseModelItem.GetRandomUniqueString();
+                t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
 
             res.Add(t);
 
@@ -20,7 +20,7 @@ namespace Intwenty.Models.MetaDesigner
             {
                 var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
                 if (string.IsNullOrEmpty(lf.MetaCode))
-                    lf.MetaCode = "LVFLD_" + BaseModelItem.GetRandomUniqueString();
+                    lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
 
                 if (!string.IsNullOrEmpty(f.DbName))
                 {

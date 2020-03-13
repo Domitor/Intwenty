@@ -75,11 +75,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        public IActionResult ConfigureDatabase()
-        {
-            return View();
-        }
-
+      
 
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationModelItem model)
@@ -89,23 +85,24 @@ namespace Intwenty.Controllers
         }
 
 
-        public IActionResult ValidateModel()
+        public IActionResult ToolConfigureDatabase()
         {
-            var apps = Repository.GetApplicationModels();
-            var views = Repository.GetMetaDataViews();
-            var res = MetaServer.ValidateModel(apps, views);
+            return View();
+        }
+
+        public IActionResult ToolValidateModel()
+        {
+            var res = MetaServer.ValidateModel();
             return View(res);
         }
 
-
-
-        public IActionResult ViewMetaModelDocumentation()
+        public IActionResult ToolModelDocumentation()
         {
             var l = Repository.GetApplicationModels();
             return View(l);
         }
 
-        public IActionResult GenerateTestData()
+        public IActionResult ToolGenerateTestData()
         {
             var l = Repository.GetApplicationModels();
             var res = MetaServer.GenerateTestData(l, Repository);
@@ -264,7 +261,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetDataViews")]
         public JsonResult GetDataViews()
         {
-            var t = Repository.GetMetaDataViews();
+            var t = Repository.GetDataViewModels();
             var views = DataViewModelCreator.GetDataViewVm(t);
             var res = new JsonResult(views);
             return res;
@@ -367,7 +364,7 @@ namespace Intwenty.Controllers
                 throw new InvalidOperationException("ApplicationId missing in model");
 
 
-            var views = Repository.GetMetaDataViews();
+            var views = Repository.GetDataViewModels();
             var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
             if (app == null)
                 throw new InvalidOperationException("Could not find application");

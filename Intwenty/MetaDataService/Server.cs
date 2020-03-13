@@ -27,7 +27,7 @@ namespace Intwenty.MetaDataService
 
         OperationResult Validate(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
 
-        OperationResult ValidateModel(List<ApplicationModel> apps, List<DataViewModelItem> viewinfo);
+        OperationResult ValidateModel();
 
         OperationResult GenerateTestData(List<ApplicationModel> apps, IModelRepository repository);
 
@@ -127,8 +127,10 @@ namespace Intwenty.MetaDataService
             return new OperationResult(true, "Successfully validated", state.Id, state.Version);
         }
 
-        public OperationResult ValidateModel(List<ApplicationModel> apps, List<DataViewModelItem> viewinfo)
+        public OperationResult ValidateModel()
         {
+            var apps = ModelRepository.GetApplicationModels();
+            var viewinfo = ModelRepository.GetDataViewModels();
             var res = new OperationResult();
 
             if (apps.Count == 0)
@@ -159,7 +161,7 @@ namespace Intwenty.MetaDataService
                     res.AddMessage("WARNING", string.Format("The application {0} has no Database objects (DATVALUE, DATAVALUETABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
 
                 if (a.UIStructure.Count == 0)
-                    res.AddMessage("WARNING", string.Format("The application {0} has no UI objects. Or MetaUIItems has wrong [AppMetaCode]", a.Application.Title));
+                    res.AddMessage("WARNING", string.Format("The application {0} has no UI objects.", a.Application.Title));
                 
                     
                 foreach (var ui in a.UIStructure)
@@ -188,8 +190,8 @@ namespace Intwenty.MetaDataService
                         return res;
                     }
 
-                    if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
-                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
+                    //if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
+                    //    res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
 
                     if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewField))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));

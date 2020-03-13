@@ -77,6 +77,7 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
+                        <th>Code</th>
                         <th>Component Type</th>
                         <th>Title</th>
                         <th>Database field</th>
@@ -86,23 +87,24 @@
                 <tbody>
                     @foreach (var ui in app.UIStructure.Where(p => (p.IsDataConnected || p.IsMetaTypeLookUp) && !p.IsMetaTypeListViewField && !p.IsMetaTypeLookUpField && !p.IsMetaTypeLookUpKeyField).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
-                        <tr>
-                            <td>@ui.MetaType</td>
-                            <td>@ui.Title</td>
+                    <tr>
+                        <td>@ui.MetaCode</td>
+                        <td>@ui.MetaType</td>
+                        <td>@ui.Title</td>
 
-                            @{
-                                if (ui.IsDataConnected)
-                                {
-                                    <td> @ui.DataInfo.DbName</td>
-                                }
-                                else
-                                {
-                                    <td></td>
-                                }
+                        @{
+                            if (ui.IsDataConnected)
+                            {
+                                <td> @ui.DataInfo.DbName</td>
                             }
+                            else
+                            {
+                                <td></td>
+                            }
+                        }
 
-                            <td>@ui.Domain</td>
-                        </tr>
+                        <td>@ui.Domain</td>
+                    </tr>
                     }
                 </tbody>
             </table>

@@ -15,6 +15,8 @@ namespace Intwenty.MetaDataService.Model
             get { return false; }
         }
 
+        public string Title { get; set; }
+
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
@@ -135,7 +137,28 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
-        public static string GetRandomUniqueString()
+        public static string GenerateNewMetaCode(BaseModelItem item)
+        {
+            if (item == null)
+                return GetUniqueString();
+
+            var res = "";
+            if (item.Title.Length > 4)
+                res += item.Title.Substring(0, 4);
+
+            if (item.MetaType.Length > 4)
+                res += item.MetaType.Substring(0, 4);
+
+            res += "_" + DateTime.Now.Day;
+            res += "_" + DateTime.Now.Hour;
+            res += "_" + DateTime.Now.Minute;
+            res += "_" + DateTime.Now.Second;
+
+            return res;
+        }
+
+
+        public static string GetUniqueString()
         {
             Guid g = Guid.NewGuid();
             var str = Convert.ToBase64String(g.ToByteArray());

@@ -37,6 +37,8 @@ namespace Intwenty.MetaDataService.Model
         /// </summary>
         public List<NoSerieModelItem> NoSeries { get; set; }
 
+
+
     }
 
 }

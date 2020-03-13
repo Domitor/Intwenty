@@ -365,7 +365,7 @@ namespace Intwenty.MetaDataService.Engine
                 foreach (var d in valuedomains)
                 {
 
-                    da.CreateCommand("SELECT ID, DomainName, Code, Value FROM sysmodel_ValueDomain WHERE DomainName = @P1");
+                    da.CreateCommand("SELECT ID, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
                     da.AddParameter("@P1", d);
                     da.FillDataset(ds, "VALUEDOMAIN_" + d);
                 }
@@ -466,6 +466,19 @@ namespace Intwenty.MetaDataService.Engine
                 var sql = string.Format(dv.SQLQuery, " ");
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                 {
+                    //Infer where formatter
+                    if (!dv.SQLQuery.Contains("{0}"))
+                    {
+                        var tmp = dv.SQLQuery.ToUpper();
+                        var frmind = tmp.IndexOf("FROM");
+                        if (frmind > 5)
+                        {
+                            frmind += 7;
+                            var blankind = tmp.IndexOf(" ", frmind);
+                            sql = tmp.Insert(blankind, "{0}");
+                        }
+                    }
+
                     sql = string.Format(dv.SQLQuery, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
                 }
 

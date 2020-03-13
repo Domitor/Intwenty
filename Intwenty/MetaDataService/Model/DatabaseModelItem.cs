@@ -43,6 +43,7 @@ namespace Intwenty.MetaDataService.Model
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;
             DbName = entity.DbName;
+            Title = entity.DbName;
             DataType = entity.DataType;
             Domain = entity.Domain;
             Mandatory = entity.Mandatory;
@@ -62,6 +63,7 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(TableName)) TableName = string.Empty;
             if (string.IsNullOrEmpty(ColumnName)) ColumnName = string.Empty;
+            if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
 
         public int Id { get; set; }

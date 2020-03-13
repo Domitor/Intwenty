@@ -66,8 +66,6 @@ namespace Intwenty.MetaDataService.Model
 
         public int Id { get; set; }
 
-        public string Title { get; set; }
-
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }

@@ -104,7 +104,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = Repository.GetMetaDataViews();
+            var viewinfo = Repository.GetDataViewModels();
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
             var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model);
             return new JsonResult(viewitem);
@@ -117,7 +117,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = Repository.GetMetaDataViews();
+            var viewinfo = Repository.GetDataViewModels();
             var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
             var dv = MetaServer.GetDataView(t, viewinfo, model);
             return new JsonResult(dv);

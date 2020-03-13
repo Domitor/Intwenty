@@ -17,7 +17,7 @@ namespace Intwenty.Models.MetaDesigner
                 var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
 
                 if (string.IsNullOrEmpty(dto.MetaCode))
-                    dto.MetaCode = dto.MetaType + "_" + BaseModelItem.GetRandomUniqueString();
+                    dto.MetaCode = BaseModelItem.GenerateNewMetaCode(dto);
 
                 if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
                 {

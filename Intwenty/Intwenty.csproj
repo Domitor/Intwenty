@@ -53,16 +53,16 @@
     <Content Update="Views\Model\GetList.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Model\ViewMetaModelDocumentation.cshtml">
+    <Content Update="Views\Model\ToolModelDocumentation.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Model\GenerateTestData.cshtml">
+    <Content Update="Views\Model\ToolGenerateTestData.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Model\ValidateModel.cshtml">
+    <Content Update="Views\Model\ToolValidateModel.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Model\ConfigureDatabase.cshtml">
+    <Content Update="Views\Model\ToolConfigureDatabase.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\Model\Create.cshtml">

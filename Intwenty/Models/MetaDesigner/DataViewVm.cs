@@ -9,9 +9,9 @@ namespace Intwenty.Models.MetaDesigner
         public static List<DataViewModelItem> GetDataViewModel(DataViewVm model)
         {
             var res = new List<DataViewModelItem>();
-            var t = new DataViewModelItem("DATAVIEW") { SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
+            var t = new DataViewModelItem("DATAVIEW") { Id = model.Id, SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
             if (string.IsNullOrEmpty(model.MetaCode))
-                t.MetaCode = "DV_" + BaseModelItem.GetRandomUniqueString();
+                t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
 
             res.Add(t);
 
@@ -21,17 +21,17 @@ namespace Intwenty.Models.MetaDesigner
                 cnt += 1;
                 if (cnt == 1)
                 {
-                    var kf = new DataViewModelItem("DATAVIEWKEYFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
+                    var kf = new DataViewModelItem("DATAVIEWKEYFIELD") { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
                     if (string.IsNullOrEmpty(kf.MetaCode))
-                        kf.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
+                        kf.MetaCode = BaseModelItem.GenerateNewMetaCode(kf);
 
                     res.Add(kf);
                 }
                 else
                 {
-                    var lf = new DataViewModelItem("DATAVIEWFIELD") { SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
+                    var lf = new DataViewModelItem("DATAVIEWFIELD") { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
                     if (string.IsNullOrEmpty(lf.MetaCode))
-                        lf.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
+                        lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
 
                     res.Add(lf);
                 }

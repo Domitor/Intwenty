@@ -23,7 +23,7 @@ namespace Intwenty.Data
 
         List<UserInterfaceModelItem> GetUserInterfaceModelItems();
 
-        List<DataViewModelItem> GetMetaDataViews();
+        List<DataViewModelItem> GetDataViewModels();
 
         List<ApplicationModel> GetApplicationModels();
 
@@ -34,8 +34,6 @@ namespace Intwenty.Data
         List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid );
 
         List<NoSerieModelItem> GetNoSeries();
-
-       
 
         void SaveApplicationUI(List<UserInterfaceModelItem> model);
 
@@ -227,7 +225,14 @@ namespace Intwenty.Data
             if (app == null)
                 return new List<NoSerieModelItem>();
 
-            var appseries = NoSeries.Select(p => new NoSerieModelItem(p)).Where(p=> p.AppMetaCode == app.MetaCode).ToList();
+            var appseries = new List<NoSerieModelItem>();
+            foreach (var n in NoSeries)
+            {
+                if (n.AppMetaCode == app.MetaCode)
+                {
+                    appseries.Add(new NoSerieModelItem(n));
+                }
+            }
 
             foreach (var item in appseries)
             {
@@ -426,7 +431,7 @@ namespace Intwenty.Data
                 var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
-                appmi.MetaCode = "MI_" + BaseModelItem.GetRandomUniqueString();
+                appmi.MetaCode = "MI_" + BaseModelItem.GetUniqueString();
                 MetaMenuItems.Add(appmi);
 
             }
@@ -463,6 +468,15 @@ namespace Intwenty.Data
             {
                 if (uic.Id < 1)
                 {
+                    if (string.IsNullOrEmpty(uic.MetaType))
+                        throw new InvalidOperationException("Can't save an ui model item without a MetaType");
+
+                    if (string.IsNullOrEmpty(uic.ParentMetaCode))
+                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a ParentMetaCode");
+
+                    if (string.IsNullOrEmpty(uic.MetaCode))
+                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
+
                     MetaUIItem.Add(CreateMetaUIItem(uic));
 
                 }
@@ -476,8 +490,6 @@ namespace Intwenty.Data
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataMetaCode = uic.DataMetaCode;
                         existing.Domain = uic.Domain;
-                        existing.MetaType = uic.MetaType;
-                        existing.MetaCode = uic.MetaCode;
                         existing.Description = uic.Description;
                     }
 
@@ -563,10 +575,9 @@ namespace Intwenty.Data
                 if (dbi.IsMetaTypeDataValue && string.IsNullOrEmpty(dbi.TableName))
                     throw new InvalidOperationException("Could not identify parent table when saving application db meta.");
 
-                if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValueTable)
-                    dbi.MetaCode = "TBL_" + BaseModelItem.GetRandomUniqueString();
-                else if (string.IsNullOrEmpty(dbi.MetaCode) && dbi.IsMetaTypeDataValue)
-                    dbi.MetaCode = "DVL_" + BaseModelItem.GetRandomUniqueString();
+                if (string.IsNullOrEmpty(dbi.MetaCode))
+                    dbi.MetaCode = BaseModelItem.GenerateNewMetaCode(dbi);
+              
 
                 if (dbi.IsMetaTypeDataValue && dbi.TableName == app.Application.DbName)
                 {
@@ -683,7 +694,7 @@ namespace Intwenty.Data
         #endregion
 
         #region Data Views
-        public List<DataViewModelItem> GetMetaDataViews()
+        public List<DataViewModelItem> GetDataViewModels()
         {
             return MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
         }
@@ -696,12 +707,8 @@ namespace Intwenty.Data
                 if (dv.IsMetaTypeDataView)
                     dv.ParentMetaCode = "ROOT";
 
-                if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataView)
-                    dv.MetaCode = "DV_" + BaseModelItem.GetRandomUniqueString();
-                else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewKeyField)
-                    dv.MetaCode = "DVKF_" + BaseModelItem.GetRandomUniqueString();
-                else if (string.IsNullOrEmpty(dv.MetaCode) && dv.IsMetaTypeDataViewField)
-                    dv.MetaCode = "DVLF_" + BaseModelItem.GetRandomUniqueString();
+                if (string.IsNullOrEmpty(dv.MetaCode))
+                    dv.MetaCode = BaseModelItem.GenerateNewMetaCode(dv);
 
             }
 
@@ -717,10 +724,6 @@ namespace Intwenty.Data
                     var existing = MetaDataViews.FirstOrDefault(p => p.Id == dv.Id);
                     if (existing != null)
                     {
-
-                        existing.MetaType = dv.MetaType;
-                        existing.MetaCode = dv.MetaCode;
-                        existing.ParentMetaCode = dv.ParentMetaCode;
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
