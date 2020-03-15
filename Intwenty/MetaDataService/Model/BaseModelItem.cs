@@ -9,6 +9,7 @@ namespace Intwenty.MetaDataService.Model
     {
         public static readonly string MetaTypeRoot = "ROOT";
 
+        private static int MetaCodeCounter = 1;
 
         public virtual bool IsValid
         {
@@ -145,6 +146,8 @@ namespace Intwenty.MetaDataService.Model
             var res = "";
             if (item.Title.Length > 6)
                 res += item.Title.Substring(0, 6);
+            else if (item.Title.Length > 3)
+                res += item.Title.Substring(0, 4);
             else
             {
                 if (item.MetaType.Length > 5)
@@ -154,23 +157,16 @@ namespace Intwenty.MetaDataService.Model
 
             }
 
+            MetaCodeCounter += 1;
 
-            res += "_" + DateTime.Now.Day;
-            res +=  + DateTime.Now.Hour;
-            res +=  + DateTime.Now.Minute;
-            res +=  + DateTime.Now.Second;
+            res += "META_" + MetaCodeCounter;
 
             Guid g = Guid.NewGuid();
             var str = Convert.ToBase64String(g.ToByteArray());
             char[] arr = str.ToCharArray();
             arr = Array.FindAll(arr, (c => (char.IsLetterOrDigit(c))));
             str = new string(arr);
-
-            if (str.Length > 20)
-            {
-                res += "_" + str.Substring(0, 2).ToUpper();
-                res += str.Substring(18, 2).ToUpper();
-            }
+            res += "_" + str.Substring(0, 6).ToUpper();
 
             return res;
         }

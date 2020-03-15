@@ -53,7 +53,8 @@
                         if (response.isSuccess) {
                             context.model.Id = response.id;
                             context.model.Version = response.version;
-                            endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
+                            //endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
+                            endpointurl = baseurl + "GetList/@Model.Application.Id";
                             window.location.href = endpointurl;
                         }
                         else {

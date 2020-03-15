@@ -28,7 +28,7 @@
 
 
 <div id="app">
-    {{model.userInputs}}
+   
     <br />
     <br />
 
@@ -78,14 +78,14 @@
                 <div class="row">
                     <div v-bind:class="layoutClass" v-for="c in layoutColumns">
                         <div class="form-group">
-                            <label class="control-label">Panel Title (Optional){{userInputPanels(c).id}}</label>
+                            <label class="control-label">Panel Title (Optional)</label>
                             <input type="text" class="form-control" v-model="userInputPanels(c).title" />
                         </div>
                     </div>
                 </div>
 
 
-                <div class="row" v-for="r in bodyRows">
+                <div class="row" v-for="r in model.layoutRows">
 
                     <div v-bind:class="layoutClass" v-for="c in layoutColumns">
 
@@ -111,42 +111,42 @@
 
                             <div v-bind:id="'uipnl_' + r.id +'_'+c.id" class="uipnl" v-if="hasUI(r,c)">
 
-                                <label class="control-label"><i>{{cell(r,c).title}}</i></label>
-                                <span class="fa fa-trash" v-on:click="removeUI(r,c)" style="float:right; margin:5px"></span>
+                                <label class="control-label"><i>{{userInputControls(r,c).title}}</i></label>
+                                <span class="fa fa-trash" v-on:click="removeUI(r,c, false)" style="float:right; margin:5px"></span>
                                 <span class="fa fa-cog" v-on:click="openSettingsDlg(r,c)" style="float:right; margin:5px"></span>
 
-                                <div v-if="cell(r,c).metaType==='TEXTBOX'">
+                                <div v-if="userInputControls(r,c).metaType==='TEXTBOX'">
                                     <div class="form-group">
                                         <input type="text" class="form-control" disabled />
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='NUMBOX'">
+                                <div v-if="userInputControls(r,c).metaType==='NUMBOX'">
                                     <div class="form-group">
                                         <input type="number" class="form-control" disabled />
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='CHECKBOX'">
+                                <div v-if="userInputControls(r,c).metaType==='CHECKBOX'">
                                     <div class="form-group">
                                         <br />
                                         <input type="checkbox" disabled />
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='TEXTAREA'">
+                                <div v-if="userInputControls(r,c).metaType==='TEXTAREA'">
                                     <div class="form-group">
                                         <textarea class="form-control" rows="5" cols="50" disabled></textarea>
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='DATEPICKER'">
+                                <div v-if="userInputControls(r,c).metaType==='DATEPICKER'">
                                     <div class="form-group">
                                         <input type="date" class="form-control" />
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='COMBOBOX'">
+                                <div v-if="userInputControls(r,c).metaType==='COMBOBOX'">
                                     <div class="form-group">
                                         <select class="form-control" disabled>
                                             <option>Example 1</option>
@@ -155,7 +155,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="cell(r,c).metaType==='LOOKUP'">
+                                <div v-if="userInputControls(r,c).metaType==='LOOKUP'">
                                     <div>
                                         <div style="width:10%">
                                             <button style="float:left" class="btn btn-primary"><span class="fa fa-plus"></span></button>
@@ -367,21 +367,9 @@
             },
             methods:
             {
-                openSettingsDlg(row, col) {
-                    /*
-                    var ui = this.cell(row, col);
-                    this.model.active_setting_input = {};
-                    this.model.active_setting_input.metaType = ui.metaType;
-                    this.model.active_setting_input.tableName = ui.tableName;
-                    this.model.active_setting_input.columnName = ui.columnName;
-                    this.model.active_setting_input.title = ui.title;
-                    this.model.active_setting_input.lookUpFieldViewDbName = ui.lookUpFieldViewDbName;
-                    this.model.active_setting_input.lookUpFieldDbName = ui.lookUpFieldDbName;
-                    this.model.active_setting_input.lookUpKeyFieldViewDbName = ui.lookUpKeyFieldViewDbName;
-                    this.model.active_setting_input.lookUpKeyFieldDbName = ui.lookUpKeyFieldDbName;
-                    this.model.active_setting_input.domain = ui.domain;
-                    */
-                    var ui = this.cell(row, col);
+                openSettingsDlg(row, col)
+                {
+                    var ui = this.userInputControls(row, col);
                     this.active_setting_input = ui;
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
@@ -395,19 +383,24 @@
                 createUI: function (row, col, metatype) {
                     var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "", applicationId: this.model.id }
                     this.model.userInputs.push(t);
+                    this.openSettingsDlg(row, col);
                     return t;
                 },
-                removeUI: function (row, col) {
+                removeUI: function (row, col, removepanel) {
 
                     for (var i = 0; i < this.model.userInputs.length; i++) {
-                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id) {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id)
+                        {
+                            if (this.model.userInputs[i].metaType === "PANEL" && !removepanel)
+                                continue;
+
                             this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
                         }
                     }
                 },
-                cell: function (row, col) {
+                userInputControls: function (row, col) {
 
                     if (!row || !col)
                         return {};
@@ -474,13 +467,13 @@
                     {
                         if (this.model.layoutPanels === "1")
                         {
-                            this.removeUI(this.model.layoutRows[i], { id:2 });
-                            this.removeUI(this.model.layoutRows[i], { id:3 });
+                            this.removeUI(this.model.layoutRows[i], { id:2 }, true);
+                            this.removeUI(this.model.layoutRows[i], { id:3 }, true);
                         }
 
                         if (this.model.layoutPanels === "2")
                         {
-                            this.removeUI(this.model.layoutRows[i], { id:3 });
+                            this.removeUI(this.model.layoutRows[i], { id:3 }, true);
                         } 
                     }
 
@@ -503,7 +496,7 @@
                 },
                 closeAndSave: function (row, col) {
                     var context = this;
-                    var item = context.cell(row, col);
+                    var item = context.userInputControls(row, col);
                     context.SaveApplicationUI();
                     item.showSettings = !item.showSettings;
                 },
@@ -579,23 +572,7 @@
                     if (this.model.layoutPanels === "3")
                         return [{ id: 1 }, { id: 2 }, { id: 3 }];
 
-                },
-                bodyRows: function ()
-                {
-                    return this.model.layoutRows;
-
-                    var arr = [];
-                    for (var i = 0; i < this.model.layoutRows.length; i++) {
-                        if (i > 0) {
-                            arr.push(this.model.layoutRows[i]);
-                        }
-                    }
-                    return arr;
-
                 }
-
-
-
 
             },
             mounted: function () {

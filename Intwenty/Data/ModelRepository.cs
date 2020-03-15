@@ -613,7 +613,7 @@ namespace Intwenty.Data
 
             var app = GetApplicationModels().Find(p => p.Application.Id == applicationid);
             if (app == null)
-                throw new InvalidOperationException("Could not find application when saving application db meta.");
+                throw new InvalidOperationException("Could not find application when saving application database model.");
 
             foreach (var dbi in model)
             {
@@ -623,11 +623,7 @@ namespace Intwenty.Data
                 dbi.ParentMetaCode = "ROOT";
 
                 if (dbi.IsMetaTypeDataValue && string.IsNullOrEmpty(dbi.TableName))
-                    throw new InvalidOperationException("Could not identify parent table when saving application db meta.");
-
-                if (string.IsNullOrEmpty(dbi.MetaCode))
-                    dbi.MetaCode = BaseModelItem.GenerateNewMetaCode(dbi);
-              
+                    throw new InvalidOperationException("Could not identify parent table when saving application database model.");
 
                 if (dbi.IsMetaTypeDataValue && dbi.TableName == app.Application.DbName)
                 {
@@ -638,10 +634,10 @@ namespace Intwenty.Data
                     dbi.DbName = dbi.DbName.Replace(" ", "");
 
                 if (!dbi.HasValidMetaType)
-                    throw new InvalidOperationException("Invalid meta type when saving application db meta.");
+                    throw new InvalidOperationException("Invalid meta type when saving application database model.");
 
                 if (dbi.IsMetaTypeDataValue && !dbi.HasValidDataType)
-                    throw new InvalidOperationException("Invalid datatype type when saving application db meta.");
+                    throw new InvalidOperationException("Invalid datatype type when saving application database model.");
 
 
             }
@@ -650,6 +646,9 @@ namespace Intwenty.Data
             {
                 if (dbi.Id < 1)
                 {
+                    if (string.IsNullOrEmpty(dbi.MetaCode))
+                        dbi.MetaCode = BaseModelItem.GenerateNewMetaCode(dbi);
+
                     var t = CreateMetaDataItem(dbi);
 
 
@@ -670,9 +669,14 @@ namespace Intwenty.Data
                 }
                 else
                 {
+                  
+
                     var existing = MetaDBItem.FirstOrDefault(p => p.Id == dbi.Id);
                     if (existing != null)
                     {
+                        if (string.IsNullOrEmpty(dbi.MetaCode))
+                            throw new InvalidOperationException("No meta code found when updating application database model.");
+
                         existing.DataType = dbi.DataType;
                         existing.Domain = dbi.Domain;
                         existing.MetaType = dbi.MetaType;

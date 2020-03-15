@@ -166,7 +166,7 @@ namespace Intwenty.MetaDataService
                     
                 foreach (var ui in a.UIStructure)
                 {
-                    if (string.IsNullOrEmpty(ui.Title))
+                    if (string.IsNullOrEmpty(ui.Title) && !ui.IsMetaTypePanel)
                     {
                         res.AddMessage("ERROR", string.Format("The UI object with Id {0} in application {1} has no [Title].", ui.Id, a.Application.Title));
                         return res;

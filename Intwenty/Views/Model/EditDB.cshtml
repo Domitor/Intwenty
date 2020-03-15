@@ -6,109 +6,112 @@
 
 
 
-<div id="app">
+    <div id="app">
 
 
-    <br />
-    <br />
-    <div class="card">
-        <div class="card-header"><h2>Manage database for application {{model.title}}</h2></div>
-        <div class="card-body">Define the application data structure.</div>
-    </div>
-   
-    <br />
-    <br />
-
-
-    <h4>Database tables</h4>
-
-    <div>
-        <div class="btn btn-secondary" v-on:click="addDbTable">
-            <span class="fa fa-plus"></span> Add table
+        <br />
+        <br />
+        <div class="card">
+            <div class="card-header"><h2>Manage database for application {{model.title}}</h2></div>
+            <div class="card-body">Define the application data structure.</div>
         </div>
-        <div class="btn btn-primary" v-on:click="saveApplicationDB" style="float:right">
-            <span class="fa fa-save"></span> Save changes
+
+        <br />
+
+
+        <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-default"><span class="fa fa-backward"></span> Back to list</a>
+        <br />
+        <br />
+
+        <h4>Database tables</h4>
+
+        <div>
+            <div class="btn btn-secondary" v-on:click="addDbTable">
+                <span class="fa fa-plus"></span> Add table
+            </div>
+            <div class="btn btn-primary" v-on:click="saveApplicationDB" style="float:right">
+                <span class="fa fa-save"></span> Save changes
+            </div>
         </div>
-    </div>
-    <br />
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th style="width:5%">ID</th>
-                <th style="width:27%">Table name <span style="color: red"> *</span></th>
-                <th style="width:55%">Description <span style="color: red"> *</span></th>
-                <th style="width:8%">ID</th>
+        <br />
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:5%">ID</th>
+                    <th style="width:27%">Table name <span style="color: red"> *</span></th>
+                    <th style="width:55%">Description <span style="color: red"> *</span></th>
+                    <th style="width:8%">ID</th>
+                </tr>
+            </thead>
+            <tr v-for="item in model.tables">
+                <td>{{item.id}}</td>
+                <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+                <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+                <td></td>
             </tr>
-        </thead>
-        <tr v-for="item in model.tables">
-            <td>{{item.id}}</td>
-            <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
-            <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
-            <td></td>
-        </tr>
-    </table>
+        </table>
 
-    <br />
-    <br />
+        <br />
+        <br />
 
-    <h4>Database columns</h4>
+        <h4>Database columns</h4>
 
-    <div>
-        <div class="btn btn-secondary" v-on:click="addDbColumn">
-            <span class="fa fa-plus"></span> Add column
+        <div>
+            <div class="btn btn-secondary" v-on:click="addDbColumn">
+                <span class="fa fa-plus"></span> Add column
+            </div>
         </div>
+        <br />
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:5%">ID</th>
+                    <th style="width:18%">Table name <span style="color: red"> *</span></th>
+                    <th style="width:18%">Column name <span style="color: red"> *</span></th>
+                    <th style="width:18%">Data type <span style="color: red"> *</span></th>
+                    <th style="width:28%">Description</th>
+                    <th style="width:8%"></th>
+                </tr>
+            </thead>
+            <tbody v-for="col in model.columns">
+                <tr>
+                    <td>{{col.id}}</td>
+                    <td>
+                        <select v-model="col.tableName" class="form-control">
+                            <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" v-model="col.dbName" /></td>
+                    <td>
+                        <select v-model="col.dataType" class="form-control">
+                            <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" v-model="col.description" />
+                    </td>
+                    <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="fa fa-remove"></span> Delete</div></td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="5">
+                        <label class="control-label" v-if="!col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Settings]</a></label>
+                        <label class="control-label" v-if="col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Close]</a></label>
+                        <div v-if="col.showSettings">
+                            <i>Settings</i>
+                            <br />
+                            <input type="checkbox" v-model="col.mandatory" /> Mandatory
+                            <br />
+                            Domain <input type="text" class="form-control" v-model="col.domain" style="width:450px" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
     </div>
-    <br />
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th style="width:5%">ID</th>
-                <th style="width:18%">Table name <span style="color: red"> *</span></th>
-                <th style="width:18%">Column name <span style="color: red"> *</span></th>
-                <th style="width:18%">Data type <span style="color: red"> *</span></th>
-                <th style="width:28%">Description</th>
-                <th style="width:8%"></th>
-            </tr>
-        </thead>
-        <tbody v-for="col in model.columns">
-            <tr>
-                <td>{{col.id}}</td>
-                <td>
-                    <select v-model="col.tableName" class="form-control">
-                        <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                    </select>
-                </td>
-                <td><input type="text" class="form-control" v-model="col.dbName" /></td>
-                <td>
-                    <select v-model="col.dataType" class="form-control">
-                        <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="text" class="form-control" v-model="col.description" />
-                </td>
-                <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="fa fa-remove"></span> Delete</div></td>
-            </tr>
-            <tr>
-                <td colspan="1"></td>
-                <td colspan="5">
-                    <label class="control-label" v-if="!col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Settings]</a></label>
-                    <label class="control-label" v-if="col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Close]</a></label>
-                    <div v-if="col.showSettings">
-                        <i>Settings</i>
-                        <br />
-                        <input type="checkbox" v-model="col.mandatory" /> Mandatory
-                        <br />
-                        Domain <input type="text" class="form-control" v-model="col.domain" style="width:450px" />
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-
-
-</div>
 
 @section Scripts
     {
