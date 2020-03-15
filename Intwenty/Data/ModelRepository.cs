@@ -101,6 +101,8 @@ namespace Intwenty.Data
     }
     */
 
+   
+
     public class ModelRepository : IModelRepository
     {
 
@@ -115,8 +117,6 @@ namespace Intwenty.Data
         private IMemoryCache ModelCache;
 
         private static readonly string AppModelCacheKey = "APPMODELS";
-
-
 
         public ModelRepository(ApplicationDbContext context, IMemoryCache cache)
         {
@@ -139,8 +139,7 @@ namespace Intwenty.Data
 
             if (ModelCache.TryGetValue(AppModelCacheKey, out res))
             {
-                if (res != null)
-                    return res;
+                 return res;
             }
 
             res = new List<ApplicationModel>();
@@ -512,7 +511,9 @@ namespace Intwenty.Data
         public void SaveApplicationUI(List<UserInterfaceModelItem> model)
         {
             ModelCache.Remove(AppModelCacheKey);
-            
+           
+
+
             foreach (var uic in model)
             {
                 if (uic.Id < 1)

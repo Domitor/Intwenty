@@ -34,8 +34,6 @@ namespace Intwenty
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
-            //services.AddSingleton<IMemCache,MemCache>();
             services.AddTransient<IModelRepository, ModelRepository>();
             services.AddTransient<MetaDataService.IServiceEngine, MetaDataService.Server>();
             services.AddTransient<MetaDataService.Engine.IDataAccessService, MetaDataService.Engine.DataAccessService>();

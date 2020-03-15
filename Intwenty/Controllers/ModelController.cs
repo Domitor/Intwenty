@@ -360,23 +360,36 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult SaveApplicationUI([FromBody] UIVm model)
         {
-            if (model.Id < 1)
-                throw new InvalidOperationException("ApplicationId missing in model");
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
 
 
-            var views = Repository.GetDataViewModels();
-            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
-            if (app == null)
-                throw new InvalidOperationException("Could not find application");
+                var views = Repository.GetDataViewModels();
+                var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application");
 
-            var dtolist = UIModelCreator.GetUIModel(model, app, views);
+                var dtolist = UIModelCreator.GetUIModel(model, app, views);
 
-            Repository.SaveApplicationUI(dtolist);
+                Repository.SaveApplicationUI(dtolist);
 
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-            return new JsonResult(UIModelCreator.GetUIVm(t));
+                var t = Repository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+                var vm = UIModelCreator.GetUIVm(t);
+                return new JsonResult(vm);
 
-        }
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+}
 
         /// <summary>
         /// Removes one input control from the UI meta data collection

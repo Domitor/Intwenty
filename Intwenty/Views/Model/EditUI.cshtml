@@ -28,7 +28,7 @@
 
 
 <div id="app">
-
+    {{model.userInputs}}
     <br />
     <br />
 
@@ -78,7 +78,7 @@
                 <div class="row">
                     <div v-bind:class="layoutClass" v-for="c in layoutColumns">
                         <div class="form-group">
-                            <label class="control-label">Panel Title (Optional)</label>
+                            <label class="control-label">Panel Title (Optional){{userInputPanels(c).id}}</label>
                             <input type="text" class="form-control" v-model="userInputPanels(c).title" />
                         </div>
                     </div>
@@ -357,7 +357,8 @@
             el: '#app',
             data: {
                 model: {
-                    layoutPanels: "2", layoutRows: [], userInputs: [], active_setting_input: {} },
+                    layoutPanels: "2", layoutRows: [], userInputs: [], active_setting_input: {}
+                },
                 dbtables: [],
                 valuedomains: [],
                 dataviews: [],
@@ -365,8 +366,7 @@
             },
             methods:
             {
-                openSettingsDlg(row,col)
-                {
+                openSettingsDlg(row, col) {
                     /*
                     var ui = this.cell(row, col);
                     this.model.active_setting_input = {};
@@ -385,26 +385,21 @@
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
                 },
-                addUserInputRow: function ()
-                {
+                addUserInputRow: function () {
                     this.model.layoutRows.push({ id: this.model.layoutRows.length * 10 });
                 },
                 addListViewField: function () {
                     this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWFIELD" });
                 },
-                createUI: function (row, col, metatype)
-                {
+                createUI: function (row, col, metatype) {
                     var t = { id: -1, metaType: metatype, title: " - Your title - ", rowid: row.id, colid: col.id, showSettings: false, applicationId: this.model.id, metaCode: "", parentMetaCode: "", applicationId: this.model.id }
                     this.model.userInputs.push(t);
                     return t;
                 },
-                removeUI: function (row, col)
-                {
+                removeUI: function (row, col) {
 
-                    for (var i = 0; i < this.model.userInputs.length; i++)
-                    {
-                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL")
-                        {
+                    for (var i = 0; i < this.model.userInputs.length; i++) {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL") {
                             this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
@@ -430,10 +425,9 @@
                             return this.model.userInputs[i];
                     }
 
-                    return {};
+                    return null;
                 },
-                hasUI: function (row, col)
-                {
+                hasUI: function (row, col) {
 
 
                     for (var i = 0; i < this.model.userInputs.length; i++) {
@@ -443,18 +437,15 @@
 
                     return false;
                 },
-                hasPanel: function (row, col)
-                {
-                    for (var i = 0; i < this.model.userInputs.length; i++)
-                    {
+                hasPanel: function (row, col) {
+                    for (var i = 0; i < this.model.userInputs.length; i++) {
                         if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType == "PANEL")
                             return true;
                     }
 
                     return false;
                 },
-                dbcolumns: function (tablename)
-                {
+                dbcolumns: function (tablename) {
                     for (var i = 0; i < this.dbtables.length; i++)
                         if (this.dbtables[i].dbName == tablename)
                             return this.dbtables[i].columns;
@@ -468,8 +459,7 @@
 
                     return [];
                 },
-                layoutClassChanged: function ()
-                {
+                layoutClassChanged: function () {
                     if (this.model.layoutRows.length === 0)
                         return;
 
@@ -478,8 +468,7 @@
 
                     var cnt = 0;
                     var tot = this.model.userInputs.length;
-                    while (cnt < tot)
-                    {
+                    while (cnt < tot) {
                         cnt += 1;
 
                         for (var i = 0; i < this.model.userInputs.length; i++) {
@@ -494,31 +483,14 @@
 
 
                 },
-                addHeaderPanels: function()
-                {
-                    if (this.model.layoutRows.length === 0)
-                    {
-                        var r = { id: 1 };
-                        this.model.layoutRows.push(r);
-                    }
-
-                    for (var i = 0; i < this.layoutColumns.length; i++)
-                    {
-                        if (!this.hasPanel(this.model.layoutRows[0], this.layoutColumns[i])) {
-                            var t = this.createUI(this.model.layoutRows[0], this.layoutColumns[i], "PANEL");
-                            t.parentMetaCode = "ROOT";
-                        }
-                    }
-                },
-                closeAndSave: function (row, col)
-                {
+                closeAndSave: function (row, col) {
                     var context = this;
                     var item = context.cell(row, col);
                     context.SaveApplicationUI();
                     item.showSettings = !item.showSettings;
                 },
-                SaveApplicationUI: function ()
-                {
+                SaveApplicationUI: function () {
+                    var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationUI";
 
@@ -526,15 +498,18 @@
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(this.model),
-                        success: function (response)
+                        data: JSON.stringify(context.model),
+                        success: function (response) {
+                            context.model = response;
+                            context.model.active_setting_input = {};
+                        },
+                        error: function (response)
                         {
-                            this.model = response;
+                           raiseErrorModal(response.responseJSON);
                         }
                     });
                 },
-                removeApplicationUI: function (item)
-                {
+                removeApplicationUI: function (item) {
                     if (item.id < 1)
                         return;
 
@@ -547,15 +522,13 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(item),
-                        success: function (response)
-                        {
+                        success: function (response) {
                             context.model = response;
-                            context.model.active_setting_input={};
+                            context.model.active_setting_input = {};
                         }
                     });
                 },
-                saveListView: function ()
-                {
+                saveListView: function () {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationListView";
@@ -565,8 +538,7 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(context.listview),
-                        success: function (response)
-                        {
+                        success: function (response) {
                             context.listview = response;
                         }
                     });
@@ -577,28 +549,25 @@
             {
                 layoutClass: function () {
                     return {
-                        'col-lg-12': this.model.layoutPanels ==="1",
+                        'col-lg-12': this.model.layoutPanels === "1",
                         'col-lg-6': this.model.layoutPanels === "2",
                         'col-lg-4': this.model.layoutPanels === "3",
                     }
                 },
                 layoutColumns: function () {
 
-                        if (this.model.layoutPanels === "1")
-                            return [{ id: 1 }];
-                        if (this.model.layoutPanels === "2")
-                            return [{ id: 1 }, { id: 2 }];
-                        if (this.model.layoutPanels === "3")
-                            return [{ id: 1 }, { id: 2 }, { id: 3 }];
+                    if (this.model.layoutPanels === "1")
+                        return [{ id: 1 }];
+                    if (this.model.layoutPanels === "2")
+                        return [{ id: 1 }, { id: 2 }];
+                    if (this.model.layoutPanels === "3")
+                        return [{ id: 1 }, { id: 2 }, { id: 3 }];
 
                 },
-                bodyRows : function ()
-                {
+                bodyRows: function () {
                     var arr = [];
-                    for (var i = 0; i < this.model.layoutRows.length; i++)
-                    {
-                        if (i > 0)
-                        {
+                    for (var i = 0; i < this.model.layoutRows.length; i++) {
+                        if (i > 0) {
                             arr.push(this.model.layoutRows[i]);
                         }
                     }
@@ -610,48 +579,48 @@
 
 
             },
-            mounted: function ()
-            {
+            mounted: function () {
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/")';
                 var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
 
                 //Application
-                $.get(endpointurl, function (response)
-                {
+                $.get(endpointurl, function (response) {
                     context.model = response;
-                    context.addHeaderPanels();
-                    context.model.active_setting_input={};
-                });
+                    context.model.active_setting_input = {};
+                }).done(function () {
 
-                //Tables
-                endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
-                $.get(endpointurl, function (response)
-                {
-                    context.dbtables = response;
-                });
+                    //Tables
+                    endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
+                    $.get(endpointurl, function (response) {
+                        context.dbtables = response;
+                    }).done(function () {
 
-                //DataViews
-                endpointurl = baseurl + "GetDataViews";
-                $.get(endpointurl, function (response) {
-                    context.dataviews = response;
-                });
+                        //DataViews
+                        endpointurl = baseurl + "GetDataViews";
+                        $.get(endpointurl, function (response) {
+                            context.dataviews = response;
+                        }).done(function () {
 
-                //Valuedomains
-                endpointurl = baseurl + "GetValueDomainNames";
-                $.get(endpointurl, function (response) {
-                    context.valuedomains = response;
-                });
+                            //Valuedomains
+                            endpointurl = baseurl + "GetValueDomainNames";
+                            $.get(endpointurl, function (response) {
+                                context.valuedomains = response;
+                            }).done(function () {
 
-                //ListView
-                endpointurl = baseurl + "GetApplicationListView/@ViewBag.SystemId";
-                $.get(endpointurl, function (response) {
-                    context.listview = response;
-                });
+                                //ListView
+                                endpointurl = baseurl + "GetApplicationListView/@ViewBag.SystemId";
+                                $.get(endpointurl, function (response) {
+                                    context.listview = response;
+                                });
+                            });
+                        });
 
+                    });
+                });
             }
-        })
+        });
 
     </script>
 }
