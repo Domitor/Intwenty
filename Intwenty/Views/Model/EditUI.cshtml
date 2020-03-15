@@ -271,7 +271,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">UI {{model.active_setting_input.metaType}} Settings</h5>
+                    <h5 class="modal-title">UI {{active_setting_input.metaType}} Settings</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -280,56 +280,56 @@
                     <div class="settingpnl">
                         <div class="form-group">
                             <label class="control-label">Title</label>
-                            <input type="text" class="form-control" v-model="model.active_setting_input.title" />
+                            <input type="text" class="form-control" v-model="active_setting_input.title" />
                         </div>
 
                         <div class="form-group">
                             <label class="control-label">Set database table</label>
-                            <select v-model="model.active_setting_input.tableName" class="form-control">
+                            <select v-model="active_setting_input.tableName" class="form-control">
                                 <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                             </select>
                         </div>
 
-                        <div class="form-group" v-if="model.active_setting_input.metaType != 'LOOKUP'">
+                        <div class="form-group" v-if="active_setting_input.metaType != 'LOOKUP'">
                             <label class="control-label">Set database column</label>
-                            <select v-model="model.active_setting_input.columnName" class="form-control">
-                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.columnName" class="form-control">
+                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='COMBOBOX'">
+                        <div v-if="active_setting_input.metaType=='COMBOBOX'">
                             <label class="control-label">Set value domain</label>
-                            <select v-model="model.active_setting_input.domain" class="form-control">
+                            <select v-model="active_setting_input.domain" class="form-control">
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set data view</label>
-                            <select v-model="model.active_setting_input.domain" class="form-control">
+                            <select v-model="active_setting_input.domain" class="form-control">
                                 <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set key field database column</label>
-                            <select v-model="model.active_setting_input.lookUpKeyFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.lookUpKeyFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="model.control-label">Set key field data view column</label>
-                            <select v-model="model.active_setting_input.lookUpKeyFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(model.active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="active_setting_input.lookUpKeyFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">(optional) Set look up field database column</label>
-                            <select v-model="model.active_setting_input.lookUpFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(model.active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.lookUpFieldDbName" class="form-control">
+                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="model.active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set look up field data view column</label>
-                            <select v-model="model.active_setting_input.lookUpFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(model.active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="active_setting_input.lookUpFieldViewDbName" class="form-control">
+                                <option v-for="col in viewcolumn(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
                     </div>
@@ -357,12 +357,13 @@
             el: '#app',
             data: {
                 model: {
-                    layoutPanels: "2", layoutRows: [], userInputs: [], active_setting_input: {}
+                    layoutPanels: "2", layoutRows: [], userInputs: []
                 },
                 dbtables: [],
                 valuedomains: [],
                 dataviews: [],
-                listview: {}
+                listview: {},
+                active_setting_input: {}
             },
             methods:
             {
@@ -381,7 +382,7 @@
                     this.model.active_setting_input.domain = ui.domain;
                     */
                     var ui = this.cell(row, col);
-                    this.model.active_setting_input = ui;
+                    this.active_setting_input = ui;
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
                 },
@@ -399,7 +400,7 @@
                 removeUI: function (row, col) {
 
                     for (var i = 0; i < this.model.userInputs.length; i++) {
-                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType != "PANEL") {
+                        if (this.model.userInputs[i].rowid === row.id && this.model.userInputs[i].colid === col.id) {
                             this.removeApplicationUI(this.model.userInputs[i]);
                             this.model.userInputs.splice(i, 1);
                             break;
@@ -420,12 +421,15 @@
                 },
                 userInputPanels: function (col) {
 
+                     if (!col || !this.model.layoutRows || !this.model.layoutRows[0])
+                        return {};
+
                     for (var i = 0; i < this.model.userInputs.length; i++) {
                         if (this.model.userInputs[i].rowid === this.model.layoutRows[0].id && this.model.userInputs[i].colid === col.id && this.model.userInputs[i].metaType === "PANEL")
                             return this.model.userInputs[i];
                     }
 
-                    return null;
+                    return {};
                 },
                 hasUI: function (row, col) {
 
@@ -466,22 +470,36 @@
                     //IF 1 remove all on 2  and 3
                     //IF 2 remove all on 3
 
-                    var cnt = 0;
-                    var tot = this.model.userInputs.length;
-                    while (cnt < tot) {
-                        cnt += 1;
-
-                        for (var i = 0; i < this.model.userInputs.length; i++) {
-                            if (this.model.layoutPanels === "1" && (this.model.userInputs[i].colid === 2 || this.model.userInputs[i].colid === 3))
-                                this.model.userInputs.splice(i, 1);
-                            if (this.model.layoutPanels === "2" && this.model.userInputs[i].colid === 3)
-                                this.model.userInputs.splice(i, 1);
+                    for (var i = 0; i < this.model.layoutRows.length; i++)
+                    {
+                        if (this.model.layoutPanels === "1")
+                        {
+                            this.removeUI(this.model.layoutRows[i], { id:2 });
+                            this.removeUI(this.model.layoutRows[i], { id:3 });
                         }
+
+                        if (this.model.layoutPanels === "2")
+                        {
+                            this.removeUI(this.model.layoutRows[i], { id:3 });
+                        } 
                     }
 
                     this.addHeaderPanels();
 
 
+                },
+                addHeaderPanels: function () {
+                    if (this.model.layoutRows.length === 0) {
+                        var r = { id: 1 };
+                        this.model.layoutRows.push(r);
+                    }
+
+                    for (var i = 0; i < this.layoutColumns.length; i++) {
+                        if (!this.hasPanel(this.model.layoutRows[0], this.layoutColumns[i])) {
+                            var t = this.createUI(this.model.layoutRows[0], this.layoutColumns[i], "PANEL");
+                            t.parentMetaCode = "ROOT";
+                        }
+                    }
                 },
                 closeAndSave: function (row, col) {
                     var context = this;
@@ -501,7 +519,6 @@
                         data: JSON.stringify(context.model),
                         success: function (response) {
                             context.model = response;
-                            context.model.active_setting_input = {};
                         },
                         error: function (response)
                         {
@@ -524,7 +541,6 @@
                         data: JSON.stringify(item),
                         success: function (response) {
                             context.model = response;
-                            context.model.active_setting_input = {};
                         }
                     });
                 },
@@ -564,7 +580,10 @@
                         return [{ id: 1 }, { id: 2 }, { id: 3 }];
 
                 },
-                bodyRows: function () {
+                bodyRows: function ()
+                {
+                    return this.model.layoutRows;
+
                     var arr = [];
                     for (var i = 0; i < this.model.layoutRows.length; i++) {
                         if (i > 0) {
@@ -588,7 +607,7 @@
                 //Application
                 $.get(endpointurl, function (response) {
                     context.model = response;
-                    context.model.active_setting_input = {};
+                    context.addHeaderPanels();
                 }).done(function () {
 
                     //Tables
