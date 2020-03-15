@@ -153,13 +153,13 @@ namespace Intwenty.MetaDataService.Model
                 if (item.MetaType.Length > 5)
                     res += item.MetaType.Substring(0, 6);
                 else
-                    res += "META_";
+                    res += "META";
 
             }
 
             MetaCodeCounter += 1;
 
-            res += "META_" + MetaCodeCounter;
+            res += "_" + MetaCodeCounter;
 
             Guid g = Guid.NewGuid();
             var str = Convert.ToBase64String(g.ToByteArray());
