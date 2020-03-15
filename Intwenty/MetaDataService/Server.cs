@@ -302,6 +302,31 @@ namespace Intwenty.MetaDataService
                     }
                 }
 
+                if (v.IsMetaTypeDataView)
+                {
+                    if (v.SQLQuery.ToUpper().Contains("ALTER ") ||
+                        v.SQLQuery.ToUpper().Contains("DROP ") ||
+                        v.SQLQuery.ToUpper().Contains("TRUNCATE ") ||
+                        v.SQLQuery.ToUpper().Contains("UPDATE ") ||
+                        v.SQLQuery.ToUpper().Contains("DELETE "))
+                    {
+                        res.AddMessage("ERROR", string.Format("The sql query defined for dataview {0} contains invalid commands.", v.Title));
+                    }
+                    else
+                    {
+                        try
+                        {
+                            DataRepository.Open();
+                            DataRepository.CreateCommand(v.SQLQuery);
+                            var t = DataRepository.ExecuteScalarQuery();
+
+                        }
+                        catch
+                        {
+                            res.AddMessage("WARNING", string.Format("The sql query defined for dataview {0} returned an error.", v.Title));
+                        }
+                    }
+                }
 
 
             }
