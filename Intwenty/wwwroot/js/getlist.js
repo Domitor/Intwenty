@@ -15,6 +15,10 @@ function createVue(vueelement, applicationid, baseurl)
 
         },
         methods: {
+            downloadExcel: function () {
+                var context = this;
+                alert('test');
+            },
             nextpage: function () {
                 var context = this;
                 context.listRetrieveInfo.currentRowNum += context.listRetrieveInfo.batchSize;
@@ -88,12 +92,6 @@ function createVue(vueelement, applicationid, baseurl)
         mounted: function () {
             var context = this;
             context.getPage();
-
-            /* GET
-            $.get(endpointurl, function (response)
-            {
-        
-            });*/
         }
     });
 

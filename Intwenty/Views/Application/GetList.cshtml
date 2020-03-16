@@ -21,14 +21,20 @@
             }
         }
 
-        <h2>@title</h2>
+        <div class="card">
+            <div class="card-header"><h2>@title</h2></div>
+            <div class="card-body">
+
+                Download<a href="#" v-on:click="downloadExcel()"><br /><img src="~/images/excel_app_list.png" class="img-fluid" alt="Download" /></a>
+
+            </div>
+        </div>
+
 
         <br />
 
-        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-primary"><span class="fa fa-plus"></span> Create New</a>
+      
 
-        <br />
-        <br />
 
         @await Html.PartialAsync("_DefaultListView", Model)
 
