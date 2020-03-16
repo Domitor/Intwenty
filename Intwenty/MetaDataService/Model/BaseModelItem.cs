@@ -7,6 +7,8 @@ namespace Intwenty.MetaDataService.Model
 {
     public abstract class BaseModelItem
     {
+        public int Id { get; set; }
+
         public static readonly string MetaTypeRoot = "ROOT";
 
         private static int MetaCodeCounter = 1;

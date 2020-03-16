@@ -104,6 +104,18 @@ namespace Intwenty.Models
                 return string.Empty;
             }
         }
+
+        public string Result
+        {
+            get
+            {
+                var msg = Messages.Find(p => p.Code == "RESULT");
+                if (msg != null)
+                    return msg.Message;
+
+                return string.Empty;
+            }
+        }
     }
 
    

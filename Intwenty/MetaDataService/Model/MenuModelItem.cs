@@ -33,9 +33,6 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
-
-        public int Id { get; set; }
-
         public ApplicationModelItem Application { get; set; }
 
         public int Order { get; set; }

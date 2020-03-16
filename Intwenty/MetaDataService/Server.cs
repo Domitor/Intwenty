@@ -29,7 +29,7 @@ namespace Intwenty.MetaDataService
 
         OperationResult ValidateModel();
 
-        OperationResult GenerateTestData(List<ApplicationModel> apps, IModelRepository repository);
+        OperationResult GenerateTestData();
 
     }
 
@@ -345,22 +345,77 @@ namespace Intwenty.MetaDataService
             return res;
         }
 
-        public OperationResult GenerateTestData(List<ApplicationModel> apps, IModelRepository repository)
+        public OperationResult GenerateTestData()
         {
-            var counter = 0;
-            foreach (var app in apps)
+            var res = new OperationResult();
+
+            try
             {
-                for (int i = 0; i < app.Application.TestDataAmount; i++)
+                var apps = ModelRepository.GetApplicationModels();
+
+                var counter = 0;
+
+                var properties = "ISTESTDATA=TRUE#TESTDATABATCH=Test Batch - " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+
+                //RUN APPS WITHOUT A LOOKUP CONTROL
+                foreach (var app in apps)
                 {
-                    var t = DataManager.GetDataManager(app);
-                    t.ClientState = new ClientStateInfo();
-                    var result = t.GenerateTestData(repository, i);
-                    if (result.IsSuccess)
-                        counter += 1;
+                    if (app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
+                        continue;
+
+                    var amount = app.Application.TestDataAmount;
+                    if (amount == 0 || amount > 100)
+                        amount = 10;
+
+                    for (int i = 0; i < amount; i++)
+                    {
+                        var t = DataManager.GetDataManager(app);
+                        var clientstate = new ClientStateInfo();
+                        clientstate.Properties = properties;
+                        t.ClientState = clientstate;
+                        t.DataRepository = DataRepository;
+                        t.ModelRepository = ModelRepository;
+                        var result = t.GenerateTestData(i);
+                        if (result.IsSuccess)
+                            counter += 1;
+
+                    }
                 }
+
+                //RUN APPS WITH A LOOKUP CONTROL
+                foreach (var app in apps)
+                {
+                    if (!app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
+                        continue;
+
+                    var amount = app.Application.TestDataAmount;
+                    if (amount == 0 || amount > 100)
+                        amount = 10;
+
+                    for (int i = 0; i < amount; i++)
+                    {
+                        var t = DataManager.GetDataManager(app);
+                        var clientstate = new ClientStateInfo();
+                        clientstate.Properties = properties;
+                        t.ClientState = clientstate;
+                        t.DataRepository = DataRepository;
+                        t.ModelRepository = ModelRepository;
+                        var result = t.GenerateTestData(i);
+                        if (result.IsSuccess)
+                            counter += 1;
+
+                    }
+                }
+
+                res = new OperationResult(true, string.Format("Generated {0} test data applications.", counter), 0, 0);
+            }
+            catch (Exception ex)
+            {
+                res.SetError(ex.Message, "An error occured when generating testdata");
             }
 
-            return new OperationResult(true,string.Format("Generated {0} test data applications.",counter),0,0);
+
+            return res;
         }
 
        

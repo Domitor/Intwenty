@@ -59,9 +59,6 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
-
-        public int Id { get; set; }
-
         public string DomainName { get; set; }
 
         public string Code { get; set; }

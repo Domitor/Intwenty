@@ -13,93 +13,66 @@ namespace Intwenty.Data
     /// </summary>
     public interface IModelRepository
     {
+ 
+        List<ApplicationModel> GetApplicationModels();
+
+
+
         List<ApplicationModelItem> GetApplicationModelItems();
 
         ApplicationModelItem SaveApplication(ApplicationModelItem model);
 
         void DeleteApplicationModel(ApplicationModelItem model);
 
+
+
         List<DatabaseModelItem> GetDatabaseModelItems();
-
-        List<UserInterfaceModelItem> GetUserInterfaceModelItems();
-
-        List<DataViewModelItem> GetDataViewModels();
-
-        List<ApplicationModel> GetApplicationModels();
-
-        List<MenuModelItem> GetMenuModelItems();
-
-        List<ValueDomainModelItem> GetValueDomains();
-
-        List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid );
-
-        List<NoSerieModelItem> GetNoSeries();
-
-        void SaveApplicationUI(List<UserInterfaceModelItem> model);
 
         void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid);
 
-        void SaveDataView(List<DataViewModelItem> model);
+        void DeleteApplicationDB(int id);
+       
 
-        void SaveValueDomains(List<ValueDomainModelItem> model);
+
+
+        List<UserInterfaceModelItem> GetUserInterfaceModelItems();
+
+        void SaveApplicationUI(List<UserInterfaceModelItem> model);
 
         void DeleteApplicationUI(int id);
 
-        void DeleteApplicationDB(int id);
+        
+
+
+        List<DataViewModelItem> GetDataViewModels();
+
+        void SaveDataView(List<DataViewModelItem> model);
 
         void DeleteDataView(int id);
 
+
+
+        List<ValueDomainModelItem> GetValueDomains();
+        void SaveValueDomains(List<ValueDomainModelItem> model);
+
         void DeleteValueDomain(int id);
 
+
+
+
+        List<MenuModelItem> GetMenuModelItems();
+
+        List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid);
+
+        List<NoSerieModelItem> GetNoSeries();
+
+        List<string> GetTestDataBatches();
+
+        void DeleteTestDataBatch(string batchname);
+
     }
 
-    /*
 
-    public interface IMemCache
-    {
-        bool Get<T>(string key, out T cachedval);
-        void Set(string key, object value);
-        void Remove(string key);
-    }
-
-    public class MemCache : IMemCache
-    {
-        public MemoryCache Cache { get; set; }
-        public MemCache()
-        {
-            Cache = new MemoryCache(new MemoryCacheOptions
-            {
-               
-            });
-        }
-
-        public bool Get<T>(string key, out T cachedval)
-        {
-            object value = null;
-            if (Cache.TryGetValue(key, out value))
-            {
-                if (value != null)
-                {
-                    cachedval = (T)value;
-                    return true;
-                }
-            }
-
-            cachedval = default(T);
-            return false;
-        }
-
-        public void Set(string key, object value) 
-        {
-            Cache.Set(key, value);
-        }
-
-        public void Remove(string key)
-        {
-            Cache.Remove(key);
-        }
-    }
-    */
 
    
 
@@ -113,7 +86,7 @@ namespace Intwenty.Data
         private DbSet<DataViewItem> MetaDataViews;
         private DbSet<MenuItem> MetaMenuItems;
         private DbSet<NoSerie> NoSeries;
-        private DbSet<Entity.ValueDomainItem> ValueDomains;
+        private DbSet<ValueDomainItem> ValueDomains;
         private IMemoryCache ModelCache;
 
         private static readonly string AppModelCacheKey = "APPMODELS";
@@ -881,9 +854,68 @@ namespace Intwenty.Data
             }
         }
 
-       
+
+
+
 
         #endregion
+
+        #region misc
+
+        public List<string> GetTestDataBatches()
+        {
+            var sysid = context.Set<SystemID>();
+            var filtered = sysid.Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+
+            var res = new List<string>();
+            foreach (var s in filtered)
+            {
+                if (string.IsNullOrEmpty(s.BatchName))
+                    continue;
+
+                if (!res.Contains(s.BatchName))
+                    res.Add(s.BatchName);
+            }
+
+            return res;
+
+        }
+
+        public void DeleteTestDataBatch(string batchname)
+        {
+            var sysid = context.Set<SystemID>();
+            var filtered = sysid.Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+
+            foreach (var t in filtered)
+            {
+                if (string.IsNullOrEmpty(t.BatchName))
+                    continue;
+
+                if (t.BatchName == batchname)
+                {
+                    if (t.MetaType == "APPLICATION")
+                    {
+                        var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
+                        if (app != null && t.Id > 0)
+                        {
+                            var rowsaffected = context.Database.ExecuteSqlRaw("delete from " + app.DbName + " where ID = " + t.Id);
+                            rowsaffected = context.Database.ExecuteSqlRaw("delete from " + app.VersioningTableName + " where ID = " + t.Id);
+                            rowsaffected = context.Database.ExecuteSqlRaw("delete from sysdata_InformationStatus where ID = " + t.Id);
+                            rowsaffected = context.Database.ExecuteSqlRaw("delete from sysdata_SystemID where ID = " + t.Id);
+
+                        }
+                    }
+                }
+
+            }
+
+         
+
+        }
+
+        #endregion
+
+
     }
 
 }

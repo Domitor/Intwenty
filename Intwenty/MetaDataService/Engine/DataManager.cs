@@ -41,7 +41,7 @@ namespace Intwenty.MetaDataService.Engine
 
         OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult GenerateTestData(IModelRepository repository, int gencount);
+        OperationResult GenerateTestData(int gencount);
 
     }
 
@@ -560,7 +560,7 @@ namespace Intwenty.MetaDataService.Engine
 
         }
 
-        public OperationResult GenerateTestData(IModelRepository repository, int gencount)
+        public OperationResult GenerateTestData(int gencount)
         {
             var rnd = new Random(9999999);
             var data = new Dictionary<string, object>();
@@ -575,18 +575,52 @@ namespace Intwenty.MetaDataService.Engine
                         var noserie = this.Meta.NoSeries.Find(p => p.DataMetaCode == t.MetaCode);
                         if (noserie != null)
                         {
-                            var nolist = repository.GetNewNoSeriesValues(this.Meta.Application.Id);
+                            var nolist = ModelRepository.GetNewNoSeriesValues(this.Meta.Application.Id);
                             var noseriesval = nolist.FirstOrDefault(p => p.DataMetaCode == t.MetaCode).NewValue;
                             data.Add(t.MetaCode, noseriesval);
                             continue;
                         }
                     }
 
-                    var value = GetSemanticValue(t, rnd, gencount);
-                    if (value != null)
-                        data.Add(t.MetaCode, value);
+                    var toskip = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.IsDataConnected && p.DataInfo.MetaCode == t.MetaCode && p.IsDataViewConnected);
+                    if (toskip != null)
+                        continue;
 
+                    var lookupkeyfield = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.IsDataConnected && p.DataInfo.MetaCode == t.MetaCode && p.IsDataViewConnected);
+                    if (lookupkeyfield != null)
+                    {
+                        var lookup = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUp && p.MetaCode == lookupkeyfield.ParentMetaCode && p.IsDataViewConnected);
+                        if (lookup != null)
+                        {
 
+                            var ds = new DataSet();
+                            DataRepository.Open();
+                            DataRepository.CreateCommand(lookup.ViewInfo.SQLQuery);
+                            DataRepository.FillDataset(ds, "VIEW");
+                            DataRepository.Close();
+                            if (ds.Tables[0].Rows.Count > 0)
+                            {
+                                var maxindex = ds.Tables[0].Rows.Count - 1;
+                                var rowindex = new Random(1).Next(0, maxindex);
+                                data.Add(t.MetaCode, ds.Tables[0].Rows[rowindex][lookupkeyfield.ViewInfo.SQLQueryFieldName]);
+                                var lookupfield = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.IsDataConnected && p.ParentMetaCode == lookup.MetaCode && p.IsDataViewConnected);
+                                if (lookupfield != null)
+                                {
+                                    data.Add(lookupfield.DataInfo.MetaCode, ds.Tables[0].Rows[rowindex][lookupfield.ViewInfo.SQLQueryFieldName]);
+                                }
+                            }
+
+                        }
+
+                    }
+                    else
+                    {
+
+                        var value = GetSemanticValue(t, rnd, gencount);
+                        if (value != null)
+                            data.Add(t.MetaCode, value);
+
+                    }
                 }
 
             }
@@ -733,10 +767,11 @@ namespace Intwenty.MetaDataService.Engine
 
             var da = new DataAccessClient();
             da.Open();
-            da.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate) Values (@ApplicationId, @MetaType, @MetaCode, getDate()) select @NewId = Scope_Identity()");
+            da.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate, Properties) Values (@ApplicationId, @MetaType, @MetaCode, getDate(), @Properties) select @NewId = Scope_Identity()");
             da.AddParameter("@ApplicationId", this.Meta.Application.Id);
             da.AddParameter("@MetaType", metatype);
             da.AddParameter("@MetaCode", metacode);
+            da.AddParameter("@Properties", this.ClientState.Properties);
             da.AddParameter(output);
             da.ExecuteNonQuery();
             var id = (int)output.Value;

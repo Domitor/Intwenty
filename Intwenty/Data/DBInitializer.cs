@@ -118,7 +118,7 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONTYPE", DbName = "LocationType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
 
             //VIEWS
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName  from Location {0} order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName from Location order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCNAME", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "LocationName" });
 
@@ -245,7 +245,7 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORTXT", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORNAME" });
 
             //VIEWS
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item {0} order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName" });
 
@@ -287,7 +287,7 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATAVALUE", MetaCode = "VENDORNAME", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING" });
 
             //VIEWS
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country  from Vendor{0} order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country from Vendor order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "VENDORID", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Id", SQLQueryFieldName = "VendorId" });
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "VENDORNAME", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Name", SQLQueryFieldName = "VendorName" });
 

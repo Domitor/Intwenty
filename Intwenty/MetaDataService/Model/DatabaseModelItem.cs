@@ -66,8 +66,6 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
         }
 
-        public int Id { get; set; }
-
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }

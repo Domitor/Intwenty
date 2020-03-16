@@ -104,9 +104,7 @@ namespace Intwenty.Controllers
 
         public IActionResult ToolGenerateTestData()
         {
-            var l = Repository.GetApplicationModels();
-            var res = MetaServer.GenerateTestData(l, Repository);
-            return View(res);
+            return View();
         }
 
 
@@ -120,6 +118,51 @@ namespace Intwenty.Controllers
         {
             var res = MetaServer.ConfigureDatabase();
             return new JsonResult(res); 
+        }
+
+        /// <summary>
+        /// Creates test data for all applications in the model
+        /// </summary>
+        [HttpPost]
+        public JsonResult GenerateTestData()
+        {
+            var res = MetaServer.GenerateTestData();
+            return new JsonResult(res);
+        }
+
+        /// <summary>
+        /// Get a list of testdata batch names
+        /// </summary>
+        [HttpGet("/Model/GetTestDataBatches")]
+        public JsonResult GetTestDataBatches()
+        {
+            var t = Repository.GetTestDataBatches();
+            return new JsonResult(t);
+
+        }
+
+        /// <summary>
+        /// Delete testdata included in the batch
+        /// </summary>
+        [HttpPost]
+        public JsonResult DeleteTestDataBatch([FromBody] string batchname)
+        {
+            
+            try
+            {
+                Repository.DeleteTestDataBatch(batchname);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting a testdata batch.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+         
+            return GetTestDataBatches();
+
         }
 
         /// <summary>

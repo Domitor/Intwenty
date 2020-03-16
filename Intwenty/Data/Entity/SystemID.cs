@@ -18,6 +18,8 @@ namespace Intwenty.Data.Entity
 
         public DateTime GeneratedDate { get; set; }
 
+        public string Properties { get; set; }
+
     }
 
     public class SystemIDMap

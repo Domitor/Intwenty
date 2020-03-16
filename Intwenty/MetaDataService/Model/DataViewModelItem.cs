@@ -35,8 +35,6 @@ namespace Intwenty.MetaDataService.Model
         }
 
 
-        public int Id { get; set; }
-
         public string SQLQuery { get; set; }
 
         public string SQLQueryFieldName { get; set; }
