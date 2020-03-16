@@ -445,20 +445,13 @@ namespace Intwenty.MetaDataService.Engine
                 result.IsSuccess = true;
                 result.RetriveListArgs = new ListRetrivalArgs();
                 result.RetriveListArgs = args;
-                /*
-                result.RetriveListArgs.MaxCount = args.MaxCount;
-                result.RetriveListArgs.BatchSize = args.BatchSize;
-                result.RetriveListArgs.CurrentRowNum = args.CurrentRowNum;
-                result.RetriveListArgs.ApplicationId = args.ApplicationId;
-                result.RetriveListArgs.ListViewMetaCode = args.ListViewMetaCode;
-                result.RetriveListArgs.FilterField = args.FilterField;
-                result.RetriveListArgs.FilterValue = args.FilterValue;
-                result.RetriveListArgs.DataViewMetaCode = args.DataViewMetaCode;
-                */
+
 
                 var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
                 if (dv== null)
                     throw new InvalidOperationException("Could not find dataview to fetch");
+                if (dv.HasNonSelectSql)
+                    throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " ("+dv.MetaCode+")"));
 
                 result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
 

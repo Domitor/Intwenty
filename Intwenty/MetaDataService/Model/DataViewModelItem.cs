@@ -95,6 +95,28 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
+        public bool HasNonSelectSql
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(SQLQuery))
+                {
+
+                    if (SQLQuery.ToUpper().Contains("ALTER ") ||
+                        SQLQuery.ToUpper().Contains("DROP ") ||
+                        SQLQuery.ToUpper().Contains("TRUNCATE ") ||
+                        SQLQuery.ToUpper().Contains("UPDATE ") ||
+                        SQLQuery.ToUpper().Contains("DELETE "))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+        }
+
       
 
       

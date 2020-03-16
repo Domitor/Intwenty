@@ -304,11 +304,7 @@ namespace Intwenty.MetaDataService
 
                 if (v.IsMetaTypeDataView)
                 {
-                    if (v.SQLQuery.ToUpper().Contains("ALTER ") ||
-                        v.SQLQuery.ToUpper().Contains("DROP ") ||
-                        v.SQLQuery.ToUpper().Contains("TRUNCATE ") ||
-                        v.SQLQuery.ToUpper().Contains("UPDATE ") ||
-                        v.SQLQuery.ToUpper().Contains("DELETE "))
+                    if (v.HasNonSelectSql)
                     {
                         res.AddMessage("ERROR", string.Format("The sql query defined for dataview {0} contains invalid commands.", v.Title));
                     }
@@ -357,15 +353,15 @@ namespace Intwenty.MetaDataService
 
                 var properties = "ISTESTDATA=TRUE#TESTDATABATCH=Test Batch - " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
 
-                //RUN APPS WITHOUT A LOOKUP CONTROL
+                //RUN APPS WITHOUT A LOOKUP CONTROL AS THEY MIGHT BE USED BY DATAVIEWS
                 foreach (var app in apps)
                 {
                     if (app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
                         continue;
 
                     var amount = app.Application.TestDataAmount;
-                    if (amount == 0 || amount > 100)
-                        amount = 10;
+                    if (amount < 100 || amount > 100)
+                        amount = 100;
 
                     for (int i = 0; i < amount; i++)
                     {
@@ -382,15 +378,15 @@ namespace Intwenty.MetaDataService
                     }
                 }
 
-                //RUN APPS WITH A LOOKUP CONTROL
+                //RUN APPS WITH A LOOKUP CONTROL AS THEY MIGHT BE USING DATAVIEWS
                 foreach (var app in apps)
                 {
                     if (!app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
                         continue;
 
                     var amount = app.Application.TestDataAmount;
-                    if (amount == 0 || amount > 100)
-                        amount = 10;
+                    if (amount < 100 || amount > 100)
+                        amount = 100;
 
                     for (int i = 0; i < amount; i++)
                     {

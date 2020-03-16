@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Generate Test Data";
+    ViewData["Title"] = "Manage Testdata";
 }
 
 
@@ -10,9 +10,9 @@
         <br />
 
         <div class="card">
-            <div class="card-header"><h2>Generate testdata</h2></div>
+            <div class="card-header"><h2>Manage testdata</h2></div>
             <div class="card-body">
-                Use this tool only for dev/test scenarios. Warning it will create testdata for all applications in the system. Please make sure that you have a valid model and have run 'Configure Database' before using this tool. Otherwise it will fail.
+                Use this tool carefully and only for dev/test scenarios. It will create a testdata batch including 100 records of testdata for every applications defined in the model. Please make sure that you have run 'Validate Model' and 'Configure Database' before using this tool.
             </div>
         </div>
 
@@ -81,6 +81,10 @@
                             {
                                 context.model.isRunning = false;
                                 context.opresult = response;
+                                endpointurl = baseurl + "GetTestDataBatches";
+                                $.get(endpointurl, function (response) {
+                                    context.batches = response;
+                                });
                             }
                         });
                     };
