@@ -4,7 +4,7 @@
     <div>
 
         <br />
-        <br />
+      
 
         @{
             var title = Model.Application.Title + " List";
@@ -25,15 +25,25 @@
             <div class="card-header"><h2>@title</h2></div>
             <div class="card-body">
 
-                Download<a href="#" v-on:click="downloadExcel()"><br /><img src="~/images/excel_app_list.png" class="img-fluid" alt="Download" /></a>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> New</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" v-on:click="test()" class="nav-link btn btn-outline-secondary" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</a>
+                    </li>
+
+                </ul>
 
             </div>
         </div>
 
+     
+
 
         <br />
 
-      
+
 
 
         @await Html.PartialAsync("_DefaultListView", Model)
@@ -45,7 +55,14 @@
 {
     <script src="~/js/getlist.js"></script>
     <script>
-        var app = createVue('#app',@Model.Application.Id,'@Url.Content("~/Application/")');
+        Vue.prototype.test = function ()
+        {
+            var context = this;
+             alert( context.datalist[0].Id);
+        }
+        var app = createVue('#app',@Model.Application.Id, '@Url.Content("~/Application/")');
+       
+        
     </script>
        
    

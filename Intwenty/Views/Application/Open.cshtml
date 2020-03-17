@@ -1,125 +1,83 @@
 ﻿@model Intwenty.MetaDataService.Model.ApplicationModel
 
 @{
-    ViewData["Title"] = "Edit "  + Model.Application.Title + " (" + ViewBag.SystemId + ")";
+    ViewData["Title"] = "Edit " + Model.Application.Title + " (" + ViewBag.SystemId + ")";
 }
 
+    <div id="app">
+
+        <br />
+
+        <div class="card">
+            <div class="card-header"><h2>Edit @Model.Application.Title</h2></div>
+            <div class="card-body">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a asp-action="GetList" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-outline-secondary" style="margin:10px"><span class="fa fa-backward" style="font-size:large"></span> Back to list</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <br />
+        <br />
 
 
+        @await Html.PartialAsync("_DefaultAppUI", Model)
 
-@await Html.PartialAsync("_DefaultAppUI", Model)
-
-
+    </div>
 
 @section Scripts
-    {
-<script>
-        var app = new Vue({
-            el: '#app',
-            data: {
-                dataview: [],
-                valuedomains: {},
-                model: {},
-                viewretrieveinfo: { "applicationId":@Model.Application.Id, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-            },
-            methods:
-            {
-                saveApplication: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "Save";
+{
 
-                    this.model.ApplicationId = @Model.Application.Id;
+    <script src="~/js/createupdate.js"></script>
+    <script>
+        Vue.prototype.runMounted = function () {
 
-                    if (!context.canSave())
-                        return;
+            var context = this;
+            var baseurl = '@Url.Content("~/Application/")';
+            var endpointurl = baseurl + "GetLatestVersion/@Model.Application.Id/@ViewBag.SystemId";
 
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(this.model),
-                        success: function (response) {
-                            window.location.reload(true);
-                        }
-                    });
-                },
-                canSave: function () {
-                    var helper = new IntwentyHelper(this);
-                    return helper.canSave();
-                },
-                onUserInput: function (event) {
-                    var helper = new IntwentyHelper(this);
-                    helper.onUserInput(event);
-                },
-                setSelectedDataViewValue: function (item, lookupid) {
-                    var helper = new IntwentyHelper(this);
-                    helper.setSelectedDataViewValue(item, lookupid);
-                },
-                getDataViewValue: function (viewname, keyfield, lookupid)
-                {
-                    this.viewretrieveinfo.dataViewMetaCode = viewname;
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDataViewValue";
-
-                    var helper = new IntwentyHelper(this, endpointurl);
-                    helper.getDataViewValue(keyfield, lookupid);
-                },
-                openDataViewLookUp: function (viewname) {
-                    if (!viewname)
-                        return;
-
-                    this.viewretrieveinfo.maxCount = 0;
-                    this.viewretrieveinfo.currentRowNum = 0;
-                    this.viewretrieveinfo.filterField = "";
-                    this.viewretrieveinfo.filterValue = "";
-                    this.viewretrieveinfo.dataViewMetaCode = viewname;
-                    this.getDataViewLookUpPage();
-                    $("#" + viewname).modal();
-                },
-                nextDataViewLookUpPage: function () {
-                    var context = this;
-                    context.viewretrieveinfo.currentRowNum += context.viewretrieveinfo.batchSize;
-                    context.getDataViewLookUpPage();
-                },
-                prevDataViewLookUpPage: function () {
-                    var context = this;
-                    context.viewretrieveinfo.currentRowNum -= context.viewretrieveinfo.batchSize;
-                    context.getDataViewLookUpPage();
-                },
-                getDataViewLookUpPage: function () {
-                    var baseurl = '@Url.Content("~/Application/")';
-                    var endpointurl = baseurl + "GetDataView";
-
-                    var helper = new IntwentyHelper(this, endpointurl);
-                    helper.getDataViewLookUpPage();
-                },
-                isFirstDataViewPage: function () {
-                    return this.listRetrieveInfo.currentRowNum <= 0;
-                },
-                handleDataViewFilter: function () {
-                    var context = this;
-                    context.viewretrieveinfo.currentRowNum = 0;
-                    context.getDataViewLookUpPage();
-
-                }
-            },
-            mounted: function ()
-            {
-                var context = this;
-                var baseurl = '@Url.Content("~/Application/")';
-                var endpointurl = baseurl + "GetLatestVersion/@Model.Application.Id/@ViewBag.SystemId";
-
+            $.get(endpointurl, function (response) {
+                context.model = JSON.parse(response.data);
+                endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
                 $.get(endpointurl, function (response) {
-                    context.model = JSON.parse(response.data);
-                     endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
-                    $.get(endpointurl, function (response) {
-                        context.valuedomains = JSON.parse(response.data);
-                    });
+                    context.valuedomains = JSON.parse(response.data);
                 });
-            }
-        })
-</script>
+            });
+
+        };
+
+        Vue.prototype.runSave = function () {
+
+            var context = this;
+            var baseurl = '@Url.Content("~/Application/")';
+            var endpointurl = baseurl + "Save";
+
+            this.model.ApplicationId = @Model.Application.Id;
+
+            if (!context.canSave())
+                return;
+
+            $.ajax({
+                url: endpointurl,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(this.model),
+                success: function (response) {
+                    window.location.reload(true);
+                }
+            });
+
+        };
+
+        var app = createVue('#app',@Model.Application.Id, '@Url.Content("~/Application/")');
+
+
+    </script>
+
 
 }
