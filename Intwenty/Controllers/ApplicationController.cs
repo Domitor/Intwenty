@@ -134,7 +134,8 @@ namespace Intwenty.Controllers
 
         }
 
-       
+
+
 
         [HttpPost]
         public JsonResult Save([FromBody] System.Text.Json.JsonElement model)

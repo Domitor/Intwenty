@@ -72,6 +72,29 @@ function createVue(vueelement, applicationid, baseurl)
                     this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
                 }
                 this.currentSort = s;
+            },
+            exportToExcel: function ()
+            {
+                var args = { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 2000, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                var context = this;
+                var endpointurl = context.baseUrl + "GetListView";
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(args),
+                    success: function (response)
+                    {
+                        var data = JSON.parse(response.data);
+                        alasql.promise('SELECT * INTO XLSX("download.xlsx",{headers:true}) FROM ?', [data])
+                            .then(function (data) {
+                                console.log('Data saved');
+                            }).catch(function (err) {
+                                console.log('Error:', err);
+                            });
+                    }
+                });
             }
         },
         computed: {
