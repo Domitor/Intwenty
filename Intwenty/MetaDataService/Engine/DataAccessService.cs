@@ -92,7 +92,12 @@ namespace Intwenty.MetaDataService.Engine
 
         public StringBuilder GetAsJSONArray()
         {
-            return DBClient.GetAsJSONArray();
+            return DBClient.GetAsJSONArray(0,0);
+        }
+
+        public StringBuilder GetAsJSONArray(int minrow = 0, int maxrow=0)
+        {
+            return DBClient.GetAsJSONArray(minrow, maxrow);
         }
 
         public StringBuilder GetAsJSONObject()

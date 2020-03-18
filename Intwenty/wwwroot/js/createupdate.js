@@ -1,5 +1,5 @@
 ﻿
-function createVue(vueelement, applicationid, baseurl)
+function createVue(vueelement, applicationid, appmetacode, baseurl)
 {
 
     var app = new Vue({
@@ -7,7 +7,7 @@ function createVue(vueelement, applicationid, baseurl)
         data: {
             dataview: [],
             valuedomains: {},
-            model: {},
+            model: { [appmetacode]:{}},
             viewretrieveinfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
         },
         methods:
@@ -26,11 +26,11 @@ function createVue(vueelement, applicationid, baseurl)
                     var required = $(this).data('required');
                     if (required === "True") {
                         var dbfield = $(this).data('dbfield');
-                        if (!context.model[dbfield]) {
+                        if (!context.model[appmetacode][dbfield]) {
                             result = false;
                             $(this).addClass('requiredNotValid');
                         }
-                        else if (context.model[dbfield].length == 0) {
+                        else if (context.model[appmetacode][dbfield].length == 0) {
                             result = false;
                             $(this).addClass('requiredNotValid');
                         }
@@ -76,7 +76,7 @@ function createVue(vueelement, applicationid, baseurl)
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
-                        context.model[dbfield] = item[viewfield];
+                        context.model[appmetacode][dbfield] = item[viewfield];
                     }
                 });
 
@@ -94,7 +94,7 @@ function createVue(vueelement, applicationid, baseurl)
                         var viewfield = $(this).data('viewfield');
                         if (dbfield === keyfield) {
                             context.viewretrieveinfo.filterField = viewfield;
-                            context.viewretrieveinfo.filterValue = context.model[dbfield];
+                            context.viewretrieveinfo.filterValue = context.model[appmetacode][dbfield];
                         }
                     }
                 });
@@ -118,7 +118,7 @@ function createVue(vueelement, applicationid, baseurl)
                             if (id === lookupid) {
                                 var dbfield = $(this).data('dbfield');
                                 var viewfield = $(this).data('viewfield');
-                                context.model[dbfield] = dataviewitem[viewfield];
+                                context.model[appmetacode][dbfield] = dataviewitem[viewfield];
                                 context.$forceUpdate();
                             }
                         });
@@ -176,7 +176,12 @@ function createVue(vueelement, applicationid, baseurl)
                 context.viewretrieveinfo.currentRowNum = 0;
                 context.getDataViewLookUpPage();
 
-            }
+            },
+            addSubTableLine: function (tablename) {
+                var context = this;
+                context.model[tablename].push({ Id: 0, ParentId: 0 });
+                context.$forceUpdate();
+            },
         },
         mounted: function () {
             this.runMounted();

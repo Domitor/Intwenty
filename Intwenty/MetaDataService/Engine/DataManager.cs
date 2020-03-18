@@ -123,58 +123,73 @@ namespace Intwenty.MetaDataService.Engine
 
         public virtual OperationResult GetLatestVersion()
         {
-            var sb = new StringBuilder();
+            var jsonresult = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched latest version for application {0}", this.Meta.Application.Title), ClientState.Id, ClientState.Version);
 
             try
             {
-                var sql_list_stmt = new StringBuilder();
-                sql_list_stmt.Append("SELECT t1.* ");
+                var sql_stmt = new StringBuilder();
+                sql_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.DataStructure)
                 {
                     if (t.IsMetaTypeDataValue && t.IsRoot)
                     {
-                        sql_list_stmt.Append(", t2." + t.DbName + " " + t.MetaCode + " ");
+                        sql_stmt.Append(", t2." + t.DbName + " " + t.MetaCode + " ");
                     }
                 }
-                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
-                sql_list_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+                sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
+                sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+                sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+
+                jsonresult.Append("{");
 
                 var ds = new DataSet();
                 DataRepository.Open();
-                DataRepository.CreateCommand(sql_list_stmt.ToString());
-                DataRepository.FillDataset(ds, "App");
+                DataRepository.CreateCommand(sql_stmt.ToString());
+                var appjson = DataRepository.GetAsJSONObject();
                 DataRepository.Close();
-
-                if (ds.Tables[0].Rows.Count == 0)
+               
+                if (appjson.Length < 5)
                 {
-                    result.Data = "[]";
+                    jsonresult.Append("}");
+                    result.Data = jsonresult.ToString();
                     return result;
                 }
 
-                var cindex = 0;
+                jsonresult.Append("\"" + this.Meta.Application.MetaCode + "\":" + appjson.ToString());
 
-                sb.Append("{");
-
-                foreach (DataColumn dc in ds.Tables[0].Columns)
+                //SUBTABLES
+                foreach (var t in this.Meta.DataStructure)
                 {
-                    var val = NetCoreDBAccess.DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
-                    if (string.IsNullOrEmpty(val))
-                        continue;
+                    if (t.IsMetaTypeDataValueTable && t.IsRoot)
+                    {
+                        sql_stmt = new StringBuilder();
+                        sql_stmt.Append("SELECT t1.* ");
+                        foreach (var v in this.Meta.DataStructure)
+                        {
+                            if (v.IsMetaTypeDataValue && v.ParentMetaCode == t.MetaCode)
+                            {
+                                sql_stmt.Append(", t2." + v.DbName + " " + v.MetaCode + " ");
+                            }
+                        }
+                        sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                        sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.ID=t2.ParentID and t1.Version = t2.Version ");
+                        sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+                        sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+                        DataRepository.Open();
+                        DataRepository.CreateCommand(sql_stmt.ToString());
+                        var tablearray = DataRepository.GetAsJSONArray();
+                        DataRepository.Close();
 
-                    if (cindex == 0)
-                        sb.Append(val);
-                    else
-                        sb.Append("," + val);
+                        jsonresult.Append(", \""+t.MetaCode+"\": " + tablearray.ToString());
 
-                    cindex += 1;
+                    }
                 }
-                sb.Append(", \"subtableone\":[{\"Id\": 1, \"ParentId\": "+this.ClientState.Id+ ", \"Column1\": \"test 1\", \"Column2\": \"test 2\", \"Column3\" : \"test 3\"}, {\"Id\": 2, \"ParentId\": " + this.ClientState.Id + ", \"Column1\": \"test 1\", \"Column2\": \"test 2\", \"Column3\" : \"test 3\"}]");
-                sb.Append("}");
 
-                result.Data = sb.ToString();
+                jsonresult.Append("}");
+
+                result.Data = jsonresult.ToString();
 
             }
             catch (Exception ex)
@@ -183,7 +198,7 @@ namespace Intwenty.MetaDataService.Engine
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Get latest version for application {0} failed", this.Meta.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
-                result.Data = "[]";
+                result.Data = "{}";
 
             }
 
@@ -1166,7 +1181,7 @@ namespace Intwenty.MetaDataService.Engine
 
             foreach (var t in Meta.DataStructure)
             {
-                if (t.MetaType == "DATAVALUE" && t.ParentMetaCode == table.MetaCode)
+                if (t.IsMetaTypeDataValue && t.ParentMetaCode == table.MetaCode)
                     CreateDBColumn(o, t, table.DbName);
             }
 

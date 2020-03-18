@@ -148,10 +148,17 @@ namespace Intwenty.Controllers
 
             foreach (var j in jsonarr)
             {
-                if (j.Value.ValueKind== System.Text.Json.JsonValueKind.Number)
-                    appvalues.Add(j.Name, j.Value.GetDecimal());
-                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.String || j.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
-                    appvalues.Add(j.Name, j.Value.GetString());
+                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                {
+                    var jsonobjarr = j.Value.EnumerateObject();
+                    foreach (var av in jsonobjarr)
+                    {
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                            appvalues.Add(av.Name, av.Value.GetDecimal());
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                            appvalues.Add(av.Name, av.Value.GetString());
+                    }
+                }
                 if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
                 {
                     appvalues.Add(j.Name, j.Value);

@@ -261,6 +261,11 @@ namespace Intwenty.MetaDataService.Model
             get { return MetaType == MetaTypeDatePicker; }
         }
 
+        public bool IsMetaTypeEditGrid
+        {
+            get { return MetaType == MetaTypeEditGrid; }
+        }
+
         public override bool HasValidMetaType
         {
             get

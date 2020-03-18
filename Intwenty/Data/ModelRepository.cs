@@ -143,7 +143,7 @@ namespace Intwenty.Data
                                 item.TableName = app.DbName;
                             else
                             {
-                                var table = ditems.Find(p => p.MetaCode == item.ParentMetaCode && p.IsMetaTypeDataValueTable);
+                                var table = ditems.Find(p => p.MetaCode == item.ParentMetaCode && p.IsMetaTypeDataValueTable && p.AppMetaCode == app.MetaCode);
                                 if (table != null)
                                     item.TableName = table.DbName;
                             }
@@ -168,7 +168,7 @@ namespace Intwenty.Data
                         t.UIStructure.Add(item);
                         if (!string.IsNullOrEmpty(item.DataMetaCode))
                         {
-                            var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode);
+                            var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
                             if (dinf != null)
                                 item.DataInfo = dinf;
                         }

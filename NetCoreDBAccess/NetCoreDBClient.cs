@@ -359,36 +359,7 @@ namespace NetCoreDBAccess
 
         }
 
-        /*
-        public void FillDataset(DataSet ds)
-        {
-
-            if (DBTYPE == 1)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-            else if (DBTYPE == 2)
-            {
-                var adapt = new OleDbDataAdapter(oledb_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-            else if (DBTYPE == 3)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-            else if (DBTYPE == 4)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-        }
-        */
+      
 
         public StringBuilder GetAsJSONArray(int minrow=0, int maxrow=0)
         {
@@ -403,7 +374,7 @@ namespace NetCoreDBAccess
             {
 
                 rindex += 1;
-                if (maxrow > minrow)
+                if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                 {
                     if (!(minrow <= rindex && maxrow > rindex))
                         continue;
