@@ -28,6 +28,7 @@
 
         @await Html.PartialAsync("_DefaultAppUI", Model)
 
+
     </div>
 
 @section Scripts
@@ -61,6 +62,7 @@
 
             if (!context.canSave())
                 return;
+
 
             $.ajax({
                 url: endpointurl,

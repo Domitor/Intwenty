@@ -135,8 +135,7 @@ namespace Intwenty.Controllers
         }
 
 
-
-
+        
         [HttpPost]
         public JsonResult Save([FromBody] System.Text.Json.JsonElement model)
         {
@@ -153,6 +152,10 @@ namespace Intwenty.Controllers
                     appvalues.Add(j.Name, j.Value.GetDecimal());
                 if (j.Value.ValueKind == System.Text.Json.JsonValueKind.String || j.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
                     appvalues.Add(j.Name, j.Value.GetString());
+                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                {
+                    appvalues.Add(j.Name, j.Value);
+                }
             }
 
             if (!appvalues.ContainsKey("ApplicationId"))

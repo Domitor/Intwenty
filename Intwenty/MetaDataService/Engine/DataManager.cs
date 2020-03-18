@@ -132,7 +132,7 @@ namespace Intwenty.MetaDataService.Engine
                 sql_list_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.DataStructure)
                 {
-                    if (t.MetaType == "DATAVALUE" && t.IsRoot)
+                    if (t.IsMetaTypeDataValue && t.IsRoot)
                     {
                         sql_list_stmt.Append(", t2." + t.DbName + " " + t.MetaCode + " ");
                     }
@@ -171,6 +171,7 @@ namespace Intwenty.MetaDataService.Engine
 
                     cindex += 1;
                 }
+                sb.Append(", \"subtableone\":[{\"Id\": 1, \"ParentId\": "+this.ClientState.Id+ ", \"Column1\": \"test 1\", \"Column2\": \"test 2\", \"Column3\" : \"test 3\"}, {\"Id\": 2, \"ParentId\": " + this.ClientState.Id + ", \"Column1\": \"test 1\", \"Column2\": \"test 2\", \"Column3\" : \"test 3\"}]");
                 sb.Append("}");
 
                 result.Data = sb.ToString();
@@ -1132,7 +1133,7 @@ namespace Intwenty.MetaDataService.Engine
         private void CreateDBTable(OperationResult o, DatabaseModelItem table)
         {
 
-            if (table.MetaType != "DATAVALUETABLE")
+            if (!table.IsMetaTypeDataValueTable)
             {
                 o.AddMessage("DBCONFIG_ERROR", "Invalid MetaType when configuring table");
                 return;

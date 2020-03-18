@@ -21,13 +21,13 @@ namespace Intwenty.Data
             }
             else
             {
-                /*
+                
                 SeedApplicationDescriptions(context, true);
                 SeedSystemMenus(context, true);
                 SeedApplicationContent(context, true);
                 SeedValueDomains(context, true);
                 SeedNoSeries(context, true);
-                */
+                
 
             }
 
@@ -54,7 +54,7 @@ namespace Intwenty.Data
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 70, Description = "An app for managing shipment files", MetaCode = "SHIPMENTFILES", Title = "Shipment files", DbName = "Shipments", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 80, Description = "An app for managing goods issue", MetaCode = "GOODSISSUE", Title = "Goods Issue", DbName = "GoodsIssue", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 90, Description = "An app for managing goods transfer", MetaCode = "GOODSTRANSFER", Title = "Goods Transfer", DbName = "GoodsTransfer", IsHierarchicalApplication = false, UseVersioning = false });
-
+            context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 100, Description = "An app for managing sales orders", MetaCode = "SALESORDER", Title = "Sales Order", DbName = "SalesHeader", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
 
 
             context.SaveChanges();
@@ -78,7 +78,7 @@ namespace Intwenty.Data
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "MENUITEM", MetaCode = "M_GR", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Receipt", Order = 40, Action = "", Controller = "" });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "GOODSISSUE", MetaType = "MENUITEM", MetaCode = "M_GI", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Issue", Order = 50, Action = "", Controller = "" });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "MENUITEM", MetaCode = "M_GT", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Transfer", Order = 60, Action = "", Controller = "" });
-
+            context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "WMS_MAINMENU", Title = "Sales Order", Order = 70, Action = "", Controller = "" });
 
             context.SaveChanges();
         }
@@ -95,6 +95,34 @@ namespace Intwenty.Data
                 context.Set<UserInterfaceItem>().RemoveRange(context.Set<UserInterfaceItem>());
                 context.SaveChanges();
             }
+
+            //SALESORDER
+            //--------------------------------------------------
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ORDERNO", DbName = "OrderNo", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ORDERDATE", DbName = "OrderDate", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "CUSTID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "CUSTNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
+
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUETABLE", MetaCode = "DTORDLINE", DbName = "SalesLine", ParentMetaCode = "ROOT", DataType = "" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemNo", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "DTORDLINE", DataType = "INTEGER" });
+
+            //LISTVIEW
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Sales Orders", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWFIELD", MetaCode = "LF_ORDERID", DataMetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWFIELD", MetaCode = "LF_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+
+            //UI
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "PANEL", MetaCode = "PANEL1", DataMetaCode = "", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_ORDERNO", DataMetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "PANEL1", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "DATEPICKER", MetaCode = "DP_ORDERDATE", DataMetaCode = "ORDERDATE", Title = "Order Date", ParentMetaCode = "PANEL1", RowOrder = 2, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer Name", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID", MetaCode = "LINETABLE", DataMetaCode = "DTORDLINE", Title = "Customer Name", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "LINE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "LINE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+
 
             //SHIPMENTFILES
             //----------------------------------------------------
