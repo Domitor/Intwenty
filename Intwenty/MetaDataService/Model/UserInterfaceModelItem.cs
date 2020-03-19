@@ -21,6 +21,7 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeEditGrid = "EDITGRID";
+        public static readonly string MetaTypeSection = "SECTION";
 
 
         public UserInterfaceModelItem()
@@ -114,6 +115,7 @@ namespace Intwenty.MetaDataService.Model
                 t.Add(MetaTypePanel);
                 t.Add(MetaTypeDatePicker);
                 t.Add(MetaTypeEditGrid);
+                t.Add(MetaTypeSection);
                 return t;
             }
         }
@@ -264,6 +266,11 @@ namespace Intwenty.MetaDataService.Model
         public bool IsMetaTypeEditGrid
         {
             get { return MetaType == MetaTypeEditGrid; }
+        }
+
+        public bool IsMetaTypeSection
+        {
+            get { return MetaType == MetaTypeSection; }
         }
 
         public override bool HasValidMetaType
