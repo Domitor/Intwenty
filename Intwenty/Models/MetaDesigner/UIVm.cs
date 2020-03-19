@@ -126,7 +126,7 @@ namespace Intwenty.Models.MetaDesigner
 
             if (!app.UIStructure.Exists(p => p.IsMetaTypeSection))
             {
-                res.Sections.Add(new Section() { Id = 0, Title = "Section 1", MetaCode = "DEFAULTSECTION", ParentMetaCode = "ROOT" });
+                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "DEFAULTSECTION", ParentMetaCode = "ROOT" });
 
             }
             else
@@ -221,6 +221,8 @@ namespace Intwenty.Models.MetaDesigner
                         }
                     }
                 }
+
+                section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel).ToString();
             }
 
            
@@ -260,12 +262,8 @@ namespace Intwenty.Models.MetaDesigner
 
         public string Title { get; set; }
 
-        public string LayoutPanelCount 
-        {
-            get { return LayoutPanels.Count.ToString(); }
-        
-        }
-
+        public string LayoutPanelCount { get; set; }
+       
         public List<UserInput> LayoutPanels { get; set; }
 
         public List<LayoutRow> LayoutRows { get; set; }
