@@ -12,106 +12,115 @@ namespace Intwenty.Models.MetaDesigner
         public static List<UserInterfaceModelItem> GetUIModel(UIVm model, ApplicationModel app, List<DataViewModelItem> views)
         {
             var res = new List<UserInterfaceModelItem>();
-            /*
-            foreach (var input in model.UserInputs)
+
+            foreach (var section in model.Sections)
             {
-                var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.Colid, RowOrder = input.Rowid, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+                var sect = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = BaseModelItem.MetaTypeRoot };
+                res.Add(sect);
+                if (sect.Id == 0)
+                    sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
 
-                if (string.IsNullOrEmpty(dto.MetaCode))
-                    dto.MetaCode = BaseModelItem.GenerateNewMetaCode(dto);
-
-                if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
+                foreach (var panel in section.LayoutPanels)
                 {
-                    if (!string.IsNullOrEmpty(input.ColumnName))
+                    var pnl = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = app.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
+                    res.Add(pnl);
+
+                    foreach (var lr in section.LayoutRows)
                     {
-                        var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName);
-                        if (dmc != null)
-                            dto.DataMetaCode = dmc.MetaCode;
-                    }
-                    if (dto.IsMetaTypeComboBox)
-                    {
-                        if (!string.IsNullOrEmpty(input.Domain))
+                        foreach (var input in lr.UserInputs)
                         {
-                            dto.Domain = "VALUEDOMAIN." + input.Domain;
+                            if (input.ParentMetaCode != pnl.MetaCode)
+                                continue;
+
+                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+
+                            if (dto.Id==0)
+                                dto.MetaCode = BaseModelItem.GenerateNewMetaCode(dto);
+
+                            if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
+                            {
+                                if (!string.IsNullOrEmpty(input.ColumnName))
+                                {
+                                    var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName);
+                                    if (dmc != null)
+                                        dto.DataMetaCode = dmc.MetaCode;
+                                }
+                                if (dto.IsMetaTypeComboBox)
+                                {
+                                    if (!string.IsNullOrEmpty(input.Domain))
+                                    {
+                                        dto.Domain = "VALUEDOMAIN." + input.Domain;
+                                    }
+                                }
+                            }
+
+                            if (dto.IsMetaTypeLookUp)
+                            {
+                                if (!string.IsNullOrEmpty(input.Domain))
+                                {
+                                    dto.Domain = "DATAVIEW." + input.Domain;
+                                }
+
+                                var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                                if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
+                                {
+                                    var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName);
+                                    if (dmc != null)
+                                        keyfield.DataMetaCode = dmc.MetaCode;
+                                }
+                                if (!string.IsNullOrEmpty(input.LookUpKeyFieldViewDbName))
+                                {
+                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.LookUpKeyFieldViewDbName && p.ParentMetaCode == input.Domain);
+                                    if (dmc != null)
+                                        keyfield.Domain = "DATAVIEW." + input.Domain + "." + dmc.MetaCode;
+                                }
+                                if (dto.Id > 0)
+                                {
+                                    var currentkeyfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.ParentMetaCode == dto.MetaCode);
+                                    if (currentkeyfield != null)
+                                    {
+                                        keyfield.Id = currentkeyfield.Id;
+                                        keyfield.MetaCode = currentkeyfield.MetaCode;
+                                    }
+                                }
+                                res.Add(keyfield);
+
+                                var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                                if (!string.IsNullOrEmpty(input.LookUpFieldDbName))
+                                {
+                                    var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpFieldDbName);
+                                    if (dmc != null)
+                                        lookupfield.DataMetaCode = dmc.MetaCode;
+                                }
+                                if (!string.IsNullOrEmpty(input.LookUpFieldViewDbName))
+                                {
+                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.LookUpFieldViewDbName && p.ParentMetaCode == input.Domain);
+                                    if (dmc != null)
+                                        lookupfield.Domain = "DATAVIEW." + input.Domain + "." + dmc.MetaCode;
+                                }
+                                if (dto.Id > 0)
+                                {
+                                    var currentlookupfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.ParentMetaCode == dto.MetaCode);
+                                    if (currentlookupfield != null)
+                                    {
+                                        lookupfield.Id = currentlookupfield.Id;
+                                        lookupfield.MetaCode = currentlookupfield.MetaCode;
+                                    }
+                                }
+                                res.Add(lookupfield);
+
+
+                            }
+
+                            res.Add(dto);
+
+
                         }
-                    }
+
+                    } 
                 }
-
-                if (dto.IsMetaTypeLookUp)
-                {
-                    if (!string.IsNullOrEmpty(input.Domain))
-                    {
-                        dto.Domain = "DATAVIEW." + input.Domain;
-                    }
-
-                    var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
-                    if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
-                    {
-                        var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName);
-                        if (dmc != null)
-                            keyfield.DataMetaCode = dmc.MetaCode;
-                    }
-                    if (!string.IsNullOrEmpty(input.LookUpKeyFieldViewDbName))
-                    {
-                        var dmc = views.Find(p => p.SQLQueryFieldName == input.LookUpKeyFieldViewDbName && p.ParentMetaCode == input.Domain);
-                        if (dmc != null)
-                            keyfield.Domain = "DATAVIEW." + input.Domain + "." + dmc.MetaCode;
-                    }
-                    if (dto.Id > 0)
-                    {
-                        var currentkeyfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.ParentMetaCode == dto.MetaCode);
-                        if (currentkeyfield != null)
-                        {
-                            keyfield.Id = currentkeyfield.Id;
-                            keyfield.MetaCode = currentkeyfield.MetaCode;
-                        }
-                    }
-                    res.Add(keyfield);
-
-                    var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
-                    if (!string.IsNullOrEmpty(input.LookUpFieldDbName))
-                    {
-                        var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpFieldDbName);
-                        if (dmc != null)
-                            lookupfield.DataMetaCode = dmc.MetaCode;
-                    }
-                    if (!string.IsNullOrEmpty(input.LookUpFieldViewDbName))
-                    {
-                        var dmc = views.Find(p => p.SQLQueryFieldName == input.LookUpFieldViewDbName && p.ParentMetaCode == input.Domain);
-                        if (dmc != null)
-                            lookupfield.Domain = "DATAVIEW." + input.Domain + "." + dmc.MetaCode;
-                    }
-                    if (dto.Id > 0)
-                    {
-                        var currentlookupfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.ParentMetaCode == dto.MetaCode);
-                        if (currentlookupfield != null)
-                        {
-                            lookupfield.Id = currentlookupfield.Id;
-                            lookupfield.MetaCode = currentlookupfield.MetaCode;
-                        }
-                    }
-                    res.Add(lookupfield);
-
-
-                }
-
-                res.Add(dto);
-
-
             }
 
-            //SET PARENT META CODE
-            foreach (var t in res)
-            {
-                if (!t.IsMetaTypePanel && !t.IsMetaTypeLookUpField && !t.IsMetaTypeLookUpKeyField && !t.IsMetaTypeListView && !t.IsMetaTypeListViewField)
-                {
-                    var pnl = res.Find(p => p.IsMetaTypePanel && p.ColumnOrder == t.ColumnOrder && p.IsRoot);
-                    if (pnl != null)
-                        t.ParentMetaCode = pnl.MetaCode;
-                }
-            }
-
-    */
             return res;
 
         }
@@ -126,7 +135,7 @@ namespace Intwenty.Models.MetaDesigner
 
             if (!app.UIStructure.Exists(p => p.IsMetaTypeSection))
             {
-                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "DEFAULTSECTION", ParentMetaCode = "ROOT" });
+                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "", ParentMetaCode = "ROOT", RowOrder = 1, ColOrder = 1 });
 
             }
             else
@@ -256,6 +265,10 @@ namespace Intwenty.Models.MetaDesigner
     {
         public int Id { get; set; }
 
+        public int RowOrder { get; set; }
+
+        public int ColOrder { get; set; }
+
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
@@ -295,8 +308,8 @@ namespace Intwenty.Models.MetaDesigner
         public int Id { get; set; }
         public int ApplicationId { get; set; }
         public string Title { get; set; }
-        public int Rowid { get; set; }
-        public int Colid { get; set; }
+        public int RowOrder { get; set; }
+        public int ColOrder { get; set; }
         public string Description { get; set; }
         public string Properties { get; set; }
         public string TableName { get; set; }

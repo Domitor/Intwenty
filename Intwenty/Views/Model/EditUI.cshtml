@@ -72,18 +72,18 @@
 
                     <div class="col-lg-12">
 
-                        <div class="accordion" v-bind:id="'accordion_'+sect.tempid">
+                        <div class="accordion" v-bind:id="'accordion_'+sect.rowOrder">
                             <div class="card">
                                 <div class="card-header" id="headingOne">
                                     <h5 class="mb-0">
-                                        <button class="btn btn-link" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.tempid">
+                                        <button class="btn btn-link" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder">
                                             Section {{sect.title}}
                                         </button>
                                         <input type="text" class="form-control" v-model="sect.title" style="width:200px" />
                                     </h5>
                                 </div>
 
-                                <div v-bind:id="'colapse'+sect.tempid" class="collapse"  v-bind:data-parent="'#accordion_'+sect.tempid">
+                                <div v-bind:id="'colapse'+sect.rowOrder" class="collapse"  v-bind:data-parent="'#accordion_'+sect.rowOrder">
                                     <div class="card-body">
 
                                         <label><b>Choose Layout </b></label>
@@ -397,22 +397,29 @@
                 },
                 addLayoutRow: function (sect)
                 {
-                    var new_row_id = 0;
+                    var new_row_order = 0;
                     if (sect.layoutRows.length > 0)
-                        new_row_id = sect.layoutRows[sect.layoutRows.length - 1].id + 1;
+                        new_row_order = sect.layoutRows[sect.layoutRows.length - 1].id + 1;
                     else
-                        new_row_id = 1;
+                        new_row_order = 1;
 
                     var row = { id: new_row_id, userInputs: [] };
                     for (var i = 0; i < sect.layoutPanels.length; i++) {
-                        row.userInputs.push({ id: 0, metaType: "", metaCode: "", parentMetaCode: sect.layoutPanels[i].metaCode, rowid:new_row_id, colid:sect.layoutPanels[i].colid });
+                        row.userInputs.push({ id: 0, metaType: "", metaCode: "", parentMetaCode: sect.layoutPanels[i].metaCode, rowOrder:new_row_order, colOrder:sect.layoutPanels[i].colOrder });
                     }
                     sect.layoutRows.push(row);
 
                 },
-                addSection: function () {
+                addSection: function ()
+                {
+                    var new_section_order = 0;
+                    if (this.model.sections.length > 0)
+                        new_section_order = this.model.sections[this.model.sections.length - 1].id + 1;
+                    else
+                        new_section_order = 1;
+
                     this.idgenerator += 1;
-                    var sect = { id:0, tempid: this.idgenerator, title: "-- Your title --", layoutPanelCount: "2", layoutPanels: [], layoutRows: [] };
+                    var sect = { id:0, rowOrder: new_section_order, colOrder: 1, title: "-- Your title --", layoutPanelCount: "2", layoutPanels: [], layoutRows: [] };
                     this.model.sections.push(sect);
                     this.layoutClassChanged(sect);
                     this.addLayoutRow(sect);
@@ -459,7 +466,7 @@
                     {
                         if (sect.layoutPanels.length === 0) {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "", rowid:1, colid:1 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "", rowOrder:1, colOrder:1 });
                         }
                         else if (sect.layoutPanels.length === 2) {
                             sect.layoutPanels.splice(1, 1);
@@ -472,16 +479,19 @@
                        
                         if (sect.layoutPanels.length === 0) {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:1 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:1 });
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:2 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:2 });
                         }
                         else if (sect.layoutPanels.length === 1) {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:2 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:2 });
                         }
-                        else if (sect.layoutPanels.length === 3) {
+                        else if (sect.layoutPanels.length === 3)
+                        {
+                           
                             sect.layoutPanels.splice(2, 1);
+
                         }
                     }
                     else if (sect.layoutPanelCount === "3")
@@ -490,21 +500,21 @@
                         if (sect.layoutPanels.length === 0)
                         {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:1 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:1 });
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:2 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:2 });
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:3 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:3 });
                         }
                         else if (sect.layoutPanels.length === 1) {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:2 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:2 });
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:3 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:3 });
                         }
                        else if (sect.layoutPanels.length === 2) {
                             this.idgenerator += 1;
-                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowid:1, colid:3 });
+                            sect.layoutPanels.push({ id:0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "",rowOrder:1, colOrder:3 });
                         }
 
                     }
@@ -535,7 +545,7 @@
                                 if (!found) {
 
                                      this.idgenerator += 1;
-                                     sect.layoutRows[r].userInputs.push({ id:0, tempid: this.idgenerator, metaType: "", metaCode: "", parentMetaCode: sect.layoutPanels[c].metaCode, rowid:sect.layoutRows[r].rowid, colid:sect.layoutPanels[c].colid });
+                                     sect.layoutRows[r].userInputs.push({ id:0, tempid: this.idgenerator, metaType: "", metaCode: "", parentMetaCode: sect.layoutPanels[c].metaCode, rowOrder:sect.layoutRows[r].rowOrder, colOrder:sect.layoutPanels[c].colOrder });
                                 }
 
                             }
@@ -543,6 +553,21 @@
 
                     }
 
+                },
+                deletePanel: function(sect, pnlnumber)
+                {
+                    for (var idx = 0; idx < sect.layoutRows.length; idx++)
+                    {
+                        for (var uic = 0; uic < sect.layoutRows[idx].userInputs.length; uic++)
+                        {
+                            if (sect.layoutRows[idx].userInputs[uic].colOrder == pnlnumber)
+                            {
+                                var input = ect.layoutRows[idx].userInputs[uic];
+                                this.removeApplicationUI(input);
+                            }
+                        }
+                    }
+                    this.removeApplicationUI(sect.layoutPanels[pnlnumber-1]);
                 },
                 closeAndSave: function (item)
                 {
