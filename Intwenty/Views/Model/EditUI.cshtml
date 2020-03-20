@@ -114,7 +114,7 @@
                                                         <button class="btn btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><span class="fa fa-plus"></span></button>
                                                         <div class="dropdown-menu dropdown-menu-lg-right">
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'TEXTBOX')">Textbox</a>
-                                                            <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'NUMBOX')">Numbox</a>
+                                                            <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'NUMBOX')">Numeric</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'TEXTAREA')">Textarea</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'CHECKBOX')">Checkbox</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'COMBOBOX')">Combobox</a>
@@ -342,7 +342,7 @@
                                 <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='COMBOBOX'">
+                        <div v-if="showSettingValueDomain">
                             <label class="control-label">Set value domain</label>
                             <select v-model="active_setting_input.domain" class="form-control">
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
@@ -376,6 +376,16 @@
                             <label class="control-label">Set look up field data view column</label>
                             <select v-model="active_setting_input.lookUpFieldViewDbName" class="form-control">
                                 <option v-for="col in viewcolumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            </select>
+                        </div>
+                        <div v-if="showSettingGridColumnType">
+                            <label class="control-label">Set input type</label>
+                            <select v-model="active_setting_input.metaType" class="form-control">
+                                <option value="EDITGRID_TEXTBOX">Textbox</option>
+                                <option value="EDITGRID_NUMBOX">Numeric</option>
+                                <option value="EDITGRID_DATEPICKER">Textbox</option>
+                                <option value="EDITGRID_CHECKBOX">Numeric</option>
+                                <option value="EDITGRID_COMBOBOX">Numeric</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='EDITGRID'">
@@ -493,7 +503,7 @@
                 },
                 addEditGridColumn: function ()
                 {
-                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: "", metaCode: "", parentMetaCode:"" });
+                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: "EDITGRID_COLUMN", metaCode: "", parentMetaCode:"" });
                 },
                 setUserInput: function (input, metatype)
                 {
@@ -722,6 +732,38 @@
                         return false;
 
                     return true;
+                },
+                showSettingGridColumnType: function ()
+                {
+                    if (this.active_setting_input.metaType === "EDITGRID_COLUMN")
+                        return true;
+
+                     if (this.active_setting_input.metaType == "EDITGRID_TEXTBOX")
+                        return true;
+
+                     if (this.active_setting_input.metaType == "EDITGRID_NUMBOX")
+                        return true;
+
+                     if (this.active_setting_input.metaType == "EDITGRID_DATEPICKER")
+                        return true;
+
+                      if (this.active_setting_input.metaType == "EDITGRID_CHECKBOX")
+                        return true;
+
+                      if (this.active_setting_input.metaType == "EDITGRID_COMBOBOX")
+                        return true;
+
+                    return false;
+                },
+                showSettingValueDomain: function ()
+                {
+                    if (this.active_setting_input.metaType === "COMBOBOX")
+                        return true;
+
+                      if (this.active_setting_input.metaType == "EDITGRID_COMBOBOX")
+                        return true;
+
+                    return false;
                 }
               
             },
