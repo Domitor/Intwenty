@@ -29,7 +29,7 @@ namespace Intwenty.Models.MetaDesigner
                     {
                         foreach (var input in lr.UserInputs)
                         {
-                            if (input.ParentMetaCode != pnl.MetaCode)
+                            if (input.ParentMetaCode != pnl.MetaCode || string.IsNullOrEmpty(input.MetaType))
                                 continue;
 
                             var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
@@ -154,12 +154,12 @@ namespace Intwenty.Models.MetaDesigner
 
                 foreach (var uicomp in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                 {
-                    if (uicomp.ParentMetaCode == section.MetaCode || section.MetaCode == "DEFAULTSECTION")
+                    if (uicomp.ParentMetaCode == section.MetaCode || section.Id == 0)
                     {
                        
                         if (uicomp.IsMetaTypePanel)
                         {
-                            var pnl = new UserInput() { Id = uicomp.Id, ApplicationId = app.Application.Id, Colid = uicomp.ColumnOrder, Rowid = 1, MetaCode = uicomp.MetaCode, MetaType = uicomp.MetaType, Title = uicomp.Title, ParentMetaCode = "ROOT" };
+                            var pnl = new UserInput() { Id = uicomp.Id, ApplicationId = app.Application.Id, ColOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, MetaType = uicomp.MetaType, Title = uicomp.Title, ParentMetaCode = "ROOT" };
                             section.LayoutPanels.Add(pnl);
                             foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                             {
@@ -181,7 +181,7 @@ namespace Intwenty.Models.MetaDesigner
                                 {
 
 
-                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, Colid = uic.ColumnOrder, Rowid = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName };
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColOrder = uic.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName };
                                     if (uic.IsDataConnected)
                                     {
                                         input.ColumnName = uic.DataInfo.ColumnName;
@@ -198,7 +198,7 @@ namespace Intwenty.Models.MetaDesigner
                                     var keyfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.ParentMetaCode == uic.MetaCode);
                                     var lookupfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.ParentMetaCode == uic.MetaCode);
 
-                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, Colid = uic.ColumnOrder, Rowid = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName };
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColOrder = uic.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName };
                                     if (keyfield != null)
                                     {
                                         if (keyfield.IsDataConnected)
