@@ -53,7 +53,7 @@ namespace Intwenty.Data.Entity
 
         /// <summary>
         /// This variable is used to tell if versioning should occur in the
-        /// DATAVALUE level. Eg. That a new trans row with a new
+        /// DATACOLUMN level. Eg. That a new trans row with a new
         /// versionno for the value should be created everytime a value
         /// in an application is changed.
         /// (This means that a new version of every value is created on every
@@ -62,7 +62,7 @@ namespace Intwenty.Data.Entity
 
         /// <summary>
         /// This variable is used to tell if versioning should occur in the
-        /// DATAVALUETABLEROW level. Eg. That a new table row with a new
+        /// DATATABLEROW level. Eg. That a new table row with a new
         /// versionno should be created everytime atleast one single value
         /// in a tablerow is changed
         /// (This means that a new version of the row is created on every
@@ -72,7 +72,7 @@ namespace Intwenty.Data.Entity
 
         /// <summary>
         /// This variable is used to tell if versioning should occur in the
-        /// DATAVALUE level. Eg. That a new trans row with a new
+        /// DATACOLUMN level. Eg. That a new trans row with a new
         /// versionno for the value should be created everytime a value
         /// in a tablerow is changed.
         /// (This means that a new version of every value is created on every

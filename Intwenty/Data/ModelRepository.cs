@@ -136,19 +136,21 @@ namespace Intwenty.Data
                     if (item.AppMetaCode == app.MetaCode)
                     {
                         t.DataStructure.Add(item);
-                        if (item.IsMetaTypeDataValue)
+                        if (item.IsMetaTypeDataColumn)
                         {
                             item.ColumnName = item.DbName;
                             if (item.IsRoot)
                                 item.TableName = app.DbName;
                             else
                             {
-                                var table = ditems.Find(p => p.MetaCode == item.ParentMetaCode && p.IsMetaTypeDataValueTable && p.AppMetaCode == app.MetaCode);
+                                var table = ditems.Find(p => p.MetaCode == item.ParentMetaCode && p.IsMetaTypeDataTable && p.AppMetaCode == app.MetaCode);
                                 if (table != null)
                                     item.TableName = table.DbName;
                             }
-                                
-
+                        }
+                        if (item.IsMetaTypeDataTable)
+                        {
+                            item.TableName = item.DbName;
                         }
                     }
                 }
@@ -595,10 +597,10 @@ namespace Intwenty.Data
                 //ASSUME ALL IS ROOT, CORRECT LATER
                 dbi.ParentMetaCode = "ROOT";
 
-                if (dbi.IsMetaTypeDataValue && string.IsNullOrEmpty(dbi.TableName))
+                if (dbi.IsMetaTypeDataColumn && string.IsNullOrEmpty(dbi.TableName))
                     throw new InvalidOperationException("Could not identify parent table when saving application database model.");
 
-                if (dbi.IsMetaTypeDataValue && dbi.TableName == app.Application.DbName)
+                if (dbi.IsMetaTypeDataColumn && dbi.TableName == app.Application.DbName)
                 {
                     dbi.ParentMetaCode = "ROOT";
                 }
@@ -609,7 +611,7 @@ namespace Intwenty.Data
                 if (!dbi.HasValidMetaType)
                     throw new InvalidOperationException("Invalid meta type when saving application database model.");
 
-                if (dbi.IsMetaTypeDataValue && !dbi.HasValidDataType)
+                if (dbi.IsMetaTypeDataColumn && !dbi.HasValidDataType)
                     throw new InvalidOperationException("Invalid datatype type when saving application database model.");
 
 
@@ -626,15 +628,15 @@ namespace Intwenty.Data
 
 
                     //SET PARENT META CODE
-                    if (dbi.IsMetaTypeDataValue && dbi.TableName != app.Application.DbName)
+                    if (dbi.IsMetaTypeDataColumn && dbi.TableName != app.Application.DbName)
                     {
-                        var tbl = model.Find(p => p.IsMetaTypeDataValueTable && p.DbName == dbi.TableName);
+                        var tbl = model.Find(p => p.IsMetaTypeDataTable && p.DbName == dbi.TableName);
                         if (tbl != null)
                             t.ParentMetaCode = tbl.MetaCode;
                     }
 
                     //Don't save main table, it's implicit for application
-                    if (dbi.IsMetaTypeDataValueTable && dbi.DbName == app.Application.DbName)
+                    if (dbi.IsMetaTypeDataTable && dbi.DbName == app.Application.DbName)
                         continue;
 
                     MetaDBItem.Add(t);
@@ -683,9 +685,9 @@ namespace Intwenty.Data
                 if (app == null)
                     return;
 
-                if (dto.IsMetaTypeDataValueTable && dto.DbName != app.Application.DbName)
+                if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
                 {
-                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATAVALUE") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
                     MetaDBItem.Remove(existing);
                     MetaDBItem.RemoveRange(childlist);
                 }

@@ -33,8 +33,8 @@
     <br />
 
     <div class="card">
-        <div class="card-header"> <h2>Manage UI for application {{model.title}}</h2></div>
-        <div class="card-body">Design application UI and connect it to the database.</div>
+        <div class="card-header"> <h2>UI model designer </h2></div>
+        <div class="card-body">Design the {{model.title}} UI model and connect it to the database model.</div>
     </div>
 
     <br />
@@ -48,23 +48,14 @@
     <div class="tab-content">
 
         <div id="userinput" class="tab-pane fade show active">
-
-
-
             <br />
             <br />
-
-
             <div class="btn btn-secondary" v-on:click="addSection">
                 <span class="fa fa-plus"></span> Add section
             </div>
-
-
             <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
                 <span class="fa fa-save"></span> Save changes
             </div>
-
-
             <hr />
             <div>
 
@@ -75,12 +66,14 @@
                         <div class="accordion" v-bind:id="'accordion_'+sect.rowOrder">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="mb-0">
+                                    <div>
                                         <button class="btn btn-link" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder">
-                                            Section {{sect.title}}
+                                            {{sect.title}}
                                         </button>
                                         <input type="text" class="form-control" v-model="sect.title" style="width:200px" />
-                                    </h5>
+                                        <span v-if="sect.collapsible" style="float:right">Start expanded <input type="checkbox" v-model="sect.startExpanded" /></span>
+                                        <span style="float:right">Collapsible <input type="checkbox" v-model="sect.collapsible" /> </span>
+                                    </div>
                                 </div>
 
                                 <div v-bind:id="'colapse'+sect.rowOrder" class="collapse"  v-bind:data-parent="'#accordion_'+sect.rowOrder">
@@ -168,7 +161,6 @@
                                                             <div class="form-group">
                                                                 <select class="form-control" disabled>
                                                                     <option>Example 1</option>
-                                                                    <option>Example 2</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -192,10 +184,9 @@
                                                             <table class="table table-bordered">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th v-for="tcol in input.children">
-                                                                        {{tcol.title}}  
-                                                                           <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="float:right; margin:5px"></span>
-                                                                        </th>
+                                                                        <td v-for="tcol in input.children">
+                                                                            <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px"></span> {{tcol.title}}
+                                                                        </td>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -204,6 +195,29 @@
                                                                             <div v-if="tcol.metaType==='EDITGRID_TEXTBOX'">
                                                                                 <div class="form-group">
                                                                                     <input type="text" class="form-control" disabled />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div v-if="tcol.metaType==='EDITGRID_NUMBOX'">
+                                                                                <div class="form-group">
+                                                                                    <input type="number" class="form-control" disabled />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div v-if="tcol.metaType==='EDITGRID_COMBOBOX'">
+                                                                                <div class="form-group">
+                                                                                    <select class="form-control" disabled>
+                                                                                        <option>Example 1</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div v-if="tcol.metaType==='EDITGRID_CHECKBOX'">
+                                                                                <div class="form-group">
+                                                                                    <br />
+                                                                                    <input type="checkbox" disabled />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div v-if="tcol.metaType==='EDITGRID_DATEPICKER'">
+                                                                                <div class="form-group">
+                                                                                    <input type="date" class="form-control" />
                                                                                 </div>
                                                                             </div>
                                                                         </td>
@@ -237,74 +251,65 @@
         <div id="listview" class="tab-pane fade">
             <br />
             <br />
-
-            <h4>Define the application listview</h4>
-
+            <div class="btn btn-primary" v-on:click="saveListView" style="float:right">
+                <span class="fa fa-save"></span> Save changes
+            </div>
             <br />
-            <br />
+            <hr />
 
-
-            <div>
-
-                <div style="margin:15px">
-                    <div style="padding: 5px; border:dotted 1px gray">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label class="control-label">Title <span style="color: red"> *</span></label>
-                                    <input type="text" class="form-control" v-model="listview.title" />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-
+            <div style="margin:15px">
+                <div style="padding: 5px; border:dotted 1px gray">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label class="control-label">Title <span style="color: red"> *</span></label>
+                                <input type="text" class="form-control" v-model="listview.title" />
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-12" style="margin: 5px">
-                                <b>Fields: </b>
-                                <br />
-                                <br />
-                                <div>
-                                    <div>
-                                        <div class="btn btn-secondary" v-on:click="addListViewField">
-                                            <span class="fa fa-plus"></span> Add list view field
-                                        </div>
-                                    </div>
-                                    <br />
-                                    <table class="table table">
-                                        <thead>
-                                            <tr>
+                        <div class="col-lg-6">
 
-                                                <th style="width:30%">Title <span style="color: red"> *</span></th>
-                                                <th style="width:65%">Column name <span style="color: red"> *</span></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody v-for="field in listview.fields">
-                                            <tr>
-
-                                                <td><input type="text" class="form-control" v-model="field.title" /></td>
-                                                <td>
-                                                    <select v-model="field.dbName" class="form-control">
-                                                        <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                                    </select>
-
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <br />
-                                <div>
-                                    <div class="btn btn-primary" v-on:click="saveListView">
-                                        <span class="fa fa-save"></span> Save
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
                     </div>
+                    <div class="row">
+                        <div class="col-lg-12" style="margin: 5px">
+                            <b>Fields: </b>
+                            <br />
+                            <br />
+                            <div>
+                                <div>
+                                    <div class="btn btn-secondary" v-on:click="addListViewField">
+                                        <span class="fa fa-plus"></span> Add list view field
+                                    </div>
+                                </div>
+                                <br />
+                                <table class="table table">
+                                    <thead>
+                                        <tr>
+
+                                            <th style="width:30%">Title <span style="color: red"> *</span></th>
+                                            <th style="width:65%">Column name <span style="color: red"> *</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody v-for="field in listview.fields">
+                                        <tr>
+
+                                            <td><input type="text" class="form-control" v-model="field.title" /></td>
+                                            <td>
+                                                <select v-model="field.dbName" class="form-control">
+                                                    <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                                </select>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </div>
 
 
         </div>
@@ -317,7 +322,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">UI {{active_setting_input.metaType}} Settings</h5>
+                    <h5 class="modal-title">UI Settings</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -383,9 +388,9 @@
                             <select v-model="active_setting_input.metaType" class="form-control">
                                 <option value="EDITGRID_TEXTBOX">Textbox</option>
                                 <option value="EDITGRID_NUMBOX">Numeric</option>
-                                <option value="EDITGRID_DATEPICKER">Textbox</option>
-                                <option value="EDITGRID_CHECKBOX">Numeric</option>
-                                <option value="EDITGRID_COMBOBOX">Numeric</option>
+                                <option value="EDITGRID_DATEPICKER">Datepicker</option>
+                                <option value="EDITGRID_CHECKBOX">Checkbox</option>
+                                <option value="EDITGRID_COMBOBOX">Combobox</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='EDITGRID'">

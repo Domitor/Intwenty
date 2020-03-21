@@ -20,19 +20,27 @@ namespace Intwenty.Models.MetaDesigner
                 if (sect.Id == 0)
                     sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
 
+                if (section.Collapsible)
+                    sect.AddUpdateProperty("COLLAPSIBLE", "TRUE");
+                if (section.StartExpanded)
+                    sect.AddUpdateProperty("STARTEXPANDED", "TRUE");
+
                 foreach (var panel in section.LayoutPanels)
                 {
                     var pnl = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = app.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
                     res.Add(pnl);
+                    if (pnl.Id == 0)
+                        pnl.MetaCode = BaseModelItem.GenerateNewMetaCode(pnl);
 
                     foreach (var lr in section.LayoutRows)
                     {
                         foreach (var input in lr.UserInputs)
                         {
-                            if (input.ParentMetaCode != pnl.MetaCode || string.IsNullOrEmpty(input.MetaType))
+                            if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType))
                                 continue;
 
                             var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+                            res.Add(dto);
 
                             if (dto.Id==0)
                                 dto.MetaCode = BaseModelItem.GenerateNewMetaCode(dto);
@@ -112,8 +120,45 @@ namespace Intwenty.Models.MetaDesigner
 
                             }
 
-                            res.Add(dto);
+                            if (dto.IsMetaTypeEditGrid)
+                            {
+                                foreach (var tcol in input.Children)
+                                {
+                                    var column = new UserInterfaceModelItem(input.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode };
 
+                                    if (column.Id == 0)
+                                        column.MetaCode = BaseModelItem.GenerateNewMetaCode(column);
+
+                                    if (column.IsMetaTypeEditGridCheckBox || column.IsMetaTypeEditGridComboBox || column.IsMetaTypeEditGridDatePicker || column.IsMetaTypeEditGridNumBox || column.IsMetaTypeEditGridTextBox)
+                                    {
+                                        if (!string.IsNullOrEmpty(tcol.TableName))
+                                        {
+                                            var dmt = app.DataStructure.Find(p => p.DbName == tcol.TableName && p.IsMetaTypeDataTable);
+                                            if (dmt != null)
+                                            {
+                                                if (!string.IsNullOrEmpty(tcol.ColumnName))
+                                                {
+                                                    var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName  && p.ParentMetaCode == dmt.MetaCode);
+                                                    if (dmc != null)
+                                                        column.DataMetaCode = dmc.MetaCode;
+                                                }
+                                            }
+                                               
+                                        }
+
+                                        if (column.IsMetaTypeEditGridComboBox)
+                                        {
+                                            if (!string.IsNullOrEmpty(tcol.Domain))
+                                            {
+                                                column.Domain = "VALUEDOMAIN." + tcol.Domain;
+                                            }
+                                        }
+
+                                        res.Add(column);
+                                    }
+                                }
+
+                            }
 
                         }
 
@@ -135,7 +180,7 @@ namespace Intwenty.Models.MetaDesigner
 
             if (!app.UIStructure.Exists(p => p.IsMetaTypeSection))
             {
-                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1 });
+                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Collapsible = true, StartExpanded=true });
 
             }
             else
@@ -144,7 +189,10 @@ namespace Intwenty.Models.MetaDesigner
                 {
                     if (uic.IsMetaTypeSection)
                     {
-                        res.Sections.Add(new Section() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 });
+                        var sect = new Section() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
+                        sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE","TRUE");
+                        sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
+                        res.Sections.Add(sect);
                     }
                 }
             }
@@ -179,8 +227,6 @@ namespace Intwenty.Models.MetaDesigner
                                 //SIMPLE INPUTS
                                 if (uic.IsMetaTypeCheckBox || uic.IsMetaTypeComboBox || uic.IsMetaTypeDatePicker || uic.IsMetaTypeNumBox || uic.IsMetaTypeTextArea || uic.IsMetaTypeTextBox)
                                 {
-
-
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = uic.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName };
                                     if (uic.IsDataConnected)
                                     {
@@ -193,7 +239,6 @@ namespace Intwenty.Models.MetaDesigner
                                 //LOOK UP
                                 if (uic.IsMetaTypeLookUp)
                                 {
-
 
                                     var keyfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.ParentMetaCode == uic.MetaCode);
                                     var lookupfield = app.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.ParentMetaCode == uic.MetaCode);
@@ -224,6 +269,32 @@ namespace Intwenty.Models.MetaDesigner
                                             input.LookUpFieldViewDbName = lookupfield.ViewInfo.SQLQueryFieldName;
                                         }
                                     }
+
+                                    lr.UserInputs.Add(input);
+                                }
+
+                                if (uic.IsMetaTypeEditGrid)
+                                {
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = uic.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName };
+                                    if (uic.IsDataConnected)
+                                        input.TableName = uic.DataInfo.TableName;
+
+                                    //COLUMNS
+                                    foreach (var gridcol in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                                    {
+                                        if (gridcol.ParentMetaCode != input.MetaCode)
+                                            continue;
+
+                                        var child = new UserInput() { Id = gridcol.Id, ApplicationId = app.Application.Id, ColumnOrder = gridcol.ColumnOrder, RowOrder = gridcol.RowOrder, MetaCode = gridcol.MetaCode, MetaType = gridcol.MetaType, Title = gridcol.Title, ParentMetaCode = gridcol.ParentMetaCode, Domain = gridcol.DomainName };
+                                        input.Children.Add(child);
+
+                                        if (gridcol.IsDataConnected)
+                                        {
+                                            child.ColumnName = gridcol.DataInfo.ColumnName;
+                                            child.TableName = gridcol.DataInfo.TableName;
+                                        }
+                                    }
+
                                     lr.UserInputs.Add(input);
                                 }
                             }
@@ -276,7 +347,11 @@ namespace Intwenty.Models.MetaDesigner
         public string Title { get; set; }
 
         public string LayoutPanelCount { get; set; }
-       
+
+        public bool Collapsible { get; set; }
+
+        public bool StartExpanded { get; set; }
+
         public List<UserInput> LayoutPanels { get; set; }
 
         public List<LayoutRow> LayoutRows { get; set; }

@@ -98,15 +98,15 @@ namespace Intwenty.Data
 
             //SALESORDER
             //--------------------------------------------------
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ORDERNO", DbName = "OrderNo", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ORDERDATE", DbName = "OrderDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "CUSTID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "CUSTNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "ORDERNO", DbName = "OrderNo", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "ORDERDATE", DbName = "OrderDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "CUSTID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "CUSTNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
 
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUETABLE", MetaCode = "DTORDLINE", DbName = "SalesLine", ParentMetaCode = "ROOT", DataType = "" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemNo", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "DTORDLINE", DataType = "INTEGER" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATATABLE", MetaCode = "DTORDLINE", DbName = "SalesLine", ParentMetaCode = "ROOT", DataType = "" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "ITEMID", DbName = "ItemNo", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "DTORDLINE", DataType = "INTEGER" });
 
             //LISTVIEW
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Sales Orders", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
@@ -119,17 +119,17 @@ namespace Intwenty.Data
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_ORDERNO", DataMetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "PANEL1", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "DATEPICKER", MetaCode = "DP_ORDERDATE", DataMetaCode = "ORDERDATE", Title = "Order Date", ParentMetaCode = "PANEL1", RowOrder = 2, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer Name", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID", MetaCode = "LINETABLE", DataMetaCode = "DTORDLINE", Title = "Sales Lines", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "LINE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "NUMBOX", MetaCode = "LINE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 2, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID", MetaCode = "LINETABLE", DataMetaCode = "DTORDLINE", Title = "Sales Lines", ParentMetaCode = "PANEL1", RowOrder = 4, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_TEXTBOX", MetaCode = "LINE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_NUMBOX", MetaCode = "LINE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 2, CssClass = "" });
 
 
             //SHIPMENTFILES
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "SHIPMENTID", DbName = "ShipmentId", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "FILENAME", DbName = "FileName", ParentMetaCode = "ROOT", DataType = "STRING"});
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATAVALUE", MetaCode = "IMPORTDATE", DbName = "ImportDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATACOLUMN", MetaCode = "SHIPMENTID", DbName = "ShipmentId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATACOLUMN", MetaCode = "FILENAME", DbName = "FileName", ParentMetaCode = "ROOT", DataType = "STRING"});
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "DATACOLUMN", MetaCode = "IMPORTDATE", DbName = "ImportDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
 
             //LISTVIEW
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Shipment files", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "HIDEFILTER=TRUE" });
@@ -141,9 +141,9 @@ namespace Intwenty.Data
             //LOCATION
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATAVALUE", MetaCode = "LOCATIONTYPE", DbName = "LocationType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATACOLUMN", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATACOLUMN", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "LOCATION", MetaType = "DATACOLUMN", MetaCode = "LOCATIONTYPE", DbName = "LocationType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
 
             //VIEWS
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName from Location order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
@@ -166,12 +166,12 @@ namespace Intwenty.Data
             //GOODSRECEIPT
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "RECEIPTDATE", DbName = "ReceiptDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "RECEIPTDATE", DbName = "ReceiptDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "LOCATIONID", DbName = "LocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
             //UI
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
@@ -197,12 +197,12 @@ namespace Intwenty.Data
             //GOODSISSUE
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "ISSUEDATE", DbName = "IssueDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "ISSUEDATE", DbName = "IssueDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "LOCATIONID", DbName = "LocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "LOCATIONNAME", DbName = "LocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
             //UI
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
@@ -227,22 +227,22 @@ namespace Intwenty.Data
             //GOODSTRANSFER
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "TRANSDATE", DbName = "TransferDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "FROMLOCID", DbName = "FromLocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "FROMLOCNAME", DbName = "FromLocationName", ParentMetaCode = "ROOT", DataType = "STRING"});
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "TOLOCID", DbName = "ToLocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "TOLOCNAME", DbName = "ToLocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "TRANSDATE", DbName = "TransferDate", ParentMetaCode = "ROOT", DataType = "DATETIME", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "ITEMID", DbName = "ItemID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.ITEM.ITEMID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "ITEMNAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "FROMLOCID", DbName = "FromLocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "FROMLOCNAME", DbName = "FromLocationName", ParentMetaCode = "ROOT", DataType = "STRING"});
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "TOLOCID", DbName = "ToLocationID", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "APP.LOCATION.LOCATIONID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "TOLOCNAME", DbName = "ToLocationName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSTRANSFER", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
 
             //CUSTOMER
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATAVALUE", MetaCode = "CUSTOMERID", DbName = "CustomerId", ParentMetaCode = "ROOT",   DataType = "STRING", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATAVALUE", MetaCode = "CUSTOMERNAME", DbName = "CustomerName", ParentMetaCode = "ROOT",  DataType = "STRING"  });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATAVALUE", MetaCode = "CUSTOMERINFO", DbName = "CustomerInfo", ParentMetaCode = "ROOT", DataType = "TEXT" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERID", DbName = "CustomerId", ParentMetaCode = "ROOT",   DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERNAME", DbName = "CustomerName", ParentMetaCode = "ROOT",  DataType = "STRING"  });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERINFO", DbName = "CustomerInfo", ParentMetaCode = "ROOT", DataType = "TEXT" });
 
             //UI
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel"  });
@@ -262,15 +262,15 @@ namespace Intwenty.Data
             //ITEM
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "ITEMID", DbName = "ItemId", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "NAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "CATCODE", DbName = "ItemCategoryCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.CODE" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "CATVALUE", DbName = "ItemCategoryValue", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.VALUE" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "MODIFIED", DbName = "Modified", ParentMetaCode = "ROOT", DataType = "DATETIME" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "ACTIVE", DbName = "Active", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "PURCHASEPRICE", DbName = "PurchasePrice", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORCODE", DbName = "VendorCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORID" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATAVALUE", MetaCode = "VENDORTXT", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORNAME" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "ITEMID", DbName = "ItemId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "NAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "CATCODE", DbName = "ItemCategoryCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.CODE" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "CATVALUE", DbName = "ItemCategoryValue", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.VALUE" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "MODIFIED", DbName = "Modified", ParentMetaCode = "ROOT", DataType = "DATETIME" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "ACTIVE", DbName = "Active", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "PURCHASEPRICE", DbName = "PurchasePrice", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "VENDORCODE", DbName = "VendorCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORID" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "VENDORTXT", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "APP.VENDOR.VENDORNAME" });
 
             //VIEWS
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
@@ -301,18 +301,18 @@ namespace Intwenty.Data
             //ITEMLEDGER
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATAVALUE", MetaCode = "TRANSDATE", DbName = "TransactionDate", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATAVALUE", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATAVALUE", MetaCode = "TRANSTYPE", DbName = "TransactionType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.ITEMTRANSTYPE.CODE" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATAVALUE", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "TRANSDATE", DbName = "TransactionDate", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "TRANSTYPE", DbName = "TransactionType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.ITEMTRANSTYPE.CODE" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
 
 
 
             //VENDOR
             //----------------------------------------------------
             //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATAVALUE", MetaCode = "VENDORID", DbName = "VendorId", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATAVALUE", MetaCode = "VENDORNAME", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATACOLUMN", MetaCode = "VENDORID", DbName = "VendorId", ParentMetaCode = "ROOT", DataType = "STRING" });
+            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATACOLUMN", MetaCode = "VENDORNAME", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING" });
 
             //VIEWS
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country from Vendor order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });

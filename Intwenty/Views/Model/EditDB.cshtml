@@ -12,8 +12,8 @@
         <br />
         <br />
         <div class="card">
-            <div class="card-header"><h2>Manage database for application {{model.title}}</h2></div>
-            <div class="card-body">Define the application data structure.</div>
+            <div class="card-header"><h2>Database model designer</h2></div>
+            <div class="card-body">Define the data structure for the {{model.title}} application</div>
         </div>
 
         <br />
@@ -167,12 +167,12 @@
                 {
                     var context = this;
                     context.idgen -= 1;
-                    context.model.tables.unshift({ properties: "", metaType: "DATAVALUETABLE", properties: "", id: context.idgen });
+                    context.model.tables.unshift({ properties: "", metaType: "DATATABLE", properties: "", id: context.idgen });
                 },
                 addDbColumn: function () {
                     var context = this;
                     context.idgen -= 1;
-                    context.model.columns.unshift({ properties: "", metaType: "DATAVALUE", id: context.idgen, showSettings:false, mandatory: false, domain:"" });
+                    context.model.columns.unshift({ properties: "", metaType: "DATACOLUMN", id: context.idgen, showSettings:false, mandatory: false, domain:"" });
                 }
                 ,
                 deleteDbColumn: function (col)

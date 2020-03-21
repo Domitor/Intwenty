@@ -19,8 +19,8 @@ namespace Intwenty.MetaDataService.Model
 
 
         //META TYPES
-        public static readonly string MetaTypeDataValue = "DATAVALUE";
-        public static readonly string MetaTypeDataValueTable = "DATAVALUETABLE";
+        public static readonly string MetaTypeDataColumn = "DATACOLUMN";
+        public static readonly string MetaTypeDataTable = "DATATABLE";
 
         public DatabaseModelItem()
         {
@@ -172,8 +172,8 @@ namespace Intwenty.MetaDataService.Model
             get
             {
                 var t = new List<string>();
-                t.Add(MetaTypeDataValue);
-                t.Add(MetaTypeDataValueTable);
+                t.Add(MetaTypeDataColumn);
+                t.Add(MetaTypeDataTable);
                 return t;
             }
         }
@@ -240,15 +240,15 @@ namespace Intwenty.MetaDataService.Model
             }
         }
       
-        public bool IsMetaTypeDataValue
+        public bool IsMetaTypeDataColumn
         {
-            get { return MetaType == MetaTypeDataValue; }
+            get { return MetaType == MetaTypeDataColumn; }
         }
 
 
-        public bool IsMetaTypeDataValueTable
+        public bool IsMetaTypeDataTable
         {
-            get { return MetaType == MetaTypeDataValueTable; }
+            get { return MetaType == MetaTypeDataTable; }
         }
 
         public override bool HasValidMetaType

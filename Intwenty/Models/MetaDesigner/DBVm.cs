@@ -47,21 +47,21 @@ namespace Intwenty.Models.MetaDesigner
         {
             var res = new List<DatabaseTableVm>();
 
-            res.Add(new DatabaseTableVm() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATAVALUETABLE", Description = "Main table for " + app.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
+            res.Add(new DatabaseTableVm() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, Properties = "DEFAULTTABLE=TRUE" });
 
             foreach (var t in app.DataStructure)
             {
-                if (t.IsMetaTypeDataValue && t.IsRoot)
+                if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
                     res[0].Columns.Add(new DatabaseTableFieldVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id });
                 }
 
-                if (t.IsMetaTypeDataValueTable)
+                if (t.IsMetaTypeDataTable)
                 {
                     var tbl = new DatabaseTableVm() { Id = 0, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description, ApplicationId = app.Application.Id };
                     foreach (var col in app.DataStructure)
                     {
-                        if (col.IsMetaTypeDataValue && col.ParentMetaCode == t.MetaCode)
+                        if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                         {
                             tbl.Columns.Add(new DatabaseTableFieldVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName, ApplicationId = app.Application.Id });
                         }

@@ -22,6 +22,11 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeEditGrid = "EDITGRID";
         public static readonly string MetaTypeSection = "SECTION";
+        public static readonly string MetaTypeEditGridTextBox = "EDITGRID_TEXTBOX";
+        public static readonly string MetaTypeEditGridNumBox = "EDITGRID_NUMBOX";
+        public static readonly string MetaTypeEditGridDatePicker = "EDITGRID_DATEPICKER";
+        public static readonly string MetaTypeEditGridCheckBox = "EDITGRID_CHECKBOX";
+        public static readonly string MetaTypeEditGridComboBox = "EDITGRID_COMBOBOX";
 
 
         public UserInterfaceModelItem()
@@ -116,6 +121,11 @@ namespace Intwenty.MetaDataService.Model
                 t.Add(MetaTypeDatePicker);
                 t.Add(MetaTypeEditGrid);
                 t.Add(MetaTypeSection);
+                t.Add(MetaTypeEditGridCheckBox);
+                t.Add(MetaTypeEditGridComboBox);
+                t.Add(MetaTypeEditGridTextBox);
+                t.Add(MetaTypeEditGridNumBox);
+                t.Add(MetaTypeEditGridDatePicker);
                 return t;
             }
         }
@@ -271,6 +281,32 @@ namespace Intwenty.MetaDataService.Model
         public bool IsMetaTypeSection
         {
             get { return MetaType == MetaTypeSection; }
+        }
+
+        public bool IsMetaTypeEditGridCheckBox
+        {
+            get { return MetaType == MetaTypeEditGridCheckBox; }
+        }
+
+
+        public bool IsMetaTypeEditGridComboBox
+        {
+            get { return MetaType == MetaTypeEditGridComboBox; }
+        }
+
+        public bool IsMetaTypeEditGridDatePicker
+        {
+            get { return MetaType == MetaTypeEditGridDatePicker; }
+        }
+
+        public bool IsMetaTypeEditGridTextBox
+        {
+            get { return MetaType == MetaTypeEditGridTextBox; }
+        }
+
+        public bool IsMetaTypeEditGridNumBox
+        {
+            get { return MetaType == MetaTypeEditGridNumBox; }
         }
 
         public override bool HasValidMetaType

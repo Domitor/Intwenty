@@ -57,7 +57,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var data in app.DataStructure.Where(p => p.IsMetaTypeDataValue && p.IsRoot))
+                                    @foreach (var data in app.DataStructure.Where(p => p.IsMetaTypeDataColumn && p.IsRoot))
                                     {
                                         <tr>
                                             <td>@data.DbName</td>

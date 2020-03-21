@@ -49,6 +49,40 @@ namespace Intwenty.MetaDataService.Model
             get { return !string.IsNullOrEmpty(Properties); }
         }
 
+        public void AddUpdateProperty(string key, string value)
+        {
+            var res = string.Empty;
+
+            try
+            {
+
+                if (!string.IsNullOrEmpty(Properties))
+                {
+                    var arr = Properties.Split("#".ToCharArray());
+                    foreach (String v in arr)
+                    {
+                        String[] keyval = v.Split("=".ToCharArray());
+                        if (keyval[0].ToUpper() != key.ToUpper())
+                        {
+                            if (string.IsNullOrEmpty(res))
+                                res = v;
+                            else
+                                res += "#" + v;
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(res))
+                    res = key + "=" + value;
+                else
+                    res += "#" + key + "=" + value;
+
+                Properties = res;
+            }
+            catch { }
+
+        }
+
         public string GetPropertyValue(string propertyname)
         {
             if (string.IsNullOrEmpty(Properties))

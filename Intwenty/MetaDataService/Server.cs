@@ -158,7 +158,7 @@ namespace Intwenty.MetaDataService
                     res.AddMessage("ERROR", string.Format("The application: {0} has a non uppercase [MetaCode].", a.Application.Title));
 
                 if (a.DataStructure.Count == 0)
-                    res.AddMessage("WARNING", string.Format("The application {0} has no Database objects (DATVALUE, DATAVALUETABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
+                    res.AddMessage("WARNING", string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
 
                 if (a.UIStructure.Count == 0)
                     res.AddMessage("WARNING", string.Format("The application {0} has no UI objects.", a.Application.Title));

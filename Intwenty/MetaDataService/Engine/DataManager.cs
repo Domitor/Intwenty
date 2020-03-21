@@ -99,12 +99,12 @@ namespace Intwenty.MetaDataService.Engine
 
                 foreach (var t in Meta.DataStructure)
                 {
-                    if (t.IsMetaTypeDataValue && t.IsRoot)
+                    if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
                         CreateDBColumn(res, t, Meta.Application.MainTableName);
                     }
 
-                    if (t.IsMetaTypeDataValueTable)
+                    if (t.IsMetaTypeDataTable)
                     {
                         CreateDBTable(res, t);
                     }
@@ -132,7 +132,7 @@ namespace Intwenty.MetaDataService.Engine
                 sql_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.DataStructure)
                 {
-                    if (t.IsMetaTypeDataValue && t.IsRoot)
+                    if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
                         sql_stmt.Append(", t2." + t.DbName + " " + t.MetaCode + " ");
                     }
@@ -162,13 +162,13 @@ namespace Intwenty.MetaDataService.Engine
                 //SUBTABLES
                 foreach (var t in this.Meta.DataStructure)
                 {
-                    if (t.IsMetaTypeDataValueTable && t.IsRoot)
+                    if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
                         sql_stmt = new StringBuilder();
                         sql_stmt.Append("SELECT t1.* ");
                         foreach (var v in this.Meta.DataStructure)
                         {
-                            if (v.IsMetaTypeDataValue && v.ParentMetaCode == t.MetaCode)
+                            if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)
                             {
                                 sql_stmt.Append(", t2." + v.DbName + " " + v.MetaCode + " ");
                             }
@@ -577,7 +577,7 @@ namespace Intwenty.MetaDataService.Engine
             foreach (var t in this.Meta.DataStructure)
             {
 
-                if (t.IsMetaTypeDataValue)
+                if (t.IsMetaTypeDataColumn)
                 {
                     if (t.IsDataTypeString)
                     {
@@ -809,7 +809,7 @@ namespace Intwenty.MetaDataService.Engine
             foreach (var t in Meta.DataStructure)
             {
 
-                if (t.IsRoot && t.IsMetaTypeDataValue)
+                if (t.IsRoot && t.IsMetaTypeDataColumn)
                 {
                     sql_insert.Append("," + t.DbName);
 
@@ -859,7 +859,7 @@ namespace Intwenty.MetaDataService.Engine
             foreach (var t in Meta.DataStructure)
             {
 
-                if (t.IsRoot && t.IsMetaTypeDataValue)
+                if (t.IsRoot && t.IsMetaTypeDataColumn)
                 {
                     var dv = data.FirstOrDefault(p => p.Key == t.MetaCode);
                     if (dv.Equals(default(KeyValuePair<string, object>)))
@@ -945,7 +945,7 @@ namespace Intwenty.MetaDataService.Engine
             {
 
 
-                if (t.MetaType == "DATAVALUE" && t.IsRoot)
+                if (t.MetaType == "DATACOLUMN" && t.IsRoot)
                 {
 
                     if (t.IsDataTypeInt)
@@ -958,7 +958,7 @@ namespace Intwenty.MetaDataService.Engine
                         ds.Tables[this.Meta.Application.MainTableName].Columns.Add(t.DbName, typeof(double));
                 }
 
-                if (t.MetaType == "DATAVALUETABLE")
+                if (t.MetaType == "DATATABLE")
                 {
                     ds.Tables.Add(t.DbName);
                     ds.Tables[t.DbName].Columns.Add("ID", typeof(int));
@@ -971,7 +971,7 @@ namespace Intwenty.MetaDataService.Engine
 
                     foreach (var dv in this.Meta.DataStructure)
                     {
-                        if (dv.ParentMetaCode == t.MetaCode && t.MetaType == "DATAVALUE")
+                        if (dv.ParentMetaCode == t.MetaCode && t.MetaType == "DATACOLUMN")
                         {
                             if (dv.IsDataTypeInt)
                                 ds.Tables[t.DbName].Columns.Add(dv.DbName, typeof(int));
@@ -1085,7 +1085,7 @@ namespace Intwenty.MetaDataService.Engine
 
         private void CreateDBColumn(OperationResult o, DatabaseModelItem column, string tablename)
         {
-            if (!column.IsMetaTypeDataValue)
+            if (!column.IsMetaTypeDataColumn)
             {
                 o.AddMessage("DBCONFIG_ERROR", "Invalid MetaType when configuring column");
                 return;
@@ -1148,7 +1148,7 @@ namespace Intwenty.MetaDataService.Engine
         private void CreateDBTable(OperationResult o, DatabaseModelItem table)
         {
 
-            if (!table.IsMetaTypeDataValueTable)
+            if (!table.IsMetaTypeDataTable)
             {
                 o.AddMessage("DBCONFIG_ERROR", "Invalid MetaType when configuring table");
                 return;
@@ -1181,7 +1181,7 @@ namespace Intwenty.MetaDataService.Engine
 
             foreach (var t in Meta.DataStructure)
             {
-                if (t.IsMetaTypeDataValue && t.ParentMetaCode == table.MetaCode)
+                if (t.IsMetaTypeDataColumn && t.ParentMetaCode == table.MetaCode)
                     CreateDBColumn(o, t, table.DbName);
             }
 
@@ -1221,10 +1221,8 @@ namespace Intwenty.MetaDataService.Engine
                 //Create index on subtables
                 foreach (var t in this.Meta.DataStructure)
                 {
-                    if (t.IsMetaTypeDataValueTable)
+                    if (t.IsMetaTypeDataTable)
                     {
-
-
                         sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + t.DbName + " (ID, Version)";
                         da.CreateCommand(sql);
                         da.ExecuteScalarQuery();
