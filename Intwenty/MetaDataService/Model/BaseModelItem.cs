@@ -177,21 +177,37 @@ namespace Intwenty.MetaDataService.Model
         public static string GenerateNewMetaCode(BaseModelItem item)
         {
             if (item == null)
-                return GetUniqueString();
+                return GetQuiteUniqueString();
 
-            var res = "";
-            if (item.Title.Length > 6)
-                res += item.Title.Substring(0, 6);
-            else if (item.Title.Length > 3)
-                res += item.Title.Substring(0, 4);
+            var res = GetMetaTypeAbbreviation(item);
+            var title = "";
+            if (item is UserInterfaceModelItem ui)
+            {
+                if (ui.IsDataConnected)
+                    title += ui.DataInfo.DbName.ToUpper();
+            }
+            else if (item is DatabaseModelItem db)
+            {
+                title += db.DbName.ToUpper();
+            }
             else
             {
-                if (item.MetaType.Length > 5)
-                    res += item.MetaType.Substring(0, 6);
-                else
-                    res += "META";
-
+                title = item.Title;
             }
+
+            if (title.Length > 0)
+            {
+                var titlechars = Array.FindAll(title.ToCharArray(), (c => (char.IsLetterOrDigit(c))));
+                if (titlechars.Length > 0)
+                    title = new string(titlechars);
+
+                if (title.Length > 9)
+                    title = title.Substring(0, 9).ToUpper();
+            }
+
+            if (title.Length > 0)
+                res += "_" + title;
+           
 
             MetaCodeCounter += 1;
 
@@ -207,8 +223,68 @@ namespace Intwenty.MetaDataService.Model
             return res;
         }
 
+        private static string GetMetaTypeAbbreviation(BaseModelItem item)
+        {
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeCheckBox)
+                return "CBOX";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeComboBox)
+                return "CB";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeDatePicker)
+                return "DP";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGrid)
+                return "TBL";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridCheckBox)
+                return "TBL_CBOX";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridComboBox)
+                return "TBL_CB";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker)
+                return "TBLDP";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox)
+                return "TBL_NUMBOX";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox)
+                return "TBL_TB";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeListView)
+                return "LV";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeListViewField)
+                return "LV_FLD";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
+                return "LOOKUP";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUpField)
+                return "LOOKUP_FLD";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField)
+                return "LOOKUP_KFLD";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeNumBox)
+                return "NUMBOX";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypePanel)
+                return "PNL";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeSection)
+                return "SECT";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextArea)
+                return "TA";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextBox)
+                return "TB";
+            if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)
+                return "DCOL";
+            if (item.MetaType == DatabaseModelItem.MetaTypeDataTable)
+                return "DTBL";
+            if (item.MetaType == ValueDomainModelItem.MetaTypeValueDomain)
+                return "VDOM";
+            if (item.MetaType == DataViewModelItem.MetaTypeDataView)
+                return "DV";
+            if (item.MetaType == DataViewModelItem.MetaTypeDataViewField)
+                return "DV_FLD";
+            if (item.MetaType == DataViewModelItem.MetaTypeDataViewKeyField)
+                return "DV_KFLD";
+            if (item.MetaType == MenuModelItem.MetaTypeMainMenu)
+                return "MAINMENU";
+            if (item.MetaType == MenuModelItem.MetaTypeMenuItem)
+                return "MENITM";
 
-        public static string GetUniqueString()
+            return item.MetaType;
+        }
+
+
+        public static string GetQuiteUniqueString()
         {
             Guid g = Guid.NewGuid();
             var str = Convert.ToBase64String(g.ToByteArray());

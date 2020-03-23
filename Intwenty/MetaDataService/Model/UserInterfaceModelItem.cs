@@ -97,6 +97,10 @@ namespace Intwenty.MetaDataService.Model
 
                 if (this.IsMetaTypeListView)
                     t.Add("HIDEFILTER");
+                if (this.IsMetaTypeSection)
+                    t.Add("COLLAPSIBLE");
+                if (this.IsMetaTypeSection)
+                    t.Add("STARTEXPANDED");
 
                 return t;
             }

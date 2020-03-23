@@ -124,7 +124,7 @@ namespace Intwenty.Models.MetaDesigner
                             {
                                 foreach (var tcol in input.Children)
                                 {
-                                    var column = new UserInterfaceModelItem(input.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode };
+                                    var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode };
 
                                     if (column.Id == 0)
                                         column.MetaCode = BaseModelItem.GenerateNewMetaCode(column);
@@ -178,24 +178,18 @@ namespace Intwenty.Models.MetaDesigner
 
          
 
-            if (!app.UIStructure.Exists(p => p.IsMetaTypeSection))
+       
+            foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
             {
-                res.Sections.Add(new Section() { Id = 0, Title = "-- Your Title --", MetaCode = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Collapsible = true, StartExpanded=true });
-
-            }
-            else
-            {
-                foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                if (uic.IsMetaTypeSection)
                 {
-                    if (uic.IsMetaTypeSection)
-                    {
-                        var sect = new Section() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
-                        sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE","TRUE");
-                        sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
-                        res.Sections.Add(sect);
-                    }
+                    var sect = new Section() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
+                    sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE","TRUE");
+                    sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
+                    res.Sections.Add(sect);
                 }
             }
+            
 
             foreach (var section in res.Sections)
             {

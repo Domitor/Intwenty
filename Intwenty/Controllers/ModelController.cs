@@ -401,7 +401,7 @@ namespace Intwenty.Controllers
 
 
         [HttpPost]
-        public JsonResult SaveApplicationUI([FromBody] UIVm model)
+        public JsonResult SaveUserInterfaceModel([FromBody] UIVm model)
         {
             try
             {
@@ -416,7 +416,7 @@ namespace Intwenty.Controllers
 
                 var dtolist = UIModelCreator.GetUIModel(model, app, views);
 
-                Repository.SaveApplicationUI(dtolist);
+                Repository.SaveUserInterfaceModel(dtolist);
 
                 var t = Repository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
                 var vm = UIModelCreator.GetUIVm(t);
@@ -438,14 +438,14 @@ namespace Intwenty.Controllers
         /// Removes one input control from the UI meta data collection
         /// </summary>
         [HttpPost]
-        public JsonResult RemoveFromApplicationUI([FromBody] UserInput model)
+        public JsonResult DeleteUserInterfaceModel([FromBody] List<UserInterfaceModelItem> model)
         {
             if (model.Id < 1)
                 throw new InvalidOperationException("Id is missing in model when removing UI");
             if (model.ApplicationId < 1)
                 throw new InvalidOperationException("ApplicationId is missing in model when removing UI");
 
-            Repository.DeleteApplicationUI(model.Id);
+            Repository.DeleteUserInterfaceModel(model.Id);
 
             return GetApplicationUI(model.ApplicationId);
         }

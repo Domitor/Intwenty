@@ -37,9 +37,9 @@ namespace Intwenty.Data
 
         List<UserInterfaceModelItem> GetUserInterfaceModelItems();
 
-        void SaveApplicationUI(List<UserInterfaceModelItem> model);
+        void SaveUserInterfaceModel(List<UserInterfaceModelItem> model);
 
-        void DeleteApplicationUI(int id);
+        void DeleteUserInterfaceModel(List<UserInterfaceModelItem> model);
 
         
 
@@ -451,10 +451,10 @@ namespace Intwenty.Data
                     max = menu.Max(p => p.Order);
                 }
 
-                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = "MENUITEM", Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
+                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
-                appmi.MetaCode = "MI_" + BaseModelItem.GetUniqueString();
+                appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
                 MetaMenuItems.Add(appmi);
 
             }
@@ -483,7 +483,7 @@ namespace Intwenty.Data
             return res;
         }
 
-        public void SaveApplicationUI(List<UserInterfaceModelItem> model)
+        public void SaveUserInterfaceModel(List<UserInterfaceModelItem> model)
         {
             ModelCache.Remove(AppModelCacheKey);
            
@@ -516,6 +516,7 @@ namespace Intwenty.Data
                         existing.DataMetaCode = uic.DataMetaCode;
                         existing.Domain = uic.Domain;
                         existing.Description = uic.Description;
+                        existing.Properties = uic.Properties;
                     }
 
                 }
@@ -527,29 +528,68 @@ namespace Intwenty.Data
 
       
 
-        public void DeleteApplicationUI(int id)
+        public void DeleteUserInterfaceModel(List<UserInterfaceModelItem> model)
         {
-           
+            if (model == null)
+                return;
 
-            var existing = MetaUIItem.FirstOrDefault(p => p.Id == id);
-            if (existing != null)
+            if (model.Count == 0)
+                return;
+
+            foreach (var ui in model)
             {
-                var dto = new UserInterfaceModelItem(existing);
-                if (dto.IsMetaTypeLookUp)
-                {
-                    var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField || p.MetaType == UserInterfaceModelItem.MetaTypeLookUpField) && p.ParentMetaCode == existing.MetaCode).ToList();
-                    MetaUIItem.Remove(existing);
-                    MetaUIItem.RemoveRange(childlist);
-                }
-                else
-                {
-                    MetaUIItem.Remove(existing);
+                if (ui.Id < 1)
+                    continue;
 
-                }
-              
-                context.SaveChanges();
+                var existing = MetaUIItem.FirstOrDefault(p => p.Id == ui.Id);
+                if (existing != null)
+                {
+                    var dto = new UserInterfaceModelItem(existing);
+                    if (dto.IsMetaTypeLookUp)
+                    {
+                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField || p.MetaType == UserInterfaceModelItem.MetaTypeLookUpField) && p.ParentMetaCode == existing.MetaCode).ToList();
+                        if (childlist == null)
+                            continue;
+                        if (childlist.Count == 0)
+                            continue;
+                        MetaUIItem.Remove(existing);
+                        MetaUIItem.RemoveRange(childlist);
+                    }
+                    if (dto.IsMetaTypeListView)
+                    {
+                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeListViewField) && p.ParentMetaCode == existing.MetaCode).ToList();
+                        if (childlist == null)
+                            continue;
+                        if (childlist.Count == 0)
+                            continue;
+                        MetaUIItem.Remove(existing);
+                        MetaUIItem.RemoveRange(childlist);
+                    }
+                    if (dto.IsMetaTypeEditGrid)
+                    {
+                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeEditGridCheckBox || 
+                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridComboBox || 
+                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker ||
+                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox ||
+                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox) && p.ParentMetaCode == existing.MetaCode).ToList();
+                        if (childlist == null)
+                            continue;
+                        if (childlist.Count == 0)
+                            continue;
+                        MetaUIItem.Remove(existing);
+                        MetaUIItem.RemoveRange(childlist);
+                    }
+                    else
+                    {
+                        MetaUIItem.Remove(existing);
 
-                ModelCache.Remove(AppModelCacheKey);
+                    }
+
+                    context.SaveChanges();
+
+                    ModelCache.Remove(AppModelCacheKey);
+                }
+
             }
         }
 
@@ -567,7 +607,9 @@ namespace Intwenty.Data
                 MetaType = dto.MetaType,
                 ParentMetaCode = dto.ParentMetaCode,
                 RowOrder = dto.RowOrder,
-                Title = dto.Title
+                Title = dto.Title,
+                Properties = dto.Properties
+                
             };
 
             return res;
