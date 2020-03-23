@@ -426,7 +426,7 @@ namespace Intwenty.Controllers
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
+                r.SetError(ex.Message, "An error occured when saving user interface model.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -438,16 +438,26 @@ namespace Intwenty.Controllers
         /// Removes one input control from the UI meta data collection
         /// </summary>
         [HttpPost]
-        public JsonResult DeleteUserInterfaceModel([FromBody] List<UserInterfaceModelItem> model)
+        public JsonResult DeleteUserInterfaceModel([FromBody] UIDeleteVm model)
         {
-            if (model.Id < 1)
-                throw new InvalidOperationException("Id is missing in model when removing UI");
-            if (model.ApplicationId < 1)
-                throw new InvalidOperationException("ApplicationId is missing in model when removing UI");
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
 
-            Repository.DeleteUserInterfaceModel(model.Id);
 
-            return GetApplicationUI(model.ApplicationId);
+                Repository.DeleteUserInterfaceModel(model.Components);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting user interface model items.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+            return GetApplicationUI(model.Id);
         }
 
         [HttpPost]
@@ -541,7 +551,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not find application");
 
                 var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
-                Repository.SaveApplicationUI(dtolist);
+                Repository.SaveUserInterfaceModel(dtolist);
 
             }
             catch (Exception ex)

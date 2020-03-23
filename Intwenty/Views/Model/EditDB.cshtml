@@ -37,16 +37,14 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:5%">ID</th>
-                    <th style="width:27%">Table name <span style="color: red"> *</span></th>
-                    <th style="width:55%">Description <span style="color: red"> *</span></th>
-                    <th style="width:8%">ID</th>
+                    <th style="width:40%">Table name <span style="color: red"> *</span></th>
+                    <th style="width:50%">Description <span style="color: red"> *</span></th>
+                    <th style="width:10%"></th>
                 </tr>
             </thead>
             <tr v-for="item in model.tables">
-                <td>{{item.id}}</td>
-                <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
-                <td><input type="text" class="form-control" v-model="item.description" :disabled="item.properties=='DEFAULTTABLE=TRUE'" /></td>
+                <td><input type="text" class="form-control" v-model="item.dbName" :disabled="item.isDefaultTable" /></td>
+                <td><input type="text" class="form-control" v-model="item.description" :disabled="item.isDefaultTable" /></td>
                 <td></td>
             </tr>
         </table>
@@ -65,8 +63,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:5%">ID</th>
-                    <th style="width:18%">Table name <span style="color: red"> *</span></th>
+                    <th></th>
+                    <th style="width:23%">Table name <span style="color: red"> *</span></th>
                     <th style="width:18%">Column name <span style="color: red"> *</span></th>
                     <th style="width:18%">Data type <span style="color: red"> *</span></th>
                     <th style="width:28%">Description</th>
@@ -75,7 +73,7 @@
             </thead>
             <tbody v-for="col in model.columns">
                 <tr>
-                    <td>{{col.id}}</td>
+                    <td><span class="fa fa-cog" v-on:click="handleSettings(col)" style="cursor:pointer"></span></td>
                     <td>
                         <select v-model="col.tableName" class="form-control">
                             <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
@@ -90,19 +88,22 @@
                     <td>
                         <input type="text" class="form-control" v-model="col.description" />
                     </td>
-                    <td><div class="btn btn-danger" v-on:click="deleteDbColumn(col)"><span class="fa fa-remove"></span> Delete</div></td>
+                    <td><span v-on:click="deleteDbColumn(col)" class="fa fa-trash" style="cursor:pointer"></span></td>
                 </tr>
                 <tr>
                     <td colspan="1"></td>
                     <td colspan="5">
-                        <label class="control-label" v-if="!col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Settings]</a></label>
-                        <label class="control-label" v-if="col.showSettings"><a href="#" v-on:click="handleSettings(col)">[Close]</a></label>
                         <div v-if="col.showSettings">
-                            <i>Settings</i>
+                            <b>Column settings</b>
                             <br />
-                            <input type="checkbox" v-model="col.mandatory" /> Mandatory
+                            <div class="form-check-inline">
+                                <label class="form-check-label">
+                                    <input type="checkbox" v-model="col.mandatory" class="form-check-input" />Mandatory
+                                </label>
+                            </div>
                             <br />
-                            Domain <input type="text" class="form-control" v-model="col.domain" style="width:450px" />
+                            <br />
+                            Domain <input type="text" class="form-control form-control-sm" v-model="col.domain" style="width:450px" />
                         </div>
                     </td>
                 </tr>

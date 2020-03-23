@@ -548,21 +548,27 @@ namespace Intwenty.Data
                     if (dto.IsMetaTypeLookUp)
                     {
                         var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField || p.MetaType == UserInterfaceModelItem.MetaTypeLookUpField) && p.ParentMetaCode == existing.MetaCode).ToList();
+
+                        MetaUIItem.Remove(existing);
+
                         if (childlist == null)
                             continue;
                         if (childlist.Count == 0)
                             continue;
-                        MetaUIItem.Remove(existing);
+                  
                         MetaUIItem.RemoveRange(childlist);
                     }
                     if (dto.IsMetaTypeListView)
                     {
                         var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeListViewField) && p.ParentMetaCode == existing.MetaCode).ToList();
+
+                        MetaUIItem.Remove(existing);
+
                         if (childlist == null)
                             continue;
                         if (childlist.Count == 0)
                             continue;
-                        MetaUIItem.Remove(existing);
+                    
                         MetaUIItem.RemoveRange(childlist);
                     }
                     if (dto.IsMetaTypeEditGrid)
@@ -572,11 +578,14 @@ namespace Intwenty.Data
                                                                p.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker ||
                                                                p.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox ||
                                                                p.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox) && p.ParentMetaCode == existing.MetaCode).ToList();
+
+                        MetaUIItem.Remove(existing);
+
                         if (childlist == null)
                             continue;
                         if (childlist.Count == 0)
                             continue;
-                        MetaUIItem.Remove(existing);
+
                         MetaUIItem.RemoveRange(childlist);
                     }
                     else
@@ -691,13 +700,9 @@ namespace Intwenty.Data
                     var existing = MetaDBItem.FirstOrDefault(p => p.Id == dbi.Id);
                     if (existing != null)
                     {
-                        if (string.IsNullOrEmpty(dbi.MetaCode))
-                            throw new InvalidOperationException("No meta code found when updating application database model.");
-
                         existing.DataType = dbi.DataType;
                         existing.Domain = dbi.Domain;
                         existing.MetaType = dbi.MetaType;
-                        existing.MetaCode = dbi.MetaCode;
                         existing.Description = dbi.Description;
                         existing.ParentMetaCode = dbi.ParentMetaCode;
                         existing.DbName = dbi.DbName;

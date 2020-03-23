@@ -76,7 +76,7 @@
                                     </div>
                                 </div>
 
-                                <div v-bind:id="'colapse'+sect.rowOrder"  class="collapse show" v-bind:data-parent="'#accordion_'+sect.rowOrder">
+                                <div v-bind:id="'colapse'+sect.rowOrder" class="collapse show" v-bind:data-parent="'#accordion_'+sect.rowOrder">
                                     <div class="card-body">
 
                                         <label><b>Choose Layout </b></label>
@@ -96,10 +96,10 @@
                                         </div>
 
 
-                                         
+
 
                                         <div class="row" v-for="lrow in sect.layoutRows">
-                                            
+
                                             <div v-bind:class="layoutClass(sect)" v-for="lpnl in sect.layoutPanels">
 
                                                 <div class="formpanel" v-for="input in lrow.userInputs" v-if="input.parentMetaCode==lpnl.metaCode">
@@ -244,7 +244,7 @@
                     </div>
                 </div>
             </div>
-
+        </div>
 
 
         <div id="listview" class="tab-pane fade">
@@ -313,10 +313,10 @@
 
         </div>
 
-    </div>
 
 
-    <!-- STTING MODAL-->
+
+    <!-- SETTING MODAL-->
     <div class="modal" id="ui_setting_modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -649,10 +649,9 @@
                 SaveApplicationUI: function ()
                 {
 
-
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
-                    var endpointurl = baseurl + "SaveApplicationUI";
+                    var endpointurl = baseurl + "SaveUserInterfaceModel";
 
                     $.ajax({
                         url: endpointurl,
@@ -672,7 +671,7 @@
                 removeOrphans: function ()
                 {
                     var list = [];
-                    //CREATE A LIST OF ORPHANS AND DELETE IT
+                    //CREATE A LIST OF ORPHANS AND DELETE IT, USED AFTER PANEL LAYOUT CHANGE
                     for (var s = 0; s < this.model.sections.length; s++) {
                         var sect = this.model.sections[s];
                         for (var r = 0; r < sect.layoutRows.length; r++) {
@@ -683,7 +682,7 @@
                             }
                         }
                     }
-                    this.deleteUIComponents(list);
+                    //this.deleteUIComponents(list);
                 },
                 removeLayoutRow: function (row)
                 {
@@ -691,6 +690,7 @@
                 },
                 removeSection: function (section)
                 {
+                      var context = this;
                     raiseYesNoModal("Delete ?", "Delete the entire section ?", function () {
                         var list = [];
                         list.push({ id: section.id, metaCode: section.metaCode, metaType: "SECTION", parentMetaCode: section.parentMetaCode });
@@ -699,15 +699,17 @@
                                 list.push(section.layoutRows[r].userInputs[u]);
                             }
                         }
-                        this.deleteUIComponents(list);
+                        context.deleteUIComponents(list);
                     });
                 },
                 removeUserInput: function (input)
                 {
-                    raiseYesNoModal("Delete ?", "Delete user interface ?", function () {
+                    var context = this;
+                    raiseYesNoModal("Delete ?", "Delete user interface ?", function ()
+                    {
                         var list = [];
                         list.push(input);
-                        this.deleteUIComponents(list);
+                        context.deleteUIComponents(list);
                     });
                 },
                 deleteUIComponents: function (list)
@@ -715,20 +717,27 @@
                   
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
-                    var endpointurl = baseurl + "RemoveFromApplicationUI";
+                    var endpointurl = baseurl + "DeleteUserInterfaceModel";
+                    var deletemodel = { id: context.model.id, components: list };
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(input),
-                        success: function (response) {
+                        data: JSON.stringify(deletemodel),
+                        success: function (response)
+                        {
                             context.model = response;
                             context.addUserInputSelects();
+                        },
+                        error: function (response)
+                        {
+                             raiseErrorModal(response.responseJSON);
                         }
                     });
                 },
-                saveListView: function () {
+                saveListView: function ()
+                {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
                     var endpointurl = baseurl + "SaveApplicationListView";
@@ -740,6 +749,9 @@
                         data: JSON.stringify(context.listview),
                         success: function (response) {
                             context.listview = response;
+                        },
+                        error: function (response) {
+                                raiseErrorModal(response.responseJSON);
                         }
                     });
                 }

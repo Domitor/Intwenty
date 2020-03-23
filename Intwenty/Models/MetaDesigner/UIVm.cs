@@ -39,7 +39,7 @@ namespace Intwenty.Models.MetaDesigner
                             if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType))
                                 continue;
 
-                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = input.ParentMetaCode };
+                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode };
                             res.Add(dto);
 
                             if (dto.Id==0)
@@ -296,7 +296,7 @@ namespace Intwenty.Models.MetaDesigner
                     }
                 }
 
-                section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel).ToString();
+                section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode).ToString();
             }
 
            
@@ -325,6 +325,21 @@ namespace Intwenty.Models.MetaDesigner
         }
 
     }
+
+    public class UIDeleteVm
+    {
+        public int Id { get; set; }
+
+        public List<UserInterfaceModelItem> Components { get; set; }
+
+
+        public UIDeleteVm()
+        {
+            Components = new List<UserInterfaceModelItem>();
+        }
+
+    }
+
 
     public class Section
     {
