@@ -398,8 +398,6 @@ namespace Intwenty.Controllers
 
         }
 
-
-
         [HttpPost]
         public JsonResult SaveUserInterfaceModel([FromBody] UIVm model)
         {
