@@ -15,6 +15,10 @@ namespace Intwenty.Models.MetaDesigner
 
             foreach (var section in model.Sections)
             {
+                //SECTION CREATED IN UI BUT THEN REMOVED BEFORE SAVE
+                if (section.Id == 0 && section.IsRemoved)
+                    continue;
+
                 var sect = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = BaseModelItem.MetaTypeRoot };
                 res.Add(sect);
                 if (sect.Id == 0)
@@ -24,19 +28,28 @@ namespace Intwenty.Models.MetaDesigner
                     sect.AddUpdateProperty("COLLAPSIBLE", "TRUE");
                 if (section.StartExpanded)
                     sect.AddUpdateProperty("STARTEXPANDED", "TRUE");
+                if(section.IsRemoved)
+                    sect.AddUpdateProperty("REMOVED", "TRUE");
 
                 foreach (var panel in section.LayoutPanels)
                 {
+                    //PANEL CREATED IN UI BUT THEN REMOVED BEFORE SAVE
+                    if (panel.Id == 0 && panel.IsRemoved)
+                        continue;
+
                     var pnl = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = app.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
                     res.Add(pnl);
                     if (pnl.Id == 0)
                         pnl.MetaCode = BaseModelItem.GenerateNewMetaCode(pnl);
 
+                    if (panel.IsRemoved)
+                        pnl.AddUpdateProperty("REMOVED", "TRUE");
+
                     foreach (var lr in section.LayoutRows)
                     {
                         foreach (var input in lr.UserInputs)
                         {
-                            if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType))
+                            if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType) || (input.Id == 0 && input.IsRemoved))
                                 continue;
 
                             var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode };
@@ -45,11 +58,14 @@ namespace Intwenty.Models.MetaDesigner
                             if (dto.Id==0)
                                 dto.MetaCode = BaseModelItem.GenerateNewMetaCode(dto);
 
+                            if (input.IsRemoved)
+                                dto.AddUpdateProperty("REMOVED", "TRUE");
+
                             if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
                             {
                                 if (!string.IsNullOrEmpty(input.ColumnName))
                                 {
-                                    var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName);
+                                    var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName && p.IsRoot);
                                     if (dmc != null)
                                         dto.DataMetaCode = dmc.MetaCode;
                                 }
@@ -124,10 +140,16 @@ namespace Intwenty.Models.MetaDesigner
                             {
                                 foreach (var tcol in input.Children)
                                 {
+                                    if (tcol.Id == 0 && tcol.IsRemoved)
+                                        continue;
+
                                     var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode };
 
                                     if (column.Id == 0)
                                         column.MetaCode = BaseModelItem.GenerateNewMetaCode(column);
+
+                                    if (tcol.IsRemoved || input.IsRemoved)
+                                        column.AddUpdateProperty("REMOVED", "TRUE");
 
                                     if (column.IsMetaTypeEditGridCheckBox || column.IsMetaTypeEditGridComboBox || column.IsMetaTypeEditGridDatePicker || column.IsMetaTypeEditGridNumBox || column.IsMetaTypeEditGridTextBox)
                                     {
@@ -136,6 +158,7 @@ namespace Intwenty.Models.MetaDesigner
                                             var dmt = app.DataStructure.Find(p => p.DbName == tcol.TableName && p.IsMetaTypeDataTable);
                                             if (dmt != null)
                                             {
+                                                dto.DataMetaCode = dmt.MetaCode;
                                                 if (!string.IsNullOrEmpty(tcol.ColumnName))
                                                 {
                                                     var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName  && p.ParentMetaCode == dmt.MetaCode);

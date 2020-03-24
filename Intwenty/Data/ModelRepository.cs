@@ -486,11 +486,26 @@ namespace Intwenty.Data
         public void SaveUserInterfaceModel(List<UserInterfaceModelItem> model)
         {
             ModelCache.Remove(AppModelCacheKey);
-           
 
+            foreach (var t in model)
+            {
+                if (t.Id > 0 && t.HasProperty("REMOVED"))
+                {
+                    var existing = MetaUIItem.FirstOrDefault(p => p.Id == t.Id);
+                    if (existing != null)
+                    {
+                        MetaUIItem.Remove(existing);
+                    }
+                }
+            }
+
+            context.SaveChanges();
 
             foreach (var uic in model)
             {
+                if (uic.HasProperty("REMOVED"))
+                    continue;
+
                 if (uic.Id < 1)
                 {
                     if (string.IsNullOrEmpty(uic.MetaType))

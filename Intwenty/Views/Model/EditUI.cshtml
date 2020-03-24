@@ -23,12 +23,13 @@
     .uipnl {
         margin-top: 10px;
     }
+   
 </style>
 
 
 
 <div id="app">
-   
+
     <br />
     <br />
 
@@ -37,6 +38,8 @@
         <div class="card-body">Design the {{model.title}} UI model and connect it to the database model.</div>
     </div>
 
+    <br />
+    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-default"><span class="fa fa-backward"></span> Back to list</a>
     <br />
     <br />
 
@@ -50,10 +53,10 @@
         <div id="userinput" class="tab-pane fade show active">
             <br />
             <br />
-            <div class="btn btn-secondary" v-on:click="addSection">
+            <div class="btn btn-sm btn-secondary" v-on:click="addSection">
                 <span class="fa fa-plus"></span> Add section
             </div>
-            <div class="btn btn-primary" v-on:click="SaveApplicationUI" style="float:right">
+            <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI" style="float:right">
                 <span class="fa fa-save"></span> Save changes
             </div>
             <hr />
@@ -67,12 +70,12 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="form-inline">
+                                        <span class="fa fa-trash" v-on:click="removeSection(sect)" style="margin:10px; cursor:pointer" title="Delete"></span>
+                                        <input type="text" class="form-control form-control-sm" v-model="sect.title" style="width:200px; margin:5px" />
+                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder" style="margin:5px"><span class="fa fa-expand-alt"></span></button>
+                                        <span v-if="sect.collapsible" style="margin:10px">Start expanded <input type="checkbox" v-model="sect.startExpanded" /></span>
+                                        <span style="margin:10px">Collapsible <input type="checkbox" v-model="sect.collapsible" /> </span>
 
-                                        <input type="text" class="form-control" v-model="sect.title" style="width:200px; margin:5px" />
-                                        <button class="btn btn-secondary" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder" style="margin:5px"><span class="fa fa-expand-alt"></span></button>
-                                        <span v-if="sect.collapsible" style="margin:5px">Start expanded <input type="checkbox" v-model="sect.startExpanded" /></span>
-                                        <span style="margin:5px">Collapsible <input type="checkbox" v-model="sect.collapsible" /> </span>
-                                        <span class="fa fa-trash" v-on:click="removeSection(sect)" style="float:right; margin:5px; cursor:pointer"></span>
                                     </div>
                                 </div>
 
@@ -90,7 +93,7 @@
                                             <div v-bind:class="layoutClass(sect)" v-for="pnl in sect.layoutPanels" v-if="!pnl.isRemoved">
                                                 <div class="form-group">
                                                     <label class="control-label">Panel Title (Optional)</label>
-                                                    <input type="text" class="form-control" v-model="pnl.title" />
+                                                    <input type="text" class="form-control form-control-sm" v-model="pnl.title" />
                                                 </div>
                                             </div>
                                         </div>
@@ -106,7 +109,7 @@
 
                                                     <div class="dropdown" v-if="input.metaType==''" style="text-align:center; margin-top:40px">
 
-                                                        <button class="btn btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><span class="fa fa-plus"></span></button>
+                                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><span class="fa fa-plus"></span></button>
                                                         <div class="dropdown-menu dropdown-menu-lg-right">
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'TEXTBOX')">Textbox</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'NUMBOX')">Numeric</a>
@@ -124,19 +127,19 @@
 
                                                     <div v-bind:id="'uipnl_' + input.id" class="uipnl" v-if="input.metaType!=''">
 
+                                                        <span class="fa fa-trash" v-on:click="removeUserInput(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
+                                                        <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Remove"></span>
                                                         <label class="control-label"><i>{{input.title}}</i></label>
-                                                        <span class="fa fa-trash" v-on:click="removeUserInput(input)" style="float:right; margin:5px; cursor:pointer"></span>
-                                                        <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="float:right; margin:5px"></span>
 
                                                         <div v-if="input.metaType==='TEXTBOX'">
                                                             <div class="form-group">
-                                                                <input type="text" class="form-control" disabled />
+                                                                <input type="text" class="form-control form-control-sm" disabled />
                                                             </div>
                                                         </div>
 
                                                         <div v-if="input.metaType==='NUMBOX'">
                                                             <div class="form-group">
-                                                                <input type="number" class="form-control" disabled />
+                                                                <input type="number" class="form-control form-control-sm" disabled />
                                                             </div>
                                                         </div>
 
@@ -149,19 +152,19 @@
 
                                                         <div v-if="input.metaType==='TEXTAREA'">
                                                             <div class="form-group">
-                                                                <textarea class="form-control" rows="5" cols="50" disabled></textarea>
+                                                                <textarea class="form-control form-control-sm" rows="5" cols="50" disabled></textarea>
                                                             </div>
                                                         </div>
 
                                                         <div v-if="input.metaType==='DATEPICKER'">
                                                             <div class="form-group">
-                                                                <input type="date" class="form-control" />
+                                                                <input type="date" class="form-control form-control-sm" />
                                                             </div>
                                                         </div>
 
                                                         <div v-if="input.metaType==='COMBOBOX'">
                                                             <div class="form-group">
-                                                                <select class="form-control" disabled>
+                                                                <select class="form-control form-control-sm" disabled>
                                                                     <option>Example 1</option>
                                                                 </select>
                                                             </div>
@@ -170,13 +173,13 @@
                                                         <div v-if="input.metaType==='LOOKUP'">
                                                             <div>
                                                                 <div style="width:10%">
-                                                                    <button style="float:left" class="btn btn-primary"><span class="fa fa-plus"></span></button>
+                                                                    <button style="float:left" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
                                                                 </div>
                                                                 <div style="float:left; margin-left:5px; width:20%">
-                                                                    <input type="text" class="form-control" disabled />
+                                                                    <input type="text" class="form-control form-control-sm" disabled />
                                                                 </div>
                                                                 <div style="float:left; margin-left:5px; width:60%">
-                                                                    <input type="text" class="form-control" readonly />
+                                                                    <input type="text" class="form-control form-control-sm" readonly />
                                                                 </div>
                                                             </div>
                                                             <br />
@@ -187,7 +190,7 @@
                                                                 <thead>
                                                                     <tr>
                                                                         <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
-                                                                            <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px"></span> {{tcol.title}}
+                                                                            <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px; float:right; cursor:pointer" title="Column settings"></span> {{tcol.title}}
                                                                         </td>
                                                                     </tr>
                                                                 </thead>
@@ -196,17 +199,17 @@
                                                                         <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
                                                                             <div v-if="tcol.metaType==='EDITGRID_TEXTBOX'">
                                                                                 <div class="form-group">
-                                                                                    <input type="text" class="form-control" disabled />
+                                                                                    <input type="text" class="form-control form-control-sm" disabled />
                                                                                 </div>
                                                                             </div>
                                                                             <div v-if="tcol.metaType==='EDITGRID_NUMBOX'">
                                                                                 <div class="form-group">
-                                                                                    <input type="number" class="form-control" disabled />
+                                                                                    <input type="number" class="form-control form-control-sm" disabled />
                                                                                 </div>
                                                                             </div>
                                                                             <div v-if="tcol.metaType==='EDITGRID_COMBOBOX'">
                                                                                 <div class="form-group">
-                                                                                    <select class="form-control" disabled>
+                                                                                    <select class="form-control form-control-sm" disabled>
                                                                                         <option>Example 1</option>
                                                                                     </select>
                                                                                 </div>
@@ -219,7 +222,7 @@
                                                                             </div>
                                                                             <div v-if="tcol.metaType==='EDITGRID_DATEPICKER'">
                                                                                 <div class="form-group">
-                                                                                    <input type="date" class="form-control" />
+                                                                                    <input type="date" class="form-control form-control-sm" />
                                                                                 </div>
                                                                             </div>
                                                                         </td>
@@ -232,7 +235,7 @@
                                             </div>
                                         </div>
                                         <br />
-                                        <div class="btn btn-secondary" v-on:click="addLayoutRow(sect)">
+                                        <div class="btn btn-sm btn-secondary" v-on:click="addLayoutRow(sect)">
                                             <span class="fa fa-plus"></span> Add layout row
                                         </div>
                                     </div>
@@ -250,7 +253,7 @@
         <div id="listview" class="tab-pane fade">
             <br />
             <br />
-            <div class="btn btn-primary" v-on:click="saveListView" style="float:right">
+            <div class="btn btn-sm btn-primary" v-on:click="saveListView" style="float:right">
                 <span class="fa fa-save"></span> Save changes
             </div>
             <br />
@@ -262,7 +265,7 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label class="control-label">Title <span style="color: red"> *</span></label>
-                                <input type="text" class="form-control" v-model="listview.title" />
+                                <input type="text" class="form-control form-control-sm" v-model="listview.title" />
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -276,7 +279,7 @@
                             <br />
                             <div>
                                 <div>
-                                    <div class="btn btn-secondary" v-on:click="addListViewField">
+                                    <div class="btn btn-sm btn-secondary" v-on:click="addListViewField">
                                         <span class="fa fa-plus"></span> Add list view field
                                     </div>
                                 </div>
@@ -292,10 +295,10 @@
                                     <tbody v-for="field in listview.fields">
                                         <tr>
 
-                                            <td><input type="text" class="form-control" v-model="field.title" /></td>
+                                            <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
                                             <td>
-                                                <select v-model="field.dbName" class="form-control">
-                                                    <option v-for="col in dbcolumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                                <select v-model="field.dbName" class="form-control form-control-sm">
+                                                    <option v-for="col in dbColumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                                 </select>
 
                                             </td>
@@ -311,7 +314,7 @@
         </div>
 
 
-        </div>
+    </div>
 
 
 
@@ -330,95 +333,96 @@
                     <div class="settingpnl">
                         <div class="form-group">
                             <label class="control-label">Title</label>
-                            <input type="text" class="form-control" v-model="active_setting_input.title" />
+                            <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group"  v-if="showSettingDbTable">
                             <label class="control-label">Set database table</label>
-                            <select v-model="active_setting_input.tableName" class="form-control">
-                                <option v-for="tbl in dbtables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                            <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
+                                <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                             </select>
                         </div>
 
                         <div class="form-group" v-if="showSettingDbColumn">
                             <label class="control-label">Set database column</label>
-                            <select v-model="active_setting_input.columnName" class="form-control">
-                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
+                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
                         <div v-if="showSettingValueDomain">
                             <label class="control-label">Set value domain</label>
-                            <select v-model="active_setting_input.domain" class="form-control">
+                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set data view</label>
-                            <select v-model="active_setting_input.domain" class="form-control">
+                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
                                 <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set key field database column</label>
-                            <select v-model="active_setting_input.lookUpKeyFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.lookUpKeyFieldDbName" class="form-control form-control-sm">
+                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="model.control-label">Set key field data view column</label>
-                            <select v-model="active_setting_input.lookUpKeyFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="active_setting_input.lookUpKeyFieldViewDbName" class="form-control form-control-sm">
+                                <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">(optional) Set look up field database column</label>
-                            <select v-model="active_setting_input.lookUpFieldDbName" class="form-control">
-                                <option v-for="col in dbcolumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                            <select v-model="active_setting_input.lookUpFieldDbName" class="form-control form-control-sm">
+                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
                         <div v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set look up field data view column</label>
-                            <select v-model="active_setting_input.lookUpFieldViewDbName" class="form-control">
-                                <option v-for="col in viewcolumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                            <select v-model="active_setting_input.lookUpFieldViewDbName" class="form-control form-control-sm">
+                                <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                        <div v-if="showSettingGridColumnType">
-                            <label class="control-label">Set input type</label>
-                            <select v-model="active_setting_input.metaType" class="form-control">
-                                <option value="EDITGRID_TEXTBOX">Textbox</option>
-                                <option value="EDITGRID_NUMBOX">Numeric</option>
-                                <option value="EDITGRID_DATEPICKER">Datepicker</option>
-                                <option value="EDITGRID_CHECKBOX">Checkbox</option>
-                                <option value="EDITGRID_COMBOBOX">Combobox</option>
-                            </select>
-                        </div>
+                      
                         <div v-if="active_setting_input.metaType=='EDITGRID'">
                             <label class="control-label">Columns</label>
                             <br />
-                            <div class="btn btn-sm btn-secondary" v-on:click="addEditGridColumn">
-                                <span class="fa fa-plus"></span> Add row
+
+
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
+                                <div class="dropdown-menu dropdown-menu-lg-right">
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_TEXTBOX')">Textbox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_NUMBOX')">Numeric</a>
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_DATEPICKER')">Datepicker</a>
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_CHECKBOX')">Checkbox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_COMBOBOX')">Combobox</a>
+                                </div>
                             </div>
+
                             <br />
                             <br />
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th><span class="fa fa-cogs"></span></th>
+                                        <th></th>
                                         <th>Title</th>
                                         <th>Order</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="tcol in active_setting_input.children">
-                                        <td></td>
+                                        <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
                                         <td>
                                             <div class="form-group">
-                                                <input type="text" class="form-control" v-model="tcol.title" />
+                                                <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-group">
-                                                <input type="number" class="form-control" v-model.number="tcol.columnOrder" />
+                                                <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
                                             </div>
                                         </td>
                                     </tr>
@@ -428,7 +432,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id ="setting_modal_close_btn" type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -461,6 +465,14 @@
             },
             methods:
             {
+                setUserInput: function (input, metatype)
+                {
+                    input.metaType = metatype;
+                    if (input.metaType != "EDITGRID")
+                        input.tableName = this.defaultTable;
+
+                    this.openSettingsDlg(input); 
+                },
                 openSettingsDlg(input) {
                     this.active_setting_input = input;
                     this.$forceUpdate();
@@ -505,23 +517,18 @@
                 addListViewField: function () {
                     this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWFIELD" });
                 },
-                addEditGridColumn: function ()
+                addEditGridColumn: function (metatype)
                 {
-                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: "EDITGRID_COLUMN", metaCode: "", parentMetaCode:"" });
+                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: metatype, metaCode: "", parentMetaCode:"", tableName:this.active_setting_input.tableName });
                 },
-                setUserInput: function (input, metatype)
-                {
-                    input.metaType = metatype;
-                    this.openSettingsDlg(input); 
-                },
-                dbcolumns: function (tablename) {
+                dbColumns: function (tablename) {
                     for (var i = 0; i < this.dbtables.length; i++)
                         if (this.dbtables[i].dbName == tablename)
                             return this.dbtables[i].columns;
 
                     return [];
                 },
-                viewcolumns: function (viewname) {
+                viewColumns: function (viewname) {
                     for (var i = 0; i < this.dataviews.length; i++)
                         if (this.dataviews[i].metaCode == viewname)
                             return this.dataviews[i].fields;
@@ -641,9 +648,15 @@
                         }
                     });
                 },
-                removeLayoutRow: function (row)
+                removeEditGridColumn: function (column)
                 {
                    
+                    $("#setting_modal_close_btn").click();
+                    var context = this;
+                    raiseYesNoModal("Delete ?", "Delete column ?", function ()
+                    {
+                        column.isRemoved = true;
+                    });
                 },
                 removeSection: function (section)
                 {
@@ -727,6 +740,13 @@
 
                     return true;
                 },
+                showSettingDbTable: function ()
+                {
+                     if (this.active_setting_input.metaType == "EDITGRID")
+                        return true;
+
+                    return false;
+                },
                 showSettingGridColumnType: function ()
                 {
                     if (this.active_setting_input.metaType === "EDITGRID_COLUMN")
@@ -758,6 +778,22 @@
                         return true;
 
                     return false;
+                },
+                defaultTable: function () {
+                    for (var i = 0; i < this.dbtables.length; i++)
+                        if (this.dbtables[i].isDefaultTable)
+                            return this.dbtables[i];
+
+                    return {};
+                },
+                nonDefaultTables: function ()
+                {
+                    var list = [];
+                    for (var i = 0; i < this.dbtables.length; i++)
+                        if (!this.dbtables[i].isDefaultTable)
+                            list.push(this.dbtables[i]);
+
+                    return list;
                 }
               
             },
