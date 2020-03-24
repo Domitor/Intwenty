@@ -88,7 +88,7 @@ namespace Intwenty.Models.MetaDesigner
                                 var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
                                 if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
                                 {
-                                    var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName);
+                                    var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName && p.IsRoot);
                                     if (dmc != null)
                                         keyfield.DataMetaCode = dmc.MetaCode;
                                 }
@@ -107,6 +107,12 @@ namespace Intwenty.Models.MetaDesigner
                                         keyfield.MetaCode = currentkeyfield.MetaCode;
                                     }
                                 }
+                                else
+                                {
+                                    if (keyfield.Id == 0)
+                                        keyfield.MetaCode = BaseModelItem.GenerateNewMetaCode(keyfield);
+                                }
+                               
                                 res.Add(keyfield);
 
                                 var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
@@ -130,6 +136,11 @@ namespace Intwenty.Models.MetaDesigner
                                         lookupfield.Id = currentlookupfield.Id;
                                         lookupfield.MetaCode = currentlookupfield.MetaCode;
                                     }
+                                }
+                                else
+                                {
+                                    if (lookupfield.Id == 0)
+                                        lookupfield.MetaCode = BaseModelItem.GenerateNewMetaCode(lookupfield);
                                 }
                                 res.Add(lookupfield);
 

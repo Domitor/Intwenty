@@ -430,33 +430,9 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-}
-
-        /// <summary>
-        /// Removes one input control from the UI meta data collection
-        /// </summary>
-        [HttpPost]
-        public JsonResult DeleteUserInterfaceModel([FromBody] UIDeleteVm model)
-        {
-            try
-            {
-                if (model.Id < 1)
-                    throw new InvalidOperationException("ApplicationId missing in model");
-
-
-                Repository.DeleteUserInterfaceModel(model.Components);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting user interface model items.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-            return GetApplicationUI(model.Id);
         }
+
+      
 
         [HttpPost]
         public JsonResult SaveApplicationDB([FromBody] DBVm model)

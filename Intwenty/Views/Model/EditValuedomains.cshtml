@@ -19,7 +19,7 @@
 
     <div class="row">
         <div class="col-lg-6">
-            <div class="btn btn-secondary" v-on:click="model.showNew=!model.showNew">
+            <div class="btn btn-sm btn-secondary" v-on:click="model.showNew=!model.showNew">
                 <span class="fa fa-plus"></span> Create new value domain
             </div>
         </div>
@@ -39,20 +39,20 @@
             <div v-if="model.showNew">
                 <div class="form-group">
                     <label class="control-label">New domain name<span style="color: red"> *</span></label>
-                    <input type="text" class="form-control" v-model="model.newDomainName" style="text-transform:uppercase" />
+                    <input type="text" class="form-control form-control-sm" v-model="model.newDomainName" style="text-transform:uppercase" />
                 </div>
             </div>
 
             <div class="form-group" v-if="!model.showNew">
                 <label class="control-label">Domain name<span style="color: red"> *</span></label>
-                <select v-model="model.domainName" class="form-control" id="CB">
+                <select v-model="model.domainName" class="form-control form-control-sm" id="CB">
                     <option v-for="dom in uniquedomains" v-bind:value="dom.domainName">{{dom.domainName}}</option>
                 </select>
             </div>
 
         </div>
         <div class="col-lg-4">
-            <div class="btn btn-primary" v-on:click="saveChanges" style="margin-top:28px">
+            <div class="btn btn-sm btn-primary" v-on:click="saveChanges" style="margin-top:28px">
                 <span class="glyphicon glyphicon-save"></span> Save changes
             </div>
         </div>
@@ -63,7 +63,7 @@
     <br />
     <br />
     <div>
-        <div class="btn btn-secondary" v-on:click="addDomainValue">
+        <div class="btn btn-sm btn-secondary" v-on:click="addDomainValue">
             <span class="fa fa-plus"></span> Add domain value
         </div>
     </div>
@@ -81,9 +81,9 @@
         <tbody v-for="entry in filtereddomains">
             <tr>
 
-                <td><input type="text" class="form-control" v-model="entry.code" v-on:input="markChanged(entry)" /></td>
-                <td><input type="text" class="form-control" v-model="entry.value" v-on:input="markChanged(entry)" /></td>
-                <td><div class="btn btn-danger" v-on:click="deleteDomainValue(entry)"><span class="fa fa-remove"></span> Delete</div></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.code" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.value" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteDomainValue(entry)"><span class="fa fa-remove"></span> Delete</div></td>
             </tr>
         </tbody>
     </table>

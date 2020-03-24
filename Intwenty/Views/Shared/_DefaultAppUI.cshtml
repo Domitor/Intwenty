@@ -30,7 +30,7 @@
                                     @t.Title @{ if (t.DataInfo.Mandatory)
                                         { <span style="color: red"> *</span> }}
                                 </label>
-                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="text" class="form-control" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="TEXTBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
+                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="text" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="TEXTBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                             </div>
 
                         }
@@ -42,7 +42,7 @@
                                     @t.Title  @{ if (t.DataInfo.Mandatory)
                                         { <span style="color: red"> *</span> }}
                                 </label>
-                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="number" class="form-control" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="NUMBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
+                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="number" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="NUMBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                             </div>
 
                         }
@@ -54,7 +54,7 @@
                                     @t.Title  @{ if (t.DataInfo.Mandatory)
                                         { <span style="color: red"> *</span> }}
                                 </label>
-                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="date" class="form-control" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:change="onUserInput(event)" data-metatype="DATEPICKER" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
+                                <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="date" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:change="onUserInput(event)" data-metatype="DATEPICKER" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory" />
                             </div>
 
                         }
@@ -74,7 +74,7 @@
                                     @t.Title  @{ if (t.DataInfo.Mandatory)
                                         { <span style="color: red"> *</span> }}
                                 </label>
-                                <textarea id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" rows="10" cols="50" class="form-control" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory"></textarea>
+                                <textarea id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" rows="10" cols="50" class="form-control form-control-sm" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory"></textarea>
                             </div>
 
                         }
@@ -86,7 +86,7 @@
                                     @t.Title  @{ if (t.DataInfo.Mandatory)
                                         { <span style="color: red"> *</span> }}
                                 </label>
-                                <select id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" class="form-control" v-on:change="onUserInput(event)" data-metatype="COMBOBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory">
+                                <select id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="COMBOBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataInfo.Mandatory">
                                     <option v-for="item in valuedomains.VALUEDOMAIN_@t.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
                                 </select>
                             </div>
@@ -106,7 +106,7 @@
 
 
                                 <div style="width:10%">
-                                    <button style="float:left" class="btn btn-secondary" v-on:click="openDataViewLookUp('@t.ViewName')"><span class="fa fa-plus"></span></button>
+                                    <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@t.ViewName')"><span class="fa fa-plus"></span></button>
                                 </div>
                                 @{
 
@@ -114,14 +114,14 @@
                                     if (keyfield != null)
                                     {
                                         <div style="float:left; margin-left:5px; width:30%">
-                                            <input type="text" class="form-control" v-model="model.@Model.Application.MetaCode.@keyfield.DataMetaCode" v-on:keydown.tab="getDataViewValue('@t.ViewName','@keyfield.DataMetaCode','@keyfield.ParentMetaCode')" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode" />
+                                            <input type="text" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@keyfield.DataMetaCode" v-on:keydown.tab="getDataViewValue('@t.ViewName','@keyfield.DataMetaCode','@keyfield.ParentMetaCode')" data-dbfield="@keyfield.DataMetaCode" data-viewfield="@keyfield.ViewInfo.SQLQueryFieldName" data-lookupid="@keyfield.ParentMetaCode" />
                                         </div>
                                     }
 
                                     foreach (var lf in Model.UIStructure.OrderBy(p => p.RowOrder).Where(x => x.ParentMetaCode == t.MetaCode && x.IsMetaTypeLookUpField && x.IsDataViewConnected && x.IsDataConnected))
                                     {
                                         <div style="float:left; margin-left:5px; width:60%">
-                                            <input type="text" class="form-control" v-model="model.@Model.Application.MetaCode.@lf.DataMetaCode" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode" readonly />
+                                            <input type="text" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@lf.DataMetaCode" data-dbfield="@lf.DataMetaCode" data-viewfield="@lf.ViewInfo.SQLQueryFieldName" data-lookupid="@lf.ParentMetaCode" readonly />
                                         </div>
                                     }
 
@@ -150,7 +150,7 @@
         <h4>@table.Title</h4>
 
         <div>
-            <div class="btn btn-secondary" v-on:click="addSubTableLine('@table.DataMetaCode')">
+            <div class="btn btn-sm btn-secondary" v-on:click="addSubTableLine('@table.DataMetaCode')">
                 <span class="fa fa-plus"></span> Add
             </div>
         </div>
@@ -173,12 +173,12 @@
                 {
                     if (tf.ParentMetaCode == table.MetaCode && tf.IsMetaTypeTextBox)
                     {
-                        <td><input type="text" class="form-control" v-model="item.@tf.DataMetaCode" /></td>
+                        <td><input type="text" class="form-control form-control-sm" v-model="item.@tf.DataMetaCode" /></td>
                     }
 
                     if (tf.ParentMetaCode == table.MetaCode && tf.IsMetaTypeNumBox)
                     {
-                        <td><input type="number" class="form-control" v-model="item.@tf.DataMetaCode" /></td>
+                        <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataMetaCode" /></td>
                     }
                 }
 
@@ -205,13 +205,13 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="control-label">Value</label>
-                                    <input type="text" class="form-control" v-model="viewretrieveinfo.filterValue" v-on:blur="handleDataViewFilter" />
+                                    <input type="text" class="form-control form-control-sm" v-model="viewretrieveinfo.filterValue" v-on:blur="handleDataViewFilter" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="control-label">Filter</label>
-                                    <select v-model="viewretrieveinfo.filterField" class="form-control">
+                                    <select v-model="viewretrieveinfo.filterField" class="form-control form-control-sm">
                                         @{
                                             foreach (var c in Model.UIStructure)
                                             {
@@ -275,7 +275,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>

@@ -469,7 +469,7 @@
                 {
                     input.metaType = metatype;
                     if (input.metaType != "EDITGRID")
-                        input.tableName = this.defaultTable;
+                        input.tableName = this.defaultTable.dbName;
 
                     this.openSettingsDlg(input); 
                 },
@@ -681,30 +681,6 @@
                     {
                         input.isRemoved = true;
                         context.addUserInputSelects();
-                    });
-                },
-                deleteUIComponents: function (list)
-                {
-                  
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
-                    var endpointurl = baseurl + "DeleteUserInterfaceModel";
-                    var deletemodel = { id: context.model.id, components: list };
-
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(deletemodel),
-                        success: function (response)
-                        {
-                            context.model = response;
-                            context.addUserInputSelects();
-                        },
-                        error: function (response)
-                        {
-                             raiseErrorModal(response.responseJSON);
-                        }
                     });
                 },
                 saveListView: function ()

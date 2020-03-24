@@ -21,12 +21,12 @@
 
     <div class="row">
         <div class="col-lg-6">
-            <div class="btn btn-secondary" v-on:click="addMenuItem">
+            <div class="btn btn-sm btn-secondary" v-on:click="addMenuItem">
                 <span class="fa fa-plus"></span> Create new menu item
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="btn btn-primary" v-on:click="saveChanges" style="float:right">
+            <div class="btn btn-sm btn-primary" v-on:click="saveChanges" style="float:right">
                 <span class="fa fa-save"></span> Save changes
             </div>
         </div>
@@ -49,16 +49,16 @@
         <tbody v-for="entry in menuitems">
             <tr>
 
-                <td><input type="text" class="form-control" v-model="entry.title" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.title" v-on:input="markChanged(entry)" /></td>
                 <td>
-                    <select v-model="entry.application.metaCode" class="form-control" v-on:change="tableChanged(entry)">
+                    <select v-model="entry.application.metaCode" class="form-control form-control-sm" v-on:change="tableChanged(entry)">
                         <option v-for="app in applications" v-bind:value="app.metaCode">{{app.title}}</option>
                     </select>
                 </td>
               
-                <td><input type="text" class="form-control" v-model="entry.controller" v-on:input="markChanged(entry)" /></td>
-                <td><input type="text" class="form-control" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
-                <td><div class="btn btn-danger" v-on:click="deleteMenuItem(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.controller" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteMenuItem(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
             </tr>
         </tbody>
     </table>

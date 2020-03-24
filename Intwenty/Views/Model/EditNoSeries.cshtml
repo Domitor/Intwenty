@@ -21,12 +21,12 @@
 
     <div class="row">
         <div class="col-lg-6">
-            <div class="btn btn-default" v-on:click="addNoSerie">
+            <div class="btn btn-sm btn-default" v-on:click="addNoSerie">
                 <span class="glyphicon glyphicon-plus"></span> Create new number serie
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="btn btn-primary" v-on:click="saveChanges" style="float:right">
+            <div class="btn btn-sm btn-primary" v-on:click="saveChanges" style="float:right">
                 <span class="glyphicon glyphicon-save"></span> Save changes
             </div>
         </div>
@@ -50,20 +50,20 @@
         <tbody v-for="entry in noseries">
             <tr>
 
-                <td><input type="text" class="form-control" v-model="entry.description" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.description" v-on:input="markChanged(entry)" /></td>
                 <td>
-                    <select v-model="entry.tableName" class="form-control" v-on:change="tableChanged(entry)">
+                    <select v-model="entry.tableName" class="form-control form-control-sm" v-on:change="tableChanged(entry)">
                         <option v-for="tbl in apptables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                     </select>
                 </td>
                 <td>
-                    <select v-model="entry.columnName" class="form-control">
+                    <select v-model="entry.columnName" class="form-control form-control-sm">
                         <option v-for="col in tablecolumns(entry)" v-bind:value="col.dbName">{{col.dbName}}</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control" v-model="entry.prefix" v-on:input="markChanged(entry)" /></td>
-                <td><input type="text" class="form-control" v-model="entry.startValue" v-on:input="markChanged(entry)" /></td>
-                <td><div class="btn btn-danger" v-on:click="deleteNoSeries(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.prefix" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.startValue" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteNoSeries(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
             </tr>
         </tbody>
     </table>

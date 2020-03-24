@@ -3,37 +3,37 @@
 
         <div class="form-group">
             <label class="control-label">Title<span style="color: red"> *</span></label>
-            <input id="apptitle" type="text" class="form-control" v-model="model.title" v-on:input="setCodes" />
+            <input id="apptitle" type="text" class="form-control form-control-sm" v-model="model.title" v-on:input="setCodes" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Description<span style="color: red"> *</span></label>
-            <input id="appdescr" type="text" class="form-control" v-model="model.description" />
+            <input id="appdescr" type="text" class="form-control form-control-sm" v-model="model.description" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Database name<span style="color: red"> *</span></label>
-            <input id="appdbname" type="text" class="form-control" v-model="model.dbName" :disabled="model.id > 0" />
+            <input id="appdbname" type="text" class="form-control form-control-sm" v-model="model.dbName" :disabled="model.id > 0" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Code<span style="color: red"> *</span></label>
-            <input id="appmetacode" type="text" class="form-control" v-model="model.metaCode" :disabled="model.id > 0" />
+            <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Menu Title (The text to use in the main menu for this application)</label>
-            <input id="menutitle" type="text" class="form-control" v-model="model.mainMenuItem.title" />
+            <input id="menutitle" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.title" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Action name (Leave blank to use standard logic)</label>
-            <input id="actionname" type="text" class="form-control" v-model="model.mainMenuItem.action" />
+            <input id="actionname" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.action" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Controller name (Leave blank to use standard logic)</label>
-            <input id="controllername" type="text" class="form-control" v-model="model.mainMenuItem.controller" />
+            <input id="controllername" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.controller" />
         </div>
     </div>
 

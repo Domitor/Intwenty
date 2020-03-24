@@ -20,7 +20,7 @@
         <br />
 
 
-        <button class="btn btn-primary" type="button" v-on:click="generateTestData()">
+        <button class="btn btn-sm btn-primary" type="button" v-on:click="generateTestData()">
             <span class="fa fa-cog"></span> Generate testdata
             <div class="spinner-grow spinner-grow-sm text-danger" v-if="model.isRunning"></div>
         </button>
@@ -32,7 +32,7 @@
             <h5>Old batches</h5>
             <div v-for="item in batches" class="row">
                 <div class="col-lg-4"><br /><p>{{item}}</p></div>
-                <div class="col-lg-2"><br /><button class="btn btn-danger" v-on:click="deleteTestDataBatch(item)">Delete</button></div>
+                <div class="col-lg-2"><br /><button class="btn btn-sm btn-danger" v-on:click="deleteTestDataBatch(item)">Delete</button></div>
                 <div class="col-lg-6"></div>
             </div>
         </div>

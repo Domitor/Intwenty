@@ -9,13 +9,13 @@
     <div class="col-lg-2">
         <div class="form-group">
             <label class="control-label">Value</label>
-            <input type="text" class="form-control" v-model="model.filtervalue" v-on:blur="handleFilterValue" />
+            <input type="text" class="form-control form-control-sm" v-model="model.filtervalue" v-on:blur="handleFilterValue" />
         </div>
     </div>
     <div class="col-lg-2">
         <div class="form-group">
             <label class="control-label">Filter</label>
-            <select v-model="model.filterfield" class="form-control">
+            <select v-model="model.filterfield" class="form-control form-control-sm">
                 @{
                     foreach (var c in Model.UIStructure)
                     {
@@ -53,7 +53,7 @@
         </tr>
     </thead>
     <tr v-for="item in sortedResults">
-        <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn btn-secondary" role="button">Open</a></td>
+        <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button">Open</a></td>
         @{
             foreach (var c in Model.UIStructure)
             {

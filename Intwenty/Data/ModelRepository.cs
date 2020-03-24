@@ -39,8 +39,6 @@ namespace Intwenty.Data
 
         void SaveUserInterfaceModel(List<UserInterfaceModelItem> model);
 
-        void DeleteUserInterfaceModel(List<UserInterfaceModelItem> model);
-
         
 
 
@@ -543,79 +541,7 @@ namespace Intwenty.Data
 
       
 
-        public void DeleteUserInterfaceModel(List<UserInterfaceModelItem> model)
-        {
-            if (model == null)
-                return;
-
-            if (model.Count == 0)
-                return;
-
-            foreach (var ui in model)
-            {
-                if (ui.Id < 1)
-                    continue;
-
-                var existing = MetaUIItem.FirstOrDefault(p => p.Id == ui.Id);
-                if (existing != null)
-                {
-                    var dto = new UserInterfaceModelItem(existing);
-                    if (dto.IsMetaTypeLookUp)
-                    {
-                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField || p.MetaType == UserInterfaceModelItem.MetaTypeLookUpField) && p.ParentMetaCode == existing.MetaCode).ToList();
-
-                        MetaUIItem.Remove(existing);
-
-                        if (childlist == null)
-                            continue;
-                        if (childlist.Count == 0)
-                            continue;
-                  
-                        MetaUIItem.RemoveRange(childlist);
-                    }
-                    if (dto.IsMetaTypeListView)
-                    {
-                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeListViewField) && p.ParentMetaCode == existing.MetaCode).ToList();
-
-                        MetaUIItem.Remove(existing);
-
-                        if (childlist == null)
-                            continue;
-                        if (childlist.Count == 0)
-                            continue;
-                    
-                        MetaUIItem.RemoveRange(childlist);
-                    }
-                    if (dto.IsMetaTypeEditGrid)
-                    {
-                        var childlist = MetaUIItem.Where(p => (p.MetaType == UserInterfaceModelItem.MetaTypeEditGridCheckBox || 
-                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridComboBox || 
-                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker ||
-                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox ||
-                                                               p.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox) && p.ParentMetaCode == existing.MetaCode).ToList();
-
-                        MetaUIItem.Remove(existing);
-
-                        if (childlist == null)
-                            continue;
-                        if (childlist.Count == 0)
-                            continue;
-
-                        MetaUIItem.RemoveRange(childlist);
-                    }
-                    else
-                    {
-                        MetaUIItem.Remove(existing);
-
-                    }
-
-                    context.SaveChanges();
-
-                    ModelCache.Remove(AppModelCacheKey);
-                }
-
-            }
-        }
+       
 
 
         private UserInterfaceItem CreateMetaUIItem(UserInterfaceModelItem dto)
