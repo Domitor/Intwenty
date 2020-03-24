@@ -296,7 +296,7 @@ namespace Intwenty.Models.MetaDesigner
                     }
                 }
 
-                section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode).ToString();
+                section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
             }
 
            
@@ -355,11 +355,13 @@ namespace Intwenty.Models.MetaDesigner
 
         public string Title { get; set; }
 
-        public string LayoutPanelCount { get; set; }
+        public int LayoutPanelCount { get; set; }
 
         public bool Collapsible { get; set; }
 
         public bool StartExpanded { get; set; }
+
+        public bool IsRemoved { get; set; }
 
         public List<UserInput> LayoutPanels { get; set; }
 
@@ -372,6 +374,7 @@ namespace Intwenty.Models.MetaDesigner
             MetaCode = "";
             LayoutPanels = new List<UserInput>();
             LayoutRows = new List<LayoutRow>();
+            
         }
     }
 
@@ -408,7 +411,7 @@ namespace Intwenty.Models.MetaDesigner
         public string LookUpFieldViewDbName { get; set; }
         public string LookUpFieldTitle { get; set; }
         public string Domain { get; set; }
-        public bool ShowSettings { get; set; }
+        public bool IsRemoved { get; set; }
 
         public List<UserInput> Children { get; set; }
 
