@@ -238,7 +238,7 @@ namespace Intwenty.MetaDataService.Model
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridComboBox)
                 return "TBL_CB";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker)
-                return "TBLDP";
+                return "TBL_DP";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox)
                 return "TBL_NUMBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox)
@@ -263,6 +263,10 @@ namespace Intwenty.MetaDataService.Model
                 return "TA";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeTextBox)
                 return "TB";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUp)
+                return "TBL_LOOKUP";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUpKeyField)
+                return "TBL_LOOKUP_KF";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)
                 return "DCOL";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataTable)

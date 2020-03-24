@@ -225,6 +225,14 @@
                                                                                     <input type="date" class="form-control form-control-sm" />
                                                                                 </div>
                                                                             </div>
+                                                                            <div v-if="tcol.metaType==='EDITGRID_LOOKUP'">
+                                                                                <div style="width:10%">
+                                                                                    <button style="float:left" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
+                                                                                </div>
+                                                                                <div style="float:left; margin-left:5px; width:20%">
+                                                                                    <input type="text" class="form-control form-control-sm" disabled />
+                                                                                </div>
+                                                                            </div>
                                                                         </td>
                                                                     </tr>
                                                                 </tbody>
@@ -330,7 +338,9 @@
                     </button>
                 </div>
                 <div class="modal-body" id="ui_setting_modal_body">
+
                     <div class="settingpnl">
+
                         <div class="form-group">
                             <label class="control-label">Title</label>
                             <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
@@ -355,19 +365,19 @@
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="showSettingLookUp">
                             <label class="control-label">Set data view</label>
                             <select v-model="active_setting_input.domain" class="form-control form-control-sm">
                                 <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="showSettingLookUp">
                             <label class="control-label">Set key field database column</label>
                             <select v-model="active_setting_input.lookUpKeyFieldDbName" class="form-control form-control-sm">
                                 <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='LOOKUP'">
+                        <div v-if="showSettingLookUp">
                             <label class="model.control-label">Set key field data view column</label>
                             <select v-model="active_setting_input.lookUpKeyFieldViewDbName" class="form-control form-control-sm">
                                 <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
@@ -399,6 +409,7 @@
                                     <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_DATEPICKER')">Datepicker</a>
                                     <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_CHECKBOX')">Checkbox</a>
                                     <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_COMBOBOX')">Combobox</a>
+                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_LOOKUP')">Lookup</a>
                                 </div>
                             </div>
 
@@ -751,6 +762,16 @@
                         return true;
 
                       if (this.active_setting_input.metaType == "EDITGRID_COMBOBOX")
+                        return true;
+
+                    return false;
+                },
+                showSettingLookUp: function ()
+                {
+                    if (this.active_setting_input.metaType === "LOOKUP")
+                        return true;
+
+                      if (this.active_setting_input.metaType == "EDITGRID_LOOKUP")
                         return true;
 
                     return false;

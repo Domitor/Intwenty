@@ -85,7 +85,7 @@ namespace Intwenty.Models.MetaDesigner
                                     dto.Domain = "DATAVIEW." + input.Domain;
                                 }
 
-                                var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                                var keyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = dto.MetaCode };
                                 if (!string.IsNullOrEmpty(input.LookUpKeyFieldDbName))
                                 {
                                     var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpKeyFieldDbName && p.IsRoot);
@@ -115,7 +115,7 @@ namespace Intwenty.Models.MetaDesigner
                                
                                 res.Add(keyfield);
 
-                                var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = input.LookUpKeyFieldTitle, ParentMetaCode = dto.MetaCode };
+                                var lookupfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeLookUpField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = dto.MetaCode };
                                 if (!string.IsNullOrEmpty(input.LookUpFieldDbName))
                                 {
                                     var dmc = app.DataStructure.Find(p => p.DbName == input.LookUpFieldDbName);
@@ -149,12 +149,23 @@ namespace Intwenty.Models.MetaDesigner
 
                             if (dto.IsMetaTypeEditGrid)
                             {
+                                DatabaseModelItem dt = null;
+                                if (!string.IsNullOrEmpty(input.TableName))
+                                {
+                                    dt = app.DataStructure.Find(p => p.DbName == input.TableName && p.IsMetaTypeDataTable);
+                                    if (dt != null)
+                                    {
+                                        dto.DataMetaCode = dt.MetaCode;
+                                    }
+                                }
+
                                 foreach (var tcol in input.Children)
                                 {
                                     if (tcol.Id == 0 && tcol.IsRemoved)
                                         continue;
 
                                     var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode };
+                                    res.Add(column);
 
                                     if (column.Id == 0)
                                         column.MetaCode = BaseModelItem.GenerateNewMetaCode(column);
@@ -162,22 +173,16 @@ namespace Intwenty.Models.MetaDesigner
                                     if (tcol.IsRemoved || input.IsRemoved)
                                         column.AddUpdateProperty("REMOVED", "TRUE");
 
-                                    if (column.IsMetaTypeEditGridCheckBox || column.IsMetaTypeEditGridComboBox || column.IsMetaTypeEditGridDatePicker || column.IsMetaTypeEditGridNumBox || column.IsMetaTypeEditGridTextBox)
+                                    if (column.IsMetaTypeEditGridCheckBox || column.IsMetaTypeEditGridComboBox || column.IsMetaTypeEditGridDatePicker || column.IsMetaTypeEditGridNumBox || column.IsMetaTypeEditGridTextBox || column.IsMetaTypeEditGridLookUp)
                                     {
-                                        if (!string.IsNullOrEmpty(tcol.TableName))
+                                        if (dt != null)
                                         {
-                                            var dmt = app.DataStructure.Find(p => p.DbName == tcol.TableName && p.IsMetaTypeDataTable);
-                                            if (dmt != null)
+                                            if (!string.IsNullOrEmpty(tcol.ColumnName))
                                             {
-                                                dto.DataMetaCode = dmt.MetaCode;
-                                                if (!string.IsNullOrEmpty(tcol.ColumnName))
-                                                {
-                                                    var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName  && p.ParentMetaCode == dmt.MetaCode);
-                                                    if (dmc != null)
-                                                        column.DataMetaCode = dmc.MetaCode;
-                                                }
-                                            }
-                                               
+                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName  && p.ParentMetaCode == dt.MetaCode);
+                                                if (dmc != null)
+                                                    column.DataMetaCode = dmc.MetaCode;
+                                            }  
                                         }
 
                                         if (column.IsMetaTypeEditGridComboBox)
@@ -188,7 +193,44 @@ namespace Intwenty.Models.MetaDesigner
                                             }
                                         }
 
-                                        res.Add(column);
+
+                                        if (column.IsMetaTypeEditGridLookUp)
+                                        {
+                                            if (!string.IsNullOrEmpty(tcol.Domain))
+                                            {
+                                                column.Domain = "DATAVIEW." + tcol.Domain;
+                                            }
+
+                                            var colkeyfield = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeEditGridLookUpKeyField) { AppMetaCode = app.Application.MetaCode, ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = column.MetaCode };
+                                            if (!string.IsNullOrEmpty(tcol.LookUpKeyFieldDbName))
+                                            {
+                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.LookUpKeyFieldDbName && !p.IsRoot);
+                                                if (dmc != null)
+                                                    colkeyfield.DataMetaCode = dmc.MetaCode;
+                                            }
+                                            if (!string.IsNullOrEmpty(tcol.LookUpKeyFieldViewDbName))
+                                            {
+                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.LookUpKeyFieldViewDbName && p.ParentMetaCode == tcol.Domain);
+                                                if (dmc != null)
+                                                    colkeyfield.Domain = "DATAVIEW." + tcol.Domain + "." + dmc.MetaCode;
+                                            }
+                                            if (column.Id > 0)
+                                            {
+                                                var currentkeyfield = app.UIStructure.Find(p => p.IsMetaTypeEditGridLookUpKeyField && p.ParentMetaCode == column.MetaCode);
+                                                if (currentkeyfield != null)
+                                                {
+                                                    colkeyfield.Id = currentkeyfield.Id;
+                                                    colkeyfield.MetaCode = currentkeyfield.MetaCode;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (colkeyfield.Id == 0)
+                                                    colkeyfield.MetaCode = BaseModelItem.GenerateNewMetaCode(colkeyfield);
+                                            }
+
+                                            res.Add(colkeyfield);
+                                        }
                                     }
                                 }
 
@@ -278,7 +320,6 @@ namespace Intwenty.Models.MetaDesigner
                                         {
                                             input.TableName = keyfield.DataInfo.TableName;
                                             input.LookUpKeyFieldDbName = keyfield.DataInfo.ColumnName;
-                                            input.LookUpKeyFieldTitle = keyfield.Title;
                                         }
                                         if (keyfield.IsDataViewConnected)
                                         {
@@ -290,7 +331,6 @@ namespace Intwenty.Models.MetaDesigner
                                         if (lookupfield.IsDataConnected)
                                         {
                                             input.LookUpFieldDbName = lookupfield.DataInfo.ColumnName;
-                                            input.LookUpFieldTitle = lookupfield.Title;
                                         }
                                         if (lookupfield.IsDataViewConnected)
                                         {
@@ -320,6 +360,25 @@ namespace Intwenty.Models.MetaDesigner
                                         {
                                             child.ColumnName = gridcol.DataInfo.ColumnName;
                                             child.TableName = gridcol.DataInfo.TableName;
+                                        }
+
+                                        if (gridcol.IsMetaTypeEditGridLookUp)
+                                        {
+                                            child.Domain = gridcol.ViewName;
+
+                                            var keyfield = app.UIStructure.Find(p => p.IsMetaTypeEditGridLookUpKeyField && p.ParentMetaCode == gridcol.MetaCode);
+                                            if (keyfield != null)
+                                            {
+                                                if (keyfield.IsDataConnected)
+                                                {
+                                                    child.TableName = keyfield.DataInfo.TableName;
+                                                    child.LookUpKeyFieldDbName = keyfield.DataInfo.ColumnName;
+                                                }
+                                                if (keyfield.IsDataViewConnected)
+                                                {
+                                                    child.LookUpKeyFieldViewDbName = keyfield.ViewInfo.SQLQueryFieldName;
+                                                }
+                                            }
                                         }
                                     }
 
@@ -440,10 +499,8 @@ namespace Intwenty.Models.MetaDesigner
         public string ParentMetaCode { get; set; }
         public string LookUpKeyFieldDbName { get; set; }
         public string LookUpKeyFieldViewDbName { get; set; }
-        public string LookUpKeyFieldTitle { get; set; }
         public string LookUpFieldDbName { get; set; }
         public string LookUpFieldViewDbName { get; set; }
-        public string LookUpFieldTitle { get; set; }
         public string Domain { get; set; }
         public bool IsRemoved { get; set; }
 
@@ -463,10 +520,8 @@ namespace Intwenty.Models.MetaDesigner
             ParentMetaCode = "";
             LookUpKeyFieldDbName = "";
             LookUpKeyFieldViewDbName = "";
-            LookUpKeyFieldTitle = "";
             LookUpFieldDbName = "";
             LookUpFieldViewDbName = "";
-            LookUpFieldTitle = "";
             Domain = "";
             Children = new List<UserInput>();
 

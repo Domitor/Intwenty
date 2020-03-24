@@ -27,6 +27,8 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypeEditGridDatePicker = "EDITGRID_DATEPICKER";
         public static readonly string MetaTypeEditGridCheckBox = "EDITGRID_CHECKBOX";
         public static readonly string MetaTypeEditGridComboBox = "EDITGRID_COMBOBOX";
+        public static readonly string MetaTypeEditGridLookUp = "EDITGRID_LOOKUP";
+        public static readonly string MetaTypeEditGridLookUpKeyField = "EDITGRID_LOOKUPKEYFIELD";
 
 
         public UserInterfaceModelItem()
@@ -130,6 +132,8 @@ namespace Intwenty.MetaDataService.Model
                 t.Add(MetaTypeEditGridTextBox);
                 t.Add(MetaTypeEditGridNumBox);
                 t.Add(MetaTypeEditGridDatePicker);
+                t.Add(MetaTypeEditGridLookUp);
+                t.Add(MetaTypeEditGridLookUpKeyField);
                 return t;
             }
         }
@@ -311,6 +315,16 @@ namespace Intwenty.MetaDataService.Model
         public bool IsMetaTypeEditGridNumBox
         {
             get { return MetaType == MetaTypeEditGridNumBox; }
+        }
+
+        public bool IsMetaTypeEditGridLookUp
+        {
+            get { return MetaType == MetaTypeEditGridLookUp; }
+        }
+
+        public bool IsMetaTypeEditGridLookUpKeyField
+        {
+            get { return MetaType == MetaTypeEditGridLookUpKeyField; }
         }
 
         public override bool HasValidMetaType
