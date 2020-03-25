@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Create New " + Model.Application.Title;
 
-    if (!Model.UIStructure.Exists(p => p.IsRoot && p.IsMetaTypePanel))
+    if (!Model.UIStructure.Exists(p => p.IsRoot && p.IsMetaTypeSection))
     {
         <h1><span class="label label-warning btn-lg">There's no UI model defined for this application yet.</span></h1>
         return;
@@ -67,7 +67,7 @@
             var baseurl = '@Url.Content("~/Application/")';
             var endpointurl = baseurl + "Save";
 
-            this.model.ApplicationId = @Model.Application.Id;
+            this.model['@Model.Application.MetaCode'].ApplicationId = @Model.Application.Id;
 
             if (!context.canSave())
                 return;

@@ -44,6 +44,7 @@ namespace Intwenty.Data.Entity
         public DatabaseItemMap(EntityTypeBuilder<DatabaseItem> entityBuilder)
         {
             entityBuilder.HasIndex(p => new { p.AppMetaCode, p.MetaCode }).IsUnique(true);
+            entityBuilder.HasIndex(p => new { p.AppMetaCode, p.ParentMetaCode, p.MetaType, p.DbName }).IsUnique(true);
         }
     }
 

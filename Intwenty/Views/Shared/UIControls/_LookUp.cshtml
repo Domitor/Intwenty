@@ -1,0 +1,30 @@
+﻿@model Intwenty.MetaDataService.Model.IUIComplexBinding
+
+<div>
+    <label>
+        @Model.Title  @{ if (Model.Mandatory)
+            { <span style="color: red"> *</span> }}
+    </label>
+
+
+    <div style="width:10%">
+        <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@Model.DataViewMetaCode')"><span class="fa fa-plus"></span></button>
+    </div>
+
+
+    <div style="float:left; margin-left:5px; width:30%">
+        <input id="@Model.UIId" type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableMetaCode.@Model.DataColumnMetaCode" v-on:keydown.tab="getDataViewValue('@Model.DataViewMetaCode','@Model.DataColumnMetaCode','@Model.UIId')" data-dbfield="@Model.DataColumnMetaCode" data-viewfield="@Model.DataViewColumnDbName" data-lookupid="@Model.UIId" />
+    </div>
+
+
+    @if (!string.IsNullOrEmpty(Model.DataViewColumn2DbName))
+    {
+
+        <div style="float:left; margin-left:5px; width:60%">
+            <input type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableMetaCode.@Model.DataColumn2MetaCode" data-dbfield="@Model.DataColumn2MetaCode" data-viewfield="@Model.DataViewColumn2DbName" data-lookupid="@Model.UIId" readonly />
+        </div>
+    }
+
+
+
+</div>

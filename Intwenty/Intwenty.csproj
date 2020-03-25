@@ -80,6 +80,12 @@
     <Content Update="Views\Custom\ShipmentFiles.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Shared\UIControls\_LookUp.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_TextBox.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Shared\_MetaAppDescription.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

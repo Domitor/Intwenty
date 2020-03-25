@@ -5,7 +5,36 @@ using System.Collections.Generic;
 namespace Intwenty.MetaDataService.Model
 {
 
-    public class UserInterfaceModelItem : BaseModelItem
+    public interface IUIBinding
+    {
+        string UIId { get; }
+
+        bool Mandatory { get; }
+
+        string Title { get;  }
+
+        string DataTableMetaCode { get; }
+
+        string DataColumnMetaCode { get; }
+
+    }
+
+    public interface IUIComplexBinding : IUIBinding
+    {
+      
+        string DataColumn2MetaCode { get; }
+
+        string DataViewMetaCode { get; }
+
+        string DataViewColumnDbName { get; }
+
+        string DataViewColumn2DbName { get; }
+
+    }
+
+
+
+    public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding
     {
         //META TYPES
         public static readonly string MetaTypeTextBox = "TEXTBOX";
@@ -352,6 +381,91 @@ namespace Intwenty.MetaDataService.Model
                 return true;
             }
         }
+
+        public string UIId
+        {
+            get { return MetaCode; }
+        }
+
+        public bool Mandatory
+        {
+            get 
+            {
+                if (IsDataColumnConnected)
+                    return DataColumnInfo.Mandatory;
+
+                return false;
+            }
+        }
+
+        public string DataTableMetaCode
+        {
+            get 
+            { 
+                if (IsDataTableConnected)
+                    return DataTableInfo.MetaCode;
+
+                return string.Empty;
+            }
+        }
+
+        public string DataColumnMetaCode
+        {
+            get
+            {
+                if (IsDataColumnConnected)
+                    return DataColumnInfo.MetaCode;
+
+                return string.Empty;
+            }
+        }
+
+        public string DataColumn2MetaCode
+        {
+            get
+            {
+                if (IsDataColumn2Connected)
+                    return DataColumnInfo2.MetaCode;
+
+                return string.Empty;
+            }
+        }
+
+        public string DataViewMetaCode
+        {
+            get
+            {
+                if (IsDataViewConnected)
+                    return DataViewInfo.MetaCode;
+
+                return string.Empty;
+            }
+        }
+
+        public string DataViewColumnDbName
+        {
+            get
+            {
+                if (IsDataViewColumnConnected)
+                    return DataViewColumnInfo.SQLQueryFieldName;
+
+                return string.Empty;
+            }
+        }
+
+        public string DataViewColumn2DbName
+        {
+            get
+            {
+                if (IsDataViewColumn2Connected)
+                    return DataViewColumnInfo2.SQLQueryFieldName;
+
+                return string.Empty;
+            }
+        }
+
+
+
 
 
     }

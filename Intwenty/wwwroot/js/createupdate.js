@@ -76,6 +76,11 @@ function createVue(vueelement, applicationid, appmetacode, baseurl)
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
+                        if (!dbfield || !viewfield)
+                            continue;
+                        if (dbfield === "" || viewfield === "")
+                            continue;
+
                         context.model[appmetacode][dbfield] = item[viewfield];
                     }
                 });
