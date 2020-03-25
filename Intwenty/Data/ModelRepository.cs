@@ -166,6 +166,7 @@ namespace Intwenty.Data
                     if (item.AppMetaCode == app.MetaCode)
                     {
                         t.UIStructure.Add(item);
+
                         if (!string.IsNullOrEmpty(item.DataMetaCode))
                         {
                             var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
@@ -184,13 +185,13 @@ namespace Intwenty.Data
                                 }
                                 else
                                 {
-                                    item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id=0, DbName = app.DbName, TableName = app.DbName, MetaCode= "MAINTABLE", ParentMetaCode = "ROOT", Title = app.DbName   };
+                                    item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id=0, DbName = app.DbName, TableName = app.DbName, MetaCode= "VIRTUAL", ParentMetaCode = "ROOT", Title = app.DbName   };
 
                                 }
                             }
 
-
                         }
+
                         if (!string.IsNullOrEmpty(item.DataMetaCode2))
                         {
                             var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode2 && p.AppMetaCode == app.MetaCode);
@@ -206,13 +207,13 @@ namespace Intwenty.Data
 
                             if (!string.IsNullOrEmpty(item.ViewMetaCode))
                             {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && p.IsMetaTypeDataViewKeyColumn);
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && !p.IsRoot);
                                 if (vinf != null)
                                     item.DataViewColumnInfo = vinf;
                             }
                             if (!string.IsNullOrEmpty(item.ViewMetaCode2))
                             {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && p.IsMetaTypeDataViewColumn);
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && !p.IsRoot);
                                 if (vinf != null)
                                     item.DataViewColumnInfo2 = vinf;
                             }
@@ -547,6 +548,9 @@ namespace Intwenty.Data
                         existing.RowOrder = uic.RowOrder;
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataMetaCode = uic.DataMetaCode;
+                        existing.DataMetaCode2 = uic.DataMetaCode2;
+                        existing.ViewMetaCode = uic.ViewMetaCode;
+                        existing.ViewMetaCode2 = uic.ViewMetaCode2;
                         existing.Domain = uic.Domain;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
@@ -571,6 +575,9 @@ namespace Intwenty.Data
                 AppMetaCode = dto.AppMetaCode,
                 ColumnOrder = dto.ColumnOrder,
                 DataMetaCode = dto.DataMetaCode,
+                DataMetaCode2 = dto.DataMetaCode2,
+                ViewMetaCode = dto.ViewMetaCode,
+                ViewMetaCode2 = dto.ViewMetaCode2,
                 Description = dto.Description,
                 Domain = dto.Domain,
                 MetaCode = dto.MetaCode,

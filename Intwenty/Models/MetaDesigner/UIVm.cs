@@ -251,7 +251,8 @@ namespace Intwenty.Models.MetaDesigner
                                 }
 
                                 //LOOK UP
-                                if (uic.IsMetaTypeLookUp){
+                                if (uic.IsMetaTypeLookUp)
+                                {
                                 
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = uic.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName };
 
@@ -269,7 +270,8 @@ namespace Intwenty.Models.MetaDesigner
                                         input.ViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
                                     if (uic.IsDataViewColumn2Connected)
                                         input.ViewColumnName2 = uic.DataViewColumnInfo2.SQLQueryFieldName;
-                                  
+
+                                    lr.UserInputs.Add(input);
                                 }
 
                                 if (uic.IsMetaTypeEditGrid)
@@ -299,7 +301,7 @@ namespace Intwenty.Models.MetaDesigner
                                           
                                             //VIEW CONNECTION
                                             if (gridcol.IsDataViewColumnConnected)
-                                                child.ViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
+                                                child.ViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
                                             
                                         }
                                     }

@@ -198,15 +198,29 @@ namespace Intwenty.MetaDataService
 
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumnConnected)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYKOLUMN", ui.Title, a.Application.Title));
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
+
+                    if (ui.IsMetaTypeLookUp && ui.IsDataViewColumnConnected && ui.DataViewColumnInfo.IsMetaTypeDataViewColumn)
+                    {
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has a connection (ViewMetaCode) to a DATAVIEWCOLUMN, it should be a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
+                    }
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewConnected)
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
 
+                    if (!ui.IsMetaTypeEditGrid)
+                    {
+                        if (!ui.IsDataColumnConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
+                            res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
+                    }
+                    else
+                    {
+                        if (!ui.IsDataTableConnected)
+                            res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database table [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
+                    }
 
-
-                    if (!ui.IsDataColumnConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to DatabaseItem [DataMetaCode].", new object[] { ui.Title, a.Application.Title } ));
+                    if (ui.IsMetaTypeEditGridLookUp && !ui.IsDataViewColumnConnected)
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type EDITGRID_LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
 
                     if (!ui.HasValidProperties)
                     {

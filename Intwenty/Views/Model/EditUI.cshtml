@@ -172,14 +172,10 @@
 
                                                         <div v-if="input.metaType==='LOOKUP'">
                                                             <div>
-                                                                <div style="width:10%">
-                                                                    <button style="float:left" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
-                                                                </div>
-                                                                <div style="float:left; margin-left:5px; width:20%">
-                                                                    <input type="text" class="form-control form-control-sm" disabled />
-                                                                </div>
-                                                                <div style="float:left; margin-left:5px; width:60%">
-                                                                    <input type="text" class="form-control form-control-sm" readonly />
+                                                                <div class="form form-inline">
+                                                                    <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
+                                                                    <input  style="margin:5px" type="text" class="form-control form-control-sm" disabled />
+                                                                    <input  style="margin:5px" type="text" class="form-control form-control-sm" disabled />
                                                                 </div>
                                                             </div>
                                                             <br />
@@ -226,12 +222,11 @@
                                                                                 </div>
                                                                             </div>
                                                                             <div v-if="tcol.metaType==='EDITGRID_LOOKUP'">
-                                                                                <div style="width:10%">
-                                                                                    <button style="float:left" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
-                                                                                </div>
-                                                                                <div style="float:left; margin-left:5px; width:20%">
+                                                                                <div class="form form-inline">
+                                                                                    <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
                                                                                     <input type="text" class="form-control form-control-sm" disabled />
                                                                                 </div>
+                                                                                
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -346,10 +341,24 @@
                             <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
                         </div>
 
-                        <div class="form-group"  v-if="showSettingDbTable">
+                        <div class="form-group" v-if="showSettingDbTable">
                             <label class="control-label">Set database table</label>
                             <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
                                 <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" v-if="showSettingLookUp">
+                            <label class="control-label">Set data view</label>
+                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
+                                <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group"  v-if="showSettingValueDomain">
+                            <label class="control-label">Set value domain</label>
+                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
+                                <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
                             </select>
                         </div>
 
@@ -359,44 +368,27 @@
                                 <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="showSettingValueDomain">
-                            <label class="control-label">Set value domain</label>
-                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
-                                <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
-                            </select>
-                        </div>
-                        <div v-if="showSettingLookUp">
-                            <label class="control-label">Set data view</label>
-                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
-                                <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                            </select>
-                        </div>
-                        <div v-if="showSettingLookUp">
-                            <label class="control-label">Set key field database column</label>
-                            <select v-model="active_setting_input.lookUpKeyFieldDbName" class="form-control form-control-sm">
-                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-                        <div v-if="showSettingLookUp">
-                            <label class="model.control-label">Set key field data view column</label>
-                            <select v-model="active_setting_input.lookUpKeyFieldViewDbName" class="form-control form-control-sm">
+
+                        <div class="form-group" v-if="showSettingLookUp">
+                            <label class="model.control-label">Set view column (Key)</label>
+                            <select v-model="active_setting_input.viewColumnName" class="form-control form-control-sm">
                                 <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='LOOKUP'">
-                            <label class="control-label">(optional) Set look up field database column</label>
-                            <select v-model="active_setting_input.lookUpFieldDbName" class="form-control form-control-sm">
+                        <div class="form-group"  v-if="active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">Set database column 2 (opt.)</label>
+                            <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
                                 <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                             </select>
                         </div>
-                        <div v-if="active_setting_input.metaType=='LOOKUP'">
-                            <label class="control-label">Set look up field data view column</label>
-                            <select v-model="active_setting_input.lookUpFieldViewDbName" class="form-control form-control-sm">
+                        <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
+                            <label class="control-label">Set view column 2 (opt.)</label>
+                            <select v-model="active_setting_input.viewColumnName2" class="form-control form-control-sm">
                                 <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                      
-                        <div v-if="active_setting_input.metaType=='EDITGRID'">
+
+                        <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
                             <label class="control-label">Columns</label>
                             <br />
 
@@ -719,9 +711,6 @@
             {
                 showSettingDbColumn: function ()
                 {
-                    if (this.active_setting_input.metaType === "LOOKUP")
-                        return false;
-
                      if (this.active_setting_input.metaType == "EDITGRID")
                         return false;
 
@@ -730,28 +719,6 @@
                 showSettingDbTable: function ()
                 {
                      if (this.active_setting_input.metaType == "EDITGRID")
-                        return true;
-
-                    return false;
-                },
-                showSettingGridColumnType: function ()
-                {
-                    if (this.active_setting_input.metaType === "EDITGRID_COLUMN")
-                        return true;
-
-                     if (this.active_setting_input.metaType == "EDITGRID_TEXTBOX")
-                        return true;
-
-                     if (this.active_setting_input.metaType == "EDITGRID_NUMBOX")
-                        return true;
-
-                     if (this.active_setting_input.metaType == "EDITGRID_DATEPICKER")
-                        return true;
-
-                      if (this.active_setting_input.metaType == "EDITGRID_CHECKBOX")
-                        return true;
-
-                      if (this.active_setting_input.metaType == "EDITGRID_COMBOBOX")
                         return true;
 
                     return false;
