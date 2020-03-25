@@ -52,7 +52,7 @@ namespace Intwenty.Models.MetaDesigner
                     var dv = new DataViewVm() { Id = t.Id, Properties = t.Properties, SQLQuery = t.SQLQuery, Title = t.Title, MetaCode = t.MetaCode };
                     foreach (var f in viewmeta)
                     {
-                        if ((f.IsMetaTypeDataViewField || f.IsMetaTypeDataViewKeyField) && f.ParentMetaCode == t.MetaCode)
+                        if ((f.IsMetaTypeDataViewColumn || f.IsMetaTypeDataViewKeyColumn) && f.ParentMetaCode == t.MetaCode)
                         {
                             dv.Fields.Add(new DataViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, SQLQueryFieldName = f.SQLQueryFieldName });
 

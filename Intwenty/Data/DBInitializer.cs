@@ -48,7 +48,6 @@ namespace Intwenty.Data
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning=false, TestDataAmount = 0  });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 5 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 30, Description = "An app for managing item ledger", MetaCode = "ITEMLEDGER", Title = "Inventory Transactions", DbName = "ItemLedger", IsHierarchicalApplication = false, UseVersioning = false });
-            context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 10 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 50, Description = "An app for managing locations", MetaCode = "LOCATION", Title = "Location", DbName = "Location", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 3 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 60, Description = "An app for managing goods reciept", MetaCode = "GOODSRECEIPT", Title = "Goods Receipt", DbName = "GoodsReceipt", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
             context.Set<ApplicationItem>().Add(new ApplicationItem() { Id = 70, Description = "An app for managing shipment files", MetaCode = "SHIPMENTFILES", Title = "Shipment files", DbName = "Shipments", IsHierarchicalApplication = false, UseVersioning = false, TestDataAmount = 0 });
@@ -72,7 +71,6 @@ namespace Intwenty.Data
 
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "WMS_MAINMENU", ParentMetaCode = "ROOT", Title = "Menu", Order = 1, Action = "", Controller = ""  });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "WMS_MAINMENU", Title = "Item", Order = 10, Action = "", Controller = "" });
-            context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VENDOR", ParentMetaCode = "WMS_MAINMENU", Title = "Vendor", Order = 20, Action = "", Controller = "" });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "LOCATION", MetaType = "MENUITEM", MetaCode = "M_LOC", ParentMetaCode = "WMS_MAINMENU", Title = "Location", Order = 30, Action = "", Controller = "" });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "SHIPMENTFILES", MetaType = "MENUITEM", MetaCode = "M_SF", ParentMetaCode = "WMS_MAINMENU", Title = "Shipment files", Order = 32, Action = "ShipmentFiles", Controller = "Custom" });
             context.Set<MenuItem>().Add(new MenuItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "MENUITEM", MetaCode = "M_GR", ParentMetaCode = "WMS_MAINMENU", Title = "Goods Receipt", Order = 40, Action = "", Controller = "" });
@@ -115,14 +113,17 @@ namespace Intwenty.Data
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWFIELD", MetaCode = "LF_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "SECTION", MetaCode = "SECT_HDR", DataMetaCode = "", Title = "Sales Header", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "", Properties = "COLLAPSIBLE=TRUE#STARTEXPANDED=TRUE" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "PANEL", MetaCode = "PANEL1", DataMetaCode = "", Title = "", ParentMetaCode = "SECT_HDR", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "SECTION", MetaCode = "SECT_HDR", DataMetaCode = "", Title = "Sales Header", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "PANEL", MetaCode = "PANEL1", DataMetaCode = "", Title = "", ParentMetaCode = "SECT_HDR", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_ORDERNO", DataMetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "PANEL1", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "DATEPICKER", MetaCode = "DP_ORDERDATE", DataMetaCode = "ORDERDATE", Title = "Order Date", ParentMetaCode = "PANEL1", RowOrder = 2, ColumnOrder = 1 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer Name", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID", MetaCode = "LINETABLE", DataMetaCode = "DTORDLINE", Title = "Sales Lines", ParentMetaCode = "PANEL1", RowOrder = 4, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_TEXTBOX", MetaCode = "LINE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 1, CssClass = "" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_NUMBOX", MetaCode = "LINE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 2, CssClass = "" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LOOKUP", MetaCode = "LOOKUP_CUSTOMER", DataMetaCode = "CUSTID", ViewMetaCode="VCUSTID", DataMetaCode2 = "CUSTNAME", ViewMetaCode2 = "VCUSTNAME", Title = "Customer", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1, Domain= "DATAVIEW.CUSTOMERVIEW" });
+
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "SECTION", MetaCode = "SECT_LINES", DataMetaCode = "", Title = "Sales Lines", ParentMetaCode = "ROOT", RowOrder = 2, ColumnOrder = 1, Properties = "COLLAPSIBLE=TRUE#STARTEXPANDED=TRUE" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "PANEL", MetaCode = "PANEL2", DataMetaCode = "", Title = "", ParentMetaCode = "SECT_LINES", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID", MetaCode = "LINETABLE", DataMetaCode = "DTORDLINE", Title = "Sales Lines", ParentMetaCode = "PANEL2", RowOrder = 4, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_TEXTBOX", MetaCode = "LINE_ITEMNAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "EDITGRID_NUMBOX", MetaCode = "LINE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "LINETABLE", RowOrder = 1, ColumnOrder = 2 });
 
 
             //SHIPMENTFILES
@@ -148,11 +149,13 @@ namespace Intwenty.Data
 
             //VIEWS
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "LOCATIONLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select LocationId, LocationName from Location order by LocationId asc", Title = "Location", SQLQueryFieldName = "" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "LOCNAME", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "LocationName" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "LOCID", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "LocationId" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWCOLUMN", MetaCode = "LOCNAME", ParentMetaCode = "LOCATIONLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "LocationName" });
+
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "TEXTBOX", MetaCode = "TB_ID", DataMetaCode = "LOCATIONID", Title = "Location ID", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "TEXTBOX", MetaCode = "TB_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "LOCATION", MetaType = "COMBOBOX", MetaCode = "CB_TYPE", DataMetaCode = "LOCATIONTYPE", Title = "Location Type", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "VALUEDOMAIN.LOCATIONTYPE.CODE" });
@@ -175,16 +178,11 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "DATEPICKER", MetaCode = "GR_DATE", DataMetaCode = "RECEIPTDATE", Title = "Receipt Date", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLITEM_CODE", DataMetaCode = "ITEMID", Title = "Item Id", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP.ITEMID" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPFIELD", MetaCode = "MLITEM_NAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.ITEMLOOKUP.ITEMNAME" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLLOCATION_CODE", DataMetaCode = "LOCATIONID", Title = "Location Id", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCID" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUPFIELD", MetaCode = "MLLOCATION_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCNAME" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "NUMBOX", MetaCode = "NB_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "PANEL", MetaCode = "PNL2", DataMetaCode = "", Title = "Info", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "ITEMID", ViewMetaCode= "ITEMID", DataMetaCode2= "ITEMNAME", ViewMetaCode2= "ITEMNAME", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "LOCATIONID", ViewMetaCode= "LOCID",DataMetaCode2= "LOCATIONNAME", ViewMetaCode2= "LOCNAME", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" });            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "NUMBOX", MetaCode = "NB_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
             
 
             //LISTVIEW
@@ -206,14 +204,11 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "INTEGER", Mandatory = true });
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "DATEPICKER", MetaCode = "ISSUE_DATE", DataMetaCode = "ISSUEDATE", Title = "Issue Date", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLITEM_CODE", DataMetaCode = "ITEMID", Title = "Item Id", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP.ITEMID" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPFIELD", MetaCode = "MLITEM_NAME", DataMetaCode = "ITEMNAME", Title = "Item Name", ParentMetaCode = "MLITEM", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.ITEMLOOKUP.ITEMNAME" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLLOCATION_CODE", DataMetaCode = "LOCATIONID", Title = "Location Id", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCID" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUPFIELD", MetaCode = "MLLOCATION_NAME", DataMetaCode = "LOCATIONNAME", Title = "Location Name", ParentMetaCode = "MLLOCATION", RowOrder = 0, ColumnOrder = 2, Domain = "DATAVIEW.LOCATIONLOOKUP.LOCNAME" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLITEM", DataMetaCode = "ITEMID", ViewMetaCode = "ITEMID", DataMetaCode2 = "ITEMNAME", ViewMetaCode2 = "ITEMNAME", Title = "Item", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1, Domain = "DATAVIEW.ITEMLOOKUP" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "LOOKUP", MetaCode = "MLLOCATION", DataMetaCode = "LOCATIONID", ViewMetaCode = "LOCID", DataMetaCode2 = "LOCATIONNAME", ViewMetaCode2 = "LOCNAME", Title = "Location", ParentMetaCode = "PNL1", RowOrder = 3, ColumnOrder = 1, Domain = "DATAVIEW.LOCATIONLOOKUP" }); context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSRECEIPT", MetaType = "NUMBOX", MetaCode = "NB_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "GOODSISSUE", MetaType = "NUMBOX", MetaCode = "NB_ISSUE_QTY", DataMetaCode = "QTY", Title = "Qty", ParentMetaCode = "PNL1", RowOrder = 4, ColumnOrder = 1 });
 
 
@@ -246,11 +241,17 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERINFO", DbName = "CustomerInfo", ParentMetaCode = "ROOT", DataType = "TEXT" });
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel"  });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1  });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataMetaCode = "CUSTOMERID", Title = "Customer ID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1  });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataMetaCode = "CUSTOMERNAME", Title = "Customer Name", ParentMetaCode = "CUSTPNL1", RowOrder = 2, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL2", DataMetaCode = "", Title = "Information", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL2", DataMetaCode = "", Title = "Information", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2 });
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "TEXTAREA", MetaCode = "TA_CUSTINFO", DataMetaCode = "CUSTOMERINFO", Title = "Customer Notes", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 1 });
+
+            //VIEWS
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "CUSTOMERVIEW", ParentMetaCode = "ROOT", SQLQuery = "select CustomerId, CustomerName from Customer order by CustomerId asc", Title = "Customer", SQLQueryFieldName = "" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "VCUSTID", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Id", SQLQueryFieldName = "CustomerId" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWCOLUMN", MetaCode = "VCUSTNAME", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Name", SQLQueryFieldName = "CustomerName" });
+
 
             //LISTVIEW
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Customer List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
@@ -275,23 +276,25 @@ namespace Intwenty.Data
 
             //VIEWS
             context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Select Item", SQLQueryFieldName = "" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId" });
+            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWCOLUMN", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName" });
 
 
             //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITID", DataMetaCode = "ITEMID", Title = "Item ID", ParentMetaCode = "ITMPNL", RowOrder = 1, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITNAME", DataMetaCode = "NAME", Title = "Item Name", ParentMetaCode = "ITMPNL", RowOrder = 2, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "COMBOBOX", MetaCode = "CB_CATEGORY", DataMetaCode = "CATCODE", Title = "Category", ParentMetaCode = "ITMPNL", RowOrder = 3, ColumnOrder = 1 , Domain = "VALUEDOMAIN.ITEMCATEGORY" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "NUMBOX", MetaCode = "NUMBOX_PURCHPRICE", DataMetaCode = "PURCHASEPRICE", Title = "Purchase Price", ParentMetaCode = "ITMPNL", RowOrder = 10, ColumnOrder = 1 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "DATEPICKER", MetaCode = "DP_MOD", DataMetaCode = "MODIFIED", Title = "Modified Date", ParentMetaCode = "ITMPNL", RowOrder = 20, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "CHECKBOX", MetaCode = "CB_ACTIVE", DataMetaCode = "ACTIVE", Title = "Is Active", ParentMetaCode = "ITMPNL", RowOrder = 30, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LOOKUP", MetaCode = "MLVENDOR", DataMetaCode = "", Title = "Default Vendor", ParentMetaCode = "ITMPNL", RowOrder = 40, ColumnOrder = 1 , Domain = "DATAVIEW.VENDORLOOKUP" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LOOKUPKEYFIELD", MetaCode = "MLVENDOR_CODE", DataMetaCode = "VENDORCODE", Title = "Vendor Id", ParentMetaCode = "MLVENDOR", RowOrder = 0, ColumnOrder = 1 , Domain = "DATAVIEW.VENDORLOOKUP.VENDORID" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LOOKUPFIELD", MetaCode = "MLVENDOR_NAME", DataMetaCode = "VENDORTXT", Title = "Vendor Name", ParentMetaCode = "MLVENDOR", RowOrder = 0, ColumnOrder = 2 , Domain = "DATAVIEW.VENDORLOOKUP.VENDORNAME" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL_INFO", DataMetaCode = "", Title = "Info", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 2, CssClass = "app_panel" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL_A", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITID", DataMetaCode = "ITEMID", Title = "Item ID", ParentMetaCode = "ITMPNL_A", RowOrder = 1, ColumnOrder = 1  });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "TEXTBOX", MetaCode = "TB_ITNAME", DataMetaCode = "NAME", Title = "Item Name", ParentMetaCode = "ITMPNL_A", RowOrder = 2, ColumnOrder = 1  });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "DATEPICKER", MetaCode = "DP_MOD", DataMetaCode = "MODIFIED", Title = "Modified Date", ParentMetaCode = "ITMPNL_A", RowOrder = 3, ColumnOrder = 1 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "CHECKBOX", MetaCode = "CB_ACTIVE", DataMetaCode = "ACTIVE", Title = "Is Active", ParentMetaCode = "ITMPNL_A", RowOrder = 4, ColumnOrder = 1 });
 
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "PANEL", MetaCode = "ITMPNL_B", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 2 });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "COMBOBOX", MetaCode = "CB_CATEGORY", DataMetaCode = "CATCODE", Title = "Category", ParentMetaCode = "ITMPNL_B", RowOrder = 1, ColumnOrder = 1 , Domain = "VALUEDOMAIN.ITEMCATEGORY" });
+            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "NUMBOX", MetaCode = "NUMBOX_PURCHPRICE", DataMetaCode = "PURCHASEPRICE", Title = "Purchase Price", ParentMetaCode = "ITMPNL_B", RowOrder = 2, ColumnOrder = 1 });
+            
+     
+     
 
             //LISTVIEW
             context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Item List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
@@ -306,31 +309,6 @@ namespace Intwenty.Data
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "LOCATIONID", DbName = "LocationId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "TRANSTYPE", DbName = "TransactionType", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, Domain = "VALUEDOMAIN.ITEMTRANSTYPE.CODE" });
             context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "ITEMLEDGER", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true });
-
-
-
-            //VENDOR
-            //----------------------------------------------------
-            //DATA
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATACOLUMN", MetaCode = "VENDORID", DbName = "VendorId", ParentMetaCode = "ROOT", DataType = "STRING" });
-            context.Set<DatabaseItem>().Add(new DatabaseItem() { AppMetaCode = "VENDOR", MetaType = "DATACOLUMN", MetaCode = "VENDORNAME", DbName = "VendorName", ParentMetaCode = "ROOT", DataType = "STRING" });
-
-            //VIEWS
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEW",  MetaCode = "VENDORLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName, 'Country' as Country from Vendor order by VendorId asc", Title = "Select Vendor", SQLQueryFieldName = "" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWKEYFIELD", MetaCode = "VENDORID", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Id", SQLQueryFieldName = "VendorId" });
-            context.Set<DataViewItem>().Add(new DataViewItem() { MetaType = "DATAVIEWFIELD", MetaCode = "VENDORNAME", ParentMetaCode = "VENDORLOOKUP", SQLQuery = "", Title = "Vendor Name", SQLQueryFieldName = "VendorName" });
-
-            //UI
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "PANEL", MetaCode = "VNDPNL", DataMetaCode = "", Title = "Basics", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, CssClass = "app_panel" });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "TEXTBOX", MetaCode = "TB_VENDID", DataMetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "VNDPNL", RowOrder = 1, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "TEXTBOX", MetaCode = "TB_VENDNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "VNDPNL", RowOrder = 2, ColumnOrder = 1  });
-
-            //LISTVIEW
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Vendor List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWFIELD", MetaCode = "LV_VID", DataMetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2  });
-            context.Set<UserInterfaceItem>().Add(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWFIELD", MetaCode = "LV_VNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3  });
-
 
 
             context.SaveChanges();

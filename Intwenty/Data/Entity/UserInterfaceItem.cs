@@ -25,15 +25,22 @@ namespace Intwenty.Data.Entity
         public string AppMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a MataDataItem
+        /// Reference to a DatabaseItem
         /// </summary>
         public string DataMetaCode { get; set; }
+
+        /// <summary>
+        /// Reference to a DataViewItem
+        /// </summary>
+        public string ViewMetaCode { get; set; }
+
+        public string DataMetaCode2 { get; set; }
+
+        public string ViewMetaCode2 { get; set; }
 
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
-
-        public string CssClass { get; set; }
 
         public int ColumnOrder { get; set; }
 

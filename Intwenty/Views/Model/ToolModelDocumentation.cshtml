@@ -85,7 +85,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var ui in app.UIStructure.Where(p => (p.IsDataConnected || p.IsMetaTypeLookUp) && !p.IsMetaTypeListViewField && !p.IsMetaTypeLookUpField && !p.IsMetaTypeLookUpKeyField).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    @foreach (var ui in app.UIStructure.Where(p=> !p.IsMetaTypeEditGridCheckBox && 
+                                                                  !p.IsMetaTypeEditGridComboBox &&
+                                                                  !p.IsMetaTypeEditGridDatePicker &&
+                                                                  !p.IsMetaTypeEditGridLookUp &&
+                                                                  !p.IsMetaTypeEditGridNumBox &&
+                                                                  !p.IsMetaTypeEditGridTextBox).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
                     <tr>
                         <td>@ui.MetaCode</td>
@@ -93,9 +98,13 @@
                         <td>@ui.Title</td>
 
                         @{
-                            if (ui.IsDataConnected)
+                            if (ui.IsDataColumnConnected)
                             {
-                                <td> @ui.DataInfo.DbName</td>
+                                <td> @ui.DataColumnInfo.DbName</td>
+                            }
+                            else if (ui.IsDataTableConnected)
+                            {
+                                <td> @ui.DataTableInfo.DbName</td>
                             }
                             else
                             {

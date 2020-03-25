@@ -20,9 +20,9 @@
                     foreach (var c in Model.UIStructure)
                     {
 
-                        if (c.IsMetaTypeListViewField && c.IsDataConnected)
+                        if (c.IsMetaTypeListViewField && c.IsDataColumnConnected)
                         {
-                            <option value="@c.DataInfo.DbName">@c.Title</option>
+                            <option value="@c.DataColumnInfo.DbName">@c.Title</option>
                         }
 
                     }
@@ -43,9 +43,9 @@
                 foreach (var c in Model.UIStructure)
                 {
 
-                    if (c.IsMetaTypeListViewField && c.IsDataConnected)
+                    if (c.IsMetaTypeListViewField && c.IsDataColumnConnected)
                     {
-                        <th v-on:click="sortBycolumn('@c.DataInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
+                        <th v-on:click="sortBycolumn('@c.DataColumnInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
                     }
 
                 }
@@ -58,9 +58,9 @@
             foreach (var c in Model.UIStructure)
             {
 
-                if (c.IsMetaTypeListViewField && c.IsDataConnected)
+                if (c.IsMetaTypeListViewField && c.IsDataColumnConnected)
                 {
-                    <td>{{item.@c.DataInfo.DbName}}</td>
+                    <td>{{item.@c.DataColumnInfo.DbName}}</td>
                 }
 
             }

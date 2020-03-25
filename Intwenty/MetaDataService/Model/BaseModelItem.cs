@@ -183,8 +183,10 @@ namespace Intwenty.MetaDataService.Model
             var title = "";
             if (item is UserInterfaceModelItem ui)
             {
-                if (ui.IsDataConnected)
-                    title += ui.DataInfo.DbName.ToUpper();
+                if (ui.IsDataColumnConnected)
+                    title += ui.DataColumnInfo.DbName.ToUpper();
+                else if (ui.IsDataTableConnected)
+                    title += ui.DataTableInfo.DbName.ToUpper();
             }
             else if (item is DatabaseModelItem db)
             {
@@ -249,10 +251,6 @@ namespace Intwenty.MetaDataService.Model
                 return "LV_FLD";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
                 return "LOOKUP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUpField)
-                return "LOOKUP_FLD";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUpKeyField)
-                return "LOOKUP_KFLD";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeNumBox)
                 return "NUMBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypePanel)
@@ -265,8 +263,6 @@ namespace Intwenty.MetaDataService.Model
                 return "TB";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUp)
                 return "TBL_LOOKUP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUpKeyField)
-                return "TBL_LOOKUP_KF";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)
                 return "DCOL";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataTable)
@@ -275,9 +271,9 @@ namespace Intwenty.MetaDataService.Model
                 return "VDOM";
             if (item.MetaType == DataViewModelItem.MetaTypeDataView)
                 return "DV";
-            if (item.MetaType == DataViewModelItem.MetaTypeDataViewField)
+            if (item.MetaType == DataViewModelItem.MetaTypeDataViewColumn)
                 return "DV_FLD";
-            if (item.MetaType == DataViewModelItem.MetaTypeDataViewKeyField)
+            if (item.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn)
                 return "DV_KFLD";
             if (item.MetaType == MenuModelItem.MetaTypeMainMenu)
                 return "MAINMENU";

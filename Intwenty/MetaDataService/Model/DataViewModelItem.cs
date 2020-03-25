@@ -8,8 +8,8 @@ namespace Intwenty.MetaDataService.Model
     {
         //META TYPES
         public static readonly string MetaTypeDataView = "DATAVIEW";
-        public static readonly string MetaTypeDataViewField = "DATAVIEWFIELD";
-        public static readonly string MetaTypeDataViewKeyField = "DATAVIEWKEYFIELD";
+        public static readonly string MetaTypeDataViewColumn = "DATAVIEWCOLUMN";
+        public static readonly string MetaTypeDataViewKeyColumn = "DATAVIEWKEYCOLUMN";
 
 
         public DataViewModelItem()
@@ -58,8 +58,8 @@ namespace Intwenty.MetaDataService.Model
             {
                 var t = new List<string>();
                 t.Add(MetaTypeDataView);
-                t.Add(MetaTypeDataViewField);
-                t.Add(MetaTypeDataViewKeyField);
+                t.Add(MetaTypeDataViewColumn);
+                t.Add(MetaTypeDataViewKeyColumn);
                 return t;
             }
         }
@@ -69,15 +69,15 @@ namespace Intwenty.MetaDataService.Model
             get { return MetaType == MetaTypeDataView; }
         }
 
-        public bool IsMetaTypeDataViewField
+        public bool IsMetaTypeDataViewColumn
         {
-            get { return MetaType == MetaTypeDataViewField; }
+            get { return MetaType == MetaTypeDataViewColumn; }
         }
 
 
-        public bool IsMetaTypeDataViewKeyField
+        public bool IsMetaTypeDataViewKeyColumn
         {
-            get { return MetaType == MetaTypeDataViewKeyField; }
+            get { return MetaType == MetaTypeDataViewKeyColumn; }
         }
 
         public override bool HasValidMetaType

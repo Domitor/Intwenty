@@ -307,9 +307,9 @@ namespace Intwenty.MetaDataService.Engine
                 sql_list_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.UIStructure)
                 {
-                    if (t.IsMetaTypeListViewField && t.IsDataConnected)
+                    if (t.IsMetaTypeListViewField && t.IsDataColumnConnected)
                     {
-                        sql_list_stmt.Append(", t2." + t.DataInfo.DbName + " ");
+                        sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
                     }
                 }
                 sql_list_stmt.Append("FROM (select *, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = "+ this.Meta.Application.Id + ") t1 ");
@@ -533,7 +533,7 @@ namespace Intwenty.MetaDataService.Engine
                 {
                     if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
                     {
-                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyField && p.ParentMetaCode == v.MetaCode);
+                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == v.MetaCode);
                         if (keyfield == null)
                             continue;
 
@@ -591,34 +591,24 @@ namespace Intwenty.MetaDataService.Engine
                         }
                     }
 
-                    var toskip = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.IsDataConnected && p.DataInfo.MetaCode == t.MetaCode && p.IsDataViewConnected);
-                    if (toskip != null)
-                        continue;
-
-                    var lookupkeyfield = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpKeyField && p.IsDataConnected && p.DataInfo.MetaCode == t.MetaCode && p.IsDataViewConnected);
-                    if (lookupkeyfield != null)
+                    var lookup = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected);
+                    if (lookup != null)
                     {
-                        var lookup = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUp && p.MetaCode == lookupkeyfield.ParentMetaCode && p.IsDataViewConnected);
-                        if (lookup != null)
+
+                        var ds = new DataSet();
+                        DataRepository.Open();
+                        DataRepository.CreateCommand(lookup.DataViewInfo.SQLQuery);
+                        DataRepository.FillDataset(ds, "VIEW");
+                        DataRepository.Close();
+                        if (ds.Tables[0].Rows.Count > 0)
                         {
-
-                            var ds = new DataSet();
-                            DataRepository.Open();
-                            DataRepository.CreateCommand(lookup.ViewInfo.SQLQuery);
-                            DataRepository.FillDataset(ds, "VIEW");
-                            DataRepository.Close();
-                            if (ds.Tables[0].Rows.Count > 0)
+                            var maxindex = ds.Tables[0].Rows.Count - 1;
+                            var rowindex = new Random(1).Next(0, maxindex);
+                            data.Add(t.MetaCode, ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName]);
+                            if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
                             {
-                                var maxindex = ds.Tables[0].Rows.Count - 1;
-                                var rowindex = new Random(1).Next(0, maxindex);
-                                data.Add(t.MetaCode, ds.Tables[0].Rows[rowindex][lookupkeyfield.ViewInfo.SQLQueryFieldName]);
-                                var lookupfield = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUpField && p.IsDataConnected && p.ParentMetaCode == lookup.MetaCode && p.IsDataViewConnected);
-                                if (lookupfield != null)
-                                {
-                                    data.Add(lookupfield.DataInfo.MetaCode, ds.Tables[0].Rows[rowindex][lookupfield.ViewInfo.SQLQueryFieldName]);
-                                }
+                                data.Add(lookup.DataColumnInfo2.MetaCode, ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName]);
                             }
-
                         }
 
                     }

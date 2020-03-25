@@ -169,30 +169,56 @@ namespace Intwenty.Data
                         if (!string.IsNullOrEmpty(item.DataMetaCode))
                         {
                             var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
-                            if (dinf != null)
-                                item.DataInfo = dinf;
+                            if (dinf != null && dinf.IsMetaTypeDataColumn)
+                                item.DataColumnInfo = dinf;
+                            else if (dinf != null && dinf.IsMetaTypeDataTable)
+                                item.DataTableInfo = dinf;
+
+                            if (item.DataColumnInfo != null && item.DataTableInfo == null)
+                            {
+                                if (!item.DataColumnInfo.IsRoot)
+                                {
+                                    dinf = ditems.Find(p => p.MetaCode == item.DataColumnInfo.ParentMetaCode && p.AppMetaCode == app.MetaCode);
+                                    if (dinf != null && dinf.IsMetaTypeDataTable)
+                                        item.DataTableInfo = dinf;
+                                }
+                                else
+                                {
+                                    item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id=0, DbName = app.DbName, TableName = app.DbName, MetaCode= "MAINTABLE", ParentMetaCode = "ROOT", Title = app.DbName   };
+
+                                }
+                            }
+
+
+                        }
+                        if (!string.IsNullOrEmpty(item.DataMetaCode2))
+                        {
+                            var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode2 && p.AppMetaCode == app.MetaCode);
+                            if (dinf != null && dinf.IsMetaTypeDataColumn)
+                                item.DataColumnInfo2 = dinf;
                         }
 
-                        if (item.HasDataViewDomain && item.IsMetaTypeLookUp)
+                        if (item.HasDataViewDomain)
                         {
                             var vinf = views.Find(p => p.MetaCode == item.ViewName && p.IsRoot);
                             if (vinf != null)
-                                item.ViewInfo = vinf;
+                                item.DataViewInfo = vinf;
+
+                            if (!string.IsNullOrEmpty(item.ViewMetaCode))
+                            {
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && p.IsMetaTypeDataViewKeyColumn);
+                                if (vinf != null)
+                                    item.DataViewColumnInfo = vinf;
+                            }
+                            if (!string.IsNullOrEmpty(item.ViewMetaCode2))
+                            {
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && p.IsMetaTypeDataViewColumn);
+                                if (vinf != null)
+                                    item.DataViewColumnInfo2 = vinf;
+                            }
                         }
 
-                        if (item.HasDataViewDomain && item.IsMetaTypeLookUpKeyField)
-                        {
-                            var vinf = views.Find(p => p.MetaCode == item.ViewField && p.ParentMetaCode == item.ViewName && !p.IsRoot && !item.IsRoot);
-                            if (vinf != null)
-                                item.ViewInfo = vinf;
-                        }
-
-                        if (item.HasDataViewDomain && item.IsMetaTypeLookUpField)
-                        {
-                            var vinf = views.Find(p => p.MetaCode == item.ViewField && p.ParentMetaCode == item.ViewName && !p.IsRoot && !item.IsRoot);
-                            if (vinf != null)
-                                item.ViewInfo = vinf;
-                        }
+                       
                     }
                 }
 
@@ -463,19 +489,13 @@ namespace Intwenty.Data
         #region UI
         public List<UserInterfaceModelItem> GetUserInterfaceModelItems()
         {
-            var dataitems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
-            var res = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
+            var res = new List<UserInterfaceModelItem>();
 
-            foreach (var item in res)
+            var models = GetApplicationModels();
+
+            foreach (var m in models)
             {
-
-                if (!string.IsNullOrEmpty(item.DataMetaCode))
-                {
-                    var dinf = dataitems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == item.AppMetaCode);
-                    if (dinf != null)
-                        item.DataInfo = dinf;
-                }
-
+                res.AddRange(m.UIStructure);
             }
 
             return res;

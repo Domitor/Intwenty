@@ -71,8 +71,8 @@ namespace Intwenty.Models.MetaDesigner
                     {
                         if (f.IsMetaTypeListViewField && f.ParentMetaCode == t.MetaCode)
                         {
-                            if (f.IsDataConnected)
-                                res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataInfo.DbName });
+                            if (f.IsDataColumnConnected)
+                                res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumnInfo.DbName });
                             else
                                 res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title});
                         }

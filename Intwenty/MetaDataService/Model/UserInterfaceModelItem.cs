@@ -11,8 +11,6 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypeTextBox = "TEXTBOX";
         public static readonly string MetaTypeTextArea = "TEXTAREA";
         public static readonly string MetaTypeLookUp = "LOOKUP";
-        public static readonly string MetaTypeLookUpKeyField = "LOOKUPKEYFIELD";
-        public static readonly string MetaTypeLookUpField = "LOOKUPFIELD";
         public static readonly string MetaTypeNumBox = "NUMBOX";
         public static readonly string MetaTypeCheckBox = "CHECKBOX";
         public static readonly string MetaTypeComboBox = "COMBOBOX";
@@ -28,7 +26,6 @@ namespace Intwenty.MetaDataService.Model
         public static readonly string MetaTypeEditGridCheckBox = "EDITGRID_CHECKBOX";
         public static readonly string MetaTypeEditGridComboBox = "EDITGRID_COMBOBOX";
         public static readonly string MetaTypeEditGridLookUp = "EDITGRID_LOOKUP";
-        public static readonly string MetaTypeEditGridLookUpKeyField = "EDITGRID_LOOKUPKEYFIELD";
 
 
         public UserInterfaceModelItem()
@@ -51,10 +48,12 @@ namespace Intwenty.MetaDataService.Model
             AppMetaCode = entity.AppMetaCode;
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;
-            CssClass = entity.CssClass;
             ColumnOrder = entity.ColumnOrder;
             RowOrder = entity.RowOrder;
             DataMetaCode = entity.DataMetaCode;
+            ViewMetaCode = entity.ViewMetaCode;
+            DataMetaCode2 = entity.DataMetaCode2;
+            ViewMetaCode2 = entity.ViewMetaCode2;
             Domain = entity.Domain;
             Properties = entity.Properties;
             SetEmptyStrings();
@@ -66,8 +65,10 @@ namespace Intwenty.MetaDataService.Model
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(CssClass)) CssClass = string.Empty;
+            if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ViewMetaCode2)) ViewMetaCode2 = string.Empty;
+            if (string.IsNullOrEmpty(DataMetaCode2)) DataMetaCode2 = string.Empty;
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
@@ -79,7 +80,11 @@ namespace Intwenty.MetaDataService.Model
 
         public string DataMetaCode { get; set; }
 
-        public string CssClass { get; set; }
+        public string ViewMetaCode { get; set; }
+
+        public string DataMetaCode2 { get; set; }
+
+        public string ViewMetaCode2 { get; set; }
 
         public int ColumnOrder { get; set; }
 
@@ -87,9 +92,17 @@ namespace Intwenty.MetaDataService.Model
 
         public string Domain { get; set; }
 
-        public DatabaseModelItem DataInfo { get; set; }
+        public DatabaseModelItem DataTableInfo { get; set; }
 
-        public DataViewModelItem ViewInfo { get; set; }
+        public DatabaseModelItem DataColumnInfo { get; set; }
+
+        public DatabaseModelItem DataColumnInfo2 { get; set; }
+
+        public DataViewModelItem DataViewInfo { get; set; }
+
+        public DataViewModelItem DataViewColumnInfo { get; set; }
+
+        public DataViewModelItem DataViewColumnInfo2 { get; set; }
 
         public List<string> ValidProperties
         {
@@ -116,8 +129,6 @@ namespace Intwenty.MetaDataService.Model
                 t.Add(MetaTypeTextBox);
                 t.Add(MetaTypeTextArea);
                 t.Add(MetaTypeLookUp);
-                t.Add(MetaTypeLookUpKeyField);
-                t.Add(MetaTypeLookUpField);
                 t.Add(MetaTypeNumBox);
                 t.Add(MetaTypeCheckBox);
                 t.Add(MetaTypeComboBox);
@@ -133,19 +144,38 @@ namespace Intwenty.MetaDataService.Model
                 t.Add(MetaTypeEditGridNumBox);
                 t.Add(MetaTypeEditGridDatePicker);
                 t.Add(MetaTypeEditGridLookUp);
-                t.Add(MetaTypeEditGridLookUpKeyField);
                 return t;
             }
         }
 
-        public bool IsDataConnected
+        public bool IsDataTableConnected
         {
-            get { return DataInfo != null && !string.IsNullOrEmpty(DataMetaCode); }
+            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
+        }
+
+        public bool IsDataColumnConnected
+        {
+            get { return (DataColumnInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataColumnInfo.IsMetaTypeDataColumn); }
+        }
+
+        public bool IsDataColumn2Connected
+        {
+            get { return (DataColumnInfo2 != null && !string.IsNullOrEmpty(DataMetaCode2) && DataColumnInfo2.IsMetaTypeDataColumn); }
         }
 
         public bool IsDataViewConnected
         {
-            get { return Domain.Contains(DataViewModelItem.MetaTypeDataView) && ViewInfo != null; }
+            get { return (Domain.Contains(DataViewModelItem.MetaTypeDataView) && DataViewInfo != null && DataViewInfo.IsMetaTypeDataView); }
+        }
+
+        public bool IsDataViewColumnConnected
+        {
+            get { return (DataViewColumnInfo != null && !string.IsNullOrEmpty(ViewMetaCode)); }
+        }
+
+        public bool IsDataViewColumn2Connected
+        {
+            get { return (DataViewColumnInfo2 != null && !string.IsNullOrEmpty(ViewMetaCode2)); }
         }
 
         public bool HasValueDomain
@@ -190,21 +220,6 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public string ViewField
-        {
-            get
-            {
-                if (!HasDataViewDomain)
-                    return string.Empty;
-
-                var splits = Domain.Split(".".ToCharArray());
-                if (splits.Length >= 3)
-                    return splits[2];
-                else
-                    return string.Empty;
-
-            }
-        }
 
 
         public bool IsMetaTypeTextBox
@@ -225,19 +240,6 @@ namespace Intwenty.MetaDataService.Model
         }
 
     
-
-        public bool IsMetaTypeLookUpKeyField
-        {
-            get { return MetaType == MetaTypeLookUpKeyField; }
-        }
-
- 
-        public bool IsMetaTypeLookUpField
-        {
-            get { return MetaType == MetaTypeLookUpField; }
-        }
-
-
         public bool IsMetaTypeNumBox
         {
             get { return MetaType == MetaTypeNumBox; }
@@ -320,11 +322,6 @@ namespace Intwenty.MetaDataService.Model
         public bool IsMetaTypeEditGridLookUp
         {
             get { return MetaType == MetaTypeEditGridLookUp; }
-        }
-
-        public bool IsMetaTypeEditGridLookUpKeyField
-        {
-            get { return MetaType == MetaTypeEditGridLookUpKeyField; }
         }
 
         public override bool HasValidMetaType

@@ -107,7 +107,7 @@ namespace Intwenty.MetaDataService
 
             foreach (var t in app.UIStructure)
             {
-                if (t.IsDataConnected && t.DataInfo.Mandatory)
+                if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
                 {
                     var dv = data.FirstOrDefault(p => p.Key == t.DataMetaCode);
                     if (dv.Equals(default(KeyValuePair<string, object>)))
@@ -197,24 +197,16 @@ namespace Intwenty.MetaDataService
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
-                    if (ui.IsMetaTypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeLookUpField))
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPFIELD.", ui.Title, a.Application.Title));
-
-                    if (ui.IsMetaTypeLookUp && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeLookUpKeyField))
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no children with [MetaType]=LOOKUPKEYFIELD.", ui.Title, a.Application.Title));
+                    if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumnConnected)
+                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYKOLUMN", ui.Title, a.Application.Title));
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewConnected)
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
 
-                    if (ui.IsMetaTypeLookUpKeyField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewKeyField)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPKEYFIELD in application {1} is not connected to a DATAVIEWKEYFIELD, check domainname.", ui.Title, a.Application.Title));
-
-                    if (ui.IsMetaTypeLookUpField && ui.IsDataViewConnected && !ui.ViewInfo.IsMetaTypeDataViewField)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUPFIELD in application {1} is not connected to a DATAVIEWFIELD, check domainname.", ui.Title, a.Application.Title));
 
 
-                    if (!ui.IsDataConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
-                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to MetaDataItem [DataMetaCode].", new object[] { ui.Title, a.Application.Title } ));
+                    if (!ui.IsDataColumnConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
+                        res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to DatabaseItem [DataMetaCode].", new object[] { ui.Title, a.Application.Title } ));
 
                     if (!ui.HasValidProperties)
                     {
@@ -277,18 +269,18 @@ namespace Intwenty.MetaDataService
                     res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query field on the ROOT level.", v.Title));
                 }
 
-                if (!string.IsNullOrEmpty(v.SQLQuery) && v.IsMetaTypeDataViewField)
+                if (!string.IsNullOrEmpty(v.SQLQuery) && v.IsMetaTypeDataViewColumn)
                 {
                     res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query specified. (DATAVIEWFIELD can't have queries)", v.Title));
                 }
 
-                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewField))
-                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWFIELD.", v.Title));
+                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewColumn))
+                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWCOLUMN.", v.Title));
 
-                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyField))
-                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWKEYFIELD.", v.Title));
+                if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyColumn))
+                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWKEYCOLUMN.", v.Title));
 
-                if (v.IsMetaTypeDataViewField || v.IsMetaTypeDataViewKeyField)
+                if (v.IsMetaTypeDataViewColumn || v.IsMetaTypeDataViewKeyColumn)
                 {
                     var view = viewinfo.Find(p => p.IsMetaTypeDataView && p.MetaCode == v.ParentMetaCode);
                     if (view != null)
