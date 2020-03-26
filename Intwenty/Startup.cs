@@ -49,15 +49,18 @@ namespace Intwenty
 
             services.AddDefaultIdentity<SystemUser>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = true;
+                //options.SignIn.RequireConfirmedAccount = true;
                 //options.SignIn.RequireConfirmedPhoneNumber = true;
-
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireNonAlphanumeric = false;
                 }) 
                .AddRoles<SystemRole>()
                .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            //services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>().AddRoles<SystemRole>();
-         
 
             services.AddControllersWithViews().AddJsonOptions(options =>
             {

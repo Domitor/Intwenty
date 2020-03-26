@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Intwenty.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "User,Administrator")]
     public class ApplicationController : Controller
     {
         private IServiceEngine MetaServer { get; }
