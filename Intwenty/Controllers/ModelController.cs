@@ -7,9 +7,12 @@ using Intwenty.Models.MetaDesigner;
 using Intwenty.Data;
 using Intwenty.MetaDataService;
 using Intwenty.MetaDataService.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intwenty.Controllers
 {
+    
+    [Authorize(Roles="Administrator")]
     public class ModelController : Controller
     {
         public IServiceEngine MetaServer { get; }

@@ -8,9 +8,11 @@ using Intwenty.Models;
 using Intwenty.Data;
 using Intwenty.MetaDataService;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intwenty.Controllers
 {
+    [Authorize(Roles = "User")]
     public class ApplicationController : Controller
     {
         private IServiceEngine MetaServer { get; }

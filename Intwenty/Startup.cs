@@ -47,8 +47,17 @@ namespace Intwenty
 
             });
 
-            services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddDefaultIdentity<SystemUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+                //options.SignIn.RequireConfirmedPhoneNumber = true;
 
+                }) 
+               .AddRoles<SystemRole>()
+               .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            //services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>().AddRoles<SystemRole>();
+         
 
             services.AddControllersWithViews().AddJsonOptions(options =>
             {
