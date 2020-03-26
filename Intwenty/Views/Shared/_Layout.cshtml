@@ -33,7 +33,7 @@
             <div class="collapse navbar-collapse" id="navbarText">
 
                 <ul class="nav navbar-nav mr-auto">
-                    @if (User.IsInRole("User"))
+                    @if (User.Identity.IsAuthenticated)
                     {
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
