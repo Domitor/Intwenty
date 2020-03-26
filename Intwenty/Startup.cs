@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Intwenty.Data;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Intwenty.Data.Entity;
 
 namespace Intwenty
 {
@@ -46,7 +47,7 @@ namespace Intwenty
 
             });
 
-
+            services.AddDefaultIdentity<SystemUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
 
 
             services.AddControllersWithViews().AddJsonOptions(options =>
@@ -77,9 +78,14 @@ namespace Intwenty
             app.UseCookiePolicy();
            
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }

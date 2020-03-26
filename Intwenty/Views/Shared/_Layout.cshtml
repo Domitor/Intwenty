@@ -29,7 +29,8 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="/">Intwenty</a>
             <div class="collapse navbar-collapse" id="navbarText">
-                <ul class="nav navbar-nav">
+
+                <ul class="nav navbar-nav mr-auto">
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
                         <div class="dropdown-menu">
@@ -72,9 +73,10 @@
                             <a class="dropdown-item" asp-controller="Model" asp-action="ToolGenerateTestData"><span class="fa fa-meteor"></span> Manage testdata</a>
                         </div>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#"><span class="fa fa-user"></span> Users and security</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="techModal()"><span class="fa fa-question"></span> Technology</a></li>
+
                 </ul>
+                <partial name="_LoginPartial" />
             </div>
 
         </nav>

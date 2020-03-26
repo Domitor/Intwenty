@@ -1,0 +1,31 @@
+﻿@{
+    //Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<br />
+<br />
+
+<div class="card">
+    <div class="card-header"><h2>Manage your account</h2></div>
+    <div class="card-body">Change your account settings</div>
+</div>
+
+<br />
+<br />
+
+<div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <partial name="_ManageNav" />
+        </div>
+        <div class="col-md-8">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
