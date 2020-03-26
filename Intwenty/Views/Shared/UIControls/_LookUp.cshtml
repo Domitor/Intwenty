@@ -8,12 +8,12 @@
 
 
     <div style="width:10%">
-        <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@Model.DataViewMetaCode')"><span class="fa fa-plus"></span></button>
+        <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@Model.ViewName')"><span class="fa fa-plus"></span></button>
     </div>
 
 
     <div style="float:left; margin-left:5px; width:30%">
-        <input id="@Model.UIId" type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableMetaCode.@Model.DataColumnMetaCode" v-on:keydown.tab="getDataViewValue('@Model.DataViewMetaCode','@Model.DataColumnMetaCode','@Model.UIId')" data-dbfield="@Model.DataColumnMetaCode" data-viewfield="@Model.DataViewColumnDbName" data-lookupid="@Model.UIId" />
+        <input id="@Model.UIId" type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@Model.ViewName','@Model.DataColumnDbName','@Model.UIId')" data-dbfield="@Model.DataColumnDbName" data-viewfield="@Model.DataViewColumnDbName" data-lookupid="@Model.UIId" />
     </div>
 
 
@@ -21,7 +21,7 @@
     {
 
         <div style="float:left; margin-left:5px; width:60%">
-            <input type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableMetaCode.@Model.DataColumn2MetaCode" data-dbfield="@Model.DataColumn2MetaCode" data-viewfield="@Model.DataViewColumn2DbName" data-lookupid="@Model.UIId" readonly />
+            <input type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumn2DbName" data-dbfield="@Model.DataColumn2DbName" data-viewfield="@Model.DataViewColumn2DbName" data-lookupid="@Model.UIId" readonly />
         </div>
     }
 

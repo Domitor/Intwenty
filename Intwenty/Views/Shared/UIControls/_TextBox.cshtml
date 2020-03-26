@@ -5,5 +5,5 @@
         @Model.Title @{ if (Model.Mandatory)
             { <span style="color: red"> *</span> }}
     </label>
-    <input id="@Model.UIId"  type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableMetaCode.@Model.DataColumnMetaCode" v-on:input="onUserInput(event)" data-metatype="TEXTBOX" data-dbfield="@Model.DataColumnMetaCode" data-required="@Model.Mandatory" />
+    <input id="@Model.UIId"  type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="TEXTBOX" data-dbfield="@Model.DataColumnDbName" data-required="@Model.Mandatory" />
 </div>

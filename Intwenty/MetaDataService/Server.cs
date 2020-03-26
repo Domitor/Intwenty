@@ -13,7 +13,7 @@ namespace Intwenty.MetaDataService
     {
         List<OperationResult> ConfigureDatabase();
 
-        OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
+        OperationResult Save(ApplicationModel app, ClientStateInfo state, ApplicationData data);
 
         OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state);
 
@@ -25,7 +25,7 @@ namespace Intwenty.MetaDataService
 
         OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult Validate(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data);
+        OperationResult Validate(ApplicationModel app, ClientStateInfo state, ApplicationData data);
 
         OperationResult ValidateModel();
 
@@ -61,7 +61,7 @@ namespace Intwenty.MetaDataService
             return res;
         }
 
-        public OperationResult Save(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data)
+        public OperationResult Save(ApplicationModel app, ClientStateInfo state, ApplicationData data)
         {
 
             var validation = Validate(app, state, data);
@@ -102,25 +102,31 @@ namespace Intwenty.MetaDataService
             return t.GetValueDomains();
         }
 
-        public OperationResult Validate(ApplicationModel app, ClientStateInfo state, Dictionary<string, object> data)
+        public OperationResult Validate(ApplicationModel app, ClientStateInfo state, ApplicationData data)
         {
 
             foreach (var t in app.UIStructure)
             {
                 if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
                 {
-                    var dv = data.FirstOrDefault(p => p.Key == t.DataMetaCode);
-                    if (dv.Equals(default(KeyValuePair<string, object>)))
+                    var dv = data.MainTable.FirstOrDefault(p => p.Code == t.DataMetaCode || p.Code == t.DataColumnInfo.DbName);
+                    if (dv != null && !dv.HasValue)
                     {
                         return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title),state.Id, state.Version);
                     }
-                    else
+                    foreach (var table in data.SubTables)
                     {
-                        if (dv.Value == null)
-                            return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
-                        else if (string.IsNullOrEmpty(Convert.ToString(dv.Value)))
-                            return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                        foreach (var row in table.Rows)
+                        {
+                            dv = row.Values.Find(p => p.Code == t.DataMetaCode || p.Code == t.DataColumnInfo.DbName);
+                            if (dv != null && !dv.HasValue)
+                            {
+                                return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                            }
+                        }
+
                     }
+                   
                 }
             }
 

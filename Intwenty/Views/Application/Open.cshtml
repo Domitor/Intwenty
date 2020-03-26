@@ -58,7 +58,7 @@
             var baseurl = '@Url.Content("~/Application/")';
             var endpointurl = baseurl + "Save";
 
-            this.model['@Model.Application.MetaCode'].ApplicationId = @Model.Application.Id;
+            this.model['@Model.Application.DbName'].ApplicationId = @Model.Application.Id;
 
             if (!context.canSave())
                 return;
@@ -76,7 +76,7 @@
 
         };
 
-        var app = createVue('#app',@Model.Application.Id, '@Model.Application.MetaCode','@Url.Content("~/Application/")');
+        var app = createVue('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/")');
 
 
     </script>

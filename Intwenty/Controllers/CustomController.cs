@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
+using Intwenty.MetaDataService.Model;
 
 namespace Intwenty.Controllers.Custom
 {
@@ -54,9 +55,9 @@ namespace Intwenty.Controllers.Custom
 
             var state = new ClientStateInfo() { Application = t.Application };
 
-            var data = new Dictionary<string, object>();
-            data.Add("FILENAME", uniquefilename);
-            data.Add("IMPORTDATE", DateTime.Now);
+            var data = new ApplicationData();
+            data.MainTable.Add(new ApplicationDataValue() { Code = "FILENAME", Value = uniquefilename });
+            data.MainTable.Add(new ApplicationDataValue() { Code = "IMPORTDATE", Value = DateTime.Now });
 
             var res = MetaServer.Save(t, state, data);
 

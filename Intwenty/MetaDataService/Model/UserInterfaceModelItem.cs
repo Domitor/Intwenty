@@ -13,18 +13,20 @@ namespace Intwenty.MetaDataService.Model
 
         string Title { get;  }
 
-        string DataTableMetaCode { get; }
+        string DataTableDbName { get; }
 
-        string DataColumnMetaCode { get; }
+        string DataColumnDbName { get; }
 
     }
 
     public interface IUIComplexBinding : IUIBinding
     {
-      
-        string DataColumn2MetaCode { get; }
 
-        string DataViewMetaCode { get; }
+        string ViewName { get; }
+
+        string DomainName { get; }
+
+        string DataColumn2DbName { get; }
 
         string DataViewColumnDbName { get; }
 
@@ -398,50 +400,40 @@ namespace Intwenty.MetaDataService.Model
             }
         }
 
-        public string DataTableMetaCode
+        public string DataTableDbName
         {
             get 
             { 
                 if (IsDataTableConnected)
-                    return DataTableInfo.MetaCode;
+                    return DataTableInfo.DbName;
 
                 return string.Empty;
             }
         }
 
-        public string DataColumnMetaCode
+        public string DataColumnDbName
         {
             get
             {
                 if (IsDataColumnConnected)
-                    return DataColumnInfo.MetaCode;
+                    return DataColumnInfo.DbName;
 
                 return string.Empty;
             }
         }
 
-        public string DataColumn2MetaCode
+        public string DataColumn2DbName
         {
             get
             {
                 if (IsDataColumn2Connected)
-                    return DataColumnInfo2.MetaCode;
+                    return DataColumnInfo2.DbName;
 
                 return string.Empty;
             }
         }
 
-        public string DataViewMetaCode
-        {
-            get
-            {
-                if (IsDataViewConnected)
-                    return DataViewInfo.MetaCode;
-
-                return string.Empty;
-            }
-        }
-
+      
         public string DataViewColumnDbName
         {
             get

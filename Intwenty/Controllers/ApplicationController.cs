@@ -9,6 +9,7 @@ using Intwenty.Data;
 using Intwenty.MetaDataService;
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Intwenty.MetaDataService.Model;
 
 namespace Intwenty.Controllers
 {
@@ -142,48 +143,21 @@ namespace Intwenty.Controllers
         public JsonResult Save([FromBody] System.Text.Json.JsonElement model)
         {
 
-
-            var jsonarr = model.EnumerateObject();
-            var appvalues = new Dictionary<string, object>();
-            if (jsonarr.Count() < 1)
+            var data = ApplicationData.CreateFromJSON(model);
+            if (!data.HasData)
                 return new JsonResult("{}");
 
-            foreach (var j in jsonarr)
-            {
-                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
-                {
-                    var jsonobjarr = j.Value.EnumerateObject();
-                    foreach (var av in jsonobjarr)
-                    {
-                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
-                            appvalues.Add(av.Name, av.Value.GetDecimal());
-                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
-                            appvalues.Add(av.Name, av.Value.GetString());
-                    }
-                }
-                if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
-                {
-                    appvalues.Add(j.Name, j.Value);
-                }
-            }
-
-            if (!appvalues.ContainsKey("ApplicationId"))
+            if (data.ApplicationId < 1)
                 throw new InvalidOperationException("ApplicationId missing when saving...");
 
-            var appid = Convert.ToInt32(appvalues.First(p => p.Key == "ApplicationId").Value);
-
-            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == appid);
+            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == data.ApplicationId);
 
             var state = new ClientStateInfo();
             state.Application = app.Application;
+            state.Id = data.Id;
+            state.Version = data.Version;
 
-            if (appvalues.ContainsKey("Id") && appvalues.ContainsKey("Version"))
-            {
-                state.Id = Convert.ToInt32(appvalues.First(p => p.Key == "Id").Value);
-                state.Version = Convert.ToInt32(appvalues.First(p => p.Key == "Version").Value);
-            }
-
-            var res = MetaServer.Save(app, state, appvalues);
+            var res = MetaServer.Save(app, state, data);
 
             return new JsonResult(res);
 

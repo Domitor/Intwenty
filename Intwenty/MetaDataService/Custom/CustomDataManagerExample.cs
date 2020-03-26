@@ -35,28 +35,28 @@ namespace Intwenty.MetaDataService.Custom
             return base.GetVersion();
         }
 
-        public override OperationResult Save(Dictionary<string, object> data)
+        public override OperationResult Save(ApplicationData data)
         {
             return base.Save(data);
         }
 
-        protected override void BeforeSave(Dictionary<string, object> data)
+        protected override void BeforeSave(ApplicationData data)
         {
             base.BeforeSave(data);
         }
 
-        protected override void BeforeSaveNew(DataAccessClient da, Dictionary<string, object> data)
+        protected override void BeforeSaveNew(DataAccessClient da, ApplicationData data)
         {
             base.BeforeSaveNew(da, data);
         }
 
-        protected override void BeforeSaveUpdate(DataAccessClient da, Dictionary<string, object> data)
+        protected override void BeforeSaveUpdate(DataAccessClient da, ApplicationData data)
         {
             base.BeforeSaveUpdate(da, data);
         }
 
 
-        protected override void AfterSave(Dictionary<string, object> data)
+        protected override void AfterSave(ApplicationData data)
         {
             base.AfterSave(data);
         }

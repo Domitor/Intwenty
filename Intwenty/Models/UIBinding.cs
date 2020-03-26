@@ -12,27 +12,28 @@ namespace Intwenty.Models
 
         public bool Mandatory { get; set; }
 
-        public string DataTableMetaCode { get; set; }
+        public string DataTableDbName { get; set; }
 
-        public string DataColumnMetaCode { get; set; }
+        public string DataColumnDbName{ get; set; }
 
 
         public UIBinding()
         {
-            DataTableMetaCode = "";
+            DataTableDbName = "";
             UIId = "";
             Title = "";
-            DataColumnMetaCode = "";
+            DataColumnDbName = "";
 
         }
     }
 
     public class UIComplexBinding : UIBinding, IUIComplexBinding
     {
+        public string ViewName { get; set; }
 
-        public string DataColumn2MetaCode { get; set; }
+        public string DomainName { get; set; }
 
-        public string DataViewMetaCode { get; set; }
+        public string DataColumn2DbName { get; set; }
 
         public string DataViewColumnDbName{ get; set; }
 
@@ -40,12 +41,13 @@ namespace Intwenty.Models
 
         public UIComplexBinding()
         {
-            DataTableMetaCode = "";
+            DataTableDbName = "";
             UIId = "";
             Title = "";
-            DataColumnMetaCode = "";
-            DataColumn2MetaCode = "";
-            DataViewMetaCode = "";
+            DataColumnDbName = "";
+            DataColumn2DbName = "";
+            ViewName = "";
+            DomainName = "";
             DataViewColumnDbName = "";
             DataViewColumn2DbName = "";
            

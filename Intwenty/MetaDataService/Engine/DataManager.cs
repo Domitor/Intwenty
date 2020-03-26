@@ -33,7 +33,7 @@ namespace Intwenty.MetaDataService.Engine
 
         OperationResult GetListView(ListRetrivalArgs args);
 
-        OperationResult Save(Dictionary<string, object> data);
+        OperationResult Save(ApplicationData data);
 
         OperationResult GetValueDomains();
 
@@ -134,7 +134,7 @@ namespace Intwenty.MetaDataService.Engine
                 {
                     if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
-                        sql_stmt.Append(", t2." + t.DbName + " " + t.MetaCode + " ");
+                        sql_stmt.Append(", t2." + t.DbName + " ");
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
@@ -157,7 +157,7 @@ namespace Intwenty.MetaDataService.Engine
                     return result;
                 }
 
-                jsonresult.Append("\"" + this.Meta.Application.MetaCode + "\":" + appjson.ToString());
+                jsonresult.Append("\"" + this.Meta.Application.DbName + "\":" + appjson.ToString());
 
                 //SUBTABLES
                 foreach (var t in this.Meta.DataStructure)
@@ -170,7 +170,7 @@ namespace Intwenty.MetaDataService.Engine
                         {
                             if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)
                             {
-                                sql_stmt.Append(", t2." + v.DbName + " " + v.MetaCode + " ");
+                                sql_stmt.Append(", t2." + v.DbName + " ");
                             }
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
@@ -182,7 +182,7 @@ namespace Intwenty.MetaDataService.Engine
                         var tablearray = DataRepository.GetAsJSONArray();
                         DataRepository.Close();
 
-                        jsonresult.Append(", \""+t.MetaCode+"\": " + tablearray.ToString());
+                        jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
 
                     }
                 }
@@ -210,7 +210,7 @@ namespace Intwenty.MetaDataService.Engine
             throw new NotImplementedException();
         }
 
-        public virtual OperationResult Save(Dictionary<string, object> data)
+        public virtual OperationResult Save(ApplicationData data)
         {
 
             if (ClientState == null)
@@ -234,7 +234,7 @@ namespace Intwenty.MetaDataService.Engine
                     BeforeSaveNew(da, data);
                     InsertMainTable(data, da);
                     InsertInformationStatus(da);
-
+                    HandleSubTables(data, da);
                     this.Status = LifecycleStatus.NEW_SAVED;
                 }
                 else if (ClientState.Id > 0 && this.Meta.Application.UseVersioning)
@@ -244,6 +244,7 @@ namespace Intwenty.MetaDataService.Engine
                     BeforeSaveUpdate(da, data);
                     InsertMainTable(data, da);
                     UpdateInformationStatus(da);
+                    HandleSubTables(data, da);
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
                 else if (ClientState.Id > 0 && !this.Meta.Application.UseVersioning)
@@ -252,6 +253,7 @@ namespace Intwenty.MetaDataService.Engine
                     BeforeSaveUpdate(da, data);
                     UpdateMainTable(data, da);
                     UpdateInformationStatus(da);
+                    HandleSubTables(data, da);
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
 
@@ -572,7 +574,7 @@ namespace Intwenty.MetaDataService.Engine
         public OperationResult GenerateTestData(int gencount)
         {
             var rnd = new Random(9999999);
-            var data = new Dictionary<string, object>();
+            var data = new ApplicationData();
 
             foreach (var t in this.Meta.DataStructure)
             {
@@ -586,7 +588,7 @@ namespace Intwenty.MetaDataService.Engine
                         {
                             var nolist = ModelRepository.GetNewNoSeriesValues(this.Meta.Application.Id);
                             var noseriesval = nolist.FirstOrDefault(p => p.DataMetaCode == t.MetaCode).NewValue;
-                            data.Add(t.MetaCode, noseriesval);
+                            data.MainTable.Add(new ApplicationDataValue() { Code = t.MetaCode, Value = noseriesval });
                             continue;
                         }
                     }
@@ -604,10 +606,10 @@ namespace Intwenty.MetaDataService.Engine
                         {
                             var maxindex = ds.Tables[0].Rows.Count - 1;
                             var rowindex = new Random(1).Next(0, maxindex);
-                            data.Add(t.MetaCode, ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName]);
+                            data.MainTable.Add(new ApplicationDataValue() { Code = t.MetaCode, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName] });
                             if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
                             {
-                                data.Add(lookup.DataColumnInfo2.MetaCode, ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName]);
+                                data.MainTable.Add(new ApplicationDataValue() { Code = lookup.DataColumnInfo2.MetaCode, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName] });
                             }
                         }
 
@@ -617,7 +619,7 @@ namespace Intwenty.MetaDataService.Engine
 
                         var value = GetSemanticValue(t, rnd, gencount);
                         if (value != null)
-                            data.Add(t.MetaCode, value);
+                            data.MainTable.Add(new ApplicationDataValue() { Code = t.MetaCode, Value = value });
 
                     }
                 }
@@ -634,22 +636,22 @@ namespace Intwenty.MetaDataService.Engine
 
         #region Handlers
 
-        protected virtual void BeforeSave(Dictionary<string, object> data)
+        protected virtual void BeforeSave(ApplicationData data)
         {
 
         }
 
-        protected virtual void BeforeSaveNew(DataAccessClient da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveNew(DataAccessClient da, ApplicationData data)
         {
 
         }
 
-        protected virtual void BeforeSaveUpdate(DataAccessClient da, Dictionary<string, object> data)
+        protected virtual void BeforeSaveUpdate(DataAccessClient da, ApplicationData data)
         {
 
         }
 
-        protected virtual void AfterSave(Dictionary<string, object> data)
+        protected virtual void AfterSave(ApplicationData data)
         {
 
         }
@@ -779,7 +781,7 @@ namespace Intwenty.MetaDataService.Engine
             return id;
         }
 
-        private void InsertMainTable(Dictionary<string, object> data, DataAccessClient da)
+        private void InsertMainTable(ApplicationData data, DataAccessClient da)
         {
             var paramlist = new Dictionary<DatabaseModelItem, object>();
 
@@ -803,8 +805,8 @@ namespace Intwenty.MetaDataService.Engine
                 {
                     sql_insert.Append("," + t.DbName);
 
-                    var dv = data.FirstOrDefault(p => p.Key == t.MetaCode);
-                    if (dv.Equals(default(KeyValuePair<string, object>)))
+                    var dv = data.MainTable.FirstOrDefault(p => p.Code == t.DbName);
+                    if (!dv.HasValue)
                     {
                         sql_insert_value.Append(",null");
                     }
@@ -835,8 +837,35 @@ namespace Intwenty.MetaDataService.Engine
 
         }
 
+        private void HandleSubTables(ApplicationData data, DataAccessClient da)
+        {
+            foreach (var table in data.SubTables)
+            {
+                var tbl = Meta.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName == table.Code);
+                if (tbl == null)
+                    continue;
 
-        private void UpdateMainTable(Dictionary<string, object> data, DataAccessClient da)
+                foreach (var row in table.Rows)
+                {
+                    if (row.Id < 1 || this.Meta.Application.UseVersioning)
+                    {
+                        InsertTableRow(row, tbl, da);
+
+                    }
+                    else
+                    {
+                        UpdateTableRow(row, tbl, da);
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        private void UpdateMainTable(ApplicationData data, DataAccessClient da)
         {
             var paramlist = new Dictionary<DatabaseModelItem, object>();
 
@@ -851,8 +880,8 @@ namespace Intwenty.MetaDataService.Engine
 
                 if (t.IsRoot && t.IsMetaTypeDataColumn)
                 {
-                    var dv = data.FirstOrDefault(p => p.Key == t.MetaCode);
-                    if (dv.Equals(default(KeyValuePair<string, object>)))
+                    var dv = data.MainTable.FirstOrDefault(p => p.Code == t.DbName);
+                    if (!dv.HasValue)
                     {
                         sql_update.Append("," + t.DbName + "=null");
                     }
@@ -875,6 +904,103 @@ namespace Intwenty.MetaDataService.Engine
 
         }
 
+        private void InsertTableRow(ApplicationTableRow data, DatabaseModelItem tablemodel, DataAccessClient da)
+        {
+            var paramlist = new Dictionary<DatabaseModelItem, object>();
+
+            var rowid = GetNewSystemID(DatabaseModelItem.MetaTypeDataTable, tablemodel.MetaCode);
+            if (rowid < 1)
+                throw new InvalidOperationException("Could not get a new row id for table " + tablemodel.DbName);
+
+            var sql_insert = new StringBuilder();
+            var sql_insert_value = new StringBuilder();
+            sql_insert.Append("INSERT INTO " + tablemodel.DbName + " ");
+            sql_insert.Append(" (ID, ParentId, RowChangeDate, UserID,  Version, OwnerRefId");
+            sql_insert_value.Append(" VALUES (" + Convert.ToString(rowid));
+            sql_insert_value.Append(", " + Convert.ToString(this.ClientState.Id));
+            sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_insert_value.Append(",'SYSTEM'");
+            sql_insert_value.Append("," + Convert.ToString(this.ClientState.Version));
+            sql_insert_value.Append("," + Convert.ToString(this.ClientState.OwnerId));
+
+            foreach (var t in Meta.DataStructure)
+            {
+
+                if (t.IsRoot && t.IsMetaTypeDataColumn)
+                {
+                    sql_insert.Append("," + t.DbName);
+
+                    var dv = data.Values.Find(p => p.Code == t.DbName);
+                    if (dv == null)
+                    {
+                        sql_insert_value.Append(",null");
+                    }
+                    else
+                    {
+                        if (!dv.HasValue)
+                            sql_insert_value.Append(",null");
+                        else
+                        {
+                            sql_insert_value.Append(",@" + t.DbName);
+                            paramlist.Add(t, dv.Value);
+                        }
+                    }
+                }
+            }
+
+            sql_insert.Append(")");
+            sql_insert_value.Append(")");
+            sql_insert.Append(sql_insert_value.ToString());
+
+            da.CreateCommand(sql_insert.ToString());
+
+            SetParameters(paramlist, da);
+
+            da.ExecuteNonQuery();
+
+        }
+
+        private void UpdateTableRow(ApplicationTableRow data, DatabaseModelItem tablemodel, DataAccessClient da)
+        {
+            var paramlist = new Dictionary<DatabaseModelItem, object>();
+
+            StringBuilder sql_update = new StringBuilder();
+            sql_update.Append("UPDATE " + tablemodel.DbName);
+            sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_update.Append(",UserID='SYSTEM'");
+            sql_update.Append(",OwnerRefId=" + Convert.ToString(this.ClientState.OwnerId));
+
+            foreach (var t in Meta.DataStructure)
+            {
+
+                if (t.IsRoot && t.IsMetaTypeDataColumn)
+                {
+                    var dv = data.Values.Find(p => p.Code == t.DbName);
+                    if (dv == null)
+                        continue;
+
+                    if (!dv.HasValue)
+                    {
+                        sql_update.Append("," + t.DbName + "=null");
+                    }
+                    else
+                    {
+                        sql_update.Append("," + t.DbName + "=@" + t.DbName);
+                        paramlist.Add(t, dv.Value);
+                    }
+                }
+            }
+
+            sql_update.Append(" WHERE ID=@ID and Version = @Version");
+
+
+            da.CreateCommand(sql_update.ToString());
+            da.AddParameter("@ID", ClientState.Id);
+            da.AddParameter("@Version", ClientState.Version);
+            SetParameters(paramlist, da);
+            da.ExecuteNonQuery();
+
+        }
 
         private int CreateVersionRecord(DataAccessClient da)
         {

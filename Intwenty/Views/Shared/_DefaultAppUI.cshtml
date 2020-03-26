@@ -28,59 +28,31 @@
 
                             if (t.IsMetaTypeNumBox && t.IsDataColumnConnected)
                             {
-                                <div class="form-group">
-                                    <label class="control-label">
-                                        @t.Title  @{ if (t.DataColumnInfo.Mandatory)
-                                            { <span style="color: red"> *</span> }}
-                                    </label>
-                                    <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="number" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="NUMBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataColumnInfo.Mandatory" />
-                                </div>
+                                @await Html.PartialAsync("UIControls/_NumBox", t)
 
                             }
 
                             if (t.IsMetaTypeDatePicker && t.IsDataColumnConnected)
                             {
-                                <div class="form-group">
-                                    <label class="control-label">
-                                        @t.Title  @{ if (t.DataColumnInfo.Mandatory)
-                                            { <span style="color: red"> *</span> }}
-                                    </label>
-                                    <input id="@t.MetaCode" data-parentid="@t.ParentMetaCode" type="date" class="form-control form-control-sm" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" v-on:change="onUserInput(event)" data-metatype="DATEPICKER" data-dbfield="@t.DataMetaCode" data-required="@t.DataColumnInfo.Mandatory" />
-                                </div>
+                                @await Html.PartialAsync("UIControls/_DatePicker", t)
 
                             }
 
                             if (t.IsMetaTypeCheckBox && t.IsDataColumnConnected)
                             {
-                                <div class="form-group">
-                                    <input type="checkbox" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" /> @t.Title
-                                </div>
+                                @await Html.PartialAsync("UIControls/_CheckBox", t)
 
                             }
 
                             if (t.IsMetaTypeTextArea && t.IsDataColumnConnected)
                             {
-                                <div class="form-group">
-                                    <label class="control-label">
-                                        @t.Title  @{ if (t.DataColumnInfo.Mandatory)
-                                            { <span style="color: red"> *</span> }}
-                                    </label>
-                                    <textarea id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" rows="10" cols="50" class="form-control form-control-sm" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@t.DataMetaCode" data-required="@t.DataColumnInfo.Mandatory"></textarea>
-                                </div>
+                                @await Html.PartialAsync("UIControls/_TextArea", t)
 
                             }
 
                             if (t.IsMetaTypeComboBox && t.IsDataColumnConnected && t.HasValueDomain)
                             {
-                                <div class="form-group">
-                                    <label class="control-label">
-                                        @t.Title  @{ if (t.DataColumnInfo.Mandatory)
-                                            { <span style="color: red"> *</span> }}
-                                    </label>
-                                    <select id="@t.MetaCode" data-parentid="@t.ParentMetaCode" v-model="model.@Model.Application.MetaCode.@t.DataMetaCode" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="COMBOBOX" data-dbfield="@t.DataMetaCode" data-required="@t.DataColumnInfo.Mandatory">
-                                        <option v-for="item in valuedomains.VALUEDOMAIN_@t.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
-                                    </select>
-                                </div>
+                                @await Html.PartialAsync("UIControls/_ComboBox", t)
 
                             }
 
@@ -88,7 +60,7 @@
                             if (t.IsMetaTypeLookUp && t.IsDataViewConnected && t.IsDataColumnConnected && t.IsDataViewColumnConnected)
                             {
                                 @await Html.PartialAsync("UIControls/_LookUp", t)
-              
+
                                 <br />
                                 <br />
                             }
