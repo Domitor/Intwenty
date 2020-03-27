@@ -36,15 +36,14 @@ namespace Intwenty.Controllers.Custom
         [HttpPost]
         public JsonResult GetShipmentFiles([FromBody] ListRetrivalArgs model)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
-            var listdata = MetaServer.GetListView(t, model);
+            model.ApplicationId = 70;
+            var listdata = MetaServer.GetListView(model);
             return new JsonResult(listdata);
         }
 
         [HttpPost]
         public async Task<JsonResult> UploadDocument(IFormFile file)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
             var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
 
             var fileandpath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\USERDOC", uniquefilename);
@@ -53,13 +52,11 @@ namespace Intwenty.Controllers.Custom
                 await file.CopyToAsync(fs);
             }
 
-            var state = new ClientStateInfo() { Application = t.Application };
+            var state = new ClientStateInfo() { ApplicationId = 70 };
+            state.Values.Add(new ApplicationValue() { DbName = "FileName", Value = uniquefilename });
+            state.Values.Add(new ApplicationValue() { DbName = "ImportDate", Value = DateTime.Now.ToString() });
 
-            var data = new ApplicationData();
-            data.MainTable.Add(new ApplicationDataValue() { Code = "FILENAME", Value = uniquefilename });
-            data.MainTable.Add(new ApplicationDataValue() { Code = "IMPORTDATE", Value = DateTime.Now });
-
-            var res = MetaServer.Save(t, state, data);
+            var res = MetaServer.Save(state);
 
             return new JsonResult(res);
         }

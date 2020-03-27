@@ -66,12 +66,8 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetLatestVersion/{applicationid}/{id}")]
         public JsonResult GetLatestVersion(int applicationid, int id)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            var state = new ClientStateInfo() { Id = id };
-            var data = MetaServer.GetLatestVersion(t, state);
-            //var settings = new Newtonsoft.Json.JsonSerializerSettings();
-            //settings.Culture = new CultureInfo("sv-SE");
-            //settings.Culture.NumberFormat.NumberDecimalSeparator = ".";
+            var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
+            var data = MetaServer.GetLatestVersion(state);
             return new JsonResult(data);
 
         }
@@ -82,8 +78,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetListView([FromBody] ListRetrivalArgs model)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            var listdata = MetaServer.GetListView(t, model);
+            var listdata = MetaServer.GetListView(model);
             return new JsonResult(listdata);
         }
 
@@ -142,22 +137,16 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult Save([FromBody] System.Text.Json.JsonElement model)
         {
-
-            var data = ApplicationData.CreateFromJSON(model);
-            if (!data.HasData)
+      
+            var state = ClientStateInfo.CreateFromJSON(model);
+            if (!state.HasData)
                 return new JsonResult("{}");
 
-            if (data.ApplicationId < 1)
+            if (state.ApplicationId < 1)
                 throw new InvalidOperationException("ApplicationId missing when saving...");
 
-            var app = Repository.GetApplicationModels().Find(p => p.Application.Id == data.ApplicationId);
 
-            var state = new ClientStateInfo();
-            state.Application = app.Application;
-            state.Id = data.Id;
-            state.Version = data.Version;
-
-            var res = MetaServer.Save(app, state, data);
+            var res = MetaServer.Save(state);
 
             return new JsonResult(res);
 

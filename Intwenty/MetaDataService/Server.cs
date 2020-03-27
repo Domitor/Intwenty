@@ -13,11 +13,11 @@ namespace Intwenty.MetaDataService
     {
         List<OperationResult> ConfigureDatabase();
 
-        OperationResult Save(ApplicationModel app, ClientStateInfo state, ApplicationData data);
+        OperationResult Save(ClientStateInfo state);
 
-        OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state);
+        OperationResult GetLatestVersion(ClientStateInfo state);
 
-        OperationResult GetListView(ApplicationModel app, ListRetrivalArgs args);
+        OperationResult GetListView(ListRetrivalArgs args);
 
         OperationResult GetValueDomains(ApplicationModel app);
 
@@ -25,7 +25,7 @@ namespace Intwenty.MetaDataService
 
         OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult Validate(ApplicationModel app, ClientStateInfo state, ApplicationData data);
+        OperationResult Validate(ApplicationModel app, ClientStateInfo state);
 
         OperationResult ValidateModel();
 
@@ -61,15 +61,15 @@ namespace Intwenty.MetaDataService
             return res;
         }
 
-        public OperationResult Save(ApplicationModel app, ClientStateInfo state, ApplicationData data)
+        public OperationResult Save(ClientStateInfo state)
         {
+            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
-            var validation = Validate(app, state, data);
+            var validation = Validate(app, state);
             if (validation.IsSuccess)
             {
                 var t = DataManager.GetDataManager(app);
-                t.ClientState = state;
-                var result = t.Save(data);
+                var result = t.Save(state);
                 return result;
             }
             else
@@ -79,21 +79,22 @@ namespace Intwenty.MetaDataService
         }
 
 
-        public OperationResult GetListView(ApplicationModel app, ListRetrivalArgs args)
+        public OperationResult GetListView(ListRetrivalArgs args)
         {
+            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
             var t = DataManager.GetDataManager(app);
             t.DataRepository = DataRepository;
             t.ModelRepository = ModelRepository;
             return t.GetListView(args);
         }
 
-        public OperationResult GetLatestVersion(ApplicationModel app, ClientStateInfo state)
+        public OperationResult GetLatestVersion(ClientStateInfo state)
         {
+            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             var t = DataManager.GetDataManager(app);
             t.DataRepository = DataRepository;
             t.ModelRepository = ModelRepository;
-            t.ClientState = state;
-            return t.GetLatestVersion();
+            return t.GetLatestVersion(state);
         }
 
         public OperationResult GetValueDomains(ApplicationModel app)
@@ -102,23 +103,23 @@ namespace Intwenty.MetaDataService
             return t.GetValueDomains();
         }
 
-        public OperationResult Validate(ApplicationModel app, ClientStateInfo state, ApplicationData data)
+        public OperationResult Validate(ApplicationModel app, ClientStateInfo state)
         {
 
             foreach (var t in app.UIStructure)
             {
                 if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
                 {
-                    var dv = data.MainTable.FirstOrDefault(p => p.Code == t.DataMetaCode || p.Code == t.DataColumnInfo.DbName);
+                    var dv = state.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
                     if (dv != null && !dv.HasValue)
                     {
                         return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title),state.Id, state.Version);
                     }
-                    foreach (var table in data.SubTables)
+                    foreach (var table in state.SubTables)
                     {
                         foreach (var row in table.Rows)
                         {
-                            dv = row.Values.Find(p => p.Code == t.DataMetaCode || p.Code == t.DataColumnInfo.DbName);
+                            dv = row.Values.Find(p => p.DbName == t.DataColumnInfo.DbName);
                             if (dv != null && !dv.HasValue)
                             {
                                 return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);

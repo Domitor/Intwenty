@@ -83,64 +83,6 @@ namespace Intwenty.MetaDataService.Model
         public bool Mandatory { get; set; }
 
 
-
-        public int? GetInteger(object value)
-        {
-            try
-            {
-                return Convert.ToInt32(value);
-            }
-            catch{}
-            return null;
-        }
-
-        public decimal? GetDecimal(object value)
-        {
-            try
-            {
-                return Convert.ToDecimal(value);
-            }
-            catch{}
-            return null;
-        }
-
-        public DateTime? GetDateTime(object value)
-        {
-            try
-            {
-                return Convert.ToDateTime(value);
-            }
-            catch{}
-            return null;
-        }
-
-        public string GetString(object value)
-        {
-            try
-            {
-                return Convert.ToString(value);
-            }
-            catch{}
-            return null;
-        }
-
-        public int? GetBoolean(object value)
-        {
-            try
-            {
-                int val = 0;
-                var s = Convert.ToString(value);
-                if (s == "1") val = 1;
-                if (s.ToLower() == "true") val = 1;
-
-                return val;
-            }
-            catch{}
-            return null;
-        }
-
-      
-
         public static List<string> DataTypes
         {
             get

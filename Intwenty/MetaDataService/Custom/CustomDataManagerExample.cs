@@ -20,9 +20,9 @@ namespace Intwenty.MetaDataService.Custom
             return base.GetValueDomains();
         }
 
-        public override OperationResult GetLatestVersion()
+        public override OperationResult GetLatestVersion(ClientStateInfo data)
         {
-            return base.GetLatestVersion();
+            return base.GetLatestVersion(data);
         }
 
         public override OperationResult GetListView(ListRetrivalArgs args)
@@ -35,28 +35,28 @@ namespace Intwenty.MetaDataService.Custom
             return base.GetVersion();
         }
 
-        public override OperationResult Save(ApplicationData data)
+        public override OperationResult Save(ClientStateInfo data)
         {
             return base.Save(data);
         }
 
-        protected override void BeforeSave(ApplicationData data)
+        protected override void BeforeSave(ClientStateInfo data)
         {
             base.BeforeSave(data);
         }
 
-        protected override void BeforeSaveNew(DataAccessClient da, ApplicationData data)
+        protected override void BeforeSaveNew(DataAccessClient da, ClientStateInfo data)
         {
             base.BeforeSaveNew(da, data);
         }
 
-        protected override void BeforeSaveUpdate(DataAccessClient da, ApplicationData data)
+        protected override void BeforeSaveUpdate(DataAccessClient da, ClientStateInfo data)
         {
             base.BeforeSaveUpdate(da, data);
         }
 
 
-        protected override void AfterSave(ApplicationData data)
+        protected override void AfterSave(ClientStateInfo data)
         {
             base.AfterSave(data);
         }
