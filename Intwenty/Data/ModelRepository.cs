@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Entity;
-using Intwenty.MetaDataService.Model;
+using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Intwenty.Data
@@ -77,7 +77,7 @@ namespace Intwenty.Data
     public class ModelRepository : IModelRepository
     {
 
-        private ApplicationDbContext context;
+        private IntwentyDbContext context;
         private DbSet<ApplicationItem> AppDescription;
         private DbSet<DatabaseItem> MetaDBItem;
         private DbSet<UserInterfaceItem> MetaUIItem;
@@ -89,7 +89,7 @@ namespace Intwenty.Data
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
-        public ModelRepository(ApplicationDbContext context, IMemoryCache cache)
+        public ModelRepository(IntwentyDbContext context, IMemoryCache cache)
         {
             this.context = context;
             AppDescription = context.Set<ApplicationItem>();

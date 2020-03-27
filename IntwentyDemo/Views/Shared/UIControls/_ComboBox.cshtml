@@ -1,0 +1,11 @@
+﻿@model Intwenty.Model.IUIComplexBinding
+
+    <div class="form-group">
+        <label class="control-label">
+            @Model.Title  @{ if (Model.Mandatory)
+                { <span style="color: red"> *</span> }}
+        </label>
+        <select id="@Model.UIId" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="COMBOBOX" data-dbfield="@Model.DataColumnDbName" data-required="@Model.Mandatory">
+            <option v-for="item in valuedomains.VALUEDOMAIN_@Model.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
+        </select>
+    </div>

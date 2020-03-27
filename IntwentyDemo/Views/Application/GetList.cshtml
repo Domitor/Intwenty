@@ -1,0 +1,70 @@
+﻿@model Intwenty.Model.ApplicationModel
+
+<div id="app">
+    <div>
+
+        <br />
+      
+
+        @{
+            var title = Model.Application.Title + " List";
+            var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+            if (lv != null)
+            {
+                title = lv.Title;
+            }
+            else
+            {
+                <h1><span class="label label-warning btn-lg">There's no listview meta data defined for this application yet.</span></h1>
+                return;
+
+            }
+        }
+
+        <div class="card">
+            <div class="card-header"><h2>@title</h2></div>
+            <div class="card-body">
+
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> New</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" v-on:click="exportToExcel()" class="nav-link btn btn-outline-secondary" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+
+     
+
+
+        <br />
+
+
+
+
+        @await Html.PartialAsync("_DefaultListView", Model)
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/getlist.js"></script>
+    <script>
+        Vue.prototype.test = function ()
+        {
+            var context = this;
+             alert( context.datalist[0].Id);
+        }
+        var app = createVue('#app',@Model.Application.Id, '@Url.Content("~/Application/")');
+       
+        
+    </script>
+       
+   
+
+}

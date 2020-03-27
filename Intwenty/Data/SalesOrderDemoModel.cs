@@ -8,7 +8,7 @@ namespace Intwenty.Data
 {
     public static class SalesOrderDemoModel
     {
-        public static void Seed(ApplicationDbContext context, bool isupdate)
+        public static void Seed(IntwentyDbContext context, bool isupdate)
         {
 
             if (isupdate)

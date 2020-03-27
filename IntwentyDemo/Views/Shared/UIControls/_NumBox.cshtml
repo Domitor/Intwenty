@@ -1,0 +1,9 @@
+﻿@model Intwenty.Model.IUIBinding
+
+<div class="form-group">
+    <label class="control-label">
+        @Model.Title @{ if (Model.Mandatory)
+            { <span style="color: red"> *</span> }}
+    </label>
+    <input id="@Model.UIId" type="number" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="NUMBOX" data-dbfield="@Model.DataColumnDbName" data-required="@Model.Mandatory" />
+</div>

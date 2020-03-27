@@ -1,0 +1,165 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Dto\**" />
+    <Compile Remove="DBScripts\**" />
+    <Compile Remove="MetaDataService\**" />
+    <Compile Remove="Models\MetaDesigner\**" />
+    <Content Remove="Data\Dto\**" />
+    <Content Remove="DBScripts\**" />
+    <Content Remove="MetaDataService\**" />
+    <Content Remove="Models\MetaDesigner\**" />
+    <EmbeddedResource Remove="Data\Dto\**" />
+    <EmbeddedResource Remove="DBScripts\**" />
+    <EmbeddedResource Remove="MetaDataService\**" />
+    <EmbeddedResource Remove="Models\MetaDesigner\**" />
+    <None Remove="Data\Dto\**" />
+    <None Remove="DBScripts\**" />
+    <None Remove="MetaDataService\**" />
+    <None Remove="Models\MetaDesigner\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Entity\ApplicationItem.cs" />
+    <Compile Remove="Data\Entity\DatabaseItem.cs" />
+    <Compile Remove="Data\Entity\DataViewItem.cs" />
+    <Compile Remove="Data\Entity\InformationStatus.cs" />
+    <Compile Remove="Data\Entity\MenuItem.cs" />
+    <Compile Remove="Data\Entity\NoSerie.cs" />
+    <Compile Remove="Data\Entity\SystemID.cs" />
+    <Compile Remove="Data\Entity\UserInterfaceItem.cs" />
+    <Compile Remove="Data\Entity\ValueDomainItem.cs" />
+    <Compile Remove="Data\ModelRepository.cs" />
+    <Compile Remove="Models\ClientStateInfo.cs" />
+    <Compile Remove="Models\OperationResult.cs" />
+    <Compile Remove="Models\UIBinding.cs" />
+    <Compile Remove="SystemSettings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Model\EditMainMenu.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\EditNoSeries.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\EditValuedomains.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\EditDataviews.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\EditDB.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\EditUI.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\Edit.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\GetList.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\ToolModelDocumentation.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\ToolGenerateTestData.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\ToolValidateModel.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\ToolConfigureDatabase.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Model\Create.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\GetList.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\Open.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Application\Create.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Custom\ShipmentFiles.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_ComboBox.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_TextArea.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_LookUp.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_DatePicker.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_NumBox.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_CheckBox.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\UIControls\_TextBox.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\_MetaAppDescription.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Shared\_DefaultListView.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap-theme.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap-theme.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\bootstrap.js" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\bootstrap.min.js" />
+    <None Include="wwwroot\lib\bootstrap-3.4.1\js\npm.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Intwenty\Intwenty.csproj" />
+    <ProjectReference Include="..\NetCoreDBAccess\NetCoreDBAccess.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\USERDOC\" />
+  </ItemGroup>
+
+</Project>

@@ -1,9 +1,0 @@
-﻿@model Intwenty.MetaDataService.Model.IUIBinding
-
-<div class="form-group">
-    <label class="control-label">
-        @Model.Title  @{ if (Model.Mandatory)
-            { <span style="color: red"> *</span> }}
-    </label>
-    <textarea id="@Model.UIId" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" rows="10" cols="50" class="form-control form-control-sm" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@Model.DataColumnDbName" data-required="@Model.Mandatory"></textarea>
-</div>
