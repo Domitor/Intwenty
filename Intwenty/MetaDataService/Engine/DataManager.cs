@@ -166,7 +166,13 @@ namespace Intwenty.MetaDataService.Engine
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
                         sql_stmt = new StringBuilder();
-                        sql_stmt.Append("SELECT t1.* ");
+                        sql_stmt.Append("SELECT t1.ApplicationId ");
+                        sql_stmt.Append(", t2.ID ");
+                        sql_stmt.Append(", t2.RowChangeDate ");
+                        sql_stmt.Append(", t2.UserID ");
+                        sql_stmt.Append(", t2.ParentID ");
+                        sql_stmt.Append(", t2.Version ");
+                        sql_stmt.Append(", t2.OwnerRefId ");
                         foreach (var v in this.Meta.DataStructure)
                         {
                             if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)

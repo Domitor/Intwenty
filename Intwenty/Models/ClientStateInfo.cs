@@ -112,12 +112,12 @@ namespace Intwenty.Models
                 {
                     var tabledata = new ApplicationTable() { DbName = j.Name };
                     res.SubTables.Add(tabledata);
-                    var jsonrows = j.Value.EnumerateObject();
+                    var jsonrows = j.Value.EnumerateArray();
                     foreach (var row in jsonrows)
                     {
                         var tablerow = new ApplicationTableRow() { Table = tabledata };
                         tabledata.Rows.Add(tablerow);
-                        var jsonobjarr = row.Value.EnumerateObject();
+                        var jsonobjarr = row.EnumerateObject();
                         foreach (var av in jsonobjarr)
                         {
                             if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
