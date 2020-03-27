@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 
-namespace IntwentyDemo.Controllers.Custom
+namespace Intwenty.Controllers.Custom
 {
     public class CustomController : Controller
     {

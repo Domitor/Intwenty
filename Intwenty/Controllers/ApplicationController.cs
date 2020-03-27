@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 
-namespace IntwentyDemo.Controllers
+namespace Intwenty.Controllers
 {
     [Authorize(Roles = "User,Administrator")]
     public class ApplicationController : Controller

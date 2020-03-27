@@ -71,6 +71,8 @@ namespace IntwentyDemo
                .AddRoles<SystemRole>()
                .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            //Intwenty controller
+            var assembly = typeof(Intwenty.Controllers.ApplicationController).Assembly;
 
             services.AddControllersWithViews().AddJsonOptions(options =>
             {
@@ -78,8 +80,11 @@ namespace IntwentyDemo
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.WriteIndented = false;
                 options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-            }); 
+            }).AddApplicationPart(assembly); 
+
             services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

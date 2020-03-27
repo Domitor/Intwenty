@@ -9,7 +9,7 @@ using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Data.Dto;
 
-namespace IntwentyDemo.Controllers
+namespace Intwenty.Controllers
 {
     
     [Authorize(Roles="Administrator")]
