@@ -99,8 +99,13 @@ namespace Intwenty.Models
                     var jsonobjarr = j.Value.EnumerateObject();
                     foreach (var av in jsonobjarr)
                     {
-                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
                             res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetString() });
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                            res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                            res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
+
                     }
                 }
                 if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
@@ -115,8 +120,12 @@ namespace Intwenty.Models
                         var jsonobjarr = row.Value.EnumerateObject();
                         foreach (var av in jsonobjarr)
                         {
-                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
                                 tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetString() });
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                                tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                                tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
                         }
                         var rowid = tablerow.Values.Find(p => p.DbName == "Id");
                         if (rowid != null)
