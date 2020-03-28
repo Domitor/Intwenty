@@ -1,26 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+   
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+	<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	 <MvcRazorExcludeRefAssembliesFromPublish>false</MvcRazorExcludeRefAssembliesFromPublish>
+    <CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
+    <RazorLangVersion>3.0</RazorLangVersion>
   </PropertyGroup>
 
+ 
+  
   <ItemGroup>
 	<EmbeddedResource Include="Views\**\*.cshtml" />
   </ItemGroup>
 
-   <PropertyGroup>
-    <MvcRazorExcludeRefAssembliesFromPublish>false</MvcRazorExcludeRefAssembliesFromPublish>
-    <CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
-    <RazorLangVersion>3.0</RazorLangVersion>
-    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-  </PropertyGroup>
-
+ 
+  
   <ItemGroup>
-    <Content Include="Views\**\*.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <EmbeddedResource Remove="Views\Application\GetList.cshtml" />
   </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
@@ -30,6 +33,10 @@
 
   <ItemGroup>
     <Folder Include="Database\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="Views\Application\GetList.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
