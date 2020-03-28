@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intwenty", "..\Intwenty\Int
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "..\Shared\Shared.csproj", "{B9B2B373-DE60-4345-A338-A8CBDAF98D60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntwentyUI", "..\IntwentyUI\IntwentyUI.csproj", "{A2088472-9CF2-4B84-976C-CA765420A014}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2088472-9CF2-4B84-976C-CA765420A014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2088472-9CF2-4B84-976C-CA765420A014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2088472-9CF2-4B84-976C-CA765420A014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2088472-9CF2-4B84-976C-CA765420A014}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
