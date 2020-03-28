@@ -14,6 +14,8 @@ using IntwentyDemo.Data.Entity;
 using IntwentyDemo.Data;
 using Shared;
 using Intwenty;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+using Microsoft.Extensions.FileProviders;
 
 namespace IntwentyDemo
 {
@@ -80,11 +82,19 @@ namespace IntwentyDemo
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.WriteIndented = false;
                 options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-            }).AddApplicationPart(assembly); 
+            }).AddApplicationPart(assembly);
 
-            services.AddRazorPages().AddRazorRuntimeCompilation();
+ 
 
             
+            services.AddRazorPages().AddRazorRuntimeCompilation(options =>
+            {
+                options.FileProviders.Add(new EmbeddedFileProvider(assembly));
+
+            });
+            
+          
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
