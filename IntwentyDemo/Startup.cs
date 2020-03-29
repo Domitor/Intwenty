@@ -84,7 +84,7 @@ namespace IntwentyDemo
                 options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
             }).AddApplicationPart(assembly);
 
- 
+            services.AddRazorPages().AddRazorRuntimeCompilation();
 
             /*
             services.AddRazorPages().AddRazorRuntimeCompilation(options =>
@@ -93,7 +93,7 @@ namespace IntwentyDemo
 
             });
             */
-          
+
 
         }
 
