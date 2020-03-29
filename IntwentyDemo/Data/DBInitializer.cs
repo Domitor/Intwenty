@@ -37,11 +37,11 @@ namespace IntwentyDemo.Data
 
             if (isupdate)
             {
-                var u = await userManager.FindByNameAsync("admin@intwenty.se");
+                var u = await userManager.FindByNameAsync("admin@intwenty.com");
                 if (u!=null)
                     await userManager.DeleteAsync(u);
 
-                u = await userManager.FindByNameAsync("user@intwenty.se");
+                u = await userManager.FindByNameAsync("user@intwenty.com");
                 if (u != null)
                     await userManager.DeleteAsync(u);
 
@@ -67,22 +67,22 @@ namespace IntwentyDemo.Data
             await roleManager.CreateAsync(role);
 
             var user = new SystemUser();
-            user.UserName = "admin@intwenty.se";
-            user.Email = "admin@intwenty.se";
+            user.UserName = "admin@intwenty.com";
+            user.Email = "admin@intwenty.com";
             user.FirstName = "Admin";
             user.LastName = "Adminsson";
             user.EmailConfirmed = true;
-            await userManager.CreateAsync(user, "Thriller#2020");
+            await userManager.CreateAsync(user, "thriller");
             await userManager.AddToRoleAsync(user, "Administrator");
 
 
             user = new SystemUser();
-            user.UserName = "user@intwenty.se";
-            user.Email = "user@intwenty.se";
+            user.UserName = "user@intwenty.com";
+            user.Email = "user@intwenty.com";
             user.FirstName = "User";
             user.LastName = "Usersson";
             user.EmailConfirmed = true;
-            await userManager.CreateAsync(user, "Thriller#2020");
+            await userManager.CreateAsync(user, "thriller");
             await userManager.AddToRoleAsync(user, "User");
 
 

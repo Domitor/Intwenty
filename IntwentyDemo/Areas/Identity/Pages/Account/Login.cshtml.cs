@@ -43,10 +43,12 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            [Display(Name = "Email (Demo: admin@intwenty.com)")]
             [Required]
             [EmailAddress]
             public string Email { get; set; }
 
+            [Display(Name = "Password (Demo: thriller)")]
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
