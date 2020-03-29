@@ -17,9 +17,10 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 6. Let the user easily override all the above when necessary
 
 # Features
-- Forget about entity framework code irst, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
+- Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
 - Easy import and export of metamodels which makes it possible for users to share models.
 - Automatic CRUD endpoints for integrations.
+- Generates documentation. 
 
 # How
 - Intwenty does not work with strongly typed models, except for the metamodel itself. It uses entity framework to store and retrive the metamodel and it uses a custom service to manage (application) data according to the model.
