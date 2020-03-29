@@ -1,8 +1,8 @@
-![alt text](https://github.com/Domitor/Intwenty/blob/master/Intwenty/wwwroot/images/intwenty_loggo_small.png)
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/intwenty_loggo_small.png)
 
 
 # Intwenty
-Create metadata driven applications with java script and ASP.NET Core, a tool for developers or for people who wants to build quick business applications without or with minimal coding
+Create metadata driven applications with java script and ASP.NET Core, a tool for developers or users who wants to build quick business applications without or with minimal coding
 
 # Why
 - To minimize coding by reusing the same code with different sets of metadata.
@@ -17,12 +17,14 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 6. Let the user easily override all the above when necessary
 
 # Features
+- Forget about entity framework code irst, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
 - Easy import and export of metamodels which makes it possible for users to share models.
 - Automatic CRUD endpoints for integrations.
 
 # How
 - Intwenty does not work with strongly typed models, except for the metamodel itself. It uses entity framework to store and retrive the metamodel and it uses a custom service to manage (application) data according to the model.
 - Users/Developers can input metadata via a graphical UI, which allows for handling both the datamodel and the UI model. 
+- It comes as an RCL (Razor Clas Library) which can easily be included in any asp.net core web application.
 
 # Technologies Used
 - asp.net core 3.1
