@@ -1,42 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-   
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-	<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-	 <MvcRazorExcludeRefAssembliesFromPublish>false</MvcRazorExcludeRefAssembliesFromPublish>
-    <CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
-    <RazorLangVersion>3.0</RazorLangVersion>
-  </PropertyGroup>
-
- 
-  
-  <ItemGroup>
-	<EmbeddedResource Include="Views\**\*.cshtml" />
-  </ItemGroup>
-
- 
-  
-  <ItemGroup>
-    <EmbeddedResource Remove="Views\Application\GetList.cshtml" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Database\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Include="Views\Application\GetList.cshtml" />
+    <Folder Include="Pages\Application\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,4 +25,6 @@
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
+
 </Project>
+

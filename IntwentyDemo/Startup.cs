@@ -86,13 +86,13 @@ namespace IntwentyDemo
 
  
 
-            
+            /*
             services.AddRazorPages().AddRazorRuntimeCompilation(options =>
             {
                 options.FileProviders.Add(new EmbeddedFileProvider(assembly));
 
             });
-            
+            */
           
 
         }
