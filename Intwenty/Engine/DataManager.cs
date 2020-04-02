@@ -27,6 +27,8 @@ namespace Intwenty.Engine
     {
         OperationResult ConfigureDatabase();
 
+        OperationResult GetLatestIdByOwnerUser(ClientStateInfo data);
+
         OperationResult GetLatestVersion(ClientStateInfo data);
 
         OperationResult GetVersion();
@@ -49,7 +51,7 @@ namespace Intwenty.Engine
 
     public class DataManager : IDataManager
     {
-        public IModelRepository ModelRepository { get; set; }
+        public IIntwentyModelService ModelRepository { get; set; }
 
         public IDataAccessService DataRepository { get; set; }
 
@@ -101,7 +103,7 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
-                        CreateDBColumn(res, t, Meta.Application.MainTableName);
+                        CreateDBColumn(res, t, Meta.Application.DbName);
                     }
 
                     if (t.IsMetaTypeDataTable)
@@ -119,6 +121,41 @@ namespace Intwenty.Engine
             }
 
             return res;
+        }
+
+        public OperationResult GetLatestIdByOwnerUser(ClientStateInfo data)
+        {
+            ClientState = data;
+            var result = new OperationResult(true, string.Format("Fetched latest id for application {0} for Owner {1}", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
+
+            try
+            {
+                DataRepository.Open();
+                DataRepository.CreateCommand("SELECT TOP 1 * from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
+                DataRepository.AddParameter("@ApplicationId", data.ApplicationId);
+                DataRepository.AddParameter("@OwnedBy", data.OwnerUserId);
+                var ds = new DataSet();
+                DataRepository.FillDataset(ds, "Result");
+                if (ds.Tables[0].Rows.Count == 0) 
+                {
+                    var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
+                    return fail;
+                }
+                result.Id = NetCoreDBAccess.DBHelpers.GetRowIntValue(ds.Tables[0], "Id");
+                result.Version = NetCoreDBAccess.DBHelpers.GetRowIntValue(ds.Tables[0], "Version");
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Meta.Application.Title, data.OwnerUserId));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+
+            }
+
+            return result;
         }
 
         public virtual OperationResult GetLatestVersion(ClientStateInfo data)
@@ -142,6 +179,7 @@ namespace Intwenty.Engine
                 sql_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
                 sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
                 sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+               
 
                 jsonresult.Append("{");
 
@@ -268,7 +306,7 @@ namespace Intwenty.Engine
 
                 da.Close();
 
-                result.ID = ClientState.Id;
+                result.Id = ClientState.Id;
                 result.Version = ClientState.Version;
 
                 AfterSave(data);
@@ -772,11 +810,11 @@ namespace Intwenty.Engine
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + this.Meta.Application.MainTableName + " ");
+            sql_insert.Append("INSERT INTO " + this.Meta.Application.DbName + " ");
             sql_insert.Append(" (ID, RowChangeDate, UserID,  Version, OwnerRefId");
             sql_insert_value.Append(" VALUES (" + Convert.ToString(this.ClientState.Id));
             sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_insert_value.Append(",'SYSTEM'");
+            sql_insert_value.Append(",'" + this.ClientState.UserId + "'");
             sql_insert_value.Append("," + Convert.ToString(this.ClientState.Version));
             sql_insert_value.Append("," + Convert.ToString(this.ClientState.OwnerId));
 
@@ -843,7 +881,7 @@ namespace Intwenty.Engine
             var paramlist = new List<ApplicationValue>();
 
             StringBuilder sql_update = new StringBuilder();
-            sql_update.Append("UPDATE " + this.Meta.Application.MainTableName);
+            sql_update.Append("UPDATE " + this.Meta.Application.DbName);
             sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",UserID='SYSTEM'");
             sql_update.Append(",OwnerRefId=" + Convert.ToString(this.ClientState.OwnerId));
@@ -1012,12 +1050,12 @@ namespace Intwenty.Engine
         {
             DataSet ds = new DataSet(this.Meta.Application.MetaCode);
 
-            ds.Tables.Add(this.Meta.Application.MainTableName);
-            ds.Tables[this.Meta.Application.MainTableName].Columns.Add("ID", typeof(int));
-            ds.Tables[this.Meta.Application.MainTableName].Columns.Add("RowChangeDate", typeof(DateTime));
-            ds.Tables[this.Meta.Application.MainTableName].Columns.Add("UserID", typeof(string));
-            ds.Tables[this.Meta.Application.MainTableName].Columns.Add("Version", typeof(int));
-            ds.Tables[this.Meta.Application.MainTableName].Columns.Add("OwnerRefId", typeof(int));
+            ds.Tables.Add(this.Meta.Application.DbName);
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("ID", typeof(int));
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("UserID", typeof(string));
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("Version", typeof(int));
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("OwnerRefId", typeof(int));
 
             foreach (var t in this.Meta.DataStructure)
             {
@@ -1027,13 +1065,13 @@ namespace Intwenty.Engine
                 {
 
                     if (t.IsDataTypeInt)
-                        ds.Tables[this.Meta.Application.MainTableName].Columns.Add(t.DbName, typeof(int));
+                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(int));
                     else if (t.IsDataTypeDateTime)
-                        ds.Tables[this.Meta.Application.MainTableName].Columns.Add(t.DbName, typeof(DateTime));
+                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(DateTime));
                     else if (t.IsDataTypeText || t.IsDataTypeString)
-                        ds.Tables[this.Meta.Application.MainTableName].Columns.Add(t.DbName, typeof(string));
+                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(string));
                     else
-                        ds.Tables[this.Meta.Application.MainTableName].Columns.Add(t.DbName, typeof(double));
+                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(double));
                 }
 
                 if (t.IsMetaTypeDataTable)
@@ -1065,13 +1103,13 @@ namespace Intwenty.Engine
                 }
             }
 
-            DataRow dr = ds.Tables[this.Meta.Application.MainTableName].NewRow();
+            DataRow dr = ds.Tables[this.Meta.Application.DbName].NewRow();
             dr["ID"] = 0;
             dr["RowChangeDate"] = DateTime.Now;
             dr["UserID"] = "SYSTEM";
             dr["Version"] = 0;
             dr["OwnerRefId"] = 0;
-            ds.Tables[this.Meta.Application.MainTableName].Rows.Add(dr);
+            ds.Tables[this.Meta.Application.DbName].Rows.Add(dr);
 
 
             return ds;
@@ -1080,20 +1118,23 @@ namespace Intwenty.Engine
 
         private void InsertInformationStatus(DataAccessClient da)
         {
-            da.CreateCommand("insert into sysdata_InformationStatus (Id, Version, ApplicationId, MetaCode, PerformDate, OwnerId, CreatedBy) Values (@Id, @Version, @ApplicationId, @MetaCode, getDate(), @OwnerId, @CreatedBy)");
+            da.CreateCommand("insert into sysdata_InformationStatus (Id, Version, ApplicationId, MetaCode, PerformDate, OwnerId, CreatedBy, ChangedBy, OwnedBy, ChangedDate) Values (@Id, @Version, @ApplicationId, @MetaCode, getDate(), @OwnerId, @CreatedBy,@ChangedBy,@OwnedBy,getDate())");
             da.AddParameter("@Id", this.ClientState.Id);
             da.AddParameter("@Version", this.ClientState.Version);
             da.AddParameter("@ApplicationId", this.Meta.Application.Id);
             da.AddParameter("@MetaCode", this.Meta.Application.MetaCode);
             da.AddParameter("@OwnerId", this.ClientState.OwnerId);
-            da.AddParameter("@CreatedBy", "SYSTEM");
+            da.AddParameter("@CreatedBy", this.ClientState.UserId);
+            da.AddParameter("@ChangedBy", this.ClientState.UserId);
+            da.AddParameter("@OwnedBy", this.ClientState.OwnerUserId);
+            da.AddParameter("@ChangedDate", this.ClientState.OwnerUserId);
             da.ExecuteNonQuery();
         }
 
         private void UpdateInformationStatus(DataAccessClient da)
         {
-            da.CreateCommand("Update sysdata_InformationStatus set PerformDate=getDate(), CreatedBy = @CreatedBy, Version = @Version WHERE ID=@ID");
-            da.AddParameter("@CreatedBy", "SYSTEM");
+            da.CreateCommand("Update sysdata_InformationStatus set ChangedDate=getDate(), ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
+            da.AddParameter("@ChangedBy", this.ClientState.UserId);
             da.AddParameter("@Version", this.ClientState.Version);
             da.AddParameter("@ID", this.ClientState.Id);
             da.ExecuteNonQuery();
@@ -1276,11 +1317,11 @@ namespace Intwenty.Engine
             {
 
                 //Ctreate index on main application table
-                sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + this.Meta.Application.MainTableName + " (ID, Version)";
+                sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + this.Meta.Application.DbName + " (ID, Version)";
                 da.CreateCommand(sql);
                 da.ExecuteScalarQuery();
 
-                sql = "CREATE INDEX Idx2 ON " + this.Meta.Application.MainTableName + " (RowChangeDate)";
+                sql = "CREATE INDEX Idx2 ON " + this.Meta.Application.DbName + " (RowChangeDate)";
                 da.CreateCommand(sql);
                 da.ExecuteScalarQuery();
 

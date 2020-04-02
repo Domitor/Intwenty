@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Models.DesignerVM;
+using Intwenty.Model.DesignerVM;
 using Intwenty.Data;
 using Intwenty;
 using Intwenty.Model;
@@ -15,13 +15,13 @@ namespace Intwenty.Controllers
     [Authorize(Roles="Administrator")]
     public class ModelController : Controller
     {
-        public IServiceEngine MetaServer { get; }
-        public IModelRepository Repository { get; }
+        public IIntwentyDataService DataRepository { get; }
+        public IIntwentyModelService ModelRepository { get; }
 
-        public ModelController(IServiceEngine ms, IModelRepository sr)
+        public ModelController(IIntwentyDataService ms, IIntwentyModelService sr)
         {
-            MetaServer = ms;
-            Repository = sr;
+            DataRepository = ms;
+            ModelRepository = sr;
         }
 
         public IActionResult Create()
@@ -83,7 +83,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationModelItem model)
         {
-            var res = Repository.SaveApplication(model);
+            var res = ModelRepository.SaveApplication(model);
             return new JsonResult(res);
         }
 
@@ -95,13 +95,13 @@ namespace Intwenty.Controllers
 
         public IActionResult ToolValidateModel()
         {
-            var res = MetaServer.ValidateModel();
+            var res = DataRepository.ValidateModel();
             return View(res);
         }
 
         public IActionResult ToolModelDocumentation()
         {
-            var l = Repository.GetApplicationModels();
+            var l = ModelRepository.GetApplicationModels();
             return View(l);
         }
 
@@ -119,7 +119,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult RunDatabaseConfiguration()
         {
-            var res = MetaServer.ConfigureDatabase();
+            var res = DataRepository.ConfigureDatabase();
             return new JsonResult(res); 
         }
 
@@ -129,7 +129,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GenerateTestData()
         {
-            var res = MetaServer.GenerateTestData();
+            var res = DataRepository.GenerateTestData();
             return new JsonResult(res);
         }
 
@@ -139,7 +139,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetTestDataBatches")]
         public JsonResult GetTestDataBatches()
         {
-            var t = Repository.GetTestDataBatches();
+            var t = ModelRepository.GetTestDataBatches();
             return new JsonResult(t);
 
         }
@@ -153,7 +153,7 @@ namespace Intwenty.Controllers
             
             try
             {
-                Repository.DeleteTestDataBatch(batchname);
+                ModelRepository.DeleteTestDataBatch(batchname);
             }
             catch (Exception ex)
             {
@@ -174,7 +174,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplications")]
         public JsonResult GetApplications()
         {
-            var t = Repository.GetApplicationModelItems();
+            var t = ModelRepository.GetApplicationModelItems();
             return new JsonResult(t);
 
         }
@@ -185,7 +185,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplication/{applicationid}")]
         public JsonResult GetApplication(int applicationid)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(t.Application);
 
         }
@@ -198,7 +198,7 @@ namespace Intwenty.Controllers
         {
             try
             {
-                Repository.DeleteApplicationModel(model);
+                ModelRepository.DeleteApplicationModel(model);
             }
             catch (Exception ex)
             {
@@ -218,7 +218,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplicationUI/{applicationid}")]
         public JsonResult GetApplicationUI(int applicationid)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(UIModelCreator.GetUIVm(t));
 
         }
@@ -232,7 +232,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
                 if (t == null)
                     throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
@@ -256,7 +256,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplicationListView/{applicationid}")]
         public JsonResult GetApplicationListView(int applicationid)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(ListViewVm.GetListView(t));
 
         }
@@ -280,7 +280,7 @@ namespace Intwenty.Controllers
         public JsonResult GetListOfDatabaseTables()
         {
             var res = new List<DatabaseTableVm>();
-            var apps = Repository.GetApplicationModels();
+            var apps = ModelRepository.GetApplicationModels();
             foreach (var t in apps)
             {
                 res.AddRange(DatabaseModelCreator.GetDatabaseTableVm(t));
@@ -296,7 +296,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplicationListOfDatabaseTables/{applicationid}")]
         public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(DatabaseModelCreator.GetDatabaseTableVm(t));
 
         }
@@ -307,7 +307,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetDataViews")]
         public JsonResult GetDataViews()
         {
-            var t = Repository.GetDataViewModels();
+            var t = ModelRepository.GetDataViewModels();
             var views = DataViewModelCreator.GetDataViewVm(t);
             var res = new JsonResult(views);
             return res;
@@ -320,7 +320,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetValueDomains")]
         public JsonResult GetValueDomains()
         {
-            var t = Repository.GetValueDomains();
+            var t = ModelRepository.GetValueDomains();
             return new JsonResult(t);
 
         }
@@ -331,7 +331,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetValueDomainNames")]
         public JsonResult GetValueDomainNames()
         {
-            var t = Repository.GetValueDomains();
+            var t = ModelRepository.GetValueDomains();
             return new JsonResult(t.Select(p => p.DomainName).Distinct());
 
         }
@@ -341,7 +341,7 @@ namespace Intwenty.Controllers
         {
             try
             {
-                Repository.SaveValueDomains(model);
+                ModelRepository.SaveValueDomains(model);
             }
             catch (Exception ex)
             {
@@ -364,7 +364,7 @@ namespace Intwenty.Controllers
                 if (model.Id < 1)
                     throw new InvalidOperationException("Id is missing in model when removing value domain value");
 
-                Repository.DeleteValueDomain(model.Id);
+                ModelRepository.DeleteValueDomain(model.Id);
             }
             catch (Exception ex)
             {
@@ -384,7 +384,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetNoSeries")]
         public JsonResult GetNoSeries()
         {
-            var t = Repository.GetNoSeries();
+            var t = ModelRepository.GetNoSeries();
             return new JsonResult(NoSeriesVmCreator.GetNoSeriesVm(t));
 
         }
@@ -396,7 +396,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetMenuModelItems")]
         public JsonResult GetMenuModelItems()
         {
-            var t = Repository.GetMenuModelItems();
+            var t = ModelRepository.GetMenuModelItems();
             return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
 
         }
@@ -410,16 +410,16 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId missing in model");
 
 
-                var views = Repository.GetDataViewModels();
-                var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
+                var views = ModelRepository.GetDataViewModels();
+                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
                 if (app == null)
                     throw new InvalidOperationException("Could not find application");
 
                 var dtolist = UIModelCreator.GetUIModel(model, app, views);
 
-                Repository.SaveUserInterfaceModel(dtolist);
+                ModelRepository.SaveUserInterfaceModel(dtolist);
 
-                var t = Repository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
                 var vm = UIModelCreator.GetUIVm(t);
                 return new JsonResult(vm);
 
@@ -447,7 +447,7 @@ namespace Intwenty.Controllers
 
                 var list = DatabaseModelCreator.GetDatabaseModel(model);
 
-                Repository.SaveApplicationDB(list, model.Id);
+                ModelRepository.SaveApplicationDB(list, model.Id);
 
             }
             catch (Exception ex)
@@ -477,7 +477,7 @@ namespace Intwenty.Controllers
                 if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
 
-                Repository.DeleteApplicationDB(model.Id);
+                ModelRepository.DeleteApplicationDB(model.Id);
 
             }
             catch (Exception ex)
@@ -499,7 +499,7 @@ namespace Intwenty.Controllers
             {
 
                 var dtolist = DataViewModelCreator.GetDataViewModel(model);
-                Repository.SaveDataView(dtolist);
+                ModelRepository.SaveDataView(dtolist);
 
             }
             catch (Exception ex)
@@ -523,12 +523,12 @@ namespace Intwenty.Controllers
                 if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
 
-                var app = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
                 if (app == null)
                     throw new InvalidOperationException("Could not find application");
 
                 var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
-                Repository.SaveUserInterfaceModel(dtolist);
+                ModelRepository.SaveUserInterfaceModel(dtolist);
 
             }
             catch (Exception ex)

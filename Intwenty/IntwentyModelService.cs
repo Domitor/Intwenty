@@ -5,13 +5,14 @@ using System.Linq;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
+using Intwenty.Data;
 
-namespace Intwenty.Data
+namespace Intwenty
 {
     /// <summary>
     /// Interface for operations on meta data
     /// </summary>
-    public interface IModelRepository
+    public interface IIntwentyModelService
     {
  
         List<ApplicationModel> GetApplicationModels();
@@ -72,9 +73,9 @@ namespace Intwenty.Data
 
 
 
-   
 
-    public class ModelRepository : IModelRepository
+
+    public class IntwentyModelService : IIntwentyModelService
     {
 
         private IntwentyDbContext context;
@@ -89,7 +90,7 @@ namespace Intwenty.Data
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
-        public ModelRepository(IntwentyDbContext context, IMemoryCache cache)
+        public IntwentyModelService(IntwentyDbContext context, IMemoryCache cache)
         {
             this.context = context;
             AppDescription = context.Set<ApplicationItem>();
@@ -98,7 +99,7 @@ namespace Intwenty.Data
             MetaDataViews = context.Set<DataViewItem>();
             MetaMenuItems = context.Set<MenuItem>();
             NoSeries = context.Set<NoSerie>();
-            ValueDomains = context.Set<Entity.ValueDomainItem>();
+            ValueDomains = context.Set<ValueDomainItem>();
             ModelCache = cache;
     }
 
@@ -836,7 +837,7 @@ namespace Intwenty.Data
 
                 if (vd.Id < 1)
                 {
-                    ValueDomains.Add(new Entity.ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    ValueDomains.Add(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {

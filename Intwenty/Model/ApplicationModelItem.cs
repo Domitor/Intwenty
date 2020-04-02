@@ -68,11 +68,6 @@ namespace Intwenty.Model
 
         public MenuModelItem MainMenuItem { get; set; }
 
-        public string MainTableName
-        {
-            get { return this.DbName;  }
-        }
-
         public string VersioningTableName
         {
             get { return this.DbName + "_Versioning"; }

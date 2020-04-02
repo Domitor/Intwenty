@@ -1,4 +1,5 @@
 ﻿@model Intwenty.Model.IUIBinding
+
 @{
     var validationfield = Model.UIId + "_validationmsg";
 
@@ -10,15 +11,15 @@
         </label>
         <input id="@Model.UIId"
                name="@Model.UIId"
-               type="text"
+               type="email"
                class="form-control form-control-sm"
                v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName"
                v-on:input="onUserInput(event)"
-               data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextBox
+               data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeEmailBox
                data-title="@Model.Title"
                data-validationfield="@validationfield"
                data-dbtable="@Model.DataTableDbName"
                data-dbfield="@Model.DataColumnDbName"
                data-required="@Model.Mandatory" />
-        <span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span>
+        <span class="invalidInput">@Html.Raw("{{validation."+validationfield+"}}")</span>
     </div>

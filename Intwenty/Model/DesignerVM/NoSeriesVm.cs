@@ -2,7 +2,7 @@
 using Intwenty.Model;
 using System.Collections.Generic;
 
-namespace Intwenty.Models.DesignerVM
+namespace Intwenty.Model.DesignerVM
 {
     public static class NoSeriesVmCreator
     {

@@ -1,32 +1,31 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Models;
+using Intwenty.Model;
 using Intwenty.Data;
 using Intwenty;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
-using Intwenty.Model;
 using Intwenty.Data.Dto;
 
 namespace Intwenty.Controllers.Custom
 {
     public class CustomController : Controller
     {
-        private IServiceEngine MetaServer { get; }
-        private IModelRepository Repository { get; }
+        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyModelService ModelRepository { get; }
 
-        public CustomController(IServiceEngine ms, IModelRepository sr)
+        public CustomController(IIntwentyDataService ms, IIntwentyModelService sr)
         {
-            MetaServer = ms;
-            Repository = sr;
+            DataRepository = ms;
+            ModelRepository = sr;
         }
 
       
         public IActionResult ShipmentFiles()
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == 70);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == 70);
             return View(t);
         }
 
@@ -38,7 +37,7 @@ namespace Intwenty.Controllers.Custom
         public JsonResult GetShipmentFiles([FromBody] ListRetrivalArgs model)
         {
             model.ApplicationId = 70;
-            var listdata = MetaServer.GetListView(model);
+            var listdata = DataRepository.GetListView(model);
             return new JsonResult(listdata);
         }
 
@@ -57,7 +56,7 @@ namespace Intwenty.Controllers.Custom
             state.Values.Add(new ApplicationValue() { DbName = "FileName", Value = uniquefilename });
             state.Values.Add(new ApplicationValue() { DbName = "ImportDate", Value = DateTime.Now.ToString() });
 
-            var res = MetaServer.Save(state);
+            var res = DataRepository.Save(state);
 
             return new JsonResult(res);
         }

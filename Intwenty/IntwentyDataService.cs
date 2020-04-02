@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Intwenty.Data;
 using Intwenty.Engine;
 using Intwenty.Model;
-using Intwenty.Models;
 using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Dto;
@@ -12,13 +11,17 @@ using Shared;
 
 namespace Intwenty
 {
-    public interface IServiceEngine
+    public interface IIntwentyDataService
     {
         List<OperationResult> ConfigureDatabase();
+
+        void ConfigureDatabaseIfNeeded();
 
         OperationResult Save(ClientStateInfo state);
 
         OperationResult GetLatestVersion(ClientStateInfo state);
+
+        OperationResult GetLatestIdByOwnerUser(ClientStateInfo state);
 
         OperationResult GetListView(ListRetrivalArgs args);
 
@@ -34,16 +37,22 @@ namespace Intwenty
 
         OperationResult GenerateTestData();
 
+        void LogError(string message, int applicationid=0, string appmetacode="NONE", string username="");
+
+        void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
+        void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
     }
 
-    public class Server : IServiceEngine
+    public class IntwentyDataService : IIntwentyDataService
     {
         
         private IOptions<SystemSettings> SysSettings { get; }
-        private IModelRepository ModelRepository { get; }
+        private IIntwentyModelService ModelRepository { get; }
         private IDataAccessService DataRepository { get; }
 
-        public Server(IOptions<SystemSettings> sysconfig, IModelRepository mr, IDataAccessService dr)
+        public IntwentyDataService(IOptions<SystemSettings> sysconfig, IIntwentyModelService mr, IDataAccessService dr)
         {
             SysSettings = sysconfig;
             ModelRepository = mr;
@@ -62,6 +71,27 @@ namespace Intwenty
             }
 
             return res;
+        }
+
+        public void ConfigureDatabaseIfNeeded()
+        {
+            var l = ModelRepository.GetApplicationModels();
+            if (l.Count > 0)
+            {
+                try
+                {
+
+                    DataRepository.Open();
+                    DataRepository.CreateCommand("SELECT 1 FROM " + l[0].Application.DbName);
+                    DataRepository.ExecuteScalarQuery();
+                    DataRepository.Close();
+                }
+                catch 
+                {
+                    ConfigureDatabase();
+                }
+
+            }
         }
 
         public OperationResult Save(ClientStateInfo state)
@@ -91,6 +121,26 @@ namespace Intwenty
             return t.GetListView(args);
         }
 
+        public OperationResult GetLatestIdByOwnerUser(ClientStateInfo state)
+        {
+            if (state==null)
+                return new OperationResult(false, "ClientStateInfo was null when using GetLatestIdByOwnerUser", 0, 0);
+            if (state.ApplicationId < 1)
+                return new OperationResult(false, "No ApplicationId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
+            if (string.IsNullOrEmpty(state.OwnerUserId))
+                return new OperationResult(false, "No OwnerUserId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
+            if (state.UserId == ClientStateInfo.DEFAULT_USERID)
+                return new OperationResult(false, "No UserId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
+
+            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+
+
+            var t = DataManager.GetDataManager(app);
+            t.DataRepository = DataRepository;
+            t.ModelRepository = ModelRepository;
+            return t.GetLatestIdByOwnerUser(state);
+        }
+
         public OperationResult GetLatestVersion(ClientStateInfo state)
         {
             var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
@@ -99,6 +149,8 @@ namespace Intwenty
             t.ModelRepository = ModelRepository;
             return t.GetLatestVersion(state);
         }
+
+       
 
         public OperationResult GetValueDomains(ApplicationModel app)
         {
@@ -442,6 +494,40 @@ namespace Intwenty
         {
             var t = DataManager.GetDataManager(app);
             return t.GetDataViewValue(viewinfo, args);
+        }
+
+        public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            LogEvent("ERROR",message,applicationid,appmetacode,username);
+        }
+
+        public void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            LogEvent("INFO",message, applicationid, appmetacode, username);
+        }
+
+        public void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            LogEvent("WARNING", message, applicationid, appmetacode, username);
+        }
+
+        private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+
+            try
+            {
+                DataRepository.Open();
+                DataRepository.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (getDate(), @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
+                DataRepository.AddParameter("@Verbosity", verbosity);
+                DataRepository.AddParameter("@Message", message);
+                DataRepository.AddParameter("@AppMetaCode", appmetacode);
+                DataRepository.AddParameter("@ApplicationId", applicationid);
+                DataRepository.AddParameter("@UserName", username);
+                DataRepository.ExecuteNonQuery();
+                DataRepository.Close();
+
+            }
+            catch { }
         }
     }
 }

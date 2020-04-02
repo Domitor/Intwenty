@@ -39,6 +39,8 @@ namespace Intwenty.Model
     public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding
     {
         //META TYPES
+        public static readonly string MetaTypeEmailBox = "EMAILBOX";
+        public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
         public static readonly string MetaTypeTextArea = "TEXTAREA";
         public static readonly string MetaTypeLookUp = "LOOKUP";
@@ -158,6 +160,8 @@ namespace Intwenty.Model
             {
                 var t = new List<string>();
                 t.Add(MetaTypeTextBox);
+                t.Add(MetaTypeEmailBox);
+                t.Add(MetaTypePasswordBox);
                 t.Add(MetaTypeTextArea);
                 t.Add(MetaTypeLookUp);
                 t.Add(MetaTypeNumBox);
@@ -175,6 +179,7 @@ namespace Intwenty.Model
                 t.Add(MetaTypeEditGridNumBox);
                 t.Add(MetaTypeEditGridDatePicker);
                 t.Add(MetaTypeEditGridLookUp);
+
                 return t;
             }
         }
@@ -251,7 +256,16 @@ namespace Intwenty.Model
             }
         }
 
+        public bool IsMetaTypeEmailBox
+        {
+            get { return MetaType == MetaTypeEmailBox; }
+        }
 
+
+        public bool IsMetaTypePasswordBox
+        {
+            get { return MetaType == MetaTypePasswordBox; }
+        }
 
         public bool IsMetaTypeTextBox
         {

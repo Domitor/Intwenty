@@ -1,7 +1,7 @@
 ﻿
 using Intwenty.Model;
 
-namespace Intwenty.Data.Dto
+namespace Intwenty.Model.DesignerVM
 {
 
     public class UIBinding : IUIBinding

@@ -23,6 +23,12 @@ namespace Intwenty.Data.Entity
 
         public string CreatedBy { get; set; }
 
+        public string ChangedBy { get; set; }
+
+        public string OwnedBy { get; set; }
+
+        public DateTime ChangedDate { get; set; }
+
         public DateTime PerformDate { get; set; }
 
         public DateTime? StartDate { get; set; }

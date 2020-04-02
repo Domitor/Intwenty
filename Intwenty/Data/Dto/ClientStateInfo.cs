@@ -9,11 +9,17 @@ namespace Intwenty.Data.Dto
 
     public class ClientStateInfo
     {
+        public static readonly string DEFAULT_USERID = "SYSTEM";
+
         public int Id { get; set; }
 
         public int Version { get; set; }
 
         public int OwnerId { get; set; }
+
+        public string UserId { get; set; }
+
+        public string OwnerUserId { get; set; }
 
         public int ApplicationId { get; set; }
 
@@ -26,6 +32,8 @@ namespace Intwenty.Data.Dto
 
         public ClientStateInfo()
         {
+            UserId = DEFAULT_USERID;
+            OwnerUserId = DEFAULT_USERID;
             Properties = "";
             Values = new List<ApplicationValue>();
             SubTables = new List<ApplicationTable>();

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Intwenty.Models.DesignerVM
+namespace Intwenty.Model.DesignerVM
 {
 
     public static class DatabaseModelCreator
@@ -47,7 +47,7 @@ namespace Intwenty.Models.DesignerVM
         {
             var res = new List<DatabaseTableVm>();
 
-            res.Add(new DatabaseTableVm() { Id = 0, DbName = app.Application.MainTableName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true });
+            res.Add(new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true });
 
             foreach (var t in app.DataStructure)
             {

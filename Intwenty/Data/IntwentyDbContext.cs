@@ -44,7 +44,8 @@ namespace Intwenty.Data
             builder.Entity<InformationStatus>(entity => { entity.ToTable("sysdata_InformationStatus"); });
             builder.Entity<SystemID>(entity => { entity.ToTable("sysdata_SystemID"); });
             builder.Entity<NoSerie>(entity => { entity.ToTable("sysdata_NoSeries"); });
-          
+            builder.Entity<EventLog>(entity => { entity.ToTable("sysdata_EventLog"); });
+
 
 
 

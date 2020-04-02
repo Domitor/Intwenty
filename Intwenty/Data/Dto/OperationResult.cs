@@ -57,7 +57,7 @@ namespace Intwenty.Data.Dto
 
         public int Version { get; set; }
 
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         public string Data { get; set; }
 
@@ -66,11 +66,11 @@ namespace Intwenty.Data.Dto
             Messages = new List<OperationMessage>();
         }
 
-        public OperationResult(bool success, string resultmessage, int id, int version)
+        public OperationResult(bool success, string resultmessage="", int id=0, int version=0)
         {
             Messages = new List<OperationMessage>();
             IsSuccess = success;
-            ID = id;
+            Id = id;
             Version = version;
             AddMessage("RESULT", resultmessage);
         }
@@ -97,6 +97,18 @@ namespace Intwenty.Data.Dto
         {
             get {
                 var msg = Messages.Find(p => p.Code == "USERERROR");
+                if (msg != null)
+                    return msg.Message;
+
+                return string.Empty;
+            }
+        }
+
+        public string SystemError
+        {
+            get
+            {
+                var msg = Messages.Find(p => p.Code == "SYSTEMERROR");
                 if (msg != null)
                     return msg.Message;
 

@@ -4,26 +4,22 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Models;
-using Intwenty.Data;
-using Intwenty;
-using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 
 namespace Intwenty.Controllers
 {
-    [Authorize(Roles = "User,Administrator")]
+    [Authorize(Roles = "User,Administrator,Producer")]
     public class ApplicationController : Controller
     {
-        private IServiceEngine MetaServer { get; }
-        private IModelRepository Repository { get; }
+        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyModelService ModelRepository { get; }
 
-        public ApplicationController(IServiceEngine ms, IModelRepository sr)
+        public ApplicationController(IIntwentyDataService ms, IIntwentyModelService sr)
         {
-            MetaServer = ms;
-            Repository = sr;
+            DataRepository = ms;
+            ModelRepository = sr;
         }
 
         /// <summary>
@@ -31,7 +27,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public IActionResult Create(int id)
         {
-            var t = Repository.GetApplicationModels().Find(p=> p.Application.Id == id);
+            var t = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == id);
             return View(t);
         }
 
@@ -40,7 +36,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public IActionResult GetList(int id)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == id);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == id);
             return View(t);
         }
 
@@ -51,7 +47,7 @@ namespace Intwenty.Controllers
         public IActionResult Open(int applicationid, int id)
         {
             ViewBag.SystemId = Convert.ToString(id);
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return View(t);
 
         }
@@ -68,7 +64,7 @@ namespace Intwenty.Controllers
         public JsonResult GetLatestVersion(int applicationid, int id)
         {
             var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-            var data = MetaServer.GetLatestVersion(state);
+            var data = DataRepository.GetLatestVersion(state);
             return new JsonResult(data);
 
         }
@@ -79,7 +75,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetListView([FromBody] ListRetrivalArgs model)
         {
-            var listdata = MetaServer.GetListView(model);
+            var listdata = DataRepository.GetListView(model);
             return new JsonResult(listdata);
         }
 
@@ -89,8 +85,8 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetValueDomains/{id}")]
         public JsonResult GetValueDomains(int id)
         {
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == id);
-            var data = MetaServer.GetValueDomains(t);
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == id);
+            var data = DataRepository.GetValueDomains(t);
             var res = new JsonResult(data);
             return res;
 
@@ -103,9 +99,9 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = Repository.GetDataViewModels();
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            var viewitem = MetaServer.GetDataViewValue(t, viewinfo, model);
+            var viewinfo = ModelRepository.GetDataViewModels();
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+            var viewitem = DataRepository.GetDataViewValue(t, viewinfo, model);
             return new JsonResult(viewitem);
         }
 
@@ -116,9 +112,9 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = Repository.GetDataViewModels();
-            var t = Repository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            var dv = MetaServer.GetDataView(t, viewinfo, model);
+            var viewinfo = ModelRepository.GetDataViewModels();
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+            var dv = DataRepository.GetDataView(t, viewinfo, model);
             return new JsonResult(dv);
         }
 
@@ -128,7 +124,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetNoSerieValues/{id}")]
         public JsonResult GetNoSerieValues(int id)
         {
-            var t = Repository.GetNewNoSeriesValues(id);
+            var t = ModelRepository.GetNewNoSeriesValues(id);
             return new JsonResult(t);
 
         }
@@ -147,7 +143,7 @@ namespace Intwenty.Controllers
                 throw new InvalidOperationException("ApplicationId missing when saving...");
 
 
-            var res = MetaServer.Save(state);
+            var res = DataRepository.Save(state);
 
             return new JsonResult(res);
 

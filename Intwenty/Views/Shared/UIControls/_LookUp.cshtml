@@ -13,7 +13,20 @@
 
 
     <div style="float:left; margin-left:5px; width:30%">
-        <input id="@Model.UIId" type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@Model.ViewName','@Model.DataColumnDbName','@Model.UIId')" data-dbfield="@Model.DataColumnDbName" data-viewfield="@Model.DataViewColumnDbName" data-lookupid="@Model.UIId" />
+        <input id="@Model.UIId" 
+               name="@Model.UIId"
+               type="text" 
+               class="form-control form-control-sm" 
+               v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" 
+               v-on:keydown.tab="getDataViewValue('@Model.ViewName','@Model.DataColumnDbName','@Model.UIId')" 
+               data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeLookUp
+               data-title="@Model.Title"
+               data-dbtable="@Model.DataTableDbName" 
+               data-dbfield="@Model.DataColumnDbName" 
+               data-viewfield="@Model.DataViewColumnDbName" 
+               data-lookupid="@Model.UIId" 
+               data-required="@Model.Mandatory"
+               />
     </div>
 
 
@@ -21,7 +34,13 @@
     {
 
         <div style="float:left; margin-left:5px; width:60%">
-            <input type="text" class="form-control form-control-sm" v-model="model.@Model.DataTableDbName.@Model.DataColumn2DbName" data-dbfield="@Model.DataColumn2DbName" data-viewfield="@Model.DataViewColumn2DbName" data-lookupid="@Model.UIId" readonly />
+            <input type="text" 
+                   class="form-control form-control-sm" 
+                   v-model="model.@Model.DataTableDbName.@Model.DataColumn2DbName" 
+                   data-dbtable="@Model.DataTableDbName" 
+                   data-dbfield="@Model.DataColumn2DbName" 
+                   data-viewfield="@Model.DataViewColumn2DbName" 
+                   data-lookupid="@Model.UIId" readonly />
         </div>
     }
 

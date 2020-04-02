@@ -5,5 +5,16 @@
         @Model.Title  @{ if (Model.Mandatory)
             { <span style="color: red"> *</span> }}
     </label>
-    <textarea id="@Model.UIId" v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" rows="10" cols="50" class="form-control form-control-sm" v-on:input="onUserInput(event)" data-metatype="TEXTAREA" data-dbfield="@Model.DataColumnDbName" data-required="@Model.Mandatory"></textarea>
+    <textarea id="@Model.UIId" 
+              name="@Model.UIId"
+              v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" 
+              rows="10" 
+              cols="50" 
+              class="form-control form-control-sm" 
+              v-on:input="onUserInput(event)" 
+              data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextArea
+              data-title="@Model.Title"
+              data-dbtable="@Model.DataTableDbName" 
+              data-dbfield="@Model.DataColumnDbName" 
+              data-required="@Model.Mandatory"></textarea>
 </div>
