@@ -16,7 +16,7 @@ namespace Intwenty.Engine
     public class DataAccessClient : NetCoreDBClient   
 	{
 
-        public DataAccessClient() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=FoodcourtDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
+        public DataAccessClient() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=IntwentyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
         {
 
         }	

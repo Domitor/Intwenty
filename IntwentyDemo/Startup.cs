@@ -41,8 +41,8 @@ namespace IntwentyDemo
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddTransient<IModelRepository, ModelRepository>();
-            services.AddTransient<IServiceEngine, Server>();
+            services.AddTransient<IIntwentyModelService, IntwentyModelService>();
+            services.AddTransient<IIntwentyDataService, IntwentyDataService>();
             services.AddTransient<Intwenty.Engine.IDataAccessService, Intwenty.Engine.DataAccessService>();
 
 
