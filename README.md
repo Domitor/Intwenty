@@ -28,7 +28,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - Users/Developers can input metadata via a graphical UI, which allows for handling both the datamodel and the UI model. 
 - It comes as an RCL (Razor Clas Library) which can easily be included in any asp.net core web application.
 
-#Intentions
+# Intentions
 1. Boost productivity
 2. To be lightweight
 3. Keep dependencies to a minimum.
