@@ -24,6 +24,9 @@ namespace Intwenty
         void FillDataset(DataSet ds, string srcTable);
         object ExecuteScalarQuery();
         int ExecuteNonQuery();
+
+        DBMS GetDBMS();
+
         StringBuilder GetAsJSONArray();
 
         StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
@@ -33,7 +36,7 @@ namespace Intwenty
 
 
 
-    public class IntwentyDBAccessService : IDataAccessService
+    public class IntwentyDbAccessService : IDataAccessService
     {
 
         private IOptions<SystemSettings> Settings { get; }
@@ -42,7 +45,7 @@ namespace Intwenty
 
         private NetCoreDBClient DBClient { get; }
 
-        public IntwentyDBAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentyDbAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
         {
             Settings = settings;
             Connections = connections;
@@ -107,6 +110,11 @@ namespace Intwenty
         public StringBuilder GetAsJSONObject()
         {
             return DBClient.GetAsJSONObject();
+        }
+
+        public DBMS GetDBMS()
+        {
+            return DBClient.GetDBMS();
         }
     }
 

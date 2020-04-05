@@ -71,7 +71,28 @@ namespace Intwenty
 
     }
 
+    public class IntwentyModelService2
+    {
+        private readonly IDataAccessService Connection;
+        private readonly IMemoryCache ModelCache;
+        private static readonly string AppModelCacheKey = "APPMODELS";
 
+        public IntwentyModelService2(IDataAccessService connection, IMemoryCache cache)
+        {
+             Connection = connection;
+             ModelCache = cache;
+        }
+
+        public void SetupModelTables()
+        {
+            if (Connection.GetDBMS() == Data.DBAccess.DBMS.MSSqlServer)
+            {
+
+
+            }
+        }
+
+    }
 
 
 

@@ -44,7 +44,7 @@ namespace IntwentyDemo
 
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
-            services.AddTransient<Intwenty.IDataAccessService, Intwenty.IntwentyDBAccessService>();
+            services.AddTransient<Intwenty.IDataAccessService, Intwenty.IntwentyDbAccessService>();
 
 
             // Add framework services.

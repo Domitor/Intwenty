@@ -64,6 +64,18 @@ namespace Intwenty.Data.DBAccess
             ConnStr = connectionstring;
         }
 
+        public DBMS GetDBMS()
+        {
+            if (DBTYPE == 1)
+                return DBMS.MSSqlServer;
+            if (DBTYPE == 3)
+                return DBMS.Postgres;
+            if (DBTYPE == 4)
+                return DBMS.MySql;
+
+            return DBMS.MSSqlServer;
+        }
+
       
 
         public void Dispose()
