@@ -24,9 +24,14 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - Generates documentation. 
 
 # How
-- Intwenty does not work with strongly typed models, except for the metamodel itself. It uses entity framework to store and retrive the metamodel and it uses a custom service to manage (application) data according to the model.
+- Intwenty does not work with strongly typed models. Instead it performs work both on the data and UI level based on the information in the metamodel.
 - Users/Developers can input metadata via a graphical UI, which allows for handling both the datamodel and the UI model. 
 - It comes as an RCL (Razor Clas Library) which can easily be included in any asp.net core web application.
+
+#Intentions
+1. Boost productivity
+2. To be lightweight
+3. Keep dependencies to a minimum.
 
 # Technologies Used
 - asp.net core 3.1
@@ -36,7 +41,10 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - alasql 0.5.5
 
 # Database
-- Intwenty targets MS Sql Server and MySql
+- Intwenty targets:
+- MS Sql Server
+- MySql
+- PostgreSQL
 
 # How to get started
 <a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
