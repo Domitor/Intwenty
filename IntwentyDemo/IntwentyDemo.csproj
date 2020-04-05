@@ -73,7 +73,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Intwenty\Intwenty.csproj" />
-    <ProjectReference Include="..\NetCoreDBAccess\NetCoreDBAccess.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 

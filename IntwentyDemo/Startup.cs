@@ -33,6 +33,7 @@ namespace IntwentyDemo
         {
             //System Settings
             services.Configure<SystemSettings>(Configuration.GetSection("SystemSettings"));
+            services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -43,7 +44,7 @@ namespace IntwentyDemo
 
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
-            services.AddTransient<Intwenty.Engine.IDataAccessService, Intwenty.Engine.DataAccessService>();
+            services.AddTransient<Intwenty.IDataAccessService, Intwenty.IntwentyDBAccessService>();
 
 
             // Add framework services.

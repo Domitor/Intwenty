@@ -5,8 +5,15 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
+    public class ConnectionStrings
+    {
+        public string DefaultConnection { get; set; }
+    }
+
     public class SystemSettings
     {
+        public int DBMS { get; set; }
+
         public string SiteLanguage { get; set; }
 
         public bool AllowExternalLogins { get; set; }
@@ -19,8 +26,7 @@ namespace Shared
 
         public bool EnableEMailVerification { get; set; }
 
-        public string SiteUrl { get; set; }
-
+        //EMAIL
         public string MailServiceServer { get; set; }
 
         public int MailServicePort { get; set; }
@@ -48,7 +54,5 @@ namespace Shared
 
         public string StorageConnectionString { get; set; }
 
-        //RawDataDB
-        public string DBConn { get; set; }
     }
 }

@@ -45,14 +45,14 @@ namespace Intwenty.Custom
             base.BeforeSave(data);
         }
 
-        protected override void BeforeSaveNew(DataAccessClient da, ClientStateInfo data)
+        protected override void BeforeSaveNew(ClientStateInfo data)
         {
-            base.BeforeSaveNew(da, data);
+            base.BeforeSaveNew(data);
         }
 
-        protected override void BeforeSaveUpdate(DataAccessClient da, ClientStateInfo data)
+        protected override void BeforeSaveUpdate(ClientStateInfo data)
         {
-            base.BeforeSaveUpdate(da, data);
+            base.BeforeSaveUpdate(data);
         }
 
 

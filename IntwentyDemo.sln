@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreDBAccess", "..\NetCoreDBAccess\NetCoreDBAccess.csproj", "{4CFA02BE-6902-4E7E-ADA2-AB6C89655905}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntwentyDemo", "IntwentyDemo\IntwentyDemo.csproj", "{829F9532-2E5B-453D-B2FB-4CD625EF5113}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntwentyDemo", "IntwentyDemo.csproj", "{829F9532-2E5B-453D-B2FB-4CD625EF5113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Intwenty", "Intwenty\Intwenty.csproj", "{7A56EAFE-D518-4982-BE13-9EE1FB56C045}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Intwenty", "..\Intwenty\Intwenty.csproj", "{7A56EAFE-D518-4982-BE13-9EE1FB56C045}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "..\Shared\Shared.csproj", "{B9B2B373-DE60-4345-A338-A8CBDAF98D60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{B9B2B373-DE60-4345-A338-A8CBDAF98D60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4CFA02BE-6902-4E7E-ADA2-AB6C89655905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4CFA02BE-6902-4E7E-ADA2-AB6C89655905}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4CFA02BE-6902-4E7E-ADA2-AB6C89655905}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4CFA02BE-6902-4E7E-ADA2-AB6C89655905}.Release|Any CPU.Build.0 = Release|Any CPU
 		{829F9532-2E5B-453D-B2FB-4CD625EF5113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{829F9532-2E5B-453D-B2FB-4CD625EF5113}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{829F9532-2E5B-453D-B2FB-4CD625EF5113}.Release|Any CPU.ActiveCfg = Release|Any CPU

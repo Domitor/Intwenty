@@ -4,23 +4,13 @@ using System.Data.SqlClient;
 using System.Data.OleDb;
 using System.Web;
 using System.Configuration;
-using NetCoreDBAccess;
 using Microsoft.Extensions.Options;
 using System.Text;
 using Shared;
+using Intwenty.Data.DBAccess;
 
-namespace Intwenty.Engine
+namespace Intwenty
 {
-
-
-    public class DataAccessClient : NetCoreDBClient   
-	{
-
-        public DataAccessClient() : base(DBMS.MSSqlServer, "Data Source=localhost;Initial Catalog=IntwentyDB;User ID=sa;Password=thriller;MultipleActiveResultSets=true")
-        {
-
-        }	
-	}
 
 
     public interface IDataAccessService
@@ -30,25 +20,33 @@ namespace Intwenty.Engine
         void CreateCommand(string sqlcode);
         void CreateSPCommand(string procname);
         void AddParameter(string name, object value);
+        void AddParameter(SqlStmtParameter p);
         void FillDataset(DataSet ds, string srcTable);
         object ExecuteScalarQuery();
         int ExecuteNonQuery();
         StringBuilder GetAsJSONArray();
+
+        StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
+
         StringBuilder GetAsJSONObject();
     }
 
 
-    public class DataAccessService : IDataAccessService
+
+    public class IntwentyDBAccessService : IDataAccessService
     {
 
-        private IOptions<SystemSettings> SysSettings { get; }
+        private IOptions<SystemSettings> Settings { get; }
+
+        private IOptions<ConnectionStrings> Connections { get; }
 
         private NetCoreDBClient DBClient { get; }
 
-        public DataAccessService(IOptions<SystemSettings> sysconfig)
+        public IntwentyDBAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
         {
-            SysSettings = sysconfig;
-            DBClient = new NetCoreDBClient(DBMS.MSSqlServer, SysSettings.Value.DBConn);
+            Settings = settings;
+            Connections = connections;
+            DBClient = new NetCoreDBClient((DBMS)Settings.Value.DBMS, Connections.Value.DefaultConnection);
         }
 
         public void Open()
@@ -74,6 +72,11 @@ namespace Intwenty.Engine
         public void AddParameter(string name, object value)
         {
             DBClient.AddParameter(name, value);
+        }
+
+        public void AddParameter(SqlStmtParameter p)
+        {
+            DBClient.AddParameter(p);
         }
 
         public void FillDataset(DataSet ds, string srcTable)

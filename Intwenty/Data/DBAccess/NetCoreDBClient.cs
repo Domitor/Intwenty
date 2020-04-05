@@ -7,17 +7,34 @@ using Npgsql;
 using NpgsqlTypes;
 using System.Text;
 
-namespace NetCoreDBAccess
+namespace Intwenty.Data.DBAccess
 {
-    public enum DBMS { MSSqlServer, MySql, MariaDB, Postgres, OleDB };
+    public enum DBMS { MSSqlServer, MySql, MariaDB, Postgres };
+
+    public enum DbColumnDataType { String, LongString, Integer, Decimal, Float, Boolean, TimeStamp, DateTime, Date };
+
+    public enum SqlStmtParameterDirection { Input, Output};
+
+    public class SqlStmtParameter
+    {
+        public string ParameterName { get; set; }
+
+        public object Value { get; set; }
+
+        public DbColumnDataType DataType { get; set; }
+
+        public ParameterDirection Direction { get; set; }
+
+        public SqlStmtParameter()
+        {
+            Direction = ParameterDirection.Input;
+        }
+    }
 
     public class NetCoreDBClient : IDisposable
     {
         private SqlConnection sql_connection;
         private SqlCommand sql_cmd;
-
-        private OleDbConnection oledb_connection;
-        private OleDbCommand oledb_cmd;
 
         private NpgsqlConnection pgres_connection;
         private NpgsqlCommand pgres_cmd;
@@ -42,8 +59,7 @@ namespace NetCoreDBAccess
                 DBTYPE = 4;
             if (d == DBMS.Postgres)
                 DBTYPE = 3;
-            if (d == DBMS.OleDB)
-                DBTYPE = 2;
+           
 
             ConnStr = connectionstring;
         }
@@ -64,19 +80,6 @@ namespace NetCoreDBAccess
                 }
 
                 this.sql_cmd = null;
-            }
-            else if (DBTYPE == 2)
-            {
-                if (this.oledb_connection != null)
-                {
-                    if (this.oledb_connection.State != ConnectionState.Closed)
-                    {
-                        this.oledb_connection.Dispose();
-                    }
-
-                }
-
-                this.oledb_cmd = null;
             }
             else if (DBTYPE == 3)
             {
@@ -118,13 +121,6 @@ namespace NetCoreDBAccess
                 sql_connection.ConnectionString = this.ConnStr;
                 sql_connection.Open();
             }
-            else if (DBTYPE == 2)
-            {
-
-                oledb_connection = new OleDbConnection();
-                oledb_connection.ConnectionString = this.ConnStr;
-                oledb_connection.Open();
-            }
             else if (DBTYPE == 3)
             {
 
@@ -152,17 +148,6 @@ namespace NetCoreDBAccess
                     if (this.sql_connection.State != ConnectionState.Closed)
                     {
                         this.sql_connection.Close();
-                    }
-                }
-
-            }
-            else if (DBTYPE == 2)
-            {
-                if (oledb_connection != null)
-                {
-                    if (this.oledb_connection.State != ConnectionState.Closed)
-                    {
-                        this.oledb_connection.Close();
                     }
                 }
 
@@ -206,36 +191,13 @@ namespace NetCoreDBAccess
 
        
 
-        public void AddParameter(string name, SqlDbType type, object value)
-        {
-
-            if (DBTYPE == 1)
-            {
-                this.sql_cmd.Parameters.Add(name, type).Value = value;
-            }
-            else if (DBTYPE == 2)
-            {
-                this.oledb_cmd.Parameters.Add(name, this.GetOleDBType(type)).Value = value;
-            }
-            else if (DBTYPE == 3)
-            {
-                this.pgres_cmd.Parameters.Add(name, this.GetPgresDBType(type)).Value = value;
-            }
-            else if (DBTYPE == 4)
-            {
-                this.mysql_cmd.Parameters.Add(name, this.GetMysqlDBType(type)).Value = value;
-            }
-        }
+      
 
         public void AddParameter(string name, object value)
         {
             if (DBTYPE == 1)
             {
                 this.sql_cmd.Parameters.AddWithValue(name, value);
-            }
-            else if (DBTYPE == 2)
-            {
-                this.oledb_cmd.Parameters.AddWithValue(name, value);
             }
             else if (DBTYPE == 3)
             {
@@ -248,23 +210,31 @@ namespace NetCoreDBAccess
 
         }
 
-        public void AddParameter(SqlParameter p)
+        public void AddParameter(SqlStmtParameter p)
         {
             if (DBTYPE == 1)
             {
-                this.sql_cmd.Parameters.Add(p);
-            }
-            else if (DBTYPE == 2)
-            {
-                this.oledb_cmd.Parameters.Add(new OleDbParameter() { ParameterName = p.ParameterName, Value = p.Value });
+                var param = new SqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
+                if (param.Direction == ParameterDirection.Output)
+                    param.DbType = GetDBType(p.DataType);
+
+                this.sql_cmd.Parameters.Add(param);
             }
             else if (DBTYPE == 3)
             {
-                this.pgres_cmd.Parameters.Add(new NpgsqlParameter() { ParameterName = p.ParameterName, Value = p.Value });
+                var param = new NpgsqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
+                if (param.Direction == ParameterDirection.Output)
+                    param.DbType = GetDBType(p.DataType);
+
+                this.pgres_cmd.Parameters.Add(param);
             }
             else if (DBTYPE == 4)
             {
-                this.mysql_cmd.Parameters.Add(new MySqlParameter() { ParameterName = p.ParameterName, Value = p.Value });
+                var param = new MySqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
+                if (param.Direction == ParameterDirection.Output)
+                    param.DbType = GetDBType(p.DataType);
+
+                this.mysql_cmd.Parameters.Add(param);
             }
 
         }
@@ -277,10 +247,6 @@ namespace NetCoreDBAccess
             {
                 this.sql_cmd.CommandTimeout = seconds;
             }
-            else if (DBTYPE == 2)
-            {
-                this.oledb_cmd.CommandTimeout = seconds;
-            }
             else if (DBTYPE == 3)
             {
                 this.pgres_cmd.CommandTimeout = seconds;
@@ -292,39 +258,7 @@ namespace NetCoreDBAccess
         }
 
 
-
-
-
-
-        public void SetParameterDirection(String name, ParameterDirection param_direction)
-        {
-            if (DBTYPE == 1)
-                this.sql_cmd.Parameters[name].Direction = param_direction;
-            if (DBTYPE == 2)
-                this.oledb_cmd.Parameters[name].Direction = param_direction;
-            if (DBTYPE == 3)
-                this.pgres_cmd.Parameters[name].Direction = param_direction;
-            if (DBTYPE == 4)
-                this.mysql_cmd.Parameters[name].Direction = param_direction;
-
-        }
-
-        public object GetParameterValue(string name)
-        {
-            if (DBTYPE == 1)
-                return this.sql_cmd.Parameters[name].Value;
-            else if (DBTYPE == 2)
-                return this.oledb_cmd.Parameters[name].Value;
-            else if (DBTYPE == 3)
-                return this.pgres_cmd.Parameters[name].Value;
-            else if (DBTYPE == 4)
-                return this.mysql_cmd.Parameters[name].Value;
-            else
-                return null;
-
-        }
-
-        public void FillDataset(DataSet ds, string srcTable)
+        public void FillDataset(DataSet ds, string tablename)
         {
 
 
@@ -333,28 +267,21 @@ namespace NetCoreDBAccess
                 var adapt = new SqlDataAdapter(sql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-                adapt.Fill(ds, srcTable);
-            }
-            else if (DBTYPE == 2)
-            {
-                var adapt = new OleDbDataAdapter(oledb_cmd);
-                adapt.MissingMappingAction = MissingMappingAction.Passthrough;
-                adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-                adapt.Fill(ds, srcTable);
+                adapt.Fill(ds, tablename);
             }
             else if (DBTYPE == 3)
             {
                 var adapt = new NpgsqlDataAdapter(pgres_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-                adapt.Fill(ds, srcTable);
+                adapt.Fill(ds, tablename);
             }
             else if (DBTYPE == 4)
             {
                 var adapt = new MySqlDataAdapter(mysql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-                adapt.Fill(ds, srcTable);
+                adapt.Fill(ds, tablename);
             }
 
         }
@@ -466,12 +393,6 @@ namespace NetCoreDBAccess
                 adapt.FillSchema(ds, SchemaType.Mapped);
                 adapt.Fill(ds);
             }
-            else if (DBTYPE == 2)
-            {
-                var adapt = new OleDbDataAdapter(oledb_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
             else if (DBTYPE == 3)
             {
                 var adapt = new NpgsqlDataAdapter(pgres_cmd);
@@ -500,10 +421,6 @@ namespace NetCoreDBAccess
             {
                 return sql_cmd.ExecuteScalar();
             }
-            else if (DBTYPE == 2)
-            {
-                return oledb_cmd.ExecuteScalar();
-            }
             else if (DBTYPE == 3)
             {
                 return pgres_cmd.ExecuteScalar();
@@ -526,10 +443,6 @@ namespace NetCoreDBAccess
             if (DBTYPE == 1)
             {
                 return sql_cmd.ExecuteNonQuery();
-            }
-            else if (DBTYPE == 2)
-            {
-                return oledb_cmd.ExecuteNonQuery();
             }
             else if (DBTYPE == 3)
             {
@@ -558,15 +471,6 @@ namespace NetCoreDBAccess
             }
         }
 
-        public OleDbDataReader ExecuteOleDBDataReader(CommandBehavior cbv)
-        {
-            if (DBTYPE == 2)
-            {
-                return oledb_cmd.ExecuteReader(cbv);
-            } else {
-                return null;
-            }
-        }
 
         public NpgsqlDataReader ExecutePgSqlDataReader(CommandBehavior cbv)
         {
@@ -590,13 +494,6 @@ namespace NetCoreDBAccess
             {
                 return null;
             }
-        }
-
-        public SqlCommand GetNewSqlCommand()
-        {
-            this.sql_cmd = new SqlCommand();
-            this.sql_cmd.Connection = this.sql_connection;
-            return this.sql_cmd;
         }
 
 
@@ -623,25 +520,6 @@ namespace NetCoreDBAccess
                     this.sql_cmd.CommandType = CommandType.StoredProcedure;
                 }
 
-
-            }
-            else if (DBTYPE == 2)
-            {
-                if (this.oledb_cmd == null)
-                {
-                    this.oledb_cmd = new OleDbCommand();
-                }
-                else
-                {
-                    this.oledb_cmd.Dispose();
-                    this.oledb_cmd = new OleDbCommand();
-                }
-                this.oledb_cmd.Connection = this.oledb_connection;
-                this.oledb_cmd.CommandText = sqlcode;
-                if (isstoredprocedure)
-                {
-                    this.sql_cmd.CommandType = CommandType.StoredProcedure;
-                }
 
             }
             else if (DBTYPE == 3)
@@ -684,97 +562,40 @@ namespace NetCoreDBAccess
             }
         }
 
-        private OleDbType GetOleDBType(SqlDbType type)
-        {
-            OleDbType res;
-            if (type == SqlDbType.Bit)
-            {
-                res = OleDbType.Boolean;
-            }
-            else if (type == SqlDbType.Char)
-            {
-                res = OleDbType.Char;
-            }
-            else if (type == SqlDbType.DateTime)
-            {
-                res = OleDbType.DBTimeStamp;
-            }
-            else if (type == SqlDbType.Decimal)
-            {
-                res = OleDbType.Decimal;
-            }
-            else if (type == SqlDbType.Float)
-            {
-                res = OleDbType.Double;
-            }
-            else if (type == SqlDbType.Int)
-            {
-                res = OleDbType.Integer;
-            }
-            else if (type == SqlDbType.NText)
-            {
-                res = OleDbType.LongVarChar;
-            }
-            else if (type == SqlDbType.NVarChar)
-            {
-                res = OleDbType.VarWChar;
-            }
-            else if (type == SqlDbType.Timestamp)
-            {
-                res = OleDbType.Binary;
-            }
-            else if (type == SqlDbType.UniqueIdentifier)
-            {
-                res = OleDbType.Guid;
-            }
-            else
-            {
-                res = OleDbType.VarWChar;
-            }
-            return res;
-        }
 
-        private NpgsqlDbType GetPgresDBType(SqlDbType type)
+        private NpgsqlDbType GetPgresDBType(DbColumnDataType type)
         {
             NpgsqlDbType res;
 
-            if (type == SqlDbType.Bit)
+            if (type == DbColumnDataType.Boolean)
             {
                 res = NpgsqlDbType.Bit;
             }
-            else if (type == SqlDbType.Char)
-            {
-                res = NpgsqlDbType.Char;
-            }
-            else if (type == SqlDbType.DateTime)
+            else if (type == DbColumnDataType.DateTime)
             {
                 res = NpgsqlDbType.Date;
             }
-            else if (type == SqlDbType.Decimal)
+            else if (type == DbColumnDataType.Decimal)
             {
                 res = NpgsqlDbType.Double;
             }
-            else if (type == SqlDbType.Float)
+            else if (type == DbColumnDataType.Float)
             {
                 res = NpgsqlDbType.Double;
             }
-            else if (type == SqlDbType.Int)
+            else if (type == DbColumnDataType.Integer)
             {
                 res = NpgsqlDbType.Integer;
             }
-            else if (type == SqlDbType.NText)
+            else if (type == DbColumnDataType.LongString)
             {
                 res = NpgsqlDbType.Text;
             }
-            else if (type == SqlDbType.NVarChar)
+            else if (type == DbColumnDataType.String)
             {
                 res = NpgsqlDbType.Varchar;
             }
-            else if (type == SqlDbType.Timestamp)
-            {
-                res = NpgsqlDbType.Timestamp;
-            }
-            else if (type == SqlDbType.UniqueIdentifier)
+            else if (type == DbColumnDataType.TimeStamp)
             {
                 res = NpgsqlDbType.Timestamp;
             }
@@ -787,47 +608,39 @@ namespace NetCoreDBAccess
             return res;
         }
 
-        private MySqlDbType GetMysqlDBType(SqlDbType type)
+        private MySqlDbType GetMysqlDBType(DbColumnDataType type)
         {
             MySqlDbType res;
 
-            if (type == SqlDbType.Bit)
+            if (type == DbColumnDataType.Boolean)
             {
                 res = MySqlDbType.Bit;
             }
-            else if (type == SqlDbType.Char)
-            {
-                res = MySqlDbType.VarChar;
-            }
-            else if (type == SqlDbType.DateTime)
+            else if (type == DbColumnDataType.DateTime)
             {
                 res = MySqlDbType.DateTime;
             }
-            else if (type == SqlDbType.Decimal)
+            else if (type == DbColumnDataType.Decimal)
             {
                 res = MySqlDbType.Decimal;
             }
-            else if (type == SqlDbType.Float)
+            else if (type == DbColumnDataType.Float)
             {
                 res = MySqlDbType.Float;
             }
-            else if (type == SqlDbType.Int)
+            else if (type == DbColumnDataType.Integer)
             {
                 res = MySqlDbType.Int32;
             }
-            else if (type == SqlDbType.NText)
+            else if (type == DbColumnDataType.LongString)
             {
                 res = MySqlDbType.Text;
             }
-            else if (type == SqlDbType.NVarChar)
+            else if (type == DbColumnDataType.String)
             {
                 res = MySqlDbType.VarChar;
             }
-            else if (type == SqlDbType.Timestamp)
-            {
-                res = MySqlDbType.Timestamp;
-            }
-            else if (type == SqlDbType.UniqueIdentifier)
+            else if (type == DbColumnDataType.TimeStamp)
             {
                 res = MySqlDbType.Timestamp;
             }
@@ -840,9 +653,95 @@ namespace NetCoreDBAccess
             return res;
         }
 
-      
+        private SqlDbType GetSqlServerDBType(DbColumnDataType type)
+        {
+            SqlDbType res;
 
-    
+            if (type == DbColumnDataType.Boolean)
+            {
+                res = SqlDbType.Bit;
+            }
+            else if (type == DbColumnDataType.DateTime)
+            {
+                res = SqlDbType.DateTime;
+            }
+            else if (type == DbColumnDataType.Decimal)
+            {
+                res = SqlDbType.Decimal;
+            }
+            else if (type == DbColumnDataType.Float)
+            {
+                res = SqlDbType.Float;
+            }
+            else if (type == DbColumnDataType.Integer)
+            {
+                res = SqlDbType.Int;
+            }
+            else if (type == DbColumnDataType.LongString)
+            {
+                res = SqlDbType.NVarChar;
+            }
+            else if (type == DbColumnDataType.String)
+            {
+                res = SqlDbType.NVarChar;
+            }
+            else if (type == DbColumnDataType.TimeStamp)
+            {
+                res = SqlDbType.Timestamp;
+            }
+            else
+            {
+                res = SqlDbType.NVarChar;
+            }
+
+
+            return res;
+        }
+
+        private DbType GetDBType(DbColumnDataType type)
+        {
+            DbType res;
+
+            if (type == DbColumnDataType.Boolean)
+            {
+                res = DbType.Boolean;
+            }
+            else if (type == DbColumnDataType.DateTime)
+            {
+                res = DbType.DateTime;
+            }
+            else if (type == DbColumnDataType.Decimal)
+            {
+                res = DbType.Decimal;
+            }
+            else if (type == DbColumnDataType.Float)
+            {
+                res = DbType.Double;
+            }
+            else if (type == DbColumnDataType.Integer)
+            {
+                res = DbType.Int32;
+            }
+            else if (type == DbColumnDataType.LongString)
+            {
+                res = DbType.String;
+            }
+            else if (type == DbColumnDataType.String)
+            {
+                res = DbType.String;
+            }
+            else
+            {
+                res = DbType.Object;
+            }
+
+
+            return res;
+        }
+
+
+
+
 
     }
 }
