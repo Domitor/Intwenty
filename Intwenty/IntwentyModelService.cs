@@ -85,11 +85,7 @@ namespace Intwenty
 
         public void SetupModelTables()
         {
-            if (Connection.GetDBMS() == Data.DBAccess.DBMS.MSSqlServer)
-            {
-
-
-            }
+            
         }
 
     }
