@@ -1,0 +1,31 @@
+﻿@model Intwenty.Model.IUIBinding
+@{
+    var validationfield = Model.UIId + "_validationmsg";
+    var onclick = "$('#"+ Model.UIId + "').trigger('click');";
+}
+
+
+    <label class="control-label"> @Model.Title</label>
+    <div style="padding:10px; border: thin solid  lightgray">
+
+        <div class="file btn btn-sm btn-primary">
+            <span class="fas fa-cloud-upload-alt"></span> Upload
+            <input id="@Model.UIId"
+                   name="@Model.UIId"
+                   type="file"
+                   class="uploadInput"
+                   data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeImageBox
+                   data-title="@Model.Title"
+                   data-validationfield="@validationfield"
+                   data-dbtable="@Model.DataTableDbName"
+                   data-dbfield="@Model.DataColumnDbName"
+                   data-required="@Model.Mandatory"
+                   v-on:change="onImageChanged"
+                   accept="image/*" />
+        </div>
+
+        <br />
+
+        <img v-bind:src="model.@Model.DataTableDbName.@Model.DataColumnDbName" width="240" class="rounded border-light" style="margin-top:5px" />
+
+    </div>

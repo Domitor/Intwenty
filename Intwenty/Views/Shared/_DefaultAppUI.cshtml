@@ -56,6 +56,12 @@
 
                             }
 
+                            if (t.IsMetaTypeImageBox && t.IsDataColumnConnected)
+                            {
+                                @await Html.PartialAsync("UIControls/_ImageBox", t)
+
+                            }
+
                             //LOOKUP bound to DATAVIEW
                             if (t.IsMetaTypeLookUp && t.IsDataViewConnected && t.IsDataColumnConnected && t.IsDataViewColumnConnected)
                             {
@@ -67,75 +73,75 @@
 
 
 
-                                if (t.IsMetaTypeEditGrid && t.IsDataTableConnected)
-                                {
-                                    <h4>@t.Title</h4>
+                            if (t.IsMetaTypeEditGrid && t.IsDataTableConnected)
+                            {
+                                <h4>@t.Title</h4>
 
-                                    <div>
-                                        <div class="btn btn-sm btn-secondary" v-on:click="addSubTableLine('@t.DataTableDbName')">
-                                            <span class="fa fa-plus"></span> Add
-                                        </div>
+                                <div>
+                                    <div class="btn btn-sm btn-secondary" v-on:click="addSubTableLine('@t.DataTableDbName')">
+                                        <span class="fa fa-plus"></span> Add
                                     </div>
-                                    <br />
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                @foreach (var tf in Model.UIStructure.OrderBy(p => p.ColumnOrder))
-                                                {
-                                                    if (tf.ParentMetaCode == t.MetaCode)
-                                                    {
-                                                        <th>@tf.Title</th>
-                                                    }
-                                                }
-                                            </tr>
-                                        </thead>
-                                        <tr v-for="item in model.@t.DataTableDbName">
-
+                                </div>
+                                <br />
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
                                             @foreach (var tf in Model.UIStructure.OrderBy(p => p.ColumnOrder))
                                             {
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridTextBox && tf.IsDataColumnConnected)
+                                                if (tf.ParentMetaCode == t.MetaCode)
                                                 {
-                                                    <td><input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_TEXTBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
-                                                }
-
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridLookUp && tf.IsDataColumnConnected && tf.IsDataViewColumnConnected && tf.IsDataViewConnected)
-                                                {
-                                                    <td>
-                                                        <div class="form form-inline">
-                                                            <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.ViewName')"><span class="fa fa-plus"></span></button>
-                                                            <input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.ViewName','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
-                                                        </div>
-                                                    </td>
-                                                }
-
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridNumBox && tf.IsDataColumnConnected)
-                                                {
-                                                    <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_NUMBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
-                                                }
-
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridDatePicker && tf.IsDataColumnConnected)
-                                                {
-                                                    <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_DATEPICKER" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
-                                                }
-
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridComboBox && tf.IsDataColumnConnected && tf.HasValueDomain)
-                                                {
-                                                    <td>
-                                                        <select v-model="item.@tf.DataColumnDbName" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="EDITGRID_COMBOBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory">
-                                                            <option v-for="item in valuedomains.VALUEDOMAIN_@tf.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
-                                                        </select>
-                                                    </td>
-                                                }
-
-                                                if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridCheckBox && tf.IsDataColumnConnected)
-                                                {
-                                                    <td><input type="checkbox" class="form-control form-control-sm" v-model="item.@tf.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="EDITGRID_CHECKBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                                    <th>@tf.Title</th>
                                                 }
                                             }
-
                                         </tr>
-                                    </table>
-                                
+                                    </thead>
+                                    <tr v-for="item in model.@t.DataTableDbName">
+
+                                        @foreach (var tf in Model.UIStructure.OrderBy(p => p.ColumnOrder))
+                                        {
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridTextBox && tf.IsDataColumnConnected)
+                                            {
+                                                <td><input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_TEXTBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                            }
+
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridLookUp && tf.IsDataColumnConnected && tf.IsDataViewColumnConnected && tf.IsDataViewConnected)
+                                            {
+                                                <td>
+                                                    <div class="form form-inline">
+                                                        <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.ViewName')"><span class="fa fa-plus"></span></button>
+                                                        <input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.ViewName','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
+                                                    </div>
+                                                </td>
+                                            }
+
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridNumBox && tf.IsDataColumnConnected)
+                                            {
+                                                <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_NUMBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                            }
+
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridDatePicker && tf.IsDataColumnConnected)
+                                            {
+                                                <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_DATEPICKER" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                            }
+
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridComboBox && tf.IsDataColumnConnected && tf.HasValueDomain)
+                                            {
+                                                <td>
+                                                    <select v-model="item.@tf.DataColumnDbName" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="EDITGRID_COMBOBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory">
+                                                        <option v-for="item in valuedomains.VALUEDOMAIN_@tf.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
+                                                    </select>
+                                                </td>
+                                            }
+
+                                            if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridCheckBox && tf.IsDataColumnConnected)
+                                            {
+                                                <td><input type="checkbox" class="form-control form-control-sm" v-model="item.@tf.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="EDITGRID_CHECKBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                            }
+                                        }
+
+                                    </tr>
+                                </table>
+
                             }
 
                         }  <!--FOR-->

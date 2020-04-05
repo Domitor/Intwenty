@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
+using Microsoft.AspNetCore.Http;
 
 namespace Intwenty.Controllers
 {
@@ -147,6 +149,20 @@ namespace Intwenty.Controllers
 
             return new JsonResult(res);
 
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> UploadImage(IFormFile file)
+        {
+            var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
+
+            var fileandpath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\USERDOC", uniquefilename);
+            using (var fs = new FileStream(fileandpath, FileMode.Create))
+            {
+                await file.CopyToAsync(fs);
+            }
+
+            return new JsonResult(new { fileName= uniquefilename });
         }
 
 

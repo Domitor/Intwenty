@@ -53,14 +53,23 @@
         </tr>
     </thead>
     <tr v-for="item in sortedResults">
-        <td><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button">Open</a></td>
+        <td style="vertical-align:middle"><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit"></span> Edit</a></td>
         @{
             foreach (var c in Model.UIStructure)
             {
 
                 if (c.IsMetaTypeListViewField && c.IsDataColumnConnected)
                 {
-                    <td>{{item.@c.DataColumnInfo.DbName}}</td>
+                    if (c.HasProperty("IMAGE"))
+                    {
+                        <td>
+                            <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80"  class="rounded" />
+                        </td>
+                    }
+                    else
+                    {
+                        <td>{{item.@c.DataColumnInfo.DbName}}</td>
+                    }
                 }
 
             }
