@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿
+using Intwenty.Data.DBAccess.Annotations;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,6 +10,8 @@ using System.Runtime.Serialization;
 namespace Intwenty.Data.Entity
 {
 
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysmodel_ApplicationItem")]
    public class ApplicationItem
    {
         public ApplicationItem()
@@ -15,6 +19,7 @@ namespace Intwenty.Data.Entity
 
         }
 
+        [AutoIncrement]
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
@@ -29,6 +34,7 @@ namespace Intwenty.Data.Entity
 
         public string DbName { get; set; }
 
+        [DbColumnName("IsHierarc")]
         public bool IsHierarchicalApplication { get; set; }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace Intwenty.Data
 			var res = new StringBuilder();
 			if (db == DBMS.MSSqlServer)
 			{
-				res.Append("CREATE TABLE [dbo].[sysmodel_ApplicationItem]( ");
+				res.Append("CREATE TABLE sysmodel_ApplicationItem( ");
 				res.Append("[Id] [int] NOT NULL ");
 				res.Append(",[Title] [nvarchar](max) NULL ");
 				res.Append(",[Description] [nvarchar](max) NULL ");
@@ -27,7 +27,7 @@ namespace Intwenty.Data
 
 			if (db == DBMS.Postgres)
 			{
-				res.Append("CREATE TABLE [dbo].[sysmodel_ApplicationItem]( ");
+				res.Append("CREATE TABLE sysmodel_ApplicationItem( ");
 				res.Append("[Id] [int] NOT NULL ");
 				res.Append(",[Title] [nvarchar](max) NULL ");
 				res.Append(",[Description] [nvarchar](max) NULL ");
@@ -41,7 +41,7 @@ namespace Intwenty.Data
 
 			if (db == DBMS.MariaDB || db == DBMS.MySql)
 			{
-				res.Append("CREATE TABLE [dbo].[sysmodel_ApplicationItem]( ");
+				res.Append("CREATE TABLE sysmodel_ApplicationItem( ");
 				res.Append("Id [int] NOT NULL ");
 				res.Append(",Title VARCHAR(500) NULL DEFAULT NULL ");
 				res.Append(",Description VARCHAR(500) NULL DEFAULT NULL ");
@@ -59,4 +59,6 @@ namespace Intwenty.Data
 		}
 
     }
+
+
 }

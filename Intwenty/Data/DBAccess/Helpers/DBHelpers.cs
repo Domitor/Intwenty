@@ -3,7 +3,7 @@ using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.DBAccess.Helpers
 {
     public static class DBHelpers
     {

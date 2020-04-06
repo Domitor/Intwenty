@@ -1,4 +1,5 @@
 ﻿using Intwenty.Data.DBAccess;
+using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
 using Intwenty.Model;
 using System;
@@ -780,7 +781,7 @@ namespace Intwenty.Engine
         private int GetNewSystemID(string metatype, string metacode)
         {
 
-            var output = new SqlStmtParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbColumnDataType.Integer };
+            var output = new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 };
 
             DataRepository.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate, Properties) Values (@ApplicationId, @MetaType, @MetaCode, getDate(), @Properties) select @NewId = Scope_Identity()");
             DataRepository.AddParameter("@ApplicationId", this.Meta.Application.Id);
