@@ -46,7 +46,10 @@ namespace Intwenty
         {
             Settings = settings;
             Connections = connections;
-            DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.DefaultConnection);
+            if (Settings.Value.DBMS==1)
+                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.SqlServerConnection);
+            if (Settings.Value.DBMS == 2)
+                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
         }
 
         public void Open()

@@ -46,19 +46,25 @@ namespace IntwentyDemo
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
             services.AddTransient<Intwenty.IDataAccessService, Intwenty.IntwentyDbAccessService>();
 
+            var settings = Configuration.GetSection(nameof(SystemSettings)).Get<SystemSettings>();
 
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                if (settings.DBMS == 1)
+                    options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
+                if (settings.DBMS == 2)
+                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
 
             });
 
+            /*
             services.AddDbContext<IntwentyDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
 
             });
+            */
 
             services.AddDefaultIdentity<SystemUser>(options =>
             {

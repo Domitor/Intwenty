@@ -13,18 +13,18 @@ namespace IntwentyDemo.Data
     {
         public static void Initialize(IServiceProvider provider)
         {
-            var intwentycontext = provider.GetRequiredService<IntwentyDbContext>();
+            //var intwentycontext = provider.GetRequiredService<IntwentyDbContext>();
             var sitecontext = provider.GetRequiredService<ApplicationDbContext>();
 
 
             if (sitecontext.Database.EnsureCreated())
             {
                 //CREATE INTWENTY MODEL TABLES
-                RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)intwentycontext.Database.GetService<IDatabaseCreator>();
-                databaseCreator.CreateTables();
+                //RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)intwentycontext.Database.GetService<IDatabaseCreator>();
+                //databaseCreator.CreateTables();
 
                 //SEED INTWENTY SALES ORDER DEMO
-                Intwenty.Data.SalesOrderDemoModel.Seed(intwentycontext, false);
+                //Intwenty.Data.SalesOrderDemoModel.Seed(intwentycontext, false);
 
                 //SEED DEMO ROLES AND USERS
                 SeedRolesAndUsers(sitecontext, provider, true).Wait();

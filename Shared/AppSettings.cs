@@ -7,7 +7,8 @@ namespace Shared
 {
     public class ConnectionStrings
     {
-        public string DefaultConnection { get; set; }
+        public string SqlServerConnection { get; set; }
+        public string MySqlConnection { get; set; }
     }
 
     public class SystemSettings
