@@ -24,12 +24,12 @@ namespace Intwenty
         StringBuilder GetAsJSONArray();
         StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
         StringBuilder GetAsJSONObject();
-        void CreateTable<T>(bool checkexisting=false);
-        List<T> Get<T>() where T : new();
-        int Insert<T>(T model);
-        int Update<T>(T model);
-        int Delete<T>(T model);
-        int DeleteRange<T>(IEnumerable<T> model);
+        void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false);
+        List<T> Get<T>(bool use_current_connection = false) where T : new();
+        int Insert<T>(T model, bool use_current_connection = false);
+        int Update<T>(T model, bool use_current_connection = false);
+        int Delete<T>(T model, bool use_current_connection = false);
+        int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false);
     }
 
 
@@ -122,34 +122,34 @@ namespace Intwenty
             return DBClient.GetDBMS();
         }
 
-        public void CreateTable<T>(bool checkexisting=false)
+        public void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false)
         {
-            DBClient.CreateTable<T>(checkexisting);
+            DBClient.CreateTable<T>(checkexisting, use_current_connection);
         }
 
-        public List<T> Get<T>() where T : new()
+        public List<T> Get<T>(bool use_current_connection = false) where T : new()
         {
-            return DBClient.Get<T>();
+            return DBClient.Get<T>(use_current_connection);
         }
 
-        public int Insert<T>(T model)
+        public int Insert<T>(T model, bool use_current_connection = false)
         {
-            return DBClient.Insert(model);
+            return DBClient.Insert(model, use_current_connection);
         }
 
-        public int Update<T>(T model)
+        public int Update<T>(T model, bool use_current_connection = false)
         {
-            return DBClient.Update(model);
+            return DBClient.Update(model, use_current_connection);
         }
 
-        public int Delete<T>(T model)
+        public int Delete<T>(T model, bool use_current_connection = false)
         {
-            return DBClient.Delete(model);
+            return DBClient.Delete(model, use_current_connection);
         }
 
-        public int DeleteRange<T>(IEnumerable<T> model)
+        public int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false)
         {
-            return DBClient.DeleteRange(model);
+            return DBClient.DeleteRange(model, use_current_connection);
         }
     }
 

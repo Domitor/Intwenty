@@ -425,9 +425,10 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public void CreateTable<T>(bool checkexisting=false)
+        public void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false)
         {
-            OpenIfNeeded();
+            if (!use_current_connection)
+                OpenIfNeeded();
 
             var colsep = "";
             var workingtype = typeof(T);
@@ -552,11 +553,12 @@ namespace Intwenty.Data.DBAccess
                 }
             }
 
-            Close();
+            if (!use_current_connection)
+                Close();
 
         }
 
-        public List<T> Get<T>() where T : new()
+        public List<T> Get<T>(bool use_current_connection = false) where T : new()
         {
           
 
@@ -569,10 +571,15 @@ namespace Intwenty.Data.DBAccess
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
             var ds = new DataSet();
-            OpenIfNeeded();
+
+            if (!use_current_connection)
+                OpenIfNeeded();
+
             CreateCommand(string.Format("SELECT * FROM {0}", tname));
             FillDataset(ds, "NONE");
-            Close();
+
+            if (!use_current_connection)
+                Close();
 
             foreach (DataRow r in ds.Tables[0].Rows)
             {
@@ -598,7 +605,7 @@ namespace Intwenty.Data.DBAccess
             return res;
         }
 
-        public int Insert<T>(T model)
+        public int Insert<T>(T model, bool use_current_connection = false)
         {
             var autoinccolumn = "";
             var colsep = "";
@@ -658,24 +665,36 @@ namespace Intwenty.Data.DBAccess
 
             if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.MSSqlServer)
             {
+                //values.Append(" SELECT SCOPE_IDENTITY()");
                 values.Append(" select @NewId=Scope_Identity()");
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
-            if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (!string.IsNullOrEmpty(autoinccolumn) && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))
             {
+                //values.Append(" SELECT LAST_INSERT_ID()");
                 values.Append(" select @NewId=LAST_INSERT_ID()");
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
+            else if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.PostgreSQL)
+            {
+                //values.Append(string.Format("; SELECT lastval()"));
+                //values.Append(string.Format(" select @NewId= select currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
+                //parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.InputOutput, DataType = DbType.Int32 });
+            }
 
+            if (!use_current_connection)
+                OpenIfNeeded();
 
-            OpenIfNeeded();
             CreateCommand(query.ToString() + values.ToString());
-           
             foreach (var p in parameters)
+            {
                 AddParameter(p);
+            }
 
             var res = ExecuteNonQuery();
-            Close();
+           
+
+      
             var output = res.OutputParameters.Find(p => p.ParameterName == "@NewId");
             if (output != null && !string.IsNullOrEmpty(autoinccolumn))
             {
@@ -684,12 +703,21 @@ namespace Intwenty.Data.DBAccess
                     property.SetValue(model, output.Value, null);
             }
 
+            if (res.Value == 0 && DBMSType == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
+            {
+                CreateCommand(string.Format("SELECT currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
+                res.Value = (int)ExecuteScalarQuery();
+
+            }
+
+            if (!use_current_connection)
+                Close();
 
 
-            return res.Value; 
+            return res.Value;
         }
 
-        public int Update<T>(T model)
+        public int Update<T>(T model, bool use_current_connection = false)
         {
 
             var colsep = "";
@@ -783,7 +811,9 @@ namespace Intwenty.Data.DBAccess
                 wheresep = " AND ";
             }
 
-            OpenIfNeeded();
+            if (!use_current_connection)
+                OpenIfNeeded();
+
             CreateCommand(query.ToString());
             foreach (var p in keyparameters)
                 AddParameter(p);
@@ -791,23 +821,25 @@ namespace Intwenty.Data.DBAccess
                 AddParameter(p);
 
             var res = ExecuteNonQuery().Value;
-            Close();
+
+            if (!use_current_connection)
+                Close();
 
             return res;
 
         }
 
-        public int DeleteRange<T>(IEnumerable<T> model)
+        public int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false)
         {
             var result = 0;
             foreach (var t in model)
             {
-                result+=Delete(t);
+                result+=Delete(t, use_current_connection);
             }
             return result;
         }
 
-        public int Delete<T>(T model)
+        public int Delete<T>(T model, bool use_current_connection = false)
         {
            
             var t = typeof(T);
@@ -877,13 +909,18 @@ namespace Intwenty.Data.DBAccess
 
                 wheresep = " AND ";
             }
-            OpenIfNeeded();
+
+            if (!use_current_connection)
+                OpenIfNeeded();
+
             CreateCommand(query.ToString());
             foreach (var p in keyparameters)
                 AddParameter(p);
 
             var res = ExecuteNonQuery().Value;
-            Close();
+
+            if (!use_current_connection)
+                Close();
 
             return res;
         }
@@ -936,9 +973,10 @@ namespace Intwenty.Data.DBAccess
             {
                 return mysql_cmd.ExecuteScalar();
             }
-
-            return null;
-           
+            else
+            {
+                return null;
+            }
         }
 
         public NonQueryResult ExecuteNonQuery()

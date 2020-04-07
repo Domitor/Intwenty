@@ -69,6 +69,8 @@ namespace Intwenty
             foreach (var app in l)
             {
                 var t = DataManager.GetDataManager(app);
+                t.DataRepository = DataRepository;
+                t.ModelRepository = ModelRepository;
                 res.Add(t.ConfigureDatabase());
             }
 
@@ -104,6 +106,8 @@ namespace Intwenty
             if (validation.IsSuccess)
             {
                 var t = DataManager.GetDataManager(app);
+                t.DataRepository = DataRepository;
+                t.ModelRepository = ModelRepository;
                 var result = t.Save(state);
                 return result;
             }

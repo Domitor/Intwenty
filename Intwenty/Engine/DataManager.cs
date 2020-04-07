@@ -1,6 +1,7 @@
 ﻿using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
+using Intwenty.Data.Entity;
 using Intwenty.Model;
 using System;
 using System.Collections.Generic;
@@ -781,18 +782,9 @@ namespace Intwenty.Engine
         private int GetNewSystemID(string metatype, string metacode)
         {
 
-            var output = new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 };
-
-            DataRepository.CreateCommand("insert into sysdata_SystemID (ApplicationId, MetaType, MetaCode, GeneratedDate, Properties) Values (@ApplicationId, @MetaType, @MetaCode, getDate(), @Properties) select @NewId = Scope_Identity()");
-            DataRepository.AddParameter("@ApplicationId", this.Meta.Application.Id);
-            DataRepository.AddParameter("@MetaType", metatype);
-            DataRepository.AddParameter("@MetaCode", metacode);
-            DataRepository.AddParameter("@Properties", this.ClientState.Properties);
-            DataRepository.AddParameter(output);
-            DataRepository.ExecuteNonQuery();
-            var id = (int)output.Value;
-
-            return id;
+            var model = new SystemID() { ApplicationId=this.Meta.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= this.ClientState.Properties };
+            var result = DataRepository.Insert(model, true);
+            return result;
         }
 
         private void InsertMainTable(ClientStateInfo data)
@@ -1108,21 +1100,19 @@ namespace Intwenty.Engine
 
         private void InsertInformationStatus()
         {
-            DataRepository.CreateCommand("insert into sysdata_InformationStatus (Id, Version, ApplicationId, MetaCode, PerformDate, OwnerId, CreatedBy, ChangedBy, OwnedBy, ChangedDate) Values (@Id, @Version, @ApplicationId, @MetaCode, getDate(), @OwnerId, @CreatedBy,@ChangedBy,@OwnedBy,getDate())");
-            DataRepository.AddParameter("@Id", this.ClientState.Id);
-            DataRepository.AddParameter("@Version", this.ClientState.Version);
-            DataRepository.AddParameter("@ApplicationId", this.Meta.Application.Id);
-            DataRepository.AddParameter("@MetaCode", this.Meta.Application.MetaCode);
-            DataRepository.AddParameter("@OwnerId", this.ClientState.OwnerId);
-            DataRepository.AddParameter("@CreatedBy", this.ClientState.UserId);
-            DataRepository.AddParameter("@ChangedBy", this.ClientState.UserId);
-            DataRepository.AddParameter("@OwnedBy", this.ClientState.OwnerUserId);
-            DataRepository.AddParameter("@ChangedDate", this.ClientState.OwnerUserId);
-            DataRepository.ExecuteNonQuery();
+            var model = new InformationStatus() { Id = this.ClientState.Id, ApplicationId= this.Meta.Application.Id, 
+                                                  ChangedBy=this.ClientState.UserId, ChangedDate = DateTime.Now, CreatedBy = this.ClientState.UserId, 
+                                                  MetaCode = this.Meta.Application.MetaCode, OwnedBy = this.ClientState.OwnerUserId, OwnerId = this.ClientState.OwnerId, 
+                                                  PerformDate = DateTime.Now, Version = this.ClientState.Version };
+
+            DataRepository.Insert(model, true);
+
         }
 
         private void UpdateInformationStatus()
         {
+
+
             DataRepository.CreateCommand("Update sysdata_InformationStatus set ChangedDate=getDate(), ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
             DataRepository.AddParameter("@ChangedBy", this.ClientState.UserId);
             DataRepository.AddParameter("@Version", this.ClientState.Version);
