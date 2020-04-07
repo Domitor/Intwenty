@@ -165,7 +165,38 @@ namespace Intwenty.Data.DBAccess
             }
         }
 
-      
+        private void OpenIfNeeded()
+        {
+            if (DBTYPE == 1)
+            {
+                if (sql_connection != null && sql_connection.State == ConnectionState.Open)
+                    return;
+
+                sql_connection = new SqlConnection();
+                sql_connection.ConnectionString = this.ConnStr;
+                sql_connection.Open();
+            }
+            else if (DBTYPE == 3)
+            {
+                if (pgres_connection != null && pgres_connection.State == ConnectionState.Open)
+                    return;
+
+                pgres_connection = new NpgsqlConnection();
+                pgres_connection.ConnectionString = this.ConnStr;
+                pgres_connection.Open();
+            }
+            else if (DBTYPE == 4)
+            {
+                if (mysql_connection != null && mysql_connection.State == ConnectionState.Open)
+                    return;
+
+                mysql_connection = new MySqlConnection();
+                mysql_connection.ConnectionString = this.ConnStr;
+                mysql_connection.Open();
+            }
+        }
+
+
 
         public void Close()
         {
@@ -411,8 +442,10 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public void CreateTable<T>()
+        public void CreateTable<T>(bool checkexisting=false)
         {
+            OpenIfNeeded();
+
             var colsep = "";
             var workingtype = typeof(T);
             var tablename = workingtype.Name;
@@ -421,6 +454,20 @@ namespace Intwenty.Data.DBAccess
             var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
+
+            if (checkexisting)
+            {
+                var exists = false;
+                try
+                {
+                    CreateCommand(string.Format("select 1 from {0}", tablename));
+                    ExecuteScalarQuery();
+                }
+                catch { exists = true; }
+                if (!exists)
+                    return;
+
+            }
 
             //PK
             DbTablePrimaryKey pk = null;
@@ -499,10 +546,14 @@ namespace Intwenty.Data.DBAccess
                 }
             }
 
+            Close();
+
         }
 
         public List<T> Get<T>() where T : new()
         {
+          
+
             var res = new List<T>();
 
             var t = typeof(T);
@@ -512,9 +563,10 @@ namespace Intwenty.Data.DBAccess
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
             var ds = new DataSet();
+            OpenIfNeeded();
             CreateCommand(string.Format("SELECT * FROM {0}", tname));
             FillDataset(ds, "NONE");
-
+            Close();
 
             foreach (DataRow r in ds.Tables[0].Rows)
             {
@@ -595,7 +647,9 @@ namespace Intwenty.Data.DBAccess
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
 
+            OpenIfNeeded();
             CreateCommand(query.ToString() + values.ToString());
+            Close();
             foreach (var p in parameters)
                 AddParameter(p);
 
@@ -693,19 +747,33 @@ namespace Intwenty.Data.DBAccess
                 wheresep = " AND ";
             }
 
+            OpenIfNeeded();
             CreateCommand(query.ToString());
             foreach (var p in keyparameters)
                 AddParameter(p);
             foreach (var p in parameters)
                 AddParameter(p);
 
-            return ExecuteNonQuery().Value;
+            var res = ExecuteNonQuery().Value;
+            Close();
 
+            return res;
+
+        }
+
+        public int DeleteRange<T>(IEnumerable<T> model)
+        {
+            var result = 0;
+            foreach (var t in model)
+            {
+                result+=Delete(t);
+            }
+            return result;
         }
 
         public int Delete<T>(T model)
         {
-
+           
             var t = typeof(T);
             var tname = t.Name;
             var annot_tablename = t.GetCustomAttributes(typeof(DbTableName), false);
@@ -767,12 +835,15 @@ namespace Intwenty.Data.DBAccess
                 query.Append(wheresep + p.ParameterName + "=@" + p.ParameterName);
                 wheresep = " AND ";
             }
-
+            OpenIfNeeded();
             CreateCommand(query.ToString());
             foreach (var p in keyparameters)
                 AddParameter(p);
-          
-            return ExecuteNonQuery().Value;
+
+            var res = ExecuteNonQuery().Value;
+            Close();
+
+            return res;
         }
 
 

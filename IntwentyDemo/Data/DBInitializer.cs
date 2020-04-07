@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using Intwenty.Data;
 using IntwentyDemo.Data.Entity;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+
 
 namespace IntwentyDemo.Data
 {
@@ -13,26 +12,17 @@ namespace IntwentyDemo.Data
     {
         public static void Initialize(IServiceProvider provider)
         {
-            //var intwentycontext = provider.GetRequiredService<IntwentyDbContext>();
-            var sitecontext = provider.GetRequiredService<ApplicationDbContext>();
 
+            var sitecontext = provider.GetRequiredService<ApplicationDbContext>();
 
             if (sitecontext.Database.EnsureCreated())
             {
-                //CREATE INTWENTY MODEL TABLES
-                //RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)intwentycontext.Database.GetService<IDatabaseCreator>();
-                //databaseCreator.CreateTables();
-
-                //SEED INTWENTY SALES ORDER DEMO
-                //Intwenty.Data.SalesOrderDemoModel.Seed(intwentycontext, false);
-
+                
                 //SEED DEMO ROLES AND USERS
                 SeedRolesAndUsers(sitecontext, provider, true).Wait();
             }
-            else
-            {
-                
-            }
+
+            SalesOrderDemoModel.Seed(provider, true);
 
            
         }
@@ -61,7 +51,6 @@ namespace IntwentyDemo.Data
                 if (r != null)
                     await roleManager.DeleteAsync(r);
               
-
             }
 
             

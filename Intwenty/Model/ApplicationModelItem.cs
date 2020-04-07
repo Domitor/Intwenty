@@ -26,7 +26,6 @@ namespace Intwenty.Model
             DbName = entity.DbName;
             UseVersioning = entity.UseVersioning;
             IsHierarchicalApplication = entity.IsHierarchicalApplication;
-            TestDataAmount = entity.TestDataAmount;
             MetaType = MetaTypeApplication;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
             MainMenuItem = new MenuModelItem(MenuModelItem.MetaTypeMenuItem);
@@ -63,8 +62,6 @@ namespace Intwenty.Model
 
         [Obsolete]
         public bool UseRowValueVersioning { get; set; }
-
-        public int TestDataAmount { get; set; }
 
         public MenuModelItem MainMenuItem { get; set; }
 

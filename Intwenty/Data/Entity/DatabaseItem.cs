@@ -1,21 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
+﻿using System;
+using Intwenty.Data.DBAccess.Annotations;
+
 
 namespace Intwenty.Data.Entity
 {
-
+    [DbTableIndex("IDX_1", true, "AppMetaCode,MetaCode")]
+    [DbTableIndex("IDX_2", true, "AppMetaCode,ParentMetaCode,MetaType,DbName")]
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysmodel_DatabaseItem")]
     public class DatabaseItem
     {
         public DatabaseItem()
         {
-
-
         }
 
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string MetaType { get; set; }
@@ -39,13 +38,6 @@ namespace Intwenty.Data.Entity
         public bool Mandatory { get; set; }
     }
 
-    public class DatabaseItemMap
-    {
-        public DatabaseItemMap(EntityTypeBuilder<DatabaseItem> entityBuilder)
-        {
-            entityBuilder.HasIndex(p => new { p.AppMetaCode, p.MetaCode }).IsUnique(true);
-            entityBuilder.HasIndex(p => new { p.AppMetaCode, p.ParentMetaCode, p.MetaType, p.DbName }).IsUnique(true);
-        }
-    }
+   
 
 }

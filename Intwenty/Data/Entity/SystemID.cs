@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.ComponentModel.DataAnnotations;
-
+﻿using System;
+using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysdata_SystemId")]
     public class SystemID
     {
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public int ApplicationId { get; set; }
@@ -22,11 +22,4 @@ namespace Intwenty.Data.Entity
 
     }
 
-    public class SystemIDMap
-    {
-        public SystemIDMap(EntityTypeBuilder<SystemID> entityBuilder)
-        {
-
-        }
-    }
 }

@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Intwenty.Data.Entity;
-using System;
-using System.ComponentModel.DataAnnotations;
-
+﻿using System;
 
 namespace Intwenty.Model
 {
@@ -14,20 +10,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public NoSerieModelItem(Data.Entity.NoSerie entity)
-        {
-            Id = entity.Id;
-            AppMetaCode = entity.AppMetaCode;
-            MetaCode = entity.MetaCode;
-            DataMetaCode = entity.DataMetaCode;
-            Description = entity.Description;
-            Counter = entity.Counter;
-            StartValue = entity.StartValue;
-            Prefix = entity.Prefix;
-            Properties = entity.Properties;
-            SetEmptyStrings();
-        }
-
+       
 
         private void SetEmptyStrings()
         {

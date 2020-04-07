@@ -18,7 +18,7 @@ namespace Intwenty.Data.DBAccess.Annotations
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class DbTableIndex : Attribute
     {
         public string Name { get; }

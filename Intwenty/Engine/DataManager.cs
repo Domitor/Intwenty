@@ -54,7 +54,7 @@ namespace Intwenty.Engine
     {
         public IIntwentyModelService ModelRepository { get; set; }
 
-        public IDataAccessService DataRepository { get; set; }
+        public IIntwentyDbAccessService DataRepository { get; set; }
 
         protected ApplicationModel Meta { get; set; }
 

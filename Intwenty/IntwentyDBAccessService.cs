@@ -9,31 +9,32 @@ namespace Intwenty
 {
 
 
-    public interface IDataAccessService
+    public interface IIntwentyDbAccessService
     {
         void Open();
         void Close();
-        void CreateCommand(string sqlcode);
-        void CreateSPCommand(string procname);
+        void CreateCommand(string sql);
+        void CreateSPCommand(string procedurename);
         void AddParameter(string name, object value);
         void AddParameter(IntwentySqlParameter p);
-        void FillDataset(DataSet ds, string srcTable);
+        void FillDataset(DataSet ds, string tablename);
         object ExecuteScalarQuery();
         NonQueryResult ExecuteNonQuery();
         DBMS GetDBMS();
         StringBuilder GetAsJSONArray();
         StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
         StringBuilder GetAsJSONObject();
-        void CreateTable<T>();
+        void CreateTable<T>(bool checkexisting=false);
         List<T> Get<T>() where T : new();
         int Insert<T>(T model);
         int Update<T>(T model);
         int Delete<T>(T model);
+        int DeleteRange<T>(IEnumerable<T> model);
     }
 
 
 
-    public class IntwentyDbAccessService : IDataAccessService
+    public class IntwentyDbAccessService : IIntwentyDbAccessService
     {
 
         private IOptions<SystemSettings> Settings { get; }
@@ -67,9 +68,9 @@ namespace Intwenty
             DBClient.CreateCommand(sqlstmt);
         }
 
-        public void CreateSPCommand(string procname)
+        public void CreateSPCommand(string procedurename)
         {
-            DBClient.CreateSPCommand(procname);
+            DBClient.CreateSPCommand(procedurename);
         }
 
         public void AddParameter(string name, object value)
@@ -82,9 +83,9 @@ namespace Intwenty
             DBClient.AddParameter(p);
         }
 
-        public void FillDataset(DataSet ds, string srcTable)
+        public void FillDataset(DataSet ds, string tablename)
         {
-            DBClient.FillDataset(ds, srcTable);
+            DBClient.FillDataset(ds, tablename);
         }
 
         public object ExecuteScalarQuery()
@@ -117,9 +118,9 @@ namespace Intwenty
             return DBClient.GetDBMS();
         }
 
-        public void CreateTable<T>()
+        public void CreateTable<T>(bool checkexisting=false)
         {
-            DBClient.CreateTable<T>();
+            DBClient.CreateTable<T>(checkexisting);
         }
 
         public List<T> Get<T>() where T : new()
@@ -129,17 +130,22 @@ namespace Intwenty
 
         public int Insert<T>(T model)
         {
-            return DBClient.Insert<T>(model);
+            return DBClient.Insert(model);
         }
 
         public int Update<T>(T model)
         {
-            return DBClient.Update<T>(model);
+            return DBClient.Update(model);
         }
 
         public int Delete<T>(T model)
         {
-            return DBClient.Delete<T>(model);
+            return DBClient.Delete(model);
+        }
+
+        public int DeleteRange<T>(IEnumerable<T> model)
+        {
+            return DBClient.DeleteRange(model);
         }
     }
 

@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using Intwenty.Data.DBAccess.Annotations;
+
 
 
 namespace Intwenty.Data.Entity
 {
+    [DbTableIndex("IDX_1", true, "MetaCode,ParentMetaCode")]
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysmodel_DataViewItem")]
     public class DataViewItem
     {
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string MetaType { get; set; }
@@ -26,11 +28,4 @@ namespace Intwenty.Data.Entity
 
     }
 
-    public class DataViewItemMap
-    {
-        public DataViewItemMap(EntityTypeBuilder<DataViewItem> entityBuilder)
-        {
-            entityBuilder.HasIndex(p => new {  p.MetaCode, p.ParentMetaCode }).IsUnique(true);
-        }
-    }
 }

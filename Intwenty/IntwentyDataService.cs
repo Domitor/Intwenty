@@ -7,12 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Dto;
 using Shared;
-
+using Intwenty.Data.Entity;
 
 namespace Intwenty
 {
     public interface IIntwentyDataService
     {
+        void CreateDatabase();
+
         List<OperationResult> ConfigureDatabase();
 
         void ConfigureDatabaseIfNeeded();
@@ -50,9 +52,9 @@ namespace Intwenty
         
         private IOptions<SystemSettings> SysSettings { get; }
         private IIntwentyModelService ModelRepository { get; }
-        private IDataAccessService DataRepository { get; }
+        private IIntwentyDbAccessService DataRepository { get; }
 
-        public IntwentyDataService(IOptions<SystemSettings> sysconfig, IIntwentyModelService mr, IDataAccessService dr)
+        public IntwentyDataService(IOptions<SystemSettings> sysconfig, IIntwentyModelService mr, IIntwentyDbAccessService dr)
         {
             SysSettings = sysconfig;
             ModelRepository = mr;
@@ -412,6 +414,7 @@ namespace Intwenty
         public OperationResult GenerateTestData()
         {
             var res = new OperationResult();
+            var amount = 50;
 
             try
             {
@@ -427,10 +430,7 @@ namespace Intwenty
                     if (app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
                         continue;
 
-                    var amount = app.Application.TestDataAmount;
-                    if (amount < 100 || amount > 100)
-                        amount = 100;
-
+                  
                     for (int i = 0; i < amount; i++)
                     {
                         var t = DataManager.GetDataManager(app);
@@ -451,10 +451,6 @@ namespace Intwenty
                 {
                     if (!app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
                         continue;
-
-                    var amount = app.Application.TestDataAmount;
-                    if (amount < 100 || amount > 100)
-                        amount = 100;
 
                     for (int i = 0; i < amount; i++)
                     {
@@ -528,6 +524,24 @@ namespace Intwenty
 
             }
             catch { }
+        }
+
+        public void CreateDatabase()
+        {
+            if (!SysSettings.Value.IsDevelopment)
+                return;
+
+            DataRepository.Open();
+            DataRepository.CreateTable<ApplicationItem>(true);
+            DataRepository.CreateTable<DatabaseItem>(true);
+            DataRepository.CreateTable<DataViewItem>(true);
+            DataRepository.CreateTable<EventLog>(true);
+            DataRepository.CreateTable<InformationStatus>(true);
+            DataRepository.CreateTable<MenuItem>(true);
+            DataRepository.CreateTable<SystemID>(true);
+            DataRepository.CreateTable<UserInterfaceItem>(true);
+            DataRepository.CreateTable<ValueDomainItem>(true);
+
         }
     }
 }

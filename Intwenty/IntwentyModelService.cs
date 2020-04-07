@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Entity;
@@ -71,52 +70,20 @@ namespace Intwenty
 
     }
 
-    public class IntwentyModelService2
-    {
-        private readonly IDataAccessService Connection;
-        private readonly IMemoryCache ModelCache;
-        private static readonly string AppModelCacheKey = "APPMODELS";
-
-        public IntwentyModelService2(IDataAccessService connection, IMemoryCache cache)
-        {
-             Connection = connection;
-             ModelCache = cache;
-        }
-
-        public void SetupModelTables()
-        {
-            
-        }
-
-    }
 
 
 
     public class IntwentyModelService : IIntwentyModelService
     {
 
-        private IntwentyDbContext context;
-        private DbSet<ApplicationItem> AppDescription;
-        private DbSet<DatabaseItem> MetaDBItem;
-        private DbSet<UserInterfaceItem> MetaUIItem;
-        private DbSet<DataViewItem> MetaDataViews;
-        private DbSet<MenuItem> MetaMenuItems;
-        private DbSet<NoSerie> NoSeries;
-        private DbSet<ValueDomainItem> ValueDomains;
+        private IIntwentyDbAccessService context;
         private IMemoryCache ModelCache;
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
-        public IntwentyModelService(IntwentyDbContext context, IMemoryCache cache)
+        public IntwentyModelService(IIntwentyDbAccessService context, IMemoryCache cache)
         {
             this.context = context;
-            AppDescription = context.Set<ApplicationItem>();
-            MetaDBItem = context.Set<DatabaseItem>();
-            MetaUIItem = context.Set<UserInterfaceItem>();
-            MetaDataViews = context.Set<DataViewItem>();
-            MetaMenuItems = context.Set<MenuItem>();
-            NoSeries = context.Set<NoSerie>();
-            ValueDomains = context.Set<ValueDomainItem>();
             ModelCache = cache;
     }
 
@@ -133,11 +100,10 @@ namespace Intwenty
 
             res = new List<ApplicationModel>();
             var apps =  GetApplicationModelItems();
-            var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
-            var uitems = MetaUIItem.Select(p => new UserInterfaceModelItem(p)).ToList();
-            var views = MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
-            var noseries = NoSeries.Select(p => new NoSerieModelItem(p)).ToList();
-
+            var ditems = context.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            var uitems = context.Get<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
+            var views = context.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+         
 
             foreach (var app in apps)
             {
@@ -171,13 +137,6 @@ namespace Intwenty
                     }
                 }
 
-                foreach (var item in noseries)
-                {
-                    if (item.AppMetaCode == app.MetaCode)
-                    {
-                        t.NoSeries.Add(item);
-                    }
-                }
 
                 foreach (var item in uitems.OrderBy(p=> p.RowOrder).ThenBy(p=> p.ColumnOrder))
                 {
@@ -254,9 +213,13 @@ namespace Intwenty
 
         public List<MenuModelItem> GetMenuModelItems()
         {
-            var apps = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
+    
+            var apps = context.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            var menu = context.Get<MenuItem>();
+         
+
             var res = new List<MenuModelItem>();
-            foreach (var m in MetaMenuItems.OrderBy(p=> p.Order))
+            foreach (var m in menu.OrderBy(p=> p.Order))
             {
                 var s = new MenuModelItem(m);
 
@@ -287,7 +250,8 @@ namespace Intwenty
         {
             var res = new List<NoSerieModelItem>();
 
-            var app = AppDescription.FirstOrDefault(p => p.Id == applicationid);
+            /*
+            var app = context.Get<ApplicationItem>().FirstOrDefault(p => p.Id == applicationid);
             if (app == null)
                 return new List<NoSerieModelItem>();
 
@@ -323,6 +287,7 @@ namespace Intwenty
 
             context.SaveChanges();
 
+    */
 
 
             return res;
@@ -331,6 +296,8 @@ namespace Intwenty
 
         public List<NoSerieModelItem> GetNoSeries()
         {
+            var res = new List<NoSerieModelItem>();
+            /*
             var res = NoSeries.Select(p => new NoSerieModelItem(p)).ToList();
             var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
 
@@ -355,14 +322,15 @@ namespace Intwenty
                 }
 
             }
-
+            */
             return res;
         }
 
         #region Application
         public List<ApplicationModelItem> GetApplicationModelItems()
         {
-            var t = AppDescription.Select(p => new ApplicationModelItem(p)).ToList();
+           
+            var t = context.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
             var menu = GetMenuModelItems();
             foreach (var app in t)
             {
@@ -383,25 +351,25 @@ namespace Intwenty
             if (model.Id < 1 || string.IsNullOrEmpty(model.MetaCode))
                 throw new InvalidOperationException("Missing required information when deleting application model.");
 
-            var existing = AppDescription.FirstOrDefault(p => p.Id == model.Id);
+            var existing = context.Get<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
             if (existing == null)
                 return; //throw new InvalidOperationException("Could not find application model when deleting application model.");
 
-            var dbitems = MetaDBItem.Where(p => p.AppMetaCode == existing.MetaCode);
+
+            var dbitems = context.Get<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (dbitems != null && dbitems.Count() > 0)
-                MetaDBItem.RemoveRange(dbitems);
+                context.DeleteRange(dbitems);
 
-            var uiitems = MetaUIItem.Where(p => p.AppMetaCode == existing.MetaCode);
+            var uiitems = context.Get<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (uiitems != null && uiitems.Count() > 0)
-                MetaUIItem.RemoveRange(uiitems);
+                context.DeleteRange(uiitems);
 
-            var menuitems = MetaMenuItems.Where(p => p.AppMetaCode == existing.MetaCode);
+            var menuitems = context.Get<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (menuitems != null && menuitems.Count() > 0)
-                MetaMenuItems.RemoveRange(menuitems);
+                context.DeleteRange(menuitems);
 
-            AppDescription.Remove(existing);
+            context.Delete(existing);
 
-            context.SaveChanges();
 
             ModelCache.Remove(AppModelCacheKey);
 
@@ -411,7 +379,9 @@ namespace Intwenty
         {
             ModelCache.Remove(AppModelCacheKey);
 
-            var res = new ApplicationModelItem();
+            var AppDescription = context.Get<ApplicationItem>();
+
+
 
             if (model == null)
                 return null;
@@ -432,13 +402,9 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                AppDescription.Add(entity);
+                context.Insert(entity);
 
                 CreateApplicationMenuItem(model);
-
-                context.SaveChanges();
-
-               
 
                 return new ApplicationModelItem(entity);
 
@@ -455,19 +421,20 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                var menuitem = MetaMenuItems.FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
+                var menuitem = context.Get<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
                 if (menuitem != null)
                 {
                     menuitem.Action = model.MainMenuItem.Action;
                     menuitem.Controller = model.MainMenuItem.Controller;
                     menuitem.Title = model.MainMenuItem.Title;
+          
+                    context.Update(menuitem);
+                
                 }
                 else
                 {
                     CreateApplicationMenuItem(model);
                 }
-
-                context.SaveChanges();
 
                 return new ApplicationModelItem(entity);
 
@@ -486,7 +453,7 @@ namespace Intwenty
                 if (root == null)
                 {
                     var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", Order = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
-                    MetaMenuItems.Add(main);
+                    context.Insert(main);
                     max = 1;
                 }
                 else
@@ -498,7 +465,7 @@ namespace Intwenty
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
-                MetaMenuItems.Add(appmi);
+                context.Insert(appmi);
 
             }
 
@@ -528,15 +495,13 @@ namespace Intwenty
             {
                 if (t.Id > 0 && t.HasProperty("REMOVED"))
                 {
-                    var existing = MetaUIItem.FirstOrDefault(p => p.Id == t.Id);
+                    var existing = context.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
                     if (existing != null)
                     {
-                        MetaUIItem.Remove(existing);
+                        context.Delete(existing);
                     }
                 }
             }
-
-            context.SaveChanges();
 
             foreach (var uic in model)
             {
@@ -554,12 +519,12 @@ namespace Intwenty
                     if (string.IsNullOrEmpty(uic.MetaCode))
                         throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
 
-                    MetaUIItem.Add(CreateMetaUIItem(uic));
+                    context.Insert(CreateMetaUIItem(uic));
 
                 }
                 else
                 {
-                    var existing = MetaUIItem.FirstOrDefault(p => p.Id == uic.Id);
+                    var existing = context.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
@@ -572,13 +537,14 @@ namespace Intwenty
                         existing.Domain = uic.Domain;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
+                        context.Update(existing);
                     }
 
                 }
 
             }
 
-            context.SaveChanges();
+           
         }
 
       
@@ -616,7 +582,7 @@ namespace Intwenty
 
         public List<DatabaseModelItem> GetDatabaseModelItems()
         {
-            return MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
+            return context.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
         }
 
         public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid)
@@ -676,14 +642,14 @@ namespace Intwenty
                     if (dbi.IsMetaTypeDataTable && dbi.DbName == app.Application.DbName)
                         continue;
 
-                    MetaDBItem.Add(t);
+                    context.Insert(t);
 
                 }
                 else
                 {
                   
 
-                    var existing = MetaDBItem.FirstOrDefault(p => p.Id == dbi.Id);
+                    var existing = context.Get<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
                     if (existing != null)
                     {
                         existing.DataType = dbi.DataType;
@@ -693,14 +659,13 @@ namespace Intwenty
                         existing.ParentMetaCode = dbi.ParentMetaCode;
                         existing.DbName = dbi.DbName;
                         existing.Mandatory = dbi.Mandatory;
-                       
+                        context.Update(existing);
                     }
 
                 }
 
             }
 
-            context.SaveChanges();
 
             ModelCache.Remove(AppModelCacheKey);
 
@@ -710,7 +675,7 @@ namespace Intwenty
         {
            
 
-            var existing = MetaDBItem.FirstOrDefault(p => p.Id == id);
+            var existing = context.Get<DatabaseItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DatabaseModelItem(existing);
@@ -720,15 +685,14 @@ namespace Intwenty
 
                 if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
                 {
-                    var childlist = MetaDBItem.Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    MetaDBItem.Remove(existing);
-                    MetaDBItem.RemoveRange(childlist);
+                    var childlist = context.Get<DatabaseItem>().Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    context.Delete(existing);
+                    context.DeleteRange(childlist);
                 }
                 else
                 {
-                    MetaDBItem.Remove(existing);
+                    context.Delete(existing);
                 }
-                context.SaveChanges();
 
                 ModelCache.Remove(AppModelCacheKey);
             }
@@ -758,7 +722,7 @@ namespace Intwenty
         #region Data Views
         public List<DataViewModelItem> GetDataViewModels()
         {
-            return MetaDataViews.Select(p => new DataViewModelItem(p)).ToList();
+            return context.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
         }
 
         public void SaveDataView(List<DataViewModelItem> model)
@@ -779,23 +743,23 @@ namespace Intwenty
                 if (dv.Id < 1)
                 {
                     var t = CreateMetaDataView(dv);
-                    MetaDataViews.Add(t);
+                    context.Insert(t);
                 }
                 else
                 {
-                    var existing = MetaDataViews.FirstOrDefault(p => p.Id == dv.Id);
+                    var existing = context.Get<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
                     if (existing != null)
                     {
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
+                        context.Update(existing);
                     }
 
                 }
 
             }
 
-            context.SaveChanges();
         }
 
 
@@ -823,21 +787,20 @@ namespace Intwenty
 
         public void DeleteDataView(int id)
         {
-            var existing = MetaDataViews.FirstOrDefault(p => p.Id == id);
+            var existing = context.Get<DataViewItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DataViewModelItem(existing);
                 if (dto.IsMetaTypeDataView)
                 {
-                    var childlist = MetaDataViews.Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    MetaDataViews.Remove(existing);
-                    MetaDataViews.RemoveRange(childlist);
+                    var childlist = context.Get<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    context.Delete(existing);
+                    context.DeleteRange(childlist);
                 }
                 else
                 {
-                    MetaDataViews.Remove(existing);
+                    context.Delete(existing);
                 }
-                context.SaveChanges();
             }
         }
         #endregion
@@ -854,38 +817,36 @@ namespace Intwenty
 
                 if (vd.Id < 1)
                 {
-                    ValueDomains.Add(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    context.Insert(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {
-                    var existing = ValueDomains.FirstOrDefault(p => p.Id == vd.Id);
+                    var existing = context.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == vd.Id);
                     if (existing != null)
                     {
                         existing.Code = vd.Code;
                         existing.Value = vd.Value;
                         existing.DomainName = vd.DomainName;
+                        context.Update(existing);
                     }
 
                 }
 
             }
-
-            context.SaveChanges();
         }
 
         public List<ValueDomainModelItem> GetValueDomains()
         {
-            var t = ValueDomains.Select(p => new ValueDomainModelItem(p)).ToList();
+            var t = context.Get<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
             return t;
         }
 
         public void DeleteValueDomain(int id)
         {
-            var existing = ValueDomains.FirstOrDefault(p => p.Id == id);
+            var existing = context.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                ValueDomains.Remove(existing);
-                context.SaveChanges();
+                context.Delete(existing);
             }
         }
 
@@ -899,8 +860,7 @@ namespace Intwenty
 
         public List<string> GetTestDataBatches()
         {
-            var sysid = context.Set<SystemID>();
-            var filtered = sysid.Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+            var filtered = context.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
 
             var res = new List<string>();
             foreach (var s in filtered)
@@ -918,9 +878,9 @@ namespace Intwenty
 
         public void DeleteTestDataBatch(string batchname)
         {
-            var sysid = context.Set<SystemID>();
-            var filtered = sysid.Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+            var filtered = context.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
 
+            context.Open();
             foreach (var t in filtered)
             {
                 if (string.IsNullOrEmpty(t.BatchName))
@@ -933,16 +893,24 @@ namespace Intwenty
                         var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
                         if (app != null && t.Id > 0)
                         {
-                            var rowsaffected = context.Database.ExecuteSqlRaw("delete from " + app.DbName + " where ID = " + t.Id);
-                            rowsaffected = context.Database.ExecuteSqlRaw("delete from " + app.VersioningTableName + " where ID = " + t.Id);
-                            rowsaffected = context.Database.ExecuteSqlRaw("delete from sysdata_InformationStatus where ID = " + t.Id);
-                            rowsaffected = context.Database.ExecuteSqlRaw("delete from sysdata_SystemID where ID = " + t.Id);
+                            context.CreateCommand("delete from " + app.DbName + " where ID = " + t.Id);
+                            context.ExecuteNonQuery();
+
+                            context.CreateCommand("delete from " + app.VersioningTableName + " where ID = " + t.Id);
+                            context.ExecuteNonQuery();
+
+                            context.CreateCommand("delete from sysdata_InformationStatus where ID = " + t.Id);
+                            context.ExecuteNonQuery();
+
+                            context.CreateCommand("delete from sysdata_SystemID where ID = " + t.Id);
+                            context.ExecuteNonQuery();
 
                         }
                     }
                 }
 
             }
+            context.Close();
 
          
 

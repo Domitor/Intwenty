@@ -9,10 +9,13 @@ namespace Shared
     {
         public string SqlServerConnection { get; set; }
         public string MySqlConnection { get; set; }
+        public string PostGreSQLConnection { get; set; }
     }
 
     public class SystemSettings
     {
+        public bool IsDevelopment { get; set; }
+
         public int DBMS { get; set; }
 
         public string SiteLanguage { get; set; }

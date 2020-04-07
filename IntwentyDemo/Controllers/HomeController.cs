@@ -1,4 +1,5 @@
 ﻿
+using Intwenty;
 using Intwenty.Data.Entity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,9 +8,9 @@ namespace IntwentyDemo.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly Intwenty.IDataAccessService Connection;
+        private readonly IIntwentyDbAccessService Connection;
 
-        public HomeController(Intwenty.IDataAccessService db)
+        public HomeController(IIntwentyDbAccessService db)
         {
             Connection = db;
         }

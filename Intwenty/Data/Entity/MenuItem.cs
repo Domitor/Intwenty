@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations;
+﻿using Intwenty.Data.DBAccess.Annotations;
 
 
 namespace Intwenty.Data.Entity
 {
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysmodel_MenuItem")]
     public class MenuItem
     {
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string AppMetaCode { get; set; }
@@ -31,11 +32,5 @@ namespace Intwenty.Data.Entity
 
    
 
-    public class MenuItemMap
-    {
-        public MenuItemMap(EntityTypeBuilder<MenuItem> entityBuilder)
-        {
-
-        }
-    }
+  
 }

@@ -1,16 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
+using Intwenty.Data.DBAccess.Annotations;
+
+
 
 namespace Intwenty.Data.Entity
 {
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysdata_InformationStatus")]
     public class InformationStatus
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+
         public int Id { get; set; }
 
         public int Version { get; set; }
@@ -36,11 +35,4 @@ namespace Intwenty.Data.Entity
         public DateTime? EndDate { get; set; }
     }
 
-    public class InformationStatusMap
-    {
-        public InformationStatusMap(EntityTypeBuilder<InformationStatus> entityBuilder)
-        {
-
-        }
-    }
 }

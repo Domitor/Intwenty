@@ -6,16 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Intwenty.Data;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-using Intwenty.Data.Entity;
 using IntwentyDemo.Data.Entity;
 using IntwentyDemo.Data;
 using Shared;
 using Intwenty;
-using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
-using Microsoft.Extensions.FileProviders;
+
 
 namespace IntwentyDemo
 {
@@ -44,7 +39,7 @@ namespace IntwentyDemo
 
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
-            services.AddTransient<Intwenty.IDataAccessService, Intwenty.IntwentyDbAccessService>();
+            services.AddTransient<IIntwentyDbAccessService, IntwentyDbAccessService>();
 
             var settings = Configuration.GetSection(nameof(SystemSettings)).Get<SystemSettings>();
 
@@ -55,6 +50,10 @@ namespace IntwentyDemo
                     options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
                 if (settings.DBMS == 2)
                     options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
+                if (settings.DBMS == 3)
+                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
+                if (settings.DBMS == 4)
+                    options.UseNpgsql(Configuration.GetConnectionString("PostgreSQLConnection"));
 
             });
 

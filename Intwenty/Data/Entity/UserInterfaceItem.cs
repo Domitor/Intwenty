@@ -1,19 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
+﻿using System;
+using Intwenty.Data.DBAccess.Annotations;
+
 
 namespace Intwenty.Data.Entity
 {
-
+    [DbTableIndex("IDX_1", true, "AppMetaCode,MetaCode")]
+    [DbTablePrimaryKey("Id")]
+    [DbTableName("sysmodel_UserInterfaceItem")]
     public class UserInterfaceItem
     {
         public UserInterfaceItem()
         {
         }
 
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string MetaType { get; set; }
@@ -51,12 +51,5 @@ namespace Intwenty.Data.Entity
         public string Properties { get; set; }
     }
 
-    public class UserInterfaceItemMap
-    {
-        public UserInterfaceItemMap(EntityTypeBuilder<UserInterfaceItem> entityBuilder)
-        {
-            entityBuilder.HasIndex(p => new { p.AppMetaCode, p.MetaCode }).IsUnique(true);
-        }
-    }
 
 }
