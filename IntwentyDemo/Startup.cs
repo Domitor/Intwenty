@@ -46,13 +46,13 @@ namespace IntwentyDemo
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                if (settings.DBMS == 1)
+                if (settings.DBMS == 0)
                     options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
+                if (settings.DBMS == 1)
+                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
                 if (settings.DBMS == 2)
                     options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
                 if (settings.DBMS == 3)
-                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
-                if (settings.DBMS == 4)
                     options.UseNpgsql(Configuration.GetConnectionString("PostgreSQLConnection"));
 
             });

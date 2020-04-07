@@ -219,7 +219,7 @@ namespace Intwenty
          
 
             var res = new List<MenuModelItem>();
-            foreach (var m in menu.OrderBy(p=> p.Order))
+            foreach (var m in menu.OrderBy(p=> p.OrderNo))
             {
                 var s = new MenuModelItem(m);
 
@@ -452,7 +452,7 @@ namespace Intwenty
                 var root = menu.Find(p => p.IsMetaTypeMainMenu);
                 if (root == null)
                 {
-                    var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", Order = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
+                    var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", OrderNo = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
                     context.Insert(main);
                     max = 1;
                 }
@@ -461,7 +461,7 @@ namespace Intwenty
                     max = menu.Max(p => p.Order);
                 }
 
-                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, Order = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
+                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);

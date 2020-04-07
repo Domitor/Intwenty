@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using Intwenty.Data;
 using IntwentyDemo.Data.Entity;
-
+using Microsoft.Extensions.Options;
+using Shared;
 
 namespace IntwentyDemo.Data
 {
@@ -14,26 +15,27 @@ namespace IntwentyDemo.Data
         {
 
             var sitecontext = provider.GetRequiredService<ApplicationDbContext>();
+            var SysSettings = provider.GetRequiredService<IOptions<SystemSettings>>();
 
             if (sitecontext.Database.EnsureCreated())
             {
-                
+
                 //SEED DEMO ROLES AND USERS
-                SeedRolesAndUsers(sitecontext, provider, true).Wait();
+                SeedRolesAndUsers(sitecontext, provider, SysSettings.Value.ReCreateModelOnStartUp).Wait();
             }
 
-            SalesOrderDemoModel.Seed(provider, true);
+            SalesOrderDemoModel.Seed(provider);
 
            
         }
 
 
-        private async static Task SeedRolesAndUsers(ApplicationDbContext context, IServiceProvider provider, bool isupdate)
+        private async static Task SeedRolesAndUsers(ApplicationDbContext context, IServiceProvider provider, bool recreate)
         {
             var userManager = provider.GetRequiredService<UserManager<SystemUser>>();
             var roleManager = provider.GetRequiredService<RoleManager<SystemRole>>();
 
-            if (isupdate)
+            if (recreate)
             {
                 var u = await userManager.FindByNameAsync("admin@intwenty.com");
                 if (u!=null)

@@ -13,7 +13,7 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.DBAccess
 {
-    public enum DBMS { MSSqlServer, MySql, MariaDB, Postgres };
+    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL };
 
     public class IntwentySqlParameter
     {
@@ -58,38 +58,26 @@ namespace Intwenty.Data.DBAccess
         private MySqlConnection mysql_connection;
         private MySqlCommand mysql_cmd;
 
-        private int DBTYPE = -1;
+        private DBMS DBMSType { get; set; }
 
-        private string ConnStr = "";
+        private string ConnectionString { get; set; }
 
 
         public IntwentyDBClient()
         {
+            ConnectionString = string.Empty;
+            DBMSType = DBMS.MSSqlServer;
         }
 
         public IntwentyDBClient(DBMS d, string connectionstring)
         {
-            if (d== DBMS.MSSqlServer)
-                DBTYPE = 1;
-            if (d == DBMS.MySql || d == DBMS.MariaDB)
-                DBTYPE = 4;
-            if (d == DBMS.Postgres)
-                DBTYPE = 3;
-           
-
-            ConnStr = connectionstring;
+            DBMSType = d;
+            ConnectionString = connectionstring;
         }
 
         public DBMS GetDBMS()
         {
-            if (DBTYPE == 1)
-                return DBMS.MSSqlServer;
-            if (DBTYPE == 3)
-                return DBMS.Postgres;
-            if (DBTYPE == 4)
-                return DBMS.MySql;
-
-            return DBMS.MSSqlServer;
+            return DBMSType;
         }
 
       
@@ -97,7 +85,7 @@ namespace Intwenty.Data.DBAccess
         public void Dispose()
         {
 
-            if (DBTYPE == 1)
+            if (DBMSType ==  DBMS.MSSqlServer)
             {
                 if (this.sql_connection != null)
                 {
@@ -109,7 +97,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.sql_cmd = null;
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType ==  DBMS.PostgreSQL)
             {
                 if (this.pgres_connection != null)
                 {
@@ -123,7 +111,7 @@ namespace Intwenty.Data.DBAccess
                 this.pgres_cmd = null;
             }
 
-            else if (DBTYPE == 4)
+            else if (DBMSType ==  DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 if (this.mysql_connection != null)
                 {
@@ -142,56 +130,56 @@ namespace Intwenty.Data.DBAccess
 
         public virtual void Open()
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
 
                 sql_connection = new SqlConnection();
-                sql_connection.ConnectionString = this.ConnStr;
+                sql_connection.ConnectionString = ConnectionString;
                 sql_connection.Open();
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
 
                 pgres_connection = new NpgsqlConnection();
-                pgres_connection.ConnectionString = this.ConnStr;
+                pgres_connection.ConnectionString = ConnectionString;
                 pgres_connection.Open();
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
 
                 mysql_connection = new MySqlConnection();
-                mysql_connection.ConnectionString = this.ConnStr;
+                mysql_connection.ConnectionString = ConnectionString;
                 mysql_connection.Open();
             }
         }
 
         private void OpenIfNeeded()
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 if (sql_connection != null && sql_connection.State == ConnectionState.Open)
                     return;
 
                 sql_connection = new SqlConnection();
-                sql_connection.ConnectionString = this.ConnStr;
+                sql_connection.ConnectionString = this.ConnectionString;
                 sql_connection.Open();
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 if (pgres_connection != null && pgres_connection.State == ConnectionState.Open)
                     return;
 
                 pgres_connection = new NpgsqlConnection();
-                pgres_connection.ConnectionString = this.ConnStr;
+                pgres_connection.ConnectionString = this.ConnectionString;
                 pgres_connection.Open();
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 if (mysql_connection != null && mysql_connection.State == ConnectionState.Open)
                     return;
 
                 mysql_connection = new MySqlConnection();
-                mysql_connection.ConnectionString = this.ConnStr;
+                mysql_connection.ConnectionString = this.ConnectionString;
                 mysql_connection.Open();
             }
         }
@@ -200,7 +188,7 @@ namespace Intwenty.Data.DBAccess
 
         public void Close()
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 if (sql_connection != null)
                 {
@@ -211,7 +199,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 if (pgres_connection != null)
                 {
@@ -222,7 +210,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 if (mysql_connection != null)
                 {
@@ -254,15 +242,15 @@ namespace Intwenty.Data.DBAccess
 
         public void AddParameter(string name, object value)
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 this.sql_cmd.Parameters.AddWithValue(name, value);
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 this.pgres_cmd.Parameters.Add(new NpgsqlParameter() { Value = value, ParameterName = name });
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 this.mysql_cmd.Parameters.Add(new MySqlParameter() { Value = value, ParameterName = name });
             }
@@ -271,7 +259,7 @@ namespace Intwenty.Data.DBAccess
 
         public void AddParameter(IntwentySqlParameter p)
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 var param = new SqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -279,7 +267,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.sql_cmd.Parameters.Add(param);
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 var param = new NpgsqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -287,7 +275,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.pgres_cmd.Parameters.Add(param);
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 var param = new MySqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -302,18 +290,13 @@ namespace Intwenty.Data.DBAccess
 
         public void SetSelectCommandTimeout(Int32 seconds)
         {
-            if (DBTYPE == 1)
-            {
+            if (DBMSType == DBMS.MSSqlServer)
                 this.sql_cmd.CommandTimeout = seconds;
-            }
-            else if (DBTYPE == 3)
-            {
+            else if (DBMSType == DBMS.PostgreSQL)
                 this.pgres_cmd.CommandTimeout = seconds;
-            }
-            else if (DBTYPE == 4)
-            {
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
                 this.mysql_cmd.CommandTimeout = seconds;
-            }
+            
         }
 
 
@@ -321,21 +304,21 @@ namespace Intwenty.Data.DBAccess
         {
 
 
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 var adapt = new SqlDataAdapter(sql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 var adapt = new NpgsqlDataAdapter(pgres_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 var adapt = new MySqlDataAdapter(mysql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
@@ -511,11 +494,15 @@ namespace Intwenty.Data.DBAccess
                 sb.Append(colsep + GetColumnDefinition(colname,m.PropertyType.ToString(),autoinc,notnull));
                 colsep = ", ";
             }
-            if (pk != null && DBTYPE == 4)
+            if (pk != null && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))
             {
                 sb.Append(colsep + string.Format("PRIMARY KEY (`{0}`)", pk.Columns));
             }
-            if (pk != null && DBTYPE == 1)
+            else if (pk != null && DBMSType == DBMS.PostgreSQL)
+            {
+                sb.Append(colsep + string.Format("PRIMARY KEY ({0})", pk.Columns));
+            }
+            else if (pk != null && DBMSType == DBMS.MSSqlServer)
             {
                 sb.Append(colsep + string.Format("CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED ([{1}] ASC)", tablename, pk.Columns));
             }
@@ -532,10 +519,29 @@ namespace Intwenty.Data.DBAccess
                 foreach (var ai in annot_index)
                 {
                     var index = (DbTableIndex)ai;
-                    if (index.IsUnique)
-                        indexbuilder = string.Format("CREATE UNIQUE INDEX {0} ON {1} ({2})", new object[] { index.Name, tablename, index.Columns });
-                    if (!index.IsUnique)
-                        indexbuilder = string.Format("CREATE INDEX {0} ON {1} ({2})", new object[] { index.Name, tablename, index.Columns });
+                    if (DBMSType != DBMS.PostgreSQL)
+                    {
+                        if (index.IsUnique)
+                            indexbuilder = string.Format("CREATE UNIQUE INDEX {0} ON {1} ({2})", new object[] { index.Name, tablename, index.Columns });
+                        if (!index.IsUnique)
+                            indexbuilder = string.Format("CREATE INDEX {0} ON {1} ({2})", new object[] { index.Name, tablename, index.Columns });
+                    }
+                    else
+                    {
+                        if (index.IsUnique)
+                            indexbuilder = string.Format("CREATE UNIQUE INDEX {0} ON {1} (", index.Name, tablename);
+                        if (!index.IsUnique)
+                            indexbuilder = string.Format("CREATE INDEX {0} ON {1} (", index.Name, tablename);
+                        var indexcols = index.Columns.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                        colsep = "";
+                        foreach (var indcol in indexcols)
+                        {
+                            indexbuilder += colsep + string.Format("{0}", indcol);
+                            colsep = ",";
+                        }
+                        indexbuilder += ")";
+
+                    }
 
                     if (!string.IsNullOrEmpty(indexbuilder))
                     {
@@ -629,31 +635,47 @@ namespace Intwenty.Data.DBAccess
                 prm.ParameterName = "@" + colname;
 
                 if (value == null)
-                    prm.Value = "NULL";
+                    prm.Value = DBNull.Value;
                 else
                     prm.Value = value;
 
-                query.Append(colsep+colname);
-                values.Append(colsep + "@" + colname);
+                if (DBMSType == DBMS.MSSqlServer)
+                    query.Append(colsep + colname);
+                else if (DBMSType == DBMS.PostgreSQL)
+                    query.Append(colsep + string.Format("{0}", colname));
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    query.Append(colsep + string.Format("`{0}`", colname));
+
+             
+
+
+                values.Append(colsep + string.Format("@{0}", colname));
                 parameters.Add(prm);
                 colsep = ", ";
             }
             query.Append(") ");
             values.Append(")");
 
-            if (!string.IsNullOrEmpty(autoinccolumn) && DBTYPE == 1)
+            if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.MSSqlServer)
             {
-                values.Append(" select @NewId= Scope_Identity()");
+                values.Append(" select @NewId=Scope_Identity()");
+                parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
+            }
+            if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            {
+                values.Append(" select @NewId=LAST_INSERT_ID()");
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
 
+
             OpenIfNeeded();
             CreateCommand(query.ToString() + values.ToString());
-            Close();
+           
             foreach (var p in parameters)
                 AddParameter(p);
 
             var res = ExecuteNonQuery();
+            Close();
             var output = res.OutputParameters.Find(p => p.ParameterName == "@NewId");
             if (output != null && !string.IsNullOrEmpty(autoinccolumn))
             {
@@ -661,6 +683,7 @@ namespace Intwenty.Data.DBAccess
                 if (property != null)
                     property.SetValue(model, output.Value, null);
             }
+
 
 
             return res.Value; 
@@ -727,11 +750,18 @@ namespace Intwenty.Data.DBAccess
                 var prm = new IntwentySqlParameter();
                 prm.ParameterName = "@" + colname;
                 if (value == null)
-                    prm.Value = "NULL";
+                    prm.Value = DBNull.Value;
                 else
                     prm.Value = value;
 
-                query.Append(colsep + colname + "=@"+colname);
+                if (DBMSType == DBMS.MSSqlServer)
+                    query.Append(colsep + colname + "=@" + colname);
+                else if (DBMSType == DBMS.PostgreSQL)
+                    query.Append(colsep + string.Format("{0}=@{0}", colname));
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    query.Append(colsep + string.Format("`{0}`=@{0}", colname));
+
+          
                 parameters.Add(prm);
                 colsep = ", ";
             }
@@ -743,7 +773,13 @@ namespace Intwenty.Data.DBAccess
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                query.Append(wheresep + p.ParameterName+"=@"+p.ParameterName);
+                if (DBMSType == DBMS.MSSqlServer)
+                    query.Append(wheresep + p.ParameterName + "=@" + p.ParameterName);
+                else if (DBMSType == DBMS.PostgreSQL)
+                    query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    query.Append(wheresep + string.Format("`{0}`=@{0}", p.ParameterName));
+
                 wheresep = " AND ";
             }
 
@@ -832,7 +868,13 @@ namespace Intwenty.Data.DBAccess
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                query.Append(wheresep + p.ParameterName + "=@" + p.ParameterName);
+                if (DBMSType == DBMS.MSSqlServer)
+                    query.Append(wheresep + p.ParameterName + "=@" + p.ParameterName);
+                else if (DBMSType == DBMS.PostgreSQL)
+                    query.Append(wheresep + string.Format("{0}=@{0}",p.ParameterName));
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    query.Append(wheresep + string.Format("`{0}`=@{0}", p.ParameterName));
+
                 wheresep = " AND ";
             }
             OpenIfNeeded();
@@ -852,19 +894,19 @@ namespace Intwenty.Data.DBAccess
         {
             var ds = new DataSet();
 
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 var adapt = new SqlDataAdapter(sql_cmd);
                 adapt.FillSchema(ds, SchemaType.Mapped);
                 adapt.Fill(ds);
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 var adapt = new NpgsqlDataAdapter(pgres_cmd);
                 adapt.FillSchema(ds, SchemaType.Mapped);
                 adapt.Fill(ds);
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 var adapt = new MySqlDataAdapter(mysql_cmd);
                 adapt.FillSchema(ds, SchemaType.Mapped);
@@ -882,30 +924,27 @@ namespace Intwenty.Data.DBAccess
         public object ExecuteScalarQuery()
         {
 
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 return sql_cmd.ExecuteScalar();
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 return pgres_cmd.ExecuteScalar();
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 return mysql_cmd.ExecuteScalar();
             }
-            else
-            {
-                return sql_cmd.ExecuteScalar();
-            }
 
-
+            return null;
+           
         }
 
         public NonQueryResult ExecuteNonQuery()
         {
 
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 var res = new NonQueryResult();
                 res.Value = sql_cmd.ExecuteNonQuery();
@@ -917,7 +956,7 @@ namespace Intwenty.Data.DBAccess
 
                 return res;
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 var res = new NonQueryResult();
                 res.Value = pgres_cmd.ExecuteNonQuery();
@@ -929,7 +968,7 @@ namespace Intwenty.Data.DBAccess
 
                 return res;
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 var res = new NonQueryResult();
                 res.Value = mysql_cmd.ExecuteNonQuery();
@@ -941,16 +980,15 @@ namespace Intwenty.Data.DBAccess
 
                 return res;
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+
+            return null;
+            
 
         }
 
         public SqlDataReader ExecuteSqlServerDataReader(CommandBehavior cbv)
         {
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 return sql_cmd.ExecuteReader(cbv);
             }
@@ -963,7 +1001,7 @@ namespace Intwenty.Data.DBAccess
 
         public NpgsqlDataReader ExecutePgSqlDataReader(CommandBehavior cbv)
         {
-            if (DBTYPE == 3)
+            if (DBMSType == DBMS.PostgreSQL)
             {
                 return pgres_cmd.ExecuteReader(cbv);
             }
@@ -975,7 +1013,7 @@ namespace Intwenty.Data.DBAccess
 
         public MySqlDataReader ExecuteMySqlDataReader(CommandBehavior cbv)
         {
-            if (DBTYPE == 4)
+            if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 return mysql_cmd.ExecuteReader(cbv);
             }
@@ -991,7 +1029,7 @@ namespace Intwenty.Data.DBAccess
         {
 
 
-            if (DBTYPE == 1)
+            if (DBMSType == DBMS.MSSqlServer)
             {
                 if (this.sql_cmd == null)
                 {
@@ -1011,7 +1049,7 @@ namespace Intwenty.Data.DBAccess
 
 
             }
-            else if (DBTYPE == 3)
+            else if (DBMSType == DBMS.PostgreSQL)
             {
                 if (this.pgres_cmd == null)
                 {
@@ -1030,7 +1068,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBTYPE == 4)
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 if (this.mysql_cmd == null)
                 {
@@ -1061,26 +1099,38 @@ namespace Intwenty.Data.DBAccess
             var result = string.Empty;
             var defaultvalue = "DEFAULT NULL";
             var allownullvalue = "NULL";
-
             var autoincvalue = string.Empty;
             var datatype = string.Empty;
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBTYPE == 1)  datatype = "NVARCHAR(300)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBTYPE == 4)  datatype = "VARCHAR(300)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBTYPE == 1 && longtext) datatype = "NVARCHAR(MAX)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBTYPE == 4 && longtext) datatype = "LONGTEXT";
-            if (nettype.ToUpper() == "SYSTEM.INT32" && DBTYPE == 1)   datatype = "INT";
-            if (nettype.ToUpper() == "SYSTEM.INT32" && DBTYPE == 4)   datatype = "INT(11)";
-            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBTYPE == 1) datatype = "BIT";
-            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBTYPE == 4) datatype = "TINYINT(1)";
 
-            if (autoincrement && DBTYPE == 1)
+            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.MSSqlServer)  datatype = "NVARCHAR(300)";
+            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.MSSqlServer && longtext) datatype = "NVARCHAR(MAX)";
+            if (nettype.ToUpper() == "SYSTEM.STRING" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))  datatype = "VARCHAR(300)";
+            if (nettype.ToUpper() == "SYSTEM.STRING" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql) && longtext) datatype = "LONGTEXT";
+            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.PostgreSQL) datatype = "VARCHAR(300)";
+            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.PostgreSQL && longtext) datatype = "TEXT";
+
+            if (nettype.ToUpper() == "SYSTEM.INT32" && DBMSType == DBMS.MSSqlServer)   datatype = "INT";
+            if (nettype.ToUpper() == "SYSTEM.INT32" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))   datatype = "INT(11)";
+            if (nettype.ToUpper() == "SYSTEM.INT32" && DBMSType == DBMS.PostgreSQL) datatype = "INTEGER";
+
+            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBMSType == DBMS.MSSqlServer) datatype = "BIT";
+            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)) datatype = "TINYINT(1)";
+            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBMSType == DBMS.PostgreSQL) datatype = "BOOLEAN";
+
+            if (nettype.ToUpper() == "SYSTEM.DATETIME" && DBMSType == DBMS.MSSqlServer) datatype = "DATETIME";
+            if (nettype.ToUpper() == "SYSTEM.DATETIME" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)) datatype = "DATETIME";
+            if (nettype.ToUpper() == "SYSTEM.DATETIME" && DBMSType == DBMS.PostgreSQL) datatype = "TIMESTAMP";
+
+            if (autoincrement)
             {
                 allownullvalue = "NOT NULL";
                 defaultvalue = "";
-                if (DBTYPE == 1)
+                if (DBMSType ==  DBMS.MSSqlServer)
                     autoincvalue = "IDENTITY(1,1)";
-                if (DBTYPE == 4)
+                if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
                     autoincvalue = "AUTO_INCREMENT";
+                if (DBMSType == DBMS.PostgreSQL)
+                    datatype = "SERIAL";
             }
             if (notnull)
             {
@@ -1091,8 +1141,14 @@ namespace Intwenty.Data.DBAccess
 
 
 
-            if (DBTYPE == 1) result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, autoincvalue, allownullvalue });
-            if (DBTYPE == 4) result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { name, datatype, allownullvalue, autoincvalue, defaultvalue });
+            if (DBMSType == DBMS.MSSqlServer) 
+                result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, autoincvalue, allownullvalue });
+
+            if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql) 
+                result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { name, datatype, allownullvalue, autoincvalue, defaultvalue });
+
+            if (DBMSType == DBMS.PostgreSQL)
+                result = string.Format("{0} {1} {2}", new object[] { name, datatype, allownullvalue });
 
             if (string.IsNullOrEmpty(result))
                 throw new InvalidOperationException("Could not generate sql column definition");

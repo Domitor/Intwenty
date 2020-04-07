@@ -22,7 +22,7 @@ namespace Intwenty.Model
         }
 
 
-        public DataViewModelItem(Data.Entity.DataViewItem entity)
+        public DataViewModelItem(DataViewItem entity)
         {
             Id = entity.Id;
             SQLQuery = entity.SQLQuery;
@@ -31,6 +31,7 @@ namespace Intwenty.Model
             Title = entity.Title;
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;
+            OrderNo = entity.OrderNo;
             Properties = "";
         }
 
@@ -39,9 +40,9 @@ namespace Intwenty.Model
 
         public string SQLQueryFieldName { get; set; }
 
-       
 
-      
+        public int OrderNo { get; set; }
+
 
         public static List<string> ValidProperties
         {

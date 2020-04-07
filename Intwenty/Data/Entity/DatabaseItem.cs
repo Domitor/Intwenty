@@ -4,8 +4,8 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
-    [DbTableIndex("IDX_1", true, "AppMetaCode,MetaCode")]
-    [DbTableIndex("IDX_2", true, "AppMetaCode,ParentMetaCode,MetaType,DbName")]
+    [DbTableIndex("DBITEM_IDX_1", true, "AppMetaCode,MetaCode")]
+    [DbTableIndex("DBITEM_IDX_2", true, "AppMetaCode,ParentMetaCode,MetaType,DbName")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_DatabaseItem")]
     public class DatabaseItem

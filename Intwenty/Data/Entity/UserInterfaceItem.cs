@@ -4,7 +4,7 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
-    [DbTableIndex("IDX_1", true, "AppMetaCode,MetaCode")]
+    [DbTableIndex("UI_IDX_1", true, "AppMetaCode,MetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_UserInterfaceItem")]
     public class UserInterfaceItem

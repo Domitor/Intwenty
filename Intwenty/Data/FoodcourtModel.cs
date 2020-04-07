@@ -4,18 +4,11 @@ using Shared;
 
 namespace Intwenty.Data
 {
-    public class FoodcourtModel
+    public static class FoodcourtModel
     {
-        readonly IIntwentyDbAccessService DataRepository;
-        readonly IOptions<SystemSettings> SysSettings;
+       
 
-        public FoodcourtModel(IIntwentyDbAccessService db, IOptions<SystemSettings> config)
-        {
-            DataRepository = db;
-            SysSettings = config;
-        }
-
-        public void Seed(bool isupdate = false)
+        public static void Seed(IIntwentyDbAccessService DataRepository, IOptions<SystemSettings> SysSettings)
         {
             if (!SysSettings.Value.IsDevelopment)
                 return;
@@ -32,29 +25,26 @@ namespace Intwenty.Data
             DataRepository.CreateTable<UserInterfaceItem>(true);
             DataRepository.CreateTable<ValueDomainItem>(true);
 
-            if (isupdate)
+            if (SysSettings.Value.ReCreateModelOnStartUp)
             {
-                /*
-                context.Set<ApplicationItem>().RemoveRange(context.Set<ApplicationItem>());
-                context.Set<MenuItem>().RemoveRange(context.Set<MenuItem>());
-                context.Set<DatabaseItem>().RemoveRange(context.Set<DatabaseItem>());
-                context.Set<DataViewItem>().RemoveRange(context.Set<DataViewItem>());
-                context.Set<UserInterfaceItem>().RemoveRange(context.Set<UserInterfaceItem>());
-                context.Set<ValueDomainItem>().RemoveRange(context.Set<ValueDomainItem>());
-                context.SaveChanges();
-                */
+                DataRepository.DeleteRange(DataRepository.Get<ApplicationItem>());
+                DataRepository.DeleteRange(DataRepository.Get<DatabaseItem>());
+                DataRepository.DeleteRange(DataRepository.Get<DataViewItem>());
+                DataRepository.DeleteRange(DataRepository.Get<MenuItem>());
+                DataRepository.DeleteRange(DataRepository.Get<UserInterfaceItem>());
+                DataRepository.DeleteRange(DataRepository.Get<ValueDomainItem>());
             }
 
 
             //APPLICATIONS
-             DataRepository.Insert(new ApplicationItem() { Id = 10, Description = "An app for managing producers", MetaCode = "PRODUCER", Title = "Producer", DbName = "Producer", IsHierarchicalApplication = false, UseVersioning = false });
+            DataRepository.Insert(new ApplicationItem() { Id = 10, Description = "An app for managing producers", MetaCode = "PRODUCER", Title = "Producer", DbName = "Producer", IsHierarchicalApplication = false, UseVersioning = false });
              DataRepository.Insert(new ApplicationItem() { Id = 20, Description = "An app for managing products", MetaCode = "PRODUCT", Title = "Product", DbName = "Product", IsHierarchicalApplication = false, UseVersioning = false });
 
 
             //MENU
-             DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", Order = 1, Action = "", Controller = "" });
-             DataRepository.Insert(new MenuItem() { AppMetaCode = "PRODUCER", MetaType = "MENUITEM", MetaCode = "MI_PRODUCER", ParentMetaCode = "SYSMENU", Title = "My Company", Order = 1, Action = "", Controller = "" });
-             DataRepository.Insert(new MenuItem() { AppMetaCode = "PRODUCT", MetaType = "MENUITEM", MetaCode = "MI_PRODUCT", ParentMetaCode = "SYSMENU", Title = "My Products", Order = 2, Action = "", Controller = "" });
+             DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", OrderNo = 1, Action = "", Controller = "" });
+             DataRepository.Insert(new MenuItem() { AppMetaCode = "PRODUCER", MetaType = "MENUITEM", MetaCode = "MI_PRODUCER", ParentMetaCode = "SYSMENU", Title = "My Company", OrderNo = 1, Action = "", Controller = "" });
+             DataRepository.Insert(new MenuItem() { AppMetaCode = "PRODUCT", MetaType = "MENUITEM", MetaCode = "MI_PRODUCT", ParentMetaCode = "SYSMENU", Title = "My Products", OrderNo = 2, Action = "", Controller = "" });
 
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)

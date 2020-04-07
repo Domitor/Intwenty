@@ -20,7 +20,7 @@ namespace Intwenty.Data.Entity
 
         public string ParentMetaCode { get; set; }
 
-        public int Order { get; set; }
+        public int OrderNo { get; set; }
 
         public string Controller { get; set; }
 

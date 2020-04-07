@@ -14,6 +14,8 @@ namespace Shared
 
     public class SystemSettings
     {
+        public bool ReCreateModelOnStartUp { get; set; }
+
         public bool IsDevelopment { get; set; }
 
         public int DBMS { get; set; }

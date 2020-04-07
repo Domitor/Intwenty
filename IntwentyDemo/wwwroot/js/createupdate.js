@@ -7,7 +7,8 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
         data: {
             dataview: [],
             valuedomains: {},
-            model: { [apptablename]:{}},
+            model: { [apptablename]: {} },
+            validation: {},
             viewretrieveinfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
         },
         methods:
@@ -15,33 +16,110 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
             saveApplication() {
                 this.runSave();
             },
-            /*
-            * Client validation.
-            * Check if this application can be changed.
-            */
+            onFileUpload: function ()
+            {
+               
+            },
+            onImageChanged: function (event)
+            {
+                var context = this;
+                var endpoint = baseurl + 'UploadImage';
+                var formData = new FormData();
+                formData.append('File', event.srcElement.files[0]);
+                formData.append('FileName', event.srcElement.files[0].name);
+                formData.append('FileSize', event.srcElement.files[0].size);
+
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4)
+                    {
+                        var dbtable = event.srcElement.dataset.dbtable;
+                        var dbfield = event.srcElement.dataset.dbfield;
+
+                        var fileref = JSON.parse(xhr.response);
+                        context.model[dbtable][dbfield] = "/USERDOC/" + fileref.fileName;
+                        context.$forceUpdate();
+                        var s = "";
+                    }
+                }
+                xhr.open('POST', endpoint, true);
+                xhr.send(formData);
+            },
             canSave: function () {
                 var context = this;
                 var result = true;
                 $("[data-required]").each(function () {
                     var required = $(this).data('required');
                     if (required === "True") {
+                        var validationfield = $(this).data('validationfield');
+                        var id = $(this).attr('id');
+                        var title = $(this).data('title');
+                        var metatype = $(this).data('metatype');
                         var dbfield = $(this).data('dbfield');
-                        if (!context.model[apptablename][dbfield]) {
+                        var dbtable = $(this).data('dbtable');
+
+                        if (!context.model[dbtable][dbfield]) {
                             result = false;
                             $(this).addClass('requiredNotValid');
+                            context.setValidationText(validationfield, title + " is required");
                         }
-                        else if (context.model[apptablename][dbfield].length == 0) {
+                        else if (context.model[dbtable][dbfield].length == 0) {
                             result = false;
                             $(this).addClass('requiredNotValid');
+                            context.setValidationText(validationfield, title + " is required");
                         }
                         else {
-                            $(this).removeClass('requiredNotValid');
+                            if (metatype == "EMAILBOX") {
+                                var check = isValidEmail(context.model[dbtable][dbfield]);
+                                if (!check.result) {
+                                    result = false;
+                                    $(this).addClass('requiredNotValid');
+                                    context.setValidationText(validationfield, check.msg);
+                                }
+                            }
+                            if (metatype == "PASSWORDBOX") {
+                                var check = isValidPassword(context.model[dbtable][dbfield]);
+                                if (!check.result) {
+                                    result = false;
+                                    $(this).addClass('requiredNotValid');
+                                    context.setValidationText(validationfield, check.msg);
+                                }
+                            }
+
+                            if (result) {
+                                context.clearValidationText(validationfield);
+                                $(this).removeClass('requiredNotValid');
+                            }
                         }
                     }
                 });
 
 
                 return result;
+            },
+            setValidationText: function (validationfield, text)
+            {
+                if (!this.validation)
+                    return;
+                if (!validationfield)
+                    return;
+                if (validationfield.length < 1)
+                    return;
+
+                    this.validation[validationfield] = text;
+                    this.$forceUpdate();
+            },
+            clearValidationText: function (validationfield)
+            {
+                    if (!this.validation)
+                    return;
+                if (!validationfield)
+                    return;
+                if (validationfield.length < 1)
+                    return;
+
+                    this.validation[validationfield] = "";
+                    this.$forceUpdate();
             },
             /*
             * Handles userinput

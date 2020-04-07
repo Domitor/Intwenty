@@ -5,6 +5,9 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
+    [DbTableIndex("ISTAT_IDX_1", false, "OwnerId")]
+    [DbTableIndex("ISTAT_IDX_2", false, "CreatedBy")]
+    [DbTableIndex("ISTAT_IDX_3", false, "OwnedBy")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysdata_InformationStatus")]
     public class InformationStatus
@@ -30,9 +33,9 @@ namespace Intwenty.Data.Entity
 
         public DateTime PerformDate { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateTime StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 
 }

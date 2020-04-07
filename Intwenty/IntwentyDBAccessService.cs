@@ -47,10 +47,14 @@ namespace Intwenty
         {
             Settings = settings;
             Connections = connections;
-            if (Settings.Value.DBMS==1)
+            if (Settings.Value.DBMS==0)
                 DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.SqlServerConnection);
+            if (Settings.Value.DBMS == 1)
+                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
             if (Settings.Value.DBMS == 2)
                 DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
+            if (Settings.Value.DBMS == 3)
+                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.PostGreSQLConnection);
         }
 
         public void Open()

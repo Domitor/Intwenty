@@ -4,7 +4,7 @@
 
 namespace Intwenty.Data.Entity
 {
-    [DbTableIndex("IDX_1", true, "MetaCode,ParentMetaCode")]
+    [DbTableIndex("DV_IDX_1", true, "MetaCode,ParentMetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_DataViewItem")]
     public class DataViewItem
@@ -24,7 +24,7 @@ namespace Intwenty.Data.Entity
 
         public string SQLQueryFieldName { get; set; }
 
-        public int Order { get; set; }
+        public int OrderNo { get; set; }
 
     }
 

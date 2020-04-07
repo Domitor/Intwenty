@@ -13,7 +13,7 @@ namespace Intwenty.Data
     {
         
 
-        public static void Seed(IServiceProvider provider, bool isupdate=false)
+        public static void Seed(IServiceProvider provider)
         {
             var DataRepository = provider.GetRequiredService<IIntwentyDbAccessService>();
             var SysSettings = provider.GetRequiredService<IOptions<SystemSettings>>();
@@ -32,17 +32,14 @@ namespace Intwenty.Data
             DataRepository.CreateTable<UserInterfaceItem>(true);
             DataRepository.CreateTable<ValueDomainItem>(true);
 
-            if (isupdate)
+            if (SysSettings.Value.ReCreateModelOnStartUp)
             {
-                /*
-                context.Set<ApplicationItem>().RemoveRange(context.Set<ApplicationItem>());
-                context.Set<MenuItem>().RemoveRange(context.Set<MenuItem>());
-                context.Set<DatabaseItem>().RemoveRange(context.Set<DatabaseItem>());
-                context.Set<DataViewItem>().RemoveRange(context.Set<DataViewItem>());
-                context.Set<UserInterfaceItem>().RemoveRange(context.Set<UserInterfaceItem>());
-                context.Set<ValueDomainItem>().RemoveRange(context.Set<ValueDomainItem>());
-                context.SaveChanges();
-                */
+                DataRepository.DeleteRange(DataRepository.Get<ApplicationItem>());
+                DataRepository.DeleteRange(DataRepository.Get<DatabaseItem>());
+                DataRepository.DeleteRange(DataRepository.Get<DataViewItem>());
+                DataRepository.DeleteRange(DataRepository.Get<MenuItem>());
+                DataRepository.DeleteRange(DataRepository.Get<UserInterfaceItem>());
+                DataRepository.DeleteRange(DataRepository.Get<ValueDomainItem>());
             }
 
 
@@ -52,10 +49,10 @@ namespace Intwenty.Data
             DataRepository.Insert(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", MetaCode = "SALESORDER", Title = "Sales Order", DbName = "SalesHeader", IsHierarchicalApplication = false, UseVersioning = false });
 
             //MENU
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", Order = 1, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", Order = 1, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", Order = 10, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", Order = 20, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", OrderNo = 1, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", OrderNo = 1, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", OrderNo = 10, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", OrderNo = 20, Action = "", Controller = "" });
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
             DataRepository.Insert(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "A1", Value = "Primary" });
