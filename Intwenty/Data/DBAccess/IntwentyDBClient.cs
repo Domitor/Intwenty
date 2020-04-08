@@ -352,7 +352,7 @@ namespace Intwenty.Data.DBAccess
             }
             else if (DBMSType == DBMS.SQLite)
             {
-                var adapt = new SQLiteAdapter(mysql_cmd);
+                var adapt = new SQLiteAdapter(sqlli);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
