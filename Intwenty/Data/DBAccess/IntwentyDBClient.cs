@@ -12,6 +12,7 @@ using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
 using Intwenty.Model;
 using System.Data.SQLite;
+using System.Data.Common;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -352,7 +353,7 @@ namespace Intwenty.Data.DBAccess
             }
             else if (DBMSType == DBMS.SQLite)
             {
-                var adapt = new SQLiteAdapter(sqlli);
+                var adapt = new SQLiteDataAdapter(sqlite_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
@@ -367,24 +368,7 @@ namespace Intwenty.Data.DBAccess
             var sb = new StringBuilder();
 
             var ds = new DataSet();
-            if (DBMSType == DBMS.MSSqlServer)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.PostgreSQL)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
+            FillDataset(ds, "NONE");
 
             var firstrow = true;
             var rindex = -1;
@@ -440,24 +424,7 @@ namespace Intwenty.Data.DBAccess
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
-            if (DBMSType == DBMS.MSSqlServer)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.PostgreSQL)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
+            FillDataset(ds, "NONE");
 
 
             foreach (var ic in columns)
@@ -530,24 +497,7 @@ namespace Intwenty.Data.DBAccess
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
-            if (DBMSType == DBMS.MSSqlServer)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.PostgreSQL)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
+            FillDataset(ds, "NONE");
 
             if (ds.Tables[0].Rows.Count == 0)
             {
@@ -590,24 +540,7 @@ namespace Intwenty.Data.DBAccess
 
             var sb = new StringBuilder();
             var ds = new DataSet();
-            if (DBMSType == DBMS.MSSqlServer)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.PostgreSQL)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Source);
-                adapt.Fill(ds);
-            }
+            FillDataset(ds, "NONE");
 
             if (ds.Tables[0].Rows.Count == 0)
             {
