@@ -139,31 +139,27 @@ namespace Intwenty.Engine
             try
             {
                 DataRepository.Open();
-                DataRepository.CreateCommand("SELECT TOP 1 * from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
+                DataRepository.CreateCommand("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
                 DataRepository.AddParameter("@ApplicationId", data.ApplicationId);
                 DataRepository.AddParameter("@OwnedBy", data.OwnerUserId);
-                var ds = new DataSet();
-                DataRepository.FillDataset(ds, "Result");
-                if (ds.Tables[0].Rows.Count == 0) 
+                var maxid = DataRepository.ExecuteScalarQuery();
+                if (maxid != null && maxid != DBNull.Value)
                 {
-                    var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
-                    return fail;
-                }
+                    var ds = new DataSet();
+                    DataRepository.CreateCommand("SELECT id,version from sysdata_InformationStatus where Id = @Id");
+                    DataRepository.AddParameter("@Id", (int)maxid);
+                    DataRepository.FillDataset(ds, "Result");
+                    if (ds.Tables[0].Rows.Count == 0)
+                    {
+                        var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
+                        return fail;
+                    }
 
-                if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
-                {
                     result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "id");
                     result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "version");
-
                 }
-                else
-                {
 
-                    result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "Id");
-                    result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "Version");
-                }
                
-
             }
             catch (Exception ex)
             {
@@ -186,6 +182,17 @@ namespace Intwenty.Engine
 
             try
             {
+                var columns = new List<IIntwentyDataColum>();
+                columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "CreatedBy", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "ChangedBy", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "OwnedBy", IsDateTime = false, IsNumeric = false });
+
                 var sql_stmt = new StringBuilder();
                 sql_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.DataStructure)
@@ -193,10 +200,12 @@ namespace Intwenty.Engine
                     if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
                         sql_stmt.Append(", t2." + t.DbName + " ");
+                        columns.Add(new IntwentyDataColum() { ColumnName = t.DbName, IsDateTime = t.IsDateTime, IsNumeric=t.IsNumeric });
+
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
+                sql_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
                 sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
                 sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
                
@@ -206,12 +215,7 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql_stmt.ToString());
-                StringBuilder appjson = null;
-                if (DataRepository.GetDBMS()== DBMS.PostgreSQL)
-                    appjson = DataRepository.GetAsJSONObject(this.Meta.GetMainTableColumns());
-                else
-                    appjson = DataRepository.GetAsJSONObject();
-
+                var appjson = DataRepository.GetAsJSONObject(columns);
                 DataRepository.Close();
                
                 if (appjson.Length < 5)
@@ -228,34 +232,38 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
+                        columns = new List<IIntwentyDataColum>();
+                        columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "ParentId", IsDateTime = false, IsNumeric = true });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
+                        columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
+
                         sql_stmt = new StringBuilder();
                         sql_stmt.Append("SELECT t1.ApplicationId ");
-                        sql_stmt.Append(", t2.ID ");
+                        sql_stmt.Append(", t2.Id ");
                         sql_stmt.Append(", t2.RowChangeDate ");
-                        sql_stmt.Append(", t2.UserID ");
-                        sql_stmt.Append(", t2.ParentID ");
+                        sql_stmt.Append(", t2.UserId ");
+                        sql_stmt.Append(", t2.ParentId ");
                         sql_stmt.Append(", t2.Version ");
-                        sql_stmt.Append(", t2.OwnerRefId ");
+                        sql_stmt.Append(", t2.OwnerId ");
                         foreach (var v in this.Meta.DataStructure)
                         {
                             if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)
                             {
                                 sql_stmt.Append(", t2." + v.DbName + " ");
+                                columns.Add(new IntwentyDataColum() { ColumnName = v.DbName, IsDateTime = v.IsDateTime, IsNumeric = v.IsNumeric });
                             }
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                        sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.ID=t2.ParentID and t1.Version = t2.Version ");
+                        sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
                         sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
                         sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
                         DataRepository.Open();
                         DataRepository.CreateCommand(sql_stmt.ToString());
-                        StringBuilder tablearray = null;
-                        if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
-                            tablearray = DataRepository.GetAsJSONArray(this.Meta.GetSubTableColumns(t));
-                        else
-                            tablearray = DataRepository.GetAsJSONArray();
-
-
+                        var tablearray = DataRepository.GetAsJSONArray(columns);
                         DataRepository.Close();
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
@@ -359,7 +367,6 @@ namespace Intwenty.Engine
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
-            var sb = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Meta.Application.Title),0,0);
           
             if (args.MaxCount == 0)
@@ -381,6 +388,17 @@ namespace Intwenty.Engine
 
             try
             {
+                var columns = new List<IIntwentyDataColum>();
+                columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
+                columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "CreatedBy", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "ChangedBy", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColum() { ColumnName = "OwnedBy", IsDateTime = false, IsNumeric = false });
+
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.* ");
                 foreach (var t in this.Meta.UIStructure)
@@ -388,27 +406,24 @@ namespace Intwenty.Engine
                     if (t.IsMetaTypeListViewField && t.IsDataColumnConnected)
                     {
                         sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
+                        columns.Add(new IntwentyDataColum() { ColumnName = t.DataColumnInfo.DbName, IsDateTime=t.DataColumnInfo.IsDateTime, IsNumeric = t.DataColumnInfo.IsNumeric });
                     }
                 }
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
+                sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
                 sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
 
 
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                     sql_list_stmt.Append("AND t2."+ args.FilterField + " LIKE '%"+ args.FilterValue + "%'  ");
 
-                sql_list_stmt.Append("ORDER BY t1.ID");
+                sql_list_stmt.Append("ORDER BY t1.Id");
 
 
                 var ds = new DataSet();
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql_list_stmt.ToString());
-                StringBuilder json = null;
-                if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
-                    json = DataRepository.GetAsJSONArray(this.Meta.GetMainTableColumns(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
-                else
-                    json = DataRepository.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = DataRepository.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 DataRepository.Close();
 
                 result.Data = json.ToString();
@@ -434,6 +449,12 @@ namespace Intwenty.Engine
         /// </summary>
         public virtual OperationResult GetValueDomains()
         {
+            var columns = new List<IIntwentyDataColum>();
+            columns.Add(new IntwentyDataColum() { ColumnName = "Id",  IsDateTime=false, IsNumeric=true });
+            columns.Add(new IntwentyDataColum() { ColumnName = "DomainName",  IsDateTime = false, IsNumeric = false });
+            columns.Add(new IntwentyDataColum() { ColumnName = "Code",  IsDateTime = false, IsNumeric = false });
+            columns.Add(new IntwentyDataColum() { ColumnName = "Value",  IsDateTime = false, IsNumeric = false });
+
             var sb = new StringBuilder();
             var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Meta.Application.Title), 0, 0);
 
@@ -462,7 +483,7 @@ namespace Intwenty.Engine
                 foreach (var d in valuedomains)
                 {
 
-                    DataRepository.CreateCommand("SELECT ID, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
+                    DataRepository.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
                     DataRepository.AddParameter("@P1", d);
                     DataRepository.FillDataset(ds, "VALUEDOMAIN_" + d);
                 }
@@ -478,6 +499,19 @@ namespace Intwenty.Engine
 
                 foreach (DataTable table in ds.Tables)
                 {
+                    foreach (var ic in columns)
+                    {
+                        ic.QueryResultColumn = null;
+                        foreach (DataColumn dc in table.Columns)
+                        {
+                            if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
+                            {
+                                ic.QueryResultColumn = dc;
+                                break;
+                            }
+                        }
+                    }
+
                     if (domainindex == 0)
                         sb.Append("\"" + table.TableName + "\":[");
                     else
@@ -485,6 +519,8 @@ namespace Intwenty.Engine
 
                     domainindex += 1;
                     rowindex = 0;
+                   
+
                     foreach (DataRow row in table.Rows)
                     {
                         if (rowindex == 0)
@@ -494,9 +530,9 @@ namespace Intwenty.Engine
 
                         rowindex += 1;
                         columnindex = 0;
-                        foreach (DataColumn dc in table.Columns)
+                        foreach (var dc in columns)
                         {
-                            var val = DBHelpers.GetJSONValue(row, dc);
+                            var val = DBHelpers.GetJSONValue(row, dc, DataRepository.GetDBMS());
                             if (string.IsNullOrEmpty(val))
                                 continue;
 
@@ -550,6 +586,17 @@ namespace Intwenty.Engine
                 if (dv.HasNonSelectSql)
                     throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " ("+dv.MetaCode+")"));
 
+
+                var columns = new List<IIntwentyDataColum>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
+                    {
+                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName, IsDateTime = false, IsNumeric = false });
+                    }
+                }
+              
+
                 result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
 
 
@@ -574,7 +621,8 @@ namespace Intwenty.Engine
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql);
-                var json = DataRepository.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum,(result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                StringBuilder json = null;
+                json = DataRepository.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 DataRepository.Close();
 
                 result.Data = json.ToString();
@@ -625,11 +673,19 @@ namespace Intwenty.Engine
                 if (string.IsNullOrEmpty(sql))
                     throw new InvalidOperationException("Could not find view and key value in GetDataViewValue(viewinfo, args).");
 
+                var columns = new List<IIntwentyDataColum>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
+                    {
+                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName, IsDateTime = false, IsNumeric = false });
+                    }
+                }
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql);
                 DataRepository.AddParameter("@P1", args.FilterValue);
-                var data = DataRepository.GetAsJSONObject();
+                var data = DataRepository.GetAsJSONObject(columns);
                 DataRepository.Close();
 
                 result.Data = data.ToString();
@@ -810,7 +866,7 @@ namespace Intwenty.Engine
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
             sql_insert.Append("INSERT INTO " + this.Meta.Application.DbName + " ");
-            sql_insert.Append(" (ID, RowChangeDate, UserID,  Version, OwnerRefId");
+            sql_insert.Append(" (ID, RowChangeDate, UserID,  Version, OwnerId");
             sql_insert_value.Append(" VALUES (" + Convert.ToString(this.ClientState.Id));
             sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_insert_value.Append(",'" + this.ClientState.UserId + "'");
@@ -880,8 +936,8 @@ namespace Intwenty.Engine
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + this.Meta.Application.DbName);
             sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_update.Append(",UserID='SYSTEM'");
-            sql_update.Append(",OwnerRefId=" + Convert.ToString(this.ClientState.OwnerId));
+            sql_update.Append(",UserID='"+this.ClientState.UserId+"'");
+            sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
 
             foreach (var t in data.Values)
             {
@@ -922,7 +978,7 @@ namespace Intwenty.Engine
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
             sql_insert.Append("INSERT INTO " + data.Table.DbName + " ");
-            sql_insert.Append(" (ID, ParentId, RowChangeDate, UserID,  Version, OwnerRefId");
+            sql_insert.Append(" (Id, ParentId, RowChangeDate, UserID,  Version, OwnerId");
             sql_insert_value.Append(" VALUES (" + Convert.ToString(rowid));
             sql_insert_value.Append(", " + Convert.ToString(this.ClientState.Id));
             sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
@@ -967,7 +1023,7 @@ namespace Intwenty.Engine
             sql_update.Append("UPDATE " + data.Table.DbName);
             sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",UserID='SYSTEM'");
-            sql_update.Append(",OwnerRefId=" + Convert.ToString(this.ClientState.OwnerId));
+            sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
 
             foreach (var t in data.Values)
             {
@@ -1021,7 +1077,7 @@ namespace Intwenty.Engine
             var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == DataRepository.GetDBMS());
 
             sql = "insert into " + this.Meta.Application.VersioningTableName;
-            sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerRefId, RowChangeDate, UserID)";
+            sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerId, RowChangeDate, UserID)";
             sql += " VALUES (@P1, @P2, @P3, @P4, @P5, @P6, {0}, @P8)";
             sql = string.Format(sql, getdatecmd.Command);
 
@@ -1052,7 +1108,7 @@ namespace Intwenty.Engine
             ds.Tables[this.Meta.Application.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
             ds.Tables[this.Meta.Application.DbName].Columns.Add("UserID", typeof(string));
             ds.Tables[this.Meta.Application.DbName].Columns.Add("Version", typeof(int));
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("OwnerRefId", typeof(int));
+            ds.Tables[this.Meta.Application.DbName].Columns.Add("OwnerId", typeof(int));
 
             foreach (var t in this.Meta.DataStructure)
             {
@@ -1074,12 +1130,12 @@ namespace Intwenty.Engine
                 if (t.IsMetaTypeDataTable)
                 {
                     ds.Tables.Add(t.DbName);
-                    ds.Tables[t.DbName].Columns.Add("ID", typeof(int));
+                    ds.Tables[t.DbName].Columns.Add("Id", typeof(int));
                     ds.Tables[t.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
-                    ds.Tables[t.DbName].Columns.Add("UserID", typeof(string));
-                    ds.Tables[t.DbName].Columns.Add("ParentID", typeof(int));
+                    ds.Tables[t.DbName].Columns.Add("UserId", typeof(string));
+                    ds.Tables[t.DbName].Columns.Add("ParentId", typeof(int));
                     ds.Tables[t.DbName].Columns.Add("Version", typeof(int));
-                    ds.Tables[t.DbName].Columns.Add("OwnerRefId", typeof(int));
+                    ds.Tables[t.DbName].Columns.Add("OwnerId", typeof(int));
 
 
                     foreach (var dv in this.Meta.DataStructure)
@@ -1101,11 +1157,11 @@ namespace Intwenty.Engine
             }
 
             DataRow dr = ds.Tables[this.Meta.Application.DbName].NewRow();
-            dr["ID"] = 0;
+            dr["Id"] = 0;
             dr["RowChangeDate"] = DateTime.Now;
-            dr["UserID"] = "SYSTEM";
+            dr["UserId"] = "SYSTEM";
             dr["Version"] = 0;
-            dr["OwnerRefId"] = 0;
+            dr["OwnerId"] = 0;
             ds.Tables[this.Meta.Application.DbName].Rows.Add(dr);
 
 
@@ -1157,7 +1213,7 @@ namespace Intwenty.Engine
                 var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
                 var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
 
-                var create_sql = "CREATE TABLE " + this.Meta.Application.DbName + " (ID {0} not null, RowChangeDate {1} not null, UserID {2} not null, Version {0}  not null, OwnerRefId {0}  not null)";
+                var create_sql = "CREATE TABLE " + this.Meta.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
                 create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
                 DataRepository.Open();
@@ -1186,7 +1242,7 @@ namespace Intwenty.Engine
                 var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
                 var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
                 var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
-                string create_sql = "CREATE TABLE " + this.Meta.Application.VersioningTableName + " (ID {0} not null, ParentID {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerRefId {0} not null, RowChangeDate {1} not null, UserID {2} not null)";
+                string create_sql = "CREATE TABLE " + this.Meta.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
                 DataRepository.Open();
@@ -1258,10 +1314,9 @@ namespace Intwenty.Engine
                 var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
                 var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
                 var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
-                var booldt = DataTypes.Find(p => p.IntwentyType == "BOOLEAN" && p.DBMSType == DataRepository.GetDBMS());
 
-                string create_sql = "CREATE TABLE " + table.DbName + " (ID {0} not null, RowChangeDate {1} not null, UserID {2} not null, ParentID {0} not null, Version {0} not null, OwnerRefId {0} not null, IsDeleted {3})";
-                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType, booldt.DBMSDataType });
+                string create_sql = "CREATE TABLE " + table.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, ParentId {0} not null, Version {0} not null, OwnerId {0} not null)";
+                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(create_sql);
@@ -1290,7 +1345,7 @@ namespace Intwenty.Engine
             {
 
                 //Ctreate index on main application table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version)", this.Meta.Application.DbName);
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", this.Meta.Application.DbName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
@@ -1299,7 +1354,7 @@ namespace Intwenty.Engine
                 DataRepository.ExecuteScalarQuery();
 
                 //Create index on versioning table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version, MetaCode, MetaType)", this.Meta.Application.VersioningTableName);
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Meta.Application.VersioningTableName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
@@ -1315,7 +1370,7 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataTable)
                     {
-                        sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version)", t.DbName);
+                        sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", t.DbName);
                         DataRepository.CreateCommand(sql);
                         DataRepository.ExecuteScalarQuery();
 
@@ -1324,7 +1379,7 @@ namespace Intwenty.Engine
                         DataRepository.ExecuteScalarQuery();
 
 
-                        sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentID)", t.DbName);
+                        sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
                         DataRepository.CreateCommand(sql);
                         DataRepository.ExecuteScalarQuery();
 

@@ -41,10 +41,18 @@ namespace Intwenty.Data.DBAccess.Helpers
 
     public interface IIntwentyDataColum
     {
-        public string ColumnName { get; }
-        public string DataType { get; }
-        public bool IsNumeric { get; }
-        public bool IsDateTime { get; }
+        string ColumnName { get; }
+        bool IsNumeric { get; }
+        bool IsDateTime { get; }
+        DataColumn QueryResultColumn { get; set; }
+    }
+
+    public class IntwentyDataColum : IIntwentyDataColum
+    {
+        public string ColumnName { get; set; }
+        public bool IsNumeric { get; set; }
+        public bool IsDateTime { get; set; }
+        public DataColumn QueryResultColumn { get; set; }
 
     }
 
@@ -343,42 +351,43 @@ namespace Intwenty.Data.DBAccess.Helpers
             return null;
         }
 
-        public static string GetJSONValue(DataRow r, DataColumn c)
+        public static string GetJSONValue(DataRow r, DataColumn dc)
         {
-
-            if (r == null || c == null)
+            if (r == null || dc == null)
                 return string.Empty;
 
-            if (r[c] == null)
+            if (r[dc] == null)
                 return string.Empty;
 
-            if (r[c] == DBNull.Value)
+            if (r[dc] == DBNull.Value)
                 return string.Empty;
 
-            if (IsNumeric(c))
+
+            if (IsNumeric(dc))
             {
-                return "\"" + c.ColumnName + "\":" + Convert.ToString(r[c]).Replace(",", ".");
+                return "\"" + dc.ColumnName + "\":" + Convert.ToString(r[dc]).Replace(",", ".");
             }
-            else if (IsDateTime(c))
+            else if (IsDateTime(dc))
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[c]).ToString("yyyy-MM-dd")).ToString() + "\"";
+                return "\"" + dc.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[dc]).ToString("yyyy-MM-dd")).ToString() + "\"";
             }
             else
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[c])).ToString() + "\"";
+                return "\"" + dc.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[dc])).ToString() + "\"";
             }
         }
 
-        public static string GetJSONValue(DataRow r, IIntwentyDataColum c, DBMS dbmstype)
+        public static string GetJSONValue(DataRow r, IIntwentyDataColum ic, DBMS dbmstype)
         {
 
-            var dbcolname = c.ColumnName;
-            if (dbmstype == DBMS.PostgreSQL)
-                dbcolname = c.ColumnName.ToLower();
-
-
-            if (r == null || c == null)
+            if (r == null || ic == null)
                 return string.Empty;
+            if (ic.QueryResultColumn == null)
+                return string.Empty;
+
+            var dbcolname = ic.ColumnName;
+            if (dbmstype == DBMS.PostgreSQL)
+                dbcolname = ic.QueryResultColumn.ColumnName;
 
             if (r[dbcolname] == null)
                 return string.Empty;
@@ -386,17 +395,18 @@ namespace Intwenty.Data.DBAccess.Helpers
             if (r[dbcolname] == DBNull.Value)
                 return string.Empty;
 
-            if (c.IsNumeric)
+        
+            if (ic.IsNumeric || IsNumeric(ic.QueryResultColumn))
             {
-                return "\"" + c.ColumnName + "\":" + Convert.ToString(r[dbcolname]).Replace(",", ".");
+                return "\"" + ic.ColumnName + "\":" + Convert.ToString(r[dbcolname]).Replace(",", ".");
             }
-            else if (c.IsDateTime)
+            else if (ic.IsDateTime || IsDateTime(ic.QueryResultColumn))
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[dbcolname]).ToString("yyyy-MM-dd")).ToString() + "\"";
+                return "\"" + ic.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[dbcolname]).ToString("yyyy-MM-dd")).ToString() + "\"";
             }
             else
             {
-                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[dbcolname])).ToString() + "\"";
+                return "\"" + ic.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[dbcolname])).ToString() + "\"";
             }
         }
 

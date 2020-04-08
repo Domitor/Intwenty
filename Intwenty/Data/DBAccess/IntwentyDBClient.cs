@@ -303,9 +303,27 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetAsJSONArray(int minrow=0, int maxrow=0)
         {
             var sb = new StringBuilder();
-            var ds = GetDataSet();
 
-            var firstcol = true;
+            var ds = new DataSet();
+            if (DBMSType == DBMS.MSSqlServer)
+            {
+                var adapt = new SqlDataAdapter(sql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.PostgreSQL)
+            {
+                var adapt = new NpgsqlDataAdapter(pgres_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            {
+                var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+
             var firstrow = true;
             var rindex = -1;
             sb.Append("[");
@@ -329,7 +347,7 @@ namespace Intwenty.Data.DBAccess
                     sb.Append(",{");
                 }
 
-                firstcol = true;
+                var firstcol = true;
                 foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
                     var val = DBHelpers.GetJSONValue(r, dc);
@@ -359,9 +377,40 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
         {
             var sb = new StringBuilder();
-            var ds = GetDataSet();
+            var ds = new DataSet();
+            if (DBMSType == DBMS.MSSqlServer)
+            {
+                var adapt = new SqlDataAdapter(sql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.PostgreSQL)
+            {
+                var adapt = new NpgsqlDataAdapter(pgres_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            {
+                var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
 
-            var firstcol = true;
+
+            foreach (var ic in columns)
+            {
+                foreach (DataColumn dc in ds.Tables[0].Columns)
+                {
+                    if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
+                    {
+                        ic.QueryResultColumn = dc;
+                        break;
+                    }
+                }
+            }
+            
+
             var firstrow = true;
             var rindex = -1;
             sb.Append("[");
@@ -385,10 +434,13 @@ namespace Intwenty.Data.DBAccess
                     sb.Append(",{");
                 }
 
-                firstcol = true;
-                foreach (var dc in columns)
+                var firstcol = true;
+                foreach (var ic in columns)
                 {
-                    var val = DBHelpers.GetJSONValue(r, dc, DBMSType);
+                    if (ic.QueryResultColumn == null)
+                        continue;
+
+                    var val = DBHelpers.GetJSONValue(r, ic, DBMSType);
                     if (string.IsNullOrEmpty(val))
                         continue;
 
@@ -415,7 +467,25 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetAsJSONObject()
         {
             var sb = new StringBuilder();
-            var ds = GetDataSet();
+            var ds = new DataSet();
+            if (DBMSType == DBMS.MSSqlServer)
+            {
+                var adapt = new SqlDataAdapter(sql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.PostgreSQL)
+            {
+                var adapt = new NpgsqlDataAdapter(pgres_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            {
+                var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
 
             if (ds.Tables[0].Rows.Count == 0)
             {
@@ -457,7 +527,25 @@ namespace Intwenty.Data.DBAccess
                 throw new InvalidOperationException("Parameter columns can't be null");
 
             var sb = new StringBuilder();
-            var ds = GetDataSet();
+            var ds = new DataSet();
+            if (DBMSType == DBMS.MSSqlServer)
+            {
+                var adapt = new SqlDataAdapter(sql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.PostgreSQL)
+            {
+                var adapt = new NpgsqlDataAdapter(pgres_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
+            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            {
+                var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.FillSchema(ds, SchemaType.Source);
+                adapt.Fill(ds);
+            }
 
             if (ds.Tables[0].Rows.Count == 0)
             {
@@ -465,13 +553,28 @@ namespace Intwenty.Data.DBAccess
                 return sb;
             }
 
+            foreach (var ic in columns)
+            {
+                foreach (DataColumn dc in ds.Tables[0].Columns)
+                {
+                    if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
+                    {
+                        ic.QueryResultColumn = dc;
+                        break;
+                    }
+                }
+            }
+
             var firstcol = true;
 
             sb.Append("{");
 
-            foreach (var dc in columns)
+            foreach (var ic in columns)
             {
-                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc, DBMSType);
+                if (ic.QueryResultColumn == null)
+                    continue;
+
+                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], ic, DBMSType);
                 if (string.IsNullOrEmpty(val))
                     continue;
 
@@ -994,37 +1097,6 @@ namespace Intwenty.Data.DBAccess
 
             return res;
         }
-
-
-
-        private DataSet GetDataSet()
-        {
-            var ds = new DataSet();
-
-            if (DBMSType == DBMS.MSSqlServer)
-            {
-                var adapt = new SqlDataAdapter(sql_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.PostgreSQL)
-            {
-                var adapt = new NpgsqlDataAdapter(pgres_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-            {
-                var adapt = new MySqlDataAdapter(mysql_cmd);
-                adapt.FillSchema(ds, SchemaType.Mapped);
-                adapt.Fill(ds);
-            }
-
-            return ds;
-
-        }
-
-
 
 
 

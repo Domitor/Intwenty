@@ -40,17 +40,7 @@ namespace Intwenty.Model
         public List<NoSerieModelItem> NoSeries { get; set; }
 
 
-        public List<IIntwentyDataColum> GetMainTableColumns()
-        {
-            return DataStructure.Where(p=> p.IsRoot && p.IsMetaTypeDataColumn).Select(p=>(IIntwentyDataColum)p).ToList();
-        }
-
-        public List<IIntwentyDataColum> GetSubTableColumns(DatabaseModelItem subtable)
-        {
-            return DataStructure.Where(p => p.IsMetaTypeDataColumn && p.ParentMetaCode == subtable.MetaCode).Select(p => (IIntwentyDataColum)p).ToList();
-        }
-
-
+    
 
     }
 

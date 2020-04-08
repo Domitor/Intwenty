@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Intwenty.Model
 {
-    public class DatabaseModelItem : BaseModelItem, IIntwentyDataColum
+    public class DatabaseModelItem : BaseModelItem
     {
         //DATATYPES
         public static readonly string DataTypeBool = "BOOLEAN";
