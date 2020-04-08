@@ -10,41 +10,11 @@ using System.Collections.Generic;
 using System.Reflection;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
+using Intwenty.Model;
 
 namespace Intwenty.Data.DBAccess
 {
-    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL };
-
-    public class IntwentySqlParameter
-    {
-        public string ParameterName { get; set; }
-
-        public object Value { get; set; }
-
-        public DbType DataType { get; set; }
-
-        public ParameterDirection Direction { get; set; }
-
-        public IntwentySqlParameter()
-        {
-            Direction = ParameterDirection.Input;
-            DataType = DbType.String;
-        }
-    }
-
-    public class NonQueryResult
-    {
-        public List<IntwentySqlParameter> OutputParameters { get; set; }
-
-        public int Value { get; set; }
-
-        public NonQueryResult()
-        {
-            OutputParameters = new List<IntwentySqlParameter>();
-            Value = 0;
-        }
-    }
-
+   
 
 
     public class IntwentyDBClient : IDisposable
@@ -386,6 +356,62 @@ namespace Intwenty.Data.DBAccess
             return sb;
         }
 
+        public StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
+        {
+            var sb = new StringBuilder();
+            var ds = GetDataSet();
+
+            var firstcol = true;
+            var firstrow = true;
+            var rindex = -1;
+            sb.Append("[");
+            foreach (DataRow r in ds.Tables[0].Rows)
+            {
+
+                rindex += 1;
+                if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                {
+                    if (!(minrow <= rindex && maxrow > rindex))
+                        continue;
+                }
+
+                if (firstrow)
+                {
+                    firstrow = false;
+                    sb.Append("{");
+                }
+                else
+                {
+                    sb.Append(",{");
+                }
+
+                firstcol = true;
+                foreach (var dc in columns)
+                {
+                    var val = DBHelpers.GetJSONValue(r, dc, DBMSType);
+                    if (string.IsNullOrEmpty(val))
+                        continue;
+
+                    if (firstcol)
+                    {
+                        firstcol = false;
+                        sb.Append(val);
+                    }
+                    else
+                    {
+                        sb.Append("," + val);
+                    }
+                }
+
+                sb.Append("}");
+
+            }
+
+            sb.Append("]");
+
+            return sb;
+        }
+
         public StringBuilder GetAsJSONObject()
         {
             var sb = new StringBuilder();
@@ -404,6 +430,48 @@ namespace Intwenty.Data.DBAccess
             foreach (DataColumn dc in ds.Tables[0].Columns)
             {
                 var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
+                if (string.IsNullOrEmpty(val))
+                    continue;
+
+                if (firstcol)
+                {
+                    sb.Append(val);
+                    firstcol = false;
+                }
+                else
+                {
+                    sb.Append("," + val);
+                }
+            }
+
+            sb.Append("}");
+
+            return sb;
+
+
+        }
+
+        public StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns)
+        {
+            if (columns == null)
+                throw new InvalidOperationException("Parameter columns can't be null");
+
+            var sb = new StringBuilder();
+            var ds = GetDataSet();
+
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                sb.Append("{}");
+                return sb;
+            }
+
+            var firstcol = true;
+
+            sb.Append("{");
+
+            foreach (var dc in columns)
+            {
+                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc, DBMSType);
                 if (string.IsNullOrEmpty(val))
                     continue;
 
@@ -693,8 +761,6 @@ namespace Intwenty.Data.DBAccess
 
             var res = ExecuteNonQuery();
            
-
-      
             var output = res.OutputParameters.Find(p => p.ParameterName == "@NewId");
             if (output != null && !string.IsNullOrEmpty(autoinccolumn))
             {
@@ -703,11 +769,15 @@ namespace Intwenty.Data.DBAccess
                     property.SetValue(model, output.Value, null);
             }
 
-            if (res.Value == 0 && DBMSType == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
+            if (DBMSType == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
             {
-                CreateCommand(string.Format("SELECT currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
-                res.Value = (int)ExecuteScalarQuery();
-
+                var property = workingtype.GetProperty(autoinccolumn);
+                if (property != null)
+                {
+                    CreateCommand(string.Format("SELECT currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
+                    property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
+                }
+                   
             }
 
             if (!use_current_connection)
@@ -979,6 +1049,58 @@ namespace Intwenty.Data.DBAccess
             }
         }
 
+        public bool TableExist(string tablename)
+        {
+            if (string.IsNullOrEmpty(tablename))
+                return false;
+
+            var result = true;
+
+            try
+            {
+                CreateCommand(string.Format("SELECT 1 FROM {0}",tablename));
+                if (DBMSType == DBMS.MSSqlServer)
+                    sql_cmd.ExecuteScalar();
+                else if (DBMSType == DBMS.PostgreSQL)
+                    pgres_cmd.ExecuteScalar();
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    mysql_cmd.ExecuteScalar();
+               
+            }
+            catch 
+            {
+                result = false;
+            }
+
+            return result;
+        }
+
+        public bool ColumnExist(string tablename, string columnname)
+        {
+            if (string.IsNullOrEmpty(tablename) || string.IsNullOrEmpty(columnname))
+                return false;
+
+            var result = true;
+
+            try
+            {
+                CreateCommand(string.Format("SELECT {0} FROM {1} WHERE 1=2", columnname, tablename));
+                if (DBMSType == DBMS.MSSqlServer)
+                    sql_cmd.ExecuteScalar();
+                else if (DBMSType == DBMS.PostgreSQL)
+                    pgres_cmd.ExecuteScalar();
+                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                    mysql_cmd.ExecuteScalar();
+
+            }
+            catch
+            {
+                result = false;
+            }
+
+            return result;
+        }
+
         public NonQueryResult ExecuteNonQuery()
         {
 
@@ -998,12 +1120,6 @@ namespace Intwenty.Data.DBAccess
             {
                 var res = new NonQueryResult();
                 res.Value = pgres_cmd.ExecuteNonQuery();
-                foreach (NpgsqlParameter p in pgres_cmd.Parameters)
-                {
-                    if (p.Direction == ParameterDirection.Output)
-                        res.OutputParameters.Add(new IntwentySqlParameter() { ParameterName = p.ParameterName, Direction = ParameterDirection.Output, DataType = p.DbType, Value = p.Value });
-                }
-
                 return res;
             }
             else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
@@ -1140,35 +1256,22 @@ namespace Intwenty.Data.DBAccess
             var autoincvalue = string.Empty;
             var datatype = string.Empty;
 
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.MSSqlServer)  datatype = "NVARCHAR(300)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.MSSqlServer && longtext) datatype = "NVARCHAR(MAX)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))  datatype = "VARCHAR(300)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql) && longtext) datatype = "LONGTEXT";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.PostgreSQL) datatype = "VARCHAR(300)";
-            if (nettype.ToUpper() == "SYSTEM.STRING" && DBMSType == DBMS.PostgreSQL && longtext) datatype = "TEXT";
+            var dtmap = DBHelpers.GetDataTypeMap().Find(p => p.NetType == nettype.ToUpper() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DBMSType == DBMSType);
+            if (dtmap==null)
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", nettype.ToUpper(), DBMSType));
 
-            if (nettype.ToUpper() == "SYSTEM.INT32" && DBMSType == DBMS.MSSqlServer)   datatype = "INT";
-            if (nettype.ToUpper() == "SYSTEM.INT32" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))   datatype = "INT(11)";
-            if (nettype.ToUpper() == "SYSTEM.INT32" && DBMSType == DBMS.PostgreSQL) datatype = "INTEGER";
+            datatype = dtmap.DBMSDataType;
 
-            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBMSType == DBMS.MSSqlServer) datatype = "BIT";
-            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)) datatype = "TINYINT(1)";
-            if (nettype.ToUpper() == "SYSTEM.BOOLEAN" && DBMSType == DBMS.PostgreSQL) datatype = "BOOLEAN";
-
-            if (nettype.ToUpper() == "SYSTEM.DATETIME" && DBMSType == DBMS.MSSqlServer) datatype = "DATETIME";
-            if (nettype.ToUpper() == "SYSTEM.DATETIME" && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)) datatype = "DATETIME";
-            if (nettype.ToUpper() == "SYSTEM.DATETIME" && DBMSType == DBMS.PostgreSQL) datatype = "TIMESTAMP";
+            var autoincmap = new DBMSCommandMap() { Key = "AUTOINC" };
+            if (autoincrement)
+                autoincmap = DBHelpers.GetDBMSCommandMap().Find(p => p.DBMSType == DBMSType && p.Key== "AUTOINC");
 
             if (autoincrement)
             {
                 allownullvalue = "NOT NULL";
                 defaultvalue = "";
-                if (DBMSType ==  DBMS.MSSqlServer)
-                    autoincvalue = "IDENTITY(1,1)";
-                if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
-                    autoincvalue = "AUTO_INCREMENT";
                 if (DBMSType == DBMS.PostgreSQL)
-                    datatype = "SERIAL";
+                    datatype = autoincmap.Command;
             }
             if (notnull)
             {
@@ -1177,13 +1280,11 @@ namespace Intwenty.Data.DBAccess
             }
 
 
-
-
             if (DBMSType == DBMS.MSSqlServer) 
-                result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, autoincvalue, allownullvalue });
+                result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, autoincmap.Command, allownullvalue });
 
             if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql) 
-                result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { name, datatype, allownullvalue, autoincvalue, defaultvalue });
+                result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { name, datatype, allownullvalue, autoincmap.Command, defaultvalue });
 
             if (DBMSType == DBMS.PostgreSQL)
                 result = string.Format("{0} {1} {2}", new object[] { name, datatype, allownullvalue });

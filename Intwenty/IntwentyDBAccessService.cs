@@ -4,6 +4,7 @@ using System.Text;
 using Shared;
 using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
+using Intwenty.Data.DBAccess.Helpers;
 
 namespace Intwenty
 {
@@ -19,11 +20,14 @@ namespace Intwenty
         void AddParameter(IntwentySqlParameter p);
         void FillDataset(DataSet ds, string tablename);
         object ExecuteScalarQuery();
+        bool TableExist(string tablename);
+        bool ColumnExist(string tablename, string columnname);
         NonQueryResult ExecuteNonQuery();
         DBMS GetDBMS();
-        StringBuilder GetAsJSONArray();
+        StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0);
         StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
         StringBuilder GetAsJSONObject();
+        StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns);
         void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false);
         List<T> Get<T>(bool use_current_connection = false) where T : new();
         int Insert<T>(T model, bool use_current_connection = false);
@@ -102,9 +106,9 @@ namespace Intwenty
             return DBClient.ExecuteNonQuery();
         }
 
-        public StringBuilder GetAsJSONArray()
+        public StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetAsJSONArray(0,0);
+            return DBClient.GetAsJSONArray(columns, minrow, maxrow);
         }
 
         public StringBuilder GetAsJSONArray(int minrow = 0, int maxrow=0)
@@ -115,6 +119,11 @@ namespace Intwenty
         public StringBuilder GetAsJSONObject()
         {
             return DBClient.GetAsJSONObject();
+        }
+
+        public StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns)
+        {
+            return DBClient.GetAsJSONObject(columns);
         }
 
         public DBMS GetDBMS()
@@ -150,6 +159,16 @@ namespace Intwenty
         public int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false)
         {
             return DBClient.DeleteRange(model, use_current_connection);
+        }
+
+        public bool TableExist(string tablename)
+        {
+            return DBClient.TableExist(tablename);
+        }
+
+        public bool ColumnExist(string tablename, string columnname)
+        {
+            return DBClient.ColumnExist(tablename, columnname);
         }
     }
 

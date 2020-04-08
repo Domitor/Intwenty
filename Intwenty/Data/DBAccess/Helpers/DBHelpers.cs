@@ -1,14 +1,58 @@
 ﻿using System;
-using System.Data;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace Intwenty.Data.DBAccess.Helpers
 {
+    public enum StringLength { Standard, Long, Short };
+
+    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL };
+
+    public class IntwentySqlParameter
+    {
+        public string ParameterName { get; set; }
+
+        public object Value { get; set; }
+
+        public DbType DataType { get; set; }
+
+        public ParameterDirection Direction { get; set; }
+
+        public IntwentySqlParameter()
+        {
+            Direction = ParameterDirection.Input;
+            DataType = DbType.String;
+        }
+    }
+
+    public class NonQueryResult
+    {
+        public List<IntwentySqlParameter> OutputParameters { get; set; }
+
+        public int Value { get; set; }
+
+        public NonQueryResult()
+        {
+            OutputParameters = new List<IntwentySqlParameter>();
+            Value = 0;
+        }
+    }
+
+    public interface IIntwentyDataColum
+    {
+        public string ColumnName { get; }
+        public string DataType { get; }
+        public bool IsNumeric { get; }
+        public bool IsDateTime { get; }
+
+    }
+
+
     public static class DBHelpers
     {
 
-        public static bool GetRowBoolValue(System.Data.DataRow r, string columnname)
+        public static bool GetRowBoolValue(DataRow r, string columnname)
         {
             bool res = false;
 
@@ -27,7 +71,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static Double GetRowDoubleValue(System.Data.DataRow r, string columnname)
+        public static Double GetRowDoubleValue(DataRow r, string columnname)
         {
             var res = 0.00;
 
@@ -46,7 +90,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static Decimal GetRowDecimalValue(System.Data.DataRow r, string columnname)
+        public static Decimal GetRowDecimalValue(DataRow r, string columnname)
         {
             var res = 0.00M;
 
@@ -65,7 +109,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static Decimal GetRowDecimalValue(System.Data.DataSet ds, string columnname)
+        public static Decimal GetRowDecimalValue(DataSet ds, string columnname)
         {
             var res = 0.00M;
 
@@ -84,7 +128,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static string GetRowDateStringValue(System.Data.DataRow r, string columnname)
+        public static string GetRowDateStringValue(DataRow r, string columnname)
         {
             var res = string.Empty;
 
@@ -103,7 +147,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static string GetRowStringValue(System.Data.DataRow r, string columnname)
+        public static string GetRowStringValue(DataRow r, string columnname)
         {
             var res = string.Empty;
 
@@ -126,7 +170,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 
      
 
-        public static string GetRowStringValue(System.Data.DataTable t, string columnname)
+        public static string GetRowStringValue(DataTable t, string columnname)
         {
             var res = string.Empty;
 
@@ -145,7 +189,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static string GetRowStringValue(System.Data.DataSet t, string columnname)
+        public static string GetRowStringValue(DataSet t, string columnname)
         {
             var res = string.Empty;
 
@@ -164,7 +208,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static Int64 GetRowInt64Value(System.Data.DataRow r, string columnname)
+        public static Int64 GetRowInt64Value(DataRow r, string columnname)
         {
             Int64 res = 0;
 
@@ -183,7 +227,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static Int32 GetRowIntValue(System.Data.DataRow r, string columnname)
+        public static Int32 GetRowIntValue(DataRow r, string columnname)
         {
             int res = 0;
 
@@ -204,7 +248,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 
      
 
-        public static Int32 GetRowIntValue(System.Data.DataTable t, string columnname)
+        public static Int32 GetRowIntValue(DataTable t, string columnname)
         {
             int res = 0;
 
@@ -225,7 +269,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 
       
 
-        public static DateTime? GetRowDateTimeValue(System.Data.DataRow r, string columnname)
+        public static DateTime? GetRowDateTimeValue(DataRow r, string columnname)
         {
 
             DateTime? res;
@@ -245,7 +289,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             return res;
         }
 
-        public static DateTime? GetRowDateTimeValue(System.Data.DataSet ds, string columnname)
+        public static DateTime? GetRowDateTimeValue(DataSet ds, string columnname)
         {
 
             DateTime? res;
@@ -325,6 +369,37 @@ namespace Intwenty.Data.DBAccess.Helpers
             }
         }
 
+        public static string GetJSONValue(DataRow r, IIntwentyDataColum c, DBMS dbmstype)
+        {
+
+            var dbcolname = c.ColumnName;
+            if (dbmstype == DBMS.PostgreSQL)
+                dbcolname = c.ColumnName.ToLower();
+
+
+            if (r == null || c == null)
+                return string.Empty;
+
+            if (r[dbcolname] == null)
+                return string.Empty;
+
+            if (r[dbcolname] == DBNull.Value)
+                return string.Empty;
+
+            if (c.IsNumeric)
+            {
+                return "\"" + c.ColumnName + "\":" + Convert.ToString(r[dbcolname]).Replace(",", ".");
+            }
+            else if (c.IsDateTime)
+            {
+                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[dbcolname]).ToString("yyyy-MM-dd")).ToString() + "\"";
+            }
+            else
+            {
+                return "\"" + c.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[dbcolname])).ToString() + "\"";
+            }
+        }
+
 
         public static bool IsNumeric(DataColumn col)
         {
@@ -338,6 +413,8 @@ namespace Intwenty.Data.DBAccess.Helpers
             return numericTypes.Contains(col.DataType);
         }
 
+       
+
         public static bool IsDateTime(DataColumn col)
         {
             if (col == null)
@@ -348,133 +425,115 @@ namespace Intwenty.Data.DBAccess.Helpers
             return dateTimeTypes.Contains(col.DataType);
         }
 
+      
 
 
-        /*
-       public static System.Data.DataSet GetDataSet(string sql, System.Data.Common.DbConnection connection, bool useprocedure)
-       {
+        public static List<DBMSCommandMap> GetDBMSCommandMap()
+        {
+            var res = new List<DBMSCommandMap>();
 
-           var ds = new System.Data.DataSet();
-           var cn = new System.Data.SqlClient.SqlConnection(connection.ConnectionString);
-           cn.Open();
+            res.Add(new DBMSCommandMap() { Key=  "AUTOINC",   DBMSType = DBMS.MSSqlServer, Command = "IDENTITY(1,1)" });
+            res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.MariaDB, Command = "AUTO_INCREMENT" });
+            res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.MySql, Command = "AUTO_INCREMENT" });
+            res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.PostgreSQL, Command = "SERIAL" });
+            res.Add(new DBMSCommandMap() { Key = "GETDATE", DBMSType = DBMS.MSSqlServer, Command = "GETDATE()" });
+            res.Add(new DBMSCommandMap() { Key = "GETDATE", DBMSType = DBMS.MariaDB, Command = "NOW()" });
+            res.Add(new DBMSCommandMap() { Key = "GETDATE", DBMSType = DBMS.MySql, Command = "NOW()" });
+            res.Add(new DBMSCommandMap() { Key = "GETDATE", DBMSType = DBMS.PostgreSQL, Command = "now()" });
 
-           var sqlcmd = new System.Data.SqlClient.SqlCommand();
-           sqlcmd.Connection = cn;
-           if (useprocedure)
-               sqlcmd.CommandType = System.Data.CommandType.StoredProcedure;
+            return res;
+        }
+        public static List<SqlDataTypeMap> GetDataTypeMap()
+        {
+            var res = new List<SqlDataTypeMap>();
 
-           sqlcmd.CommandText = sql;
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MSSqlServer , DBMSDataType ="NVARCHAR(300)"  });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MSSqlServer, DBMSDataType = "NVARCHAR(max)", Length = StringLength.Long });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MariaDB, DBMSDataType = "VARCHAR(300)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MariaDB, DBMSDataType = "LONGTEXT", Length = StringLength.Long });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MySql, DBMSDataType = "VARCHAR(300)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MySql, DBMSDataType = "LONGTEXT", Length = StringLength.Long });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.PostgreSQL, DBMSDataType = "VARCHAR(300)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.PostgreSQL, DBMSDataType = "TEXT", Length = StringLength.Long });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MSSqlServer, DBMSDataType = "NVARCHAR(30)", Length = StringLength.Short });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MariaDB, DBMSDataType = "VARCHAR(30)", Length = StringLength.Short });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.MySql, DBMSDataType = "VARCHAR(30)", Length = StringLength.Short });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DBMSType = DBMS.PostgreSQL, DBMSDataType = "VARCHAR(30)", Length = StringLength.Short });
 
+            res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DBMSType = DBMS.MSSqlServer, DBMSDataType = "INT" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DBMSType = DBMS.MariaDB, DBMSDataType = "TINYINT(1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DBMSType = DBMS.MySql, DBMSDataType = "TINYINT(1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DBMSType = DBMS.PostgreSQL, DBMSDataType = "BOOLEAN" });
 
-           var sqladapter = new System.Data.SqlClient.SqlDataAdapter();
-           sqladapter.SelectCommand = sqlcmd;
-           sqladapter.Fill(ds);
+            res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DBMSType = DBMS.MSSqlServer, DBMSDataType = "INT" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DBMSType = DBMS.MariaDB, DBMSDataType = "INTEGER(11)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DBMSType = DBMS.MySql, DBMSDataType = "INTEGER(11)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Boolean, DBMSType = DBMS.PostgreSQL, DBMSDataType = "INTEGER" });
 
-           cn.Close();
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DBMSType = DBMS.MSSqlServer, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DBMSType = DBMS.MariaDB, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DBMSType = DBMS.MySql, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DBMSType = DBMS.PostgreSQL, DBMSDataType = "TIMESTAMP" });
 
-           return ds;
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
 
-       }
+            res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,2)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,2)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MySql, DBMSDataType = "DECIMAL(18,2)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,2)" });
 
-       public static System.Data.DataSet GetDataSet(string sql, System.Data.Common.DbConnection connection, bool useprocedure, List<System.Data.SqlClient.SqlParameter> sqlparams)
-       {
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DBMSType = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.DateTime, DBMSType = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
 
-           var ds = new System.Data.DataSet();
-           var cn = new System.Data.SqlClient.SqlConnection(connection.ConnectionString);
-           cn.Open();
-
-           var sqlcmd = new System.Data.SqlClient.SqlCommand();
-           sqlcmd.Connection = cn;
-           if (useprocedure)
-               sqlcmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-           sqlcmd.CommandText = sql;
-
-           if (sqlparams != null)
-           {
-               foreach (var l in sqlparams)
-               {
-                   sqlcmd.Parameters.Add(l);
-               }
-           }
-
-           var sqladapter = new System.Data.SqlClient.SqlDataAdapter();
-           sqladapter.SelectCommand = sqlcmd;
-           sqladapter.Fill(ds);
-
-
-           cn.Close();
-
-           return ds;
-
-       }
-
-
-       public static int ExecuteNonQuery(string sql, System.Data.Common.DbConnection connection, bool useprocedure, List<System.Data.SqlClient.SqlParameter> sqlparams)
-       {
-           int res = 0;
-
-           var cn = new System.Data.SqlClient.SqlConnection(connection.ConnectionString);
-           cn.Open();
-
-           var sqlcmd = new System.Data.SqlClient.SqlCommand();
-           sqlcmd.Connection = cn;
-           if (useprocedure)
-               sqlcmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-           if (sqlparams != null)
-           {
-               foreach (var l in sqlparams)
-               {
-                   sqlcmd.Parameters.Add(l);
-               }
-           }
-
-           sqlcmd.CommandText = sql;
-
-           res = sqlcmd.ExecuteNonQuery();
-
-           cn.Close();
-
-           return res;
-
-       }
+            return res;
+        }
+      
 
 
 
-       public static object ExecuteScalar(string sql, System.Data.Common.DbConnection connection, bool useprocedure, List<System.Data.SqlClient.SqlParameter> sqlparams)
-       {
-           object res = null;
-
-           var cn = new System.Data.SqlClient.SqlConnection(connection.ConnectionString);
-           cn.Open();
-
-           var sqlcmd = new System.Data.SqlClient.SqlCommand();
-           sqlcmd.Connection = cn;
-           if (useprocedure)
-               sqlcmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-           if (sqlparams != null)
-           {
-               foreach (var l in sqlparams)
-               {
-                   sqlcmd.Parameters.Add(l);
-               }
-           }
-
-           sqlcmd.CommandText = sql;
-
-           res = sqlcmd.ExecuteScalar();
-
-           cn.Close();
-
-           return res;
-
-       }
-
-     */
+    }
 
 
+    public class SqlDataTypeMap
+    {
+
+        public StringLength Length { get; set; }
+
+        public string NetType { get; set; }
+
+        public string IntwentyType { get; set; }
+
+        public DbType DataDbType { get; set; }
+
+        public DBMS DBMSType { get; set; }
+
+        public string DBMSDataType { get; set; }
+
+        public SqlDataTypeMap()
+        {
+            Length = StringLength.Standard;
+        }
+
+
+    }
+
+    public class DBMSCommandMap
+    {
+        public string Key { get; set; }
+
+        public DBMS DBMSType { get; set; }
+
+        public string Command{ get; set; }
+
+        public DBMSCommandMap()
+        {
+            Command = "";
+        }
 
 
     }

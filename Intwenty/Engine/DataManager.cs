@@ -67,10 +67,16 @@ namespace Intwenty.Engine
 
         protected DateTime ApplicationSaveTimeStamp { get; set; }
 
+        protected List<SqlDataTypeMap> DataTypes { get; set; }
+
+        protected List<DBMSCommandMap> Commands { get; set; }
+
         protected DataManager(ApplicationModel application)
         {
             Meta = application;
             ApplicationSaveTimeStamp = DateTime.Now;
+            DataTypes = DBHelpers.GetDataTypeMap();
+            Commands = DBHelpers.GetDBMSCommandMap();
         }
 
         public static DataManager GetDataManager(ApplicationModel application)
@@ -143,8 +149,20 @@ namespace Intwenty.Engine
                     var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
                     return fail;
                 }
-                result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "Id");
-                result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "Version");
+
+                if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
+                {
+                    result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "id");
+                    result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "version");
+
+                }
+                else
+                {
+
+                    result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "Id");
+                    result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "Version");
+                }
+               
 
             }
             catch (Exception ex)
@@ -188,7 +206,12 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql_stmt.ToString());
-                var appjson = DataRepository.GetAsJSONObject();
+                StringBuilder appjson = null;
+                if (DataRepository.GetDBMS()== DBMS.PostgreSQL)
+                    appjson = DataRepository.GetAsJSONObject(this.Meta.GetMainTableColumns());
+                else
+                    appjson = DataRepository.GetAsJSONObject();
+
                 DataRepository.Close();
                
                 if (appjson.Length < 5)
@@ -226,7 +249,13 @@ namespace Intwenty.Engine
                         sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
                         DataRepository.Open();
                         DataRepository.CreateCommand(sql_stmt.ToString());
-                        var tablearray = DataRepository.GetAsJSONArray();
+                        StringBuilder tablearray = null;
+                        if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
+                            tablearray = DataRepository.GetAsJSONArray(this.Meta.GetSubTableColumns(t));
+                        else
+                            tablearray = DataRepository.GetAsJSONArray();
+
+
                         DataRepository.Close();
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
@@ -336,7 +365,7 @@ namespace Intwenty.Engine
             if (args.MaxCount == 0)
             {
                 DataRepository.Open();
-                DataRepository.CreateCommand("select MAX(t1.RowNum) FROM (select ID, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id + ") t1");
+                DataRepository.CreateCommand("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id);
                 var max = DataRepository.ExecuteScalarQuery();
                 if (max == DBNull.Value)
                     args.MaxCount = 0;
@@ -361,7 +390,7 @@ namespace Intwenty.Engine
                         sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
                     }
                 }
-                sql_list_stmt.Append("FROM (select *, (ROW_NUMBER() over (order by ID)) RowNum from sysdata_InformationStatus where ApplicationId = "+ this.Meta.Application.Id + ") t1 ");
+                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.ID=t2.ID and t1.Version = t2.Version ");
                 sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
 
@@ -375,7 +404,11 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 DataRepository.Open();
                 DataRepository.CreateCommand(sql_list_stmt.ToString());
-                var json = DataRepository.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                StringBuilder json = null;
+                if (DataRepository.GetDBMS() == DBMS.PostgreSQL)
+                    json = DataRepository.GetAsJSONArray(this.Meta.GetMainTableColumns(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                else
+                    json = DataRepository.GetAsJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 DataRepository.Close();
 
                 result.Data = json.ToString();
@@ -753,27 +786,7 @@ namespace Intwenty.Engine
         }
 
 
-        private bool IsNumeric(DataColumn col)
-        {
-            if (col == null)
-                return false;
-
-            var numericTypes = new[] { typeof(byte), typeof(decimal), typeof(double),
-            typeof(short), typeof(int), typeof(long), typeof(sbyte),
-            typeof(float), typeof(ushort), typeof(uint), typeof(ulong)};
-
-            return numericTypes.Contains(col.DataType);
-        }
-
-        private bool IsDateTime(DataColumn col)
-        {
-            if (col == null)
-                return false;
-
-            var dateTimeTypes = new[] { typeof(DateTime) };
-
-            return dateTimeTypes.Contains(col.DataType);
-        }
+      
 
         #endregion
 
@@ -784,7 +797,7 @@ namespace Intwenty.Engine
 
             var model = new SystemID() { ApplicationId=this.Meta.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= this.ClientState.Properties };
             var result = DataRepository.Insert(model, true);
-            return result;
+            return model.Id;
         }
 
         private void InsertMainTable(ClientStateInfo data)
@@ -1005,10 +1018,12 @@ namespace Intwenty.Engine
                 newversion = 1;
             }
 
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == DataRepository.GetDBMS());
 
             sql = "insert into " + this.Meta.Application.VersioningTableName;
             sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerRefId, RowChangeDate, UserID)";
-            sql += " VALUES (@P1, @P2, @P3, @P4, @P5, @P6, getDate(), @P8)";
+            sql += " VALUES (@P1, @P2, @P3, @P4, @P5, @P6, {0}, @P8)";
+            sql = string.Format(sql, getdatecmd.Command);
 
             DataRepository.CreateCommand(sql);
             DataRepository.AddParameter("@P1", this.ClientState.Id);
@@ -1112,8 +1127,8 @@ namespace Intwenty.Engine
         private void UpdateInformationStatus()
         {
 
-
-            DataRepository.CreateCommand("Update sysdata_InformationStatus set ChangedDate=getDate(), ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == DataRepository.GetDBMS());
+            DataRepository.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
             DataRepository.AddParameter("@ChangedBy", this.ClientState.UserId);
             DataRepository.AddParameter("@Version", this.ClientState.Version);
             DataRepository.AddParameter("@ID", this.ClientState.Id);
@@ -1128,37 +1143,38 @@ namespace Intwenty.Engine
         private void CreateMainTable(OperationResult o)
         {
 
-            var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.DbName + "'";
             var table_exist = false;
             DataRepository.Open();
-            DataRepository.CreateCommand(sql);
-            table_exist = (DataRepository.ExecuteScalarQuery() != null);
+            table_exist = DataRepository.TableExist(this.Meta.Application.DbName);
             DataRepository.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Main table " + this.Meta.Application.DbName + " for application:" + this.Meta.Application.Title + " is already present");
+                o.AddMessage("DBCONFIG", "Main table " + this.Meta.Application.DbName + " for application: " + this.Meta.Application.Title + " is already present");
             }
             else
             {
-                string create_sql = "CREATE TABLE " + this.Meta.Application.DbName + " (ID int not null, RowChangeDate datetime not null, UserID NVarChar(25) not null, Version int not null, OwnerRefId int not null)";
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
+
+                var create_sql = "CREATE TABLE " + this.Meta.Application.DbName + " (ID {0} not null, RowChangeDate {1} not null, UserID {2} not null, Version {0}  not null, OwnerRefId {0}  not null)";
+                create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(create_sql);
                 DataRepository.ExecuteScalarQuery();
                 DataRepository.Close();
 
-                o.AddMessage("DBCONFIG", "Main table: " + this.Meta.Application.DbName + " for application:" + this.Meta.Application.Title + "  was created successfully");
+                o.AddMessage("DBCONFIG", "Main table: " + this.Meta.Application.DbName + " for application: " + this.Meta.Application.Title + "  was created successfully");
 
             }
         }
 
         private void CreateApplicationVersioningTable(OperationResult o)
         {
-            string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + this.Meta.Application.VersioningTableName + "'";
-            Boolean table_exist = false;
+            var table_exist = false;
             DataRepository.Open();
-            DataRepository.CreateCommand(sql);
-            table_exist = (DataRepository.ExecuteScalarQuery() != null);
+            table_exist = DataRepository.TableExist(this.Meta.Application.VersioningTableName);
             DataRepository.Close();
             if (table_exist)
             {
@@ -1167,7 +1183,11 @@ namespace Intwenty.Engine
             else
             {
 
-                string create_sql = "CREATE TABLE " + this.Meta.Application.VersioningTableName + " (ID int not null, ParentID int not null, MetaCode NVarChar(50) not null, MetaType NVarChar(25) not null, Version int not null, OwnerRefId int not null, RowChangeDate datetime not null, UserID NVarChar(25) not null)";
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
+                string create_sql = "CREATE TABLE " + this.Meta.Application.VersioningTableName + " (ID {0} not null, ParentID {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerRefId {0} not null, RowChangeDate {1} not null, UserID {2} not null)";
+                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(create_sql);
@@ -1188,52 +1208,26 @@ namespace Intwenty.Engine
             }
 
 
-            var ds = new DataSet();
-            string sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" + tablename + "' AND COLUMN_NAME='" + column.DbName + "'";
-            bool column_exist = false;
-
+            var colexist = false;
             DataRepository.Open();
-            DataRepository.CreateCommand(sql);
-            DataRepository.FillDataset(ds, "COLUMNS");
+            colexist = DataRepository.ColumnExist(tablename, column.DbName);
             DataRepository.Close();
-            column_exist = (ds.Tables[0].Rows.Count > 0);
-            if (column_exist)
+       
+            if (colexist)
             {
-               
-                string currenttype = (string)ds.Tables[0].Rows[0]["DATA_TYPE"];
-
-                if (!column.IsValidSQLDataType(currenttype))
-                {
-                    o.AddMessage("DBCONFIG", "Data type miss match for column: " + column.DbName + " in table: " + tablename);
-                    o.AddMessage("DBCONFIG", "SQL Datatype: " + currenttype);
-                    o.AddMessage("DBCONFIG", "System Datatype: " + column.DataType);
-
-                    string create_sql = "ALTER TABLE " + tablename + " ALTER COLUMN " + column.DbName + " " + column.SQLDataType;
-
-                    DataRepository.Open();
-                    DataRepository.CreateCommand(create_sql);
-                    DataRepository.ExecuteScalarQuery();
-                    DataRepository.Close();
-
-                    o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is present but it's data type were updated to " + column.SQLDataType);
-                }
-                else
-                {
-                    o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is already present, no changes.");
-                }
-
+               o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is already present.");
             }
             else
             {
-
-                string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + column.SQLDataType;
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == DataRepository.GetDBMS());
+                string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(create_sql);
                 DataRepository.ExecuteScalarQuery();
                 DataRepository.Close();
 
-                o.AddMessage("DBCONFIG", "Column: " + column.DbName + " was created successfully in table: " + tablename);
+                o.AddMessage("DBCONFIG", "Column: " + column.DbName + " ("+coldt.DBMSDataType+") was created successfully in table: " + tablename);
 
             }
 
@@ -1249,27 +1243,32 @@ namespace Intwenty.Engine
                 return;
             }
 
-            string sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + table.DbName + "'";
-            bool table_exist = false;
+
+            var table_exist = false;
             DataRepository.Open();
-            DataRepository.CreateCommand(sql);
-            table_exist = (DataRepository.ExecuteScalarQuery() != null);
+            table_exist = DataRepository.TableExist(table.DbName);
             DataRepository.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Found table: " + table.DbName + " for application:" + this.Meta.Application.Title);
+                o.AddMessage("DBCONFIG", "Table: " + table.DbName + " in application: " + this.Meta.Application.Title + " is already present.");
             }
             else
             {
 
-                string create_sql = "CREATE TABLE " + table.DbName + " (ID int not null, RowChangeDate datetime not null, UserID NVarChar(25) not null, ParentID int not null, Version int not null, OwnerRefId int not null, IsDeleted bit)";
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
+                var booldt = DataTypes.Find(p => p.IntwentyType == "BOOLEAN" && p.DBMSType == DataRepository.GetDBMS());
+
+                string create_sql = "CREATE TABLE " + table.DbName + " (ID {0} not null, RowChangeDate {1} not null, UserID {2} not null, ParentID {0} not null, Version {0} not null, OwnerRefId {0} not null, IsDeleted {3})";
+                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType, booldt.DBMSDataType });
 
                 DataRepository.Open();
                 DataRepository.CreateCommand(create_sql);
                 DataRepository.ExecuteScalarQuery();
                 DataRepository.Close();
 
-                o.AddMessage("DBCONFIG", "Table: " + table.DbName + " was created successfully");
+                o.AddMessage("DBCONFIG", "Subtable: " + table.DbName + " in application: " + this.Meta.Application.Title + "  was created successfully");
 
             }
 
@@ -1291,20 +1290,20 @@ namespace Intwenty.Engine
             {
 
                 //Ctreate index on main application table
-                sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + this.Meta.Application.DbName + " (ID, Version)";
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version)", this.Meta.Application.DbName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
-                sql = "CREATE INDEX Idx2 ON " + this.Meta.Application.DbName + " (RowChangeDate)";
+                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Meta.Application.DbName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
                 //Create index on versioning table
-                sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + this.Meta.Application.VersioningTableName + " (ID, Version, MetaCode, MetaType)";
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version, MetaCode, MetaType)", this.Meta.Application.VersioningTableName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
-                sql = "CREATE INDEX Idx2 ON " + this.Meta.Application.VersioningTableName + " (RowChangeDate)";
+                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Meta.Application.VersioningTableName);
                 DataRepository.CreateCommand(sql);
                 DataRepository.ExecuteScalarQuery();
 
@@ -1316,16 +1315,16 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataTable)
                     {
-                        sql = "CREATE UNIQUE CLUSTERED INDEX Idx1 ON " + t.DbName + " (ID, Version)";
+                        sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (ID, Version)", t.DbName);
                         DataRepository.CreateCommand(sql);
                         DataRepository.ExecuteScalarQuery();
 
-                        sql = "CREATE INDEX Idx2 ON " + t.DbName + " (RowChangeDate)";
+                        sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", t.DbName);
                         DataRepository.CreateCommand(sql);
                         DataRepository.ExecuteScalarQuery();
 
 
-                        sql = "CREATE INDEX Idx4 ON " + t.DbName + " (ParentID)";
+                        sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentID)", t.DbName);
                         DataRepository.CreateCommand(sql);
                         DataRepository.ExecuteScalarQuery();
 
@@ -1335,9 +1334,9 @@ namespace Intwenty.Engine
                 o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Meta.Application.Title);
 
             }
-            catch
+            catch(Exception ex)
             {
-
+                throw ex;
             }
 
             DataRepository.Close();

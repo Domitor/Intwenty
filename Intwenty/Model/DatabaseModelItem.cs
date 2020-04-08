@@ -1,11 +1,11 @@
-﻿using Intwenty.Data.Entity;
-using System;
+﻿using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.Entity;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+
 
 namespace Intwenty.Model
 {
-    public class DatabaseModelItem : BaseModelItem
+    public class DatabaseModelItem : BaseModelItem, IIntwentyDataColum
     {
         //DATATYPES
         public static readonly string DataTypeBool = "BOOLEAN";
@@ -209,67 +209,29 @@ namespace Intwenty.Model
         }
 
 
-        public string SQLDataType
+        public bool HasDomain
+        {
+            get { return Domain.Contains("APP."); }
+        }
+
+        public bool IsNumeric
         {
             get
             {
 
-                if (DataType == DataTypeString)
-                    return "NVarChar(300)";
-
-                if (DataType == DataTypeText)
-                    return "NVarChar(max)";
-
-                if (DataType == DataTypeDateTime)
-                    return "Datetime";
-
-                if (DataType == DataType1Decimal)
-                    return "Decimal(18,1)";
-
-                if (DataType == DataType2Decimal)
-                    return "Decimal(18,2)";
-
-                if (DataType == DataType3Decimal)
-                    return "Decimal(18,3)";
-
-                if (DataType == DataTypeBool ||
-                    DataType == DataTypeInt)
-                    return "Int";
-
-                return "NVarChar(50)";
+                return (DataType == DataType1Decimal) ||
+                       (DataType == DataType2Decimal) ||
+                       (DataType == DataType3Decimal) ||
+                       (DataType == DataTypeInt) ||
+                       (DataType == DataTypeBool);
             }
         }
-
-        public bool IsValidSQLDataType(string sqltype)
+        public bool IsDateTime
         {
-            
-            if (DataType == DataTypeString && sqltype.ToUpper() == "NVARCHAR")
-                return true;
-
-            if (DataType == DataTypeText && sqltype.ToUpper() == "NVARCHAR")
-                return true;
-
-            if (DataType == DataTypeDateTime && sqltype.ToUpper() == "DATETIME")
-                return true;
-
-            if ((DataType == DataType1Decimal) && sqltype.ToUpper() == "DECIMAL")
-                return true;
-
-            if ((DataType == DataType2Decimal) && sqltype.ToUpper() == "DECIMAL")
-                return true;
-
-            if ((DataType == DataType3Decimal) && sqltype.ToUpper() == "DECIMAL")
-                return true;
-
-            if ((DataType == DataTypeInt || DataType == DataTypeBool) && sqltype.ToUpper() == "INT")
-                return true;
-
-            return false;
-        }
-
-        public bool HasDomain
-        {
-            get { return Domain.Contains("APP."); }
+            get
+            {
+                return (DataType == DataTypeDateTime);
+            }
         }
 
 
