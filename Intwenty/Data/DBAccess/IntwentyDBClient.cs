@@ -11,6 +11,7 @@ using System.Reflection;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
 using Intwenty.Model;
+using System.Data.SQLite;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -27,6 +28,9 @@ namespace Intwenty.Data.DBAccess
 
         private MySqlConnection mysql_connection;
         private MySqlCommand mysql_cmd;
+
+        private SQLiteConnection sqlite_connection;
+        private SQLiteCommand sqlite_cmd;
 
         private DBMS DBMSType { get; set; }
 
@@ -80,7 +84,6 @@ namespace Intwenty.Data.DBAccess
 
                 this.pgres_cmd = null;
             }
-
             else if (DBMSType ==  DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 if (this.mysql_connection != null)
@@ -88,6 +91,19 @@ namespace Intwenty.Data.DBAccess
                     if (this.mysql_connection.State != ConnectionState.Closed)
                     {
                         this.mysql_connection.Dispose();
+                    }
+
+                }
+
+                this.mysql_cmd = null;
+            }
+            else if (DBMSType == DBMS.SQLite)
+            {
+                if (this.sqlite_connection != null)
+                {
+                    if (this.sqlite_connection.State != ConnectionState.Closed)
+                    {
+                        this.sqlite_connection.Dispose();
                     }
 
                 }
@@ -121,6 +137,13 @@ namespace Intwenty.Data.DBAccess
                 mysql_connection.ConnectionString = ConnectionString;
                 mysql_connection.Open();
             }
+            else if (DBMSType == DBMS.SQLite)
+            {
+
+                sqlite_connection = new SQLiteConnection();
+                sqlite_connection.ConnectionString = ConnectionString;
+                sqlite_connection.Open();
+            }
         }
 
         private void OpenIfNeeded()
@@ -151,6 +174,15 @@ namespace Intwenty.Data.DBAccess
                 mysql_connection = new MySqlConnection();
                 mysql_connection.ConnectionString = this.ConnectionString;
                 mysql_connection.Open();
+            }
+            else if (DBMSType == DBMS.SQLite)
+            {
+                if (sqlite_connection != null && sqlite_connection.State == ConnectionState.Open)
+                    return;
+
+                sqlite_connection = new SQLiteConnection();
+                sqlite_connection.ConnectionString = this.ConnectionString;
+                sqlite_connection.Open();
             }
         }
 
@@ -191,6 +223,17 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
+            else if (DBMSType == DBMS.SQLite)
+            {
+                if (sqlite_connection != null)
+                {
+                    if (this.sqlite_connection.State != ConnectionState.Closed)
+                    {
+                        this.sqlite_connection.Close();
+                    }
+                }
+
+            }
         }
 
 
@@ -224,7 +267,10 @@ namespace Intwenty.Data.DBAccess
             {
                 this.mysql_cmd.Parameters.Add(new MySqlParameter() { Value = value, ParameterName = name });
             }
-
+            else if (DBMSType == DBMS.SQLite)
+            {
+                this.sqlite_cmd.Parameters.Add(new SQLiteParameter() { Value = value, ParameterName = name });
+            }
         }
 
         public void AddParameter(IntwentySqlParameter p)
@@ -253,7 +299,14 @@ namespace Intwenty.Data.DBAccess
 
                 this.mysql_cmd.Parameters.Add(param);
             }
+            else if (DBMSType == DBMS.SQLite)
+            {
+                var param = new SQLiteParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
+                if (param.Direction == ParameterDirection.Output)
+                    param.DbType = p.DataType;
 
+                this.sqlite_cmd.Parameters.Add(param);
+            }
         }
 
 
@@ -266,7 +319,9 @@ namespace Intwenty.Data.DBAccess
                 this.pgres_cmd.CommandTimeout = seconds;
             else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
                 this.mysql_cmd.CommandTimeout = seconds;
-            
+            else if (DBMSType == DBMS.SQLite)
+                this.sqlite_cmd.CommandTimeout = seconds;
+
         }
 
 
@@ -291,6 +346,13 @@ namespace Intwenty.Data.DBAccess
             else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
             {
                 var adapt = new MySqlDataAdapter(mysql_cmd);
+                adapt.MissingMappingAction = MissingMappingAction.Passthrough;
+                adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+                adapt.Fill(ds, tablename);
+            }
+            else if (DBMSType == DBMS.SQLite)
+            {
+                var adapt = new SQLiteAdapter(mysql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
