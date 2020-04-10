@@ -10,6 +10,8 @@ namespace Shared
         public string SqlServerConnection { get; set; }
         public string MySqlConnection { get; set; }
         public string PostGreSQLConnection { get; set; }
+        public string SQLiteConnection { get; set; }
+
     }
 
     public class SystemSettings

@@ -59,6 +59,8 @@ namespace Intwenty
                 DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
             if (Settings.Value.DBMS == 3)
                 DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.PostGreSQLConnection);
+            if (Settings.Value.DBMS == 4)
+                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.SQLiteConnection);
         }
 
         public void Open()

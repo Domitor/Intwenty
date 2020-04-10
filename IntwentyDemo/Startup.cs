@@ -54,6 +54,8 @@ namespace IntwentyDemo
                     options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
                 if (settings.DBMS == 3)
                     options.UseNpgsql(Configuration.GetConnectionString("PostgreSQLConnection"));
+                if (settings.DBMS == 4)
+                    options.UseSqlite(Configuration.GetConnectionString("SQLiteConnection"));
 
             });
 
