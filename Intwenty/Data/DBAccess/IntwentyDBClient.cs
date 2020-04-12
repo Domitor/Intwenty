@@ -19,7 +19,7 @@ namespace Intwenty.Data.DBAccess
    
 
 
-    public class IntwentyDBClient : IDisposable
+    public class IntwentyDBClient : IDisposable, IIntwentyDbAccessService
     {
         private SqlConnection sql_connection;
         private SqlCommand sql_cmd;

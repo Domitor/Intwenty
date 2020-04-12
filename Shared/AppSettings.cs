@@ -11,6 +11,7 @@ namespace Shared
         public string MySqlConnection { get; set; }
         public string PostGreSQLConnection { get; set; }
         public string SQLiteConnection { get; set; }
+        public string MongoDbConnection { get; set; }
 
     }
 

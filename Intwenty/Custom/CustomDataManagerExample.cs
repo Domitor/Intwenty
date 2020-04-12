@@ -2,15 +2,17 @@
 using Intwenty.Engine;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
+using Intwenty.Data.DBAccess;
+using Shared;
 
 namespace Intwenty.Custom
 {
 
 
-    public class AppDataManagerExample : DataManager
+    public class CustomSqlDbDataManagerExample : SqlDbDataManager
     {
 
-        public AppDataManagerExample(ApplicationModel application) : base(application)
+        public CustomSqlDbDataManagerExample(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyDBClient sqlclient) : base(model,modelservice,settings, sqlclient)
         {
         }
 

@@ -7,7 +7,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 {
     public enum StringLength { Standard, Long, Short };
 
-    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
+    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb };
 
     public class IntwentySqlParameter
     {

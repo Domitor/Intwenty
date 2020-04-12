@@ -8,6 +8,8 @@ using System.Linq;
 using Intwenty.Data.Dto;
 using Shared;
 using Intwenty.Data.Entity;
+using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.DBAccess;
 
 namespace Intwenty
 {
@@ -27,13 +29,13 @@ namespace Intwenty
 
         OperationResult GetListView(ListRetrivalArgs args);
 
-        OperationResult GetValueDomains(ApplicationModel app);
+        OperationResult GetValueDomains(ApplicationModel model);
 
-        OperationResult GetDataView(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataView(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataViewValue(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
 
-        OperationResult Validate(ApplicationModel app, ClientStateInfo state);
+        OperationResult Validate(ApplicationModel model, ClientStateInfo state);
 
         OperationResult ValidateModel();
 
@@ -50,15 +52,24 @@ namespace Intwenty
     public class IntwentyDataService : IIntwentyDataService
     {
         
-        private IOptions<SystemSettings> SysSettings { get; }
-        private IIntwentyModelService ModelRepository { get; }
-        private IIntwentyDbAccessService DataRepository { get; }
+        private SystemSettings Settings { get; }
 
-        public IntwentyDataService(IOptions<SystemSettings> sysconfig, IIntwentyModelService mr, IIntwentyDbAccessService dr)
+        private DBMS DBMSType { get; }
+
+        private bool IsNoSql { get; }
+
+        private ConnectionStrings DbConnections { get; }
+
+        private IIntwentyModelService ModelRepository { get; }
+
+        public IntwentyDataService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections,  IIntwentyModelService modelservice)
         {
-            SysSettings = sysconfig;
-            ModelRepository = mr;
-            DataRepository = dr;
+            Settings = settings.Value;
+            DbConnections = connections.Value;
+            ModelRepository = modelservice;
+            DBMSType = (DBMS)Settings.DBMS;
+            if (DBMSType == DBMS.MongoDb)
+                IsNoSql = true;
         }
         
 
@@ -68,27 +79,53 @@ namespace Intwenty
             var l = ModelRepository.GetApplicationModels();
             foreach (var app in l)
             {
-                var t = DataManager.GetDataManager(app);
-                t.DataRepository = DataRepository;
-                t.ModelRepository = ModelRepository;
-                res.Add(t.ConfigureDatabase());
+                if (IsNoSql)
+                {
+                    res.Add(new OperationResult(true,string.Format("{0} configured for use with NoSql", app.Application.Title)));
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, GetSqlClient());
+                    res.Add(t.ConfigureDatabase());
+                }
             }
 
             return res;
         }
 
+        private IntwentyDBClient GetSqlClient()
+        {
+            if (Settings.DBMS == 0)
+                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.SqlServerConnection);
+            if (Settings.DBMS == 1)
+                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.MySqlConnection);
+            if (Settings.DBMS == 2)
+                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.MySqlConnection);
+            if (Settings.DBMS == 3)
+                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.PostGreSQLConnection);
+            if (Settings.DBMS == 4)
+                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.SQLiteConnection);
+          
+
+
+            return null;
+        }
+
         public void ConfigureDatabaseIfNeeded()
         {
+            if (IsNoSql)
+                return;
+
             var l = ModelRepository.GetApplicationModels();
             if (l.Count > 0)
             {
                 try
                 {
-
-                    DataRepository.Open();
-                    DataRepository.CreateCommand("SELECT 1 FROM " + l[0].Application.DbName);
-                    DataRepository.ExecuteScalarQuery();
-                    DataRepository.Close();
+                    var client = GetSqlClient();
+                    client.Open();
+                    client.CreateCommand("SELECT 1 FROM " + l[0].Application.DbName);
+                    client.ExecuteScalarQuery();
+                    client.Close();
                 }
                 catch 
                 {
@@ -100,16 +137,25 @@ namespace Intwenty
 
         public OperationResult Save(ClientStateInfo state)
         {
-            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
-            var validation = Validate(app, state);
+            var validation = Validate(model, state);
             if (validation.IsSuccess)
             {
-                var t = DataManager.GetDataManager(app);
-                t.DataRepository = DataRepository;
-                t.ModelRepository = ModelRepository;
-                var result = t.Save(state);
-                return result;
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                    var result = t.Save(state);
+                    return result;
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                    var result = t.Save(state);
+                    return result;
+                }
+
+       
             }
             else
             {
@@ -120,11 +166,19 @@ namespace Intwenty
 
         public OperationResult GetListView(ListRetrivalArgs args)
         {
-            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
-            var t = DataManager.GetDataManager(app);
-            t.DataRepository = DataRepository;
-            t.ModelRepository = ModelRepository;
-            return t.GetListView(args);
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetListView(args);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetListView(args);
+            }
+           
         }
 
         public OperationResult GetLatestIdByOwnerUser(ClientStateInfo state)
@@ -138,30 +192,55 @@ namespace Intwenty
             if (state.UserId == ClientStateInfo.DEFAULT_USERID)
                 return new OperationResult(false, "No UserId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
 
-            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
 
-            var t = DataManager.GetDataManager(app);
-            t.DataRepository = DataRepository;
-            t.ModelRepository = ModelRepository;
-            return t.GetLatestIdByOwnerUser(state);
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetLatestIdByOwnerUser(state);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetLatestIdByOwnerUser(state);
+            }
+
+          
         }
 
         public OperationResult GetLatestVersion(ClientStateInfo state)
         {
-            var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-            var t = DataManager.GetDataManager(app);
-            t.DataRepository = DataRepository;
-            t.ModelRepository = ModelRepository;
-            return t.GetLatestVersion(state);
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetLatestVersion(state);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetLatestVersion(state);
+            }
+          
         }
 
        
 
-        public OperationResult GetValueDomains(ApplicationModel app)
+        public OperationResult GetValueDomains(ApplicationModel model)
         {
-            var t = DataManager.GetDataManager(app);
-            return t.GetValueDomains();
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetValueDomains();
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetValueDomains();
+            }
+
         }
 
         public OperationResult Validate(ApplicationModel app, ClientStateInfo state)
@@ -386,9 +465,14 @@ namespace Intwenty
                     {
                         try
                         {
-                            DataRepository.Open();
-                            DataRepository.CreateCommand(v.SQLQuery);
-                            var t = DataRepository.ExecuteScalarQuery();
+                            if (!IsNoSql)
+                            {
+                                var client = GetSqlClient();
+                                client.Open();
+                                client.CreateCommand(v.SQLQuery);
+                                var t = client.ExecuteScalarQuery();
+
+                            }
 
                         }
                         catch
@@ -417,6 +501,10 @@ namespace Intwenty
 
         public OperationResult GenerateTestData()
         {
+
+            if (IsNoSql)
+                throw new NotImplementedException("This function is not implemented for NoSql");
+
             var res = new OperationResult();
             var amount = 50;
 
@@ -437,12 +525,10 @@ namespace Intwenty
                   
                     for (int i = 0; i < amount; i++)
                     {
-                        var t = DataManager.GetDataManager(app);
+                        var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, GetSqlClient());
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
                         t.ClientState = clientstate;
-                        t.DataRepository = DataRepository;
-                        t.ModelRepository = ModelRepository;
                         var result = t.GenerateTestData(i);
                         if (result.IsSuccess)
                             counter += 1;
@@ -458,12 +544,11 @@ namespace Intwenty
 
                     for (int i = 0; i < amount; i++)
                     {
-                        var t = DataManager.GetDataManager(app);
+
+                        var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, GetSqlClient());
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
                         t.ClientState = clientstate;
-                        t.DataRepository = DataRepository;
-                        t.ModelRepository = ModelRepository;
                         var result = t.GenerateTestData(i);
                         if (result.IsSuccess)
                             counter += 1;
@@ -484,16 +569,35 @@ namespace Intwenty
 
        
 
-        public OperationResult GetDataView(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataView(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
-            var t = DataManager.GetDataManager(app);
-            return t.GetDataView(viewinfo, args);
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetDataView(viewinfo, args);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetDataView(viewinfo, args);
+            }
+
+          
         }
 
-        public OperationResult GetDataViewValue(ApplicationModel app, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataViewValue(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
-            var t = DataManager.GetDataManager(app);
-            return t.GetDataViewValue(viewinfo, args);
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings);
+                return t.GetDataViewValue(viewinfo, args);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, GetSqlClient());
+                return t.GetDataViewValue(viewinfo, args);
+            }
+
         }
 
         public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
@@ -516,15 +620,24 @@ namespace Intwenty
 
             try
             {
-                DataRepository.Open();
-                DataRepository.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (getDate(), @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
-                DataRepository.AddParameter("@Verbosity", verbosity);
-                DataRepository.AddParameter("@Message", message);
-                DataRepository.AddParameter("@AppMetaCode", appmetacode);
-                DataRepository.AddParameter("@ApplicationId", applicationid);
-                DataRepository.AddParameter("@UserName", username);
-                DataRepository.ExecuteNonQuery();
-                DataRepository.Close();
+                if (IsNoSql)
+                {
+
+                    throw new NotImplementedException("LogEvent is not implemented for nosql");
+                }
+                else
+                {
+                    var client = GetSqlClient();
+                    client.Open();
+                    client.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (getDate(), @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
+                    client.AddParameter("@Verbosity", verbosity);
+                    client.AddParameter("@Message", message);
+                    client.AddParameter("@AppMetaCode", appmetacode);
+                    client.AddParameter("@ApplicationId", applicationid);
+                    client.AddParameter("@UserName", username);
+                    client.ExecuteNonQuery();
+                    client.Close();
+                }
 
             }
             catch { }
@@ -532,19 +645,23 @@ namespace Intwenty
 
         public void CreateDatabase()
         {
-            if (!SysSettings.Value.IsDevelopment)
+            if (IsNoSql)
                 return;
 
-            DataRepository.Open();
-            DataRepository.CreateTable<ApplicationItem>(true);
-            DataRepository.CreateTable<DatabaseItem>(true);
-            DataRepository.CreateTable<DataViewItem>(true);
-            DataRepository.CreateTable<EventLog>(true);
-            DataRepository.CreateTable<InformationStatus>(true);
-            DataRepository.CreateTable<MenuItem>(true);
-            DataRepository.CreateTable<SystemID>(true);
-            DataRepository.CreateTable<UserInterfaceItem>(true);
-            DataRepository.CreateTable<ValueDomainItem>(true);
+            if (!Settings.IsDevelopment)
+                return;
+
+            var client = GetSqlClient();
+            client.Open();
+            client.CreateTable<ApplicationItem>(true);
+            client.CreateTable<DatabaseItem>(true);
+            client.CreateTable<DataViewItem>(true);
+            client.CreateTable<EventLog>(true);
+            client.CreateTable<InformationStatus>(true);
+            client.CreateTable<MenuItem>(true);
+            client.CreateTable<SystemID>(true);
+            client.CreateTable<UserInterfaceItem>(true);
+            client.CreateTable<ValueDomainItem>(true);
 
         }
     }

@@ -3,6 +3,8 @@ using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
+using Microsoft.Extensions.Options;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,50 +16,19 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Engine
 {
-    public enum LifecycleStatus
-    {
-        NONE = 0
-        , NEW_NOT_SAVED = 1
-        , NEW_SAVED = 2
-        , EXISTING_NOT_SAVED = 3
-        , EXISTING_SAVED = 4
-        , DELETED_NOT_SAVED = 5
-        , DELETED_SAVED = 6
-    }
-
-    public interface IDataManager
-    {
-        OperationResult ConfigureDatabase();
-
-        OperationResult GetLatestIdByOwnerUser(ClientStateInfo data);
-
-        OperationResult GetLatestVersion(ClientStateInfo data);
-
-        OperationResult GetVersion();
-
-        OperationResult GetListView(ListRetrivalArgs args);
-
-        OperationResult Save(ClientStateInfo data);
-
-        OperationResult GetValueDomains();
-
-        OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
-
-        OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
-
-        OperationResult GenerateTestData(int gencount);
-
-    }
+   
 
    
 
-    public class DataManager : IDataManager
+    public class SqlDbDataManager : IDataManager
     {
-        public IIntwentyModelService ModelRepository { get; set; }
+        protected IIntwentyModelService ModelRepository { get; set; }
 
-        public IIntwentyDbAccessService DataRepository { get; set; }
+        protected IntwentyDBClient SqlClient { get; set; }
 
-        protected ApplicationModel Meta { get; set; }
+        protected ApplicationModel Model { get; set; }
+
+        protected SystemSettings Settings { get; set; }
 
         public ClientStateInfo ClientState { get; set; }
 
@@ -71,24 +42,28 @@ namespace Intwenty.Engine
 
         protected List<DBMSCommandMap> Commands { get; set; }
 
-        protected DataManager(ApplicationModel application)
+        protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyDBClient sqlclient)
         {
-            Meta = application;
+            Settings = settings;
+            Model = model;
+            ModelRepository = modelservice;
+            SqlClient = sqlclient;
             ApplicationSaveTimeStamp = DateTime.Now;
             DataTypes = DBHelpers.GetDataTypeMap();
             Commands = DBHelpers.GetDBMSCommandMap();
         }
 
-        public static DataManager GetDataManager(ApplicationModel application)
+        public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyDBClient sqlclient)
         {
+            
 
-            if (application.Application.MetaCode == "XXXXX")
+            if (model.Application.MetaCode == "XXXXX")
             {
-                return new  Custom.AppDataManagerExample(application);
+                return new  Custom.CustomSqlDbDataManagerExample(model, modelservice, settings, sqlclient);
             }
             else
             {
-                var t = new DataManager(application);
+                var t = new SqlDbDataManager(model,modelservice, settings, sqlclient);
                 return t;
             }
         }
@@ -107,11 +82,11 @@ namespace Intwenty.Engine
                 CreateMainTable(res);
                 CreateApplicationVersioningTable(res);
 
-                foreach (var t in Meta.DataStructure)
+                foreach (var t in Model.DataStructure)
                 {
                     if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
-                        CreateDBColumn(res, t, Meta.Application.DbName);
+                        CreateDBColumn(res, t, Model.Application.DbName);
                     }
 
                     if (t.IsMetaTypeDataTable)
@@ -134,24 +109,24 @@ namespace Intwenty.Engine
         public OperationResult GetLatestIdByOwnerUser(ClientStateInfo data)
         {
             ClientState = data;
-            var result = new OperationResult(true, string.Format("Fetched latest id for application {0} for Owner {1}", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
+            var result = new OperationResult(true, string.Format("Fetched latest id for application {0} for Owner {1}", this.Model.Application.Title, data.OwnerUserId), 0, 0);
 
             try
             {
-                DataRepository.Open();
-                DataRepository.CreateCommand("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
-                DataRepository.AddParameter("@ApplicationId", data.ApplicationId);
-                DataRepository.AddParameter("@OwnedBy", data.OwnerUserId);
-                var maxid = DataRepository.ExecuteScalarQuery();
+                SqlClient.Open();
+                SqlClient.CreateCommand("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
+                SqlClient.AddParameter("@ApplicationId", data.ApplicationId);
+                SqlClient.AddParameter("@OwnedBy", data.OwnerUserId);
+                var maxid = SqlClient.ExecuteScalarQuery();
                 if (maxid != null && maxid != DBNull.Value)
                 {
                     var ds = new DataSet();
-                    DataRepository.CreateCommand("SELECT id,version from sysdata_InformationStatus where Id = @Id");
-                    DataRepository.AddParameter("@Id", (int)maxid);
-                    DataRepository.FillDataset(ds, "Result");
+                    SqlClient.CreateCommand("SELECT id,version from sysdata_InformationStatus where Id = @Id");
+                    SqlClient.AddParameter("@Id", (int)maxid);
+                    SqlClient.FillDataset(ds, "Result");
                     if (ds.Tables[0].Rows.Count == 0)
                     {
-                        var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Meta.Application.Title, data.OwnerUserId), 0, 0);
+                        var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Model.Application.Title, data.OwnerUserId), 0, 0);
                         return fail;
                     }
 
@@ -165,7 +140,7 @@ namespace Intwenty.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Meta.Application.Title, data.OwnerUserId));
+                result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Model.Application.Title, data.OwnerUserId));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
 
@@ -178,7 +153,7 @@ namespace Intwenty.Engine
         {
             ClientState = data;
             var jsonresult = new StringBuilder();
-            var result = new OperationResult(true, string.Format("Fetched latest version for application {0}", this.Meta.Application.Title), ClientState.Id, ClientState.Version);
+            var result = new OperationResult(true, string.Format("Fetched latest version for application {0}", this.Model.Application.Title), ClientState.Id, ClientState.Version);
 
             try
             {
@@ -195,7 +170,7 @@ namespace Intwenty.Engine
 
                 var sql_stmt = new StringBuilder();
                 sql_stmt.Append("SELECT t1.* ");
-                foreach (var t in this.Meta.DataStructure)
+                foreach (var t in this.Model.DataStructure)
                 {
                     if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
@@ -205,18 +180,18 @@ namespace Intwenty.Engine
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+                sql_stmt.Append("JOIN " + this.Model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+                sql_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
                 sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
                
 
                 jsonresult.Append("{");
 
                 var ds = new DataSet();
-                DataRepository.Open();
-                DataRepository.CreateCommand(sql_stmt.ToString());
-                var appjson = DataRepository.GetAsJSONObject(columns);
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(sql_stmt.ToString());
+                var appjson = SqlClient.GetAsJSONObject(columns);
+                SqlClient.Close();
                
                 if (appjson.Length < 5)
                 {
@@ -225,10 +200,10 @@ namespace Intwenty.Engine
                     return result;
                 }
 
-                jsonresult.Append("\"" + this.Meta.Application.DbName + "\":" + appjson.ToString());
+                jsonresult.Append("\"" + this.Model.Application.DbName + "\":" + appjson.ToString());
 
                 //SUBTABLES
-                foreach (var t in this.Meta.DataStructure)
+                foreach (var t in this.Model.DataStructure)
                 {
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
@@ -249,7 +224,7 @@ namespace Intwenty.Engine
                         sql_stmt.Append(", t2.ParentId ");
                         sql_stmt.Append(", t2.Version ");
                         sql_stmt.Append(", t2.OwnerId ");
-                        foreach (var v in this.Meta.DataStructure)
+                        foreach (var v in this.Model.DataStructure)
                         {
                             if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)
                             {
@@ -259,12 +234,12 @@ namespace Intwenty.Engine
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
                         sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
-                        sql_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+                        sql_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
                         sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
-                        DataRepository.Open();
-                        DataRepository.CreateCommand(sql_stmt.ToString());
-                        var tablearray = DataRepository.GetAsJSONArray(columns);
-                        DataRepository.Close();
+                        SqlClient.Open();
+                        SqlClient.CreateCommand(sql_stmt.ToString());
+                        var tablearray = SqlClient.GetAsJSONArray(columns);
+                        SqlClient.Close();
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
 
@@ -280,7 +255,7 @@ namespace Intwenty.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Get latest version for application {0} failed", this.Meta.Application.Title));
+                result.AddMessage("USERERROR", string.Format("Get latest version for application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
 
@@ -300,20 +275,20 @@ namespace Intwenty.Engine
             if (ClientState == null)
                 return new OperationResult(false, "No client state found when performing save application.", 0, 0);
 
-            var result = new OperationResult(true, string.Format("Saved application {0}", this.Meta.Application.Title), ClientState.Id, ClientState.Version);
+            var result = new OperationResult(true, string.Format("Saved application {0}", this.Model.Application.Title), ClientState.Id, ClientState.Version);
 
             try
             {
                 //CONNECT MODEL TO DATA
-                data.InferModel(Meta);
+                data.InferModel(Model);
 
-                DataRepository.Open();
+                SqlClient.Open();
 
                 BeforeSave(data);
 
                 if (ClientState.Id < 1)
                 {
-                    this.ClientState.Id = GetNewSystemID("APPLICATION", this.Meta.Application.MetaCode);
+                    this.ClientState.Id = GetNewSystemID("APPLICATION", this.Model.Application.MetaCode);
                     this.Status = LifecycleStatus.NEW_NOT_SAVED;
                     this.ClientState.Version = CreateVersionRecord();
                     BeforeSaveNew(data);
@@ -322,7 +297,7 @@ namespace Intwenty.Engine
                     HandleSubTables(data);
                     this.Status = LifecycleStatus.NEW_SAVED;
                 }
-                else if (ClientState.Id > 0 && this.Meta.Application.UseVersioning)
+                else if (ClientState.Id > 0 && this.Model.Application.UseVersioning)
                 {
                     this.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                     this.ClientState.Version = CreateVersionRecord();
@@ -332,7 +307,7 @@ namespace Intwenty.Engine
                     HandleSubTables(data);
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
-                else if (ClientState.Id > 0 && !this.Meta.Application.UseVersioning)
+                else if (ClientState.Id > 0 && !this.Model.Application.UseVersioning)
                 {
                     this.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                     BeforeSaveUpdate(data);
@@ -342,7 +317,7 @@ namespace Intwenty.Engine
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
 
-                DataRepository.Close();
+                SqlClient.Close();
 
                 result.Id = ClientState.Id;
                 result.Version = ClientState.Version;
@@ -354,7 +329,7 @@ namespace Intwenty.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Save application {0} failed", this.Meta.Application.Title));
+                result.AddMessage("USERERROR", string.Format("Save application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
             }
 
@@ -367,19 +342,19 @@ namespace Intwenty.Engine
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
-            var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Meta.Application.Title),0,0);
+            var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title),0,0);
           
             if (args.MaxCount == 0)
             {
-                DataRepository.Open();
-                DataRepository.CreateCommand("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + this.Meta.Application.Id);
-                var max = DataRepository.ExecuteScalarQuery();
+                SqlClient.Open();
+                SqlClient.CreateCommand("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + this.Model.Application.Id);
+                var max = SqlClient.ExecuteScalarQuery();
                 if (max == DBNull.Value)
                     args.MaxCount = 0;
                 else
                     args.MaxCount = Convert.ToInt32(max);
 
-                DataRepository.Close();
+                SqlClient.Close();
             }
 
             result.RetriveListArgs = new ListRetrivalArgs();
@@ -401,7 +376,7 @@ namespace Intwenty.Engine
 
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.* ");
-                foreach (var t in this.Meta.UIStructure)
+                foreach (var t in this.Model.UIStructure)
                 {
                     if (t.IsMetaTypeListViewField && t.IsDataColumnConnected)
                     {
@@ -410,8 +385,8 @@ namespace Intwenty.Engine
                     }
                 }
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append("JOIN " + this.Meta.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Meta.Application.Id + " ");
+                sql_list_stmt.Append("JOIN " + this.Model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
 
 
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
@@ -421,10 +396,10 @@ namespace Intwenty.Engine
 
 
                 var ds = new DataSet();
-                DataRepository.Open();
-                DataRepository.CreateCommand(sql_list_stmt.ToString());
-                var json = DataRepository.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(sql_list_stmt.ToString());
+                var json = SqlClient.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                SqlClient.Close();
 
                 result.Data = json.ToString();
 
@@ -433,7 +408,7 @@ namespace Intwenty.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Fetch list for application {0} failed", this.Meta.Application.Title));
+                result.AddMessage("USERERROR", string.Format("Fetch list for application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
 
@@ -456,7 +431,7 @@ namespace Intwenty.Engine
             columns.Add(new IntwentyDataColum() { ColumnName = "Value",  IsDateTime = false, IsNumeric = false });
 
             var sb = new StringBuilder();
-            var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Meta.Application.Title), 0, 0);
+            var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Model.Application.Title), 0, 0);
 
             try
             {
@@ -464,7 +439,7 @@ namespace Intwenty.Engine
 
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
-                foreach (var t in this.Meta.UIStructure)
+                foreach (var t in this.Model.UIStructure)
                 {
                     if (t.HasValueDomain)
                     {
@@ -478,17 +453,17 @@ namespace Intwenty.Engine
                 }
 
                 var ds = new DataSet();
-                DataRepository.Open();
+                SqlClient.Open();
 
                 foreach (var d in valuedomains)
                 {
 
-                    DataRepository.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
-                    DataRepository.AddParameter("@P1", d);
-                    DataRepository.FillDataset(ds, "VALUEDOMAIN_" + d);
+                    SqlClient.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
+                    SqlClient.AddParameter("@P1", d);
+                    SqlClient.FillDataset(ds, "VALUEDOMAIN_" + d);
                 }
 
-                DataRepository.Close();
+                SqlClient.Close();
 
                 var domainindex = 0;
                 var rowindex = 0;
@@ -532,7 +507,7 @@ namespace Intwenty.Engine
                         columnindex = 0;
                         foreach (var dc in columns)
                         {
-                            var val = DBHelpers.GetJSONValue(row, dc, DataRepository.GetDBMS());
+                            var val = DBHelpers.GetJSONValue(row, dc, SqlClient.GetDBMS());
                             if (string.IsNullOrEmpty(val))
                                 continue;
 
@@ -556,7 +531,7 @@ namespace Intwenty.Engine
             {
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Fetch valuedomains for application {0} failed", this.Meta.Application.Title));
+                result.AddMessage("USERERROR", string.Format("Fetch valuedomains for application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
  
@@ -619,11 +594,11 @@ namespace Intwenty.Engine
                     sql = string.Format(dv.SQLQuery, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
                 }
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(sql);
+                SqlClient.Open();
+                SqlClient.CreateCommand(sql);
                 StringBuilder json = null;
-                json = DataRepository.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
-                DataRepository.Close();
+                json = SqlClient.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                SqlClient.Close();
 
                 result.Data = json.ToString();
 
@@ -682,11 +657,11 @@ namespace Intwenty.Engine
                     }
                 }
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(sql);
-                DataRepository.AddParameter("@P1", args.FilterValue);
-                var data = DataRepository.GetAsJSONObject(columns);
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(sql);
+                SqlClient.AddParameter("@P1", args.FilterValue);
+                var data = SqlClient.GetAsJSONObject(columns);
+                SqlClient.Close();
 
                 result.Data = data.ToString();
 
@@ -709,32 +684,32 @@ namespace Intwenty.Engine
             var rnd = new Random(9999999);
             var data = new ClientStateInfo();
 
-            foreach (var t in this.Meta.DataStructure)
+            foreach (var t in this.Model.DataStructure)
             {
 
                 if (t.IsMetaTypeDataColumn)
                 {
                     if (t.IsDataTypeString)
                     {
-                        var noserie = this.Meta.NoSeries.Find(p => p.DataMetaCode == t.MetaCode);
+                        var noserie = this.Model.NoSeries.Find(p => p.DataMetaCode == t.MetaCode);
                         if (noserie != null)
                         {
-                            var nolist = ModelRepository.GetNewNoSeriesValues(this.Meta.Application.Id);
+                            var nolist = ModelRepository.GetNewNoSeriesValues(this.Model.Application.Id);
                             var noseriesval = nolist.FirstOrDefault(p => p.DataMetaCode == t.MetaCode).NewValue;
                             data.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = noseriesval });
                             continue;
                         }
                     }
 
-                    var lookup = this.Meta.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected);
+                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected);
                     if (lookup != null)
                     {
 
                         var ds = new DataSet();
-                        DataRepository.Open();
-                        DataRepository.CreateCommand(lookup.DataViewInfo.SQLQuery);
-                        DataRepository.FillDataset(ds, "VIEW");
-                        DataRepository.Close();
+                        SqlClient.Open();
+                        SqlClient.CreateCommand(lookup.DataViewInfo.SQLQuery);
+                        SqlClient.FillDataset(ds, "VIEW");
+                        SqlClient.Close();
                         if (ds.Tables[0].Rows.Count > 0)
                         {
                             var maxindex = ds.Tables[0].Rows.Count - 1;
@@ -801,41 +776,41 @@ namespace Intwenty.Engine
                 {
                     var val = p.GetAsString();
                     if (!string.IsNullOrEmpty(val))
-                        DataRepository.AddParameter("@" + p.DbName, val);
+                        SqlClient.AddParameter("@" + p.DbName, val);
                     else
-                        DataRepository.AddParameter("@" + p.DbName, DBNull.Value);
+                        SqlClient.AddParameter("@" + p.DbName, DBNull.Value);
                 }
                 else if (p.Model.IsDataTypeInt)
                 {
                     var val = p.GetAsInt();
                     if (val.HasValue)
-                        DataRepository.AddParameter("@" + p.DbName, val.Value);
+                        SqlClient.AddParameter("@" + p.DbName, val.Value);
                     else
-                        DataRepository.AddParameter("@" + p.DbName, DBNull.Value);
+                        SqlClient.AddParameter("@" + p.DbName, DBNull.Value);
                 }
                 else if (p.Model.IsDataTypeBool)
                 {
                     var val = p.GetAsBool();
                     if (val.HasValue)
-                        DataRepository.AddParameter("@" + p.DbName, val.Value);
+                        SqlClient.AddParameter("@" + p.DbName, val.Value);
                     else
-                        DataRepository.AddParameter("@" + p.DbName, DBNull.Value);
+                        SqlClient.AddParameter("@" + p.DbName, DBNull.Value);
                 }
                 else if (p.Model.IsDataTypeDateTime)
                 {
                     var val = p.GetAsDateTime();
                     if (val.HasValue)
-                        DataRepository.AddParameter("@" + p.DbName, val.Value);
+                        SqlClient.AddParameter("@" + p.DbName, val.Value);
                     else
-                        DataRepository.AddParameter("@" + p.DbName, DBNull.Value);
+                        SqlClient.AddParameter("@" + p.DbName, DBNull.Value);
                 }
                 else if (p.Model.IsDataType1Decimal || p.Model.IsDataType2Decimal || p.Model.IsDataType3Decimal)
                 {
                     var val = p.GetAsDecimal();
                     if (val.HasValue)
-                        DataRepository.AddParameter("@" + p.DbName, val.Value);
+                        SqlClient.AddParameter("@" + p.DbName, val.Value);
                     else
-                        DataRepository.AddParameter("@" + p.DbName, DBNull.Value);
+                        SqlClient.AddParameter("@" + p.DbName, DBNull.Value);
                 }
             }
 
@@ -851,8 +826,8 @@ namespace Intwenty.Engine
         private int GetNewSystemID(string metatype, string metacode)
         {
 
-            var model = new SystemID() { ApplicationId=this.Meta.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= this.ClientState.Properties };
-            var result = DataRepository.Insert(model, true);
+            var model = new SystemID() { ApplicationId=this.Model.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= this.ClientState.Properties };
+            var result = SqlClient.Insert(model, true);
             return model.Id;
         }
 
@@ -865,7 +840,7 @@ namespace Intwenty.Engine
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + this.Meta.Application.DbName + " ");
+            sql_insert.Append("INSERT INTO " + this.Model.Application.DbName + " ");
             sql_insert.Append(" (ID, RowChangeDate, UserID,  Version, OwnerId");
             sql_insert_value.Append(" VALUES (" + Convert.ToString(this.ClientState.Id));
             sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
@@ -896,9 +871,9 @@ namespace Intwenty.Engine
             sql_insert_value.Append(")");
             sql_insert.Append(sql_insert_value.ToString());
 
-            DataRepository.CreateCommand(sql_insert.ToString());
+            SqlClient.CreateCommand(sql_insert.ToString());
             SetParameters(paramlist);
-            DataRepository.ExecuteNonQuery();
+            SqlClient.ExecuteNonQuery();
 
         }
 
@@ -911,7 +886,7 @@ namespace Intwenty.Engine
 
                 foreach (var row in table.Rows)
                 {
-                    if (row.Id < 1 || this.Meta.Application.UseVersioning)
+                    if (row.Id < 1 || this.Model.Application.UseVersioning)
                     {
                         InsertTableRow(row);
 
@@ -934,7 +909,7 @@ namespace Intwenty.Engine
             var paramlist = new List<ApplicationValue>();
 
             StringBuilder sql_update = new StringBuilder();
-            sql_update.Append("UPDATE " + this.Meta.Application.DbName);
+            sql_update.Append("UPDATE " + this.Model.Application.DbName);
             sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",UserID='"+this.ClientState.UserId+"'");
             sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
@@ -959,11 +934,11 @@ namespace Intwenty.Engine
             sql_update.Append(" WHERE ID=@ID and Version = @Version");
 
 
-            DataRepository.CreateCommand(sql_update.ToString());
-            DataRepository.AddParameter("@ID", ClientState.Id);
-            DataRepository.AddParameter("@Version", ClientState.Version);
+            SqlClient.CreateCommand(sql_update.ToString());
+            SqlClient.AddParameter("@ID", ClientState.Id);
+            SqlClient.AddParameter("@Version", ClientState.Version);
             SetParameters(paramlist);
-            DataRepository.ExecuteNonQuery();
+            SqlClient.ExecuteNonQuery();
 
         }
 
@@ -1009,9 +984,9 @@ namespace Intwenty.Engine
             sql_insert_value.Append(")");
             sql_insert.Append(sql_insert_value.ToString());
 
-            DataRepository.CreateCommand(sql_insert.ToString());
+            SqlClient.CreateCommand(sql_insert.ToString());
             SetParameters(paramlist);
-            DataRepository.ExecuteNonQuery();
+            SqlClient.ExecuteNonQuery();
 
         }
 
@@ -1045,11 +1020,11 @@ namespace Intwenty.Engine
             sql_update.Append(" WHERE ID=@ID and Version = @Version");
 
 
-            DataRepository.CreateCommand(sql_update.ToString());
-            DataRepository.AddParameter("@ID", ClientState.Id);
-            DataRepository.AddParameter("@Version", ClientState.Version);
+            SqlClient.CreateCommand(sql_update.ToString());
+            SqlClient.AddParameter("@ID", ClientState.Id);
+            SqlClient.AddParameter("@Version", ClientState.Version);
             SetParameters(paramlist);
-            DataRepository.ExecuteNonQuery();
+            SqlClient.ExecuteNonQuery();
 
         }
 
@@ -1057,12 +1032,12 @@ namespace Intwenty.Engine
         {
             int newversion = 0;
             String sql = String.Empty;
-            sql = "select max(version) from " + this.Meta.Application.VersioningTableName;
+            sql = "select max(version) from " + this.Model.Application.VersioningTableName;
             sql += " where ID=" + Convert.ToString(this.ClientState.Id);
-            sql += " and MetaCode='" + this.Meta.Application.MetaCode + "' and MetaType='APPLICATION'";
+            sql += " and MetaCode='" + this.Model.Application.MetaCode + "' and MetaType='APPLICATION'";
 
-            DataRepository.CreateCommand(sql);
-            object obj = DataRepository.ExecuteScalarQuery();
+            SqlClient.CreateCommand(sql);
+            object obj = SqlClient.ExecuteScalarQuery();
             if (obj != null && obj != DBNull.Value)
             {
 
@@ -1074,22 +1049,22 @@ namespace Intwenty.Engine
                 newversion = 1;
             }
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == DataRepository.GetDBMS());
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.GetDBMS());
 
-            sql = "insert into " + this.Meta.Application.VersioningTableName;
+            sql = "insert into " + this.Model.Application.VersioningTableName;
             sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerId, RowChangeDate, UserID)";
             sql += " VALUES (@P1, @P2, @P3, @P4, @P5, @P6, {0}, @P8)";
             sql = string.Format(sql, getdatecmd.Command);
 
-            DataRepository.CreateCommand(sql);
-            DataRepository.AddParameter("@P1", this.ClientState.Id);
-            DataRepository.AddParameter("@P2", 0);
-            DataRepository.AddParameter("@P3", this.Meta.Application.MetaCode);
-            DataRepository.AddParameter("@P4", "APPLICATION");
-            DataRepository.AddParameter("@P5", newversion);
-            DataRepository.AddParameter("@P6", this.ClientState.OwnerId);
-            DataRepository.AddParameter("@P8", this.ClientState.UserId);
-            DataRepository.ExecuteNonQuery();
+            SqlClient.CreateCommand(sql);
+            SqlClient.AddParameter("@P1", this.ClientState.Id);
+            SqlClient.AddParameter("@P2", 0);
+            SqlClient.AddParameter("@P3", this.Model.Application.MetaCode);
+            SqlClient.AddParameter("@P4", "APPLICATION");
+            SqlClient.AddParameter("@P5", newversion);
+            SqlClient.AddParameter("@P6", this.ClientState.OwnerId);
+            SqlClient.AddParameter("@P8", this.ClientState.UserId);
+            SqlClient.ExecuteNonQuery();
 
             if (this.ClientState.Version < newversion)
                 CanRollbackVersion = true;
@@ -1101,16 +1076,16 @@ namespace Intwenty.Engine
 
         private DataSet GetNewDataSet()
         {
-            DataSet ds = new DataSet(this.Meta.Application.MetaCode);
+            DataSet ds = new DataSet(this.Model.Application.MetaCode);
 
-            ds.Tables.Add(this.Meta.Application.DbName);
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("ID", typeof(int));
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("UserID", typeof(string));
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("Version", typeof(int));
-            ds.Tables[this.Meta.Application.DbName].Columns.Add("OwnerId", typeof(int));
+            ds.Tables.Add(this.Model.Application.DbName);
+            ds.Tables[this.Model.Application.DbName].Columns.Add("ID", typeof(int));
+            ds.Tables[this.Model.Application.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
+            ds.Tables[this.Model.Application.DbName].Columns.Add("UserID", typeof(string));
+            ds.Tables[this.Model.Application.DbName].Columns.Add("Version", typeof(int));
+            ds.Tables[this.Model.Application.DbName].Columns.Add("OwnerId", typeof(int));
 
-            foreach (var t in this.Meta.DataStructure)
+            foreach (var t in this.Model.DataStructure)
             {
 
 
@@ -1118,13 +1093,13 @@ namespace Intwenty.Engine
                 {
 
                     if (t.IsDataTypeInt)
-                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(int));
+                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(int));
                     else if (t.IsDataTypeDateTime)
-                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(DateTime));
+                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(DateTime));
                     else if (t.IsDataTypeText || t.IsDataTypeString)
-                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(string));
+                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(string));
                     else
-                        ds.Tables[this.Meta.Application.DbName].Columns.Add(t.DbName, typeof(double));
+                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(double));
                 }
 
                 if (t.IsMetaTypeDataTable)
@@ -1138,7 +1113,7 @@ namespace Intwenty.Engine
                     ds.Tables[t.DbName].Columns.Add("OwnerId", typeof(int));
 
 
-                    foreach (var dv in this.Meta.DataStructure)
+                    foreach (var dv in this.Model.DataStructure)
                     {
                         if (dv.ParentMetaCode == t.MetaCode && t.MetaType == "DATACOLUMN")
                         {
@@ -1156,13 +1131,13 @@ namespace Intwenty.Engine
                 }
             }
 
-            DataRow dr = ds.Tables[this.Meta.Application.DbName].NewRow();
+            DataRow dr = ds.Tables[this.Model.Application.DbName].NewRow();
             dr["Id"] = 0;
             dr["RowChangeDate"] = DateTime.Now;
             dr["UserId"] = "SYSTEM";
             dr["Version"] = 0;
             dr["OwnerId"] = 0;
-            ds.Tables[this.Meta.Application.DbName].Rows.Add(dr);
+            ds.Tables[this.Model.Application.DbName].Rows.Add(dr);
 
 
             return ds;
@@ -1171,24 +1146,24 @@ namespace Intwenty.Engine
 
         private void InsertInformationStatus()
         {
-            var model = new InformationStatus() { Id = this.ClientState.Id, ApplicationId= this.Meta.Application.Id, 
+            var model = new InformationStatus() { Id = this.ClientState.Id, ApplicationId= this.Model.Application.Id, 
                                                   ChangedBy=this.ClientState.UserId, ChangedDate = DateTime.Now, CreatedBy = this.ClientState.UserId, 
-                                                  MetaCode = this.Meta.Application.MetaCode, OwnedBy = this.ClientState.OwnerUserId, OwnerId = this.ClientState.OwnerId, 
+                                                  MetaCode = this.Model.Application.MetaCode, OwnedBy = this.ClientState.OwnerUserId, OwnerId = this.ClientState.OwnerId, 
                                                   PerformDate = DateTime.Now, Version = this.ClientState.Version };
 
-            DataRepository.Insert(model, true);
+            SqlClient.Insert(model, true);
 
         }
 
         private void UpdateInformationStatus()
         {
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == DataRepository.GetDBMS());
-            DataRepository.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
-            DataRepository.AddParameter("@ChangedBy", this.ClientState.UserId);
-            DataRepository.AddParameter("@Version", this.ClientState.Version);
-            DataRepository.AddParameter("@ID", this.ClientState.Id);
-            DataRepository.ExecuteNonQuery();
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.GetDBMS());
+            SqlClient.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
+            SqlClient.AddParameter("@ChangedBy", this.ClientState.UserId);
+            SqlClient.AddParameter("@Version", this.ClientState.Version);
+            SqlClient.AddParameter("@ID", this.ClientState.Id);
+            SqlClient.ExecuteNonQuery();
         }
 
 
@@ -1200,28 +1175,28 @@ namespace Intwenty.Engine
         {
 
             var table_exist = false;
-            DataRepository.Open();
-            table_exist = DataRepository.TableExist(this.Meta.Application.DbName);
-            DataRepository.Close();
+            SqlClient.Open();
+            table_exist = SqlClient.TableExist(this.Model.Application.DbName);
+            SqlClient.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Main table " + this.Meta.Application.DbName + " for application: " + this.Meta.Application.Title + " is already present");
+                o.AddMessage("DBCONFIG", "Main table " + this.Model.Application.DbName + " for application: " + this.Model.Application.Title + " is already present");
             }
             else
             {
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
 
-                var create_sql = "CREATE TABLE " + this.Meta.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
+                var create_sql = "CREATE TABLE " + this.Model.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
                 create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(create_sql);
-                DataRepository.ExecuteScalarQuery();
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(create_sql);
+                SqlClient.ExecuteScalarQuery();
+                SqlClient.Close();
 
-                o.AddMessage("DBCONFIG", "Main table: " + this.Meta.Application.DbName + " for application: " + this.Meta.Application.Title + "  was created successfully");
+                o.AddMessage("DBCONFIG", "Main table: " + this.Model.Application.DbName + " for application: " + this.Model.Application.Title + "  was created successfully");
 
             }
         }
@@ -1229,28 +1204,28 @@ namespace Intwenty.Engine
         private void CreateApplicationVersioningTable(OperationResult o)
         {
             var table_exist = false;
-            DataRepository.Open();
-            table_exist = DataRepository.TableExist(this.Meta.Application.VersioningTableName);
-            DataRepository.Close();
+            SqlClient.Open();
+            table_exist = SqlClient.TableExist(this.Model.Application.VersioningTableName);
+            SqlClient.Close();
             if (table_exist)
             {
-                //o.AddMessage("DBCONFIG", "Found versioning table (" + this.Meta.Application.VersioningTableName + ") for application:" + this.Meta.Application.Title);
+                //o.AddMessage("DBCONFIG", "Found versioning table (" + this.Model.Application.VersioningTableName + ") for application:" + this.Model.Application.Title);
             }
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
-                string create_sql = "CREATE TABLE " + this.Meta.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
+                string create_sql = "CREATE TABLE " + this.Model.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(create_sql);
-                DataRepository.ExecuteScalarQuery();
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(create_sql);
+                SqlClient.ExecuteScalarQuery();
+                SqlClient.Close();
 
-                //o.AddMessage("DBCONFIG", "Versioning table: " + this.Meta.Application.VersioningTableName + " was created successfully");
+                //o.AddMessage("DBCONFIG", "Versioning table: " + this.Model.Application.VersioningTableName + " was created successfully");
 
             }
         }
@@ -1265,9 +1240,9 @@ namespace Intwenty.Engine
 
 
             var colexist = false;
-            DataRepository.Open();
-            colexist = DataRepository.ColumnExist(tablename, column.DbName);
-            DataRepository.Close();
+            SqlClient.Open();
+            colexist = SqlClient.ColumnExist(tablename, column.DbName);
+            SqlClient.Close();
        
             if (colexist)
             {
@@ -1275,13 +1250,13 @@ namespace Intwenty.Engine
             }
             else
             {
-                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == DataRepository.GetDBMS());
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == SqlClient.GetDBMS());
                 string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(create_sql);
-                DataRepository.ExecuteScalarQuery();
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(create_sql);
+                SqlClient.ExecuteScalarQuery();
+                SqlClient.Close();
 
                 o.AddMessage("DBCONFIG", "Column: " + column.DbName + " ("+coldt.DBMSDataType+") was created successfully in table: " + tablename);
 
@@ -1301,33 +1276,33 @@ namespace Intwenty.Engine
 
 
             var table_exist = false;
-            DataRepository.Open();
-            table_exist = DataRepository.TableExist(table.DbName);
-            DataRepository.Close();
+            SqlClient.Open();
+            table_exist = SqlClient.TableExist(table.DbName);
+            SqlClient.Close();
             if (table_exist)
             {
-                o.AddMessage("DBCONFIG", "Table: " + table.DbName + " in application: " + this.Meta.Application.Title + " is already present.");
+                o.AddMessage("DBCONFIG", "Table: " + table.DbName + " in application: " + this.Model.Application.Title + " is already present.");
             }
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == DataRepository.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == DataRepository.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == DataRepository.GetDBMS() && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
 
                 string create_sql = "CREATE TABLE " + table.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, ParentId {0} not null, Version {0} not null, OwnerId {0} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
-                DataRepository.Open();
-                DataRepository.CreateCommand(create_sql);
-                DataRepository.ExecuteScalarQuery();
-                DataRepository.Close();
+                SqlClient.Open();
+                SqlClient.CreateCommand(create_sql);
+                SqlClient.ExecuteScalarQuery();
+                SqlClient.Close();
 
-                o.AddMessage("DBCONFIG", "Subtable: " + table.DbName + " in application: " + this.Meta.Application.Title + "  was created successfully");
+                o.AddMessage("DBCONFIG", "Subtable: " + table.DbName + " in application: " + this.Model.Application.Title + "  was created successfully");
 
             }
 
-            foreach (var t in Meta.DataStructure)
+            foreach (var t in Model.DataStructure)
             {
                 if (t.IsMetaTypeDataColumn && t.ParentMetaCode == table.MetaCode)
                     CreateDBColumn(o, t, table.DbName);
@@ -1339,54 +1314,54 @@ namespace Intwenty.Engine
         {
             string sql = string.Empty;
 
-            DataRepository.Open();
+            SqlClient.Open();
 
             try
             {
 
                 //Ctreate index on main application table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", this.Meta.Application.DbName);
-                DataRepository.CreateCommand(sql);
-                DataRepository.ExecuteScalarQuery();
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", this.Model.Application.DbName);
+                SqlClient.CreateCommand(sql);
+                SqlClient.ExecuteScalarQuery();
 
-                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Meta.Application.DbName);
-                DataRepository.CreateCommand(sql);
-                DataRepository.ExecuteScalarQuery();
+                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Model.Application.DbName);
+                SqlClient.CreateCommand(sql);
+                SqlClient.ExecuteScalarQuery();
 
                 //Create index on versioning table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Meta.Application.VersioningTableName);
-                DataRepository.CreateCommand(sql);
-                DataRepository.ExecuteScalarQuery();
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Model.Application.VersioningTableName);
+                SqlClient.CreateCommand(sql);
+                SqlClient.ExecuteScalarQuery();
 
-                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Meta.Application.VersioningTableName);
-                DataRepository.CreateCommand(sql);
-                DataRepository.ExecuteScalarQuery();
+                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Model.Application.VersioningTableName);
+                SqlClient.CreateCommand(sql);
+                SqlClient.ExecuteScalarQuery();
 
 
 
 
                 //Create index on subtables
-                foreach (var t in this.Meta.DataStructure)
+                foreach (var t in this.Model.DataStructure)
                 {
                     if (t.IsMetaTypeDataTable)
                     {
                         sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", t.DbName);
-                        DataRepository.CreateCommand(sql);
-                        DataRepository.ExecuteScalarQuery();
+                        SqlClient.CreateCommand(sql);
+                        SqlClient.ExecuteScalarQuery();
 
                         sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", t.DbName);
-                        DataRepository.CreateCommand(sql);
-                        DataRepository.ExecuteScalarQuery();
+                        SqlClient.CreateCommand(sql);
+                        SqlClient.ExecuteScalarQuery();
 
 
                         sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
-                        DataRepository.CreateCommand(sql);
-                        DataRepository.ExecuteScalarQuery();
+                        SqlClient.CreateCommand(sql);
+                        SqlClient.ExecuteScalarQuery();
 
                     }
                 }
 
-                o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Meta.Application.Title);
+                o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Model.Application.Title);
 
             }
             catch(Exception ex)
@@ -1394,7 +1369,7 @@ namespace Intwenty.Engine
                 throw ex;
             }
 
-            DataRepository.Close();
+            SqlClient.Close();
 
 
 
@@ -1418,32 +1393,32 @@ namespace Intwenty.Engine
 
         private object GetCustomSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
         {
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 1)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 1)
                 return "Anderssons AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 2)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 2)
                 return "Håkanssons AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 3)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 3)
                 return "Nilssons AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 4)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 4)
                 return "Svenssons AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 5)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 5)
                 return "Filipssons AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 6)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 6)
                 return "Jägmarks AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 7)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 7)
                 return "Björklunds AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 8)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 8)
                 return "Stensson AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 9)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 9)
                 return "Mega varor AB";
-            if (this.Meta.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 10)
+            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 10)
                 return "Superduper varor AB";
 
-            if (this.Meta.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 1)
+            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 1)
                 return "Centrallager";
-            if (this.Meta.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 2)
+            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 2)
                 return "Lager 2 (Alingsås)";
-            if (this.Meta.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 3)
+            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 3)
                 return "Lager 3 (Alingsås)";
 
             return null;
@@ -1462,9 +1437,9 @@ namespace Intwenty.Engine
             if (t.IsDataTypeText)
                 return "This is the first sentence in a sample text generated automaticly for the datatype TEXT. This is the second sentence in a sample text generated automaticly. This is the third sentence in a sample text generated automaticly.";
             if (t.IsDataTypeString && t.MetaCode.Contains("ID"))
-                return this.Meta.Application.MetaCode.Substring(0, 3) + "-" + rnd.Next();
+                return this.Model.Application.MetaCode.Substring(0, 3) + "-" + rnd.Next();
             if (t.IsDataTypeString && t.MetaCode.Contains("NAME"))
-                return "Test " + this.Meta.Application.MetaCode + " name";
+                return "Test " + this.Model.Application.MetaCode + " name";
             if (t.IsDataTypeString)
                 return "A test string";
             if (t.IsDataTypeBool)
