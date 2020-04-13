@@ -6,11 +6,11 @@ using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 
-namespace Intwenty
+namespace Intwenty.Data.DBAccess
 {
 
 
-    public interface IIntwentyDbAccessService
+    public interface IIntwentySqlDbAccessService
     {
         void Open();
         void Close();
@@ -38,29 +38,20 @@ namespace Intwenty
 
 
 
-    public class IntwentyDbAccessService : IIntwentyDbAccessService
+    public class IntwentySqlDbAccessService : IIntwentySqlDbAccessService
     {
 
         private IOptions<SystemSettings> Settings { get; }
 
         private IOptions<ConnectionStrings> Connections { get; }
 
-        private IntwentyDBClient DBClient { get; }
+        private IntwentySqlDbClient DBClient { get; }
 
-        public IntwentyDbAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentySqlDbAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
         {
             Settings = settings;
             Connections = connections;
-            if (Settings.Value.DBMS==0)
-                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.SqlServerConnection);
-            if (Settings.Value.DBMS == 1)
-                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
-            if (Settings.Value.DBMS == 2)
-                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.MySqlConnection);
-            if (Settings.Value.DBMS == 3)
-                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.PostGreSQLConnection);
-            if (Settings.Value.DBMS == 4)
-                DBClient = new IntwentyDBClient((DBMS)Settings.Value.DBMS, Connections.Value.SQLiteConnection);
+            DBClient = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
         }
 
         public void Open()

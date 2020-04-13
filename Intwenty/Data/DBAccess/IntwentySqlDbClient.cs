@@ -19,7 +19,7 @@ namespace Intwenty.Data.DBAccess
    
 
 
-    public class IntwentyDBClient : IDisposable, IIntwentyDbAccessService
+    public class IntwentySqlDbClient : IDisposable, IIntwentySqlDbAccessService
     {
         private SqlConnection sql_connection;
         private SqlCommand sql_cmd;
@@ -38,13 +38,13 @@ namespace Intwenty.Data.DBAccess
         private string ConnectionString { get; set; }
 
 
-        public IntwentyDBClient()
+        public IntwentySqlDbClient()
         {
             ConnectionString = string.Empty;
             DBMSType = DBMS.MSSqlServer;
         }
 
-        public IntwentyDBClient(DBMS d, string connectionstring)
+        public IntwentySqlDbClient(DBMS d, string connectionstring)
         {
             DBMSType = d;
             ConnectionString = connectionstring;

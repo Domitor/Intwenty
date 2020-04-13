@@ -7,32 +7,27 @@ namespace Shared
 {
     public class ConnectionStrings
     {
-        public string SqlServerConnection { get; set; }
-        public string MySqlConnection { get; set; }
-        public string PostGreSQLConnection { get; set; }
-        public string SQLiteConnection { get; set; }
-        public string MongoDbConnection { get; set; }
+        public string IdentityConnection { get; set; }
+        public string IntwentyConnection { get; set; }
 
     }
 
     public class SystemSettings
     {
+        public string SqlServerExampleConnection { get; set; }
+        public string MySqlExampleConnection { get; set; }
+        public string PostGreSQLExampleConnection { get; set; }
+        public string SQLiteExampleConnection { get; set; }
+        public string MongoDbExampleConnection { get; set; }
         public bool ReCreateModelOnStartUp { get; set; }
-
         public bool IsDevelopment { get; set; }
-
-        public int DBMS { get; set; }
-
+        public int IdentityDBMS { get; set; }
+        public int IntwentyDBMS { get; set; }
         public string SiteLanguage { get; set; }
-
         public bool AllowExternalLogins { get; set; }
-
         public bool AllowMFA { get; set; }
-
         public bool ForceMFA { get; set; }
-
         public bool EnableSMSMfa { get; set; }
-
         public bool EnableEMailVerification { get; set; }
 
         //EMAIL
@@ -62,6 +57,19 @@ namespace Shared
         public string StorageContainer { get; set; }
 
         public string StorageConnectionString { get; set; }
+
+        public bool IntwentyDBMSIsNoSQL
+        {
+
+            get
+            {
+                if (IntwentyDBMS == 5)
+                    return true;
+
+                return false;
+            }
+
+        }
 
     }
 }

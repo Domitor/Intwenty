@@ -8,11 +8,11 @@ namespace IntwentyDemo.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IIntwentyDbAccessService Connection;
+    
 
-        public HomeController(IIntwentyDbAccessService db)
+        public HomeController()
         {
-            Connection = db;
+            
         }
 
         public IActionResult Index()

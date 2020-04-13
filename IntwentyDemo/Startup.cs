@@ -39,23 +39,23 @@ namespace IntwentyDemo
 
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
-            services.AddTransient<IIntwentyDbAccessService, IntwentyDbAccessService>();
+
 
             var settings = Configuration.GetSection(nameof(SystemSettings)).Get<SystemSettings>();
 
-            // Add framework services.
+            // Add IdentityDbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                if (settings.DBMS == 0)
-                    options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
-                if (settings.DBMS == 1)
-                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
-                if (settings.DBMS == 2)
-                    options.UseMySql(Configuration.GetConnectionString("MySqlConnection"));
-                if (settings.DBMS == 3)
-                    options.UseNpgsql(Configuration.GetConnectionString("PostgreSQLConnection"));
-                if (settings.DBMS == 4)
-                    options.UseSqlite(Configuration.GetConnectionString("SQLiteConnection"));
+                if (settings.IdentityDBMS == 0)
+                    options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection"));
+                if (settings.IdentityDBMS == 1)
+                    options.UseMySql(Configuration.GetConnectionString("IdentityConnection"));
+                if (settings.IdentityDBMS == 2)
+                    options.UseMySql(Configuration.GetConnectionString("IdentityConnection"));
+                if (settings.IdentityDBMS == 3)
+                    options.UseNpgsql(Configuration.GetConnectionString("IdentityConnection"));
+                if (settings.IdentityDBMS == 4)
+                    options.UseSqlite(Configuration.GetConnectionString("IdentityConnection"));
 
             });
 

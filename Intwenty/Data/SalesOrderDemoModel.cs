@@ -1,6 +1,10 @@
-﻿using Intwenty.Data.Entity;
+﻿using Intwenty.Data.DBAccess;
+using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -11,15 +15,44 @@ namespace Intwenty.Data
 {
     public static class SalesOrderDemoModel
     {
-        
-
         public static void Seed(IServiceProvider provider)
         {
-            var DataRepository = provider.GetRequiredService<IIntwentyDbAccessService>();
-            var SysSettings = provider.GetRequiredService<IOptions<SystemSettings>>();
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
 
-            if (!SysSettings.Value.IsDevelopment)
+            if (!Settings.Value.IsDevelopment)
                 return;
+
+            if (!Settings.Value.IntwentyDBMSIsNoSQL)
+                SeedSql(provider);
+            else
+                SeedNoSql(provider);
+        }
+
+        public static void SeedNoSql(IServiceProvider provider)
+        {
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+            var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
+
+            var nosqlclient = new MongoDB.Driver.MongoClient(Connections.Value.IntwentyConnection);
+            var database = nosqlclient.GetDatabase("Intwenty");
+
+            var apps = database.GetCollection<ApplicationItem>("Application");
+            if (apps == null)
+            {
+                database.CreateCollection("Application");
+                apps = database.GetCollection<ApplicationItem>("Application");
+            }
+           
+            apps.InsertOne(new ApplicationItem() { Id = 10, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning = false });
+            apps.InsertOne(new ApplicationItem() { Id = 20, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false });
+            apps.InsertOne(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", MetaCode = "SALESORDER", Title = "Sales Order", DbName = "SalesHeader", IsHierarchicalApplication = false, UseVersioning = false });
+        }
+
+        public static void SeedSql(IServiceProvider provider)
+        {
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+            var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
+            var DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
 
 
             DataRepository.CreateTable<ApplicationItem>(true);
@@ -32,7 +65,7 @@ namespace Intwenty.Data
             DataRepository.CreateTable<UserInterfaceItem>(true);
             DataRepository.CreateTable<ValueDomainItem>(true);
 
-            if (SysSettings.Value.ReCreateModelOnStartUp)
+            if (Settings.Value.ReCreateModelOnStartUp)
             {
                 DataRepository.DeleteRange(DataRepository.Get<ApplicationItem>());
                 DataRepository.DeleteRange(DataRepository.Get<DatabaseItem>());

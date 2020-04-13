@@ -1,17 +1,40 @@
-﻿using Intwenty.Data.Entity;
+﻿using Intwenty.Data.DBAccess;
+using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.Entity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shared;
+using System;
 
 namespace Intwenty.Data
 {
     public static class FoodcourtModel
     {
-       
 
-        public static void Seed(IIntwentyDbAccessService DataRepository, IOptions<SystemSettings> SysSettings)
+
+        public static void Seed(IServiceProvider provider)
         {
-            if (!SysSettings.Value.IsDevelopment)
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+
+            if (!Settings.Value.IsDevelopment)
                 return;
+
+            if (Settings.Value.IntwentyDBMSIsNoSQL)
+                SeedSql(provider);
+            else
+                SeedNoSql(provider);
+        }
+
+        public static void SeedNoSql(IServiceProvider provider)
+        {
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+        }
+
+        public static void SeedSql(IServiceProvider provider)
+        {
+            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+            var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
+            var DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
 
             DataRepository.Open();
 
@@ -25,7 +48,7 @@ namespace Intwenty.Data
             DataRepository.CreateTable<UserInterfaceItem>(true);
             DataRepository.CreateTable<ValueDomainItem>(true);
 
-            if (SysSettings.Value.ReCreateModelOnStartUp)
+            if (Settings.Value.ReCreateModelOnStartUp)
             {
                 DataRepository.DeleteRange(DataRepository.Get<ApplicationItem>());
                 DataRepository.DeleteRange(DataRepository.Get<DatabaseItem>());

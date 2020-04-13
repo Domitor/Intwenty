@@ -54,11 +54,11 @@ namespace Intwenty
         
         private SystemSettings Settings { get; }
 
+        private ConnectionStrings DbConnections { get; }
+
         private DBMS DBMSType { get; }
 
         private bool IsNoSql { get; }
-
-        private ConnectionStrings DbConnections { get; }
 
         private IIntwentyModelService ModelRepository { get; }
 
@@ -67,7 +67,7 @@ namespace Intwenty
             Settings = settings.Value;
             DbConnections = connections.Value;
             ModelRepository = modelservice;
-            DBMSType = (DBMS)Settings.DBMS;
+            DBMSType = (DBMS)Settings.IntwentyDBMS;
             if (DBMSType == DBMS.MongoDb)
                 IsNoSql = true;
         }
@@ -93,22 +93,9 @@ namespace Intwenty
             return res;
         }
 
-        private IntwentyDBClient GetSqlClient()
+        private IntwentySqlDbClient GetSqlClient()
         {
-            if (Settings.DBMS == 0)
-                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.SqlServerConnection);
-            if (Settings.DBMS == 1)
-                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.MySqlConnection);
-            if (Settings.DBMS == 2)
-                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.MySqlConnection);
-            if (Settings.DBMS == 3)
-                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.PostGreSQLConnection);
-            if (Settings.DBMS == 4)
-                return new IntwentyDBClient((DBMS)Settings.DBMS, DbConnections.SQLiteConnection);
-          
-
-
-            return null;
+            return new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection);
         }
 
         public void ConfigureDatabaseIfNeeded()

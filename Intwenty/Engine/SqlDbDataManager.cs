@@ -24,7 +24,7 @@ namespace Intwenty.Engine
     {
         protected IIntwentyModelService ModelRepository { get; set; }
 
-        protected IntwentyDBClient SqlClient { get; set; }
+        protected IntwentySqlDbClient SqlClient { get; set; }
 
         protected ApplicationModel Model { get; set; }
 
@@ -42,7 +42,7 @@ namespace Intwenty.Engine
 
         protected List<DBMSCommandMap> Commands { get; set; }
 
-        protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyDBClient sqlclient)
+        protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentySqlDbClient sqlclient)
         {
             Settings = settings;
             Model = model;
@@ -53,7 +53,7 @@ namespace Intwenty.Engine
             Commands = DBHelpers.GetDBMSCommandMap();
         }
 
-        public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyDBClient sqlclient)
+        public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentySqlDbClient sqlclient)
         {
             
 

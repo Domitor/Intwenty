@@ -1,6 +1,7 @@
 ﻿using System;
 using Intwenty.Data.DBAccess.Annotations;
-
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Entity
 {
@@ -14,6 +15,7 @@ namespace Intwenty.Data.Entity
 
         }
 
+        [BsonId]
         public int Id { get; set; }
 
         public string Title { get; set; }
