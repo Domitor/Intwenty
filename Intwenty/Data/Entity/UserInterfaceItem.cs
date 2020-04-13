@@ -1,6 +1,6 @@
 ﻿using System;
 using Intwenty.Data.DBAccess.Annotations;
-
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Entity
 {
@@ -9,10 +9,8 @@ namespace Intwenty.Data.Entity
     [DbTableName("sysmodel_UserInterfaceItem")]
     public class UserInterfaceItem
     {
-        public UserInterfaceItem()
-        {
-        }
 
+        [BsonId]
         [AutoIncrement]
         public int Id { get; set; }
 

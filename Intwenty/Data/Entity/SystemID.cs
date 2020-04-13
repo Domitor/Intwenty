@@ -1,5 +1,6 @@
 ﻿using System;
 using Intwenty.Data.DBAccess.Annotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Entity
 {
@@ -7,6 +8,7 @@ namespace Intwenty.Data.Entity
     [DbTableName("sysdata_SystemId")]
     public class SystemID
     {
+        [BsonId]
         [AutoIncrement]
         public int Id { get; set; }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using Intwenty.Data.DBAccess.Annotations;
-
-
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Entity
 {
@@ -12,7 +11,7 @@ namespace Intwenty.Data.Entity
     [DbTableName("sysdata_InformationStatus")]
     public class InformationStatus
     {
-
+        [BsonId]
         public int Id { get; set; }
 
         public int Version { get; set; }
