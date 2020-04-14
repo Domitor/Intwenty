@@ -8,6 +8,8 @@ using Intwenty.Data;
 using Shared;
 using Microsoft.Extensions.Options;
 using Intwenty.Data.DBAccess;
+using Intwenty.Data.DBAccess.Helpers;
+using MongoDB.Driver;
 
 namespace Intwenty
 {
@@ -79,13 +81,13 @@ namespace Intwenty
     public class IntwentyModelService : IIntwentyModelService
     {
 
-        private IIntwentySqlDbAccessService SqlClient { get; }
+        private IIntwentyDbORM Client { get; }
 
         private IMemoryCache ModelCache { get; }
 
         private SystemSettings Settings { get; }
 
-        private ConnectionStrings DbConnections { get; }
+        private ConnectionStrings Connections { get; }
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
@@ -93,10 +95,14 @@ namespace Intwenty
         {
             ModelCache = cache;
             Settings = settings.Value;
-            DbConnections = connections.Value;
-            if (!Settings.IntwentyDBMSIsNoSQL)
+            Connections = connections.Value;
+            if (Settings.IntwentyDBMSIsNoSQL)
             {
-                this.SqlClient = new IntwentySqlDbClient();
+                Client = new IntwentyNoSqlDbClient((DBMS)Settings.IntwentyDBMS, Connections.IntwentyConnection, "IntwentyDb");
+            }
+            else
+            {
+                Client = new IntwentySqlDbClient((DBMS)Settings.IntwentyDBMS, Connections.IntwentyConnection);
             }
            
         }
@@ -113,12 +119,14 @@ namespace Intwenty
             }
 
             res = new List<ApplicationModel>();
+            List<DatabaseModelItem> ditems;
+            List<UserInterfaceModelItem> uitems;
+            List<DataViewModelItem> views;
             var apps =  GetApplicationModelItems();
-            var ditems = SqlClient.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
-            var uitems = SqlClient.Get<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
-            var views = SqlClient.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
-         
-
+            ditems = Client.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            uitems = Client.Get<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
+            views = Client.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+           
             foreach (var app in apps)
             {
                 var t = new ApplicationModel();
@@ -227,10 +235,10 @@ namespace Intwenty
 
         public List<MenuModelItem> GetMenuModelItems()
         {
-    
-            var apps = SqlClient.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
-            var menu = SqlClient.Get<MenuItem>();
-         
+
+           var apps = Client.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+           var menu = Client.Get<MenuItem>();
+          
 
             var res = new List<MenuModelItem>();
             foreach (var m in menu.OrderBy(p=> p.OrderNo))
@@ -265,7 +273,7 @@ namespace Intwenty
             var res = new List<NoSerieModelItem>();
 
             /*
-            var app = SqlClient.Get<ApplicationItem>().FirstOrDefault(p => p.Id == applicationid);
+            var app = Client.Get<ApplicationItem>().FirstOrDefault(p => p.Id == applicationid);
             if (app == null)
                 return new List<NoSerieModelItem>();
 
@@ -299,7 +307,7 @@ namespace Intwenty
 
             }
 
-            SqlClient.SaveChanges();
+            Client.SaveChanges();
 
     */
 
@@ -343,17 +351,18 @@ namespace Intwenty
         #region Application
         public List<ApplicationModelItem> GetApplicationModelItems()
         {
-           
-            var t = SqlClient.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+
+
+           var apps = Client.Get<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
             var menu = GetMenuModelItems();
-            foreach (var app in t)
+            foreach (var app in apps)
             {
                 var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
                 if (mi != null)
                     app.MainMenuItem = mi;
             }
 
-            return t;
+            return apps;
         }
 
         public void DeleteApplicationModel(ApplicationModelItem model)
@@ -365,25 +374,26 @@ namespace Intwenty
             if (model.Id < 1 || string.IsNullOrEmpty(model.MetaCode))
                 throw new InvalidOperationException("Missing required information when deleting application model.");
 
-            var existing = SqlClient.Get<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
+            var existing = Client.Get<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
             if (existing == null)
                 return; //throw new InvalidOperationException("Could not find application model when deleting application model.");
 
 
-            var dbitems = SqlClient.Get<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+         
+            var dbitems = Client.Get<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (dbitems != null && dbitems.Count() > 0)
-                SqlClient.DeleteRange(dbitems);
+                Client.DeleteRange(dbitems);
 
-            var uiitems = SqlClient.Get<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var uiitems = Client.Get<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (uiitems != null && uiitems.Count() > 0)
-                SqlClient.DeleteRange(uiitems);
+                Client.DeleteRange(uiitems);
 
-            var menuitems = SqlClient.Get<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var menuitems = Client.Get<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (menuitems != null && menuitems.Count() > 0)
-                SqlClient.DeleteRange(menuitems);
+                Client.DeleteRange(menuitems);
 
-            SqlClient.Delete(existing);
-
+            Client.Delete(existing);
+          
 
             ModelCache.Remove(AppModelCacheKey);
 
@@ -393,9 +403,7 @@ namespace Intwenty
         {
             ModelCache.Remove(AppModelCacheKey);
 
-            var AppDescription = SqlClient.Get<ApplicationItem>();
-
-
+            var apps = Client.Get<ApplicationItem>();
 
             if (model == null)
                 return null;
@@ -403,9 +411,9 @@ namespace Intwenty
             if (model.Id < 1)
             {
                 var max = 10;
-                if (AppDescription.Count() > 0)
+                if (apps.Count() > 0)
                 {
-                    max = AppDescription.Max(p => p.Id);
+                    max = apps.Max(p => p.Id);
                     max += 10;
                 }
 
@@ -416,7 +424,7 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                SqlClient.Insert(entity);
+                Client.Insert(entity);
 
                 CreateApplicationMenuItem(model);
 
@@ -426,7 +434,7 @@ namespace Intwenty
             else
             {
 
-                var entity = AppDescription.FirstOrDefault(p => p.Id == model.Id);
+                var entity = apps.FirstOrDefault(p => p.Id == model.Id);
                 if (entity == null)
                     return model;
 
@@ -435,14 +443,14 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                var menuitem = SqlClient.Get<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
+                var menuitem = Client.Get<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
                 if (menuitem != null)
                 {
                     menuitem.Action = model.MainMenuItem.Action;
                     menuitem.Controller = model.MainMenuItem.Controller;
                     menuitem.Title = model.MainMenuItem.Title;
           
-                    SqlClient.Update(menuitem);
+                    Client.Update(menuitem);
                 
                 }
                 else
@@ -467,7 +475,7 @@ namespace Intwenty
                 if (root == null)
                 {
                     var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", OrderNo = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
-                    SqlClient.Insert(main);
+                    Client.Insert(main);
                     max = 1;
                 }
                 else
@@ -479,7 +487,7 @@ namespace Intwenty
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
-                SqlClient.Insert(appmi);
+                Client.Insert(appmi);
 
             }
 
@@ -509,10 +517,10 @@ namespace Intwenty
             {
                 if (t.Id > 0 && t.HasProperty("REMOVED"))
                 {
-                    var existing = SqlClient.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
+                    var existing = Client.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
                     if (existing != null)
                     {
-                        SqlClient.Delete(existing);
+                        Client.Delete(existing);
                     }
                 }
             }
@@ -533,12 +541,12 @@ namespace Intwenty
                     if (string.IsNullOrEmpty(uic.MetaCode))
                         throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
 
-                    SqlClient.Insert(CreateMetaUIItem(uic));
+                    Client.Insert(CreateMetaUIItem(uic));
 
                 }
                 else
                 {
-                    var existing = SqlClient.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
+                    var existing = Client.Get<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
@@ -551,7 +559,7 @@ namespace Intwenty
                         existing.Domain = uic.Domain;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
-                        SqlClient.Update(existing);
+                        Client.Update(existing);
                     }
 
                 }
@@ -596,7 +604,7 @@ namespace Intwenty
 
         public List<DatabaseModelItem> GetDatabaseModelItems()
         {
-            return SqlClient.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            return Client.Get<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
         }
 
         public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid)
@@ -656,14 +664,14 @@ namespace Intwenty
                     if (dbi.IsMetaTypeDataTable && dbi.DbName == app.Application.DbName)
                         continue;
 
-                    SqlClient.Insert(t);
+                    Client.Insert(t);
 
                 }
                 else
                 {
                   
 
-                    var existing = SqlClient.Get<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
+                    var existing = Client.Get<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
                     if (existing != null)
                     {
                         existing.DataType = dbi.DataType;
@@ -673,7 +681,7 @@ namespace Intwenty
                         existing.ParentMetaCode = dbi.ParentMetaCode;
                         existing.DbName = dbi.DbName;
                         existing.Mandatory = dbi.Mandatory;
-                        SqlClient.Update(existing);
+                        Client.Update(existing);
                     }
 
                 }
@@ -689,7 +697,7 @@ namespace Intwenty
         {
            
 
-            var existing = SqlClient.Get<DatabaseItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.Get<DatabaseItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DatabaseModelItem(existing);
@@ -699,13 +707,13 @@ namespace Intwenty
 
                 if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
                 {
-                    var childlist = SqlClient.Get<DatabaseItem>().Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    SqlClient.Delete(existing);
-                    SqlClient.DeleteRange(childlist);
+                    var childlist = Client.Get<DatabaseItem>().Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    Client.Delete(existing);
+                    Client.DeleteRange(childlist);
                 }
                 else
                 {
-                    SqlClient.Delete(existing);
+                    Client.Delete(existing);
                 }
 
                 ModelCache.Remove(AppModelCacheKey);
@@ -736,7 +744,7 @@ namespace Intwenty
         #region Data Views
         public List<DataViewModelItem> GetDataViewModels()
         {
-            return SqlClient.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            return Client.Get<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
         }
 
         public void SaveDataView(List<DataViewModelItem> model)
@@ -757,17 +765,17 @@ namespace Intwenty
                 if (dv.Id < 1)
                 {
                     var t = CreateMetaDataView(dv);
-                    SqlClient.Insert(t);
+                    Client.Insert(t);
                 }
                 else
                 {
-                    var existing = SqlClient.Get<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
+                    var existing = Client.Get<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
                     if (existing != null)
                     {
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
-                        SqlClient.Update(existing);
+                        Client.Update(existing);
                     }
 
                 }
@@ -801,19 +809,19 @@ namespace Intwenty
 
         public void DeleteDataView(int id)
         {
-            var existing = SqlClient.Get<DataViewItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.Get<DataViewItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DataViewModelItem(existing);
                 if (dto.IsMetaTypeDataView)
                 {
-                    var childlist = SqlClient.Get<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    SqlClient.Delete(existing);
-                    SqlClient.DeleteRange(childlist);
+                    var childlist = Client.Get<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    Client.Delete(existing);
+                    Client.DeleteRange(childlist);
                 }
                 else
                 {
-                    SqlClient.Delete(existing);
+                    Client.Delete(existing);
                 }
             }
         }
@@ -831,17 +839,17 @@ namespace Intwenty
 
                 if (vd.Id < 1)
                 {
-                    SqlClient.Insert(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    Client.Insert(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {
-                    var existing = SqlClient.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == vd.Id);
+                    var existing = Client.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == vd.Id);
                     if (existing != null)
                     {
                         existing.Code = vd.Code;
                         existing.Value = vd.Value;
                         existing.DomainName = vd.DomainName;
-                        SqlClient.Update(existing);
+                        Client.Update(existing);
                     }
 
                 }
@@ -851,16 +859,16 @@ namespace Intwenty
 
         public List<ValueDomainModelItem> GetValueDomains()
         {
-            var t = SqlClient.Get<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
+            var t = Client.Get<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
             return t;
         }
 
         public void DeleteValueDomain(int id)
         {
-            var existing = SqlClient.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.Get<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                SqlClient.Delete(existing);
+                Client.Delete(existing);
             }
         }
 
@@ -874,7 +882,7 @@ namespace Intwenty
 
         public List<string> GetTestDataBatches()
         {
-            var filtered = SqlClient.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+            var filtered = Client.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
 
             var res = new List<string>();
             foreach (var s in filtered)
@@ -892,7 +900,11 @@ namespace Intwenty
 
         public void DeleteTestDataBatch(string batchname)
         {
-            var filtered = SqlClient.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+            var filtered = Client.Get<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
+
+            var SqlClient = Client as IntwentySqlDbClient;
+            if (SqlClient == null)
+                return;
 
             SqlClient.Open();
             foreach (var t in filtered)

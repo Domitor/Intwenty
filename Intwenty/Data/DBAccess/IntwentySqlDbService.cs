@@ -10,35 +10,8 @@ namespace Intwenty.Data.DBAccess
 {
 
 
-    public interface IIntwentySqlDbAccessService
-    {
-        void Open();
-        void Close();
-        void CreateCommand(string sql);
-        void CreateSPCommand(string procedurename);
-        void AddParameter(string name, object value);
-        void AddParameter(IntwentySqlParameter p);
-        void FillDataset(DataSet ds, string tablename);
-        object ExecuteScalarQuery();
-        bool TableExist(string tablename);
-        bool ColumnExist(string tablename, string columnname);
-        NonQueryResult ExecuteNonQuery();
-        DBMS GetDBMS();
-        StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0);
-        StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
-        StringBuilder GetAsJSONObject();
-        StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns);
-        void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false);
-        List<T> Get<T>(bool use_current_connection = false) where T : new();
-        int Insert<T>(T model, bool use_current_connection = false);
-        int Update<T>(T model, bool use_current_connection = false);
-        int Delete<T>(T model, bool use_current_connection = false);
-        int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false);
-    }
 
-
-
-    public class IntwentySqlDbAccessService : IIntwentySqlDbAccessService
+    public class IntwentySqlDbService : IIntwentyDbSql
     {
 
         private IOptions<SystemSettings> Settings { get; }
@@ -47,7 +20,7 @@ namespace Intwenty.Data.DBAccess
 
         private IntwentySqlDbClient DBClient { get; }
 
-        public IntwentySqlDbAccessService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentySqlDbService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
         {
             Settings = settings;
             Connections = connections;
@@ -124,14 +97,28 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetDBMS();
         }
 
+        public void CreateTable<T>(bool checkexisting = false)
+        {
+            DBClient.CreateTable<T>(checkexisting, false);
+        }
+
         public void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false)
         {
             DBClient.CreateTable<T>(checkexisting, use_current_connection);
         }
 
+        public List<T> Get<T>() where T : new()
+        {
+            return DBClient.Get<T>(false);
+        }
         public List<T> Get<T>(bool use_current_connection = false) where T : new()
         {
             return DBClient.Get<T>(use_current_connection);
+        }
+
+        public int Insert<T>(T model)
+        {
+            return DBClient.Insert(model, false);
         }
 
         public int Insert<T>(T model, bool use_current_connection = false)
@@ -139,14 +126,29 @@ namespace Intwenty.Data.DBAccess
             return DBClient.Insert(model, use_current_connection);
         }
 
+        public int Update<T>(T model)
+        {
+            return DBClient.Update(model, false);
+        }
+
         public int Update<T>(T model, bool use_current_connection = false)
         {
             return DBClient.Update(model, use_current_connection);
         }
 
+        public int Delete<T>(T model)
+        {
+            return DBClient.Delete(model, false);
+        }
+
         public int Delete<T>(T model, bool use_current_connection = false)
         {
             return DBClient.Delete(model, use_current_connection);
+        }
+
+        public int DeleteRange<T>(IEnumerable<T> model)
+        {
+            return DBClient.DeleteRange(model, false);
         }
 
         public int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false)
@@ -163,6 +165,18 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.ColumnExist(tablename, columnname);
         }
+
+       
+
+       
+
+      
+
+      
+
+      
+
+       
     }
 
       

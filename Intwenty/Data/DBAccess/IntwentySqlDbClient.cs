@@ -19,7 +19,7 @@ namespace Intwenty.Data.DBAccess
    
 
 
-    public class IntwentySqlDbClient : IDisposable, IIntwentySqlDbAccessService
+    public class IntwentySqlDbClient : IDisposable, IIntwentyDbSql
     {
         private SqlConnection sql_connection;
         private SqlCommand sql_cmd;
@@ -590,6 +590,10 @@ namespace Intwenty.Data.DBAccess
 
 
         }
+        public void CreateTable<T>(bool checkexisting = false)
+        {
+            CreateTable<T>(checkexisting, false);
+        }
 
         public void CreateTable<T>(bool checkexisting=false, bool use_current_connection = false)
         {
@@ -732,6 +736,11 @@ namespace Intwenty.Data.DBAccess
 
         }
 
+        public List<T> Get<T>() where T : new()
+        {
+            return Get<T>(false);
+        }
+
         public List<T> Get<T>(bool use_current_connection = false) where T : new()
         {
           
@@ -784,6 +793,11 @@ namespace Intwenty.Data.DBAccess
             }
 
             return res;
+        }
+
+        public int Insert<T>(T model)
+        {
+            return Insert<T>(model, false);
         }
 
         public int Insert<T>(T model, bool use_current_connection = false)
@@ -906,6 +920,11 @@ namespace Intwenty.Data.DBAccess
             return res.Value;
         }
 
+        public int Update<T>(T model)
+        {
+            return Update<T>(model, false);
+        }
+
         public int Update<T>(T model, bool use_current_connection = false)
         {
 
@@ -1022,6 +1041,11 @@ namespace Intwenty.Data.DBAccess
 
         }
 
+        public int DeleteRange<T>(IEnumerable<T> model)
+        {
+            return DeleteRange<T>(model, false);
+        }
+
         public int DeleteRange<T>(IEnumerable<T> model, bool use_current_connection = false)
         {
             var result = 0;
@@ -1030,6 +1054,11 @@ namespace Intwenty.Data.DBAccess
                 result+=Delete(t, use_current_connection);
             }
             return result;
+        }
+
+        public int Delete<T>(T model)
+        {
+            return Delete<T>(model, false);
         }
 
         public int Delete<T>(T model, bool use_current_connection = false)
@@ -1423,9 +1452,16 @@ namespace Intwenty.Data.DBAccess
             return result;
         }
 
+       
 
+       
 
+      
 
+     
 
+      
+
+       
     }
 }
