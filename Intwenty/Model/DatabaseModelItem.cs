@@ -1,11 +1,11 @@
 ﻿using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
 using System.Collections.Generic;
-
+using System.Data;
 
 namespace Intwenty.Model
 {
-    public class DatabaseModelItem : BaseModelItem
+    public class DatabaseModelItem : BaseModelItem, IIntwentyDataColum
     {
         //DATATYPES
         public static readonly string DataTypeBool = "BOOLEAN";
@@ -234,7 +234,7 @@ namespace Intwenty.Model
             }
         }
 
-
+     
     }
 
 }

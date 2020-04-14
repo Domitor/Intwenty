@@ -1,4 +1,5 @@
 ﻿using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,14 +10,15 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDb
     {
+        public DBMS DbEngine { get; }
 
-        DBMS GetDBMS();
+        public bool IsNoSql { get; }
 
     }
 
     public interface IIntwentyDbORM
     {
-
+        
         void CreateTable<T>(bool checkexisting = false);
         List<T> Get<T>() where T : new();
         int Insert<T>(T model);
@@ -28,7 +30,19 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbNoSql : IIntwentyDb, IIntwentyDbORM
     {
-        public int GetNewSystemId();
+        T Get<T>(int id, int version) where T : new();
+
+        public int InsertJsonDocument(string json, string collectionname, int id, int version);
+
+        public int UpdateJsonDocument(string json, string collectionname, int id, int version);
+
+        public int GetNewSystemId(SystemID model);
+
+        public int GetCollectionCount(string collectionname);
+
+        StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
+
+        StringBuilder GetAsJSONObject(string collectionname, int id, int version);
 
     }
 

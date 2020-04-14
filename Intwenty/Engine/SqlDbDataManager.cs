@@ -424,7 +424,7 @@ namespace Intwenty.Engine
         /// </summary>
         public virtual OperationResult GetValueDomains()
         {
-            var columns = new List<IIntwentyDataColum>();
+            var columns = new List<IIntwentySqlDbDataColum>();
             columns.Add(new IntwentyDataColum() { ColumnName = "Id",  IsDateTime=false, IsNumeric=true });
             columns.Add(new IntwentyDataColum() { ColumnName = "DomainName",  IsDateTime = false, IsNumeric = false });
             columns.Add(new IntwentyDataColum() { ColumnName = "Code",  IsDateTime = false, IsNumeric = false });
@@ -474,19 +474,7 @@ namespace Intwenty.Engine
 
                 foreach (DataTable table in ds.Tables)
                 {
-                    foreach (var ic in columns)
-                    {
-                        ic.QueryResultColumn = null;
-                        foreach (DataColumn dc in table.Columns)
-                        {
-                            if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
-                            {
-                                ic.QueryResultColumn = dc;
-                                break;
-                            }
-                        }
-                    }
-
+                   
                     if (domainindex == 0)
                         sb.Append("\"" + table.TableName + "\":[");
                     else
@@ -505,9 +493,9 @@ namespace Intwenty.Engine
 
                         rowindex += 1;
                         columnindex = 0;
-                        foreach (var dc in columns)
+                        foreach (DataColumn dc in table.Columns)
                         {
-                            var val = DBHelpers.GetJSONValue(row, dc, SqlClient.GetDBMS());
+                            var val = DBHelpers.GetJSONValue(row, dc);
                             if (string.IsNullOrEmpty(val))
                                 continue;
 
@@ -994,14 +982,19 @@ namespace Intwenty.Engine
         {
             var paramlist = new List<ApplicationValue>();
 
+            int rowid = 0;
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + data.Table.DbName);
             sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",UserID='SYSTEM'");
             sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
 
+
             foreach (var t in data.Values)
             {
+                if (t.DbName.ToLower() == "id")
+                    rowid = (int)t.Value;
+
                 if (!t.HasModel)
                     continue;
              
@@ -1049,7 +1042,7 @@ namespace Intwenty.Engine
                 newversion = 1;
             }
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.GetDBMS());
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.DbEngine);
 
             sql = "insert into " + this.Model.Application.VersioningTableName;
             sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerId, RowChangeDate, UserID)";
@@ -1158,7 +1151,7 @@ namespace Intwenty.Engine
         private void UpdateInformationStatus()
         {
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.GetDBMS());
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.DbEngine);
             SqlClient.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
             SqlClient.AddParameter("@ChangedBy", this.ClientState.UserId);
             SqlClient.AddParameter("@Version", this.ClientState.Version);
@@ -1184,9 +1177,9 @@ namespace Intwenty.Engine
             }
             else
             {
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
 
                 var create_sql = "CREATE TABLE " + this.Model.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
                 create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
@@ -1214,9 +1207,9 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
                 string create_sql = "CREATE TABLE " + this.Model.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
@@ -1250,7 +1243,7 @@ namespace Intwenty.Engine
             }
             else
             {
-                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == SqlClient.GetDBMS());
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == SqlClient.DbEngine);
                 string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
 
                 SqlClient.Open();
@@ -1286,9 +1279,9 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.GetDBMS());
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.GetDBMS());
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.GetDBMS() && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
 
                 string create_sql = "CREATE TABLE " + table.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, ParentId {0} not null, Version {0} not null, OwnerId {0} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });

@@ -48,14 +48,19 @@ namespace Intwenty.Data.DBAccess
         {
             DBMSType = d;
             ConnectionString = connectionstring;
+            if (DBMSType == DBMS.MongoDb)
+                throw new InvalidOperationException("IntwentySqlDbClient configured with wrong DBMS setting");
         }
 
-        public DBMS GetDBMS()
+        public DBMS DbEngine
         {
-            return DBMSType;
+            get { return DBMSType; }
         }
 
-      
+        public bool IsNoSql
+        {
+            get { return (DBMSType == DBMS.MongoDb); }
+        }
 
         public void Dispose()
         {
@@ -328,7 +333,7 @@ namespace Intwenty.Data.DBAccess
 
         public void FillDataset(DataSet ds, string tablename)
         {
-
+            ds.CaseSensitive = false;
 
             if (DBMSType == DBMS.MSSqlServer)
             {
@@ -427,19 +432,6 @@ namespace Intwenty.Data.DBAccess
             FillDataset(ds, "NONE");
 
 
-            foreach (var ic in columns)
-            {
-                foreach (DataColumn dc in ds.Tables[0].Columns)
-                {
-                    if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
-                    {
-                        ic.QueryResultColumn = dc;
-                        break;
-                    }
-                }
-            }
-            
-
             var firstrow = true;
             var rindex = -1;
             sb.Append("[");
@@ -464,12 +456,12 @@ namespace Intwenty.Data.DBAccess
                 }
 
                 var firstcol = true;
-                foreach (var ic in columns)
+                foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
-                    if (ic.QueryResultColumn == null)
+                    if (!columns.Exists(p=> p.ColumnName.ToLower() == dc.ColumnName.ToLower()))
                         continue;
 
-                    var val = DBHelpers.GetJSONValue(r, ic, DBMSType);
+                    var val = DBHelpers.GetJSONValue(r, dc);
                     if (string.IsNullOrEmpty(val))
                         continue;
 
@@ -548,28 +540,16 @@ namespace Intwenty.Data.DBAccess
                 return sb;
             }
 
-            foreach (var ic in columns)
-            {
-                foreach (DataColumn dc in ds.Tables[0].Columns)
-                {
-                    if (dc.ColumnName.ToLower() == ic.ColumnName.ToLower())
-                    {
-                        ic.QueryResultColumn = dc;
-                        break;
-                    }
-                }
-            }
-
             var firstcol = true;
 
             sb.Append("{");
 
-            foreach (var ic in columns)
+            foreach (DataColumn dc in ds.Tables[0].Columns)
             {
-                if (ic.QueryResultColumn == null)
+                if (!columns.Exists(p => p.ColumnName.ToLower() == dc.ColumnName.ToLower()))
                     continue;
 
-                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], ic, DBMSType);
+                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
                 if (string.IsNullOrEmpty(val))
                     continue;
 

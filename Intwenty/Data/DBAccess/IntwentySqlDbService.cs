@@ -27,6 +27,16 @@ namespace Intwenty.Data.DBAccess
             DBClient = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
         }
 
+        public DBMS DbEngine
+        {
+            get { return DBClient.DbEngine; }
+        }
+
+        public bool IsNoSql
+        {
+            get { return DBClient.IsNoSql; }
+        }
+
         public void Open()
         {
             DBClient.Open();
@@ -92,10 +102,6 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetAsJSONObject(columns);
         }
 
-        public DBMS GetDBMS()
-        {
-            return DBClient.GetDBMS();
-        }
 
         public void CreateTable<T>(bool checkexisting = false)
         {

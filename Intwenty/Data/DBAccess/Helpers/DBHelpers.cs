@@ -44,10 +44,16 @@ namespace Intwenty.Data.DBAccess.Helpers
         string ColumnName { get; }
         bool IsNumeric { get; }
         bool IsDateTime { get; }
+    }
+
+    public interface IIntwentySqlDbDataColum : IIntwentyDataColum
+    {
         DataColumn QueryResultColumn { get; set; }
     }
 
-    public class IntwentyDataColum : IIntwentyDataColum
+  
+
+    public class IntwentyDataColum : IIntwentyDataColum, IIntwentySqlDbDataColum
     {
         public string ColumnName { get; set; }
         public bool IsNumeric { get; set; }
@@ -351,6 +357,39 @@ namespace Intwenty.Data.DBAccess.Helpers
             return null;
         }
 
+        public static string GetJSONValue(string name, int value)
+        {
+            return "\"" + name + "\":" + Convert.ToString(value).Replace(",", ".");
+        }
+
+        public static string GetJSONValue(string name, string value)
+        {
+            return "\"" + name + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(value).ToString() + "\"";
+        }
+
+        public static string GetJSONValue(string name, DateTime value)
+        {
+            return "\"" + name + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(value.ToString("yyyy-MM-dd")).ToString() + "\"";
+        }
+
+        public static string GetJSONValue(object value, IIntwentyDataColum column)
+        {
+
+            if (column.IsNumeric)
+            {
+                return "\"" + column.ColumnName + "\":" + Convert.ToString(value).Replace(",", ".");
+            }
+            else if (column.IsDateTime)
+            {
+                return "\"" + column.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(value).ToString("yyyy-MM-dd")).ToString() + "\"";
+            }
+            else
+            {
+                return "\"" + column.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(value)).ToString() + "\"";
+            }
+        }
+
+
         public static string GetJSONValue(DataRow r, DataColumn dc)
         {
             if (r == null || dc == null)
@@ -377,38 +416,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             }
         }
 
-        public static string GetJSONValue(DataRow r, IIntwentyDataColum ic, DBMS dbmstype)
-        {
-
-            if (r == null || ic == null)
-                return string.Empty;
-            if (ic.QueryResultColumn == null)
-                return string.Empty;
-
-            var dbcolname = ic.ColumnName;
-            if (dbmstype == DBMS.PostgreSQL)
-                dbcolname = ic.QueryResultColumn.ColumnName;
-
-            if (r[dbcolname] == null)
-                return string.Empty;
-
-            if (r[dbcolname] == DBNull.Value)
-                return string.Empty;
-
-        
-            if (ic.IsNumeric || IsNumeric(ic.QueryResultColumn))
-            {
-                return "\"" + ic.ColumnName + "\":" + Convert.ToString(r[dbcolname]).Replace(",", ".");
-            }
-            else if (ic.IsDateTime || IsDateTime(ic.QueryResultColumn))
-            {
-                return "\"" + ic.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r[dbcolname]).ToString("yyyy-MM-dd")).ToString() + "\"";
-            }
-            else
-            {
-                return "\"" + ic.ColumnName + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r[dbcolname])).ToString() + "\"";
-            }
-        }
+       
 
 
         public static bool IsNumeric(DataColumn col)

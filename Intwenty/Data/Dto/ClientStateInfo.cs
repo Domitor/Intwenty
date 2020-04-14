@@ -29,6 +29,8 @@ namespace Intwenty.Data.Dto
 
         public List<ApplicationTable> SubTables { get; set; }
 
+        public System.Text.Json.JsonElement JSON { get; set; }
+
 
         public ClientStateInfo()
         {
@@ -98,7 +100,7 @@ namespace Intwenty.Data.Dto
         public static ClientStateInfo CreateFromJSON(System.Text.Json.JsonElement model)
         {
             var res = new ClientStateInfo();
-
+            res.JSON = model;
             var jsonarr = model.EnumerateObject();
             foreach (var j in jsonarr)
             {
