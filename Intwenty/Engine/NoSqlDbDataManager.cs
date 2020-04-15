@@ -64,6 +64,8 @@ namespace Intwenty.Engine
             throw new NotImplementedException();
         }
 
+       
+
         public OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
             var result = new OperationResult();
@@ -225,7 +227,7 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
-                        var filter = "{" + string.Format("\"ParentId\":{0}", this.ClientState) + "}";
+                        var filter = "{" + string.Format("\"ParentId\":{0}", this.ClientState.Id) + "}";
                         var tablejson = NoSqlClient.GetAsJSONArray(t.DbName, filter, string.Empty);
                         jsonresult.Append(",\"" + t.DbName + "\":" + tablejson.ToString());
                     }
@@ -361,21 +363,21 @@ namespace Intwenty.Engine
                 {
                     this.ClientState.Id = GetNewSystemID("APPLICATION", this.Model.Application.MetaCode);
                     this.Status = LifecycleStatus.NEW_NOT_SAVED;
-                    //this.ClientState.Version = CreateVersionRecord();
+                    this.ClientState.Version = CreateVersionRecord();
                     BeforeSaveNew();
                     var informationstatus = InsertInformationStatus();
                     InsertMainTable(informationstatus);
-                    HandleSubTables(informationstatus);
+                    HandleSubTables();
                     this.Status = LifecycleStatus.NEW_SAVED;
                 }
                 else if (ClientState.Id > 0 && this.Model.Application.UseVersioning)
                 {
                     this.Status = LifecycleStatus.EXISTING_NOT_SAVED;
-                    //this.ClientState.Version = CreateVersionRecord();
+                    this.ClientState.Version = CreateVersionRecord();
                     BeforeSaveUpdate();
-                    //InsertMainTable(data);
-                    //UpdateInformationStatus();
-                    //HandleSubTables(data);
+                    var informationstatus = UpdateInformationStatus();
+                    InsertMainTable(informationstatus);
+                    HandleSubTables();
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
                 else if (ClientState.Id > 0 && !this.Model.Application.UseVersioning)
@@ -384,8 +386,7 @@ namespace Intwenty.Engine
                     BeforeSaveUpdate();
                     var informationstatus = UpdateInformationStatus();
                     UpdateMainTable(informationstatus);
-                    
-                    //HandleSubTables(data);
+                    HandleSubTables();
                     this.Status = LifecycleStatus.EXISTING_SAVED;
                 }
 
@@ -405,6 +406,41 @@ namespace Intwenty.Engine
             }
 
             return result;
+        }
+
+        private int CreateVersionRecord()
+        {
+
+            var filter = "{";
+            filter += string.Format("\"{0}\":\"{1}\"", "MetaCode", this.Model.Application.MetaCode);
+            filter += string.Format(",\"{0}\":\"{1}\"", "MetaType", "APPLICATION");
+            filter += string.Format(",\"{0}\":{1}", "Id", this.ClientState.Id);
+            filter += "}";
+
+            var newversion = NoSqlClient.GetMaxValue(this.Model.Application.VersioningTableName, filter, "Version");
+            if (newversion < 1)
+                newversion = 1;
+            else
+                newversion += 1;
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{");
+            sb.Append(string.Format("\"{0}\":{1}", "Id", this.ClientState.Id));
+            sb.Append(string.Format(",\"{0}\":{1}", "ParentId", 0));
+            sb.Append(string.Format(",\"{0}\":\"{1}\"", "MetaCode", this.Model.Application.MetaCode));
+            sb.Append(string.Format(",\"{0}\":\"{1}\"", "MetaType", "APPLICATION"));
+            sb.Append(string.Format(",\"{0}\":{1}", "Version", newversion));
+            sb.Append(string.Format(",\"{0}\":{1}", "OwnerId", 0));
+            sb.Append(string.Format(",\"{0}\":\"{1}\"", "RowChangeDate", DateTime.Now));
+            sb.Append(string.Format(",\"{0}\":\"{1}\"", "UserID", this.ClientState.UserId));
+            sb.Append("}");
+
+            NoSqlClient.InsertJsonDocument(sb.ToString(), this.Model.Application.VersioningTableName, this.ClientState.Id, newversion);
+
+            if (this.ClientState.Version < newversion)
+                CanRollbackVersion = true;
+
+            return newversion;
         }
 
         private int GetNewSystemID(string metatype, string metacode)
@@ -495,7 +531,7 @@ namespace Intwenty.Engine
 
             var json = new StringBuilder();
             json.Append("{");
-            json.Append(DBHelpers.GetJSONValue("_id", this.ClientState.Id ));
+            json.Append(DBHelpers.GetJSONValue("Id", this.ClientState.Id ));
             json.Append("," + DBHelpers.GetJSONValue("RowChangeDate", DateTime.Now));
             json.Append("," + DBHelpers.GetJSONValue("UserID", this.ClientState.UserId));
             json.Append("," + DBHelpers.GetJSONValue("Version", 1));
@@ -519,7 +555,7 @@ namespace Intwenty.Engine
             NoSqlClient.UpdateJsonDocument(json.ToString(), this.Model.Application.DbName, this.ClientState.Id, this.ClientState.Version);
         }
 
-        private void HandleSubTables(InformationStatus informationstatus)
+        private void HandleSubTables()
         {
             foreach (var table in this.ClientState.SubTables)
             {
@@ -554,7 +590,8 @@ namespace Intwenty.Engine
 
             var json = new StringBuilder();
             json.Append("{");
-            json.Append(DBHelpers.GetJSONValue("ParentId", this.ClientState.Id));
+            json.Append(DBHelpers.GetJSONValue("Id", rowid));
+            json.Append("," + DBHelpers.GetJSONValue("ParentId", this.ClientState.Id));
             json.Append("," + DBHelpers.GetJSONValue("RowChangeDate", DateTime.Now));
             json.Append("," + DBHelpers.GetJSONValue("UserId", this.ClientState.UserId));
             json.Append("," + DBHelpers.GetJSONValue("Version", 1));
@@ -570,16 +607,17 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.InsertJsonDocument(json.ToString(), this.Model.Application.DbName, rowid, this.ClientState.Version);
+            NoSqlClient.InsertJsonDocument(json.ToString(), data.Table.DbName, rowid, this.ClientState.Version);
 
         }
 
         private void UpdateTableRow(ApplicationTableRow data)
         {
-            var rowid = 0;
+            
             var json = new StringBuilder();
             json.Append("{");
-            json.Append(DBHelpers.GetJSONValue("ParentId", this.ClientState.Id));
+            json.Append(DBHelpers.GetJSONValue("Id", data.Id));
+            json.Append("," + DBHelpers.GetJSONValue("ParentId", this.ClientState.Id));
             json.Append("," + DBHelpers.GetJSONValue("RowChangeDate", this.ClientState.Id));
             json.Append("," + DBHelpers.GetJSONValue("UserId", this.ClientState.UserId));
             json.Append("," + DBHelpers.GetJSONValue("Version", 1));
@@ -587,12 +625,7 @@ namespace Intwenty.Engine
 
             foreach (var t in data.Values)
             {
-                if (t.DbName.ToLower() == "id")
-                {
-                    rowid = (int)t.Value;
-                    json.Append(DBHelpers.GetJSONValue("_id", rowid));
-                  
-                }
+               
                 if (!t.HasModel)
                     continue;
 
@@ -601,7 +634,7 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.UpdateJsonDocument(json.ToString(), data.Table.DbName, rowid, this.ClientState.Version);
+            NoSqlClient.UpdateJsonDocument(json.ToString(), data.Table.DbName, data.Id, this.ClientState.Version);
         }
 
         protected virtual void BeforeSave()
@@ -623,5 +656,7 @@ namespace Intwenty.Engine
         {
 
         }
+
+       
     }
 }

@@ -297,6 +297,7 @@ namespace Intwenty.Data.DBAccess
 
         public int InsertJsonDocument(string json, string collectionname, int id, int version)
         {
+            if (version < 1) version = 1;
 
             if (DBMSType == DBMS.MongoDb)
             {
@@ -308,9 +309,19 @@ namespace Intwenty.Data.DBAccess
                     database.CreateCollection(collectionname);
                     collection = database.GetCollection<BsonDocument>(collectionname);
                 }
-                var t = BsonDocument.Parse(json);
-                t.Add(new BsonElement("_id", id));
-                collection.InsertOne(t);
+                var doc = BsonDocument.Parse(json);
+                doc.Add(new BsonElement("_id", string.Format("ID_{0}_VER_{1}",id, version)));
+                if (doc.Contains("Id"))
+                    doc.Set("Id", id);
+                if (!doc.Contains("Id"))
+                    doc.Add("Id", id);
+                if (doc.Contains("Version"))
+                    doc.Set("Version", version);
+                if (!doc.Contains("Version"))
+                    doc.Add("Version", version);
+
+                collection.InsertOne(doc);
+                return 1;
             }
 
             return 0;
@@ -318,13 +329,24 @@ namespace Intwenty.Data.DBAccess
 
         public int UpdateJsonDocument(string json, string collectionname, int id, int version)
         {
+            if (version < 1) version = 1;
+
             if (DBMSType == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                var jsonfilter = string.Format("\"{0}\":{1}", "_id", id);
-                var t = BsonDocument.Parse(json);
-                var result = database.GetCollection<BsonDocument>(collectionname).ReplaceOne("{" + jsonfilter + "}", t, new ReplaceOptions { IsUpsert = true });
+                var jsonfilter = string.Format("\"{0}\":\"{1}\"", "_id", string.Format("ID_{0}_VER_{1}", id, version));
+                var doc = BsonDocument.Parse(json);
+                if (doc.Contains("Id"))
+                    doc.Set("Id", id);
+                if (!doc.Contains("Id"))
+                    doc.Add("Id", id);
+                if (doc.Contains("Version"))
+                    doc.Set("Version", version);
+                if (!doc.Contains("Version"))
+                    doc.Add("Version", version);
+
+                var result = database.GetCollection<BsonDocument>(collectionname).ReplaceOne("{" + jsonfilter + "}", doc, new ReplaceOptions { IsUpsert = true });
                 return Convert.ToInt32(result.ModifiedCount);
 
             }
@@ -345,6 +367,36 @@ namespace Intwenty.Data.DBAccess
             }
 
             return 0;
+        }
+
+        public int GetMaxValue(string collectionname, string filter, string fieldname)
+        {
+            if (string.IsNullOrEmpty(filter) || string.IsNullOrEmpty(fieldname))
+                throw new InvalidOperationException("Parameters: filter and maxfield must be specified");
+            if (string.IsNullOrEmpty(collectionname))
+                throw new InvalidOperationException("Parameters: collectionname must be specified");
+
+            if (DBMSType == DBMS.MongoDb)
+            {
+                var projection = "{" + string.Format("\"{0}\":1", fieldname) + "}";
+                var client = new MongoClient(ConnectionString);
+                var database = client.GetDatabase(DatabaseName);
+                var docs = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(projection).ToList();
+                var result = -1;
+                foreach (var t in docs)
+                {
+                    var val = t.GetValue(fieldname).AsInt32;
+                    if (val > result)
+                        result = val;
+                    
+                }
+
+                return result;
+            }
+
+
+            return -1;
+
         }
 
         public StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0)
@@ -375,8 +427,7 @@ namespace Intwenty.Data.DBAccess
                         if (!(minrow <= rindex && maxrow > rindex))
                             continue;
                     }
-                    if (!doc.Contains("Id"))
-                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+
                     if (doc.Contains("_id"))
                         doc.Remove("_id");
 
@@ -412,8 +463,7 @@ namespace Intwenty.Data.DBAccess
                         if (!(minrow <= rindex && maxrow > rindex))
                             continue;
                     }
-                    if (!doc.Contains("Id"))
-                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+
                     if (doc.Contains("_id"))
                         doc.Remove("_id");
 
@@ -433,16 +483,15 @@ namespace Intwenty.Data.DBAccess
 
         public StringBuilder GetAsJSONObject(string collectionname, int id, int version)
         {
+            if (version < 1) version = 1;
 
             if (DBMSType == DBMS.MongoDb)
             {
                 var filter = new BsonDocument();
-                filter.Add(new BsonElement("_id", id));
+                filter.Add(new BsonElement("_id", string.Format("ID_{0}_VER_{1}", id, version)));
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var doc = database.GetCollection<BsonDocument>(collectionname).Find(filter).FirstOrDefault();
-                if (!doc.Contains("Id"))
-                    doc.Add(new BsonElement("Id", doc.GetValue("_id")));
                 if (doc.Contains("_id"))
                     doc.Remove("_id");
 
@@ -472,8 +521,6 @@ namespace Intwenty.Data.DBAccess
 
                 foreach (var doc in result)
                 {
-                    if (!doc.Contains("Id"))
-                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
                     if (doc.Contains("_id"))
                         doc.Remove("_id");
 
@@ -486,5 +533,7 @@ namespace Intwenty.Data.DBAccess
 
 
         }
+
+        
     }
 }

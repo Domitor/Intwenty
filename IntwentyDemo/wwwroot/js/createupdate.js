@@ -9,7 +9,8 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
             valuedomains: {},
             model: { [apptablename]: {} },
             validation: {},
-            viewretrieveinfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            viewretrieveinfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" },
+            current_edit_line: {}
         },
         methods:
         {
@@ -154,7 +155,7 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
-                        context.model[apptablename][dbfield] = item[viewfield];
+                        context.current_edit_line[dbfield] = item[viewfield];
                     }
                 });
 
@@ -205,7 +206,7 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
                     }
                 });
             },
-            openDataViewLookUp: function (viewname) {
+            openDataViewLookUp: function (viewname, line) {
                 if (!viewname)
                     return;
 
@@ -215,6 +216,7 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
                 this.viewretrieveinfo.filterValue = "";
                 this.viewretrieveinfo.dataViewMetaCode = viewname;
                 this.getDataViewLookUpPage();
+                this.current_edit_line = line;
                 $("#" + viewname).modal();
             },
             nextDataViewLookUpPage: function () {

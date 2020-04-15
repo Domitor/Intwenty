@@ -1,8 +1,7 @@
-using System.Data;
+using System;
 using Microsoft.Extensions.Options;
 using System.Text;
 using Shared;
-using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
@@ -67,6 +66,11 @@ namespace Intwenty.Data.DBAccess
         public int GetCollectionCount(string collectionname)
         {
             return DBClient.GetCollectionCount(collectionname);
+        }
+
+        public int GetMaxValue(string collectionname, string filter, string fieldname)
+        {
+            return DBClient.GetMaxValue(collectionname, filter, fieldname);
         }
 
         public StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0)

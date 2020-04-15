@@ -40,6 +40,8 @@ namespace Intwenty.Data.DBAccess
 
         public int GetCollectionCount(string collectionname);
 
+        public int GetMaxValue(string collectionname, string filter, string fieldname);
+
         StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
 
         StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0);
@@ -48,6 +50,7 @@ namespace Intwenty.Data.DBAccess
 
         StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields);
 
+     
     }
 
 

@@ -123,10 +123,11 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get new NoSeries for fields in the application with Id.
         /// </summary>
-        [HttpGet("/Application/GetNoSerieValues/{id}")]
-        public JsonResult GetNoSerieValues(int id)
+        [HttpGet("/Application/GetDefaultValues/{id}")]
+        public JsonResult GetDefaultValues(int id)
         {
-            var t = ModelRepository.GetNewNoSeriesValues(id);
+            var state = new ClientStateInfo() { ApplicationId = id };
+            var t = DataRepository.GetDefaultValues(state);
             return new JsonResult(t);
 
         }

@@ -48,11 +48,11 @@
             var endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
             $.get(endpointurl, function (response) {
                 context.valuedomains = JSON.parse(response.data);
-                endpointurl = baseurl + "GetNoSerieValues/@Model.Application.Id";
+                endpointurl = baseurl + "GetDefaultValues/@Model.Application.Id";
                 $.get(endpointurl, function (response) {
                     for (i = 0; i < response.length; i++) {
                         var t = response[i];
-                        context.model['@Model.Application.MetaCode'][t.dataMetaCode] = t.newValue;
+                        context.model['@Model.Application.DbName'][t.columnName] = t.latestValue;
                         context.$forceUpdate();
                     }
                 });

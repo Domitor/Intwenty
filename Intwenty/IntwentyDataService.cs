@@ -15,6 +15,8 @@ namespace Intwenty
 {
     public interface IIntwentyDataService
     {
+        List<DefaultValue> GetDefaultValues(ClientStateInfo state);
+
         void CreateDatabase();
 
         List<OperationResult> ConfigureDatabase();
@@ -71,7 +73,61 @@ namespace Intwenty
             if (DBMSType == DBMS.MongoDb)
                 IsNoSql = true;
         }
-        
+
+        public List<DefaultValue> GetDefaultValues(ClientStateInfo state)
+        {
+            var res = new List<DefaultValue>();
+            var model = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == state.ApplicationId);
+            if (model == null)
+                return new List<DefaultValue>();
+
+            foreach (var dbcol in model.DataStructure)
+            {
+                if (dbcol.IsMetaTypeDataColumn && dbcol.IsRoot)
+                {
+                    if (dbcol.HasPropertyWithValue("DEFVALUE", "AUTO"))
+                    {
+                        var start = dbcol.GetPropertyValue("DEFVALUE_START");
+                        var seed = dbcol.GetPropertyValue("DEFVALUE_SEED");
+                        var prefix = dbcol.GetPropertyValue("DEFVALUE_PREFIX");
+                        int istart = Convert.ToInt32(start);
+                        int iseed = Convert.ToInt32(seed);
+
+                        IIntwentyDbORM client = null;
+                        if (IsNoSql)
+                            client = new IntwentyNoSqlDbClient(DBMSType, DbConnections.IntwentyConnection, "IntwentyDb");
+                        else
+                            client = new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection);
+
+
+                        var result = client.GetAll<DefaultValue>();
+                        var current = result.Find(p => p.ApplicationId == model.Application.Id && p.ColumnName == dbcol.DbName);
+                        if (current == null)
+                        {
+
+                            var firstval = string.Format("{0}{1}", prefix, (istart));
+                            current = new DefaultValue() { ApplicationId = model.Application.Id, ColumnName = dbcol.DbName, GeneratedDate = DateTime.Now, TableName = model.Application.DbName, Count = istart, LatestValue = firstval };
+                            client.Insert(current);
+                            res.Add(current);
+
+                        }
+                        else
+                        {
+                            current.Count += iseed;
+                            current.LatestValue = string.Format("{0}{1}", prefix, current.Count);
+                            client.Update(current);
+                            res.Add(current);
+                        }
+                    }
+
+                }
+
+            }
+
+            return res;
+
+        }
+
 
         public List<OperationResult> ConfigureDatabase()
         {

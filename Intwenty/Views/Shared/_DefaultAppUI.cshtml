@@ -1,6 +1,8 @@
 ﻿@model Intwenty.Model.ApplicationModel
 
-
+@{
+      var dataviewmodels = ModelRepository.GetDataViewModels();
+}
 
 @foreach (var sect in Model.UIStructure.Where(p=> p.IsMetaTypeSection).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
 {
@@ -108,7 +110,7 @@
                                             {
                                                 <td>
                                                     <div class="form form-inline">
-                                                        <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.ViewName')"><span class="fa fa-plus"></span></button>
+                                                        <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.ViewName', item)"><span class="fa fa-plus"></span></button>
                                                         <input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.ViewName','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
                                                     </div>
                                                 </td>
@@ -204,27 +206,34 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
-                                                
-                                                @if (t.IsDataViewColumnConnected)
-                                                {
-                                                    <th>@t.DataViewColumnInfo.Title</th>
-                                                }
-                                                @if (t.IsDataViewColumn2Connected)
-                                                {
-                                                    <th>@t.DataViewColumnInfo2.Title</th>
-                                                }
 
+                                                @foreach (var viewcol in dataviewmodels)
+                                                {
+                                                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == t.DataViewInfo.MetaCode)
+                                                    {
+                                                        <th>@viewcol.Title</th>
+                                                    }
+
+                                                }
                                             </tr>
                                         </thead>
                                         <tr v-for="item in dataview">
+
+
                                             @if (t.IsDataViewColumnConnected)
                                             {
-                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.DataColumnDbName')" data-dismiss="modal">{{item.@t.DataViewColumnInfo.SQLQueryFieldName}}</a></td>
+                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.UIId')" data-dismiss="modal">{{item.@t.DataViewColumnInfo.SQLQueryFieldName}}</a></td>
+                                                @foreach (var viewcol in dataviewmodels)
+                                                {
+                                                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == t.DataViewInfo.MetaCode && viewcol.MetaCode != t.DataViewColumnInfo.MetaCode)
+                                                    {
+                                                        <td>{{item.@viewcol.SQLQueryFieldName}}</td>
+                                                    }
+
+                                                }
                                             }
-                                            @if (t.IsDataViewColumn2Connected)
-                                            {
-                                                <td>{{item.@t.DataViewColumnInfo2.SQLQueryFieldName}}</td>
-                                            }
+
+
 
 
                                         </tr>

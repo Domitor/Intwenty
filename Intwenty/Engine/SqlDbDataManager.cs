@@ -149,6 +149,8 @@ namespace Intwenty.Engine
             return result;
         }
 
+       
+
         public virtual OperationResult GetLatestVersion(ClientStateInfo data)
         {
             ClientState = data;
