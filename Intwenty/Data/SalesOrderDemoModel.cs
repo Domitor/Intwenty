@@ -39,12 +39,12 @@ namespace Intwenty.Data
 
             if (Settings.Value.ReCreateModelOnStartUp)
             {
-                DataRepository.DeleteRange(DataRepository.Get<ApplicationItem>());
-                DataRepository.DeleteRange(DataRepository.Get<DatabaseItem>());
-                DataRepository.DeleteRange(DataRepository.Get<DataViewItem>());
-                DataRepository.DeleteRange(DataRepository.Get<MenuItem>());
-                DataRepository.DeleteRange(DataRepository.Get<UserInterfaceItem>());
-                DataRepository.DeleteRange(DataRepository.Get<ValueDomainItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<ApplicationItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<DatabaseItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
+                DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>());
             }
 
 

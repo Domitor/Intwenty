@@ -113,13 +113,23 @@ namespace Intwenty.Data.DBAccess
             DBClient.CreateTable<T>(checkexisting, use_current_connection);
         }
 
-        public List<T> Get<T>() where T : new()
+        public T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new()
         {
-            return DBClient.Get<T>(false);
+            return DBClient.GetOne<T>(id, version, use_current_connection);
         }
-        public List<T> Get<T>(bool use_current_connection = false) where T : new()
+
+        public T GetOne<T>(int id, int version) where T : new()
         {
-            return DBClient.Get<T>(use_current_connection);
+            return DBClient.GetOne<T>(id, version, false);
+        }
+
+        public List<T> GetAll<T>() where T : new()
+        {
+            return DBClient.GetAll<T>(false);
+        }
+        public List<T> GetAll<T>(bool use_current_connection = false) where T : new()
+        {
+            return DBClient.GetAll<T>(use_current_connection);
         }
 
         public int Insert<T>(T model)
@@ -172,17 +182,7 @@ namespace Intwenty.Data.DBAccess
             return DBClient.ColumnExist(tablename, columnname);
         }
 
-       
-
-       
-
       
-
-      
-
-      
-
-       
     }
 
       

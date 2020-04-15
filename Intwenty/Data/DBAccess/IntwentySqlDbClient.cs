@@ -716,29 +716,97 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public List<T> Get<T>() where T : new()
+        public T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new()
         {
-            return Get<T>(false);
+            var parameters = new List<IntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { ParameterName = "@KEY1", Value = id });
+            var result = GetFromTableByType<T>(parameters, use_current_connection);
+            if (result.Count > 0)
+                return result[0];
+            else
+                return default(T);
         }
 
-        public List<T> Get<T>(bool use_current_connection = false) where T : new()
+        public T GetOne<T>(int id, int version) where T : new()
         {
-          
+            var parameters = new List<IntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { ParameterName="@KEY1", Value=id });
+            var result = GetFromTableByType<T>(parameters, false);
+            if (result.Count > 0)
+                return result[0];
+            else
+                return default(T);
+        }
+
+        public List<T> GetAll<T>() where T : new()
+        {
+            return GetFromTableByType<T>(new List<IntwentySqlParameter>(), false);
+        }
+
+        public List<T> GetAll<T>(bool use_current_connection = false) where T : new()
+        {
+            return GetFromTableByType<T>(new List<IntwentySqlParameter>(), use_current_connection);
+        }
+
+        private List<T> GetFromTableByType<T>(List<IntwentySqlParameter> parameters, bool use_current_connection = false) where T : new()
+        {
+
 
             var res = new List<T>();
 
-            var t = typeof(T);
-            var tname = t.Name;
-            var annot_tablename = t.GetCustomAttributes(typeof(DbTableName), false);
+            var isparameterized = false;
+            var workingtype = typeof(T);
+            var tname = workingtype.Name;
+            var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
+
+            DbTablePrimaryKey pk = null;
+            var annot_pk = workingtype.GetCustomAttributes(typeof(DbTablePrimaryKey), false);
+            if (annot_pk != null && annot_pk.Length > 0)
+                pk = ((DbTablePrimaryKey)annot_pk[0]);
+
+            if (pk == null && parameters != null && parameters.Count > 0)
+                throw new InvalidOperationException(string.Format("Can't query {0} with parameters, it has no primary key.", tname));
+
+            if (pk != null && !string.IsNullOrEmpty(pk.Columns) && parameters != null && parameters.Count > 0)
+                isparameterized = true;
+
+            string wherestmt = string.Empty; ;
+            if (isparameterized)
+            {
+                wherestmt = " WHERE";
+                var keycols = pk.Columns.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                for(int i =0; i< keycols.Length; i++)
+                {
+                    if (parameters.Count > i)
+                    {
+                        var prm = parameters[i];
+                        prm.ParameterName = "@" + keycols[i];
+                        if (i==0)
+                           wherestmt += string.Format(" {0}={1}", keycols[i], prm.ParameterName);
+                        else
+                           wherestmt += string.Format(" AND {0}={1}", keycols[i], prm.ParameterName);
+                    }
+                }
+
+            }
 
             var ds = new DataSet();
 
             if (!use_current_connection)
                 OpenIfNeeded();
 
-            CreateCommand(string.Format("SELECT * FROM {0}", tname));
+            var stmt = string.Format("SELECT * FROM {0}", tname);
+            if (isparameterized)
+                stmt = stmt + wherestmt;
+
+            CreateCommand(stmt);
+            if (isparameterized)
+            {
+                foreach (var p in parameters)
+                    AddParameter(p);
+            }
             FillDataset(ds, "NONE");
 
             if (!use_current_connection)
@@ -747,7 +815,7 @@ namespace Intwenty.Data.DBAccess
             foreach (DataRow r in ds.Tables[0].Rows)
             {
                 var m = new T();
-                var memberproperties = t.GetProperties();
+                var memberproperties = workingtype.GetProperties();
                 foreach (var property in memberproperties)
                 {
                     var colname = property.Name;
@@ -768,7 +836,7 @@ namespace Intwenty.Data.DBAccess
                     else
                         property.SetValue(m, r[colname], null);
                 }
-               
+
                 res.Add(m);
             }
 
@@ -1431,16 +1499,6 @@ namespace Intwenty.Data.DBAccess
 
             return result;
         }
-
-       
-
-       
-
-      
-
-     
-
-      
 
        
     }

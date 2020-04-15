@@ -133,9 +133,30 @@ namespace Intwenty.Data.DBAccess
             return 0;
         }
 
-      
+        public T GetOne<T>(int id, int version) where T : new()
+        {
+            var workingtype = typeof(T);
+            var tablename = workingtype.Name;
 
-        public List<T> Get<T>() where T : new()
+            //TABLENAME
+            var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
+            if (annot_tablename != null && annot_tablename.Length > 0)
+                tablename = ((DbTableName)annot_tablename[0]).Name;
+
+            if (DBMSType == DBMS.MongoDb)
+            {
+                var filter = new BsonDocument();
+                filter.Add(new BsonElement("_id", id));
+                var client = new MongoClient(ConnectionString);
+                var database = client.GetDatabase(DatabaseName);
+                var result = database.GetCollection<T>(tablename).Find(filter).FirstOrDefault();
+                return result;
+            }
+
+            return default(T);
+        }
+
+        public List<T> GetAll<T>() where T : new()
         {
             var workingtype = typeof(T);
             var tablename = workingtype.Name;
@@ -355,28 +376,7 @@ namespace Intwenty.Data.DBAccess
             return jsonresult;
         }
 
-        public T Get<T>(int id, int version) where T : new()
-        {
-            var workingtype = typeof(T);
-            var tablename = workingtype.Name;
-
-            //TABLENAME
-            var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
-            if (annot_tablename != null && annot_tablename.Length > 0)
-                tablename = ((DbTableName)annot_tablename[0]).Name;
-
-            if (DBMSType == DBMS.MongoDb)
-            {
-                var filter = new BsonDocument();
-                filter.Add(new BsonElement("_id", id));
-                var client = new MongoClient(ConnectionString);
-                var database = client.GetDatabase(DatabaseName);
-                var result = database.GetCollection<T>(tablename).Find(filter).FirstOrDefault();
-                return result;
-            }
-
-            return default(T);
-        }
+      
 
         public StringBuilder GetAsJSONObject(string collectionname, int id, int version)
         {

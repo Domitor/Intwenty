@@ -20,7 +20,8 @@ namespace Intwenty.Data.DBAccess
     {
         
         void CreateTable<T>(bool checkexisting = false);
-        List<T> Get<T>() where T : new();
+        T GetOne<T>(int id, int version) where T : new();
+        List<T> GetAll<T>() where T : new();
         int Insert<T>(T model);
         int Update<T>(T model);
         int Delete<T>(T model);
@@ -30,8 +31,7 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbNoSql : IIntwentyDb, IIntwentyDbORM
     {
-        T Get<T>(int id, int version) where T : new();
-
+       
         public int InsertJsonDocument(string json, string collectionname, int id, int version);
 
         public int UpdateJsonDocument(string json, string collectionname, int id, int version);
@@ -65,7 +65,8 @@ namespace Intwenty.Data.DBAccess
         StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns);
         NonQueryResult ExecuteNonQuery();
         void CreateTable<T>(bool checkexisting = false, bool use_current_connection = false);
-        List<T> Get<T>(bool use_current_connection = false) where T : new();
+        T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new();
+        List<T> GetAll<T>(bool use_current_connection = false) where T : new();
         int Insert<T>(T model, bool use_current_connection = false);
         int Update<T>(T model, bool use_current_connection = false);
         int Delete<T>(T model, bool use_current_connection = false);
