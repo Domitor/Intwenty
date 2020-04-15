@@ -37,7 +37,7 @@ namespace Intwenty.Controllers.Custom
         public JsonResult GetShipmentFiles([FromBody] ListRetrivalArgs model)
         {
             model.ApplicationId = 70;
-            var listdata = DataRepository.GetListView(model);
+            var listdata = DataRepository.GetList(model);
             return new JsonResult(listdata);
         }
 

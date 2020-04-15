@@ -27,9 +27,9 @@ namespace Intwenty.Custom
             return base.GetLatestVersion(data);
         }
 
-        public override OperationResult GetListView(ListRetrivalArgs args)
+        public override OperationResult GetList(ListRetrivalArgs args)
         {
-            return base.GetListView(args);
+            return base.GetList(args);
         }
 
         public override OperationResult GetVersion()

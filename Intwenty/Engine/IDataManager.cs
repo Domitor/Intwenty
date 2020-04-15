@@ -27,7 +27,7 @@ namespace Intwenty.Engine
 
         OperationResult GetVersion();
 
-        OperationResult GetListView(ListRetrivalArgs args);
+        OperationResult GetList(ListRetrivalArgs args);
 
         OperationResult Save(ClientStateInfo data);
 

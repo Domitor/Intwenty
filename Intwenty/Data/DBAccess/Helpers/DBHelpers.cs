@@ -374,6 +374,13 @@ namespace Intwenty.Data.DBAccess.Helpers
 
         public static string GetJSONValue(object value, IIntwentyDataColum column)
         {
+            if (value == null)
+                return string.Empty;
+
+            if (column.IsNumeric && Convert.ToString(value).ToLower() == "true")
+                value = 1;
+            if (column.IsNumeric && Convert.ToString(value).ToLower() == "false")
+                value = 0;
 
             if (column.IsNumeric)
             {
@@ -450,7 +457,7 @@ namespace Intwenty.Data.DBAccess.Helpers
         {
             var res = new List<DBMSCommandMap>();
 
-            res.Add(new DBMSCommandMap() { Key=  "AUTOINC",   DBMSType = DBMS.MSSqlServer, Command = "IDENTITY(1,1)" });
+            res.Add(new DBMSCommandMap() { Key=  "AUTOINC",  DBMSType = DBMS.MSSqlServer, Command = "IDENTITY(1,1)" });
             res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.MariaDB, Command = "AUTO_INCREMENT" });
             res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.MySql, Command = "AUTO_INCREMENT" });
             res.Add(new DBMSCommandMap() { Key = "AUTOINC", DBMSType = DBMS.PostgreSQL, Command = "SERIAL" });

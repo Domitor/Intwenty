@@ -69,6 +69,11 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetCollectionCount(collectionname);
         }
 
+        public StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0)
+        {
+            return DBClient.GetAsJSONArray(collectionname, filter, returnfields, minrow, maxrow);
+        }
+
         public StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
         {
             return DBClient.GetAsJSONArray(collectionname, minrow, maxrow);
@@ -77,6 +82,11 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetAsJSONObject(string collectionname, int id, int version)
         {
             return DBClient.GetAsJSONObject(collectionname, id, version);
+        }
+
+        public StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields)
+        {
+            return DBClient.GetAsJSONObject(collectionname, filter, returnfields);
         }
 
         public void CreateTable<T>(bool checkexisting = false)
@@ -105,6 +115,8 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.DeleteRange<T>(model);
         }
+
+       
     }
 
       

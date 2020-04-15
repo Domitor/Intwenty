@@ -42,7 +42,11 @@ namespace Intwenty.Data.DBAccess
 
         StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
 
+        StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0);
+
         StringBuilder GetAsJSONObject(string collectionname, int id, int version);
+
+        StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields);
 
     }
 

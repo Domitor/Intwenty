@@ -50,7 +50,7 @@ namespace Intwenty.Data.DBAccess
 
         public void CreateTable<T>(bool checkexisting = false)
         {
-           
+
             var workingtype = typeof(T);
             var tablename = workingtype.Name;
 
@@ -59,10 +59,10 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-         
+
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 if (checkexisting)
                 {
@@ -78,7 +78,7 @@ namespace Intwenty.Data.DBAccess
                 }
             }
 
-            
+
         }
 
         public int DeleteRange<T>(IEnumerable<T> model)
@@ -122,10 +122,10 @@ namespace Intwenty.Data.DBAccess
                 if (pk == null)
                     return 0;
 
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var jsonfilter = string.Format("\"{0}\":{1}", "_id", colvalue);
-                var result = database.GetCollection<T>(tablename).DeleteOne("{"+ jsonfilter + "}");
+                var result = database.GetCollection<T>(tablename).DeleteOne("{" + jsonfilter + "}");
                 return Convert.ToInt32(result.DeletedCount);
 
             }
@@ -168,7 +168,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var result = database.GetCollection<T>(tablename).Find(f => true).ToList();
                 return result;
@@ -253,7 +253,7 @@ namespace Intwenty.Data.DBAccess
                 if (pk == null)
                     return 0;
 
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var jsonfilter = string.Format("\"{0}\":{1}", "_id", colvalue);
                 var result = database.GetCollection<T>(tablename).ReplaceOne("{" + jsonfilter + "}", model, new ReplaceOptions { IsUpsert = true });
@@ -268,7 +268,7 @@ namespace Intwenty.Data.DBAccess
         {
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var result = database.GetCollection<SystemID>("sysdata_SystemId").Find(f => true).Sort("{ _id: -1}").Limit(1).FirstOrDefault();
                 if (result == null)
@@ -292,7 +292,7 @@ namespace Intwenty.Data.DBAccess
 
         private int GetNewSystemId(string tablename)
         {
-            return GetNewSystemId(new SystemID() { ApplicationId=0, GeneratedDate=DateTime.Now, MetaType="INTERNAL", MetaCode= tablename, Properties = string.Empty });
+            return GetNewSystemId(new SystemID() { ApplicationId = 0, GeneratedDate = DateTime.Now, MetaType = "INTERNAL", MetaCode = tablename, Properties = string.Empty });
         }
 
         public int InsertJsonDocument(string json, string collectionname, int id, int version)
@@ -300,7 +300,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var collection = database.GetCollection<BsonDocument>(collectionname);
                 if (collection == null)
@@ -320,7 +320,7 @@ namespace Intwenty.Data.DBAccess
         {
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var jsonfilter = string.Format("\"{0}\":{1}", "_id", id);
                 var t = BsonDocument.Parse(json);
@@ -332,13 +332,13 @@ namespace Intwenty.Data.DBAccess
             return 0;
         }
 
-      
+
 
         public int GetCollectionCount(string collectionname)
         {
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 return Convert.ToInt32(database.GetCollection<BsonDocument>(collectionname).CountDocuments(new BsonDocument()));
 
@@ -347,13 +347,60 @@ namespace Intwenty.Data.DBAccess
             return 0;
         }
 
+        public StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0)
+        {
+            var jsonresult = new StringBuilder("[");
+
+            if (DBMSType == DBMS.MongoDb)
+            {
+
+                var client = new MongoClient(ConnectionString);
+                var database = client.GetDatabase(DatabaseName);
+                List<BsonDocument> result=null;
+                if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(p=> true).ToList();
+                if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                     result = database.GetCollection<BsonDocument>(collectionname).Find(filter).ToList();
+                if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
+
+                var rindex = 0;
+                foreach (var doc in result)
+                {
+                    rindex += 1;
+                    if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                    {
+                        if (!(minrow <= rindex && maxrow > rindex))
+                            continue;
+                    }
+                    if (!doc.Contains("Id"))
+                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+                    if (doc.Contains("_id"))
+                        doc.Remove("_id");
+
+
+                    if (rindex == 1)
+                        jsonresult.Append(doc.ToJson());
+                    else
+                        jsonresult.Append("," + doc.ToJson());
+
+                }
+                jsonresult.Append("]");
+
+            }
+
+            return jsonresult;
+        }
+
         public StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
         {
             var jsonresult = new StringBuilder("[");
 
             if (DBMSType == DBMS.MongoDb)
             {
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var result = database.GetCollection<BsonDocument>(collectionname).Find(f => true).ToList();
                 var rindex = 0;
@@ -365,9 +412,15 @@ namespace Intwenty.Data.DBAccess
                         if (!(minrow <= rindex && maxrow > rindex))
                             continue;
                     }
-                    doc.Add(new BsonElement("Id", doc.GetValue("_id")));
-                    jsonresult.Append(doc.ToJson());
+                    if (!doc.Contains("Id"))
+                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+                    if (doc.Contains("_id"))
+                        doc.Remove("_id");
 
+                    if (rindex==1)
+                        jsonresult.Append(doc.ToJson());
+                    else
+                        jsonresult.Append("," + doc.ToJson());
                 }
                 jsonresult.Append("]");
 
@@ -376,7 +429,7 @@ namespace Intwenty.Data.DBAccess
             return jsonresult;
         }
 
-      
+
 
         public StringBuilder GetAsJSONObject(string collectionname, int id, int version)
         {
@@ -385,14 +438,53 @@ namespace Intwenty.Data.DBAccess
             {
                 var filter = new BsonDocument();
                 filter.Add(new BsonElement("_id", id));
-                var client = new MongoDB.Driver.MongoClient(ConnectionString);
+                var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var doc = database.GetCollection<BsonDocument>(collectionname).Find(filter).FirstOrDefault();
-                doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+                if (!doc.Contains("Id"))
+                    doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+                if (doc.Contains("_id"))
+                    doc.Remove("_id");
+
                 return new StringBuilder(doc.ToJson());
             }
 
             return new StringBuilder("{}");
+        }
+
+        public StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields)
+        {
+
+            if (DBMSType == DBMS.MongoDb)
+            {
+
+                var client = new MongoClient(ConnectionString);
+                var database = client.GetDatabase(DatabaseName);
+                List<BsonDocument> result = null;
+                if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).ToList();
+                if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).ToList();
+                if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
+
+                foreach (var doc in result)
+                {
+                    if (!doc.Contains("Id"))
+                        doc.Add(new BsonElement("Id", doc.GetValue("_id")));
+                    if (doc.Contains("_id"))
+                        doc.Remove("_id");
+
+                    return new StringBuilder(doc.ToJson());
+                }
+               
+            }
+
+            return new StringBuilder("{}");
+
+
         }
     }
 }

@@ -6,6 +6,7 @@ using Intwenty.Model;
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Intwenty.Engine
@@ -55,7 +56,7 @@ namespace Intwenty.Engine
 
         public OperationResult ConfigureDatabase()
         {
-            throw new NotImplementedException();
+            return new OperationResult(true, string.Format("{0} configured for use with NoSql", Model.Application.Title));
         }
 
         public OperationResult GenerateTestData(int gencount)
@@ -65,12 +66,138 @@ namespace Intwenty.Engine
 
         public OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
-            throw new NotImplementedException();
+            var result = new OperationResult();
+
+            try
+            {
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
+
+                result.IsSuccess = true;
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv == null)
+                    throw new InvalidOperationException("Could not find dataview to fetch");
+                if (dv.HasNonSelectSql)
+                    throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " (" + dv.MetaCode + ")"));
+
+                var tablename = dv.QueryTableDbName;
+                if (string.IsNullOrEmpty(tablename))
+                    throw new InvalidOperationException(string.Format("Could not find tablename/collectionname for the {0} dataview query", dv.Title));
+
+                var separator = "";
+                var returnfields = "{";
+                var columns = new List<IIntwentyDataColum>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
+                    {
+                        returnfields += separator + DBHelpers.GetJSONValue(viewcol.SQLQueryFieldName, 1);
+                        separator = ", ";
+                    }
+                }
+                returnfields += "}";
+
+                var filterfields = "{}";
+                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                {
+                    filterfields = string.Format("\"{0}\": /{1}/", args.FilterField, args.FilterValue);
+                    filterfields = "{" + filterfields + "}";
+                }
+
+                result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
+
+                var jsonresult = NoSqlClient.GetAsJSONArray(tablename, filterfields, returnfields, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+
+                result.Data = jsonresult.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", "Fetch dataview failed");
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+            }
+
+            return result;
         }
 
         public OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
         {
-            throw new NotImplementedException();
+
+            var result = new OperationResult(true, "Fetched dataview value", 0, 0);
+
+
+            try
+            {
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv == null)
+                    throw new InvalidOperationException("Could not find dataview to fetch value from");
+
+                if (dv.HasNonSelectSql)
+                    throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " (" + dv.MetaCode + ")"));
+
+                var tablename = dv.QueryTableDbName;
+                if (string.IsNullOrEmpty(tablename))
+                    throw new InvalidOperationException(string.Format("Could not find tablename/collectionname for the {0} dataview query", dv.Title));
+
+
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+
+                string filterfields = string.Empty;
+                foreach (var v in viewinfo)
+                {
+                    if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
+                    {
+                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == v.MetaCode);
+                        if (keyfield == null)
+                            continue;
+
+                        filterfields = string.Format("\"{0}\":\"{1}\"", args.FilterField, args.FilterValue);
+                        filterfields = "{" + filterfields + "}";
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(filterfields))
+                    throw new InvalidOperationException("Could not set filter in GetDataViewValue(viewinfo, args).");
+
+                var separator = "";
+                var returnfields = "{";
+                var columns = new List<IIntwentyDataColum>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
+                    {
+                        returnfields += separator + DBHelpers.GetJSONValue(viewcol.SQLQueryFieldName, 1);
+                        separator = ", ";
+                    }
+                }
+                returnfields += "}";
+
+                var jsonresult = NoSqlClient.GetAsJSONObject(tablename, filterfields, returnfields);
+                result.Data = jsonresult.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", "Fetch dataview failed");
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+            }
+
+            return result;
         }
 
         public OperationResult GetLatestIdByOwnerUser(ClientStateInfo data)
@@ -87,10 +214,24 @@ namespace Intwenty.Engine
             try
             {
                 jsonresult.Append("{");
+
+                //MAIN TABLE
                 var appjson = NoSqlClient.GetAsJSONObject(this.Model.Application.DbName, this.ClientState.Id, this.ClientState.Version);
                 jsonresult.Append("\"" + this.Model.Application.DbName + "\":" + appjson.ToString());
-                jsonresult.Append("}");
+               
 
+                //SUBTABLES
+                foreach (var t in this.Model.DataStructure)
+                {
+                    if (t.IsMetaTypeDataTable && t.IsRoot)
+                    {
+                        var filter = "{" + string.Format("\"ParentId\":{0}", this.ClientState) + "}";
+                        var tablejson = NoSqlClient.GetAsJSONArray(t.DbName, filter, string.Empty);
+                        jsonresult.Append(",\"" + t.DbName + "\":" + tablejson.ToString());
+                    }
+                }
+
+                jsonresult.Append("}");
                 result.Data = jsonresult.ToString();
             }
             catch (Exception ex)
@@ -106,7 +247,7 @@ namespace Intwenty.Engine
             return result;
         }
 
-        public OperationResult GetListView(ListRetrivalArgs args)
+        public OperationResult GetList(ListRetrivalArgs args)
         {
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs", 0, 0);
@@ -140,7 +281,60 @@ namespace Intwenty.Engine
 
         public OperationResult GetValueDomains()
         {
-            return new OperationResult() { Data="[]" };
+           
+            var sb = new StringBuilder();
+            var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Model.Application.Title), 0, 0);
+
+            try
+            {
+                var valuedomains = new Dictionary<string,string>();
+
+
+                //COLLECT DOMAINS AND VIEWS USED BY UI
+                foreach (var t in this.Model.UIStructure)
+                {
+                    if (t.HasValueDomain)
+                    {
+                        var domainparts = t.Domain.Split(".".ToCharArray()).ToList();
+                        if (domainparts.Count >= 2)
+                        {
+                            if (!valuedomains.ContainsKey(domainparts[1]))
+                                valuedomains.Add(domainparts[1], "");
+                        }
+                    }
+                }
+
+                sb.Append("{");
+                var domainindex = 0;
+                foreach (var d in valuedomains)
+                {
+                    var filter = "{" + string.Format("\"DomainName\":\"{0}\"", d.Key) + "}";
+                    var jsonresult = NoSqlClient.GetAsJSONArray("sysmodel_ValueDomainItem", filter, "");
+
+                    if (domainindex == 0)
+                        sb.Append("\"" + "VALUEDOMAIN_" + d.Key + "\":");
+                    else
+                        sb.Append(",\"" + "VALUEDOMAIN_" + d.Key + "\":");
+
+                    sb.Append(jsonresult.ToString());
+                    domainindex += 1;
+                }
+                sb.Append("}");
+
+                result.Data = sb.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Fetch valuedomains for application {0} failed", this.Model.Application.Title));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+
+            }
+
+            return result;
         }
 
         public OperationResult GetVersion()

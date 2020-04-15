@@ -118,6 +118,47 @@ namespace Intwenty.Model
 
         }
 
+        public string QueryTableDbName
+        {
+
+            get
+            {
+                try
+                {
+                    var ind1 = SQLQuery.ToLower().IndexOf("from");
+                    if (ind1 < 5)
+                        return string.Empty;
+
+                    ind1 += 4;
+
+                    var searchstring = SQLQuery.Substring(ind1);
+                    var namestart = 0;
+                    var nameend = 0;
+                    var count = 0;
+                    foreach (var c in searchstring)
+                    {
+                        if (!char.IsWhiteSpace(c) && namestart == 0)
+                            namestart = count;
+
+                        if (namestart > 0 && char.IsWhiteSpace(c) && nameend == 0)
+                            nameend = count;
+
+                        if (nameend > 0)
+                            break;
+
+                        count += 1;
+                    }
+
+                    return searchstring.Substring(namestart, (nameend - namestart));
+                }
+                catch { }
+
+                return string.Empty;
+            }
+
+
+        }
+
       
 
       

@@ -337,7 +337,7 @@ namespace Intwenty.Engine
 
         }
 
-        public virtual OperationResult GetListView(ListRetrivalArgs args)
+        public virtual OperationResult GetList(ListRetrivalArgs args)
         {
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);

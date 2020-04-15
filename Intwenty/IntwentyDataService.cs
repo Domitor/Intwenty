@@ -27,7 +27,7 @@ namespace Intwenty
 
         OperationResult GetLatestIdByOwnerUser(ClientStateInfo state);
 
-        OperationResult GetListView(ListRetrivalArgs args);
+        OperationResult GetList(ListRetrivalArgs args);
 
         OperationResult GetValueDomains(ApplicationModel model);
 
@@ -77,15 +77,18 @@ namespace Intwenty
         {
             var res = new List<OperationResult>();
             var l = ModelRepository.GetApplicationModels();
-            foreach (var app in l)
+            foreach (var model in l)
             {
                 if (IsNoSql)
                 {
-                    res.Add(new OperationResult(true,string.Format("{0} configured for use with NoSql", app.Application.Title)));
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.IntwentyConnection, "IntwentyDb"));
+                    res.Add(t.ConfigureDatabase());
+
+                    
                 }
                 else
                 {
-                    var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection));
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection));
                     res.Add(t.ConfigureDatabase());
                 }
             }
@@ -148,19 +151,19 @@ namespace Intwenty
         }
 
 
-        public OperationResult GetListView(ListRetrivalArgs args)
+        public OperationResult GetList(ListRetrivalArgs args)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
 
             if (IsNoSql)
             {
                 var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.IntwentyConnection, "IntwentyDb"));
-                return t.GetListView(args);
+                return t.GetList(args);
             }
             else
             {
                 var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection));
-                return t.GetListView(args);
+                return t.GetList(args);
             }
            
         }
