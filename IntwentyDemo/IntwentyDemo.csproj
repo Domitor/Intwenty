@@ -80,6 +80,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\litedb\" />
     <Folder Include="wwwroot\USERDOC\" />
   </ItemGroup>
 

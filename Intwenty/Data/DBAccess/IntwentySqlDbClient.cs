@@ -19,7 +19,7 @@ namespace Intwenty.Data.DBAccess
    
 
 
-    public class IntwentySqlDbClient : IDisposable, IIntwentyDbSql
+    public class IntwentySqlDbClient : IntwentyDbClient, IDisposable, IIntwentyDbSql
     {
         private SqlConnection sql_connection;
         private SqlCommand sql_cmd;
@@ -33,39 +33,26 @@ namespace Intwenty.Data.DBAccess
         private SQLiteConnection sqlite_connection;
         private SQLiteCommand sqlite_cmd;
 
-        private DBMS DBMSType { get; set; }
-
-        private string ConnectionString { get; set; }
-
 
         public IntwentySqlDbClient()
         {
             ConnectionString = string.Empty;
-            DBMSType = DBMS.MSSqlServer;
+            DbEngine = DBMS.MSSqlServer;
         }
 
         public IntwentySqlDbClient(DBMS d, string connectionstring)
         {
-            DBMSType = d;
+            DbEngine = d;
             ConnectionString = connectionstring;
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb || DbEngine == DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentySqlDbClient configured with wrong DBMS setting");
         }
 
-        public DBMS DbEngine
-        {
-            get { return DBMSType; }
-        }
-
-        public bool IsNoSql
-        {
-            get { return (DBMSType == DBMS.MongoDb); }
-        }
 
         public void Dispose()
         {
 
-            if (DBMSType ==  DBMS.MSSqlServer)
+            if (DbEngine ==  DBMS.MSSqlServer)
             {
                 if (this.sql_connection != null)
                 {
@@ -77,7 +64,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.sql_cmd = null;
             }
-            else if (DBMSType ==  DBMS.PostgreSQL)
+            else if (DbEngine ==  DBMS.PostgreSQL)
             {
                 if (this.pgres_connection != null)
                 {
@@ -90,7 +77,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.pgres_cmd = null;
             }
-            else if (DBMSType ==  DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine ==  DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 if (this.mysql_connection != null)
                 {
@@ -103,7 +90,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.mysql_cmd = null;
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 if (this.sqlite_connection != null)
                 {
@@ -122,28 +109,28 @@ namespace Intwenty.Data.DBAccess
 
         public virtual void Open()
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
 
                 sql_connection = new SqlConnection();
                 sql_connection.ConnectionString = ConnectionString;
                 sql_connection.Open();
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
 
                 pgres_connection = new NpgsqlConnection();
                 pgres_connection.ConnectionString = ConnectionString;
                 pgres_connection.Open();
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
 
                 mysql_connection = new MySqlConnection();
                 mysql_connection.ConnectionString = ConnectionString;
                 mysql_connection.Open();
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
 
                 sqlite_connection = new SQLiteConnection();
@@ -154,7 +141,7 @@ namespace Intwenty.Data.DBAccess
 
         private void OpenIfNeeded()
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 if (sql_connection != null && sql_connection.State == ConnectionState.Open)
                     return;
@@ -163,7 +150,7 @@ namespace Intwenty.Data.DBAccess
                 sql_connection.ConnectionString = this.ConnectionString;
                 sql_connection.Open();
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 if (pgres_connection != null && pgres_connection.State == ConnectionState.Open)
                     return;
@@ -172,7 +159,7 @@ namespace Intwenty.Data.DBAccess
                 pgres_connection.ConnectionString = this.ConnectionString;
                 pgres_connection.Open();
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 if (mysql_connection != null && mysql_connection.State == ConnectionState.Open)
                     return;
@@ -181,7 +168,7 @@ namespace Intwenty.Data.DBAccess
                 mysql_connection.ConnectionString = this.ConnectionString;
                 mysql_connection.Open();
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 if (sqlite_connection != null && sqlite_connection.State == ConnectionState.Open)
                     return;
@@ -196,7 +183,7 @@ namespace Intwenty.Data.DBAccess
 
         public void Close()
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 if (sql_connection != null)
                 {
@@ -207,7 +194,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 if (pgres_connection != null)
                 {
@@ -218,7 +205,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 if (mysql_connection != null)
                 {
@@ -229,7 +216,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 if (sqlite_connection != null)
                 {
@@ -261,19 +248,19 @@ namespace Intwenty.Data.DBAccess
 
         public void AddParameter(string name, object value)
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 this.sql_cmd.Parameters.AddWithValue(name, value);
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 this.pgres_cmd.Parameters.Add(new NpgsqlParameter() { Value = value, ParameterName = name });
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 this.mysql_cmd.Parameters.Add(new MySqlParameter() { Value = value, ParameterName = name });
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 this.sqlite_cmd.Parameters.Add(new SQLiteParameter() { Value = value, ParameterName = name });
             }
@@ -281,7 +268,7 @@ namespace Intwenty.Data.DBAccess
 
         public void AddParameter(IntwentySqlParameter p)
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 var param = new SqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -289,7 +276,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.sql_cmd.Parameters.Add(param);
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 var param = new NpgsqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -297,7 +284,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.pgres_cmd.Parameters.Add(param);
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 var param = new MySqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -305,7 +292,7 @@ namespace Intwenty.Data.DBAccess
 
                 this.mysql_cmd.Parameters.Add(param);
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 var param = new SQLiteParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
@@ -319,13 +306,13 @@ namespace Intwenty.Data.DBAccess
 
         public void SetSelectCommandTimeout(Int32 seconds)
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
                 this.sql_cmd.CommandTimeout = seconds;
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
                 this.pgres_cmd.CommandTimeout = seconds;
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
                 this.mysql_cmd.CommandTimeout = seconds;
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
                 this.sqlite_cmd.CommandTimeout = seconds;
 
         }
@@ -335,28 +322,28 @@ namespace Intwenty.Data.DBAccess
         {
             ds.CaseSensitive = false;
 
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 var adapt = new SqlDataAdapter(sql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 var adapt = new NpgsqlDataAdapter(pgres_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 var adapt = new MySqlDataAdapter(mysql_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
                 adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 var adapt = new SQLiteDataAdapter(sqlite_cmd);
                 adapt.MissingMappingAction = MissingMappingAction.Passthrough;
@@ -648,19 +635,19 @@ namespace Intwenty.Data.DBAccess
                 sb.Append(colsep + GetColumnDefinition(colname,m.PropertyType.ToString(),autoinc,notnull));
                 colsep = ", ";
             }
-            if (pk != null && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))
+            if (pk != null && (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql))
             {
                 sb.Append(colsep + string.Format("PRIMARY KEY (`{0}`)", pk.Columns));
             }
-            else if (pk != null && DBMSType == DBMS.PostgreSQL)
+            else if (pk != null && DbEngine == DBMS.PostgreSQL)
             {
                 sb.Append(colsep + string.Format("PRIMARY KEY ({0})", pk.Columns));
             }
-            else if (pk != null && DBMSType == DBMS.MSSqlServer)
+            else if (pk != null && DbEngine == DBMS.MSSqlServer)
             {
                 sb.Append(colsep + string.Format("CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED ([{1}] ASC)", tablename, pk.Columns));
             }
-            else if (pk != null && DBMSType == DBMS.SQLite && string.IsNullOrEmpty(autoinccolumn))
+            else if (pk != null && DbEngine == DBMS.SQLite && string.IsNullOrEmpty(autoinccolumn))
             {
                 //IF SQLLITE, PK ONLY IF NOT AUTOINC. IF AUTOINC THAT COL IS PK.
                 sb.Append(colsep + string.Format("PRIMARY KEY ({0})", pk.Columns));
@@ -678,7 +665,7 @@ namespace Intwenty.Data.DBAccess
                 foreach (var ai in annot_index)
                 {
                     var index = (DbTableIndex)ai;
-                    if (DBMSType != DBMS.PostgreSQL)
+                    if (DbEngine != DBMS.PostgreSQL)
                     {
                         if (index.IsUnique)
                             indexbuilder = string.Format("CREATE UNIQUE INDEX {0} ON {1} ({2})", new object[] { index.Name, tablename, index.Columns });
@@ -829,9 +816,9 @@ namespace Intwenty.Data.DBAccess
                     if (!r.Table.Columns.Contains(colname))
                         continue;
 
-                    if (property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32" && DBMSType == DBMS.SQLite)
+                    if (property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32" && DbEngine == DBMS.SQLite)
                         property.SetValue(m, Convert.ToInt32(r[colname]), null);
-                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN" && DBMSType == DBMS.SQLite)
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN" && DbEngine == DBMS.SQLite)
                         property.SetValue(m, Convert.ToBoolean(r[colname]), null);
                     else
                         property.SetValue(m, r[colname], null);
@@ -889,13 +876,13 @@ namespace Intwenty.Data.DBAccess
                 else
                     prm.Value = value;
 
-                if (DBMSType == DBMS.MSSqlServer)
+                if (DbEngine == DBMS.MSSqlServer)
                     query.Append(colsep + string.Format("{0}", colname));
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (DbEngine == DBMS.PostgreSQL)
                     query.Append(colsep + string.Format("{0}", colname));
-                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
                     query.Append(colsep + string.Format("`{0}`", colname));
-                else if (DBMSType == DBMS.SQLite)
+                else if (DbEngine == DBMS.SQLite)
                     query.Append(colsep + string.Format("{0}", colname));
 
 
@@ -907,13 +894,13 @@ namespace Intwenty.Data.DBAccess
             query.Append(") ");
             values.Append(")");
 
-            if (!string.IsNullOrEmpty(autoinccolumn) && DBMSType == DBMS.MSSqlServer)
+            if (!string.IsNullOrEmpty(autoinccolumn) && DbEngine == DBMS.MSSqlServer)
             {
                 //values.Append(" SELECT SCOPE_IDENTITY()");
                 values.Append(" select @NewId=Scope_Identity()");
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
-            else if (!string.IsNullOrEmpty(autoinccolumn) && (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql))
+            else if (!string.IsNullOrEmpty(autoinccolumn) && (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql))
             {
                 //values.Append(" SELECT LAST_INSERT_ID()");
                 values.Append(" select @NewId=LAST_INSERT_ID()");
@@ -940,7 +927,7 @@ namespace Intwenty.Data.DBAccess
                     property.SetValue(model, output.Value, null);
             }
 
-            if (DBMSType == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
+            if (DbEngine == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
             {
                 var property = workingtype.GetProperty(autoinccolumn);
                 if (property != null)
@@ -950,7 +937,7 @@ namespace Intwenty.Data.DBAccess
                 }  
             }
 
-            if (DBMSType == DBMS.SQLite && !string.IsNullOrEmpty(autoinccolumn))
+            if (DbEngine == DBMS.SQLite && !string.IsNullOrEmpty(autoinccolumn))
             {
                 var property = workingtype.GetProperty(autoinccolumn);
                 if (property != null)
@@ -1038,13 +1025,13 @@ namespace Intwenty.Data.DBAccess
                 else
                     prm.Value = value;
 
-                if (DBMSType == DBMS.MSSqlServer)
+                if (DbEngine == DBMS.MSSqlServer)
                     query.Append(colsep + string.Format("{0}=@{0}", colname));
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (DbEngine == DBMS.PostgreSQL)
                     query.Append(colsep + string.Format("{0}=@{0}", colname));
-                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
                     query.Append(colsep + string.Format("`{0}`=@{0}", colname));
-                else if (DBMSType == DBMS.SQLite)
+                else if (DbEngine == DBMS.SQLite)
                     query.Append(colsep + string.Format("{0}=@{0}", colname));
 
 
@@ -1059,13 +1046,13 @@ namespace Intwenty.Data.DBAccess
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                if (DBMSType == DBMS.MSSqlServer)
+                if (DbEngine == DBMS.MSSqlServer)
                     query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (DbEngine == DBMS.PostgreSQL)
                     query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
-                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
                     query.Append(wheresep + string.Format("`{0}`=@{0}", p.ParameterName));
-                else if (DBMSType == DBMS.SQLite)
+                else if (DbEngine == DBMS.SQLite)
                     query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
 
                 wheresep = " AND ";
@@ -1170,13 +1157,13 @@ namespace Intwenty.Data.DBAccess
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                if (DBMSType == DBMS.MSSqlServer)
+                if (DbEngine == DBMS.MSSqlServer)
                     query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (DbEngine == DBMS.PostgreSQL)
                     query.Append(wheresep + string.Format("{0}=@{0}",p.ParameterName));
-                else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+                else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
                     query.Append(wheresep + string.Format("`{0}`=@{0}", p.ParameterName));
-                else if (DBMSType == DBMS.SQLite)
+                else if (DbEngine == DBMS.SQLite)
                     query.Append(wheresep + string.Format("{0}=@{0}", p.ParameterName));
 
                 wheresep = " AND ";
@@ -1202,19 +1189,19 @@ namespace Intwenty.Data.DBAccess
         public object ExecuteScalarQuery()
         {
 
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 return sql_cmd.ExecuteScalar();
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 return pgres_cmd.ExecuteScalar();
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 return mysql_cmd.ExecuteScalar();
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 return sqlite_cmd.ExecuteScalar();
             }
@@ -1269,7 +1256,7 @@ namespace Intwenty.Data.DBAccess
         public NonQueryResult ExecuteNonQuery()
         {
 
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 var res = new NonQueryResult();
                 res.Value = sql_cmd.ExecuteNonQuery();
@@ -1281,19 +1268,19 @@ namespace Intwenty.Data.DBAccess
 
                 return res;
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 var res = new NonQueryResult();
                 res.Value = pgres_cmd.ExecuteNonQuery();
                 return res;
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 var res = new NonQueryResult();
                 res.Value = sqlite_cmd.ExecuteNonQuery();
                 return res;
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 var res = new NonQueryResult();
                 res.Value = mysql_cmd.ExecuteNonQuery();
@@ -1313,7 +1300,7 @@ namespace Intwenty.Data.DBAccess
 
         public SqlDataReader ExecuteSqlServerDataReader(CommandBehavior cbv)
         {
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 return sql_cmd.ExecuteReader(cbv);
             }
@@ -1326,7 +1313,7 @@ namespace Intwenty.Data.DBAccess
 
         public NpgsqlDataReader ExecutePgSqlDataReader(CommandBehavior cbv)
         {
-            if (DBMSType == DBMS.PostgreSQL)
+            if (DbEngine == DBMS.PostgreSQL)
             {
                 return pgres_cmd.ExecuteReader(cbv);
             }
@@ -1338,7 +1325,7 @@ namespace Intwenty.Data.DBAccess
 
         public MySqlDataReader ExecuteMySqlDataReader(CommandBehavior cbv)
         {
-            if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 return mysql_cmd.ExecuteReader(cbv);
             }
@@ -1350,7 +1337,7 @@ namespace Intwenty.Data.DBAccess
 
         public SQLiteDataReader ExecuteSqliteDataReader(CommandBehavior cbv)
         {
-            if (DBMSType == DBMS.SQLite)
+            if (DbEngine == DBMS.SQLite)
             {
                 return sqlite_cmd.ExecuteReader(cbv);
             }
@@ -1366,7 +1353,7 @@ namespace Intwenty.Data.DBAccess
         {
 
 
-            if (DBMSType == DBMS.MSSqlServer)
+            if (DbEngine == DBMS.MSSqlServer)
             {
                 if (this.sql_cmd == null)
                 {
@@ -1386,7 +1373,7 @@ namespace Intwenty.Data.DBAccess
 
 
             }
-            else if (DBMSType == DBMS.PostgreSQL)
+            else if (DbEngine == DBMS.PostgreSQL)
             {
                 if (this.pgres_cmd == null)
                 {
@@ -1405,7 +1392,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql)
+            else if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
             {
                 if (this.mysql_cmd == null)
                 {
@@ -1424,7 +1411,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            else if (DBMSType == DBMS.SQLite)
+            else if (DbEngine == DBMS.SQLite)
             {
                 if (this.sqlite_cmd == null)
                 {
@@ -1458,21 +1445,21 @@ namespace Intwenty.Data.DBAccess
             var autoincvalue = string.Empty;
             var datatype = string.Empty;
 
-            var dtmap = DBHelpers.GetDataTypeMap().Find(p => p.NetType == nettype.ToUpper() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DBMSType == DBMSType);
+            var dtmap = DBHelpers.GetDataTypeMap().Find(p => p.NetType == nettype.ToUpper() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DbEngine);
             if (dtmap==null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", nettype.ToUpper(), DBMSType));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", nettype.ToUpper(), DbEngine));
 
             datatype = dtmap.DBMSDataType;
 
             var autoincmap = new DBMSCommandMap() { Key = "AUTOINC" };
             if (autoincrement)
-                autoincmap = DBHelpers.GetDBMSCommandMap().Find(p => p.DBMSType == DBMSType && p.Key== "AUTOINC");
+                autoincmap = DBHelpers.GetDBMSCommandMap().Find(p => p.DbEngine == DbEngine && p.Key== "AUTOINC");
 
             if (autoincrement)
             {
                 allownullvalue = "NOT NULL";
                 defaultvalue = "";
-                if (DBMSType == DBMS.PostgreSQL)
+                if (DbEngine == DBMS.PostgreSQL)
                     datatype = autoincmap.Command;
             }
             if (notnull)
@@ -1482,16 +1469,16 @@ namespace Intwenty.Data.DBAccess
             }
 
 
-            if (DBMSType == DBMS.MSSqlServer) 
+            if (DbEngine == DBMS.MSSqlServer) 
                 result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, autoincmap.Command, allownullvalue });
 
-            if (DBMSType == DBMS.MariaDB || DBMSType == DBMS.MySql) 
+            if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql) 
                 result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { name, datatype, allownullvalue, autoincmap.Command, defaultvalue });
 
-            if (DBMSType == DBMS.PostgreSQL)
+            if (DbEngine == DBMS.PostgreSQL)
                 result = string.Format("{0} {1} {2}", new object[] { name, datatype, allownullvalue });
 
-            if (DBMSType == DBMS.SQLite)
+            if (DbEngine == DBMS.SQLite)
                 result = string.Format("{0} {1} {2} {3}", new object[] { name, datatype, allownullvalue, autoincmap.Command });
 
             if (string.IsNullOrEmpty(result))

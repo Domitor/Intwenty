@@ -1,52 +1,45 @@
 ﻿using Intwenty.Data.DBAccess.Annotations;
 using Intwenty.Data.DBAccess.Helpers;
 using MongoDB.Driver;
-using MongoDB.Bson.Serialization.Attributes;
+using LiteDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Intwenty.Data.Entity;
 using MongoDB.Bson;
+using System.IO;
 
 namespace Intwenty.Data.DBAccess
 {
-    public class IntwentyNoSqlDbClient : IIntwentyDbNoSql
+    public class IntwentyNoSqlDbClient : IntwentyDbClient, IIntwentyDbNoSql
     {
 
-
-        private DBMS DBMSType { get; set; }
-
-        private string ConnectionString { get; set; }
-
         private string DatabaseName { get; set; }
+
+        private static LiteDatabase LiteDbClient { get; set; }
 
 
         public IntwentyNoSqlDbClient()
         {
             ConnectionString = string.Empty;
-            DBMSType = DBMS.MSSqlServer;
+            DbEngine = DBMS.MSSqlServer;
         }
 
         public IntwentyNoSqlDbClient(DBMS d, string connectionstring, string databasename)
         {
-            DBMSType = d;
+            DbEngine = d;
             ConnectionString = connectionstring;
             DatabaseName = databasename;
-            if (DBMSType != DBMS.MongoDb)
+            if (DbEngine != DBMS.MongoDb && DbEngine != DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentyNoSqlDbClient configured with wrong DBMS setting");
+            if (DbEngine == DBMS.LiteDb)
+            {
+                ConnectionString = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\litedb", ConnectionString);
+                if (LiteDbClient==null)
+                    LiteDbClient = new LiteDatabase(ConnectionString);
+            }
         }
-
-        public DBMS DbEngine
-        {
-            get { return DBMSType; }
-        }
-
-        public bool IsNoSql
-        {
-            get { return (DBMSType == DBMS.MongoDb); }
-        }
-
 
         public void CreateTable<T>(bool checkexisting = false)
         {
@@ -60,7 +53,7 @@ namespace Intwenty.Data.DBAccess
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
@@ -76,6 +69,11 @@ namespace Intwenty.Data.DBAccess
                 {
                     database.CreateCollection(tablename);
                 }
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                LiteDbClient.GetCollection<T>(tablename);
             }
 
 
@@ -102,22 +100,22 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            BsonIdAttribute pk = null;
+            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
             int colvalue = 0;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(BsonIdAttribute), false);
+                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
                 if (annot_pk != null && annot_pk.Length > 0)
                 {
-                    pk = ((BsonIdAttribute)annot_pk[0]);
+                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
                     colvalue = (int)m.GetValue(model);
                     break;
                 }
 
             }
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 if (pk == null)
                     return 0;
@@ -130,8 +128,20 @@ namespace Intwenty.Data.DBAccess
 
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                if (pk == null)
+                    return 0;
+
+                var result = LiteDbClient.GetCollection<T>(tablename).Delete(colvalue);
+                return 1;
+
+            }
+
             return 0;
         }
+
+      
 
         public T GetOne<T>(int id, int version) where T : new()
         {
@@ -143,13 +153,19 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
-                var filter = new BsonDocument();
-                filter.Add(new BsonElement("_id", id));
+                var filter = new MongoDB.Bson.BsonDocument();
+                filter.Add(new MongoDB.Bson.BsonElement("_id", id));
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var result = database.GetCollection<T>(tablename).Find(filter).FirstOrDefault();
+                return result;
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var result = LiteDbClient.GetCollection<T>(tablename).FindById(id);
                 return result;
             }
 
@@ -166,13 +182,19 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var result = database.GetCollection<T>(tablename).Find(f => true).ToList();
                 return result;
 
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var result = LiteDbClient.GetCollection<T>(tablename).FindAll().ToList();
+                return result;
             }
 
             return null;
@@ -190,14 +212,14 @@ namespace Intwenty.Data.DBAccess
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
             var newid = 0;
-            BsonIdAttribute pk = null;
+            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(BsonIdAttribute), false);
+                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
                 if (annot_pk != null && annot_pk.Length > 0)
                 {
-                    pk = ((BsonIdAttribute)annot_pk[0]);
+                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
                     var annot_autoinc = m.GetCustomAttributes(typeof(AutoIncrement), false);
                     if (annot_autoinc != null && annot_autoinc.Length > 0)
                     {
@@ -209,7 +231,7 @@ namespace Intwenty.Data.DBAccess
                 }
             }
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 if (pk == null)
                     return 0;
@@ -219,6 +241,16 @@ namespace Intwenty.Data.DBAccess
                 database.GetCollection<T>(tablename).InsertOne(model);
 
             }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                if (pk == null)
+                    return 0;
+
+                var result = LiteDbClient.GetCollection<T>(tablename).Insert(model);
+                return result;
+            }
+
 
             return newid;
         }
@@ -233,22 +265,22 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            BsonIdAttribute pk = null;
+            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
             int colvalue = 0;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(BsonIdAttribute), false);
+                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
                 if (annot_pk != null && annot_pk.Length > 0)
                 {
-                    pk = ((BsonIdAttribute)annot_pk[0]);
+                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
                     colvalue = (int)m.GetValue(model);
                     break;
                 }
 
             }
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 if (pk == null)
                     return 0;
@@ -261,12 +293,21 @@ namespace Intwenty.Data.DBAccess
 
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                if (pk == null)
+                    return 0;
+
+                LiteDbClient.GetCollection<T>(tablename).Update(colvalue, model);
+                return 1;
+            }
+
             return 0;
         }
 
         public int GetNewSystemId(SystemID model)
         {
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
@@ -287,6 +328,24 @@ namespace Intwenty.Data.DBAccess
 
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var collection = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId");
+                if (collection.Count() == 0)
+                {
+                    model.Id = 1;
+                    LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Insert(model);
+                    return model.Id;
+                }
+
+                var result = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Max(f => f.Id);
+                model.Id = result + 1;
+                LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Insert(model);
+                return model.Id;
+                
+
+            }
+
             return -1;
         }
 
@@ -299,18 +358,18 @@ namespace Intwenty.Data.DBAccess
         {
             if (version < 1) version = 1;
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                var collection = database.GetCollection<BsonDocument>(collectionname);
+                var collection = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname);
                 if (collection == null)
                 {
                     database.CreateCollection(collectionname);
-                    collection = database.GetCollection<BsonDocument>(collectionname);
+                    collection = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname);
                 }
-                var doc = BsonDocument.Parse(json);
-                doc.Add(new BsonElement("_id", string.Format("ID_{0}_VER_{1}",id, version)));
+                var doc = MongoDB.Bson.BsonDocument.Parse(json);
+                doc.Add(new MongoDB.Bson.BsonElement("_id", string.Format("ID_{0}_VER_{1}",id, version)));
                 if (doc.Contains("Id"))
                     doc.Set("Id", id);
                 if (!doc.Contains("Id"))
@@ -324,6 +383,29 @@ namespace Intwenty.Data.DBAccess
                 return 1;
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var collection = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname);
+                var val = LiteDB.JsonSerializer.Deserialize(json);
+                var doc = val.AsDocument;
+
+                doc.Add("_id", string.Format("ID_{0}_VER_{1}", id, version));
+
+                var idkey = doc.GetElements().FirstOrDefault(p => p.Key == "Id");
+
+                if (!doc.ContainsKey("Id"))
+                    doc["Id"] = id;
+                if (!doc.ContainsKey("Id"))
+                    doc.Add("Id", id);
+                if (doc.ContainsKey("Version"))
+                    doc["Version"] = version;
+                if (!doc.ContainsKey("Version"))
+                    doc.Add("Version", version);
+
+                collection.Insert(doc);
+                return 1;
+            }
+
             return 0;
         }
 
@@ -331,12 +413,12 @@ namespace Intwenty.Data.DBAccess
         {
             if (version < 1) version = 1;
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
                 var jsonfilter = string.Format("\"{0}\":\"{1}\"", "_id", string.Format("ID_{0}_VER_{1}", id, version));
-                var doc = BsonDocument.Parse(json);
+                var doc = MongoDB.Bson.BsonDocument.Parse(json);
                 if (doc.Contains("Id"))
                     doc.Set("Id", id);
                 if (!doc.Contains("Id"))
@@ -346,9 +428,30 @@ namespace Intwenty.Data.DBAccess
                 if (!doc.Contains("Version"))
                     doc.Add("Version", version);
 
-                var result = database.GetCollection<BsonDocument>(collectionname).ReplaceOne("{" + jsonfilter + "}", doc, new ReplaceOptions { IsUpsert = true });
+                var result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).ReplaceOne("{" + jsonfilter + "}", doc, new ReplaceOptions { IsUpsert = true });
                 return Convert.ToInt32(result.ModifiedCount);
 
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var collection = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname);
+                var val = LiteDB.JsonSerializer.Deserialize(json);
+                var doc = val.AsDocument;
+
+                var jsonid = string.Format("ID_{0}_VER_{1}", id, version);
+
+                if (!doc.ContainsKey("Id"))
+                    doc["Id"] = id;
+                if (!doc.ContainsKey("Id"))
+                    doc.Add("Id", id);
+                if (doc.ContainsKey("Version"))
+                    doc["Version"] = version;
+                if (!doc.ContainsKey("Version"))
+                    doc.Add("Version", version);
+
+                collection.Update(jsonid,doc);
+                return 1;
             }
 
             return 0;
@@ -358,13 +461,18 @@ namespace Intwenty.Data.DBAccess
 
         public int GetCollectionCount(string collectionname)
         {
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                return Convert.ToInt32(database.GetCollection<BsonDocument>(collectionname).CountDocuments(new BsonDocument()));
-
+                return Convert.ToInt32(database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).CountDocuments(new MongoDB.Bson.BsonDocument()));
             }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                return LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Count();
+            }
+
 
             return 0;
         }
@@ -376,12 +484,12 @@ namespace Intwenty.Data.DBAccess
             if (string.IsNullOrEmpty(collectionname))
                 throw new InvalidOperationException("Parameters: collectionname must be specified");
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var projection = "{" + string.Format("\"{0}\":1", fieldname) + "}";
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                var docs = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(projection).ToList();
+                var docs = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).Project(projection).ToList();
                 var result = -1;
                 foreach (var t in docs)
                 {
@@ -394,6 +502,27 @@ namespace Intwenty.Data.DBAccess
                 return result;
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var count = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Count();
+                if (count < 1)
+                    return 0;
+
+                var bsonfilter = LiteDB.JsonSerializer.Deserialize(filter);
+                //var projection = "{" + string.Format("\"{0}\":1", fieldname) + "}";
+                var docs = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(filter);
+                var result = -1;
+                foreach (var t in docs)
+                {
+                    LiteDB.BsonValue val = 0;
+                    if (t.TryGetValue(fieldname, out val))
+                    {
+                        if (val > result)
+                            result = val.AsInt32;
+                    }
+                }
+            }
+
 
             return -1;
 
@@ -403,20 +532,20 @@ namespace Intwenty.Data.DBAccess
         {
             var jsonresult = new StringBuilder("[");
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
 
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                List<BsonDocument> result=null;
+                List<MongoDB.Bson.BsonDocument> result=null;
                 if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(p=> true).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p=> true).ToList();
                 if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
-                     result = database.GetCollection<BsonDocument>(collectionname).Find(filter).ToList();
+                     result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).ToList();
                 if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
 
                 var rindex = 0;
                 foreach (var doc in result)
@@ -438,10 +567,48 @@ namespace Intwenty.Data.DBAccess
                         jsonresult.Append("," + doc.ToJson());
 
                 }
-                jsonresult.Append("]");
+              
 
             }
 
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+
+                List<LiteDB.BsonDocument> result = null;
+                if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(p => true).ToList();
+                if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(filter).ToList();
+                if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(p => true).ToList();
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(filter).ToList();
+
+                var rindex = 0;
+                foreach (var doc in result)
+                {
+                    rindex += 1;
+                    if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                    {
+                        if (!(minrow <= rindex && maxrow > rindex))
+                            continue;
+                    }
+
+                    if (doc.ContainsKey("_id"))
+                        doc.Remove("_id");
+
+
+                    if (rindex == 1)
+                        jsonresult.Append(doc.ToJson());
+                    else
+                        jsonresult.Append("," + doc.ToJson());
+
+                }
+
+            }
+
+            jsonresult.Append("]");
             return jsonresult;
         }
 
@@ -449,11 +616,11 @@ namespace Intwenty.Data.DBAccess
         {
             var jsonresult = new StringBuilder("[");
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                var result = database.GetCollection<BsonDocument>(collectionname).Find(f => true).ToList();
+                var result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(f => true).ToList();
                 var rindex = 0;
                 foreach (var doc in result)
                 {
@@ -472,10 +639,35 @@ namespace Intwenty.Data.DBAccess
                     else
                         jsonresult.Append("," + doc.ToJson());
                 }
-                jsonresult.Append("]");
+              
 
             }
 
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(f => true).ToList();
+                var rindex = 0;
+                foreach (var doc in result)
+                {
+                    rindex += 1;
+                    if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                    {
+                        if (!(minrow <= rindex && maxrow > rindex))
+                            continue;
+                    }
+
+                    if (doc.ContainsKey("_id"))
+                        doc.Remove("_id");
+
+                    if (rindex == 1)
+                        jsonresult.Append(doc.ToString());
+                    else
+                        jsonresult.Append("," + doc.ToString());
+                }
+
+            }
+
+            jsonresult.Append("]");
             return jsonresult;
         }
 
@@ -485,17 +677,27 @@ namespace Intwenty.Data.DBAccess
         {
             if (version < 1) version = 1;
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
-                var filter = new BsonDocument();
-                filter.Add(new BsonElement("_id", string.Format("ID_{0}_VER_{1}", id, version)));
+                var filter = new MongoDB.Bson.BsonDocument();
+                filter.Add(new MongoDB.Bson.BsonElement("_id", string.Format("ID_{0}_VER_{1}", id, version)));
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                var doc = database.GetCollection<BsonDocument>(collectionname).Find(filter).FirstOrDefault();
+                var doc = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).FirstOrDefault();
                 if (doc.Contains("_id"))
                     doc.Remove("_id");
 
                 return new StringBuilder(doc.ToJson());
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var jsonid = string.Format("ID_{0}_VER_{1}", id, version);
+                var doc = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).FindById(jsonid);
+                if (doc.ContainsKey("_id"))
+                    doc.Remove("_id");
+
+                return new StringBuilder(doc.ToString());
             }
 
             return new StringBuilder("{}");
@@ -504,20 +706,20 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields)
         {
 
-            if (DBMSType == DBMS.MongoDb)
+            if (DbEngine == DBMS.MongoDb)
             {
 
                 var client = new MongoClient(ConnectionString);
                 var database = client.GetDatabase(DatabaseName);
-                List<BsonDocument> result = null;
+                List<MongoDB.Bson.BsonDocument> result = null;
                 if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p => true).ToList();
                 if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).ToList();
                 if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p => true).Project(returnfields).ToList();
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
-                    result = database.GetCollection<BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
+                    result = database.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(filter).Project(returnfields).ToList();
 
                 foreach (var doc in result)
                 {
@@ -526,14 +728,38 @@ namespace Intwenty.Data.DBAccess
 
                     return new StringBuilder(doc.ToJson());
                 }
-               
+
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+
+                List<LiteDB.BsonDocument> result = null;
+                if (string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(p => true).ToList();
+                if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(filter).ToList();
+                if (string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(p => true).ToList();
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(returnfields))
+                    result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(filter).ToList();
+
+                foreach (var doc in result)
+                {
+
+                    if (doc.ContainsKey("_id"))
+                        doc.Remove("_id");
+
+                    return new StringBuilder(doc.ToJson());
+
+                }
+
             }
 
             return new StringBuilder("{}");
 
-
         }
 
-        
+
     }
 }

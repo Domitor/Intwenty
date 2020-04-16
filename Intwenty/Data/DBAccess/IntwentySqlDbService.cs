@@ -27,6 +27,11 @@ namespace Intwenty.Data.DBAccess
             DBClient = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
         }
 
+        public string ConnectionString
+        {
+            get { return DBClient.ConnectionString; }
+        }
+
         public DBMS DbEngine
         {
             get { return DBClient.DbEngine; }

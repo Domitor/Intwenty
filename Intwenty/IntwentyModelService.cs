@@ -96,7 +96,7 @@ namespace Intwenty
             ModelCache = cache;
             Settings = settings.Value;
             Connections = connections.Value;
-            if (Settings.IntwentyDBMSIsNoSQL)
+            if (Settings.IsNoSQL)
             {
                 Client = new IntwentyNoSqlDbClient((DBMS)Settings.IntwentyDBMS, Connections.IntwentyConnection, "IntwentyDb");
             }

@@ -21,7 +21,7 @@ namespace Intwenty.Data
 
             var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
             IIntwentyDbORM DataRepository = null;
-            if (Settings.Value.IntwentyDBMSIsNoSQL)
+            if (Settings.Value.IsNoSQL)
                 DataRepository = new IntwentyNoSqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection, "IntwentyDb");
             else
                 DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);

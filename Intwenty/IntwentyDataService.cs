@@ -70,8 +70,7 @@ namespace Intwenty
             DbConnections = connections.Value;
             ModelRepository = modelservice;
             DBMSType = (DBMS)Settings.IntwentyDBMS;
-            if (DBMSType == DBMS.MongoDb)
-                IsNoSql = true;
+            IsNoSql = settings.Value.IsNoSQL;
         }
 
         public List<DefaultValue> GetDefaultValues(ClientStateInfo state)

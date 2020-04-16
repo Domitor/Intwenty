@@ -14,11 +14,6 @@ namespace Shared
 
     public class SystemSettings
     {
-        public string SqlServerExampleConnection { get; set; }
-        public string MySqlExampleConnection { get; set; }
-        public string PostGreSQLExampleConnection { get; set; }
-        public string SQLiteExampleConnection { get; set; }
-        public string MongoDbExampleConnection { get; set; }
         public bool ReCreateModelOnStartUp { get; set; }
         public bool IsDevelopment { get; set; }
         public int IdentityDBMS { get; set; }
@@ -58,12 +53,12 @@ namespace Shared
 
         public string StorageConnectionString { get; set; }
 
-        public bool IntwentyDBMSIsNoSQL
+        public bool IsNoSQL
         {
 
             get
             {
-                if (IntwentyDBMS == 5)
+                if (IntwentyDBMS == 5 || IntwentyDBMS == 6)
                     return true;
 
                 return false;

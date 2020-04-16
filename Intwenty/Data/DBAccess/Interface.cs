@@ -10,6 +10,8 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDb
     {
+        public string ConnectionString { get; }
+
         public DBMS DbEngine { get; }
 
         public bool IsNoSql { get; }

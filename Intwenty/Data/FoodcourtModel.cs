@@ -12,6 +12,8 @@ namespace Intwenty.Data
     {
 
 
+      
+
         public static void Seed(IServiceProvider provider)
         {
             var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
@@ -19,25 +21,14 @@ namespace Intwenty.Data
             if (!Settings.Value.IsDevelopment)
                 return;
 
-            if (Settings.Value.IntwentyDBMSIsNoSQL)
-                SeedSql(provider);
-            else
-                SeedNoSql(provider);
-        }
-
-        public static void SeedNoSql(IServiceProvider provider)
-        {
-            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
-        }
-
-        public static void SeedSql(IServiceProvider provider)
-        {
-            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
             var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
-            var DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
+            IIntwentyDbORM DataRepository = null;
+            if (Settings.Value.IsNoSQL)
+                DataRepository = new IntwentyNoSqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection, "IntwentyDb");
+            else
+                DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
 
-            DataRepository.Open();
-
+        
             DataRepository.CreateTable<ApplicationItem>(true);
             DataRepository.CreateTable<DatabaseItem>(true);
             DataRepository.CreateTable<DataViewItem>(true);
@@ -123,7 +114,6 @@ namespace Intwenty.Data
              DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "PRODUCT", MetaType = "LISTVIEWFIELD", MetaCode = "LV_PRODNAME", DataMetaCode = "PRODNAME", Title = "Name", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
 
-            DataRepository.Close();
         }
     }
 }

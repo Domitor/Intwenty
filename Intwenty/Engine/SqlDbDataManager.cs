@@ -1044,7 +1044,7 @@ namespace Intwenty.Engine
                 newversion = 1;
             }
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.DbEngine);
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DbEngine == SqlClient.DbEngine);
 
             sql = "insert into " + this.Model.Application.VersioningTableName;
             sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerId, RowChangeDate, UserID)";
@@ -1153,7 +1153,7 @@ namespace Intwenty.Engine
         private void UpdateInformationStatus()
         {
 
-            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DBMSType == SqlClient.DbEngine);
+            var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DbEngine == SqlClient.DbEngine);
             SqlClient.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
             SqlClient.AddParameter("@ChangedBy", this.ClientState.UserId);
             SqlClient.AddParameter("@Version", this.ClientState.Version);
@@ -1179,9 +1179,9 @@ namespace Intwenty.Engine
             }
             else
             {
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
 
                 var create_sql = "CREATE TABLE " + this.Model.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
                 create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
@@ -1209,9 +1209,9 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
                 string create_sql = "CREATE TABLE " + this.Model.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
 
@@ -1245,7 +1245,7 @@ namespace Intwenty.Engine
             }
             else
             {
-                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DBMSType == SqlClient.DbEngine);
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DbEngine == SqlClient.DbEngine);
                 string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
 
                 SqlClient.Open();
@@ -1281,9 +1281,9 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DBMSType == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DBMSType == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DBMSType == SqlClient.DbEngine && p.Length == StringLength.Short);
+                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
+                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
+                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
 
                 string create_sql = "CREATE TABLE " + table.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, ParentId {0} not null, Version {0} not null, OwnerId {0} not null)";
                 create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
