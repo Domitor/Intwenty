@@ -11,11 +11,11 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 
 # In short Intwenty intends to
 1. Let the user or developer describe applications, user interface, data structures, and static data by inputing metadata.
-2. Let Intwenty generate database and database objects based on metadata
-3. Let Intwenty generate UI based on metadata
-4. Let Intwenty generate standard logic such as user input validation based on metadata
-5. Let Intwenty generate standard logic for I/O operations against the database based on metadata
-6. Let the user easily override all the above when necessary
+2. Let Intwenty generate database and database objects based on metadata.
+3. Let Intwenty generate UI based on metadata.
+4. Let Intwenty generate standard logic such as user input validation based on metadata.
+5. Let Intwenty generate standard logic for I/O operations against the database based on metadata.
+6. Let the user easily override all the above when necessary.
 
 # Features
 - Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
@@ -33,18 +33,29 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 2. To be lightweight
 3. Keep dependencies to a minimum.
 
-# Technologies Used
+# Backend Technologies
 - asp.net core 3.1
+- Microsoft.AspNetCore.Mvc 2.2.0
+- Microsoft.Data.Sqlite.Core 3.1.3
+- System.Data.SQLite.Core 1.0.112.1
+- System.Data.SqlClient 4.8.1
+- MongoDB.Driver 2.10.3
+- MySql.Data 8.0.19
+- Npgsql 4.1.3.1
+
+# Frontend Technologies
 - bootstrap 4.3.7
 - vue.js 2.6.11
 - jquery 3.3.1
 - alasql 0.5.5
 
-# Database
-- Intwenty targets:
+# Works with the following databases
 - MS Sql Server
 - MySql
+- Maria DB
 - PostgreSQL
+- SQLite
+- MongoDB
 
 # How to get started
 <a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
