@@ -544,14 +544,23 @@ namespace Intwenty
         public OperationResult GenerateTestData()
         {
 
-            if (IsNoSql)
-                throw new NotImplementedException("This function is not implemented for NoSql");
 
             var res = new OperationResult();
-            var amount = 50;
+            var amount = 100;
 
             try
             {
+                IntwentyNoSqlDbClient nosqlclient=null;
+                IntwentySqlDbClient sqlclient=null;
+                if (IsNoSql)
+                {
+                    nosqlclient = new IntwentyNoSqlDbClient(DBMSType, DbConnections.IntwentyConnection, "IntwentyDb");
+                }
+                else
+                {
+                    sqlclient = new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection);
+                }
+
                 var apps = ModelRepository.GetApplicationModels();
 
                 var counter = 0;
@@ -564,16 +573,28 @@ namespace Intwenty
                     if (app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
                         continue;
 
-                  
+   
+
                     for (int i = 0; i < amount; i++)
                     {
-                        var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection));
+                        IDataManager manager;
+                        if (IsNoSql)
+                        {
+                            manager = NoSqlDbDataManager.GetDataManager(app, ModelRepository, Settings, nosqlclient);
+                        }
+                        else
+                        {
+
+                            manager = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, sqlclient);
+                        }
+
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
-                        t.ClientState = clientstate;
-                        var result = t.GenerateTestData(i);
+                        manager.ClientState = clientstate;
+                        var result = manager.GenerateTestData(i);
                         if (result.IsSuccess)
                             counter += 1;
+
 
                     }
                 }
@@ -586,12 +607,21 @@ namespace Intwenty
 
                     for (int i = 0; i < amount; i++)
                     {
+                        IDataManager manager;
+                        if (IsNoSql)
+                        {
+                            manager = NoSqlDbDataManager.GetDataManager(app, ModelRepository, Settings, nosqlclient);
+                        }
+                        else
+                        {
 
-                        var t = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.IntwentyConnection));
+                            manager = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, sqlclient);
+                        }
+
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
-                        t.ClientState = clientstate;
-                        var result = t.GenerateTestData(i);
+                        manager.ClientState = clientstate;
+                        var result = manager.GenerateTestData(i);
                         if (result.IsSuccess)
                             counter += 1;
 

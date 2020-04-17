@@ -29,18 +29,7 @@ namespace Intwenty.Model
         /// </summary>
         public List<UserInterfaceModelItem> UIStructure { get; set; }
 
-        /// <summary>
-        /// Describes the data views for this application
-        /// </summary>
-        //public List<MetaDataViewDto> ViewStructure { get; set; }
 
-        /// <summary>
-        /// No Series used in this application
-        /// </summary>
-        public List<NoSerieModelItem> NoSeries { get; set; }
-
-
-    
 
     }
 

@@ -51,7 +51,10 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.GetAll<T>();
         }
-
+        public bool DeleteJsonDocumentById(string collectionname, int id, int version)
+        {
+            return DBClient.DeleteJsonDocumentById(collectionname, id, version);
+        }
 
         public int InsertJsonDocument(string json, string collectionname, int id, int version)
         {
@@ -68,34 +71,34 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetNewSystemId(model);
         }
 
-        public int GetCollectionCount(string collectionname)
+        public int GetDocumentCount(string collectionname)
         {
-            return DBClient.GetCollectionCount(collectionname);
+            return DBClient.GetDocumentCount(collectionname);
         }
 
-        public int GetMaxValue(string collectionname, string filter, string fieldname)
+        public int GetMaxIntValue(string collectionname, string expression, string fieldname)
         {
-            return DBClient.GetMaxValue(collectionname, filter, fieldname);
+            return DBClient.GetMaxIntValue(collectionname, expression, fieldname);
         }
 
-        public StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJSONArray(string collectionname, string expression, List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetAsJSONArray(collectionname, filter, returnfields, minrow, maxrow);
+            return DBClient.GetJSONArray(collectionname, expression, returnfields, minrow, maxrow);
         }
 
-        public StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetAsJSONArray(collectionname, minrow, maxrow);
+            return DBClient.GetJSONArray(collectionname, minrow, maxrow);
         }
 
-        public StringBuilder GetAsJSONObject(string collectionname, int id, int version)
+        public StringBuilder GetJSONObject(string collectionname, int id, int version)
         {
-            return DBClient.GetAsJSONObject(collectionname, id, version);
+            return DBClient.GetJSONObject(collectionname, id, version);
         }
 
-        public StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields)
+        public StringBuilder GetJSONObject(string collectionname, string expression, List<IIntwentyDataColum> returnfields)
         {
-            return DBClient.GetAsJSONObject(collectionname, filter, returnfields);
+            return DBClient.GetJSONObject(collectionname, expression, returnfields);
         }
 
         public void CreateTable<T>(bool checkexisting = false)
@@ -125,7 +128,7 @@ namespace Intwenty.Data.DBAccess
             return DBClient.DeleteRange<T>(model);
         }
 
-       
+      
     }
 
       

@@ -19,7 +19,8 @@ namespace Intwenty.Engine
 
     public interface IDataManager
     {
-        
+        public ClientStateInfo ClientState { get; set; }
+
         OperationResult ConfigureDatabase();
 
         OperationResult GetLatestIdByOwnerUser(ClientStateInfo state);

@@ -355,7 +355,7 @@ namespace Intwenty.Data.DBAccess
 
       
 
-        public StringBuilder GetAsJSONArray(int minrow=0, int maxrow=0)
+        public StringBuilder GetJSONArray(int minrow=0, int maxrow=0)
         {
             var sb = new StringBuilder();
 
@@ -412,7 +412,7 @@ namespace Intwenty.Data.DBAccess
             return sb;
         }
 
-        public StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
@@ -472,7 +472,7 @@ namespace Intwenty.Data.DBAccess
             return sb;
         }
 
-        public StringBuilder GetAsJSONObject()
+        public StringBuilder GetJSONObject()
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
@@ -512,7 +512,7 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns)
+        public StringBuilder GetJSONObject(List<IIntwentyDataColum> columns)
         {
             if (columns == null)
                 throw new InvalidOperationException("Parameter columns can't be null");

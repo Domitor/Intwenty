@@ -450,6 +450,27 @@ namespace Intwenty.Data.DBAccess.Helpers
             return dateTimeTypes.Contains(col.DataType);
         }
 
+
+        public static string GetMongoDbProjection(List<IIntwentyDataColum> columns)
+        {
+            if (columns == null)
+                return string.Empty;
+            if (columns.Count == 0)
+                return string.Empty;
+
+            var separator = "";
+            var result = string.Empty;
+            foreach (var col in columns)
+            {
+                result += separator + GetJSONValue(col.ColumnName, 1);
+                separator = ", ";
+
+            }
+
+            return result;
+
+        }
+
       
 
 

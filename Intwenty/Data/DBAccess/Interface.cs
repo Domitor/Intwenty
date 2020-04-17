@@ -20,7 +20,6 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbORM
     {
-        
         void CreateTable<T>(bool checkexisting = false);
         T GetOne<T>(int id, int version) where T : new();
         List<T> GetAll<T>() where T : new();
@@ -33,24 +32,31 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbNoSql : IIntwentyDb, IIntwentyDbORM
     {
-       
+        public bool DeleteJsonDocumentById(string collectionname, int id, int version);
+
         public int InsertJsonDocument(string json, string collectionname, int id, int version);
 
         public int UpdateJsonDocument(string json, string collectionname, int id, int version);
 
         public int GetNewSystemId(SystemID model);
 
-        public int GetCollectionCount(string collectionname);
+        /// <summary>
+        /// Counts the documents in the collection
+        /// </summary>
+        public int GetDocumentCount(string collectionname);
 
-        public int GetMaxValue(string collectionname, string filter, string fieldname);
+        /// <summary>
+        /// Returns the maxvalue for the integer field [fieldname].
+        /// </summary>
+        public int GetMaxIntValue(string collectionname, string expression, string fieldname);
 
-        StringBuilder GetAsJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
 
-        StringBuilder GetAsJSONArray(string collectionname, string filter, string returnfields, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJSONArray(string collectionname, string expression, List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
 
-        StringBuilder GetAsJSONObject(string collectionname, int id, int version);
+        StringBuilder GetJSONObject(string collectionname, int id, int version);
 
-        StringBuilder GetAsJSONObject(string collectionname, string filter, string returnfields);
+        StringBuilder GetJSONObject(string collectionname, string expression, List<IIntwentyDataColum> returnfields);
 
      
     }
@@ -68,10 +74,10 @@ namespace Intwenty.Data.DBAccess
         object ExecuteScalarQuery();
         bool TableExist(string tablename);
         bool ColumnExist(string tablename, string columnname);
-        StringBuilder GetAsJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0);
-        StringBuilder GetAsJSONArray(int minrow = 0, int maxrow = 0);
-        StringBuilder GetAsJSONObject();
-        StringBuilder GetAsJSONObject(List<IIntwentyDataColum> columns);
+        StringBuilder GetJSONArray(List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJSONArray(int minrow = 0, int maxrow = 0);
+        StringBuilder GetJSONObject();
+        StringBuilder GetJSONObject(List<IIntwentyDataColum> returnfields);
         NonQueryResult ExecuteNonQuery();
         void CreateTable<T>(bool checkexisting = false, bool use_current_connection = false);
         T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new();

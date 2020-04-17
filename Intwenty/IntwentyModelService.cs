@@ -65,9 +65,6 @@ namespace Intwenty
 
         List<MenuModelItem> GetMenuModelItems();
 
-        List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid);
-
-        List<NoSerieModelItem> GetNoSeries();
 
         List<string> GetTestDataBatches();
 
@@ -133,7 +130,7 @@ namespace Intwenty
                 t.Application = app;
                 t.DataStructure = new List<DatabaseModelItem>();
                 t.UIStructure = new List<UserInterfaceModelItem>();
-                t.NoSeries = new List<NoSerieModelItem>();
+
 
                 foreach (var item in ditems)
                 {
@@ -268,85 +265,7 @@ namespace Intwenty
             return res;
         }
 
-        public List<NoSerieModelItem> GetNewNoSeriesValues(int applicationid)
-        {
-            var res = new List<NoSerieModelItem>();
 
-            /*
-            var app = Client.Get<ApplicationItem>().FirstOrDefault(p => p.Id == applicationid);
-            if (app == null)
-                return new List<NoSerieModelItem>();
-
-            var appseries = new List<NoSerieModelItem>();
-            foreach (var n in NoSeries)
-            {
-                if (n.AppMetaCode == app.MetaCode)
-                {
-                    appseries.Add(new NoSerieModelItem(n));
-                }
-            }
-
-            foreach (var item in appseries)
-            {
-                item.Application = new ApplicationModelItem(app);
-
-                if (item.Counter < 1)
-                    item.Counter = item.StartValue;
-
-                item.Counter += 1;
-
-                var t = NoSeries.FirstOrDefault(p => p.MetaCode == item.MetaCode);
-                if (t == null)
-                    continue;
-
-                t.Counter = item.Counter;
-
-                item.NewValue = item.Prefix + Convert.ToString(item.Counter); 
-
-                res.Add(item);
-
-            }
-
-            Client.SaveChanges();
-
-    */
-
-
-            return res;
-
-        }
-
-        public List<NoSerieModelItem> GetNoSeries()
-        {
-            var res = new List<NoSerieModelItem>();
-            /*
-            var res = NoSeries.Select(p => new NoSerieModelItem(p)).ToList();
-            var ditems = MetaDBItem.Select(p => new DatabaseModelItem(p)).ToList();
-
-            foreach (var item in res)
-            {
-
-
-
-                if (!string.IsNullOrEmpty(item.AppMetaCode))
-                {
-                    var app = AppDescription.FirstOrDefault(p => p.MetaCode == item.AppMetaCode);
-                    if (app != null)
-                    {
-                        item.Application = new ApplicationModelItem(app);
-                        if (!string.IsNullOrEmpty(item.DataMetaCode))
-                        {
-                            var dinf = ditems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
-                            if (dinf != null)
-                                item.DataInfo = dinf;
-                        }
-                    }
-                }
-
-            }
-            */
-            return res;
-        }
 
         #region Application
         public List<ApplicationModelItem> GetApplicationModelItems()
@@ -903,42 +822,71 @@ namespace Intwenty
             var filtered = Client.GetAll<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
 
             var SqlClient = Client as IntwentySqlDbClient;
-            if (SqlClient == null)
-                return;
-
-            SqlClient.Open();
-            foreach (var t in filtered)
+            if (SqlClient != null)
             {
-                if (string.IsNullOrEmpty(t.BatchName))
-                    continue;
 
-                if (t.BatchName == batchname)
+
+                SqlClient.Open();
+                foreach (var t in filtered)
                 {
-                    if (t.MetaType == "APPLICATION")
+                    if (string.IsNullOrEmpty(t.BatchName))
+                        continue;
+
+                    if (t.BatchName == batchname)
                     {
-                        var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
-                        if (app != null && t.Id > 0)
+                        if (t.MetaType == "APPLICATION")
                         {
-                            SqlClient.CreateCommand("delete from " + app.DbName + " where ID = " + t.Id);
-                            SqlClient.ExecuteNonQuery();
+                            var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
+                            if (app != null && t.Id > 0)
+                            {
+                                SqlClient.CreateCommand("delete from " + app.DbName + " where ID = " + t.Id);
+                                SqlClient.ExecuteNonQuery();
 
-                            SqlClient.CreateCommand("delete from " + app.VersioningTableName + " where ID = " + t.Id);
-                            SqlClient.ExecuteNonQuery();
+                                SqlClient.CreateCommand("delete from " + app.VersioningTableName + " where ID = " + t.Id);
+                                SqlClient.ExecuteNonQuery();
 
-                            SqlClient.CreateCommand("delete from sysdata_InformationStatus where ID = " + t.Id);
-                            SqlClient.ExecuteNonQuery();
+                                SqlClient.CreateCommand("delete from sysdata_InformationStatus where ID = " + t.Id);
+                                SqlClient.ExecuteNonQuery();
 
-                            SqlClient.CreateCommand("delete from sysdata_SystemID where ID = " + t.Id);
-                            SqlClient.ExecuteNonQuery();
+                                SqlClient.CreateCommand("delete from sysdata_SystemID where ID = " + t.Id);
+                                SqlClient.ExecuteNonQuery();
 
+                            }
                         }
                     }
+
+                }
+                SqlClient.Close();
+
+            }
+            else
+            {
+                var NoSqlClient = Client as IntwentyNoSqlDbClient;
+
+                foreach (var t in filtered)
+                {
+                    if (string.IsNullOrEmpty(t.BatchName))
+                        continue;
+
+                    if (t.BatchName == batchname)
+                    {
+                        if (t.MetaType == "APPLICATION")
+                        {
+                            var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
+                            if (app != null && t.Id > 0)
+                            {
+                                NoSqlClient.DeleteJsonDocumentById(app.DbName, t.Id, 1);
+                                NoSqlClient.DeleteJsonDocumentById(app.VersioningTableName, t.Id, 1);
+                                NoSqlClient.Delete<InformationStatus>(new InformationStatus() { Id=t.Id });
+                                NoSqlClient.Delete<SystemID>(new SystemID() { Id = t.Id });
+
+                            }
+                        }
+                    }
+
                 }
 
             }
-            SqlClient.Close();
-
-         
 
         }
 

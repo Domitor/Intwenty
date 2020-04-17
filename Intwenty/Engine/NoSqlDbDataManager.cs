@@ -61,7 +61,52 @@ namespace Intwenty.Engine
 
         public OperationResult GenerateTestData(int gencount)
         {
-            throw new NotImplementedException();
+            var rnd = new Random(9999999);
+
+            foreach (var t in this.Model.DataStructure)
+            {
+
+                if (t.IsMetaTypeDataColumn && t.IsRoot)
+                {
+                    if (t.HasPropertyWithValue("DEFVAL", "AUTO"))
+                    {
+                        //continue;
+                    }
+
+                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected && p.DataMetaCode == t.MetaCode);
+                    if (lookup != null)
+                    {
+                        //continue;
+
+                        var view = NoSqlClient.GetJSONArray(lookup.DataViewInfo.QueryTableDbName);
+                        var doc = System.Text.Json.JsonDocument.Parse(view.ToString());
+                        var array = doc.RootElement.EnumerateArray();
+                        if (array.Count() > 0)
+                        {
+                            var val = array.Last();
+                            this.ClientState.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo.DbName, Value = val.GetProperty(lookup.DataViewColumnInfo.SQLQueryFieldName).GetString() });
+                            if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
+                            {
+                                this.ClientState.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.DbName, Value = val.GetProperty(lookup.DataViewColumnInfo2.SQLQueryFieldName).GetString() });
+                            }
+
+                        }
+
+
+                    }
+                    else
+                    {
+
+                        var value = TestDataHelper.GetSemanticValue(this.Model, t, rnd, gencount);
+                        if (value != null)
+                            this.ClientState.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
+
+                    }
+                }
+
+            }
+
+            return this.Save(this.ClientState);
         }
 
        
@@ -90,29 +135,28 @@ namespace Intwenty.Engine
                 if (string.IsNullOrEmpty(tablename))
                     throw new InvalidOperationException(string.Format("Could not find tablename/collectionname for the {0} dataview query", dv.Title));
 
-                var separator = "";
-                var returnfields = "{";
+
                 var columns = new List<IIntwentyDataColum>();
                 foreach (var viewcol in viewinfo)
                 {
                     if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
                     {
-                        returnfields += separator + DBHelpers.GetJSONValue(viewcol.SQLQueryFieldName, 1);
-                        separator = ", ";
+                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName });
                     }
                 }
-                returnfields += "}";
 
-                var filterfields = "{}";
+
+                var expression = "";
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                 {
-                    filterfields = string.Format("\"{0}\": /{1}/", args.FilterField, args.FilterValue);
-                    filterfields = "{" + filterfields + "}";
+                    expression = "(";
+                    expression += string.Format("'[{0}]' LIKE '%{1}%'", args.FilterField, args.FilterValue);
+                    expression += ")";
                 }
 
                 result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
 
-                var jsonresult = NoSqlClient.GetAsJSONArray(tablename, filterfields, returnfields, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var jsonresult = NoSqlClient.GetJSONArray(tablename, expression, columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
 
                 result.Data = jsonresult.ToString();
 
@@ -155,38 +199,27 @@ namespace Intwenty.Engine
                 result.RetriveListArgs = new ListRetrivalArgs();
                 result.RetriveListArgs = args;
 
-                string filterfields = string.Empty;
-                foreach (var v in viewinfo)
+                string expression = "()";
+                var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == args.DataViewMetaCode);
+                if (keyfield != null)
                 {
-                    if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
-                    {
-                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == v.MetaCode);
-                        if (keyfield == null)
-                            continue;
-
-                        filterfields = string.Format("\"{0}\":\"{1}\"", args.FilterField, args.FilterValue);
-                        filterfields = "{" + filterfields + "}";
-                        break;
-                    }
+                    expression = "(";
+                    expression += string.Format("'[{0}]' = '{1}'", keyfield.SQLQueryFieldName, args.FilterValue);
+                    expression += ")";
                 }
+                  
 
-                if (string.IsNullOrEmpty(filterfields))
-                    throw new InvalidOperationException("Could not set filter in GetDataViewValue(viewinfo, args).");
-
-                var separator = "";
-                var returnfields = "{";
                 var columns = new List<IIntwentyDataColum>();
                 foreach (var viewcol in viewinfo)
                 {
                     if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
                     {
-                        returnfields += separator + DBHelpers.GetJSONValue(viewcol.SQLQueryFieldName, 1);
-                        separator = ", ";
+                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName });
                     }
                 }
-                returnfields += "}";
 
-                var jsonresult = NoSqlClient.GetAsJSONObject(tablename, filterfields, returnfields);
+
+                var jsonresult = NoSqlClient.GetJSONObject(tablename, expression, columns);
                 result.Data = jsonresult.ToString();
 
             }
@@ -218,7 +251,7 @@ namespace Intwenty.Engine
                 jsonresult.Append("{");
 
                 //MAIN TABLE
-                var appjson = NoSqlClient.GetAsJSONObject(this.Model.Application.DbName, this.ClientState.Id, this.ClientState.Version);
+                var appjson = NoSqlClient.GetJSONObject(this.Model.Application.DbName, this.ClientState.Id, this.ClientState.Version);
                 jsonresult.Append("\"" + this.Model.Application.DbName + "\":" + appjson.ToString());
                
 
@@ -227,8 +260,10 @@ namespace Intwenty.Engine
                 {
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
-                        var filter = "{" + string.Format("\"ParentId\":{0}", this.ClientState.Id) + "}";
-                        var tablejson = NoSqlClient.GetAsJSONArray(t.DbName, filter, string.Empty);
+                        var expression = "(";
+                        expression += string.Format("'[{0}]' = '{1}'", "ParentId", this.ClientState.Id);
+                        expression += ")";
+                        var tablejson = NoSqlClient.GetJSONArray(t.DbName, expression, new List<IIntwentyDataColum>());
                         jsonresult.Append(",\"" + t.DbName + "\":" + tablejson.ToString());
                     }
                 }
@@ -257,14 +292,14 @@ namespace Intwenty.Engine
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title), 0, 0);
 
             if (args.MaxCount == 0)
-                args.MaxCount = NoSqlClient.GetCollectionCount(this.Model.Application.DbName);
+                args.MaxCount = NoSqlClient.GetDocumentCount(this.Model.Application.DbName);
 
             result.RetriveListArgs = new ListRetrivalArgs();
             result.RetriveListArgs = args;
 
             try
             {
-                var json = NoSqlClient.GetAsJSONArray(this.Model.Application.DbName, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 result.Data = json.ToString();
 
             }
@@ -310,8 +345,10 @@ namespace Intwenty.Engine
                 var domainindex = 0;
                 foreach (var d in valuedomains)
                 {
-                    var filter = "{" + string.Format("\"DomainName\":\"{0}\"", d.Key) + "}";
-                    var jsonresult = NoSqlClient.GetAsJSONArray("sysmodel_ValueDomainItem", filter, "");
+                    var expression = "(";
+                    expression += string.Format("'[{0}]' = '{1}'", "DomainName", d.Key);
+                    expression += ")";
+                    var jsonresult = NoSqlClient.GetJSONArray("sysmodel_ValueDomainItem", expression, new List<IIntwentyDataColum>());
 
                     if (domainindex == 0)
                         sb.Append("\"" + "VALUEDOMAIN_" + d.Key + "\":");
@@ -411,13 +448,13 @@ namespace Intwenty.Engine
         private int CreateVersionRecord()
         {
 
-            var filter = "{";
-            filter += string.Format("\"{0}\":\"{1}\"", "MetaCode", this.Model.Application.MetaCode);
-            filter += string.Format(",\"{0}\":\"{1}\"", "MetaType", "APPLICATION");
-            filter += string.Format(",\"{0}\":{1}", "Id", this.ClientState.Id);
-            filter += "}";
+            var filter = "(";
+            filter += string.Format("'[{0}]'='{1}'", "MetaCode", this.Model.Application.MetaCode);
+            filter += string.Format(" AND '[{0}]'='{1}'", "MetaType", "APPLICATION");
+            filter += string.Format(" AND '[{0}]'='{1}'", "Id", this.ClientState.Id);
+            filter += ")";
 
-            var newversion = NoSqlClient.GetMaxValue(this.Model.Application.VersioningTableName, filter, "Version");
+            var newversion = NoSqlClient.GetMaxIntValue(this.Model.Application.VersioningTableName, filter, "Version");
             if (newversion < 1)
                 newversion = 1;
             else

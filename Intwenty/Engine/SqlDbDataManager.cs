@@ -192,7 +192,7 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql_stmt.ToString());
-                var appjson = SqlClient.GetAsJSONObject(columns);
+                var appjson = SqlClient.GetJSONObject(columns);
                 SqlClient.Close();
                
                 if (appjson.Length < 5)
@@ -240,7 +240,7 @@ namespace Intwenty.Engine
                         sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
                         SqlClient.Open();
                         SqlClient.CreateCommand(sql_stmt.ToString());
-                        var tablearray = SqlClient.GetAsJSONArray(columns);
+                        var tablearray = SqlClient.GetJSONArray(columns);
                         SqlClient.Close();
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
@@ -400,7 +400,7 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql_list_stmt.ToString());
-                var json = SqlClient.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 SqlClient.Close();
 
                 result.Data = json.ToString();
@@ -587,7 +587,7 @@ namespace Intwenty.Engine
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql);
                 StringBuilder json = null;
-                json = SqlClient.GetAsJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 SqlClient.Close();
 
                 result.Data = json.ToString();
@@ -650,7 +650,7 @@ namespace Intwenty.Engine
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql);
                 SqlClient.AddParameter("@P1", args.FilterValue);
-                var data = SqlClient.GetAsJSONObject(columns);
+                var data = SqlClient.GetJSONObject(columns);
                 SqlClient.Close();
 
                 result.Data = data.ToString();
@@ -672,26 +672,19 @@ namespace Intwenty.Engine
         public OperationResult GenerateTestData(int gencount)
         {
             var rnd = new Random(9999999);
-            var data = new ClientStateInfo();
+
 
             foreach (var t in this.Model.DataStructure)
             {
 
-                if (t.IsMetaTypeDataColumn)
+                if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    if (t.IsDataTypeString)
+                    if (t.HasPropertyWithValue("DEFVAL","AUTO"))
                     {
-                        var noserie = this.Model.NoSeries.Find(p => p.DataMetaCode == t.MetaCode);
-                        if (noserie != null)
-                        {
-                            var nolist = ModelRepository.GetNewNoSeriesValues(this.Model.Application.Id);
-                            var noseriesval = nolist.FirstOrDefault(p => p.DataMetaCode == t.MetaCode).NewValue;
-                            data.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = noseriesval });
-                            continue;
-                        }
+                        //continue;
                     }
 
-                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected);
+                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected && p.DataMetaCode == t.MetaCode);
                     if (lookup != null)
                     {
 
@@ -704,10 +697,10 @@ namespace Intwenty.Engine
                         {
                             var maxindex = ds.Tables[0].Rows.Count - 1;
                             var rowindex = new Random(1).Next(0, maxindex);
-                            data.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName] });
+                            this.ClientState.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName] });
                             if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
                             {
-                                data.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.MetaCode, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName] });
+                                this.ClientState.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.MetaCode, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName] });
                             }
                         }
 
@@ -715,16 +708,16 @@ namespace Intwenty.Engine
                     else
                     {
 
-                        var value = GetSemanticValue(t, rnd, gencount);
+                        var value = TestDataHelper.GetSemanticValue(this.Model,t, rnd, gencount);
                         if (value != null)
-                            data.Values.Add(new ApplicationValue() { DbName = t.MetaCode, Value = value });
+                            this.ClientState.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
 
                     }
                 }
 
             }
 
-            return this.Save(data);
+            return this.Save(this.ClientState);
 
         }
 
@@ -1375,81 +1368,7 @@ namespace Intwenty.Engine
 
         #endregion
 
-        #region Test Data
-
-        private object GetSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
-        {
-            var val = GetCustomSemanticValue(t, rnd, gencount);
-            if (val == null)
-                val = GetStandardSemanticValue(t, rnd, gencount);
-
-            return val;
-        }
-
-        private object GetCustomSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
-        {
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 1)
-                return "Anderssons AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 2)
-                return "Håkanssons AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 3)
-                return "Nilssons AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 4)
-                return "Svenssons AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 5)
-                return "Filipssons AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 6)
-                return "Jägmarks AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 7)
-                return "Björklunds AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 8)
-                return "Stensson AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 9)
-                return "Mega varor AB";
-            if (this.Model.Application.MetaCode == "VENDOR" && t.MetaCode == "VENDORNAME" && gencount == 10)
-                return "Superduper varor AB";
-
-            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 1)
-                return "Centrallager";
-            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 2)
-                return "Lager 2 (Alingsås)";
-            if (this.Model.Application.MetaCode == "LOCATION" && t.MetaCode == "LOCATIONNAME" && gencount == 3)
-                return "Lager 3 (Alingsås)";
-
-            return null;
-
-        }
-
-        private object GetStandardSemanticValue(DatabaseModelItem t, Random rnd, int gencount)
-        {
-
-            if (t.IsDataType1Decimal)
-                return 200.1 + gencount;
-            if (t.IsDataType2Decimal)
-                return 400.55 + gencount;
-            if (t.IsDataType3Decimal)
-                return 70.855 + gencount;
-            if (t.IsDataTypeText)
-                return "This is the first sentence in a sample text generated automaticly for the datatype TEXT. This is the second sentence in a sample text generated automaticly. This is the third sentence in a sample text generated automaticly.";
-            if (t.IsDataTypeString && t.MetaCode.Contains("ID"))
-                return this.Model.Application.MetaCode.Substring(0, 3) + "-" + rnd.Next();
-            if (t.IsDataTypeString && t.MetaCode.Contains("NAME"))
-                return "Test " + this.Model.Application.MetaCode + " name";
-            if (t.IsDataTypeString)
-                return "A test string";
-            if (t.IsDataTypeBool)
-                return true;
-            if (t.IsDataTypeDateTime)
-                return DateTime.Now;
-            if (t.IsDataTypeInt)
-                return 20 + gencount;
-
-            return null;
-
-        }
-
-        #endregion
-
+      
 
 
 

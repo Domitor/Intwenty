@@ -384,8 +384,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetNoSeries")]
         public JsonResult GetNoSeries()
         {
-            var t = ModelRepository.GetNoSeries();
-            return new JsonResult(NoSeriesVmCreator.GetNoSeriesVm(t));
+            return new JsonResult(new List<NoSeriesVm>());
 
         }
 
