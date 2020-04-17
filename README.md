@@ -56,12 +56,13 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - PostgreSQL
 - SQLite
 - MongoDB
+- LiteDB
 
 # How to get started
 <a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
 
 # Status
-Weekly updates
+Weekly updates, but not ready for production use.
 
 
 
