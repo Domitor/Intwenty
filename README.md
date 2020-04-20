@@ -18,6 +18,8 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 6. Let the user easily override all the above when necessary.
 
 # Features
+- Supports 6 databases, se list below.
+- Implements Asp.Net Core Identity.
 - Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
 - Easy import and export of metamodels which makes it possible for users to share models.
 - Automatic CRUD endpoints for integrations.
@@ -60,6 +62,13 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 
 # How to get started
 <a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
+
+# How to get Intwenty
+- Fork this Repository.
+- Download the latest release on github.
+- Use the nuget package.
+
+
 
 # Status
 Weekly updates, but not ready for production use.
