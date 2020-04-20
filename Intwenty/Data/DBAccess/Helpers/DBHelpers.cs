@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Linq;
 namespace Intwenty.Data.DBAccess.Helpers
 {
     public enum StringLength { Standard, Long, Short };
-
-    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
 
     public class IntwentySqlParameter
     {
@@ -516,7 +515,7 @@ namespace Intwenty.Data.DBAccess.Helpers
             
             res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT", Length = StringLength.Short });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT", Length = StringLength.Long });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT", Length = StringLength.Long });
 
 
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.MSSqlServer, DBMSDataType = "INT" });

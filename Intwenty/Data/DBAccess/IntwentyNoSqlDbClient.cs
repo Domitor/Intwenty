@@ -10,6 +10,7 @@ using Intwenty.Data.Entity;
 using MongoDB.Bson;
 using System.IO;
 using System.Data;
+using Shared;
 
 namespace Intwenty.Data.DBAccess
 {

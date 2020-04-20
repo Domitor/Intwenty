@@ -1,7 +1,5 @@
-﻿using Intwenty.Data.DBAccess.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Shared;
+
 
 namespace Intwenty.Data.DBAccess
 {

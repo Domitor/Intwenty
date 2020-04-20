@@ -95,11 +95,11 @@ namespace Intwenty
             Connections = connections.Value;
             if (Settings.IsNoSQL)
             {
-                Client = new IntwentyNoSqlDbClient((DBMS)Settings.IntwentyDBMS, Connections.IntwentyConnection, "IntwentyDb");
+                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Connections.DefaultConnection, "IntwentyDb");
             }
             else
             {
-                Client = new IntwentySqlDbClient((DBMS)Settings.IntwentyDBMS, Connections.IntwentyConnection);
+                Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Connections.DefaultConnection);
             }
            
         }

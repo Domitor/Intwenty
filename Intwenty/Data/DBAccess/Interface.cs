@@ -1,6 +1,7 @@
-﻿using Intwenty.Data.DBAccess.Helpers;
+﻿using System;
+using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
-using System;
+using Shared;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;

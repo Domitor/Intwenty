@@ -5,19 +5,20 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
+
+    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
+
     public class ConnectionStrings
     {
-        public string IdentityConnection { get; set; }
-        public string IntwentyConnection { get; set; }
+        public string DefaultConnection { get; set; }
 
     }
 
     public class SystemSettings
     {
+        public DBMS DefaultConnectionDBMS { get; set; }
         public bool ReCreateModelOnStartUp { get; set; }
         public bool IsDevelopment { get; set; }
-        public int IdentityDBMS { get; set; }
-        public int IntwentyDBMS { get; set; }
         public string SiteLanguage { get; set; }
         public bool AllowExternalLogins { get; set; }
         public bool AllowMFA { get; set; }
@@ -58,7 +59,7 @@ namespace Shared
 
             get
             {
-                if (IntwentyDBMS == 5 || IntwentyDBMS == 6)
+                if (DefaultConnectionDBMS == DBMS.MongoDb  || DefaultConnectionDBMS == DBMS.LiteDb)
                     return true;
 
                 return false;

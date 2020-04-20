@@ -26,9 +26,9 @@ namespace Intwenty.Data.Seed
             var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
             IIntwentyDbORM DataRepository = null;
             if (Settings.Value.IsNoSQL)
-                DataRepository = new IntwentyNoSqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection, "IntwentyDb");
+                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Connections.Value.DefaultConnection, "IntwentyDb");
             else
-                DataRepository = new IntwentySqlDbClient((DBMS)Settings.Value.IntwentyDBMS, Connections.Value.IntwentyConnection);
+                DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Connections.Value.DefaultConnection);
 
             /*
          builder.Entity<SystemUser>(entity => { entity.ToTable(name: "security_User"); });

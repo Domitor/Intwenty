@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Data.OleDb;
 using MySql.Data.MySqlClient;
 using Npgsql;
-using NpgsqlTypes;
 using System.Text;
 using System.Collections.Generic;
-using System.Reflection;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
-using Intwenty.Model;
 using System.Data.SQLite;
-using System.Data.Common;
+using Shared;
 
 namespace Intwenty.Data.DBAccess
 {
