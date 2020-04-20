@@ -27,7 +27,7 @@ namespace Intwenty.Data.DBAccess
         public IntwentyNoSqlDbClient()
         {
             ConnectionString = string.Empty;
-            DbEngine = DBMS.MSSqlServer;
+            DbEngine = DBMS.MongoDb;
         }
 
         public IntwentyNoSqlDbClient(DBMS d, string connectionstring, string databasename)
@@ -37,16 +37,49 @@ namespace Intwenty.Data.DBAccess
             DatabaseName = databasename;
             if (DbEngine != DBMS.MongoDb && DbEngine != DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentyNoSqlDbClient configured with wrong DBMS setting");
+
             if (DbEngine == DBMS.LiteDb && LiteDbClient == null)
             {
-                ConnectionString = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\litedb", ConnectionString);
+                SetLiteDbConnectionString();
                 LiteDbClient = new LiteDatabase(ConnectionString);
             }
             if (DbEngine == DBMS.MongoDb && MongoDbClient == null)
             {
+                if (!ConnectionString.ToLower().Contains("filename"))
+                    throw new InvalidOperationException("MongoDb connectionstring must contain mongodb");
+
                 var client = new MongoClient(ConnectionString);
                 MongoDbClient = client.GetDatabase(DatabaseName);
             }
+        }
+
+        private void SetLiteDbConnectionString()
+        {
+            if (!ConnectionString.ToLower().Contains("filename"))
+                throw new InvalidOperationException("LiteDb connectionstring must contain filename");
+
+            string filename = "";
+            var index = ConnectionString.IndexOf("=") + 1;
+            if (index < 5)
+                throw new InvalidOperationException("Error in litedb connectionstring");
+            var index2 = ConnectionString.IndexOf(";");
+            if (index2 > 0)
+            {
+                filename = ConnectionString.Substring(index, index2 - index);
+                filename = Path.Combine(Directory.GetCurrentDirectory(), filename);
+                ConnectionString = ConnectionString.Remove(index, index2 - index);
+                ConnectionString = ConnectionString.Insert(index, filename);
+            }
+            else
+            {
+                filename = ConnectionString.Substring(index);
+                filename = Path.Combine(Directory.GetCurrentDirectory(), filename);
+                ConnectionString = ConnectionString.Remove(index);
+                ConnectionString = ConnectionString.Insert(index, filename);
+            }
+
+            if (ConnectionString.Contains("/"))
+                ConnectionString = ConnectionString.Replace("/", "\\");
         }
 
         public void CreateTable<T>(bool checkexisting = false)
@@ -145,9 +178,12 @@ namespace Intwenty.Data.DBAccess
             return 0;
         }
 
-      
+        public T GetOne<T>(int id) where T : new()
+        {
+            return GetOne<T>(Convert.ToString(id));
+        }
 
-        public T GetOne<T>(int id, int version) where T : new()
+        public T GetOne<T>(string id) where T : new()
         {
             var workingtype = typeof(T);
             var tablename = workingtype.Name;

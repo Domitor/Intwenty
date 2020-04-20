@@ -2,14 +2,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IntwentyDemo.Data.Entity;
-using IntwentyDemo.Data;
 using Shared;
 using Intwenty;
+using Intwenty.Data.Identity;
 
 
 namespace IntwentyDemo
@@ -23,7 +21,7 @@ namespace IntwentyDemo
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+       
         public void ConfigureServices(IServiceCollection services)
         {
             //System Settings
@@ -43,30 +41,8 @@ namespace IntwentyDemo
 
             var settings = Configuration.GetSection(nameof(SystemSettings)).Get<SystemSettings>();
 
-            // Add IdentityDbContext
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                if (settings.IdentityDBMS == 0)
-                    options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection"));
-                if (settings.IdentityDBMS == 1)
-                    options.UseMySql(Configuration.GetConnectionString("IdentityConnection"));
-                if (settings.IdentityDBMS == 2)
-                    options.UseMySql(Configuration.GetConnectionString("IdentityConnection"));
-                if (settings.IdentityDBMS == 3)
-                    options.UseNpgsql(Configuration.GetConnectionString("IdentityConnection"));
-                if (settings.IdentityDBMS == 4)
-                    options.UseSqlite(Configuration.GetConnectionString("IdentityConnection"));
 
-            });
-
-            /*
-            services.AddDbContext<IntwentyDbContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-
-            });
-            */
-
+            //Use Identity 
             services.AddDefaultIdentity<SystemUser>(options =>
             {
                 //options.SignIn.RequireConfirmedAccount = true;
@@ -77,12 +53,10 @@ namespace IntwentyDemo
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 5;
                 options.Password.RequireNonAlphanumeric = false;
-                }) 
-               .AddRoles<SystemRole>()
-               .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            //Intwenty controller
-            var assembly = typeof(Intwenty.Controllers.ApplicationController).Assembly;
+            })
+             .AddRoles<SystemRole>()
+             .AddUserStore<IntwentyUserStore>()
+             .AddRoleStore<IntwentyRoleStore>();
 
             services.AddControllersWithViews().AddJsonOptions(options =>
             {
@@ -90,18 +64,9 @@ namespace IntwentyDemo
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.WriteIndented = false;
                 options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-            }).AddApplicationPart(assembly);
+            });
 
             services.AddRazorPages().AddRazorRuntimeCompilation();
-
-            /*
-            services.AddRazorPages().AddRazorRuntimeCompilation(options =>
-            {
-                options.FileProviders.Add(new EmbeddedFileProvider(assembly));
-
-            });
-            */
-
 
         }
 

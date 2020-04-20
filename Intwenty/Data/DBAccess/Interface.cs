@@ -21,7 +21,8 @@ namespace Intwenty.Data.DBAccess
     public interface IIntwentyDbORM
     {
         void CreateTable<T>(bool checkexisting = false);
-        T GetOne<T>(int id, int version) where T : new();
+        T GetOne<T>(int id) where T : new();
+        T GetOne<T>(string id) where T : new();
         List<T> GetAll<T>() where T : new();
         int Insert<T>(T model);
         int Update<T>(T model);
@@ -80,7 +81,7 @@ namespace Intwenty.Data.DBAccess
         StringBuilder GetJSONObject(List<IIntwentyDataColum> returnfields);
         NonQueryResult ExecuteNonQuery();
         void CreateTable<T>(bool checkexisting = false, bool use_current_connection = false);
-        T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new();
+        T GetOne<T>(int id, bool use_current_connection = false) where T : new();
         List<T> GetAll<T>(bool use_current_connection = false) where T : new();
         int Insert<T>(T model, bool use_current_connection = false);
         int Update<T>(T model, bool use_current_connection = false);

@@ -118,14 +118,19 @@ namespace Intwenty.Data.DBAccess
             DBClient.CreateTable<T>(checkexisting, use_current_connection);
         }
 
-        public T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new()
+        public T GetOne<T>(int id, bool use_current_connection = false) where T : new()
         {
-            return DBClient.GetOne<T>(id, version, use_current_connection);
+            return DBClient.GetOne<T>(id, use_current_connection);
         }
 
-        public T GetOne<T>(int id, int version) where T : new()
+        public T GetOne<T>(int id) where T : new()
         {
-            return DBClient.GetOne<T>(id, version, false);
+            return DBClient.GetOne<T>(id);
+        }
+
+        public T GetOne<T>(string id) where T : new()
+        {
+            return DBClient.GetOne<T>(id);
         }
 
         public List<T> GetAll<T>() where T : new()

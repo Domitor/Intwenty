@@ -537,6 +537,12 @@ namespace Intwenty.Data.DBAccess.Helpers
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.PostgreSQL, DBMSDataType = "TIMESTAMP" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.SQLite, DBMSDataType = "DATETIME" });
 
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MariaDB, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MySql, DBMSDataType = "DATETIME" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.PostgreSQL, DBMSDataType = "TIMESTAMP" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.SQLite, DBMSDataType = "DATETIME" });
+
             res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });

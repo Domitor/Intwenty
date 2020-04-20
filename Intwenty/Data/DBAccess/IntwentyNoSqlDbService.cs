@@ -42,11 +42,14 @@ namespace Intwenty.Data.DBAccess
             get { return DBClient.IsNoSql; }
         }
 
-        public T GetOne<T>(int id, int version) where T : new()
+        public T GetOne<T>(int id) where T : new()
         {
-            return DBClient.GetOne<T>(id, version);
+            return DBClient.GetOne<T>(id);
         }
-
+        public T GetOne<T>(string id) where T : new()
+        {
+            return DBClient.GetOne<T>(id);
+        }
         public List<T> GetAll<T>() where T : new()
         {
             return DBClient.GetAll<T>();

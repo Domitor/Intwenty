@@ -703,7 +703,7 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public T GetOne<T>(int id, int version, bool use_current_connection = false) where T : new()
+        public T GetOne<T>(int id, bool use_current_connection = false) where T : new()
         {
             var parameters = new List<IntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter() { ParameterName = "@KEY1", Value = id });
@@ -714,8 +714,13 @@ namespace Intwenty.Data.DBAccess
                 return default(T);
         }
 
-        public T GetOne<T>(int id, int version) where T : new()
+        public T GetOne<T>(int id) where T : new()
         {
+            return GetOne<T>(Convert.ToString(id));
+        }
+
+        public T GetOne<T>(string id) where T : new()
+        { 
             var parameters = new List<IntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter() { ParameterName="@KEY1", Value=id });
             var result = GetFromTableByType<T>(parameters, false);
@@ -1444,6 +1449,14 @@ namespace Intwenty.Data.DBAccess
             var allownullvalue = "NULL";
             var autoincvalue = string.Empty;
             var datatype = string.Empty;
+
+            if (nettype.Contains("["))
+            {
+                var index1 = nettype.IndexOf("[");
+                var index2 = nettype.IndexOf("]");
+                nettype = nettype.Substring(index1 + 1, (index2) - (index1 + 1));
+
+            }
 
             var dtmap = DBHelpers.GetDataTypeMap().Find(p => p.NetType == nettype.ToUpper() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DbEngine);
             if (dtmap==null)

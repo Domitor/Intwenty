@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using IntwentyDemo.Data.Entity;
+using Intwenty.Data.Identity;
 
 namespace IntwentyDemo.Areas.Identity.Pages.Account
 {
