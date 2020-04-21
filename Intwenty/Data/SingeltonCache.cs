@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Data
 {
+
+    [Obsolete]
     public sealed class SingeltonCache
     {
         private static SingeltonCache instance = null;
@@ -50,7 +52,6 @@ namespace Intwenty.Data
         {
             Remove(key);
             var res = CachedObjects.TryAdd(key, value);
-            var x = "";
         }
 
         public void Remove(string key)

@@ -53,7 +53,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Intwenty\Intwenty.csproj" />
-    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,9 +6,9 @@ using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Annotations;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Engine;
+using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Shared;
 
 namespace Intwenty.Data.Identity
 {
@@ -44,23 +44,20 @@ namespace Intwenty.Data.Identity
 
     public class IntwentyUserStore : IUserStore<SystemUser>, IUserPasswordStore<SystemUser>, IUserRoleStore<SystemUser>
     {
-        private SystemSettings Settings { get; }
+        private IntwentySettings Settings { get; }
 
-        private ConnectionStrings DbConnections { get; }
-
-        public IntwentyUserStore(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentyUserStore(IOptions<IntwentySettings> settings)
         {
             Settings = settings.Value;
-            DbConnections = connections.Value;
         }
 
         public Task<IdentityResult> CreateAsync(SystemUser user, CancellationToken cancellationToken)
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Insert<SystemUser>(user);
 
@@ -71,9 +68,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Delete(user);
 
@@ -89,9 +86,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var user = client.GetOne<SystemUser>(userId);
 
@@ -102,9 +99,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var user = client.GetAll<SystemUser>().Find(p => p.NormalizedUserName == normalizedUserName);
 
@@ -145,9 +142,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Update(user);
 
@@ -174,9 +171,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var existingrole = client.GetAll<SystemRole>().Find(p => p.NormalizedName == roleName);
             if (existingrole == null)
@@ -197,9 +194,9 @@ namespace Intwenty.Data.Identity
             IList<string> result = new List<string>();
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var userroles = client.GetAll<SystemUserRole>();
             var roles = client.GetAll<SystemRole>();
@@ -227,9 +224,9 @@ namespace Intwenty.Data.Identity
             IList<SystemUser> result = new List<SystemUser>();
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var userroles = client.GetAll<SystemUserRole>();
             var users = client.GetAll<SystemUser>();
@@ -261,9 +258,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var existingrole = client.GetAll<SystemRole>().Find(p => p.NormalizedName == roleName);
             if (existingrole == null)
@@ -282,23 +279,21 @@ namespace Intwenty.Data.Identity
     public class IntwentyRoleStore : IRoleStore<SystemRole>
     {
 
-        private SystemSettings Settings { get; }
+        private IntwentySettings Settings { get; }
 
-        private ConnectionStrings DbConnections { get; }
 
-        public IntwentyRoleStore(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentyRoleStore(IOptions<IntwentySettings> settings)
         {
             Settings = settings.Value;
-            DbConnections = connections.Value;
         }
 
         public Task<IdentityResult> CreateAsync(SystemRole role, CancellationToken cancellationToken)
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Insert(role);
 
@@ -309,9 +304,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Delete(role);
 
@@ -327,9 +322,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var role = client.GetOne<SystemRole>(roleId);
 
@@ -340,9 +335,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var role = client.GetAll<SystemRole>().Find(p => p.NormalizedName == normalizedRoleName);
 
@@ -380,9 +375,9 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, DbConnections.DefaultConnection);
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Update(role);
 

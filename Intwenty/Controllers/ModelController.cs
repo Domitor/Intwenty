@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Intwenty.Model.DesignerVM;
-using Intwenty.Data;
-using Intwenty;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Data.Dto;
@@ -12,7 +10,7 @@ using Intwenty.Data.Dto;
 namespace Intwenty.Controllers
 {
     
-    [Authorize(Roles="Administrator")]
+    //[Authorize(Roles="Administrator")]
     public class ModelController : Controller
     {
         public IIntwentyDataService DataRepository { get; }

@@ -1,17 +1,15 @@
-﻿using Intwenty.Data.DBAccess;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
-using Microsoft.Extensions.Options;
-using Shared;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+
 
 
 namespace Intwenty.Engine
@@ -28,7 +26,7 @@ namespace Intwenty.Engine
 
         protected ApplicationModel Model { get; set; }
 
-        protected SystemSettings Settings { get; set; }
+        protected IntwentySettings Settings { get; set; }
 
         public ClientStateInfo ClientState { get; set; }
 
@@ -42,7 +40,7 @@ namespace Intwenty.Engine
 
         protected List<DBMSCommandMap> Commands { get; set; }
 
-        protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentySqlDbClient sqlclient)
+        protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
         {
             Settings = settings;
             Model = model;
@@ -53,7 +51,7 @@ namespace Intwenty.Engine
             Commands = DBHelpers.GetDBMSCommandMap();
         }
 
-        public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentySqlDbClient sqlclient)
+        public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
         {
             
 

@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shared
+namespace Intwenty.Model
 {
 
     public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
 
-    public class ConnectionStrings
+ 
+    public class IntwentySettings
     {
         public string DefaultConnection { get; set; }
 
-    }
-
-    public class SystemSettings
-    {
         public DBMS DefaultConnectionDBMS { get; set; }
         public bool ReCreateModelOnStartUp { get; set; }
         public bool IsDevelopment { get; set; }

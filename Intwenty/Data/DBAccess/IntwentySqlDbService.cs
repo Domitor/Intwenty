@@ -1,10 +1,10 @@
 using System.Data;
 using Microsoft.Extensions.Options;
 using System.Text;
-using Shared;
 using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Model;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -14,17 +14,14 @@ namespace Intwenty.Data.DBAccess
     public class IntwentySqlDbService : IIntwentyDbSql
     {
 
-        private IOptions<SystemSettings> Settings { get; }
-
-        private IOptions<ConnectionStrings> Connections { get; }
+        private IOptions<IntwentySettings> Settings { get; }
 
         private IntwentySqlDbClient DBClient { get; }
 
-        public IntwentySqlDbService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections)
+        public IntwentySqlDbService(IOptions<IntwentySettings> settings)
         {
             Settings = settings;
-            Connections = connections;
-            DBClient = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Connections.Value.DefaultConnection);
+            DBClient = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
         }
 
         public string ConnectionString

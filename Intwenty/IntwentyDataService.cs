@@ -6,7 +6,6 @@ using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Dto;
-using Shared;
 using Intwenty.Data.Entity;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess;
@@ -54,9 +53,7 @@ namespace Intwenty
     public class IntwentyDataService : IIntwentyDataService
     {
         
-        private SystemSettings Settings { get; }
-
-        private ConnectionStrings DbConnections { get; }
+        private IntwentySettings Settings { get; }
 
         private DBMS DBMSType { get; }
 
@@ -64,10 +61,9 @@ namespace Intwenty
 
         private IIntwentyModelService ModelRepository { get; }
 
-        public IntwentyDataService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections,  IIntwentyModelService modelservice)
+        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice)
         {
             Settings = settings.Value;
-            DbConnections = connections.Value;
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
             IsNoSql = settings.Value.IsNoSQL;
@@ -94,9 +90,9 @@ namespace Intwenty
 
                         IIntwentyDbORM client = null;
                         if (IsNoSql)
-                            client = new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb");
+                            client = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb");
                         else
-                            client = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+                            client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
 
 
                         var result = client.GetAll<DefaultValue>();
@@ -136,14 +132,14 @@ namespace Intwenty
             {
                 if (IsNoSql)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                     res.Add(t.ConfigureDatabase());
 
                     
                 }
                 else
                 {
-                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                     res.Add(t.ConfigureDatabase());
                 }
             }
@@ -163,7 +159,7 @@ namespace Intwenty
             {
                 try
                 {
-                    var client = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+                    var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                     client.Open();
                     client.CreateCommand("SELECT 1 FROM " + l[0].Application.DbName);
                     client.ExecuteScalarQuery();
@@ -186,13 +182,13 @@ namespace Intwenty
             {
                 if (IsNoSql)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                     var result = t.Save(state);
                     return result;
                 }
                 else
                 {
-                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                     var result = t.Save(state);
                     return result;
                 }
@@ -212,12 +208,12 @@ namespace Intwenty
 
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetList(args);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetList(args);
             }
            
@@ -239,12 +235,12 @@ namespace Intwenty
 
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetLatestIdByOwnerUser(state);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetLatestIdByOwnerUser(state);
             }
 
@@ -257,12 +253,12 @@ namespace Intwenty
 
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetLatestVersion(state);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetLatestVersion(state);
             }
           
@@ -274,12 +270,12 @@ namespace Intwenty
         {
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetValueDomains();
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetValueDomains();
             }
 
@@ -509,7 +505,7 @@ namespace Intwenty
                         {
                             if (!IsNoSql)
                             {
-                                var client = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+                                var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                                 client.Open();
                                 client.CreateCommand(v.SQLQuery);
                                 var t = client.ExecuteScalarQuery();
@@ -554,11 +550,11 @@ namespace Intwenty
                 IntwentySqlDbClient sqlclient=null;
                 if (IsNoSql)
                 {
-                    nosqlclient = new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb");
+                    nosqlclient = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb");
                 }
                 else
                 {
-                    sqlclient = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+                    sqlclient = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                 }
 
                 var apps = ModelRepository.GetApplicationModels();
@@ -645,12 +641,12 @@ namespace Intwenty
         {
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetDataView(viewinfo, args);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetDataView(viewinfo, args);
             }
 
@@ -661,12 +657,12 @@ namespace Intwenty
         {
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, DbConnections.DefaultConnection, "IntwentyDb"));
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb"));
                 return t.GetDataViewValue(viewinfo, args);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection));
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetDataViewValue(viewinfo, args);
             }
 
@@ -699,7 +695,7 @@ namespace Intwenty
                 }
                 else
                 {
-                    var client = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+                    var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                     client.Open();
                     client.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (getDate(), @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
                     client.AddParameter("@Verbosity", verbosity);
@@ -723,7 +719,7 @@ namespace Intwenty
             if (!Settings.IsDevelopment)
                 return;
 
-            var client = new IntwentySqlDbClient(DBMSType, DbConnections.DefaultConnection);
+            var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
             client.Open();
             client.CreateTable<ApplicationItem>(true);
             client.CreateTable<DatabaseItem>(true);

@@ -1,10 +1,9 @@
-﻿using Intwenty.Data.DBAccess;
+﻿using System;
+using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
-using Shared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +18,7 @@ namespace Intwenty.Engine
 
         protected IntwentyNoSqlDbClient NoSqlClient { get; set; }
 
-        protected SystemSettings Settings { get; set; }
+        protected IntwentySettings Settings { get; set; }
 
         public ClientStateInfo ClientState { get; set; }
 
@@ -30,7 +29,7 @@ namespace Intwenty.Engine
         protected DateTime ApplicationSaveTimeStamp { get; set; }
 
 
-        protected NoSqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyNoSqlDbClient nosqlclient)
+        protected NoSqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentyNoSqlDbClient nosqlclient)
         {
             Settings = settings;
             Model = model;
@@ -39,7 +38,7 @@ namespace Intwenty.Engine
             ApplicationSaveTimeStamp = DateTime.Now;
         }
 
-        public static NoSqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentyNoSqlDbClient nosqlclient)
+        public static NoSqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentyNoSqlDbClient nosqlclient)
         {
 
 

@@ -1,5 +1,5 @@
-﻿using Shared;
-
+﻿
+using Intwenty.Model;
 
 namespace Intwenty.Data.DBAccess
 {

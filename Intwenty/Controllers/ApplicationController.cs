@@ -1,18 +1,14 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Intwenty.Model;
 using Intwenty.Data.Dto;
 using Microsoft.AspNetCore.Http;
 
 namespace Intwenty.Controllers
 {
-    [Authorize(Roles = "User,Administrator,Producer")]
+    //[Authorize(Roles = "User,Administrator,Producer")]
     public class ApplicationController : Controller
     {
         private IIntwentyDataService DataRepository { get; }

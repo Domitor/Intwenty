@@ -1,9 +1,9 @@
 ﻿using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
+using Intwenty.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Shared;
 using System;
 
 namespace Intwenty.Data.Seed
@@ -16,17 +16,16 @@ namespace Intwenty.Data.Seed
 
         public static void Seed(IServiceProvider provider)
         {
-            var Settings = provider.GetRequiredService<IOptions<SystemSettings>>();
+            var Settings = provider.GetRequiredService<IOptions<IntwentySettings>>();
 
             if (!Settings.Value.IsDevelopment)
                 return;
 
-            var Connections = provider.GetRequiredService<IOptions<ConnectionStrings>>();
             IIntwentyDbORM DataRepository = null;
             if (Settings.Value.IsNoSQL)
-                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Connections.Value.DefaultConnection, "IntwentyDb");
+                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection, "IntwentyDb");
             else
-                DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Connections.Value.DefaultConnection);
+                DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
 
         
             DataRepository.CreateTable<ApplicationItem>(true);

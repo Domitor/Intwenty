@@ -1,10 +1,10 @@
 ﻿using System;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
-using Shared;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using Intwenty.Model;
 
 namespace Intwenty.Data.DBAccess
 {

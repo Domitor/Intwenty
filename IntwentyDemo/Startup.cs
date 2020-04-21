@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shared;
 using Intwenty;
 using Intwenty.Data.Identity;
-
+using Intwenty.Model;
 
 namespace IntwentyDemo
 {
@@ -25,8 +24,7 @@ namespace IntwentyDemo
         public void ConfigureServices(IServiceCollection services)
         {
             //System Settings
-            services.Configure<SystemSettings>(Configuration.GetSection("SystemSettings"));
-            services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
+            services.Configure<IntwentySettings>(Configuration.GetSection("IntwentySettings"));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -39,7 +37,7 @@ namespace IntwentyDemo
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
 
 
-            var settings = Configuration.GetSection(nameof(SystemSettings)).Get<SystemSettings>();
+            //var settings = Configuration.GetSection(nameof(IntwentySettings)).Get<IntwentySettings>();
 
 
             //Use Identity 

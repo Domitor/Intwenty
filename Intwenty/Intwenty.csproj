@@ -5,7 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.1.2</Version>
+    <Version>1.1.7</Version>
     <Authors>Johan Filipsson</Authors>
     <Company>Domitor Consulting AB</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -16,12 +16,9 @@
     <RepositoryType>git</RepositoryType>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <Description>Create metadata driven applications with java script and ASP.NET Core. This package does not contain any client libraries.</Description>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <StaticWebAssetBasePath Condition="$(StaticWebAssetBasePath) == ''">/path</StaticWebAssetBasePath>
-  </PropertyGroup>
-  
   <ItemGroup>
     <Compile Remove="Pages\**" />
     <Content Remove="Pages\**" />
@@ -48,10 +45,6 @@
     <PackageReference Include="Npgsql" Version="4.1.3.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 

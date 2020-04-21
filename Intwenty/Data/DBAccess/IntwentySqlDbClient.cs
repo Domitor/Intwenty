@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
 using System.Data.SQLite;
-using Shared;
+using Intwenty.Model;
 
 namespace Intwenty.Data.DBAccess
 {

@@ -5,7 +5,6 @@ using Intwenty.Data.Entity;
 using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data;
-using Shared;
 using Microsoft.Extensions.Options;
 using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
@@ -82,24 +81,21 @@ namespace Intwenty
 
         private IMemoryCache ModelCache { get; }
 
-        private SystemSettings Settings { get; }
-
-        private ConnectionStrings Connections { get; }
+        private IntwentySettings Settings { get; }
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
-        public IntwentyModelService(IOptions<SystemSettings> settings, IOptions<ConnectionStrings> connections, IMemoryCache cache)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             ModelCache = cache;
             Settings = settings.Value;
-            Connections = connections.Value;
             if (Settings.IsNoSQL)
             {
-                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Connections.DefaultConnection, "IntwentyDb");
+                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
             }
             else
             {
-                Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Connections.DefaultConnection);
+                Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             }
            
         }

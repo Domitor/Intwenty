@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Intwenty.Engine;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 using Intwenty.Data.DBAccess;
-using Shared;
 
 namespace Intwenty.Custom
 {
@@ -12,7 +11,7 @@ namespace Intwenty.Custom
     public class CustomSqlDbDataManagerExample : SqlDbDataManager
     {
 
-        public CustomSqlDbDataManagerExample(ApplicationModel model, IIntwentyModelService modelservice, SystemSettings settings, IntwentySqlDbClient sqlclient) : base(model,modelservice,settings, sqlclient)
+        public CustomSqlDbDataManagerExample(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient) : base(model,modelservice,settings, sqlclient)
         {
         }
 

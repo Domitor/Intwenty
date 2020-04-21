@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntwentyDemo", "IntwentyDem
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Intwenty", "Intwenty\Intwenty.csproj", "{7A56EAFE-D518-4982-BE13-9EE1FB56C045}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{B9B2B373-DE60-4345-A338-A8CBDAF98D60}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{7A56EAFE-D518-4982-BE13-9EE1FB56C045}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A56EAFE-D518-4982-BE13-9EE1FB56C045}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A56EAFE-D518-4982-BE13-9EE1FB56C045}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9B2B373-DE60-4345-A338-A8CBDAF98D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
