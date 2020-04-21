@@ -22,7 +22,6 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - Use Asp.Net Core Identity with all supported dbms.
 - Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
 - Easy import and export of metamodels which makes it possible for users to share models.
-- Automatic CRUD endpoints for integrations.
 - Generates documentation. 
 
 # How
