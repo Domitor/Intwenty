@@ -2,7 +2,7 @@
 
 
 # Intwenty
-Create metadata driven applications with java script and ASP.NET Core, a tool for developers or users who wants to build quick business applications without or with minimal coding
+Create metadata driven applications with java script and ASP.NET Core, a tool for lazy developers or users who wants to build quick web applications with minimal coding
 
 # Why
 - To minimize coding by reusing the same code with different sets of metadata.
@@ -18,8 +18,8 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 6. Let the user easily override all the above when necessary.
 
 # Features
-- Supports 6 databases, se list below.
-- Implements Asp.Net Core Identity.
+- Now supports four sql databases and two nosql stores, se list below.
+- Use Asp.Net Core Identity with all supported dbms.
 - Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
 - Easy import and export of metamodels which makes it possible for users to share models.
 - Automatic CRUD endpoints for integrations.
