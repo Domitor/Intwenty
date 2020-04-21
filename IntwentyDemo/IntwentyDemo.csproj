@@ -3,29 +3,26 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\Dto\**" />
     <Compile Remove="DBScripts\**" />
     <Compile Remove="MetaDataService\**" />
     <Compile Remove="Models\MetaDesigner\**" />
-    <Content Remove="Data\Dto\**" />
     <Content Remove="DBScripts\**" />
     <Content Remove="MetaDataService\**" />
     <Content Remove="Models\MetaDesigner\**" />
-    <EmbeddedResource Remove="Data\Dto\**" />
     <EmbeddedResource Remove="DBScripts\**" />
     <EmbeddedResource Remove="MetaDataService\**" />
     <EmbeddedResource Remove="Models\MetaDesigner\**" />
-    <None Remove="Data\Dto\**" />
     <None Remove="DBScripts\**" />
     <None Remove="MetaDataService\**" />
     <None Remove="Models\MetaDesigner\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\ModelRepository.cs" />
     <Compile Remove="Models\ClientStateInfo.cs" />
     <Compile Remove="Models\OperationResult.cs" />
     <Compile Remove="Models\UIBinding.cs" />
@@ -60,7 +57,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\js\" />
     <Folder Include="wwwroot\litedb\" />
     <Folder Include="wwwroot\USERDOC\" />
   </ItemGroup>

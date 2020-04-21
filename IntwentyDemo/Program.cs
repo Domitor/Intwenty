@@ -3,7 +3,8 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using IntwentyDemo.Data;
+using Intwenty.Data.Seed;
+using Microsoft.Extensions.Hosting;
 
 namespace IntwentyDemo
 {
@@ -12,8 +13,8 @@ namespace IntwentyDemo
 
         public static void Main(string[] args)
         {
-            var host = BuildWebHost(args);
-
+            var host = CreateHostBuilder(args).Build();
+            
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -21,7 +22,8 @@ namespace IntwentyDemo
                 try
                 {
 
-                    DBInitializer.Initialize(services);
+                    SeedIdentity.Seed(services);
+                    SeedSalesOrderDemoModel.Seed(services);
                 }
                 catch (Exception ex)
                 {
@@ -35,7 +37,13 @@ namespace IntwentyDemo
 
         }
 
-        public static IWebHost BuildWebHost(string[] args) => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>().Build();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+         Host.CreateDefaultBuilder(args)
+             .ConfigureWebHostDefaults(webBuilder =>
+             {
+                 webBuilder.UseStaticWebAssets();
+                 webBuilder.UseStartup<Startup>();
+             });
 
 
     }

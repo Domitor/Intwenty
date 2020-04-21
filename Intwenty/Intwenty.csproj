@@ -3,13 +3,34 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>1.1.2</Version>
+    <Authors>Johan Filipsson</Authors>
+    <Company>Domitor Consulting AB</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Domitor/Intwenty</PackageProjectUrl>
+    <PackageIcon>intwenty_loggo_small.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/Domitor/Intwenty</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <StaticWebAssetBasePath Condition="$(StaticWebAssetBasePath) == ''">/path</StaticWebAssetBasePath>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Remove="Pages\**" />
     <Content Remove="Pages\**" />
     <EmbeddedResource Remove="Pages\**" />
     <None Remove="Pages\**" />
+    <None Include="..\..\..\Users\johan\Downloads\intwenty_loggo_small.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   
