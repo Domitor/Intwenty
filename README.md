@@ -46,6 +46,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 
 # Frontend Dependencies
 - bootstrap 4.3.7
+- popper.js 1.16.1
 - vue.js 2.6.11
 - jquery 3.3.1
 - alasql 0.5.5
