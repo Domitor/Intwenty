@@ -53,7 +53,7 @@
         </tr>
     </thead>
     <tr v-for="item in sortedResults">
-        <td style="vertical-align:middle"><a v-bind:href="'/Application/Open/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit"></span> Edit</a></td>
+        <td style="vertical-align:middle"><a v-bind:href="'/Application/Edit/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit"></span> Edit</a></td>
         @{
             foreach (var c in Model.UIStructure)
             {

@@ -1,5 +1,53 @@
 ﻿
-function createVue(vueelement, applicationid, apptablename, baseurl)
+
+function raiseValidationErrorModal(message)
+{
+    $('#msg_dlg_modal_hdr').text('Error');
+    $('#msg_dlg_modal_text').text(message);
+    $('#msg_dlg_modal').modal();
+
+}
+
+function raiseErrorModal(operationresult)
+{
+    $('#msg_dlg_modal_hdr').text('Error');
+    $('#msg_dlg_modal_text').text(operationresult.userError);
+    $('#msg_dlg_modal').modal();
+
+}
+
+function raiseYesNoModal(headertxt, bodytext, yes_callback)
+{
+    $('#yesno_dlg_modal_hdr').text(headertxt);
+    $('#yesno_dlg_modal_text').text(bodytext);
+    $('#yesno_dlg_modal_yesbtn').click(yes_callback);
+    $('#yesno_dlg_modal').modal();
+
+}
+
+function hasRequiredValues(datalist, requiredlist)
+{
+
+    for (var i = 0; i < datalist.length; i++)
+    {
+        for (var z = 0; z < requiredlist.length; z++)
+        {
+            var fld = requiredlist[z];
+            if (!datalist[i][fld])
+                return false;
+            if (!datalist[i][fld] === "")
+                return false;
+
+        }          
+    }
+
+    return true;
+
+}
+
+
+
+function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
 {
 
     var app = new Vue({
@@ -17,12 +65,10 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
             saveApplication() {
                 this.runSave();
             },
-            onFileUpload: function ()
-            {
-               
+            onFileUpload: function () {
+
             },
-            onImageChanged: function (event)
-            {
+            onImageChanged: function (event) {
                 var context = this;
                 var endpoint = baseurl + 'UploadImage';
                 var formData = new FormData();
@@ -32,8 +78,7 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
 
                 var xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4)
-                    {
+                    if (xhr.readyState === 4) {
                         var dbtable = event.srcElement.dataset.dbtable;
                         var dbfield = event.srcElement.dataset.dbfield;
 
@@ -98,8 +143,7 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
 
                 return result;
             },
-            setValidationText: function (validationfield, text)
-            {
+            setValidationText: function (validationfield, text) {
                 if (!this.validation)
                     return;
                 if (!validationfield)
@@ -107,20 +151,19 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
                 if (validationfield.length < 1)
                     return;
 
-                    this.validation[validationfield] = text;
-                    this.$forceUpdate();
+                this.validation[validationfield] = text;
+                this.$forceUpdate();
             },
-            clearValidationText: function (validationfield)
-            {
-                    if (!this.validation)
+            clearValidationText: function (validationfield) {
+                if (!this.validation)
                     return;
                 if (!validationfield)
                     return;
                 if (validationfield.length < 1)
                     return;
 
-                    this.validation[validationfield] = "";
-                    this.$forceUpdate();
+                this.validation[validationfield] = "";
+                this.$forceUpdate();
             },
             /*
             * Handles userinput
@@ -272,4 +315,125 @@ function createVue(vueelement, applicationid, apptablename, baseurl)
 
     return app;
 
+}
+
+
+
+function getVueListView(vueelement, applicationid, baseurl) {
+
+
+    var app = new Vue({
+        el: vueelement,
+        data: {
+            datalist: []
+            , model: { "filtervalue": "", "filterfield": "" }
+            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , currentSort: ''
+            , currentSortDir: 'asc'
+            , baseUrl: baseurl
+
+        },
+        methods: {
+            downloadExcel: function () {
+                var context = this;
+                alert('test');
+            },
+            nextpage: function () {
+                var context = this;
+                context.listRetrieveInfo.currentRowNum += context.listRetrieveInfo.batchSize;
+                context.getPage();
+            },
+            prevpage: function () {
+                var context = this;
+                context.listRetrieveInfo.currentRowNum -= context.listRetrieveInfo.batchSize;
+                context.getPage();
+            },
+            getPage: function () {
+                var context = this;
+                var endpointurl = context.baseUrl + "GetListView";
+
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.listRetrieveInfo),
+                    success: function (response) {
+                        //DATA
+                        context.datalist = JSON.parse(response.data);
+
+                        //UPDATE CURRENT PAGE INFO
+                        context.listRetrieveInfo = response.retriveListArgs;
+                    }
+                });
+            },
+            handleFilterValue: function () {
+                var context = this;
+
+                if (!context.model.filterfield || context.model.filterfield == "")
+                    return;
+
+                if (context.model.filtervalue == "")
+                    return;
+
+                if (context.model.filtervalue != context.listRetrieveInfo.filterValue) {
+                    context.listRetrieveInfo.currentRowNum = 0;
+                    context.listRetrieveInfo.filterField = context.model.filterfield;
+                    context.listRetrieveInfo.filterValue = context.model.filtervalue;
+                    context.getPage();
+                }
+
+
+            },
+            sortBycolumn: function (s) {
+                //if s == current sort, reverse
+                if (s === this.currentSort) {
+                    this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+                }
+                this.currentSort = s;
+            },
+            exportToExcel: function () {
+                var args = { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 2000, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                var context = this;
+                var endpointurl = context.baseUrl + "GetListView";
+
+                $.ajax({
+                    url: endpointurl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(args),
+                    success: function (response) {
+                        var data = JSON.parse(response.data);
+                        alasql.promise('SELECT * INTO XLSX("download.xlsx",{headers:true}) FROM ?', [data])
+                            .then(function (data) {
+                                console.log('Data saved');
+                            }).catch(function (err) {
+                                console.log('Error:', err);
+                            });
+                    }
+                });
+            }
+        },
+        computed: {
+
+            sortedResults: function () {
+                return this.datalist.sort((a, b) => {
+                    let modifier = 1;
+                    if (this.currentSortDir === 'desc') modifier = -1;
+                    if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+                    if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+                    return 0;
+                });
+            },
+            isFirstPage: function () {
+                return this.listRetrieveInfo.currentRowNum <= 0;
+            }
+        },
+        mounted: function () {
+            var context = this;
+            context.getPage();
+        }
+    });
+
+    return app;
 }

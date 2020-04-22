@@ -42,7 +42,7 @@ namespace Intwenty.Controllers
         /// Generate UI based on UIStructure for the application with the supplied Id.
         /// </summary>
         [HttpGet("/Application/Open/{applicationid}/{id}")]
-        public IActionResult Open(int applicationid, int id)
+        public IActionResult Edit(int applicationid, int id)
         {
             ViewBag.SystemId = Convert.ToString(id);
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);

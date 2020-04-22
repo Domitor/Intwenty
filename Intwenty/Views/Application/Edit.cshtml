@@ -33,7 +33,7 @@
 @section Scripts
 {
 
-    <script src="~/js/createupdate.js"></script>
+    <script src="~/js/intwenty.js"></script>
     <script>
         Vue.prototype.runMounted = function () {
 
@@ -75,7 +75,7 @@
 
         };
 
-        var app = createVue('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/")');
+        var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/")');
 
 
     </script>

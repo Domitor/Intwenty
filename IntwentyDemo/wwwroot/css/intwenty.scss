@@ -1,0 +1,45 @@
+﻿
+body {
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+.landingpage {
+    background: url(../images/bg_leaf_1920.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 100%;
+    color: black;
+
+}
+
+.modal {
+    color: black;
+}
+
+
+
+
+.requiredNotValid {
+    border-color: red;
+    background: #FDD;
+}
+
+.uploadInput {
+    position: absolute;
+    font-size: 50px;
+    opacity: 0;
+    right: 0;
+    top: 0;
+}
+
+
