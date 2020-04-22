@@ -34,7 +34,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 2. To be lightweight
 3. Keep dependencies to a minimum.
 
-# Backend Technologies
+# Backend Dependencies
 - asp.net core 3.1
 - Microsoft.AspNetCore.Mvc 2.2.0
 - Microsoft.Data.Sqlite.Core 3.1.3
@@ -44,11 +44,12 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - MySql.Data 8.0.19
 - Npgsql 4.1.3.1
 
-# Frontend Technologies
+# Frontend Dependencies
 - bootstrap 4.3.7
 - vue.js 2.6.11
 - jquery 3.3.1
 - alasql 0.5.5
+- fontawesome-free-5.12.1-web
 
 # Works with the following databases
 - MS Sql Server
