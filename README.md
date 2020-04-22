@@ -101,8 +101,10 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
                 //- UI ~/Application/Create/10000 
                 //- UI ~/Application/Edit/10000/1 
                 //- Endpoint ~/Application/Save
-
             }
+  
+# More Examples
+(https://github.com/Domitor/Intwenty/blob/master/Intwenty/Controllers/ExamplesController.cs)
 
 # Intentions
 1. Boost productivity
