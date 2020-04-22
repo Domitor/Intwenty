@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit application";
 }
 
-
+@await Html.PartialAsync("_Modals")
 
 <div id="app">
 
@@ -44,7 +44,7 @@
             el: '#app',
             data: {
                 model: {
-                    mainMenuItem: {} 
+                    mainMenuItem: {}
                     }
             },
             methods:
@@ -68,7 +68,7 @@
                 },
                 setCodes: function ()
                 {
-                   
+
 
                 }
             },

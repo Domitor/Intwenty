@@ -4,6 +4,7 @@
     ViewData["Title"] = "Create new application";
 }
 
+@await Html.PartialAsync("_Modals")
 
 
 <div id="app">
@@ -77,7 +78,7 @@
                     if (metacode && metacode.length > 3)
                         context.model.metaCode = metacode.toUpperCase().replace(' ', '');
 
-                 
+
                     var dbname = context.model.metaCode;
                     if (dbname && dbname.length > 3)
                     {
@@ -85,7 +86,7 @@
                         context.model.dbName = dbname;
 
                     }
-                    
+
 
                 }
             },

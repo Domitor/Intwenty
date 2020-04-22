@@ -5,6 +5,7 @@
 }
 
 
+@await Html.PartialAsync("_Modals")
 
 <div id="app">
 
@@ -115,7 +116,7 @@
                 },
                 markChanged: function (entry)
                 {
-            
+
 
                 },
                 tableChanged: function (entry)
@@ -131,13 +132,13 @@
                 },
                 saveChanges: function ()
                 {
-                    
+
                 }
             },
             computed:
             {
-              
-             
+
+
 
             },
             mounted: function ()
@@ -156,7 +157,7 @@
                     context.apptables = response;
                 });
 
-             
+
 
             }
         });

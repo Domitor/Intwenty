@@ -4,7 +4,7 @@
     ViewData["Title"] = "Add / Edit Data views";
 }
 
-
+@await Html.PartialAsync("_Modals")
 
 <div id="app">
 
@@ -99,7 +99,7 @@
 
 @section Scripts
     {
-<script>
+    <script>
 
         var app = new Vue({
             el: '#app',
@@ -164,7 +164,7 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/")';
-               
+
                 //DataViews
                 var endpointurl = baseurl + "GetDataViews";
                 $.get(endpointurl, function (response)
@@ -176,9 +176,9 @@
                     raiseErrorModal(response.responseJSON);
                 });
 
-              
+
 
             }
         })
-</script>
+    </script>
 }

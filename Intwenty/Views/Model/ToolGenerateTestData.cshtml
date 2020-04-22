@@ -3,46 +3,47 @@
     ViewData["Title"] = "Manage Testdata";
 }
 
+@await Html.PartialAsync("_Modals")
 
-    <div id="app">
+<div id="app">
 
-        <br />
-        <br />
+    <br />
+    <br />
 
-        <div class="card">
-            <div class="card-header"><h2>Manage testdata</h2></div>
-            <div class="card-body">
-                Use this tool carefully and only for dev/test scenarios. It will create a testdata batch including 100 records of testdata for every applications defined in the model. Please make sure that you have run 'Validate Model' and 'Configure Database' before using this tool.
-            </div>
+    <div class="card">
+        <div class="card-header"><h2>Manage testdata</h2></div>
+        <div class="card-body">
+            Use this tool carefully and only for dev/test scenarios. It will create a testdata batch including 100 records of testdata for every applications defined in the model. Please make sure that you have run 'Validate Model' and 'Configure Database' before using this tool.
         </div>
-
-        <br />
-        <br />
-
-
-        <button class="btn btn-sm btn-primary" type="button" v-on:click="generateTestData()">
-            <span class="fa fa-cog"></span> Generate testdata
-            <div class="spinner-grow spinner-grow-sm text-danger" v-if="model.isRunning"></div>
-        </button>
-
-        <br />
-        <br />
-
-        <div>
-            <h5>Old batches</h5>
-            <div v-for="item in batches" class="row">
-                <div class="col-lg-4"><br /><p>{{item}}</p></div>
-                <div class="col-lg-2"><br /><button class="btn btn-sm btn-danger" v-on:click="deleteTestDataBatch(item)">Delete</button></div>
-                <div class="col-lg-6"></div>
-            </div>
-        </div>
-
-        <p v-if="opresult.isSuccess" class="text-info">{{opresult.result}}</p>
-        <p v-if="!opresult.isSuccess" class="text-danger">{{opresult.userError}}</p>
-
-
-
     </div>
+
+    <br />
+    <br />
+
+
+    <button class="btn btn-sm btn-primary" type="button" v-on:click="generateTestData()">
+        <span class="fa fa-cog"></span> Generate testdata
+        <div class="spinner-grow spinner-grow-sm text-danger" v-if="model.isRunning"></div>
+    </button>
+
+    <br />
+    <br />
+
+    <div>
+        <h5>Old batches</h5>
+        <div v-for="item in batches" class="row">
+            <div class="col-lg-4"><br /><p>{{item}}</p></div>
+            <div class="col-lg-2"><br /><button class="btn btn-sm btn-danger" v-on:click="deleteTestDataBatch(item)">Delete</button></div>
+            <div class="col-lg-6"></div>
+        </div>
+    </div>
+
+    <p v-if="opresult.isSuccess" class="text-info">{{opresult.result}}</p>
+    <p v-if="!opresult.isSuccess" class="text-danger">{{opresult.userError}}</p>
+
+
+
+</div>
 
 
 @section Scripts
@@ -119,7 +120,7 @@
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
                             }
-                           
+
                         });
                     };
 

@@ -4,6 +4,7 @@
     ViewData["Title"] = "Add / Edit Value Domains";
 }
 
+@await Html.PartialAsync("_Modals")
 
 
 <div id="app">
@@ -24,11 +25,11 @@
             </div>
         </div>
         <div class="col-lg-6">
-           
+
         </div>
     </div>
-       
-      
+
+
 
     <br />
     <br />
@@ -58,7 +59,7 @@
         </div>
         <div class="col-lg-4"></div>
     </div>
-   
+
 
     <br />
     <br />
@@ -118,7 +119,7 @@
 
                     this.model.showNew = !this.model.showNew;
                     this.model.newDomainName = "";
-                 
+
                 },
                 addDomainValue: function ()
                 {
@@ -133,7 +134,7 @@
                 deleteDomainValue: function (entry)
                 {
                     var context = this;
-                 
+
                     if (entry.id < 1)
                     {
                         for (var i = 0; i < context.valuedomains.length; i++)
@@ -195,7 +196,7 @@
 
                         var baseurl = '@Url.Content("~/Model/")';
                         var endpointurl = baseurl + "SaveValueDomains";
-                  
+
 
                         $.ajax({
                             url: endpointurl,
@@ -231,13 +232,13 @@
                             arr.push(context.valuedomains[i]);
                         }
                     }
-                    
+
                     return arr;
 
                 },
                 uniquedomains: function ()
                 {
-                 
+
                     var context = this;
                     var arr = [];
                     for (var i = 0; i < context.valuedomains.length; i++)
@@ -245,7 +246,7 @@
                         var found = false;
                         for (var z = 0; z < arr.length; z++)
                         {
-                          
+
                             if (arr[z].domainName === context.valuedomains[i].domainName)
                             {
                                 found = true;

@@ -4,12 +4,14 @@
     ViewData["Title"] = "Edit application";
 }
 
+@await Html.PartialAsync("_Modals")
+
 <style>
     .formpanel {
         border: 1px dotted black;
         margin: 5px;
         padding: 5px;
-        min-height:120px;
+        min-height: 120px;
     }
 
     .settingpnl {
@@ -23,7 +25,6 @@
     .uipnl {
         margin-top: 10px;
     }
-   
 </style>
 
 
@@ -174,8 +175,8 @@
                                                             <div>
                                                                 <div class="form form-inline">
                                                                     <button style="margin:5px" class="btn btn-sm btn-secondary"><span class="fa fa-plus"></span></button>
-                                                                    <input  style="margin:5px" type="text" class="form-control form-control-sm" disabled />
-                                                                    <input  style="margin:5px" type="text" class="form-control form-control-sm" disabled />
+                                                                    <input style="margin:5px" type="text" class="form-control form-control-sm" disabled />
+                                                                    <input style="margin:5px" type="text" class="form-control form-control-sm" disabled />
                                                                 </div>
                                                             </div>
                                                             <br />
@@ -226,7 +227,7 @@
                                                                                     <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
                                                                                     <input type="text" class="form-control form-control-sm" disabled />
                                                                                 </div>
-                                                                                
+
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -355,7 +356,7 @@
                             </select>
                         </div>
 
-                        <div class="form-group"  v-if="showSettingValueDomain">
+                        <div class="form-group" v-if="showSettingValueDomain">
                             <label class="control-label">Set value domain</label>
                             <select v-model="active_setting_input.domain" class="form-control form-control-sm">
                                 <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
@@ -375,7 +376,7 @@
                                 <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                             </select>
                         </div>
-                        <div class="form-group"  v-if="active_setting_input.metaType=='LOOKUP'">
+                        <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
                             <label class="control-label">Set database column 2 (opt.)</label>
                             <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
                                 <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
@@ -435,7 +436,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id ="setting_modal_close_btn" type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="setting_modal_close_btn" type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -448,7 +449,7 @@
         {
 
 
-    
+
 
 
     <script>
@@ -474,7 +475,7 @@
                     if (input.metaType != "EDITGRID")
                         input.tableName = this.defaultTable.dbName;
 
-                    this.openSettingsDlg(input); 
+                    this.openSettingsDlg(input);
                 },
                 openSettingsDlg(input) {
                     this.active_setting_input = input;
@@ -572,7 +573,7 @@
                     }
 
                     this.addUserInputSelects();
-                        
+
 
                 },
                 addUserInputSelects() {
@@ -626,7 +627,7 @@
                         }
                     }
 
-                    
+
 
                 },
                 SaveApplicationUI: function ()
@@ -653,7 +654,7 @@
                 },
                 removeEditGridColumn: function (column)
                 {
-                   
+
                     $("#setting_modal_close_btn").click();
                     var context = this;
                     raiseYesNoModal("Delete ?", "Delete column ?", function ()
@@ -759,7 +760,7 @@
 
                     return list;
                 }
-              
+
             },
             mounted: function () {
 

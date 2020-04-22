@@ -93,7 +93,7 @@ namespace Intwenty.Controllers
 
         public IActionResult ToolValidateModel()
         {
-            var res = DataRepository.ValidateModel();
+            var res = ModelRepository.ValidateModel();
             return View(res);
         }
 
@@ -117,7 +117,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult RunDatabaseConfiguration()
         {
-            var res = DataRepository.ConfigureDatabase();
+            var res = ModelRepository.ConfigureDatabase();
             return new JsonResult(res); 
         }
 

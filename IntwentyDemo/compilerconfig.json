@@ -10,5 +10,9 @@
   {
     "outputFile": "wwwroot/css/intwenty.css",
     "inputFile": "wwwroot/css/intwenty.scss"
+  },
+  {
+    "outputFile": "wwwroot/js/intwenty.es5.js",
+    "inputFile": "wwwroot/js/intwenty.js"
   }
 ]

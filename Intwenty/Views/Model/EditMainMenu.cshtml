@@ -5,6 +5,7 @@
 }
 
 
+@await Html.PartialAsync("_Modals")
 
 <div id="app">
 
@@ -55,7 +56,7 @@
                         <option v-for="app in applications" v-bind:value="app.metaCode">{{app.title}}</option>
                     </select>
                 </td>
-              
+
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.controller" v-on:input="markChanged(entry)" /></td>
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteMenuItem(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
@@ -80,7 +81,7 @@
                 applications: []
             },
             methods: {
-               
+
                 addMenuItem: function ()
                 {
                     this.menuitems.push({ id: -1, action: "", controller: "", title: "", application: {} });
@@ -123,7 +124,7 @@
                     context.applications = response;
                 });
 
-              
+
 
 
             }

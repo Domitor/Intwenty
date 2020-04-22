@@ -7,6 +7,7 @@ using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
+using Intwenty.Engine.Custom;
 using Intwenty.Model;
 
 
@@ -57,7 +58,7 @@ namespace Intwenty.Engine
 
             if (model.Application.MetaCode == "XXXXX")
             {
-                return new  Custom.CustomSqlDbDataManagerExample(model, modelservice, settings, sqlclient);
+                return new  CustomSqlDbDataManagerExample(model, modelservice, settings, sqlclient);
             }
             else
             {
@@ -98,7 +99,7 @@ namespace Intwenty.Engine
             }
             catch (Exception ex)
             {
-                throw ex;
+                //throw ex;
             }
 
             return res;

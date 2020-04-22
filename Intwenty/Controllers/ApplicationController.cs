@@ -41,7 +41,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Generate UI based on UIStructure for the application with the supplied Id.
         /// </summary>
-        [HttpGet("/Application/Open/{applicationid}/{id}")]
+        [HttpGet("/Application/Edit/{applicationid}/{id}")]
         public IActionResult Edit(int applicationid, int id)
         {
             ViewBag.SystemId = Convert.ToString(id);

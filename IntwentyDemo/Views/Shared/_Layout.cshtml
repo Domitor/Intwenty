@@ -11,157 +11,42 @@
 
 @{
 
-    var menutitle = "Applications";
-    var menuobjects = ModelRepository.GetMenuModelItems();
-    var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
-    if (mainmenu != null)
-    {
-        menutitle = mainmenu.Title;
-    }
-
     var currentpath = Context.Request.Path.ToUriComponent();
     var ishomepath = string.IsNullOrEmpty(currentpath) || currentpath.Length < 5 || currentpath.Contains("Home/Index");
- 
 }
 
 
 <body class="@(ishomepath ? "landingpage" : "")">
 
+
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="/">Intwenty</a>
             <div class="collapse navbar-collapse" id="navbarText">
-
+               
                 <ul class="nav navbar-nav mr-auto">
-                    @if (User.Identity.IsAuthenticated)
-                    {
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> Examples</span> <span class="caret"></span></a>
                         <div class="dropdown-menu">
-                            @{
-
-
-                                if (mainmenu == null)
-                                {
-                                    foreach (var a in ModelRepository.GetApplicationModelItems())
-                                    {
-                                        <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
-                                    }
-                                }
-                                else
-                                {
-                                    foreach (var mi in menuobjects)
-                                    {
-                                        if (mi.IsMetaTypeMenuItem && mi.ParentMetaCode == mainmenu.MetaCode && mi.Application != null)
-                                        {
-                                            <a class="dropdown-item" asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a>
-                                        }
-                                    }
-                                }
-                            }
+                            <a class="dropdown-item" asp-controller="Examples" asp-action="Example1"> Create simple intwenty App</a>
                         </div>
                     </li>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @await Html.PartialAsync("_IntwentyAppMenu")
                     }
                     @if (User.IsInRole("Administrator"))
                     {
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> System Administration</span> <span class="caret"></span></a>
-                        <div class="dropdown-menu">
-
-
-                            <a class="dropdown-item" asp-controller="Model" asp-action="GetList"><span class="fa fa-cogs"></span> Manage applications</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="EditNoSeries"><span class="fa fa-database"></span> Number series</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="EditMainMenu"><span class="fa fa-bookmark"></span> Main menu</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="ToolValidateModel"><span class="fa fa-info"></span> Validate model</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="ToolModelDocumentation"><span class="fa fa-book"></span> Model documentation</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="ToolConfigureDatabase"><span class="fa fa-meteor"></span> Configure database</a>
-                            <a class="dropdown-item" asp-controller="Model" asp-action="ToolGenerateTestData"><span class="fa fa-meteor"></span> Manage testdata</a>
-                        </div>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="techModal()"><span class="fa fa-question"></span> Technology</a></li>
+                        @await Html.PartialAsync("_IntwentyAdminMenu")
                     }
                 </ul>
                 <partial name="_LoginPartial" />
             </div>
-
         </nav>
     </div>
 
 
-    <div class="modal" id="msg_dlg_modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 id="msg_dlg_modal_hdr" class="modal-title">Information</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="msg_dlg_modal_text"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal" id="yesno_dlg_modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Information</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="yesno_dlg_modal_text"></p>
-                </div>
-                <div class="modal-footer">
-                    <button id="yesno_dlg_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Yes</button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">No</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal" id="tech_modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">About Intwenty</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h5>Technologies</h5>
-                    <ul>
-                        <li>asp.net core 3.1</li>
-                        <li>bootstrap 4.3.7</li>
-                        <li>vue.js 2.6.11</li>
-                        <li>jquery 3.3.1</li>
-                        <li>alasql 0.5.5</li>
-                    </ul>
-                    <h5>Licence</h5>
-                    <p>Massachusetts Institute of Technology</p>
-                    <h5>Author</h5>
-                    <p>Johan Filipsson</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    
 
     <div class="container body-content">
         @RenderBody()
@@ -181,13 +66,8 @@
     <script src="~/lib/popper.js/umd/popper.min.js"></script>
     <script src="~/lib/bootstrap-4.4.1/dist/js/bootstrap.min.js"></script>
     <script src="~/lib/vue/vue.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/intwenty.es5.min.js" asp-append-version="true"></script>
 
-    <script>
-        function techModal() {
-            $("#tech_modal").modal();
-        }
-    </script>
 
     @RenderSection("Scripts", required: false)
 

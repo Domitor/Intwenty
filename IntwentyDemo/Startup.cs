@@ -23,24 +23,31 @@ namespace IntwentyDemo
        
         public void ConfigureServices(IServiceCollection services)
         {
-            //System Settings
-            services.Configure<IntwentySettings>(Configuration.GetSection("IntwentySettings"));
+           
 
             services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            //Required for Intwenty: Settings
+            services.Configure<IntwentySettings>(Configuration.GetSection("IntwentySettings"));
+
+            //Required for Intwenty: Services
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
 
+            //Required for Intwenty services to work correctly
+            services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.WriteIndented = false;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+            });
 
-            //var settings = Configuration.GetSection(nameof(IntwentySettings)).Get<IntwentySettings>();
-
-
-            //Use Identity 
+            //Required for Intwenty if Identity is used
             services.AddDefaultIdentity<SystemUser>(options =>
             {
                 //options.SignIn.RequireConfirmedAccount = true;
@@ -56,14 +63,8 @@ namespace IntwentyDemo
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>();
 
-            services.AddControllersWithViews().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
-                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.WriteIndented = false;
-                options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-            });
-
+           
+            //Remove this in production
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
         }
@@ -86,6 +87,8 @@ namespace IntwentyDemo
             app.UseHttpsRedirection();
             app.UseCookiePolicy();
             app.UseRouting();
+
+            //Needed only if Identity is used
             app.UseAuthentication();
             app.UseAuthorization();
 

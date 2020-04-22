@@ -10,6 +10,9 @@
     }
 
 }
+
+@await Html.PartialAsync("_Modals")
+
 <div id="app">
 
     <br />
@@ -34,13 +37,13 @@
     @await Html.PartialAsync("_DefaultAppUI", Model)
 
 
-   </div>
+</div>
 
-    @section Scripts
+@section Scripts
     {
 
-        <script src="~/js/intwenty.js"></script>
-        <script>
+    <script src="~/js/intwenty.js"></script>
+    <script>
         Vue.prototype.runMounted = function () {
 
            var context = this;
@@ -100,8 +103,8 @@
         var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/")');
 
 
-        </script>
+    </script>
 
 
 
-    }
+}

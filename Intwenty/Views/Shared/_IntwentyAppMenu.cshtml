@@ -1,0 +1,44 @@
+﻿
+
+@{
+
+    var menutitle = "Applications";
+    var menuobjects = ModelRepository.GetMenuModelItems();
+    var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
+    if (mainmenu != null)
+    {
+        menutitle = mainmenu.Title;
+    }
+
+}
+
+
+
+
+
+<li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
+    <div class="dropdown-menu">
+        @{
+
+
+            if (mainmenu == null)
+            {
+                foreach (var a in ModelRepository.GetApplicationModelItems())
+                {
+                    <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
+                }
+            }
+            else
+            {
+                foreach (var mi in menuobjects)
+                {
+                    if (mi.IsMetaTypeMenuItem && mi.ParentMetaCode == mainmenu.MetaCode && mi.Application != null)
+                    {
+                        <a class="dropdown-item" asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a>
+                    }
+                }
+            }
+        }
+    </div>
+</li>
