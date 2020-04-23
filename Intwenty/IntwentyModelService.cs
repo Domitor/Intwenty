@@ -27,7 +27,9 @@ namespace Intwenty
 
         List<ApplicationModel> GetApplicationModels();
 
+        SystemModel GetSystemModel();
 
+        OperationResult InsertSystemModel(SystemModel model);
 
         List<ApplicationModelItem> GetApplicationModelItems();
 
@@ -110,7 +112,91 @@ namespace Intwenty
            
         }
 
+        public SystemModel GetSystemModel()
+        {
+            var t = new SystemModel();
+            var apps = Client.GetAll<ApplicationItem>();
+            foreach (var a in apps)
+                t.Applications.Add(a);
+            var dbitems = Client.GetAll<DatabaseItem>();
+            foreach (var a in dbitems)
+                t.DatabaseItems.Add(a);
+            var viewitems = Client.GetAll<DataViewItem>();
+            foreach (var a in viewitems)
+                t.DataViewItems.Add(a);
+            var menuitems = Client.GetAll<MenuItem>();
+            foreach (var a in menuitems)
+                t.MenuItems.Add(a);
+            var uiitems = Client.GetAll<UserInterfaceItem>();
+            foreach (var a in uiitems)
+                t.UserInterfaceItems.Add(a);
+            var valuedomainitems = Client.GetAll<ValueDomainItem>();
+            foreach (var a in valuedomainitems)
+                t.ValueDomains.Add(a);
 
+
+            return t;
+
+        }
+
+        public OperationResult InsertSystemModel(SystemModel model)
+        {
+            if (model == null)
+            {
+                var error = new OperationResult();
+                error.SetError("Import model. Model was null","The model to import was empty, check the file !");
+                return error;
+            }
+
+            var result = new OperationResult();
+
+            try
+            {
+                ModelCache.Remove(AppModelCacheKey);
+
+                if (model.DeleteCurrentModel)
+                {
+                    Client.DeleteRange(Client.GetAll<ApplicationItem>());
+                    Client.DeleteRange(Client.GetAll<DatabaseItem>());
+                    Client.DeleteRange(Client.GetAll<DataViewItem>());
+                    Client.DeleteRange(Client.GetAll<MenuItem>());
+                    Client.DeleteRange(Client.GetAll<UserInterfaceItem>());
+                    Client.DeleteRange(Client.GetAll<ValueDomainItem>());
+                }
+
+                foreach (var a in model.Applications)
+                    Client.Insert(a);
+
+                foreach (var a in model.DatabaseItems)
+                    Client.Insert(a);
+
+                foreach (var a in model.DataViewItems)
+                    Client.Insert(a);
+
+                foreach (var a in model.MenuItems)
+                    Client.Insert(a);
+
+                foreach (var a in model.UserInterfaceItems)
+                    Client.Insert(a);
+
+                foreach (var a in model.ValueDomains)
+                    Client.Insert(a);
+
+                result.IsSuccess = true;
+                result.AddMessage("RESULT", "The model was imported successfully");
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                if (!model.DeleteCurrentModel)
+                    result.SetError(ex.Message, "Error importing model, this is probably due to conflict with the current model. Try to upload with the delete option.");
+                else
+                    result.SetError(ex.Message, "Error importing model");
+            }
+
+            return result;
+
+        }
 
         public List<ApplicationModel> GetApplicationModels()
         {
@@ -1203,6 +1289,8 @@ namespace Intwenty
 
             return res;
         }
+
+      
 
         #endregion
 

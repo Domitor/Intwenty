@@ -6,6 +6,10 @@ using Intwenty.Model.DesignerVM;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Data.Dto;
+using Intwenty.Data.Entity;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace Intwenty.Controllers
 {
@@ -104,6 +108,11 @@ namespace Intwenty.Controllers
         }
 
         public IActionResult ToolGenerateTestData()
+        {
+            return View();
+        }
+
+        public IActionResult ImportModel()
         {
             return View();
         }
@@ -333,6 +342,47 @@ namespace Intwenty.Controllers
             return new JsonResult(t.Select(p => p.DomainName).Distinct());
 
         }
+
+        /// <summary>
+        /// Create a json file containing the current model
+        /// </summary>
+        [HttpGet("/Model/ExportModel")]
+        public IActionResult ExportModel()
+        {
+            var t = ModelRepository.GetSystemModel();
+            var json = System.Text.Json.JsonSerializer.Serialize(t);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            return File(bytes, "application/json", "intwentymodel.json");
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> UploadModel(IFormFile file, bool delete)
+        {
+            var result = new OperationResult();
+
+            try
+            {
+                string fileContents;
+                using (var stream = file.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    fileContents = await reader.ReadToEndAsync();
+                }
+                var model = System.Text.Json.JsonSerializer.Deserialize<SystemModel>(fileContents);
+                model.DeleteCurrentModel = delete;
+                result = ModelRepository.InsertSystemModel(model);
+            }
+            catch(Exception ex) 
+            {
+                result.SetError(ex.Message, "An error occured when uploading a new model file.");
+                var jres = new JsonResult(result);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return new JsonResult(result);
+        }
+
 
         [HttpPost]
         public JsonResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)

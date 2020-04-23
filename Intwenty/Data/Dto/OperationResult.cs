@@ -93,6 +93,12 @@ namespace Intwenty.Data.Dto
             Messages.Add(new OperationMessage("USERERROR", usermsg));
         }
 
+        public void SetSuccess(string msg)
+        {
+            IsSuccess = true;
+            Messages.Add(new OperationMessage("RESULT", msg));
+        }
+
         public string UserError
         {
             get {
