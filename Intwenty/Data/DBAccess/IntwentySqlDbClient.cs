@@ -342,8 +342,9 @@ namespace Intwenty.Data.DBAccess
             else if (DbEngine == DBMS.SQLite)
             {
                 var adapt = new SQLiteDataAdapter(sqlite_cmd);
-                adapt.MissingMappingAction = MissingMappingAction.Passthrough;
-                adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+                //The line below gave error: no current row
+                //adapt.MissingMappingAction = MissingMappingAction.Passthrough;
+                //adapt.MissingSchemaAction = MissingSchemaAction.AddWithKey;
                 adapt.Fill(ds, tablename);
             }
 

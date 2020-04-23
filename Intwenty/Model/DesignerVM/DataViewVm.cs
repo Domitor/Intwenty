@@ -9,7 +9,7 @@ namespace Intwenty.Model.DesignerVM
         public static List<DataViewModelItem> GetDataViewModel(DataViewVm model)
         {
             var res = new List<DataViewModelItem>();
-            var t = new DataViewModelItem("DATAVIEW") { Id = model.Id, SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
+            var t = new DataViewModelItem(DataViewModelItem.MetaTypeDataView) { Id = model.Id, SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
             if (string.IsNullOrEmpty(model.MetaCode))
                 t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
 
@@ -21,7 +21,7 @@ namespace Intwenty.Model.DesignerVM
                 cnt += 1;
                 if (cnt == 1)
                 {
-                    var kf = new DataViewModelItem("DATAVIEWKEYFIELD") { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
+                    var kf = new DataViewModelItem(DataViewModelItem.MetaTypeDataViewKeyColumn) { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
                     if (string.IsNullOrEmpty(kf.MetaCode))
                         kf.MetaCode = BaseModelItem.GenerateNewMetaCode(kf);
 
@@ -29,7 +29,7 @@ namespace Intwenty.Model.DesignerVM
                 }
                 else
                 {
-                    var lf = new DataViewModelItem("DATAVIEWFIELD") { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
+                    var lf = new DataViewModelItem(DataViewModelItem.MetaTypeDataViewColumn) { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
                     if (string.IsNullOrEmpty(lf.MetaCode))
                         lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
 

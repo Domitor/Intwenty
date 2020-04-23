@@ -128,8 +128,8 @@
 
                                                     <div v-bind:id="'uipnl_' + input.id" class="uipnl" v-if="input.metaType!=''">
 
-                                                        <span class="fa fa-trash" v-on:click="removeUserInput(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
-                                                        <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Remove"></span>
+                                                        <span class="fa fa-trash" v-on:click="removeUserInput(input)" style="margin:5px; cursor:pointer" title="Remove"></span>
+                                                        <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
                                                         <label class="control-label"><i>{{input.title}}</i></label>
 
                                                         <div v-if="input.metaType==='TEXTBOX'">
@@ -477,7 +477,8 @@
 
                     this.openSettingsDlg(input);
                 },
-                openSettingsDlg(input) {
+                openSettingsDlg(input)
+                {
                     this.active_setting_input = input;
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();

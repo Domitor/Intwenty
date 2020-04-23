@@ -10,6 +10,8 @@ using Intwenty.Data.Entity;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Text;
+using Intwenty.Data.DBAccess.Helpers;
 
 namespace Intwenty.Controllers
 {
@@ -113,6 +115,11 @@ namespace Intwenty.Controllers
         }
 
         public IActionResult ImportModel()
+        {
+            return View();
+        }
+
+        public IActionResult ImportData()
         {
             return View();
         }
@@ -375,6 +382,117 @@ namespace Intwenty.Controllers
             catch(Exception ex) 
             {
                 result.SetError(ex.Message, "An error occured when uploading a new model file.");
+                var jres = new JsonResult(result);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return new JsonResult(result);
+        }
+
+        /// <summary>
+        /// Create a json file containing all data registered with the current model
+        /// </summary>
+        [HttpGet("/Application/ExportData")]
+        public IActionResult ExportData()
+        {
+            var data = new StringBuilder("{\"IntwentyData\":[");
+            var apps = ModelRepository.GetApplicationModels();
+            var sep = "";
+            foreach (var app in apps)
+            {
+                var client = DataRepository.GetDbObjectMapper();
+                var infostatuslist = client.GetAll<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
+
+                foreach (var istat in infostatuslist)
+                {
+                    data.Append(sep + "{");
+                    data.Append(DBHelpers.GetJSONValue("ApplicationId", app.Application.Id));
+                    data.Append("," + DBHelpers.GetJSONValue("AppMetaCode", app.Application.MetaCode));
+                    data.Append("," + DBHelpers.GetJSONValue("DbName", app.Application.DbName));
+                    data.Append("," + DBHelpers.GetJSONValue("Id", istat.Id));
+                    data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
+                    data.Append(",\"ApplicationData\":");
+
+                    var state = new ClientStateInfo() { ApplicationId = app.Application.Id, Id = istat.Id, Version = istat.Version };
+                    var appversiondata = DataRepository.GetLatestVersion(state);
+                    data.Append(appversiondata.Data);
+                    data.Append("}");
+                    sep = ",";
+
+                }
+            }
+            data.Append("]");
+            data.Append("}");
+
+
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data.ToString());
+            return File(bytes, "application/json", "intwentydata.json");
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> UploadData(IFormFile file, bool delete)
+        {
+            var result = new OperationResult();
+
+            try
+            {
+                int savefail = 0;
+                int savesuccess= 0;
+                string fileContents;
+                using (var stream = file.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    fileContents = await reader.ReadToEndAsync();
+                }
+
+                var apps = ModelRepository.GetApplicationModels();
+                var json = System.Text.Json.JsonDocument.Parse(fileContents).RootElement;
+                var rootobject = json.EnumerateObject();
+                foreach (var attr in rootobject)
+                {
+                    if (attr.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                       
+                        var jsonarr = attr.Value.EnumerateArray();
+                        foreach (var rec in jsonarr)
+                        {
+                            ApplicationModel app = null;
+                            var istatobject = rec.EnumerateObject();
+                            foreach (var istat in istatobject)
+                            {
+                                if (istat.Name == "ApplicationId")
+                                    app = apps.Find(p => p.Application.Id == istat.Value.GetInt32());
+
+                                if (istat.Name == "ApplicationData" && app!=null)
+                                {
+                                    var state = ClientStateInfo.CreateFromJSON(istat.Value);
+                                    state.Id = 0;
+                                    state.Version = 0;
+                                    state.ApplicationId = app.Application.Id;
+                                    var saveresult = DataRepository.Save(state);
+                                    if (saveresult.IsSuccess)
+                                        savesuccess += 1;
+                                    else
+                                        savefail += 1;
+
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                if (savefail== 0)
+                    result.SetSuccess(string.Format("Successfully imported {0} applications.", savesuccess));
+                else
+                    result.SetSuccess(string.Format("Successfully imported {0} applications. Failed to import {1} applications.", savesuccess, savefail));
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "An error occured when uploading a data file.");
                 var jres = new JsonResult(result);
                 jres.StatusCode = 500;
                 return jres;

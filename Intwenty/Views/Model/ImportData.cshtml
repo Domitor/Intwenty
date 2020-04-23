@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Import Model";
+    ViewData["Title"] = "Import Data";
 }
 
 
@@ -10,22 +10,25 @@
     <div id="app">
 
         <div class="card">
-            <div class="card-header"><h2>Import Model</h2></div>
+            <div class="card-header"><h2>Import Data</h2></div>
             <div class="card-body">
-                Use this tool to upload an intwenty model (intwentymodel.json)
+                Use this tool to upload an intwenty data file (intwentydata.json)
             </div>
         </div>
 
         <br />
         <br />
-        <input type="checkbox" v-model="model.deleteCurrent" /> Delete current model before importing
+        <input type="checkbox" v-model="model.deleteCurrent" /> Delete current data before importing
         <br />
         <br />
-        <label class="control-label"> Upload model file</label>
+        <label class="control-label"> Upload data file</label>
         <div style="padding:10px; border: thin solid  lightgray">
 
             <div class="file btn btn-sm btn-primary" v-on:click="onFileUpload">
+
                 <span class="fas fa-cloud-upload-alt"></span> Upload
+                <div class="spinner-grow spinner-grow-sm text-light" v-if="model.isRunning"></div>
+
                 <input id="modelfileinput"
                        name="modelfileinput"
                        type="file"
@@ -64,7 +67,7 @@
             el: '#app',
             data: {
                 model: {
-                    "uploadresult": {}, "deleteCurrent": false
+                    "uploadresult": {}, "deleteCurrent": false, "isRunning":false
                 }
             },
             methods:
@@ -78,12 +81,12 @@
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/")';
-                    var endpointurl = baseurl + "UploadModel";
+                    var endpointurl = baseurl + "UploadData";
 
     
 
                     var yesfunc = function () {
-
+                        context.model.isRunning = true;
                         var formData = new FormData();
                         formData.append('File', event.srcElement.files[0]);
                         formData.append('delete', context.model.deleteCurrent);
@@ -93,8 +96,10 @@
                         var xhr = new XMLHttpRequest();
                         xhr.onreadystatechange = function ()
                         {
-                            if (xhr.readyState === 4) {
+                            if (xhr.readyState === 4)
+                            {
 
+                                context.model.isRunning = false;
                                 var result = JSON.parse(xhr.response);
                                  context.model.uploadresult = result;
                                 
@@ -105,7 +110,7 @@
                         xhr.send(formData);
                     };
 
-                    raiseYesNoModal("Import Model ?", "Make sure you an exported backup of your current model. Continue ?", yesfunc);
+                    raiseYesNoModal("Import Data ?", "This will import data to your database if it matches the current model. Continue ?", yesfunc);
 
 
                 }

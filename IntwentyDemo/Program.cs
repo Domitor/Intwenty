@@ -22,8 +22,8 @@ namespace IntwentyDemo
                 try
                 {
 
-                    SeedIdentity.Seed(services);
-                    SeedSalesOrderDemoModel.Seed(services);
+                    //SeedIdentity.Seed(services);
+                    //SeedSalesOrderDemoModel.Seed(services);
                 }
                 catch (Exception ex)
                 {

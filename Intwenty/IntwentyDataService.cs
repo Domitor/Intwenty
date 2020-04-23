@@ -41,6 +41,8 @@ namespace Intwenty
 
         void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 
+        IIntwentyDbORM GetDbObjectMapper();
+
     }
 
     public class IntwentyDataService : IIntwentyDataService
@@ -60,6 +62,21 @@ namespace Intwenty
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
             IsNoSql = settings.Value.IsNoSQL;
+        }
+
+        public IIntwentyDbORM GetDbObjectMapper()
+        {
+            if (IsNoSql)
+            {
+                var t = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection, "IntwentyDb");
+                return t;
+            }
+            else
+            {
+                var t = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
+                return t;
+            }
+
         }
 
         public List<DefaultValue> GetDefaultValues(ClientStateInfo state)
