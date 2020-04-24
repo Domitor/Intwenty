@@ -21,14 +21,14 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<SystemUser> _signInManager;
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager,
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
@@ -76,7 +76,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new SystemUser { UserName = Input.Email, Email = Input.Email };
+                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

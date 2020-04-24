@@ -29,27 +29,9 @@ namespace Intwenty.Data.Seed
             else
                 DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
 
-            /*
-         builder.Entity<SystemUser>(entity => { entity.ToTable(name: "security_User"); });
-         builder.Entity<SystemRole>(entity => { entity.ToTable(name: "security_Role"); });
-         builder.Entity<IdentityUserRole<string>>(entity => { entity.ToTable("security_UserRoles"); });
-         builder.Entity<IdentityUserClaim<string>>(entity => { entity.ToTable("security_UserClaims"); });
-         builder.Entity<IdentityUserLogin<string>>(entity => { entity.ToTable("security_UserLogins"); });
-         builder.Entity<IdentityRoleClaim<string>>(entity => { entity.ToTable("security_RoleClaims"); });
-         builder.Entity<IdentityUserToken<string>>(entity => { entity.ToTable("security_UserTokens"); });
-         */
 
-            DataRepository.CreateTable<SystemUser>(true);
-            DataRepository.CreateTable<SystemRole>(true);
-            DataRepository.CreateTable<SystemUserRole>(true);
-            //DataRepository.CreateTable<IdentityUserClaim<string>>(true);
-            //DataRepository.CreateTable<IdentityUserLogin<string>>(true);
-            //DataRepository.CreateTable<IdentityRoleClaim<string>>(true);
-            //DataRepository.CreateTable<IdentityUserToken<string>>(true);
-
-
-            var userManager = provider.GetRequiredService<UserManager<SystemUser>>();
-            var roleManager = provider.GetRequiredService<RoleManager<SystemRole>>();
+            var userManager = provider.GetRequiredService<UserManager<IntwentyUser>>();
+            var roleManager = provider.GetRequiredService<RoleManager<IntwentyRole>>();
 
 
             var u = userManager.FindByNameAsync("admin@intwenty.com");
@@ -69,15 +51,15 @@ namespace Intwenty.Data.Seed
                 roleManager.DeleteAsync(r.Result);
 
 
-            var role = new SystemRole();
+            var role = new IntwentyRole();
             role.Name = "Administrator";
             roleManager.CreateAsync(role);
 
-            role = new SystemRole();
+            role = new IntwentyRole();
             role.Name = "User";
             roleManager.CreateAsync(role);
 
-            var user = new SystemUser();
+            var user = new IntwentyUser();
             user.UserName = "admin@intwenty.com";
             user.Email = "admin@intwenty.com";
             user.FirstName = "Admin";
@@ -87,7 +69,7 @@ namespace Intwenty.Data.Seed
             userManager.AddToRoleAsync(user, "Administrator");
 
 
-            user = new SystemUser();
+            user = new IntwentyUser();
             user.UserName = "user@intwenty.com";
             user.Email = "user@intwenty.com";
             user.FirstName = "User";

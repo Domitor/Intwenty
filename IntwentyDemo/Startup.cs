@@ -48,7 +48,7 @@ namespace IntwentyDemo
             });
 
             //Required for Intwenty if Identity is used
-            services.AddDefaultIdentity<SystemUser>(options =>
+            services.AddDefaultIdentity<IntwentyUser>(options =>
             {
                 //options.SignIn.RequireConfirmedAccount = true;
                 //options.SignIn.RequireConfirmedPhoneNumber = true;
@@ -59,7 +59,7 @@ namespace IntwentyDemo
                 options.Password.RequiredLength = 5;
                 options.Password.RequireNonAlphanumeric = false;
             })
-             .AddRoles<SystemRole>()
+             .AddRoles<IntwentyRole>()
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>();
 

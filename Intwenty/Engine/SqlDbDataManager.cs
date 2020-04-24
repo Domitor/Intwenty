@@ -97,7 +97,7 @@ namespace Intwenty.Engine
                 CreateIndexes(res);
 
             }
-            catch (Exception ex)
+            catch
             {
                 //throw ex;
             }

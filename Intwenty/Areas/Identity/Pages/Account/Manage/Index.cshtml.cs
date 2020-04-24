@@ -13,12 +13,12 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
 
         public IndexModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager)
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -39,7 +39,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
             public string PhoneNumber { get; set; }
         }
 
-        private async Task LoadAsync(SystemUser user)
+        private async Task LoadAsync(IntwentyUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

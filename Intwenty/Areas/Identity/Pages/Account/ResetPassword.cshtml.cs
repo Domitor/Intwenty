@@ -17,9 +17,9 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ResetPasswordModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly UserManager<IntwentyUser> _userManager;
 
-        public ResetPasswordModel(UserManager<SystemUser> userManager)
+        public ResetPasswordModel(UserManager<IntwentyUser> userManager)
         {
             _userManager = userManager;
         }

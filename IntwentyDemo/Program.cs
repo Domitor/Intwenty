@@ -21,9 +21,11 @@ namespace IntwentyDemo
 
                 try
                 {
+                    CreateIntwentyDb.Run(services);
 
+                    //Create admin account, and som roles
                     //SeedIdentity.Seed(services);
-                    //SeedSalesOrderDemoModel.Seed(services);
+                   
                 }
                 catch (Exception ex)
                 {

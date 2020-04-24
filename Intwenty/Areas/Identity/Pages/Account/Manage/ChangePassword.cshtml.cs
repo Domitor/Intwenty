@@ -13,13 +13,13 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public class ChangePasswordModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly ILogger<ChangePasswordModel> _logger;
 
         public ChangePasswordModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager,
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
             ILogger<ChangePasswordModel> logger)
         {
             _userManager = userManager;

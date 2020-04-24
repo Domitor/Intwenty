@@ -28,18 +28,6 @@ namespace Intwenty.Data.Seed
             else
                 DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
 
-         
-
-            DataRepository.CreateTable<ApplicationItem>(true);
-            DataRepository.CreateTable<DatabaseItem>(true);
-            DataRepository.CreateTable<DataViewItem>(true);
-            DataRepository.CreateTable<EventLog>(true);
-            DataRepository.CreateTable<InformationStatus>(true);
-            DataRepository.CreateTable<MenuItem>(true);
-            DataRepository.CreateTable<SystemID>(true);
-            DataRepository.CreateTable<UserInterfaceItem>(true);
-            DataRepository.CreateTable<ValueDomainItem>(true);
-            DataRepository.CreateTable<DefaultValue>(true);
 
             if (Settings.Value.ReCreateModelOnStartUp)
             {

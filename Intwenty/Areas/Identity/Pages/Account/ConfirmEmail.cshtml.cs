@@ -13,9 +13,9 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ConfirmEmailModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly UserManager<IntwentyUser> _userManager;
 
-        public ConfirmEmailModel(UserManager<SystemUser> userManager)
+        public ConfirmEmailModel(UserManager<IntwentyUser> userManager)
         {
             _userManager = userManager;
         }

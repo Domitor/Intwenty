@@ -17,10 +17,10 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly UserManager<IntwentyUser> _userManager;
         private readonly IEmailSender _emailSender;
 
-        public ForgotPasswordModel(UserManager<SystemUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<IntwentyUser> userManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _emailSender = emailSender;

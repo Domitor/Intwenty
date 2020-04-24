@@ -13,12 +13,12 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
 
         public ExternalLoginsModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager)
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

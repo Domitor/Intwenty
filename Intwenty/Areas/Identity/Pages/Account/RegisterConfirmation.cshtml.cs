@@ -14,10 +14,10 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly UserManager<IntwentyUser> _userManager;
         private readonly IEmailSender _sender;
 
-        public RegisterConfirmationModel(UserManager<SystemUser> userManager, IEmailSender sender)
+        public RegisterConfirmationModel(UserManager<IntwentyUser> userManager, IEmailSender sender)
         {
             _userManager = userManager;
             _sender = sender;

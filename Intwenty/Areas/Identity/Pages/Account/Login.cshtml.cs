@@ -18,13 +18,13 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<SystemUser> signInManager, 
+        public LoginModel(SignInManager<IntwentyUser> signInManager, 
             ILogger<LoginModel> logger,
-            UserManager<SystemUser> userManager)
+            UserManager<IntwentyUser> userManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

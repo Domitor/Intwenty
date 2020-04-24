@@ -15,11 +15,11 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public class DownloadPersonalDataModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly UserManager<IntwentyUser> _userManager;
         private readonly ILogger<DownloadPersonalDataModel> _logger;
 
         public DownloadPersonalDataModel(
-            UserManager<SystemUser> userManager,
+            UserManager<IntwentyUser> userManager,
             ILogger<DownloadPersonalDataModel> logger)
         {
             _userManager = userManager;
@@ -38,7 +38,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
-            var personalDataProps = typeof(SystemUser).GetProperties().Where(
+            var personalDataProps = typeof(IntwentyUser).GetProperties().Where(
                             prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
             foreach (var p in personalDataProps)
             {

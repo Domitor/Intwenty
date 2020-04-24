@@ -17,13 +17,13 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public partial class EmailModel : PageModel
     {
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public EmailModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager,
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -51,7 +51,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
             public string NewEmail { get; set; }
         }
 
-        private async Task LoadAsync(SystemUser user)
+        private async Task LoadAsync(IntwentyUser user)
         {
             var email = await _userManager.GetEmailAsync(user);
             Email = email;

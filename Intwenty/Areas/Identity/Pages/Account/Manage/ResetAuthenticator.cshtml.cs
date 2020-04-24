@@ -11,13 +11,13 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 {
     public class ResetAuthenticatorModel : PageModel
     {
-        UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager,
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
             ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;

@@ -15,13 +15,13 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
     {
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
 
-        private readonly UserManager<SystemUser> _userManager;
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly ILogger<TwoFactorAuthenticationModel> _logger;
 
         public TwoFactorAuthenticationModel(
-            UserManager<SystemUser> userManager,
-            SignInManager<SystemUser> signInManager,
+            UserManager<IntwentyUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
             ILogger<TwoFactorAuthenticationModel> logger)
         {
             _userManager = userManager;

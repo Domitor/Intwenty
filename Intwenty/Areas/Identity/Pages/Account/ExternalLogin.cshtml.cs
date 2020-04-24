@@ -19,14 +19,14 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<SystemUser> _signInManager;
-        private readonly UserManager<SystemUser> _userManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly UserManager<IntwentyUser> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
-            SignInManager<SystemUser> signInManager,
-            UserManager<SystemUser> userManager,
+            SignInManager<IntwentyUser> signInManager,
+            UserManager<IntwentyUser> userManager,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender)
         {
@@ -121,7 +121,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = new SystemUser { UserName = Input.Email, Email = Input.Email };
+                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

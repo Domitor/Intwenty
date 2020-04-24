@@ -14,10 +14,10 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LogoutModel : PageModel
     {
-        private readonly SignInManager<SystemUser> _signInManager;
+        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly ILogger<LogoutModel> _logger;
 
-        public LogoutModel(SignInManager<SystemUser> signInManager, ILogger<LogoutModel> logger)
+        public LogoutModel(SignInManager<IntwentyUser> signInManager, ILogger<LogoutModel> logger)
         {
             _signInManager = signInManager;
             _logger = logger;
