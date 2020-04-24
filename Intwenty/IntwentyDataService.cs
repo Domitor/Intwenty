@@ -9,14 +9,14 @@ using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess;
+using System.Text;
 
 namespace Intwenty
 {
     public interface IIntwentyDataService
     {
-        List<DefaultValue> GetDefaultValues(ClientStateInfo state);
+        OperationResult CreateNew(ClientStateInfo state);
 
-      
         OperationResult Save(ClientStateInfo state);
 
         OperationResult GetLatestVersion(ClientStateInfo state);
@@ -79,7 +79,60 @@ namespace Intwenty
 
         }
 
-        public List<DefaultValue> GetDefaultValues(ClientStateInfo state)
+        public OperationResult CreateNew(ClientStateInfo state)
+        {
+            var result = new OperationResult();
+
+            try
+            {
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                {
+                    result = new OperationResult(false, string.Format("Could not find application model for applicationid {0} when creating a new empty app", state.ApplicationId));
+                    result.Data = "{}";
+                    return result;
+                }
+
+                var sb = new StringBuilder();
+                sb.Append("{");
+                sb.Append("\"" + model.Application.DbName + "\":{");
+
+                var sep = "";
+                var defval = GetDefaultValues(state);
+                if (defval.Count > 0)
+                {
+                    foreach (var df in defval)
+                    {
+                        sb.Append(sep + DBHelpers.GetJSONValue(df.ColumnName, df.LatestValue));
+                        sep = ",";
+                    }
+                }
+                sb.Append("}");
+
+                foreach (var dbtbl in model.DataStructure)
+                {
+                    if (dbtbl.IsMetaTypeDataTable && dbtbl.IsRoot)
+                    {
+                        sb.Append(",\""+ dbtbl .DbName+ "\":[]");
+                    }
+                }
+               
+                sb.Append("}");
+
+                result.Data = sb.ToString();
+                result.SetSuccess("Generated a new empty application.");
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Error when creating a new application");
+            }
+
+            return result;
+        }
+
+        private List<DefaultValue> GetDefaultValues(ClientStateInfo state)
         {
             var res = new List<DefaultValue>();
             var model = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == state.ApplicationId);

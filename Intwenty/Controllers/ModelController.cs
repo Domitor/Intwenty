@@ -64,7 +64,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-
+        [Obsolete]
         public IActionResult EditNoSeries()
         {
             return View();
@@ -547,6 +547,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get meta data for number series
         /// </summary>
+        [Obsolete]
         [HttpGet("/Model/GetNoSeries")]
         public JsonResult GetNoSeries()
         {
