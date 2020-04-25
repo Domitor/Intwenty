@@ -9,7 +9,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - To quickly produce web applications.
 - To allow for hot swapping UI and data model without recompile or publish.
 
-# In short Intwenty intends to
+# Intends to
 1. Let the user or developer describe applications, user interface, data structures, and static data by inputing metadata.
 2. Let Intwenty generate database and database objects based on metadata.
 3. Let Intwenty generate UI based on metadata.
