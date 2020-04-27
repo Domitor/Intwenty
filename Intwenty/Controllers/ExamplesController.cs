@@ -52,7 +52,7 @@ namespace Intwenty.Controllers
             //CREATE A DB CONNECTION
             IIntwentyDbORM dbstore = null;
             if (_settings.IsNoSQL)
-                dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection, "IntwentyDb");
+                dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
             else
                 dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 

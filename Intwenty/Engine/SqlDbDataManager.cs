@@ -121,7 +121,7 @@ namespace Intwenty.Engine
                 {
                     var ds = new DataSet();
                     SqlClient.CreateCommand("SELECT id,version from sysdata_InformationStatus where Id = @Id");
-                    SqlClient.AddParameter("@Id", (int)maxid);
+                    SqlClient.AddParameter("@Id", Convert.ToInt32(maxid));
                     SqlClient.FillDataset(ds, "Result");
                     if (ds.Tables[0].Rows.Count == 0)
                     {

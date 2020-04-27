@@ -31,7 +31,18 @@ namespace Intwenty.Data.DBAccess
             DbEngine = DBMS.MongoDb;
         }
 
-        public IntwentyNoSqlDbClient(DBMS d, string connectionstring, string databasename)
+        public IntwentyNoSqlDbClient(IntwentySettings settings)
+        {
+            Initialize(settings.DefaultConnectionDBMS, settings.DefaultConnection, "IntwentyDb");
+        }
+
+        public IntwentyNoSqlDbClient(DBMS d, string connectionstring, string databasename="IntwentyDb")
+        {
+            Initialize(d, connectionstring, databasename);
+        }
+
+        
+        private void Initialize(DBMS d, string connectionstring, string databasename)
         {
             DbEngine = d;
             ConnectionString = connectionstring;
@@ -53,6 +64,9 @@ namespace Intwenty.Data.DBAccess
                 MongoDbClient = client.GetDatabase(DatabaseName);
             }
         }
+
+     
+
 
         private void SetLiteDbConnectionString()
         {

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Intwenty;
 using Intwenty.Data.Identity;
 using Intwenty.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IntwentyDemo
 {
@@ -63,7 +64,21 @@ namespace IntwentyDemo
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>();
 
-           
+            services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
+                {
+                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                });
+
+                options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
+                {
+                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                });
+            });
+
+
             //Remove this in production
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
@@ -91,6 +106,8 @@ namespace IntwentyDemo
             //Needed only if Identity is used
             app.UseAuthentication();
             app.UseAuthorization();
+
+          
 
             app.UseEndpoints(endpoints =>
             {

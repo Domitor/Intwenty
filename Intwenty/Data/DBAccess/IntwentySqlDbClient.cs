@@ -36,6 +36,14 @@ namespace Intwenty.Data.DBAccess
             DbEngine = DBMS.MSSqlServer;
         }
 
+        public IntwentySqlDbClient(IntwentySettings settings)
+        {
+            DbEngine = settings.DefaultConnectionDBMS;
+            ConnectionString = settings.DefaultConnection;
+            if (DbEngine == DBMS.MongoDb || DbEngine == DBMS.LiteDb)
+                throw new InvalidOperationException("IntwentySqlDbClient configured with wrong DBMS setting");
+        }
+
         public IntwentySqlDbClient(DBMS d, string connectionstring)
         {
             DbEngine = d;

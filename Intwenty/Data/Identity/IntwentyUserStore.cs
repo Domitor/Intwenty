@@ -1,48 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Intwenty.Data.DBAccess;
-using Intwenty.Data.DBAccess.Annotations;
-using Intwenty.Data.DBAccess.Helpers;
-using Intwenty.Engine;
+﻿using Intwenty.Data.DBAccess;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Intwenty.Data.Identity
 {
-
-    [DbTableName("security_User")]
-    [DbTablePrimaryKey("Id")]
-    public class IntwentyUser : IdentityUser
-    {
-       
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; }
-
-        public string APIKey { get; set; }
-
-    }
-
-    [DbTableName("security_Role")]
-    [DbTablePrimaryKey("Id")]
-    public class IntwentyRole : IdentityRole
-    {
-
-    }
-
-    [DbTableName("security_UserRoles")]
-    [DbTablePrimaryKey("UserId,RoleId")]
-    public class IntwentyUserRole : IdentityUserRole<string>
-    {
-
-    }
-
-
-
-    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>
+    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>
     {
         private IntwentySettings Settings { get; }
 
@@ -55,7 +21,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -68,7 +34,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -86,7 +52,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -99,7 +65,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -122,7 +88,7 @@ namespace Intwenty.Data.Identity
 
         public Task<string> GetUserNameAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
-  
+
             return Task.FromResult(user.UserName);
         }
 
@@ -142,7 +108,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -171,13 +137,13 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var existingrole = client.GetAll<IntwentyRole>().Find(p => p.NormalizedName == roleName);
             if (existingrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description=string.Format("There is nor role named {0}", roleName) } }));
+                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is nor role named {0}", roleName) } }));
 
             var existing_userrole = client.GetAll<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
             if (existing_userrole != null)
@@ -194,7 +160,7 @@ namespace Intwenty.Data.Identity
             IList<string> result = new List<string>();
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -224,7 +190,7 @@ namespace Intwenty.Data.Identity
             IList<IntwentyUser> result = new List<IntwentyUser>();
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -239,9 +205,9 @@ namespace Intwenty.Data.Identity
                 if (role.NormalizedName != roleName)
                     continue;
 
-               var user = users.Find(p => p.Id == ur.UserId);
-               if (user!= null)
-                   result.Add(user);
+                var user = users.Find(p => p.Id == ur.UserId);
+                if (user != null)
+                    result.Add(user);
 
             }
 
@@ -258,7 +224,7 @@ namespace Intwenty.Data.Identity
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
@@ -274,115 +240,73 @@ namespace Intwenty.Data.Identity
 
             return Task.CompletedTask;
         }
-    }
 
-    public class IntwentyRoleStore : IRoleStore<IntwentyRole>
-    {
-
-        private IntwentySettings Settings { get; }
-
-
-        public IntwentyRoleStore(IOptions<IntwentySettings> settings)
+        public Task SetPhoneNumberAsync(IntwentyUser user, string phoneNumber, CancellationToken cancellationToken)
         {
-            Settings = settings.Value;
-        }
-
-        public Task<IdentityResult> CreateAsync(IntwentyRole role, CancellationToken cancellationToken)
-        {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            client.Insert(role);
-
-            return Task.FromResult(IdentityResult.Success);
-        }
-
-        public Task<IdentityResult> DeleteAsync(IntwentyRole role, CancellationToken cancellationToken)
-        {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            client.Delete(role);
-
-            return Task.FromResult(IdentityResult.Success);
-        }
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public Task<IntwentyRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
-        {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            var role = client.GetOne<IntwentyRole>(roleId);
-
-            return Task.FromResult(role);
-        }
-
-        public Task<IntwentyRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
-        {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            var role = client.GetAll<IntwentyRole>().Find(p => p.NormalizedName == normalizedRoleName);
-
-            return Task.FromResult(role);
-        }
-
-        public Task<string> GetNormalizedRoleNameAsync(IntwentyRole role, CancellationToken cancellationToken)
-        {
-            return Task.FromResult<string>(role.NormalizedName);
-        }
-
-        public Task<string> GetRoleIdAsync(IntwentyRole role, CancellationToken cancellationToken)
-        {
-            return Task.FromResult<string>(role.Id);
-        }
-
-        public Task<string> GetRoleNameAsync(IntwentyRole role, CancellationToken cancellationToken)
-        {
-            return Task.FromResult<string>(role.Name);
-        }
-
-        public Task SetNormalizedRoleNameAsync(IntwentyRole role, string normalizedName, CancellationToken cancellationToken)
-        {
-            role.NormalizedName = normalizedName;
+            user.PhoneNumber = phoneNumber;
             return Task.CompletedTask;
         }
 
-        public Task SetRoleNameAsync(IntwentyRole role, string roleName, CancellationToken cancellationToken)
+        public Task<string> GetPhoneNumberAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
-            role.Name = roleName;
+            return Task.FromResult(user.PhoneNumber);
+        }
+
+        public Task<bool> GetPhoneNumberConfirmedAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.PhoneNumberConfirmed);
+        }
+
+        public Task SetPhoneNumberConfirmedAsync(IntwentyUser user, bool confirmed, CancellationToken cancellationToken)
+        {
+            user.PhoneNumberConfirmed = confirmed;
             return Task.CompletedTask;
         }
 
-        public Task<IdentityResult> UpdateAsync(IntwentyRole role, CancellationToken cancellationToken)
+        public Task SetEmailAsync(IntwentyUser user, string email, CancellationToken cancellationToken)
+        {
+            user.Email = email;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetEmailAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.Email);
+        }
+
+        public Task<bool> GetEmailConfirmedAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.EmailConfirmed);
+        }
+
+        public Task SetEmailConfirmedAsync(IntwentyUser user, bool confirmed, CancellationToken cancellationToken)
+        {
+            user.EmailConfirmed = confirmed;
+            return Task.CompletedTask;
+        }
+
+        public Task<IntwentyUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
-            client.Update(role);
+            var user = client.GetAll<IntwentyUser>().Find(p => p.NormalizedEmail == normalizedEmail);
 
+            return Task.FromResult(user);
+        }
 
-            return Task.FromResult(IdentityResult.Success);
+        public Task<string> GetNormalizedEmailAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.NormalizedEmail);
+        }
+
+        public Task SetNormalizedEmailAsync(IntwentyUser user, string normalizedEmail, CancellationToken cancellationToken)
+        {
+            user.NormalizedEmail = normalizedEmail;
+            return Task.CompletedTask;
         }
     }
 }

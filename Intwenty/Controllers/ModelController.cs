@@ -15,8 +15,8 @@ using Intwenty.Data.DBAccess.Helpers;
 
 namespace Intwenty.Controllers
 {
-    
-    //[Authorize(Roles="Administrator")]
+
+    [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class ModelController : Controller
     {
         public IIntwentyDataService DataRepository { get; }

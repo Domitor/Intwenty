@@ -25,7 +25,7 @@ namespace Intwenty.Data.Seed
 
             IIntwentyDbORM DataRepository = null;
             if (Settings.Value.IsNoSQL)
-                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection, "IntwentyDb");
+                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
             else
                 DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
 

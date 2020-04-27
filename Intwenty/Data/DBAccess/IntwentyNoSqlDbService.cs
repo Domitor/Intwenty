@@ -21,7 +21,7 @@ namespace Intwenty.Data.DBAccess
         public IntwentyNoSqlDbService(IOptions<IntwentySettings> settings)
         {
             Settings = settings;
-            DBClient = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection, "IntwentyDb");
+            DBClient = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
         }
 
         public string ConnectionString

@@ -103,7 +103,7 @@ namespace Intwenty
             Settings = settings.Value;
             if (Settings.IsNoSQL)
             {
-                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb");
+                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             }
             else
             {
@@ -1018,7 +1018,7 @@ namespace Intwenty
             {
                 if (Settings.IsNoSQL)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, this, Settings, new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection, "IntwentyDb"));
+                    var t = NoSqlDbDataManager.GetDataManager(model, this, Settings, new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
                     res.Add(t.ConfigureDatabase());
 
 

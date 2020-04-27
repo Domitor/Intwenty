@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Intwenty.Controllers
 {
-    //[Authorize(Roles = "User,Administrator,Producer")]
+    [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationController : Controller
     {
         private IIntwentyDataService DataRepository { get; }
