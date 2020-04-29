@@ -19,67 +19,75 @@ namespace Intwenty
     /// </summary>
     public interface IIntwentyModelService
     {
-        void CreateIntwentyDatabase();
+        public void CreateIntwentyDatabase();
 
-        List<OperationResult> ConfigureDatabase();
+        public List<OperationResult> ConfigureDatabase();
 
-        void ConfigureDatabaseIfNeeded();
+        public void ConfigureDatabaseIfNeeded();
 
-        List<ApplicationModel> GetApplicationModels();
+        public List<ApplicationModel> GetApplicationModels();
 
-        SystemModel GetSystemModel();
+        public SystemModel GetSystemModel();
 
-        OperationResult InsertSystemModel(SystemModel model);
+        public OperationResult InsertSystemModel(SystemModel model);
 
-        List<ApplicationModelItem> GetApplicationModelItems();
+        public List<ApplicationModelItem> GetApplicationModelItems();
 
-        ApplicationModelItem SaveApplication(ApplicationModelItem model);
+        public ApplicationModelItem SaveApplication(ApplicationModelItem model);
 
-        void DeleteApplicationModel(ApplicationModelItem model);
-
-
-
-        List<DatabaseModelItem> GetDatabaseModelItems();
-
-        void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid);
-
-        void DeleteApplicationDB(int id);
-       
+        public void DeleteApplicationModel(ApplicationModelItem model);
 
 
 
-        List<UserInterfaceModelItem> GetUserInterfaceModelItems();
+        public List<DatabaseModelItem> GetDatabaseModelItems();
 
-        void SaveUserInterfaceModel(List<UserInterfaceModelItem> model);
+        public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid);
 
-        
-
-
-        List<DataViewModelItem> GetDataViewModels();
-
-        void SaveDataView(List<DataViewModelItem> model);
-
-        void DeleteDataView(int id);
-
-
-
-        List<ValueDomainModelItem> GetValueDomains();
-        void SaveValueDomains(List<ValueDomainModelItem> model);
-
-        void DeleteValueDomain(int id);
+        public void DeleteApplicationDB(int id);
 
 
 
 
-        List<MenuModelItem> GetMenuModelItems();
+        public List<UserInterfaceModelItem> GetUserInterfaceModelItems();
+
+        public void SaveUserInterfaceModel(List<UserInterfaceModelItem> model);
 
 
-        List<string> GetTestDataBatches();
-
-        void DeleteTestDataBatch(string batchname);
 
 
-        OperationResult ValidateModel();
+        public List<DataViewModelItem> GetDataViewModels();
+
+        public void SaveDataView(List<DataViewModelItem> model);
+
+        public void DeleteDataView(int id);
+
+
+
+        public List<ValueDomainModelItem> GetValueDomains();
+        public void SaveValueDomains(List<ValueDomainModelItem> model);
+
+        public void DeleteValueDomain(int id);
+
+
+
+
+        public List<MenuModelItem> GetMenuModelItems();
+
+
+        public List<string> GetTestDataBatches();
+
+        public void DeleteTestDataBatch(string batchname);
+
+
+        public OperationResult ValidateModel();
+
+        public List<IntwentyDataColumn> GetDefaultMainTableColumns();
+
+
+        public List<IntwentyDataColumn> GetDefaultSubTableColumns();
+
+
+        public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
 
     }
 
@@ -96,6 +104,13 @@ namespace Intwenty
         private IntwentySettings Settings { get; }
 
         private static readonly string AppModelCacheKey = "APPMODELS";
+
+        private static readonly string DefaultMainTableColumnsCacheKey = "DEFMAINTBLCOLS";
+
+        private static readonly string DefaultSubTableColumnsCacheKey = "DEFSUBTBLCOLS";
+
+        private static readonly string DefaultVersioningTableColumnsCacheKey = "DEFVERTBLCOLS";
+
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
@@ -1192,9 +1207,32 @@ namespace Intwenty
                         res.AddMessage("ERROR", string.Format("The data object: {0} in application {1} has no [DbName].", db.MetaCode, a.Application.Title));
                     }
 
-                    if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName)
+                    if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataColumn)
                     {
-                        res.AddMessage("WARNING", string.Format("The data object: {0} in application {1} has its [DbName] in uppercase, not very nice.", db.MetaCode, a.Application.Title));
+                        res.AddMessage("WARNING", string.Format("The data column: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
+                    }
+
+                    if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataTable)
+                    {
+                        res.AddMessage("WARNING", string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
+                    }
+
+                    if (db.IsMetaTypeDataColumn && GetDefaultMainTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    {
+                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        return res;
+                    }
+
+                    if (db.IsMetaTypeDataColumn && GetDefaultSubTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    {
+                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        return res;
+                    }
+
+                    if (db.IsMetaTypeDataColumn && GetDefaultVersioningTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    {
+                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        return res;
                     }
 
                 }
@@ -1218,12 +1256,12 @@ namespace Intwenty
 
                 if (!string.IsNullOrEmpty(v.SQLQueryFieldName) && v.IsMetaTypeDataView)
                 {
-                    res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query field on the ROOT level.", v.Title));
+                    res.AddMessage("WARNING", string.Format("The view object: {0} has a SqlQueryFieldName. It makes no sense on a DATAVIEW model item", v.Title));
                 }
 
-                if (!string.IsNullOrEmpty(v.SQLQuery) && v.IsMetaTypeDataViewColumn)
+                if (!string.IsNullOrEmpty(v.SQLQuery) && (v.IsMetaTypeDataViewColumn || v.IsMetaTypeDataViewKeyColumn))
                 {
-                    res.AddMessage("WARNING", string.Format("The view object: {0} has a sql query specified. (DATAVIEWFIELD can't have queries)", v.Title));
+                    res.AddMessage("WARNING", string.Format("The view object: {0} has a SqlQuery. It makes no sense on a DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN model item)", v.Title));
                 }
 
                 if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewColumn))
@@ -1238,11 +1276,18 @@ namespace Intwenty
                     if (view != null)
                     {
                         if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
-                            res.AddMessage("ERROR", string.Format("The viewfield {0} has no SQLQueryFieldName that is included in the SQL Query of the parent view.", v.Title));
+                            res.AddMessage("ERROR", string.Format("The  DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN {0} has no SQLQueryFieldName that is included in the SQL Query of the parent view.", v.Title));
                     }
                     else
                     {
-                        res.AddMessage("ERROR", string.Format("The view field {0} has no parent with [MetaType]=DATAVIEW.", v.Title));
+                        res.AddMessage("ERROR", string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN  {0} has no parent with [MetaType]=DATAVIEW.", v.Title));
+                    }
+
+                    if (string.IsNullOrEmpty(v.SQLQueryFieldDataType))
+                    {
+
+                        res.AddMessage("WARNING", string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN : {0} has no SQLQueryFieldDataType. STRING will be used as default.)", v.Title));
+
                     }
                 }
 
@@ -1290,7 +1335,83 @@ namespace Intwenty
             return res;
         }
 
-      
+        public List<IntwentyDataColumn> GetDefaultMainTableColumns()
+        {
+            List<IntwentyDataColumn> res = null;
+            if (ModelCache.TryGetValue(DefaultMainTableColumnsCacheKey, out res))
+            {
+                return res;
+            }
+
+          
+            var DefaultMainTableColumns = new List<IntwentyDataColumn>();
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "CreatedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "ChangedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "OwnedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
+
+
+            ModelCache.Set(DefaultMainTableColumnsCacheKey, DefaultMainTableColumns);
+
+            return DefaultMainTableColumns;
+
+        }
+
+        public List<IntwentyDataColumn> GetDefaultSubTableColumns()
+        {
+
+            List<IntwentyDataColumn> res = null;
+            if (ModelCache.TryGetValue(DefaultSubTableColumnsCacheKey, out res))
+            {
+                return res;
+            }
+
+           
+            var DefaultSubTableColumns = new List<IntwentyDataColumn>();
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "CreatedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "ChangedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "OwnedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ParentId" });
+
+            ModelCache.Set(DefaultSubTableColumnsCacheKey, DefaultSubTableColumns);
+
+            return DefaultSubTableColumns;
+
+        }
+
+        public List<IntwentyDataColumn> GetDefaultVersioningTableColumns()
+        {
+            List<IntwentyDataColumn> res = null;
+            if (ModelCache.TryGetValue(DefaultVersioningTableColumnsCacheKey, out res))
+            {
+                return res;
+            }
+
+          
+            var DefaultVersioningTableColumns = new List<IntwentyDataColumn>();
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "MetaCode" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "MetaType" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ParentId" });
+            
+
+            ModelCache.Set(DefaultVersioningTableColumnsCacheKey, DefaultVersioningTableColumns);
+
+            return DefaultVersioningTableColumns;
+
+        }
+
+
 
         #endregion
 

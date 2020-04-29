@@ -37,6 +37,8 @@ namespace Intwenty.Data.Entity
         public string Properties { get; set; }
 
         public bool Mandatory { get; set; }
+
+        public bool IsUnique { get; set; }
     }
 
    

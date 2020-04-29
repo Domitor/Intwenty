@@ -20,9 +20,14 @@ namespace Intwenty.Engine.Custom
             return base.GetValueDomains();
         }
 
-        public override OperationResult GetLatestVersion(ClientStateInfo data)
+        public override OperationResult GetLatestVersionById(ClientStateInfo state)
         {
-            return base.GetLatestVersion(data);
+            return base.GetLatestVersionById(state);
+        }
+
+        public override OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
+        {
+            return base.GetLatestVersionByOwnerUser(state);
         }
 
         public override OperationResult GetList(ListRetrivalArgs args)
@@ -30,35 +35,40 @@ namespace Intwenty.Engine.Custom
             return base.GetList(args);
         }
 
+        public override OperationResult GetList()
+        {
+            return base.GetList();
+        }
+
         public override OperationResult GetVersion()
         {
             return base.GetVersion();
         }
 
-        public override OperationResult Save(ClientStateInfo data)
+        public override OperationResult Save(ClientStateInfo state)
         {
-            return base.Save(data);
+            return base.Save(state);
         }
 
-        protected override void BeforeSave(ClientStateInfo data)
+        protected override void BeforeSave(ClientStateInfo state)
         {
-            base.BeforeSave(data);
+            base.BeforeSave(state);
         }
 
-        protected override void BeforeSaveNew(ClientStateInfo data)
+        protected override void BeforeSaveNew(ClientStateInfo state)
         {
-            base.BeforeSaveNew(data);
+            base.BeforeSaveNew(state);
         }
 
-        protected override void BeforeSaveUpdate(ClientStateInfo data)
+        protected override void BeforeSaveUpdate(ClientStateInfo state)
         {
-            base.BeforeSaveUpdate(data);
+            base.BeforeSaveUpdate(state);
         }
 
 
-        protected override void AfterSave(ClientStateInfo data)
+        protected override void AfterSave(ClientStateInfo state)
         {
-            base.AfterSave(data);
+            base.AfterSave(state);
         }
 
     }

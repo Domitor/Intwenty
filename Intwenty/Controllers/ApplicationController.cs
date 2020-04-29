@@ -53,8 +53,6 @@ namespace Intwenty.Controllers
 
         /*********************  API ***********************************************************/
 
-      
-
 
         /// <summary>
         /// Get the latest version data by id for an application with applicationid 
@@ -65,7 +63,7 @@ namespace Intwenty.Controllers
         public JsonResult GetLatestVersion(int applicationid, int id)
         {
             var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-            var data = DataRepository.GetLatestVersion(state);
+            var data = DataRepository.GetLatestVersionById(state);
             return new JsonResult(data);
 
         }
@@ -86,8 +84,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/GetValueDomains/{id}")]
         public JsonResult GetValueDomains(int id)
         {
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == id);
-            var data = DataRepository.GetValueDomains(t);
+            var data = DataRepository.GetValueDomains(id);
             var res = new JsonResult(data);
             return res;
 
@@ -100,9 +97,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = ModelRepository.GetDataViewModels();
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            var viewitem = DataRepository.GetDataViewValue(t, viewinfo, model);
+            var viewitem = DataRepository.GetDataViewRecord(model);
             return new JsonResult(viewitem);
         }
 
@@ -113,9 +108,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
         {
-            var viewinfo = ModelRepository.GetDataViewModels();
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            var dv = DataRepository.GetDataView(t, viewinfo, model);
+            var dv = DataRepository.GetDataView(model);
             return new JsonResult(dv);
         }
 

@@ -43,23 +43,42 @@ namespace Intwenty.Data.DBAccess.Helpers
         string ColumnName { get; }
         bool IsNumeric { get; }
         bool IsDateTime { get; }
+        public string DataType { get; }
     }
 
-    public interface IIntwentySqlDbDataColum : IIntwentyDataColum
-    {
-        DataColumn QueryResultColumn { get; set; }
-    }
-
+   
   
 
-    public class IntwentyDataColum : IIntwentyDataColum, IIntwentySqlDbDataColum
+    public class IntwentyDataColumn : IIntwentyDataColum
     {
         public string ColumnName { get; set; }
-        public bool IsNumeric { get; set; }
-        public bool IsDateTime { get; set; }
-        public DataColumn QueryResultColumn { get; set; }
+        public string DataType { get; set; }
+
+
+        public bool IsNumeric
+        {
+            get
+            {
+
+                return (DataType == DatabaseModelItem.DataType1Decimal) ||
+                       (DataType == DatabaseModelItem.DataType2Decimal) ||
+                       (DataType == DatabaseModelItem.DataType3Decimal) ||
+                       (DataType == DatabaseModelItem.DataTypeInt) ||
+                       (DataType == DatabaseModelItem.DataTypeBool);
+            }
+        }
+        public bool IsDateTime
+        {
+            get
+            {
+                return (DataType == DatabaseModelItem.DataTypeDateTime);
+            }
+        }
+
 
     }
+
+   
 
 
     public static class DBHelpers
@@ -563,8 +582,8 @@ namespace Intwenty.Data.DBAccess.Helpers
 
             return res;
         }
-      
 
+      
 
 
     }

@@ -1,10 +1,11 @@
 ﻿
+using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
 using System.Collections.Generic;
 
 namespace Intwenty.Model
 {
-    public class DataViewModelItem : BaseModelItem
+    public class DataViewModelItem : BaseModelItem, IIntwentyDataColum
     {
         //META TYPES
         public static readonly string MetaTypeDataView = "DATAVIEW";
@@ -33,12 +34,17 @@ namespace Intwenty.Model
             ParentMetaCode = entity.ParentMetaCode;
             OrderNo = entity.OrderNo;
             Properties = "";
+            SQLQueryFieldDataType = entity.SQLQueryFieldDataType;
+            if (string.IsNullOrEmpty(SQLQueryFieldDataType))
+                SQLQueryFieldDataType = DatabaseModelItem.DataTypeString;
         }
 
 
         public string SQLQuery { get; set; }
 
         public string SQLQueryFieldName { get; set; }
+
+        public string SQLQueryFieldDataType { get; set; }
 
 
         public int OrderNo { get; set; }
@@ -159,9 +165,29 @@ namespace Intwenty.Model
 
         }
 
-      
+        public string ColumnName => this.SQLQueryFieldName;
 
-      
+        public bool IsNumeric
+        {
+            get
+            {
+
+                return (DataType == DatabaseModelItem.DataType1Decimal) ||
+                       (DataType == DatabaseModelItem.DataType2Decimal) ||
+                       (DataType == DatabaseModelItem.DataType3Decimal) ||
+                       (DataType == DatabaseModelItem.DataTypeInt) ||
+                       (DataType == DatabaseModelItem.DataTypeBool);
+            }
+        }
+        public bool IsDateTime
+        {
+            get
+            {
+                return (DataType == DatabaseModelItem.DataTypeDateTime);
+            }
+        }
+
+        public string DataType => this.SQLQueryFieldDataType;
     }
 
   

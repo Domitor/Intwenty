@@ -9,6 +9,7 @@ using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess.Annotations;
 using System.Data.SQLite;
 using Intwenty.Model;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -322,7 +323,7 @@ namespace Intwenty.Data.DBAccess
         }
 
 
-        public void FillDataset(DataSet ds, string tablename)
+        private void FillDataset(DataSet ds, string tablename)
         {
             ds.CaseSensitive = false;
 
@@ -358,7 +359,25 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-      
+        public ApplicationTable GetDataSet()
+        {
+            var result = new ApplicationTable();
+            var ds = new DataSet();
+            FillDataset(ds, "NONE");
+            foreach (DataRow t in ds.Tables[0].Rows)
+            {
+                var row = new ApplicationTableRow();
+                foreach (DataColumn dc in ds.Tables[0].Columns)
+                {
+                    row.Values.Add(new ApplicationValue() { DbName = dc.ColumnName, Value = t[dc] });
+                }
+
+                result.Rows.Add(row);
+            }
+            return result;
+        }
+
+
 
         public StringBuilder GetJSONArray(int minrow=0, int maxrow=0)
         {
@@ -607,7 +626,7 @@ namespace Intwenty.Data.DBAccess
                 throw new InvalidOperationException("Can't create table from a class without properties");
 
             var sb = new StringBuilder();
-            sb.Append("CREATE TABLE " + tablename + "(");
+            sb.Append("CREATE TABLE " + tablename + " (");
             foreach (var m in memberproperties)
             {
                 var colname = m.Name;
@@ -1308,55 +1327,7 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public SqlDataReader ExecuteSqlServerDataReader(CommandBehavior cbv)
-        {
-            if (DbEngine == DBMS.MSSqlServer)
-            {
-                return sql_cmd.ExecuteReader(cbv);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-
-        public NpgsqlDataReader ExecutePgSqlDataReader(CommandBehavior cbv)
-        {
-            if (DbEngine == DBMS.PostgreSQL)
-            {
-                return pgres_cmd.ExecuteReader(cbv);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public MySqlDataReader ExecuteMySqlDataReader(CommandBehavior cbv)
-        {
-            if (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql)
-            {
-                return mysql_cmd.ExecuteReader(cbv);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public SQLiteDataReader ExecuteSqliteDataReader(CommandBehavior cbv)
-        {
-            if (DbEngine == DBMS.SQLite)
-            {
-                return sqlite_cmd.ExecuteReader(cbv);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
+     
 
 
         private void MakeCommand(string sqlcode, bool isstoredprocedure)

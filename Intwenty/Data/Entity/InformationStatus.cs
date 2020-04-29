@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Entity
 {
-    [DbTableIndex("ISTAT_IDX_1", false, "OwnerId")]
+
     [DbTableIndex("ISTAT_IDX_2", false, "CreatedBy")]
     [DbTableIndex("ISTAT_IDX_3", false, "OwnedBy")]
     [DbTablePrimaryKey("Id")]
@@ -15,8 +15,6 @@ namespace Intwenty.Data.Entity
         public int Id { get; set; }
 
         public int Version { get; set; }
-
-        public int OwnerId { get; set; }
 
         public int ApplicationId { get; set; }
 

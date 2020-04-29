@@ -24,6 +24,8 @@ namespace Intwenty.Data.Entity
 
         public string SQLQueryFieldName { get; set; }
 
+        public string SQLQueryFieldDataType { get; set; }
+
         public int OrderNo { get; set; }
 
     }

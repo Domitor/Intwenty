@@ -15,11 +15,7 @@ namespace Intwenty.Data.Dto
 
         public int Version { get; set; }
 
-        public int OwnerId { get; set; }
-
         public string UserId { get; set; }
-
-        public string OwnerUserId { get; set; }
 
         public int ApplicationId { get; set; }
 
@@ -31,6 +27,7 @@ namespace Intwenty.Data.Dto
 
         public System.Text.Json.JsonElement JSON { get; set; }
 
+        private string _owneruserid { get; set; }
 
         public ClientStateInfo()
         {
@@ -39,6 +36,20 @@ namespace Intwenty.Data.Dto
             Properties = "";
             Values = new List<ApplicationValue>();
             SubTables = new List<ApplicationTable>();
+        }
+
+        public string OwnerUserId
+        {
+            set { _owneruserid = value; }
+
+            get
+            {
+                if (_owneruserid == DEFAULT_USERID && !string.IsNullOrEmpty(UserId))
+                    return UserId;
+                else
+                    return _owneruserid;
+
+            }
         }
 
         public bool HasData
@@ -167,124 +178,7 @@ namespace Intwenty.Data.Dto
 
     }
 
-    public class ApplicationValue
-    {
-        public string DbName { get; set; }
-
-        public object Value { get; set; }
-
-        public DatabaseModelItem Model { get; set; }
-
-        public ApplicationValue()
-        {
-            DbName = string.Empty;
-            Value = string.Empty;
-        }
-
-        public bool HasModel
-        {
-            get
-            {
-                return Model!=null;
-            }
-        }
-
-        public int? GetAsInt()
-        {
-            if (HasValue)
-                return Convert.ToInt32(Value);
-
-            return null;
-        }
-
-        public string GetAsString()
-        {
-            if (HasValue)
-                return Convert.ToString(Value);
-
-            return string.Empty;
-        }
-
-        public bool? GetAsBool()
-        {
-            if (HasValue)
-                return Convert.ToBoolean(Value);
-
-            return null;
-        }
-
-        public decimal? GetAsDecimal()
-        {
-            if (HasValue)
-                return Convert.ToDecimal(Value);
-
-            return null;
-        }
-
-        public DateTime? GetAsDateTime()
-        {
-            if (HasValue)
-                return Convert.ToDateTime(Value);
-
-            return null;
-        }
-
-        public bool HasValue
-        {
-            get
-            {
-                if (Value == null)
-                    return false;
-
-                if (Value == DBNull.Value)
-                    return false;
-
-                return true;
-
-            }
-
-        }
-    }
-
-    public class ApplicationTable
-    {
-        public string DbName { get; set; }
-
-        public List<ApplicationTableRow> Rows { get; set; }
-
-        public DatabaseModelItem Model { get; set; }
-
-        public bool HasModel
-        {
-            get
-            {
-                return Model != null;
-            }
-        }
-
-        public ApplicationTable()
-        {
-            Rows = new List<ApplicationTableRow>();
-        }
-
-    }
-
-    public class ApplicationTableRow
-    {
-        public int Id { get; set; }
-
-        public int Version { get; set; }
-
-        public ApplicationTable Table { get; set; }
-
-        public List<ApplicationValue> Values { get; set; }
-
-        public ApplicationTableRow()
-        {
-            Values = new List<ApplicationValue>();
-        }
-
-    }
+   
 
 
 

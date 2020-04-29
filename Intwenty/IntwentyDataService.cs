@@ -15,24 +15,102 @@ namespace Intwenty
 {
     public interface IIntwentyDataService
     {
+        /// <summary>
+        /// Creates a new application JSON Document including defaultvalues.
+        /// </summary>
+        /// <returns>An OperationResult including a json object</returns>
         OperationResult CreateNew(ClientStateInfo state);
 
+        /// <summary>
+        /// Saves application data
+        /// </summary>
+        /// <returns>An OperationResult including Id and Version for the saved application</returns>
         OperationResult Save(ClientStateInfo state);
 
-        OperationResult GetLatestVersion(ClientStateInfo state);
 
-        OperationResult GetLatestIdByOwnerUser(ClientStateInfo state);
+        /// <summary>
+        /// Get the latest version data for and application based on Id
+        /// </summary>
+        /// <returns>An OperationResult including a json object</returns>
+        OperationResult GetLatestVersionById(ClientStateInfo state);
 
+        /// <summary>
+        /// Get the latest version data for and application based on OwnerUserId
+        /// </summary>
+        /// <returns>An OperationResult including a json object</returns>
+        OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
+
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// </summary>
+        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
         OperationResult GetList(ListRetrivalArgs args);
 
-        OperationResult GetValueDomains(ApplicationModel model);
+        /// <summary>
+        /// Get a list of (latest version) application data, based on OwnedBy and that matches the filter specified in args. 
+        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
+        /// This function supports paging. It returns the number of records specified in BatchSize
+        /// </summary>
+        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
+        OperationResult GetListByOwnerUser(ListRetrivalArgs args);
 
-        OperationResult GetDataView(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        /// <summary>
+        /// Get a list of (latest version) application data. 
+        /// All columns from the application's main table is returned.
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        OperationResult GetList(int applicationid);
 
-        OperationResult GetDataViewValue(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        /// <summary>
+        /// Get a list of (latest version) application data based on OwnedBy. 
+        /// All columns from the application's main table is returned.
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        OperationResult GetListByOwnerUser(int applicationid, string owneruserid);
+
+        /// <summary>
+        /// Get a list of all versions for an application based on Id
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        OperationResult GetVersionListById(ClientStateInfo state);
+
+        /// <summary>
+        /// Get the data for an application based on Id and Version
+        /// </summary>
+        /// <returns>An OperationResult including a json object</returns>
+        OperationResult GetVersion(ClientStateInfo state);
+
+        /// <summary>
+        /// Get value domains used by UI in the application specified by application id
+        /// </summary>
+        OperationResult GetValueDomains(int ApplicationId);
+
+        /// <summary>
+        /// Get all value domains.
+        /// </summary>
+        OperationResult GetValueDomains();
+
+        /// <summary>
+        /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        OperationResult GetDataView(ListRetrivalArgs args);
+
+        /// <summary>
+        /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
+        /// </summary>
+        /// <returns>An OperationResult including a json object</returns>
+        OperationResult GetDataViewRecord(ListRetrivalArgs args);
 
         OperationResult Validate(ApplicationModel model, ClientStateInfo state);
 
+        /// <summary>
+        /// Generate TestData
+        /// </summary>
+        /// <returns>A description of the amount of testdata records created</returns>
         OperationResult GenerateTestData();
 
         void LogError(string message, int applicationid=0, string appmetacode="NONE", string username="");
@@ -234,63 +312,136 @@ namespace Intwenty
            
         }
 
-        public OperationResult GetLatestIdByOwnerUser(ClientStateInfo state)
+        public OperationResult GetListByOwnerUser(ListRetrivalArgs args)
         {
-            if (state==null)
-                return new OperationResult(false, "ClientStateInfo was null when using GetLatestIdByOwnerUser", 0, 0);
-            if (state.ApplicationId < 1)
-                return new OperationResult(false, "No ApplicationId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
-            if (string.IsNullOrEmpty(state.OwnerUserId))
-                return new OperationResult(false, "No OwnerUserId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
-            if (state.UserId == ClientStateInfo.DEFAULT_USERID)
-                return new OperationResult(false, "No UserId was supplied when using GetLatestIdByOwnerUser", state.Id, state.Version);
-
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
 
             if (IsNoSql)
             {
                 var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestIdByOwnerUser(state);
+                return t.GetListByOwnerUser(args);
             }
             else
             {
                 var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestIdByOwnerUser(state);
+                return t.GetListByOwnerUser(args);
             }
 
+        }
+
+        public OperationResult GetList(int applicationid)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetList();
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetList();
+            }
+
+        }
+
+        public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetListByOwnerUser(owneruserid);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetListByOwnerUser(owneruserid);
+            }
+
+        }
+
+
+
+        public OperationResult GetLatestVersionById(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetLatestVersionById(state);
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetLatestVersionById(state);
+            }
           
         }
 
-        public OperationResult GetLatestVersion(ClientStateInfo state)
+        public OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
             if (IsNoSql)
             {
                 var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersion(state);
+                return t.GetLatestVersionByOwnerUser(state);
             }
             else
             {
                 var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersion(state);
+                return t.GetLatestVersionByOwnerUser(state);
             }
-          
+
         }
 
        
 
-        public OperationResult GetValueDomains(ApplicationModel model)
+        public OperationResult GetVersionListById(ClientStateInfo state)
         {
+            throw new NotImplementedException();
+        }
+
+        public OperationResult GetVersion(ClientStateInfo state)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        public OperationResult GetValueDomains(int applicationid)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+
             if (IsNoSql)
             {
                 var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetValueDomains();
+                return t.GetApplicationValueDomains();
             }
             else
             {
                 var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetApplicationValueDomains();
+            }
+
+        }
+
+        public OperationResult GetValueDomains()
+        {
+   
+
+            if (IsNoSql)
+            {
+                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetValueDomains();
+            }
+            else
+            {
+                var t = SqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
                 return t.GetValueDomains();
             }
 
@@ -377,8 +528,7 @@ namespace Intwenty
 
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
-                        manager.ClientState = clientstate;
-                        var result = manager.GenerateTestData(i);
+                        var result = manager.GenerateTestData(i, clientstate);
                         if (result.IsSuccess)
                             counter += 1;
 
@@ -407,8 +557,7 @@ namespace Intwenty
 
                         var clientstate = new ClientStateInfo();
                         clientstate.Properties = properties;
-                        manager.ClientState = clientstate;
-                        var result = manager.GenerateTestData(i);
+                        var result = manager.GenerateTestData(i, clientstate);
                         if (result.IsSuccess)
                             counter += 1;
 
@@ -428,33 +577,33 @@ namespace Intwenty
 
        
 
-        public OperationResult GetDataView(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataView(ListRetrivalArgs args)
         {
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataView(viewinfo, args);
+                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetDataView(args);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataView(viewinfo, args);
+                var t = SqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetDataView(args);
             }
 
           
         }
 
-        public OperationResult GetDataViewValue(ApplicationModel model, List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataViewRecord(ListRetrivalArgs args)
         {
             if (IsNoSql)
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataViewValue(viewinfo, args);
+                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetDataViewRecord(args);
             }
             else
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataViewValue(viewinfo, args);
+                var t = SqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                return t.GetDataViewRecord(args);
             }
 
         }
@@ -502,6 +651,6 @@ namespace Intwenty
             catch { }
         }
 
-        
+       
     }
 }

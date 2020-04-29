@@ -5,6 +5,7 @@ using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Model;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -69,10 +70,6 @@ namespace Intwenty.Data.DBAccess
             DBClient.AddParameter(p);
         }
 
-        public void FillDataset(DataSet ds, string tablename)
-        {
-            DBClient.FillDataset(ds, tablename);
-        }
 
         public object ExecuteScalarQuery()
         {
@@ -189,7 +186,10 @@ namespace Intwenty.Data.DBAccess
             return DBClient.ColumnExist(tablename, columnname);
         }
 
-      
+        public ApplicationTable GetDataSet()
+        {
+            return DBClient.GetDataSet();
+        }
     }
 
       

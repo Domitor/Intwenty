@@ -11,6 +11,7 @@ using MongoDB.Bson;
 using System.IO;
 using System.Data;
 using Intwenty.Model;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -678,7 +679,7 @@ namespace Intwenty.Data.DBAccess
             return jsonresult;
         }
 
-        public StringBuilder GetJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJSONArray(string collectionname, string expression = "", int minrow = 0, int maxrow = 0)
         {
             var jsonresult = new StringBuilder("[");
 
@@ -688,6 +689,12 @@ namespace Intwenty.Data.DBAccess
                 var rindex = 0;
                 foreach (var doc in result)
                 {
+                    if (!string.IsNullOrEmpty(expression))
+                    {
+                        if (!IsValidByExpression(expression, doc))
+                            continue;
+                    }
+
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {
@@ -713,6 +720,12 @@ namespace Intwenty.Data.DBAccess
                 var rindex = 0;
                 foreach (var doc in result)
                 {
+                    if (!string.IsNullOrEmpty(expression))
+                    {
+                        if (!IsValidByExpression(expression, doc))
+                            continue;
+                    }
+
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {

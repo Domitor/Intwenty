@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using Intwenty.Model;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -52,7 +53,7 @@ namespace Intwenty.Data.DBAccess
         /// </summary>
         public int GetMaxIntValue(string collectionname, string expression, string fieldname);
 
-        StringBuilder GetJSONArray(string collectionname, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJSONArray(string collectionname, string expression="", int minrow = 0, int maxrow = 0);
 
         StringBuilder GetJSONArray(string collectionname, string expression, List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
 
@@ -60,7 +61,7 @@ namespace Intwenty.Data.DBAccess
 
         StringBuilder GetJSONObject(string collectionname, string expression, List<IIntwentyDataColum> returnfields);
 
-     
+
     }
 
 
@@ -72,7 +73,6 @@ namespace Intwenty.Data.DBAccess
         void CreateSPCommand(string procedurename);
         void AddParameter(string name, object value);
         void AddParameter(IntwentySqlParameter p);
-        void FillDataset(DataSet ds, string tablename);
         object ExecuteScalarQuery();
         bool TableExist(string tablename);
         bool ColumnExist(string tablename, string columnname);
@@ -80,6 +80,9 @@ namespace Intwenty.Data.DBAccess
         StringBuilder GetJSONArray(int minrow = 0, int maxrow = 0);
         StringBuilder GetJSONObject();
         StringBuilder GetJSONObject(List<IIntwentyDataColum> returnfields);
+
+        ApplicationTable GetDataSet();
+
         NonQueryResult ExecuteNonQuery();
         void CreateTable<T>(bool checkexisting = false, bool use_current_connection = false);
         T GetOne<T>(int id, bool use_current_connection = false) where T : new();

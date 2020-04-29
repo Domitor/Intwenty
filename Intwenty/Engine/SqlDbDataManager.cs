@@ -29,17 +29,14 @@ namespace Intwenty.Engine
 
         protected IntwentySettings Settings { get; set; }
 
-        public ClientStateInfo ClientState { get; set; }
-
-        protected LifecycleStatus Status { get; set; }
-
-        protected bool CanRollbackVersion { get; set; }
-
         protected DateTime ApplicationSaveTimeStamp { get; set; }
 
         protected List<SqlDataTypeMap> DataTypes { get; set; }
 
         protected List<DBMSCommandMap> Commands { get; set; }
+
+       
+
 
         protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
         {
@@ -56,7 +53,7 @@ namespace Intwenty.Engine
         {
             
 
-            if (model.Application.MetaCode == "XXXXX")
+            if (model != null && model.Application.MetaCode == "XXXXX")
             {
                 return new  CustomSqlDbDataManagerExample(model, modelservice, settings, sqlclient);
             }
@@ -67,8 +64,11 @@ namespace Intwenty.Engine
             }
         }
 
-      
-        
+
+     
+
+
+
 
         #region Implementation
 
@@ -97,7 +97,7 @@ namespace Intwenty.Engine
                 CreateIndexes(res);
 
             }
-            catch
+            catch (Exception ex)
             {
                 //throw ex;
             }
@@ -105,85 +105,74 @@ namespace Intwenty.Engine
             return res;
         }
 
-        public OperationResult GetLatestIdByOwnerUser(ClientStateInfo data)
+      
+
+        public virtual OperationResult GetLatestVersionById(ClientStateInfo state)
         {
-            ClientState = data;
-            var result = new OperationResult(true, string.Format("Fetched latest id for application {0} for Owner {1}", this.Model.Application.Title, data.OwnerUserId), 0, 0);
+            if (state == null)
+                return new OperationResult(false, "state was null when executing SqlDbManager.GetLatestVersionById.", 0, 0);
+            if (state.Id < 0)
+                return new OperationResult(false, "Id is required when executing SqlDbManager.GetLatestVersionById.", 0, 0);
+            if (state.ApplicationId < 0)
+                return new OperationResult(false, "ApplicationId is required when executing SqlDbManager.GetLatestVersionById.", 0, 0);
 
-            try
-            {
-                SqlClient.Open();
-                SqlClient.CreateCommand("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
-                SqlClient.AddParameter("@ApplicationId", data.ApplicationId);
-                SqlClient.AddParameter("@OwnedBy", data.OwnerUserId);
-                var maxid = SqlClient.ExecuteScalarQuery();
-                if (maxid != null && maxid != DBNull.Value)
-                {
-                    var ds = new DataSet();
-                    SqlClient.CreateCommand("SELECT id,version from sysdata_InformationStatus where Id = @Id");
-                    SqlClient.AddParameter("@Id", Convert.ToInt32(maxid));
-                    SqlClient.FillDataset(ds, "Result");
-                    if (ds.Tables[0].Rows.Count == 0)
-                    {
-                        var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Model.Application.Title, data.OwnerUserId), 0, 0);
-                        return fail;
-                    }
 
-                    result.Id = DBHelpers.GetRowIntValue(ds.Tables[0], "id");
-                    result.Version = DBHelpers.GetRowIntValue(ds.Tables[0], "version");
-                }
-
-               
-            }
-            catch (Exception ex)
-            {
-                result.Messages.Clear();
-                result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Model.Application.Title, data.OwnerUserId));
-                result.AddMessage("SYSTEMERROR", ex.Message);
-                result.Data = "{}";
-
-            }
-
-            return result;
+            return GetLatestVersion(state);
         }
 
-       
-
-        public virtual OperationResult GetLatestVersion(ClientStateInfo data)
+        public virtual OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
         {
-            ClientState = data;
+            if (state == null)
+                return new OperationResult(false, "state was null when executing SqlDbManager.GetLatestVersionByOwnerUser.", 0, 0);
+            if (string.IsNullOrEmpty(state.OwnerUserId))
+                return new OperationResult(false, "OwnerUserId is required when executing SqlDbManager.GetLatestVersionByOwnerUser.", 0, 0);
+            if (state.ApplicationId < 0)
+                return new OperationResult(false, "ApplicationId is required when executing SqlDbManager.GetLatestVersionByOwnerUser.", 0, 0);
+
+            var t = FetchLatestIdByOwnerUser(state);
+            if (t.Id < 1)
+                return new OperationResult(false, "Requested data could not be found.");
+
+            state.Id = t.Id;
+            state.Version = t.Version;
+
+            return GetLatestVersion(state);
+        }
+
+
+      
+        private OperationResult GetLatestVersion(ClientStateInfo state)
+        {
             var jsonresult = new StringBuilder();
-            var result = new OperationResult(true, string.Format("Fetched latest version for application {0}", this.Model.Application.Title), ClientState.Id, ClientState.Version);
+            var result = new OperationResult(true, string.Format("Fetched latest version for application {0}", this.Model.Application.Title), state.Id, state.Version);
 
             try
             {
                 var columns = new List<IIntwentyDataColum>();
-                columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "CreatedBy", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "ChangedBy", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "OwnedBy", IsDateTime = false, IsNumeric = false });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { ColumnName = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+
 
                 var sql_stmt = new StringBuilder();
                 sql_stmt.Append("SELECT t1.* ");
-                foreach (var t in this.Model.DataStructure)
+                foreach (var col in this.Model.DataStructure)
                 {
-                    if (t.IsMetaTypeDataColumn && t.IsRoot)
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
                     {
-                        sql_stmt.Append(", t2." + t.DbName + " ");
-                        columns.Add(new IntwentyDataColum() { ColumnName = t.DbName, IsDateTime = t.IsDateTime, IsNumeric=t.IsNumeric });
+                        sql_stmt.Append(", t2." + col.DbName + " ");
+                        columns.Add(col);
 
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_stmt.Append("JOIN " + this.Model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
                 sql_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
-                sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+                sql_stmt.Append("AND t1.Id = " + state.Id);
                
 
                 jsonresult.Append("{");
@@ -209,34 +198,37 @@ namespace Intwenty.Engine
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
                         columns = new List<IIntwentyDataColum>();
-                        columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "ParentId", IsDateTime = false, IsNumeric = true });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
-                        columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = "ParentId", DataType = DatabaseModelItem.DataTypeInt });
 
                         sql_stmt = new StringBuilder();
                         sql_stmt.Append("SELECT t1.ApplicationId ");
                         sql_stmt.Append(", t2.Id ");
-                        sql_stmt.Append(", t2.RowChangeDate ");
-                        sql_stmt.Append(", t2.UserId ");
-                        sql_stmt.Append(", t2.ParentId ");
                         sql_stmt.Append(", t2.Version ");
-                        sql_stmt.Append(", t2.OwnerId ");
-                        foreach (var v in this.Model.DataStructure)
+                        sql_stmt.Append(", t2.ChangedDate ");
+                        sql_stmt.Append(", t2.CreatedBy ");
+                        sql_stmt.Append(", t2.ChangedBy ");
+                        sql_stmt.Append(", t2.OwnedBy ");
+                        sql_stmt.Append(", t2.ParentId ");
+                     
+                        foreach (var col in this.Model.DataStructure)
                         {
-                            if (v.IsMetaTypeDataColumn && v.ParentMetaCode == t.MetaCode)
+                            if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                             {
-                                sql_stmt.Append(", t2." + v.DbName + " ");
-                                columns.Add(new IntwentyDataColum() { ColumnName = v.DbName, IsDateTime = v.IsDateTime, IsNumeric = v.IsNumeric });
+                                sql_stmt.Append(", t2." + col.DbName + " ");
+                                columns.Add(col);
                             }
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
                         sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
                         sql_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
-                        sql_stmt.Append("AND t1.Id = " + this.ClientState.Id);
+                        sql_stmt.Append("AND t1.Id = " + state.Id);
                         SqlClient.Open();
                         SqlClient.CreateCommand(sql_stmt.ToString());
                         var tablearray = SqlClient.GetJSONArray(columns);
@@ -270,60 +262,60 @@ namespace Intwenty.Engine
             throw new NotImplementedException();
         }
 
-        public virtual OperationResult Save(ClientStateInfo data)
+        public virtual OperationResult Save(ClientStateInfo state)
         {
-            ClientState = data;
-            if (ClientState == null)
+
+            if (state == null)
                 return new OperationResult(false, "No client state found when performing save application.", 0, 0);
 
-            var result = new OperationResult(true, string.Format("Saved application {0}", this.Model.Application.Title), ClientState.Id, ClientState.Version);
+            var result = new OperationResult(true, string.Format("Saved application {0}", this.Model.Application.Title), state.Id, state.Version);
 
             try
             {
                 //CONNECT MODEL TO DATA
-                data.InferModel(Model);
+                state.InferModel(Model);
 
                 SqlClient.Open();
 
-                BeforeSave(data);
+                BeforeSave(state);
 
-                if (ClientState.Id < 1)
+                if (state.Id < 1)
                 {
-                    this.ClientState.Id = GetNewSystemID("APPLICATION", this.Model.Application.MetaCode);
-                    this.Status = LifecycleStatus.NEW_NOT_SAVED;
-                    this.ClientState.Version = CreateVersionRecord();
-                    BeforeSaveNew(data);
-                    InsertMainTable(data);
-                    InsertInformationStatus();
-                    HandleSubTables(data);
-                    this.Status = LifecycleStatus.NEW_SAVED;
+                    state.Id = GetNewSystemID("APPLICATION", this.Model.Application.MetaCode, state);
+                    result.Status = LifecycleStatus.NEW_NOT_SAVED;
+                    state.Version = CreateVersionRecord(state);
+                    BeforeSaveNew(state);
+                    InsertMainTable(state);
+                    InsertInformationStatus(state);
+                    HandleSubTables(state);
+                    result.Status = LifecycleStatus.NEW_SAVED;
                 }
-                else if (ClientState.Id > 0 && this.Model.Application.UseVersioning)
+                else if (state.Id > 0 && this.Model.Application.UseVersioning)
                 {
-                    this.Status = LifecycleStatus.EXISTING_NOT_SAVED;
-                    this.ClientState.Version = CreateVersionRecord();
-                    BeforeSaveUpdate(data);
-                    InsertMainTable(data);
-                    UpdateInformationStatus();
-                    HandleSubTables(data);
-                    this.Status = LifecycleStatus.EXISTING_SAVED;
+                    result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
+                    state.Version = CreateVersionRecord(state);
+                    BeforeSaveUpdate(state);
+                    InsertMainTable(state);
+                    UpdateInformationStatus(state);
+                    HandleSubTables(state);
+                    result.Status = LifecycleStatus.EXISTING_SAVED;
                 }
-                else if (ClientState.Id > 0 && !this.Model.Application.UseVersioning)
+                else if (state.Id > 0 && !this.Model.Application.UseVersioning)
                 {
-                    this.Status = LifecycleStatus.EXISTING_NOT_SAVED;
-                    BeforeSaveUpdate(data);
-                    UpdateMainTable(data);
-                    UpdateInformationStatus();
-                    HandleSubTables(data);
-                    this.Status = LifecycleStatus.EXISTING_SAVED;
+                    result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
+                    BeforeSaveUpdate(state);
+                    UpdateMainTable(state);
+                    UpdateInformationStatus(state);
+                    HandleSubTables(state);
+                    result.Status = LifecycleStatus.EXISTING_SAVED;
                 }
 
                 SqlClient.Close();
 
-                result.Id = ClientState.Id;
-                result.Version = ClientState.Version;
+                result.Id = state.Id;
+                result.Version = state.Version;
 
-                AfterSave(data);
+                AfterSave(state);
 
             }
             catch (Exception ex)
@@ -338,14 +330,35 @@ namespace Intwenty.Engine
 
         }
 
+        public virtual OperationResult GetListByOwnerUser(ListRetrivalArgs args)
+        {
+            return GetListInternal(args, true, true, true);
+        }
+
         public virtual OperationResult GetList(ListRetrivalArgs args)
+        {
+            return GetListInternal(args, false, true, true);
+        }
+
+        public virtual OperationResult GetListByOwnerUser(string owneruserid)
+        {
+            return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id, OwnerUserId = owneruserid }, true, false, false);
+        }
+
+        public virtual OperationResult GetList()
+        {
+            return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, false, false);
+        }
+
+
+        private OperationResult GetListInternal(ListRetrivalArgs args, bool getbyowneruser, bool selectcolumns, bool usepaging)
         {
             if (args == null)
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title),0,0);
           
-            if (args.MaxCount == 0)
+            if (args.MaxCount == 0 && usepaging)
             {
                 SqlClient.Open();
                 SqlClient.CreateCommand("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + this.Model.Application.Id);
@@ -365,30 +378,53 @@ namespace Intwenty.Engine
             try
             {
                 var columns = new List<IIntwentyDataColum>();
-                columns.Add(new IntwentyDataColum() { ColumnName = "Id", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "Version", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "ApplicationId", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "OwnerId", IsDateTime = false, IsNumeric = true });
-                columns.Add(new IntwentyDataColum() { ColumnName = "RowChangeDate", IsDateTime = true, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "UserID", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "CreatedBy", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "ChangedBy", IsDateTime = false, IsNumeric = false });
-                columns.Add(new IntwentyDataColum() { ColumnName = "OwnedBy", IsDateTime = false, IsNumeric = false });
+                if (selectcolumns)
+                {
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                    columns.Add(new IntwentyDataColumn() { ColumnName = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+                }
 
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.* ");
-                foreach (var t in this.Model.UIStructure)
+
+                if (this.Model.UIStructure.Exists(p => p.IsMetaTypeListViewField && p.IsDataColumnConnected) && selectcolumns)
                 {
-                    if (t.IsMetaTypeListViewField && t.IsDataColumnConnected)
+
+                    foreach (var t in this.Model.UIStructure)
                     {
-                        sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
-                        columns.Add(new IntwentyDataColum() { ColumnName = t.DataColumnInfo.DbName, IsDateTime=t.DataColumnInfo.IsDateTime, IsNumeric = t.DataColumnInfo.IsNumeric });
+                        if (t.IsMetaTypeListViewField && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
+                        {
+                            sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
+                            columns.Add(t.DataColumnInfo);
+                        }
                     }
+
                 }
+                else
+                {
+                    foreach (var t in this.Model.DataStructure)
+                    {
+                        if (t.IsMetaTypeDataColumn && t.IsRoot)
+                        {
+                            sql_list_stmt.Append(", t2." + t.DbName + " ");
+                            if (selectcolumns)
+                                columns.Add(t);
+                        }
+                    }
+
+
+                }
+               
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append("JOIN " + this.Model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
-
+                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                if (getbyowneruser)
+                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
 
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                     sql_list_stmt.Append("AND t2."+ args.FilterField + " LIKE '%"+ args.FilterValue + "%'  ");
@@ -396,13 +432,23 @@ namespace Intwenty.Engine
                 sql_list_stmt.Append("ORDER BY t1.Id");
 
 
-                var ds = new DataSet();
+                string json = "[]";
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql_list_stmt.ToString());
-                var json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                SqlClient.AddParameter("@ApplicationId", this.Model.Application.Id);
+                if (getbyowneruser)
+                    SqlClient.AddParameter("@OwnedBy", args.OwnerUserId);
+
+                if (selectcolumns && usepaging)
+                    json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
+                if (!selectcolumns && usepaging)
+                    json = SqlClient.GetJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
+                if (!selectcolumns && !usepaging)
+                    json = SqlClient.GetJSONArray().ToString();
+
                 SqlClient.Close();
 
-                result.Data = json.ToString();
+                result.Data = json;
 
             }
             catch (Exception ex)
@@ -420,24 +466,32 @@ namespace Intwenty.Engine
 
         }
 
+        public OperationResult GetVersionListById(ClientStateInfo state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public OperationResult GetVersion(ClientStateInfo state)
+        {
+            throw new NotImplementedException();
+        }
+
+
         /// <summary>
         /// Creates a JSON object with all valuedomains (arrays) used in an application
         /// </summary>
-        public virtual OperationResult GetValueDomains()
+        public virtual OperationResult GetApplicationValueDomains()
         {
-            var columns = new List<IIntwentySqlDbDataColum>();
-            columns.Add(new IntwentyDataColum() { ColumnName = "Id",  IsDateTime=false, IsNumeric=true });
-            columns.Add(new IntwentyDataColum() { ColumnName = "DomainName",  IsDateTime = false, IsNumeric = false });
-            columns.Add(new IntwentyDataColum() { ColumnName = "Code",  IsDateTime = false, IsNumeric = false });
-            columns.Add(new IntwentyDataColum() { ColumnName = "Value",  IsDateTime = false, IsNumeric = false });
-
+           
             var sb = new StringBuilder();
-            var result = new OperationResult(true, string.Format("Fetched doamins used in ui for application {0}", this.Model.Application.Title), 0, 0);
+            var result = new OperationResult(true, string.Format("Fetched domains used in ui for application {0}", this.Model.Application.Title), 0, 0);
 
             try
             {
+                var domainindex = 0;
+                var rowindex = 0;
                 var valuedomains = new List<string>();
-
+                var domaintables = new List<ApplicationTable>();
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
                 foreach (var t in this.Model.UIStructure)
@@ -453,7 +507,6 @@ namespace Intwenty.Engine
                     }
                 }
 
-                var ds = new DataSet();
                 SqlClient.Open();
 
                 foreach (var d in valuedomains)
@@ -461,52 +514,41 @@ namespace Intwenty.Engine
 
                     SqlClient.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
                     SqlClient.AddParameter("@P1", d);
-                    SqlClient.FillDataset(ds, "VALUEDOMAIN_" + d);
+                    var domaindata = SqlClient.GetDataSet();
+                    domaindata.DbName = d;
+                    domaintables.Add(domaindata);
                 }
 
                 SqlClient.Close();
 
-                var domainindex = 0;
-                var rowindex = 0;
-                var columnindex = 0;
 
                 sb.Append("{");
 
 
-                foreach (DataTable table in ds.Tables)
+                foreach (ApplicationTable table in domaintables)
                 {
                    
                     if (domainindex == 0)
-                        sb.Append("\"" + table.TableName + "\":[");
+                        sb.Append("\"" + table.DbName + "\":[");
                     else
-                        sb.Append(",\"" + table.TableName + "\":[");
+                        sb.Append(",\"" + table.DbName + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
                    
 
-                    foreach (DataRow row in table.Rows)
+                    foreach (var row in table.Rows)
                     {
                         if (rowindex == 0)
                             sb.Append("{");
                         else
                             sb.Append(",{");
 
-                        rowindex += 1;
-                        columnindex = 0;
-                        foreach (DataColumn dc in table.Columns)
-                        {
-                            var val = DBHelpers.GetJSONValue(row, dc);
-                            if (string.IsNullOrEmpty(val))
-                                continue;
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetIntValue("Id")));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetStringValue("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetStringValue("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
 
-                            if (columnindex == 0)
-                                sb.Append(val);
-                            else
-                                sb.Append("," + val);
-
-                            columnindex += 1;
-                        }
                         sb.Append("}");
                     }
                     sb.Append("]");
@@ -530,12 +572,94 @@ namespace Intwenty.Engine
 
         }
 
-        public OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        /// <summary>
+        /// Creates a JSON object with all valuedomains
+        /// </summary>
+        public virtual OperationResult GetValueDomains()
+        {
+            var sb = new StringBuilder();
+            var result = new OperationResult(true, "Fetched all value domins", 0, 0);
+
+            try
+            {
+
+                var domainindex = 0;
+                var rowindex = 0;
+                var domaintables = new List<ApplicationTable>();
+
+                SqlClient.Open();
+                SqlClient.CreateCommand("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
+                var domains = SqlClient.GetDataSet();
+                foreach (var d in domains.Rows)
+                {
+
+                    SqlClient.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
+                    SqlClient.AddParameter("@P1", d.GetStringValue("DomainName"));
+                    var domainitems = SqlClient.GetDataSet();
+                    domainitems.DbName = d.GetStringValue("DomainName");
+                    domaintables.Add(domainitems);
+                }
+
+                SqlClient.Close();
+
+               
+
+                sb.Append("{");
+
+
+                foreach (ApplicationTable table in domaintables)
+                {
+
+                    if (domainindex == 0)
+                        sb.Append("\"" + table.DbName + "\":[");
+                    else
+                        sb.Append(",\"" + table.DbName + "\":[");
+
+                    domainindex += 1;
+                    rowindex = 0;
+
+
+                    foreach (var row in table.Rows)
+                    {
+                        if (rowindex == 0)
+                            sb.Append("{");
+                        else
+                            sb.Append(",{");
+
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetIntValue("Id")));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetStringValue("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetStringValue("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
+
+                        sb.Append("}");
+                    }
+                    sb.Append("]");
+                }
+                sb.Append("}");
+
+                result.Data = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", "Fetch all valuedomains failed");
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+ 
+            }
+
+            return result;
+        }
+
+        public OperationResult GetDataView(ListRetrivalArgs args)
         {
             var result = new OperationResult();
 
             try
             {
+                var viewinfo = ModelRepository.GetDataViewModels();
+
                 if (args == null)
                     throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
 
@@ -556,7 +680,7 @@ namespace Intwenty.Engine
                 {
                     if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
                     {
-                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName, IsDateTime = false, IsNumeric = false });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = viewcol.SQLQueryFieldName, DataType = viewcol.DataType});
                     }
                 }
               
@@ -605,14 +729,17 @@ namespace Intwenty.Engine
 
         }
 
-        public OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args)
+        public OperationResult GetDataViewRecord(ListRetrivalArgs args)
         {
             var sql = "";
-            var result = new OperationResult(true, "Fetched dataview value", 0, 0);
+            var result = new OperationResult(true, "Fetched dataview record", 0, 0);
             
 
             try
             {
+
+                var viewinfo = ModelRepository.GetDataViewModels();
+
                 if (args == null)
                     throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
 
@@ -642,7 +769,7 @@ namespace Intwenty.Engine
                 {
                     if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
                     {
-                        columns.Add(new IntwentyDataColum() { ColumnName = viewcol.SQLQueryFieldName, IsDateTime = false, IsNumeric = false });
+                        columns.Add(new IntwentyDataColumn() { ColumnName = viewcol.SQLQueryFieldName, DataType = viewcol.DataType });
                     }
                 }
 
@@ -668,7 +795,7 @@ namespace Intwenty.Engine
 
         }
 
-        public OperationResult GenerateTestData(int gencount)
+        public OperationResult GenerateTestData(int gencount, ClientStateInfo state)
         {
             var rnd = new Random(9999999);
 
@@ -687,19 +814,18 @@ namespace Intwenty.Engine
                     if (lookup != null)
                     {
 
-                        var ds = new DataSet();
                         SqlClient.Open();
                         SqlClient.CreateCommand(lookup.DataViewInfo.SQLQuery);
-                        SqlClient.FillDataset(ds, "VIEW");
+                        var ds = SqlClient.GetDataSet();
                         SqlClient.Close();
-                        if (ds.Tables[0].Rows.Count > 0)
+                        if (ds.Rows.Count > 0)
                         {
-                            var maxindex = ds.Tables[0].Rows.Count - 1;
+                            var maxindex = ds.Rows.Count - 1;
                             var rowindex = new Random(1).Next(0, maxindex);
-                            this.ClientState.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo.SQLQueryFieldName] });
+                            state.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = ds.Rows[rowindex].GetStringValue(lookup.DataViewColumnInfo.SQLQueryFieldName) });
                             if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
                             {
-                                this.ClientState.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.MetaCode, Value = ds.Tables[0].Rows[rowindex][lookup.DataViewColumnInfo2.SQLQueryFieldName] });
+                                state.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.MetaCode, Value = ds.Rows[rowindex].GetStringValue(lookup.DataViewColumnInfo2.SQLQueryFieldName) });
                             }
                         }
 
@@ -709,14 +835,14 @@ namespace Intwenty.Engine
 
                         var value = TestDataHelper.GetSemanticValue(this.Model,t, rnd, gencount);
                         if (value != null)
-                            this.ClientState.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
+                            state.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
 
                     }
                 }
 
             }
 
-            return this.Save(this.ClientState);
+            return this.Save(state);
 
         }
 
@@ -805,32 +931,37 @@ namespace Intwenty.Engine
 
         #region Save
 
-        private int GetNewSystemID(string metatype, string metacode)
+        private int GetNewSystemID(string metatype, string metacode, ClientStateInfo state)
         {
 
-            var model = new SystemID() { ApplicationId=this.Model.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= this.ClientState.Properties };
+            var model = new SystemID() { ApplicationId=this.Model.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= state.Properties };
             var result = SqlClient.Insert(model, true);
             return model.Id;
         }
 
-        private void InsertMainTable(ClientStateInfo data)
+        private void InsertMainTable(ClientStateInfo state)
         {
             var paramlist = new List<ApplicationValue>();
 
-            if (this.ClientState.Id < 1)
+            if (state.Id < 1)
                 throw new InvalidOperationException("Invalid systemid");
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
             sql_insert.Append("INSERT INTO " + this.Model.Application.DbName + " ");
-            sql_insert.Append(" (ID, RowChangeDate, UserID,  Version, OwnerId");
-            sql_insert_value.Append(" VALUES (" + Convert.ToString(this.ClientState.Id));
-            sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_insert_value.Append(",'" + this.ClientState.UserId + "'");
-            sql_insert_value.Append("," + Convert.ToString(this.ClientState.Version));
-            sql_insert_value.Append("," + Convert.ToString(this.ClientState.OwnerId));
+            sql_insert.Append(" (ID, Version, ApplicationId,  CreatedBy, ChangedBy, OwnedBy, ChangedDate");
 
-            foreach (var t in data.Values)
+            sql_insert_value.Append(" VALUES (");
+            sql_insert_value.Append(" @Id");
+            sql_insert_value.Append(",@Version");
+            sql_insert_value.Append(",@ApplicationId");
+            sql_insert_value.Append(",@CreatedBy");
+            sql_insert_value.Append(",@ChangedBy");
+            sql_insert_value.Append(",@OwnedBy");
+            sql_insert_value.Append(",@ChangedDate");
+
+
+            foreach (var t in state.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -854,14 +985,21 @@ namespace Intwenty.Engine
             sql_insert.Append(sql_insert_value.ToString());
 
             SqlClient.CreateCommand(sql_insert.ToString());
+            SqlClient.AddParameter("@Id", state.Id);
+            SqlClient.AddParameter("@Version", state.Version);
+            SqlClient.AddParameter("@ApplicationId", this.Model.Application.Id);
+            SqlClient.AddParameter("@CreatedBy", state.UserId);
+            SqlClient.AddParameter("@ChangedBy", state.UserId);
+            SqlClient.AddParameter("@OwnedBy", state.OwnerUserId);
+            SqlClient.AddParameter("@ChangedDate", this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff"));
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
 
         }
 
-        private void HandleSubTables(ClientStateInfo data)
+        private void HandleSubTables(ClientStateInfo state)
         {
-            foreach (var table in data.SubTables)
+            foreach (var table in state.SubTables)
             {
                 if (!table.HasModel)
                     continue;
@@ -870,12 +1008,12 @@ namespace Intwenty.Engine
                 {
                     if (row.Id < 1 || this.Model.Application.UseVersioning)
                     {
-                        InsertTableRow(row);
+                        InsertTableRow(row, state);
 
                     }
                     else
                     {
-                        UpdateTableRow(row);
+                        UpdateTableRow(row, state);
 
                     }
 
@@ -885,18 +1023,19 @@ namespace Intwenty.Engine
 
         }
 
+  
 
-        private void UpdateMainTable(ClientStateInfo data)
+        private void UpdateMainTable(ClientStateInfo state)
         {
             var paramlist = new List<ApplicationValue>();
 
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + this.Model.Application.DbName);
-            sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_update.Append(",UserID='"+this.ClientState.UserId+"'");
-            sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
+            sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_update.Append(",ChangedBy=@ChangedBy");
 
-            foreach (var t in data.Values)
+
+            foreach (var t in state.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -917,31 +1056,39 @@ namespace Intwenty.Engine
 
 
             SqlClient.CreateCommand(sql_update.ToString());
-            SqlClient.AddParameter("@ID", ClientState.Id);
-            SqlClient.AddParameter("@Version", ClientState.Version);
+            SqlClient.AddParameter("@ID", state.Id);
+            SqlClient.AddParameter("@Version", state.Version);
+            SqlClient.AddParameter("@ChangedBy", state.UserId);
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
 
         }
 
-        private void InsertTableRow(ApplicationTableRow data)
+       
+
+        private void InsertTableRow(ApplicationTableRow data, ClientStateInfo state)
         {
             var paramlist = new List<ApplicationValue>();
 
-            var rowid = GetNewSystemID(DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode);
+            var rowid = GetNewSystemID(DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state);
             if (rowid < 1)
                 throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
             sql_insert.Append("INSERT INTO " + data.Table.DbName + " ");
-            sql_insert.Append(" (Id, ParentId, RowChangeDate, UserID,  Version, OwnerId");
-            sql_insert_value.Append(" VALUES (" + Convert.ToString(rowid));
-            sql_insert_value.Append(", " + Convert.ToString(this.ClientState.Id));
-            sql_insert_value.Append(",'" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_insert_value.Append(",'SYSTEM'");
-            sql_insert_value.Append("," + Convert.ToString(this.ClientState.Version));
-            sql_insert_value.Append("," + Convert.ToString(this.ClientState.OwnerId));
+            sql_insert.Append(" (Id, Version, ApplicationId, CreatedBy,  ChangedBy, OwnedBy, ChangedDate, ParentId");
+
+            sql_insert_value.Append(" VALUES (");
+            sql_insert_value.Append(" @Id");
+            sql_insert_value.Append(",@Version");
+            sql_insert_value.Append(",@ApplicationId");
+            sql_insert_value.Append(",@CreatedBy");
+            sql_insert_value.Append(",@ChangedBy");
+            sql_insert_value.Append(",@OwnedBy");
+            sql_insert_value.Append(",@ChangedDate");
+            sql_insert_value.Append(",@ParentId");
+
 
             foreach (var t in data.Values)
             {
@@ -967,27 +1114,36 @@ namespace Intwenty.Engine
             sql_insert.Append(sql_insert_value.ToString());
 
             SqlClient.CreateCommand(sql_insert.ToString());
+            SqlClient.AddParameter("@Id", rowid);
+            SqlClient.AddParameter("@Version", state.Version);
+            SqlClient.AddParameter("@ApplicationId", this.Model.Application.Id);
+            SqlClient.AddParameter("@CreatedBy", state.UserId);
+            SqlClient.AddParameter("@ChangedBy", state.UserId);
+            SqlClient.AddParameter("@OwnedBy", state.OwnerUserId);
+            SqlClient.AddParameter("@ChangedDate", this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff"));
+            SqlClient.AddParameter("@ParentId", state.Id);
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
 
         }
 
-        private void UpdateTableRow(ApplicationTableRow data)
+      
+
+        private void UpdateTableRow(ApplicationTableRow data, ClientStateInfo state)
         {
             var paramlist = new List<ApplicationValue>();
 
             int rowid = 0;
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + data.Table.DbName);
-            sql_update.Append(" set RowChangeDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
-            sql_update.Append(",UserID='SYSTEM'");
-            sql_update.Append(",OwnerId=" + Convert.ToString(this.ClientState.OwnerId));
+            sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_update.Append(",ChangedBy=@ChangedBy");
 
 
             foreach (var t in data.Values)
             {
                 if (t.DbName.ToLower() == "id")
-                    rowid = (int)t.Value;
+                    rowid = t.GetAsInt().Value;
 
                 if (!t.HasModel)
                     continue;
@@ -1008,19 +1164,20 @@ namespace Intwenty.Engine
 
 
             SqlClient.CreateCommand(sql_update.ToString());
-            SqlClient.AddParameter("@ID", ClientState.Id);
-            SqlClient.AddParameter("@Version", ClientState.Version);
+            SqlClient.AddParameter("@ID", rowid);
+            SqlClient.AddParameter("@Version", state.Version);
+            SqlClient.AddParameter("@ChangedBy", state.UserId);
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
 
         }
 
-        private int CreateVersionRecord()
+        private int CreateVersionRecord(ClientStateInfo state)
         {
             int newversion = 0;
             String sql = String.Empty;
             sql = "select max(version) from " + this.Model.Application.VersioningTableName;
-            sql += " where ID=" + Convert.ToString(this.ClientState.Id);
+            sql += " where ID=" + Convert.ToString(state.Id);
             sql += " and MetaCode='" + this.Model.Application.MetaCode + "' and MetaType='APPLICATION'";
 
             SqlClient.CreateCommand(sql);
@@ -1038,118 +1195,91 @@ namespace Intwenty.Engine
 
             var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DbEngine == SqlClient.DbEngine);
 
+            //DefaultVersioningTableColumns
             sql = "insert into " + this.Model.Application.VersioningTableName;
-            sql += " (ID, ParentID, MetaCode, MetaType, Version, OwnerId, RowChangeDate, UserID)";
-            sql += " VALUES (@P1, @P2, @P3, @P4, @P5, @P6, {0}, @P8)";
+            sql += " (ID, Version, ApplicationId, MetaCode, MetaType, ChangedDate, ParentId)";
+            sql += " VALUES (@P1, @P2, @P3, @P4, @P5, {0}, @P6)";
             sql = string.Format(sql, getdatecmd.Command);
 
             SqlClient.CreateCommand(sql);
-            SqlClient.AddParameter("@P1", this.ClientState.Id);
-            SqlClient.AddParameter("@P2", 0);
-            SqlClient.AddParameter("@P3", this.Model.Application.MetaCode);
-            SqlClient.AddParameter("@P4", "APPLICATION");
-            SqlClient.AddParameter("@P5", newversion);
-            SqlClient.AddParameter("@P6", this.ClientState.OwnerId);
-            SqlClient.AddParameter("@P8", this.ClientState.UserId);
+            SqlClient.AddParameter("@P1", state.Id);
+            SqlClient.AddParameter("@P2", newversion);
+            SqlClient.AddParameter("@P3", this.Model.Application.Id);
+            SqlClient.AddParameter("@P4", this.Model.Application.MetaCode);
+            SqlClient.AddParameter("@P5", "APPLICATION");
+            SqlClient.AddParameter("@P6", 0);
             SqlClient.ExecuteNonQuery();
 
-            if (this.ClientState.Version < newversion)
-                CanRollbackVersion = true;
-
+         
             return newversion;
         }
 
-       
+      
 
-        private DataSet GetNewDataSet()
+        private OperationResult FetchLatestIdByOwnerUser(ClientStateInfo state)
         {
-            DataSet ds = new DataSet(this.Model.Application.MetaCode);
+            var result = new OperationResult(true, string.Format("Fetched latest id for application {0} for Owner {1}", this.Model.Application.Title, state.OwnerUserId), 0, 0);
 
-            ds.Tables.Add(this.Model.Application.DbName);
-            ds.Tables[this.Model.Application.DbName].Columns.Add("ID", typeof(int));
-            ds.Tables[this.Model.Application.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
-            ds.Tables[this.Model.Application.DbName].Columns.Add("UserID", typeof(string));
-            ds.Tables[this.Model.Application.DbName].Columns.Add("Version", typeof(int));
-            ds.Tables[this.Model.Application.DbName].Columns.Add("OwnerId", typeof(int));
-
-            foreach (var t in this.Model.DataStructure)
+            try
             {
-
-
-                if (t.IsMetaTypeDataColumn && t.IsRoot)
+                SqlClient.Open();
+                SqlClient.CreateCommand("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy");
+                SqlClient.AddParameter("@ApplicationId", state.ApplicationId);
+                SqlClient.AddParameter("@OwnedBy", state.OwnerUserId);
+                var maxid = SqlClient.ExecuteScalarQuery();
+                if (maxid != null && maxid != DBNull.Value)
                 {
-
-                    if (t.IsDataTypeInt)
-                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(int));
-                    else if (t.IsDataTypeDateTime)
-                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(DateTime));
-                    else if (t.IsDataTypeText || t.IsDataTypeString)
-                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(string));
-                    else
-                        ds.Tables[this.Model.Application.DbName].Columns.Add(t.DbName, typeof(double));
-                }
-
-                if (t.IsMetaTypeDataTable)
-                {
-                    ds.Tables.Add(t.DbName);
-                    ds.Tables[t.DbName].Columns.Add("Id", typeof(int));
-                    ds.Tables[t.DbName].Columns.Add("RowChangeDate", typeof(DateTime));
-                    ds.Tables[t.DbName].Columns.Add("UserId", typeof(string));
-                    ds.Tables[t.DbName].Columns.Add("ParentId", typeof(int));
-                    ds.Tables[t.DbName].Columns.Add("Version", typeof(int));
-                    ds.Tables[t.DbName].Columns.Add("OwnerId", typeof(int));
-
-
-                    foreach (var dv in this.Model.DataStructure)
+                
+                    SqlClient.CreateCommand("SELECT Id,Version from sysdata_InformationStatus where Id = @Id");
+                    SqlClient.AddParameter("@Id", Convert.ToInt32(maxid));
+                    var ds = SqlClient.GetDataSet();
+                    if (ds.Rows.Count == 0)
                     {
-                        if (dv.ParentMetaCode == t.MetaCode && t.MetaType == "DATACOLUMN")
-                        {
-                            if (dv.IsDataTypeInt)
-                                ds.Tables[t.DbName].Columns.Add(dv.DbName, typeof(int));
-                            else if (dv.IsDataTypeDateTime)
-                                ds.Tables[t.DbName].Columns.Add(dv.DbName, typeof(DateTime));
-                            else if (dv.IsDataTypeString || dv.IsDataTypeText)
-                                ds.Tables[t.DbName].Columns.Add(dv.DbName, typeof(string));
-                            else
-                                ds.Tables[t.DbName].Columns.Add(dv.DbName, typeof(double));
-                        }
+                        var fail = new OperationResult(false, string.Format("Latest id for application {0} for Owner {1} could not be found", this.Model.Application.Title, state.OwnerUserId), 0, 0);
+                        return fail;
                     }
 
+                    result.Id = ds.GetFirstRowIntValue("Id");
+                    result.Version = ds.GetFirstRowIntValue("Version");
                 }
+
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Model.Application.Title, state.OwnerUserId));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+
             }
 
-            DataRow dr = ds.Tables[this.Model.Application.DbName].NewRow();
-            dr["Id"] = 0;
-            dr["RowChangeDate"] = DateTime.Now;
-            dr["UserId"] = "SYSTEM";
-            dr["Version"] = 0;
-            dr["OwnerId"] = 0;
-            ds.Tables[this.Model.Application.DbName].Rows.Add(dr);
-
-
-            return ds;
-
+            return result;
         }
 
-        private void InsertInformationStatus()
+
+    
+
+        private void InsertInformationStatus(ClientStateInfo state)
         {
-            var model = new InformationStatus() { Id = this.ClientState.Id, ApplicationId= this.Model.Application.Id, 
-                                                  ChangedBy=this.ClientState.UserId, ChangedDate = DateTime.Now, CreatedBy = this.ClientState.UserId, 
-                                                  MetaCode = this.Model.Application.MetaCode, OwnedBy = this.ClientState.OwnerUserId, OwnerId = this.ClientState.OwnerId, 
-                                                  PerformDate = DateTime.Now, Version = this.ClientState.Version };
+            var model = new InformationStatus() { Id = state.Id, ApplicationId= this.Model.Application.Id, 
+                                                  ChangedBy= state.UserId, ChangedDate = DateTime.Now, CreatedBy = state.UserId, 
+                                                  MetaCode = this.Model.Application.MetaCode, OwnedBy = state.OwnerUserId, 
+                                                  PerformDate = DateTime.Now, Version = state.Version };
 
             SqlClient.Insert(model, true);
 
         }
 
-        private void UpdateInformationStatus()
+        private void UpdateInformationStatus(ClientStateInfo state)
         {
 
             var getdatecmd = Commands.Find(p => p.Key == "GETDATE" && p.DbEngine == SqlClient.DbEngine);
             SqlClient.CreateCommand("Update sysdata_InformationStatus set ChangedDate="+getdatecmd.Command+", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID");
-            SqlClient.AddParameter("@ChangedBy", this.ClientState.UserId);
-            SqlClient.AddParameter("@Version", this.ClientState.Version);
-            SqlClient.AddParameter("@ID", this.ClientState.Id);
+            SqlClient.AddParameter("@ChangedBy", state.UserId);
+            SqlClient.AddParameter("@Version", state.Version);
+            SqlClient.AddParameter("@ID", state.Id);
             SqlClient.ExecuteNonQuery();
         }
 
@@ -1171,12 +1301,8 @@ namespace Intwenty.Engine
             }
             else
             {
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
-
-                var create_sql = "CREATE TABLE " + this.Model.Application.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, Version {0}  not null, OwnerId {0}  not null)";
-                create_sql = string.Format(create_sql,new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
+    
+                string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultMainTableColumns(), this.Model.Application.DbName);
 
                 SqlClient.Open();
                 SqlClient.CreateCommand(create_sql);
@@ -1201,11 +1327,7 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
-                string create_sql = "CREATE TABLE " + this.Model.Application.VersioningTableName + " (Id {0} not null, ParentId {0} not null, MetaCode {2} not null, MetaType {2} not null, Version {0} not null, OwnerId {0} not null, RowChangeDate {1} not null, UserId {2} not null)";
-                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
+                string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultVersioningTableColumns(), this.Model.Application.VersioningTableName);
 
                 SqlClient.Open();
                 SqlClient.CreateCommand(create_sql);
@@ -1273,12 +1395,7 @@ namespace Intwenty.Engine
             else
             {
 
-                var intdt = DataTypes.Find(p => p.IntwentyType == "INTEGER" && p.DbEngine == SqlClient.DbEngine);
-                var datedt = DataTypes.Find(p => p.IntwentyType == "DATETIME" && p.DbEngine == SqlClient.DbEngine);
-                var stringdt = DataTypes.Find(p => p.IntwentyType == "STRING" && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
-
-                string create_sql = "CREATE TABLE " + table.DbName + " (Id {0} not null, RowChangeDate {1} not null, UserId {2} not null, ParentId {0} not null, Version {0} not null, OwnerId {0} not null)";
-                create_sql = string.Format(create_sql, new object[] { intdt.DBMSDataType, datedt.DBMSDataType, stringdt.DBMSDataType });
+                string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultSubTableColumns(), table.DbName);
 
                 SqlClient.Open();
                 SqlClient.CreateCommand(create_sql);
@@ -1311,22 +1428,14 @@ namespace Intwenty.Engine
                 SqlClient.CreateCommand(sql);
                 SqlClient.ExecuteScalarQuery();
 
-                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Model.Application.DbName);
-                SqlClient.CreateCommand(sql);
-                SqlClient.ExecuteScalarQuery();
+              
 
                 //Create index on versioning table
                 sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Model.Application.VersioningTableName);
                 SqlClient.CreateCommand(sql);
                 SqlClient.ExecuteScalarQuery();
 
-                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", this.Model.Application.VersioningTableName);
-                SqlClient.CreateCommand(sql);
-                SqlClient.ExecuteScalarQuery();
-
-
-
-
+               
                 //Create index on subtables
                 foreach (var t in this.Model.DataStructure)
                 {
@@ -1336,10 +1445,7 @@ namespace Intwenty.Engine
                         SqlClient.CreateCommand(sql);
                         SqlClient.ExecuteScalarQuery();
 
-                        sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (RowChangeDate)", t.DbName);
-                        SqlClient.CreateCommand(sql);
-                        SqlClient.ExecuteScalarQuery();
-
+                    
 
                         sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
                         SqlClient.CreateCommand(sql);
@@ -1363,11 +1469,34 @@ namespace Intwenty.Engine
 
         }
 
+        private string GetCreateTableStmt(List<IntwentyDataColumn> columns, string tablename)
+        {
+            var res = string.Format("CREATE TABLE {0}", tablename) + " (";
+            var sep = "";
+            foreach (var c in columns)
+            {
+                SqlDataTypeMap dt;
+                if (c.DataType == DatabaseModelItem.DataTypeString)
+                   dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
+                else
+                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == SqlClient.DbEngine);
+
+                res += sep + string.Format("{0} {1} not null", c.ColumnName, dt.DBMSDataType);
+                sep = ", ";
+            }
+
+            res += ")";
+
+            return res;
+
+        }
+
+      
 
 
         #endregion
 
-      
+
 
 
 

@@ -1,47 +1,46 @@
 ﻿using Intwenty.Data.Dto;
-using Intwenty.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace Intwenty.Engine
 {
-    public enum LifecycleStatus
-    {
-        NONE = 0
-       , NEW_NOT_SAVED = 1
-       , NEW_SAVED = 2
-       , EXISTING_NOT_SAVED = 3
-       , EXISTING_SAVED = 4
-       , DELETED_NOT_SAVED = 5
-       , DELETED_SAVED = 6
-    }
+   
 
     public interface IDataManager
     {
-        public ClientStateInfo ClientState { get; set; }
-
+       
         OperationResult ConfigureDatabase();
 
-        OperationResult GetLatestIdByOwnerUser(ClientStateInfo state);
+        OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
 
-        OperationResult GetLatestVersion(ClientStateInfo state);
-
-        OperationResult GetVersion();
+        OperationResult GetLatestVersionById(ClientStateInfo state);
 
         OperationResult GetList(ListRetrivalArgs args);
 
+        OperationResult GetList();
+
+        OperationResult GetListByOwnerUser(ListRetrivalArgs args);
+
+        OperationResult GetListByOwnerUser(string owneruserid);
+
+        OperationResult GetVersionListById(ClientStateInfo state);
+
+        OperationResult GetVersion(ClientStateInfo state);
+
         OperationResult Save(ClientStateInfo data);
+
+        OperationResult GetApplicationValueDomains();
 
         OperationResult GetValueDomains();
 
-        OperationResult GetDataView(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataView(ListRetrivalArgs args);
 
-        OperationResult GetDataViewValue(List<DataViewModelItem> viewinfo, ListRetrivalArgs args);
+        OperationResult GetDataViewRecord(ListRetrivalArgs args);
 
-        OperationResult GenerateTestData(int gencount);
+        OperationResult GenerateTestData(int gencount, ClientStateInfo state);
 
     }
+
+   
 
     
 

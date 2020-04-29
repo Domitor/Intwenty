@@ -47,6 +47,7 @@ namespace Intwenty.Model
             DataType = entity.DataType;
             Domain = entity.Domain;
             Mandatory = entity.Mandatory;
+            IsUnique = entity.IsUnique;
             Properties = entity.Properties;
             SetEmptyStrings();
         }
@@ -81,6 +82,8 @@ namespace Intwenty.Model
         public string Domain { get; set; }
 
         public bool Mandatory { get; set; }
+
+        public bool IsUnique { get; set; }
 
 
         public static List<string> DataTypes

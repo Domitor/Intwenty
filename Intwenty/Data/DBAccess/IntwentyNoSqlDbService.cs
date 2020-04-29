@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -86,9 +87,9 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetJSONArray(collectionname, expression, returnfields, minrow, maxrow);
         }
 
-        public StringBuilder GetJSONArray(string collectionname, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJSONArray(string collectionname, string expression="", int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetJSONArray(collectionname, minrow, maxrow);
+            return DBClient.GetJSONArray(collectionname, expression, minrow, maxrow);
         }
 
         public StringBuilder GetJSONObject(string collectionname, int id, int version)
@@ -128,7 +129,7 @@ namespace Intwenty.Data.DBAccess
             return DBClient.DeleteRange<T>(model);
         }
 
-      
+       
     }
 
       
