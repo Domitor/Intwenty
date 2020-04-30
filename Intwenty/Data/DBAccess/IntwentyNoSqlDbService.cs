@@ -129,7 +129,10 @@ namespace Intwenty.Data.DBAccess
             return DBClient.DeleteRange<T>(model);
         }
 
-       
+        public void DropCollection(string collectionname)
+        {
+            DBClient.DropCollection(collectionname);
+        }
     }
 
       

@@ -74,7 +74,7 @@ namespace Intwenty.Engine
 
         public OperationResult ConfigureDatabase()
         {
-            var res = new OperationResult();
+            var res = new OperationResult(true, string.Format("Database configured for application {0}", this.Model.Application.Title));
 
             try
             {
@@ -99,7 +99,7 @@ namespace Intwenty.Engine
             }
             catch (Exception ex)
             {
-                //throw ex;
+                res.SetError(ex.Message, "");
             }
 
             return res;
@@ -527,11 +527,11 @@ namespace Intwenty.Engine
 
                 foreach (ApplicationTable table in domaintables)
                 {
-                   
+
                     if (domainindex == 0)
-                        sb.Append("\"" + table.DbName + "\":[");
+                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":");
                     else
-                        sb.Append(",\"" + table.DbName + "\":[");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":");
 
                     domainindex += 1;
                     rowindex = 0;
@@ -550,6 +550,7 @@ namespace Intwenty.Engine
                         sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
 
                         sb.Append("}");
+                        rowindex += 1;
                     }
                     sb.Append("]");
                 }
@@ -611,9 +612,9 @@ namespace Intwenty.Engine
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + table.DbName + "\":[");
+                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":");
                     else
-                        sb.Append(",\"" + table.DbName + "\":[");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":");
 
                     domainindex += 1;
                     rowindex = 0;
@@ -632,6 +633,7 @@ namespace Intwenty.Engine
                         sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
 
                         sb.Append("}");
+                        rowindex += 1;
                     }
                     sb.Append("]");
                 }
@@ -1457,9 +1459,9 @@ namespace Intwenty.Engine
                 o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Model.Application.Title);
 
             }
-            catch(Exception ex)
+            catch
             {
-                throw ex;
+               
             }
 
             SqlClient.Close();

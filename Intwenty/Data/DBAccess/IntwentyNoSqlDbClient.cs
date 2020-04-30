@@ -58,7 +58,7 @@ namespace Intwenty.Data.DBAccess
             }
             if (DbEngine == DBMS.MongoDb && MongoDbClient == null)
             {
-                if (!ConnectionString.ToLower().Contains("filename"))
+                if (!ConnectionString.ToLower().Contains("mongodb"))
                     throw new InvalidOperationException("MongoDb connectionstring must contain mongodb");
 
                 var client = new MongoClient(ConnectionString);
@@ -134,6 +134,20 @@ namespace Intwenty.Data.DBAccess
 
         }
 
+        public void DropCollection(string collectionname)
+        {
+
+            if (DbEngine == DBMS.MongoDb)
+            {
+                 MongoDbClient.DropCollection(collectionname);
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                LiteDbClient.DropCollection(collectionname);
+            }
+        }
+
         public int DeleteRange<T>(IEnumerable<T> model)
         {
             var res = 0;
@@ -155,38 +169,65 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
-            int colvalue = 0;
+
+            string stringkey = "";
+            int intkey = -1;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
                 var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
                 if (annot_pk != null && annot_pk.Length > 0)
                 {
-                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
-                    colvalue = (int)m.GetValue(model);
+                    if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
+                        stringkey = (string)m.GetValue(model);
+                    else
+                        intkey = (int)m.GetValue(model);
+
                     break;
                 }
 
             }
+            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
+            {
+                foreach (var m in memberproperties)
+                {
+                    if (m.Name.ToLower() == "id")
+                    {
+                        if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
+                            stringkey = (string)m.GetValue(model);
+                        else
+                            intkey = (int)m.GetValue(model);
+
+                        break;
+                    }
+
+                }
+            }
+
+            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
+                return 0;
+
 
             if (DbEngine == DBMS.MongoDb)
             {
-                if (pk == null)
-                    return 0;
+                if (intkey > 0)
+                    stringkey = Convert.ToString(intkey);
 
-                var jsonfilter = string.Format("\"{0}\":{1}", "_id", colvalue);
-                var result = MongoDbClient.GetCollection<T>(tablename).DeleteOne("{" + jsonfilter + "}");
+                var deleteFilter = Builders<T>.Filter.Eq("_id", stringkey);
+                var result = MongoDbClient.GetCollection<T>(tablename).DeleteOne(deleteFilter);
+                //var jsonfilter = string.Format("\"{0}\":{1}", "_id", stringkey);
+                //var result = MongoDbClient.GetCollection<T>(tablename).DeleteOne("{" + jsonfilter + "}");
                 return Convert.ToInt32(result.DeletedCount);
 
             }
 
             if (DbEngine == DBMS.LiteDb)
             {
-                if (pk == null)
-                    return 0;
+                if (intkey > 0)
+                    LiteDbClient.GetCollection<T>(tablename).Delete(intkey);
+                else
+                    LiteDbClient.GetCollection<T>(tablename).Delete(stringkey);
 
-                LiteDbClient.GetCollection<T>(tablename).Delete(colvalue);
                 return 1;
 
             }
@@ -196,7 +237,29 @@ namespace Intwenty.Data.DBAccess
 
         public T GetOne<T>(int id) where T : new()
         {
-            return GetOne<T>(Convert.ToString(id));
+            var workingtype = typeof(T);
+            var tablename = workingtype.Name;
+
+            //TABLENAME
+            var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
+            if (annot_tablename != null && annot_tablename.Length > 0)
+                tablename = ((DbTableName)annot_tablename[0]).Name;
+
+            if (DbEngine == DBMS.MongoDb)
+            {
+                var filter = new MongoDB.Bson.BsonDocument();
+                filter.Add(new MongoDB.Bson.BsonElement("_id", id));
+                var result = MongoDbClient.GetCollection<T>(tablename).Find(filter).FirstOrDefault();
+                return result;
+            }
+
+            if (DbEngine == DBMS.LiteDb)
+            {
+                var result = LiteDbClient.GetCollection<T>(tablename).FindById(id);
+                return result;
+            }
+
+            return default(T);
         }
 
         public T GetOne<T>(string id) where T : new()
@@ -238,8 +301,8 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.MongoDb)
             {
-                var result = MongoDbClient.GetCollection<T>(tablename).Find(f => true).ToList();
-                return result;
+                var result = MongoDbClient.GetCollection<T>(tablename);
+                return result.AsQueryable().ToList();
 
             }
 
@@ -264,41 +327,26 @@ namespace Intwenty.Data.DBAccess
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
             var newid = 0;
-            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
-                if (annot_pk != null && annot_pk.Length > 0)
+                var annot_autoinc = m.GetCustomAttributes(typeof(AutoIncrement), false);
+                if (annot_autoinc != null && annot_autoinc.Length > 0)
                 {
-                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
-                    var annot_autoinc = m.GetCustomAttributes(typeof(AutoIncrement), false);
-                    if (annot_autoinc != null && annot_autoinc.Length > 0)
-                    {
-                        newid = GetNewSystemId(tablename);
-                        m.SetValue(model, newid, null);
-
-                    }
+                    newid = GetNewSystemId(tablename);
+                    m.SetValue(model, newid, null);
                     break;
                 }
             }
 
             if (DbEngine == DBMS.MongoDb)
             {
-                if (pk == null)
-                    return 0;
-
                 MongoDbClient.GetCollection<T>(tablename).InsertOne(model);
-
             }
 
             if (DbEngine == DBMS.LiteDb)
             {
-                if (pk == null)
-                    return 0;
-
-                var result = LiteDbClient.GetCollection<T>(tablename).Insert(model);
-                return result;
+                LiteDbClient.GetCollection<T>(tablename).Insert(model);
             }
 
 
@@ -315,27 +363,53 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
-            MongoDB.Bson.Serialization.Attributes.BsonIdAttribute pk = null;
-            int colvalue = 0;
+
+            string stringkey = "";
+            int intkey = -1;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
                 var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
                 if (annot_pk != null && annot_pk.Length > 0)
                 {
-                    pk = ((MongoDB.Bson.Serialization.Attributes.BsonIdAttribute)annot_pk[0]);
-                    colvalue = (int)m.GetValue(model);
+                    if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
+                        stringkey = (string)m.GetValue(model);
+                    else
+                        intkey = (int)m.GetValue(model);
+
                     break;
                 }
 
             }
-
-            if (DbEngine == DBMS.MongoDb)
+            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
             {
-                if (pk == null)
-                    return 0;
+                foreach (var m in memberproperties)
+                {
+                    if (m.Name.ToLower() == "id")
+                    {
+                        if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
+                            stringkey = (string)m.GetValue(model);
+                        else
+                            intkey = (int)m.GetValue(model);
 
-                var jsonfilter = string.Format("\"{0}\":{1}", "_id", colvalue);
+                        break;
+                    }
+
+                }
+            }
+
+            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
+                return 0;
+
+
+
+           if (DbEngine == DBMS.MongoDb)
+            {
+
+                if (intkey > 0)
+                    stringkey = Convert.ToString(intkey);
+
+                var jsonfilter = string.Format("\"{0}\":{1}", "_id", stringkey);
                 var result = MongoDbClient.GetCollection<T>(tablename).ReplaceOne("{" + jsonfilter + "}", model, new ReplaceOptions { IsUpsert = true });
                 return Convert.ToInt32(result.ModifiedCount);
 
@@ -343,10 +417,12 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.LiteDb)
             {
-                if (pk == null)
-                    return 0;
 
-                LiteDbClient.GetCollection<T>(tablename).Update(colvalue, model);
+                if (intkey > 0)
+                    LiteDbClient.GetCollection<T>(tablename).Update(intkey, model);
+                else
+                    LiteDbClient.GetCollection<T>(tablename).Update(stringkey, model);
+
                 return 1;
             }
 
@@ -376,6 +452,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.LiteDb)
             {
+
                 var collection = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId");
                 if (collection.Count() == 0)
                 {

@@ -7,16 +7,18 @@ using Microsoft.Extensions.Options;
 namespace Intwenty.Controllers
 {
     
-    //[Authorize(Roles="Administrator")]
+
     public class ExamplesController : Controller
     {
 
         private readonly IIntwentyModelService _modelservice;
+        private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
 
-        public ExamplesController(IIntwentyModelService modelservice, IOptions<IntwentySettings> settings)
+        public ExamplesController(IIntwentyModelService modelservice, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings)
         {
             _modelservice = modelservice;
+            _dataservice = dataservice;
             _settings = settings.Value;
         }
 

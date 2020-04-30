@@ -35,6 +35,8 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbNoSql : IIntwentyDb, IIntwentyDbORM
     {
+        public void DropCollection(string collectionname);
+
         public bool DeleteJsonDocumentById(string collectionname, int id, int version);
 
         public int InsertJsonDocument(string json, string collectionname, int id, int version);

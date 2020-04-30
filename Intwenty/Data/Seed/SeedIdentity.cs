@@ -23,13 +23,6 @@ namespace Intwenty.Data.Seed
             if (!Settings.Value.IsDevelopment)
                 return;
 
-            IIntwentyDbORM DataRepository = null;
-            if (Settings.Value.IsNoSQL)
-                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
-            else
-                DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
-
-
             var userManager = provider.GetRequiredService<UserManager<IntwentyUser>>();
             var roleManager = provider.GetRequiredService<RoleManager<IntwentyRole>>();
 

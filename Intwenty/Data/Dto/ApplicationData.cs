@@ -142,6 +142,8 @@ namespace Intwenty.Data.Dto
 
         public int Version { get; set; }
 
+        public int ParentId { get; set; }
+
         public ApplicationTable Table { get; set; }
 
         public List<ApplicationValue> Values { get; set; }

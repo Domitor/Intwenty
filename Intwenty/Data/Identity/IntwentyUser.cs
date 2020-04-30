@@ -1,6 +1,6 @@
 ﻿using Intwenty.Data.DBAccess.Annotations;
 using Microsoft.AspNetCore.Identity;
-
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Identity
 {
@@ -8,6 +8,8 @@ namespace Intwenty.Data.Identity
     [DbTablePrimaryKey("Id")]
     public class IntwentyUser : IdentityUser
     {
+        [BsonId]
+        public override string Id { get => base.Id; set => base.Id = value; }
 
         public string FirstName { get; set; }
 

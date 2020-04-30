@@ -849,6 +849,12 @@ namespace Intwenty.Data.DBAccess
                         property.SetValue(m, Convert.ToInt32(r[colname]), null);
                     else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN" && DbEngine == DBMS.SQLite)
                         property.SetValue(m, Convert.ToBoolean(r[colname]), null);
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL" && DbEngine == DBMS.SQLite)
+                        property.SetValue(m, Convert.ToDecimal(r[colname]), null);
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE" && DbEngine == DBMS.SQLite)
+                        property.SetValue(m, Convert.ToSingle(r[colname]), null);
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE" && DbEngine == DBMS.SQLite)
+                        property.SetValue(m, Convert.ToDouble(r[colname]), null);
                     else
                         property.SetValue(m, r[colname], null);
                 }

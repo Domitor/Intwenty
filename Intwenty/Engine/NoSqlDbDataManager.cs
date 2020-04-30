@@ -36,9 +36,9 @@ namespace Intwenty.Engine
         {
 
 
-            if (model.Application.MetaCode == "XXXXX")
+            if (model != null && model.Application.MetaCode == "XXXXX")
             {
-                return null;
+                return null; //Return custom datamanager
             }
             else
             {
@@ -415,7 +415,7 @@ namespace Intwenty.Engine
             {
 
                 var expression = "(" + string.Format("'[{0}]' = '{1}'", "OwnedBy", owneruserid) + ")";
-                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, expression, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, expression, 0, 0);
                 result.Data = json.ToString();
 
             }
@@ -637,7 +637,7 @@ namespace Intwenty.Engine
             sb.Append(string.Format(",\"{0}\":{1}", "ApplicationId", this.Model.Application.Id));
             sb.Append(string.Format(",\"{0}\":\"{1}\"", "MetaCode", this.Model.Application.MetaCode));
             sb.Append(string.Format(",\"{0}\":\"{1}\"", "MetaType", "APPLICATION"));
-            sb.Append(string.Format(",\"{0}\":{1}", "ChangedDate", DateTime.Now));
+            sb.Append(string.Format(",\"{0}\":\"{1}\"", "ChangedDate", DateTime.Now));
             sb.Append(string.Format(",\"{0}\":{1}", "ParentId", 0));
             sb.Append("}");
 

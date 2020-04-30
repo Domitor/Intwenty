@@ -87,7 +87,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult Save([FromBody] ApplicationModelItem model)
         {
-            var res = ModelRepository.SaveApplication(model);
+            var res = ModelRepository.SaveAppModel(model);
             return new JsonResult(res);
         }
 
@@ -188,7 +188,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetApplications")]
         public JsonResult GetApplications()
         {
-            var t = ModelRepository.GetApplicationModelItems();
+            var t = ModelRepository.GetAppModels();
             return new JsonResult(t);
 
         }
@@ -212,7 +212,7 @@ namespace Intwenty.Controllers
         {
             try
             {
-                ModelRepository.DeleteApplicationModel(model);
+                ModelRepository.DeleteAppModel(model);
             }
             catch (Exception ex)
             {
@@ -562,7 +562,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/GetMenuModelItems")]
         public JsonResult GetMenuModelItems()
         {
-            var t = ModelRepository.GetMenuModelItems();
+            var t = ModelRepository.GetMenuModels();
             return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
 
         }
@@ -583,7 +583,7 @@ namespace Intwenty.Controllers
 
                 var dtolist = UIModelCreator.GetUIModel(model, app, views);
 
-                ModelRepository.SaveUserInterfaceModel(dtolist);
+                ModelRepository.SaveUserInterfaceModels(dtolist);
 
                 var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
                 var vm = UIModelCreator.GetUIVm(t);
@@ -613,7 +613,7 @@ namespace Intwenty.Controllers
 
                 var list = DatabaseModelCreator.GetDatabaseModel(model);
 
-                ModelRepository.SaveApplicationDB(list, model.Id);
+                ModelRepository.SaveDatabaseModels(list, model.Id);
 
             }
             catch (Exception ex)
@@ -643,7 +643,7 @@ namespace Intwenty.Controllers
                 if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
 
-                ModelRepository.DeleteApplicationDB(model.Id);
+                ModelRepository.DeleteDatabaseModel(model.Id);
 
             }
             catch (Exception ex)
@@ -665,7 +665,7 @@ namespace Intwenty.Controllers
             {
 
                 var dtolist = DataViewModelCreator.GetDataViewModel(model);
-                ModelRepository.SaveDataView(dtolist);
+                ModelRepository.SaveDataViewModels(dtolist);
 
             }
             catch (Exception ex)
@@ -694,7 +694,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not find application");
 
                 var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
-                ModelRepository.SaveUserInterfaceModel(dtolist);
+                ModelRepository.SaveUserInterfaceModels(dtolist);
 
             }
             catch (Exception ex)

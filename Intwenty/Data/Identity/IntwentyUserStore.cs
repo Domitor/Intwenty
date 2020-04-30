@@ -25,7 +25,7 @@ namespace Intwenty.Data.Identity
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
-            client.Insert<IntwentyUser>(user);
+            client.Insert(user);
 
             return Task.FromResult<IdentityResult>(IdentityResult.Success);
         }

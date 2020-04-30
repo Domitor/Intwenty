@@ -19,47 +19,64 @@ namespace Intwenty
     /// </summary>
     public interface IIntwentyModelService
     {
+        /// <summary>
+        /// Get a complete system model, used for export model
+        /// </summary>
+        /// <returns></returns>
+        public SystemModel GetSystemModel();
+
+        /// <summary>
+        /// Insert a complete system model, used for import model
+        /// </summary>
+        public OperationResult InsertSystemModel(SystemModel model);
+
+
+        /// <summary>
+        /// Create database objects used for persisting the intwenty model
+        /// </summary>
         public void CreateIntwentyDatabase();
+
 
         public List<OperationResult> ConfigureDatabase();
 
         public void ConfigureDatabaseIfNeeded();
 
+        /// <summary>
+        /// Get all application models
+        /// </summary>
         public List<ApplicationModel> GetApplicationModels();
 
-        public SystemModel GetSystemModel();
+      
 
-        public OperationResult InsertSystemModel(SystemModel model);
+        public List<ApplicationModelItem> GetAppModels();
 
-        public List<ApplicationModelItem> GetApplicationModelItems();
+        public ApplicationModelItem SaveAppModel(ApplicationModelItem model);
 
-        public ApplicationModelItem SaveApplication(ApplicationModelItem model);
-
-        public void DeleteApplicationModel(ApplicationModelItem model);
+        public void DeleteAppModel(ApplicationModelItem model);
 
 
 
-        public List<DatabaseModelItem> GetDatabaseModelItems();
+        public List<DatabaseModelItem> GetDatabaseModels();
 
-        public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid);
+        public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid);
 
-        public void DeleteApplicationDB(int id);
+        public void DeleteDatabaseModel(int id);
 
 
 
 
-        public List<UserInterfaceModelItem> GetUserInterfaceModelItems();
+        public List<UserInterfaceModelItem> GetUserInterfaceModels();
 
-        public void SaveUserInterfaceModel(List<UserInterfaceModelItem> model);
+        public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model);
 
 
 
 
         public List<DataViewModelItem> GetDataViewModels();
 
-        public void SaveDataView(List<DataViewModelItem> model);
+        public void SaveDataViewModels(List<DataViewModelItem> model);
 
-        public void DeleteDataView(int id);
+        public void DeleteDataViewModel(int id);
 
 
 
@@ -71,7 +88,7 @@ namespace Intwenty
 
 
 
-        public List<MenuModelItem> GetMenuModelItems();
+        public List<MenuModelItem> GetMenuModels();
 
 
         public List<string> GetTestDataBatches();
@@ -226,7 +243,7 @@ namespace Intwenty
             List<DatabaseModelItem> ditems;
             List<UserInterfaceModelItem> uitems;
             List<DataViewModelItem> views;
-            var apps =  GetApplicationModelItems();
+            var apps =  GetAppModels();
             ditems = Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
             uitems = Client.GetAll<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
             views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
@@ -337,7 +354,7 @@ namespace Intwenty
 
        
 
-        public List<MenuModelItem> GetMenuModelItems()
+        public List<MenuModelItem> GetMenuModels()
         {
 
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
@@ -375,12 +392,12 @@ namespace Intwenty
 
 
         #region Application
-        public List<ApplicationModelItem> GetApplicationModelItems()
+        public List<ApplicationModelItem> GetAppModels()
         {
 
 
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
-            var menu = GetMenuModelItems();
+            var menu = GetMenuModels();
             foreach (var app in apps)
             {
                 var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
@@ -391,7 +408,7 @@ namespace Intwenty
             return apps;
         }
 
-        public void DeleteApplicationModel(ApplicationModelItem model)
+        public void DeleteAppModel(ApplicationModelItem model)
         {
            
             if (model==null)
@@ -425,7 +442,7 @@ namespace Intwenty
 
         }
 
-        public ApplicationModelItem SaveApplication(ApplicationModelItem model)
+        public ApplicationModelItem SaveAppModel(ApplicationModelItem model)
         {
             ModelCache.Remove(AppModelCacheKey);
 
@@ -496,7 +513,7 @@ namespace Intwenty
             if (!string.IsNullOrEmpty(model.MainMenuItem.Title))
             {
                 var max = 0;
-                var menu = GetMenuModelItems();
+                var menu = GetMenuModels();
                 var root = menu.Find(p => p.IsMetaTypeMainMenu);
                 if (root == null)
                 {
@@ -521,7 +538,7 @@ namespace Intwenty
         #endregion
 
         #region UI
-        public List<UserInterfaceModelItem> GetUserInterfaceModelItems()
+        public List<UserInterfaceModelItem> GetUserInterfaceModels()
         {
             var res = new List<UserInterfaceModelItem>();
 
@@ -535,7 +552,7 @@ namespace Intwenty
             return res;
         }
 
-        public void SaveUserInterfaceModel(List<UserInterfaceModelItem> model)
+        public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model)
         {
             ModelCache.Remove(AppModelCacheKey);
 
@@ -628,12 +645,12 @@ namespace Intwenty
 
         #region Database
 
-        public List<DatabaseModelItem> GetDatabaseModelItems()
+        public List<DatabaseModelItem> GetDatabaseModels()
         {
             return Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
         }
 
-        public void SaveApplicationDB(List<DatabaseModelItem> model, int applicationid)
+        public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid)
         {
           
 
@@ -719,7 +736,7 @@ namespace Intwenty
 
         }
 
-        public void DeleteApplicationDB(int id)
+        public void DeleteDatabaseModel(int id)
         {
            
 
@@ -773,7 +790,7 @@ namespace Intwenty
             return Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
         }
 
-        public void SaveDataView(List<DataViewModelItem> model)
+        public void SaveDataViewModels(List<DataViewModelItem> model)
         {
             foreach (var dv in model)
             {
@@ -833,7 +850,7 @@ namespace Intwenty
 
       
 
-        public void DeleteDataView(int id)
+        public void DeleteDataViewModel(int id)
         {
             var existing = Client.GetAll<DataViewItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
@@ -943,7 +960,7 @@ namespace Intwenty
                     {
                         if (t.MetaType == "APPLICATION")
                         {
-                            var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
+                            var app = GetAppModels().Find(p => p.MetaCode == t.MetaCode);
                             if (app != null && t.Id > 0)
                             {
                                 SqlClient.CreateCommand("delete from " + app.DbName + " where ID = " + t.Id);
@@ -979,7 +996,7 @@ namespace Intwenty
                     {
                         if (t.MetaType == "APPLICATION")
                         {
-                            var app = GetApplicationModelItems().Find(p => p.MetaCode == t.MetaCode);
+                            var app = GetAppModels().Find(p => p.MetaCode == t.MetaCode);
                             if (app != null && t.Id > 0)
                             {
                                 NoSqlClient.DeleteJsonDocumentById(app.DbName, t.Id, 1);
@@ -1003,8 +1020,8 @@ namespace Intwenty
             if(Settings.IsNoSQL)
                     return;
 
-                if (!Settings.IsDevelopment)
-                    return;
+            if (!Settings.IsDevelopment)
+                return;
 
             var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
@@ -1017,6 +1034,7 @@ namespace Intwenty
             client.CreateTable<SystemID>(true, true);
             client.CreateTable<UserInterfaceItem>(true, true);
             client.CreateTable<ValueDomainItem>(true, true);
+            client.CreateTable<DefaultValue>(true, true);
             client.Close();
             client.Dispose();
 

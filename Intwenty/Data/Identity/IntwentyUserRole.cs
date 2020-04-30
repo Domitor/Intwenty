@@ -8,6 +8,6 @@ namespace Intwenty.Data.Identity
     [DbTablePrimaryKey("UserId,RoleId")]
     public class IntwentyUserRole : IdentityUserRole<string>
     {
-
+     
     }
 }
