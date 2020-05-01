@@ -268,7 +268,11 @@ namespace Intwenty.Engine
             if (t < 1)
                 return new OperationResult(false, "Requested data could not be found.");
 
-            state.Id = t;
+            var istat = istatlist.First(p => p.Id == t);
+
+
+            state.Id = istat.Id;
+            state.Version = istat.Version;
 
             return GetLatestVersion(state);
         }

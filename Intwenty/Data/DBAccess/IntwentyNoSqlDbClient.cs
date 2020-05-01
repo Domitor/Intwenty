@@ -12,6 +12,9 @@ using System.IO;
 using System.Data;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
+using MongoDB.Bson.Serialization;
+using Intwenty.Data.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -25,6 +28,22 @@ namespace Intwenty.Data.DBAccess
         private static IMongoDatabase MongoDbClient { get; set; }
 
         private static DataTable EvalDT { get; set; }
+
+
+
+        //MongoDb Intwenty Class Maps
+        private static BsonClassMap<IntwentyUser> IntwentyUserMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyRole> IntwentyRoleMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyUserRole> IntwentyUserRoleMongoDbMap { get; set; }
+        private static BsonClassMap<ApplicationItem> ApplicationItemMongoDbMap { get; set; }
+        private static BsonClassMap<DataViewItem> DataViewItemMongoDbMap { get; set; }
+        private static BsonClassMap<DefaultValue> DefaultValueMongoDbMap { get; set; }
+        private static BsonClassMap<EventLog> EventLogMongoDbMap { get; set; }
+        private static BsonClassMap<InformationStatus> InformationStatusMongoDbMap { get; set; }
+        private static BsonClassMap<MenuItem> MenuItemMongoDbMap { get; set; }
+        private static BsonClassMap<SystemID> SystemIDMongoDbMap { get; set; }
+        private static BsonClassMap<UserInterfaceItem> UserInterfaceItemMongoDbMap { get; set; }
+        private static BsonClassMap<ValueDomainItem> ValueDomainItemMongoDbMap { get; set; }
 
         public IntwentyNoSqlDbClient()
         {
@@ -58,13 +77,79 @@ namespace Intwenty.Data.DBAccess
             }
             if (DbEngine == DBMS.MongoDb && MongoDbClient == null)
             {
+                SetMongoDbClassMap();
+
                 if (!ConnectionString.ToLower().Contains("mongodb"))
                     throw new InvalidOperationException("MongoDb connectionstring must contain mongodb");
 
                 var client = new MongoClient(ConnectionString);
                 MongoDbClient = client.GetDatabase(DatabaseName);
+
+                
             }
         }
+
+        private void SetMongoDbClassMap()
+        {
+
+            if (IntwentyUserMongoDbMap == null)
+            {
+                //IntwentyUserMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUser>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+                BsonClassMap.RegisterClassMap<IdentityUser<string>>(cm =>{cm.AutoMap();cm.MapIdMember(p => p.Id);cm.SetIsRootClass(true); });
+                IntwentyUserMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUser>();
+            }
+            if (IntwentyRoleMongoDbMap == null)
+            {
+                //IntwentyRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyRole>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+                BsonClassMap.RegisterClassMap<IdentityRole<string>>(cm => { cm.AutoMap(); cm.MapIdMember(p => p.Id); cm.SetIsRootClass(true); });
+                IntwentyRoleMongoDbMap=BsonClassMap.RegisterClassMap<IntwentyRole>();
+            }
+            if (IntwentyUserRoleMongoDbMap == null)
+            {
+                //IntwentyUserRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserRole>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+                BsonClassMap.RegisterClassMap<IdentityUserRole<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+                IntwentyUserRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserRole>(cm => { cm.MapIdMember(c => c.Id); });
+            }
+            if (ApplicationItemMongoDbMap == null)
+            {
+                ApplicationItemMongoDbMap = BsonClassMap.RegisterClassMap<ApplicationItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+               
+            }
+            if (DataViewItemMongoDbMap == null)
+            {
+                DataViewItemMongoDbMap = BsonClassMap.RegisterClassMap<DataViewItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (DefaultValueMongoDbMap == null)
+            {
+                DefaultValueMongoDbMap = BsonClassMap.RegisterClassMap<DefaultValue>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (EventLogMongoDbMap == null)
+            {
+                EventLogMongoDbMap = BsonClassMap.RegisterClassMap<EventLog>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (InformationStatusMongoDbMap == null)
+            {
+                InformationStatusMongoDbMap = BsonClassMap.RegisterClassMap<InformationStatus>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (MenuItemMongoDbMap == null)
+            {
+                MenuItemMongoDbMap = BsonClassMap.RegisterClassMap<MenuItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (SystemIDMongoDbMap == null)
+            {
+                SystemIDMongoDbMap = BsonClassMap.RegisterClassMap<SystemID>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (UserInterfaceItemMongoDbMap == null)
+            {
+                UserInterfaceItemMongoDbMap = BsonClassMap.RegisterClassMap<UserInterfaceItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (ValueDomainItemMongoDbMap == null)
+            {
+                ValueDomainItemMongoDbMap = BsonClassMap.RegisterClassMap<ValueDomainItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+
+        }
+
 
      
 
@@ -175,8 +260,7 @@ namespace Intwenty.Data.DBAccess
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
-                if (annot_pk != null && annot_pk.Length > 0)
+                if (m.Name.ToLower() == "id")
                 {
                     if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
                         stringkey = (string)m.GetValue(model);
@@ -187,22 +271,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
-            {
-                foreach (var m in memberproperties)
-                {
-                    if (m.Name.ToLower() == "id")
-                    {
-                        if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
-                            stringkey = (string)m.GetValue(model);
-                        else
-                            intkey = (int)m.GetValue(model);
-
-                        break;
-                    }
-
-                }
-            }
+            
 
             if (string.IsNullOrEmpty(stringkey) && intkey == -1)
                 return 0;
@@ -210,13 +279,13 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.MongoDb)
             {
+                FilterDefinition<T> deleteFilter;
                 if (intkey > 0)
-                    stringkey = Convert.ToString(intkey);
+                    deleteFilter = Builders<T>.Filter.Eq("_id", intkey);
+                else
+                    deleteFilter = Builders<T>.Filter.Eq("_id", stringkey);
 
-                var deleteFilter = Builders<T>.Filter.Eq("_id", stringkey);
                 var result = MongoDbClient.GetCollection<T>(tablename).DeleteOne(deleteFilter);
-                //var jsonfilter = string.Format("\"{0}\":{1}", "_id", stringkey);
-                //var result = MongoDbClient.GetCollection<T>(tablename).DeleteOne("{" + jsonfilter + "}");
                 return Convert.ToInt32(result.DeletedCount);
 
             }
@@ -369,8 +438,7 @@ namespace Intwenty.Data.DBAccess
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
             {
-                var annot_pk = m.GetCustomAttributes(typeof(MongoDB.Bson.Serialization.Attributes.BsonIdAttribute), false);
-                if (annot_pk != null && annot_pk.Length > 0)
+                if (m.Name.ToLower() == "id")
                 {
                     if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
                         stringkey = (string)m.GetValue(model);
@@ -381,22 +449,7 @@ namespace Intwenty.Data.DBAccess
                 }
 
             }
-            if (string.IsNullOrEmpty(stringkey) && intkey == -1)
-            {
-                foreach (var m in memberproperties)
-                {
-                    if (m.Name.ToLower() == "id")
-                    {
-                        if (m.PropertyType.ToString().ToUpper() == "SYSTEM.STRING")
-                            stringkey = (string)m.GetValue(model);
-                        else
-                            intkey = (int)m.GetValue(model);
-
-                        break;
-                    }
-
-                }
-            }
+            
 
             if (string.IsNullOrEmpty(stringkey) && intkey == -1)
                 return 0;
@@ -406,11 +459,13 @@ namespace Intwenty.Data.DBAccess
            if (DbEngine == DBMS.MongoDb)
             {
 
+                FilterDefinition<T> updateFilter;
                 if (intkey > 0)
-                    stringkey = Convert.ToString(intkey);
+                    updateFilter = Builders<T>.Filter.Eq("_id", intkey);
+                else
+                    updateFilter = Builders<T>.Filter.Eq("_id", stringkey);
 
-                var jsonfilter = string.Format("\"{0}\":{1}", "_id", stringkey);
-                var result = MongoDbClient.GetCollection<T>(tablename).ReplaceOne("{" + jsonfilter + "}", model, new ReplaceOptions { IsUpsert = true });
+                var result = MongoDbClient.GetCollection<T>(tablename).ReplaceOne(updateFilter, model, new ReplaceOptions { IsUpsert = true });
                 return Convert.ToInt32(result.ModifiedCount);
 
             }
@@ -433,7 +488,8 @@ namespace Intwenty.Data.DBAccess
         {
             if (DbEngine == DBMS.MongoDb)
             {
-                var result = MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").Find(f => true).Sort("{ _id: -1}").Limit(1).FirstOrDefault();
+
+                var result = MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").Find(p => p.Id > 0).SortByDescending(p => p.Id).Limit(1).FirstOrDefault();
                 if (result == null)
                 {
                     model.Id = 1;

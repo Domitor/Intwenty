@@ -8,7 +8,7 @@ namespace Intwenty.Data.Identity
     [DbTablePrimaryKey("Id")]
     public class IntwentyRole : IdentityRole
     {
-        [BsonId]
-        public override string Id { get => base.Id; set => base.Id = value; }
+        //[BsonId]
+        //public override string Id { get => base.Id; set => base.Id = value; }
     }
 }

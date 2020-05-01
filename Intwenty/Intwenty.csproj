@@ -56,6 +56,11 @@
 </ItemGroup>
 
   
+<ItemGroup>
+  <Folder Include="build\" />
+</ItemGroup>
+
+  
 
 
 
