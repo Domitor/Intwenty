@@ -20,7 +20,8 @@ function raiseYesNoModal(headertxt, bodytext, yes_callback)
 {
     $('#yesno_dlg_modal_hdr').text(headertxt);
     $('#yesno_dlg_modal_text').text(bodytext);
-    $('#yesno_dlg_modal_yesbtn').click(yes_callback);
+    $('#yesno_dlg_modal_yesbtn').off('click');
+    $('#yesno_dlg_modal_yesbtn').on('click', yes_callback);
     $('#yesno_dlg_modal').modal();
 
 }

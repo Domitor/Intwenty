@@ -655,8 +655,7 @@ namespace Intwenty.Engine
         private int GetNewSystemID(string metatype, string metacode, ClientStateInfo state)
         {
             var model = new SystemID() { ApplicationId = this.Model.Application.Id, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties };
-            NoSqlClient.GetNewSystemId(model);
-            return model.Id;
+            return NoSqlClient.GetNewSystemId(model);
         }
 
         private InformationStatus InsertInformationStatus(ClientStateInfo state)

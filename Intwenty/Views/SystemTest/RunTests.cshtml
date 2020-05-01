@@ -70,34 +70,33 @@
                 runTests: function ()
                 {
 
+                    if (this.model.isRunning)
+                        return;
+
+                    raiseYesNoModal("Run system tests ?", "", this.callServer);
+
+                }, 
+                callServer: function ()
+                {
                     var context = this;
                     var baseurl = '@Url.Content("~/SystemTest/")';
                     var endpointurl = baseurl + "RunSystemTests";
 
-                    if (context.model.isRunning)
-                        return;
+                    context.model.isRunning = true;
 
-                    var yesfunc = function () {
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response)
+                        {
+                            context.model.isRunning = false;
+                            context.testresults = response;
+                        }
+                    });
 
-                        context.model.isRunning = true;
-
-                        $.ajax({
-                            url: endpointurl,
-                            type: "POST",
-                            contentType: "application/json",
-                            data: JSON.stringify(context.model),
-                            success: function (response)
-                            {
-                                context.model.isRunning = false;
-                                context.testresults = response;
-                               
-                            }
-                        });
-                    };
-
-                    raiseYesNoModal("Run system tests ?", "", yesfunc);
-
-
+                    
                 }
                 
             },

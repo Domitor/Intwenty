@@ -87,6 +87,7 @@ namespace Intwenty.Data.DBAccess
 
                 
             }
+
         }
 
         private void SetMongoDbClassMap()
@@ -197,6 +198,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.MongoDb)
             {
+                
                 if (checkexisting)
                 {
                     var table = MongoDbClient.GetCollection<T>(tablename);
@@ -489,36 +491,34 @@ namespace Intwenty.Data.DBAccess
             if (DbEngine == DBMS.MongoDb)
             {
 
-                var result = MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").Find(p => p.Id > 0).SortByDescending(p => p.Id).Limit(1).FirstOrDefault();
-                if (result == null)
+                var result = MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").AsQueryable().Max(p => p.Id); 
+                //Find(p => p.Id > 0).SortByDescending(p => p.Id).Limit(1).FirstOrDefault();
+                if (result < 1)
                 {
                     model.Id = 1;
                     MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").InsertOne(model);
-                    return model.Id;
+                    return 1;
                 }
-                else
-                {
-                    model.Id = result.Id;
-                    model.Id += 1;
-                    MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").InsertOne(model);
-                    return model.Id;
-                }
+
+                var id = result + 1;
+                model.Id = id;
+                MongoDbClient.GetCollection<SystemID>("sysdata_SystemId").InsertOne(model);
+                return id;
 
             }
 
             if (DbEngine == DBMS.LiteDb)
             {
 
-                var collection = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId");
-                if (collection.Count() == 0)
+                var max = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Max(f => f.Id);
+                if (max < 1)
                 {
                     model.Id = 1;
                     LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Insert(model);
-                    return model.Id;
+                    return 1;
                 }
 
-                var result = LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Max(f => f.Id);
-                model.Id = result + 1;
+                model.Id = max + 1;
                 LiteDbClient.GetCollection<SystemID>("sysdata_SystemId").Insert(model);
                 return model.Id;
                 
@@ -685,11 +685,12 @@ namespace Intwenty.Data.DBAccess
                 foreach (var doc in documents)
                 {
                     if (!IsValidByExpression(expression, doc))
-                    {
-                        var val = doc.GetValue(fieldname).AsInt32;
-                        if (val > result)
-                            result = val;
-                    }
+                        continue;
+
+                    var val = doc.GetValue(fieldname).AsInt32;
+                    if (val > result)
+                        result = val;
+                    
                 }
 
                 return result;
