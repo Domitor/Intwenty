@@ -630,7 +630,7 @@ namespace Intwenty.Engine
 
             int newversion = 1;
             var t = NoSqlClient.GetDataSet(this.Model.Application.VersioningTableName, filter);
-            if (t != null)
+            if (t != null && t.Rows.Count>0)
             {
                 var max = t.Rows.Max(p => p.Version);
                 if (max > 0)

@@ -116,6 +116,7 @@ namespace Intwenty.Controllers
             res.Add(Test10GetLatestVersionByOwnerUser());
             res.Add(Test11UpdateIntwentyApplication());
             res.Add(Test12GetAllValueDomains());
+            res.Add(Test13GetDataSet());
 
             return new JsonResult(res);
 
@@ -532,12 +533,51 @@ namespace Intwenty.Controllers
             return result;
         }
 
+        private OperationResult Test13GetDataSet()
+        {
+            OperationResult result = new OperationResult(true, "Get informationstatus dataset <InformationStatus>");
+            try
+            {
+
+                ApplicationTable tbl = null;
+                if (_settings.IsNoSQL)
+                {
+                    var dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+                    tbl = dbstore.GetDataSet("sysdata_InformationStatus");
+                }
+                else
+                {
+                    var dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+                    dbstore.CreateCommand("select * from sysdata_InformationStatus");
+                    dbstore.Open();
+                    tbl = dbstore.GetDataSet();
+                    dbstore.Close();
+                }
+
+                if (tbl == null)
+                    throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned null");
+
+                if (tbl.Rows.Count == 0)
+                    throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned 0 rows");
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
 
 
     }
 
+   
 
 
+
+    
     [DbTablePrimaryKey("Id")]
     [DbTableName("tests_TestDataAutoInc")]
     public class TestDataAutoInc {

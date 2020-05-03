@@ -25,13 +25,7 @@
             <div class="collapse navbar-collapse" id="navbarText">
                
                 <ul class="nav navbar-nav mr-auto">
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> Examples</span> <span class="caret"></span></a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" asp-controller="Examples" asp-action="Example1"> Create simple intwenty App</a>
-                        </div>
-                    </li>
-
+                    
                     @if (User.Identity.IsAuthenticated)
                     {
                         @await Html.PartialAsync("_IntwentyAppMenu")

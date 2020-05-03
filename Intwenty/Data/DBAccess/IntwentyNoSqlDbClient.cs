@@ -787,9 +787,18 @@ namespace Intwenty.Data.DBAccess
 
         public ApplicationTable GetDataSet(string collectionname, string filterexpression = "")
         {
-            var s = GetJsonArray(collectionname);
+            StringBuilder s;
+            if (string.IsNullOrEmpty(filterexpression))
+            {
+                s = GetJsonArray(collectionname);
+            }
+            else
+            {
+                s = GetJsonArray(collectionname, filterexpression);
+            }
+
             var result = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(s.ToString()).RootElement);
-            if (result.SubTables.Count > 1)
+            if (result.SubTables.Count > 0)
                 return result.SubTables[0];
             else
                 return null;
