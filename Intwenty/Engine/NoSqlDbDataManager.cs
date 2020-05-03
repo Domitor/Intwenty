@@ -71,7 +71,7 @@ namespace Intwenty.Engine
                     {
                         //continue;
 
-                        var view = NoSqlClient.GetJSONArray(lookup.DataViewInfo.QueryTableDbName);
+                        var view = NoSqlClient.GetJsonArray(lookup.DataViewInfo.QueryTableDbName);
                         var doc = System.Text.Json.JsonDocument.Parse(view.ToString());
                         var array = doc.RootElement.EnumerateArray();
                         if (array.Count() > 0)
@@ -158,7 +158,7 @@ namespace Intwenty.Engine
 
                 result.AddMessage("RESULT", string.Format("Fetched dataview {0}", dv.Title));
 
-                var jsonresult = NoSqlClient.GetJSONArray(tablename, expression, columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var jsonresult = NoSqlClient.GetJsonArray(tablename, expression, columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
 
                 result.Data = jsonresult.ToString();
 
@@ -223,7 +223,7 @@ namespace Intwenty.Engine
                 }
 
 
-                var jsonresult = NoSqlClient.GetJSONObject(tablename, expression, columns);
+                var jsonresult = NoSqlClient.GetJsonObject(tablename, expression, columns);
                 result.Data = jsonresult.ToString();
 
             }
@@ -287,7 +287,7 @@ namespace Intwenty.Engine
                 jsonresult.Append("{");
 
                 //MAIN TABLE
-                var appjson = NoSqlClient.GetJSONObject(this.Model.Application.DbName, state.Id, state.Version);
+                var appjson = NoSqlClient.GetIntwentyJsonObject(this.Model.Application.DbName, state.Id, state.Version);
                 jsonresult.Append("\"" + this.Model.Application.DbName + "\":" + appjson.ToString());
                
 
@@ -299,7 +299,7 @@ namespace Intwenty.Engine
                         var expression = "(";
                         expression += string.Format("'[{0}]' = '{1}'", "ParentId", state.Id);
                         expression += ")";
-                        var tablejson = NoSqlClient.GetJSONArray(t.DbName, expression, new List<IIntwentyDataColum>());
+                        var tablejson = NoSqlClient.GetJsonArray(t.DbName, expression);
                         jsonresult.Append(",\"" + t.DbName + "\":" + tablejson.ToString());
                     }
                 }
@@ -328,14 +328,14 @@ namespace Intwenty.Engine
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title), 0, 0);
 
             if (args.MaxCount == 0)
-                args.MaxCount = NoSqlClient.GetDocumentCount(this.Model.Application.DbName);
+                args.MaxCount = NoSqlClient.GetJsonDocumentCount(this.Model.Application.DbName);
 
             result.RetriveListArgs = new ListRetrivalArgs();
             result.RetriveListArgs = args;
 
             try
             {
-                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, string.Empty, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = NoSqlClient.GetJsonArray(this.Model.Application.DbName, null, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 result.Data = json.ToString();
 
             }
@@ -359,7 +359,7 @@ namespace Intwenty.Engine
 
             try
             {
-                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName);
+                var json = NoSqlClient.GetJsonArray(this.Model.Application.DbName);
                 result.Data = json.ToString();
 
             }
@@ -384,7 +384,7 @@ namespace Intwenty.Engine
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title), 0, 0);
 
             if (args.MaxCount == 0)
-                args.MaxCount = NoSqlClient.GetDocumentCount(this.Model.Application.DbName);
+                args.MaxCount = NoSqlClient.GetJsonDocumentCount(this.Model.Application.DbName);
 
             result.RetriveListArgs = new ListRetrivalArgs();
             result.RetriveListArgs = args;
@@ -393,7 +393,7 @@ namespace Intwenty.Engine
             {
 
                 var expression = "("+ string.Format("'[{0}]' = '{1}'", "OwnedBy", args.OwnerUserId) + ")";
-                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, expression, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                var json = NoSqlClient.GetJsonArray(this.Model.Application.DbName, expression, null, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 result.Data = json.ToString();
 
             }
@@ -419,7 +419,7 @@ namespace Intwenty.Engine
             {
 
                 var expression = "(" + string.Format("'[{0}]' = '{1}'", "OwnedBy", owneruserid) + ")";
-                var json = NoSqlClient.GetJSONArray(this.Model.Application.DbName, expression, 0, 0);
+                var json = NoSqlClient.GetJsonArray(this.Model.Application.DbName, expression, null, 0, 0);
                 result.Data = json.ToString();
 
             }
@@ -468,7 +468,7 @@ namespace Intwenty.Engine
                     var expression = "(";
                     expression += string.Format("'[{0}]' = '{1}'", "DomainName", d);
                     expression += ")";
-                    var jsonresult = NoSqlClient.GetJSONArray("sysmodel_ValueDomainItem", expression, new List<IIntwentyDataColum>());
+                    var jsonresult = NoSqlClient.GetJsonArray("sysmodel_ValueDomainItem", expression);
 
                     if (domainindex == 0)
                         sb.Append("\"" + "VALUEDOMAIN_" + d + "\":");
@@ -522,7 +522,7 @@ namespace Intwenty.Engine
                     var expression = "(";
                     expression += string.Format("'[{0}]' = '{1}'", "DomainName", d);
                     expression += ")";
-                    var jsonresult = NoSqlClient.GetJSONArray("sysmodel_ValueDomainItem", expression, new List<IIntwentyDataColum>());
+                    var jsonresult = NoSqlClient.GetJsonArray("sysmodel_ValueDomainItem", expression);
 
                     if (domainindex == 0)
                         sb.Append("\"" + "VALUEDOMAIN_" + d + "\":");
@@ -628,11 +628,16 @@ namespace Intwenty.Engine
             filter += string.Format(" AND '[{0}]'='{1}'", "Id", state.Id);
             filter += ")";
 
-            var newversion = NoSqlClient.GetMaxIntValue(this.Model.Application.VersioningTableName, filter, "Version");
-            if (newversion < 1)
-                newversion = 1;
-            else
-                newversion += 1;
+            int newversion = 1;
+            var t = NoSqlClient.GetDataSet(this.Model.Application.VersioningTableName, filter);
+            if (t != null)
+            {
+                var max = t.Rows.Max(p => p.Version);
+                if (max > 0)
+                    newversion = max + 1;
+
+            }
+
 
             StringBuilder sb = new StringBuilder();
             sb.Append("{");
@@ -646,7 +651,7 @@ namespace Intwenty.Engine
             sb.Append("}");
 
 
-            NoSqlClient.InsertJsonDocument(sb.ToString(), this.Model.Application.VersioningTableName, state.Id, newversion);
+            NoSqlClient.InsertIntwentyJsonObject(sb.ToString(), this.Model.Application.VersioningTableName, state.Id, newversion);
 
 
             return newversion;
@@ -654,8 +659,7 @@ namespace Intwenty.Engine
 
         private int GetNewSystemID(string metatype, string metacode, ClientStateInfo state)
         {
-            var model = new SystemID() { ApplicationId = this.Model.Application.Id, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties };
-            return NoSqlClient.GetNewSystemId(model);
+            return NoSqlClient.GetAutoIncrementalId(this.Model.Application.Id, metatype, metacode, state.Properties);
         }
 
         private InformationStatus InsertInformationStatus(ClientStateInfo state)
@@ -725,7 +729,7 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.InsertJsonDocument(json.ToString(), this.Model.Application.DbName, state.Id, state.Version);
+            NoSqlClient.InsertIntwentyJsonObject(json.ToString(), this.Model.Application.DbName, state.Id, state.Version);
         }
 
         private void UpdateMainTable(InformationStatus informationstatus, ClientStateInfo state)
@@ -754,7 +758,7 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.UpdateJsonDocument(json.ToString(), this.Model.Application.DbName, state.Id, state.Version);
+            NoSqlClient.UpdateIntwentyJsonObject(json.ToString(), this.Model.Application.DbName, state.Id, state.Version);
         }
 
         private void HandleSubTables(ClientStateInfo state)
@@ -813,7 +817,7 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.InsertJsonDocument(json.ToString(), data.Table.DbName, rowid, state.Version);
+            NoSqlClient.InsertIntwentyJsonObject(json.ToString(), data.Table.DbName, rowid, state.Version);
 
         }
 
@@ -843,7 +847,7 @@ namespace Intwenty.Engine
             }
             json.Append("}");
 
-            NoSqlClient.UpdateJsonDocument(json.ToString(), data.Table.DbName, data.Id, state.Version);
+            NoSqlClient.UpdateIntwentyJsonObject(json.ToString(), data.Table.DbName, data.Id, state.Version);
         }
 
         protected virtual void BeforeSave()

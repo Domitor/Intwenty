@@ -180,7 +180,7 @@ namespace Intwenty.Engine
                 var ds = new DataSet();
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql_stmt.ToString());
-                var appjson = SqlClient.GetJSONObject(columns);
+                var appjson = SqlClient.GetJsonObject(columns);
                 SqlClient.Close();
                
                 if (appjson.Length < 5)
@@ -231,7 +231,7 @@ namespace Intwenty.Engine
                         sql_stmt.Append("AND t1.Id = " + state.Id);
                         SqlClient.Open();
                         SqlClient.CreateCommand(sql_stmt.ToString());
-                        var tablearray = SqlClient.GetJSONArray(columns);
+                        var tablearray = SqlClient.GetJsonArray(columns);
                         SqlClient.Close();
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
@@ -440,11 +440,11 @@ namespace Intwenty.Engine
                     SqlClient.AddParameter("@OwnedBy", args.OwnerUserId);
 
                 if (selectcolumns && usepaging)
-                    json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
+                    json = SqlClient.GetJsonArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
                 if (!selectcolumns && usepaging)
-                    json = SqlClient.GetJSONArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
+                    json = SqlClient.GetJsonArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
                 if (!selectcolumns && !usepaging)
-                    json = SqlClient.GetJSONArray().ToString();
+                    json = SqlClient.GetJsonArray().ToString();
 
                 SqlClient.Close();
 
@@ -712,7 +712,7 @@ namespace Intwenty.Engine
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql);
                 StringBuilder json = null;
-                json = SqlClient.GetJSONArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
+                json = SqlClient.GetJsonArray(columns, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize));
                 SqlClient.Close();
 
                 result.Data = json.ToString();
@@ -778,7 +778,7 @@ namespace Intwenty.Engine
                 SqlClient.Open();
                 SqlClient.CreateCommand(sql);
                 SqlClient.AddParameter("@P1", args.FilterValue);
-                var data = SqlClient.GetJSONObject(columns);
+                var data = SqlClient.GetJsonObject(columns);
                 SqlClient.Close();
 
                 result.Data = data.ToString();

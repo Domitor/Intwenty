@@ -999,10 +999,10 @@ namespace Intwenty
                             var app = GetAppModels().Find(p => p.MetaCode == t.MetaCode);
                             if (app != null && t.Id > 0)
                             {
-                                NoSqlClient.DeleteJsonDocumentById(app.DbName, t.Id, 1);
-                                NoSqlClient.DeleteJsonDocumentById(app.VersioningTableName, t.Id, 1);
-                                NoSqlClient.Delete<InformationStatus>(new InformationStatus() { Id=t.Id });
-                                NoSqlClient.Delete<SystemID>(new SystemID() { Id = t.Id });
+                                NoSqlClient.DeleteIntwentyJsonObject(app.DbName, t.Id, 1);
+                                NoSqlClient.DeleteIntwentyJsonObject(app.VersioningTableName, t.Id, 1);
+                                NoSqlClient.Delete(new InformationStatus() { Id=t.Id });
+                                NoSqlClient.Delete(new SystemID() { Id = t.Id });
 
                             }
                         }

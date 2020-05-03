@@ -52,54 +52,56 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.GetAll<T>();
         }
-        public bool DeleteJsonDocumentById(string collectionname, int id, int version)
+        public bool DeleteIntwentyJsonObject(string collectionname, int id, int version)
         {
-            return DBClient.DeleteJsonDocumentById(collectionname, id, version);
+            return DBClient.DeleteIntwentyJsonObject(collectionname, id, version);
         }
 
-        public int InsertJsonDocument(string json, string collectionname, int id, int version)
+        public int InsertIntwentyJsonObject(string json, string collectionname, int id, int version)
         {
-            return DBClient.InsertJsonDocument(json, collectionname,id, version);
+            return DBClient.InsertIntwentyJsonObject(json, collectionname,id, version);
         }
 
-        public int UpdateJsonDocument(string json, string collectionname, int id, int version)
+        public int UpdateIntwentyJsonObject(string json, string collectionname, int id, int version)
         {
-            return DBClient.UpdateJsonDocument(json, collectionname, id, version);
+            return DBClient.UpdateIntwentyJsonObject(json, collectionname, id, version);
         }
 
-        public int GetNewSystemId(SystemID model)
+        public int GetAutoIncrementalId(int applicationid = 0, string metatype = "INTERNAL", string metacode = "UNSPECIFIED", string properties = "")
         {
-            return DBClient.GetNewSystemId(model);
+            return DBClient.GetAutoIncrementalId(applicationid,metatype,metacode,properties);
         }
 
-        public int GetDocumentCount(string collectionname)
+        public int GetJsonDocumentCount(string collectionname)
         {
-            return DBClient.GetDocumentCount(collectionname);
+            return DBClient.GetJsonDocumentCount(collectionname);
         }
 
+        /*
         public int GetMaxIntValue(string collectionname, string expression, string fieldname)
         {
             return DBClient.GetMaxIntValue(collectionname, expression, fieldname);
         }
+        */
 
-        public StringBuilder GetJSONArray(string collectionname, string expression, List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJsonArray(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields=null, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetJSONArray(collectionname, expression, returnfields, minrow, maxrow);
+            return DBClient.GetJsonArray(collectionname, filterexpression, returnfields, minrow, maxrow);
         }
 
-        public StringBuilder GetJSONArray(string collectionname, string expression="", int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJsonArray(string collectionname, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetJSONArray(collectionname, expression, minrow, maxrow);
+            return DBClient.GetJsonArray(collectionname, returnfields, minrow, maxrow);
         }
 
-        public StringBuilder GetJSONObject(string collectionname, int id, int version)
+        public StringBuilder GetIntwentyJsonObject(string collectionname, int id, int version, List<IIntwentyDataColum> returnfields = null)
         {
-            return DBClient.GetJSONObject(collectionname, id, version);
+            return DBClient.GetIntwentyJsonObject(collectionname, id, version, returnfields);
         }
 
-        public StringBuilder GetJSONObject(string collectionname, string expression, List<IIntwentyDataColum> returnfields)
+        public StringBuilder GetJsonObject(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields)
         {
-            return DBClient.GetJSONObject(collectionname, expression, returnfields);
+            return DBClient.GetJsonObject(collectionname, filterexpression, returnfields);
         }
 
         public void CreateTable<T>(bool checkexisting = false)
@@ -132,6 +134,51 @@ namespace Intwenty.Data.DBAccess
         public void DropCollection(string collectionname)
         {
             DBClient.DropCollection(collectionname);
+        }
+
+        public bool DeleteJsonDocument(string collectionname, int id)
+        {
+            return DBClient.DeleteJsonDocument(collectionname, id);
+        }
+
+        public bool DeleteJsonDocument(string collectionname, string id)
+        {
+            return DBClient.DeleteJsonDocument(collectionname, id);
+        }
+
+        public bool UpdateJsonDocument(string collectionname, int id)
+        {
+            return DBClient.UpdateJsonDocument(collectionname, id);
+        }
+
+        public bool UpdateJsonDocument(string collectionname, string id)
+        {
+            return DBClient.UpdateJsonDocument(collectionname, id);
+        }
+
+        public bool InsertJsonDocument(string collectionname, int id)
+        {
+            return DBClient.InsertJsonDocument(collectionname, id);
+        }
+
+        public bool InsertJsonDocument(string collectionname, string id)
+        {
+            return DBClient.InsertJsonDocument(collectionname, id);
+        }
+
+        public StringBuilder GetJsonObject(string collectionname, string id)
+        {
+            return DBClient.GetJsonObject(collectionname, id);
+        }
+
+        public StringBuilder GetJsonObject(string collectionname, int id)
+        {
+            return DBClient.GetJsonObject(collectionname, id);
+        }
+
+        public ApplicationTable GetDataSet(string collectionname, string filterexpression = "")
+        {
+            return DBClient.GetDataSet(collectionname, filterexpression);
         }
     }
 

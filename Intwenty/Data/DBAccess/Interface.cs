@@ -35,35 +35,50 @@ namespace Intwenty.Data.DBAccess
 
     public interface IIntwentyDbNoSql : IIntwentyDb, IIntwentyDbORM
     {
+
         public void DropCollection(string collectionname);
 
-        public bool DeleteJsonDocumentById(string collectionname, int id, int version);
+        public bool DeleteIntwentyJsonObject(string collectionname, int id, int version);
 
-        public int InsertJsonDocument(string json, string collectionname, int id, int version);
+        public int InsertIntwentyJsonObject(string json, string collectionname, int id, int version);
 
-        public int UpdateJsonDocument(string json, string collectionname, int id, int version);
+        public int UpdateIntwentyJsonObject(string json, string collectionname, int id, int version);
 
-        public int GetNewSystemId(SystemID model);
+        public bool DeleteJsonDocument(string collectionname, int id);
+
+        public bool DeleteJsonDocument(string collectionname, string id);
+
+        public bool UpdateJsonDocument(string collectionname, int id);
+
+        public bool UpdateJsonDocument(string collectionname, string id);
+
+        public bool InsertJsonDocument(string collectionname, int id);
+
+        public bool InsertJsonDocument(string collectionname, string id);
+
+
+
+        public int GetAutoIncrementalId(int applicationid=0, string metatype="INTERNAL", string metacode="UNSPECIFIED", string properties="");
 
         /// <summary>
         /// Counts the documents in the collection
         /// </summary>
-        public int GetDocumentCount(string collectionname);
-
-        /// <summary>
-        /// Returns the maxvalue for the integer field [fieldname].
-        /// </summary>
-        public int GetMaxIntValue(string collectionname, string expression, string fieldname);
-
-        StringBuilder GetJSONArray(string collectionname, string expression="", int minrow = 0, int maxrow = 0);
-
-        StringBuilder GetJSONArray(string collectionname, string expression, List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
-
-        StringBuilder GetJSONObject(string collectionname, int id, int version);
-
-        StringBuilder GetJSONObject(string collectionname, string expression, List<IIntwentyDataColum> returnfields);
+        public int GetJsonDocumentCount(string collectionname);
 
 
+        StringBuilder GetJsonArray(string collectionname, List<IIntwentyDataColum> returnfields=null, int minrow = 0, int maxrow = 0);
+
+        StringBuilder GetJsonArray(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0);
+
+        StringBuilder GetIntwentyJsonObject(string collectionname, int id, int version, List<IIntwentyDataColum> returnfields = null);
+
+        StringBuilder GetJsonObject(string collectionname, string id);
+
+        StringBuilder GetJsonObject(string collectionname, int id);
+
+        StringBuilder GetJsonObject(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields = null);
+
+        ApplicationTable GetDataSet(string collectionname, string filterexpression = "");
     }
 
 
@@ -78,10 +93,10 @@ namespace Intwenty.Data.DBAccess
         object ExecuteScalarQuery();
         bool TableExist(string tablename);
         bool ColumnExist(string tablename, string columnname);
-        StringBuilder GetJSONArray(List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
-        StringBuilder GetJSONArray(int minrow = 0, int maxrow = 0);
-        StringBuilder GetJSONObject();
-        StringBuilder GetJSONObject(List<IIntwentyDataColum> returnfields);
+        StringBuilder GetJsonArray(List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJsonArray(int minrow = 0, int maxrow = 0);
+        StringBuilder GetJsonObject();
+        StringBuilder GetJsonObject(List<IIntwentyDataColum> returnfields);
 
         ApplicationTable GetDataSet();
 

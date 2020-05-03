@@ -8,6 +8,7 @@ namespace Intwenty.Data.Identity
     [DbTablePrimaryKey("UserId,RoleId")]
     public class IntwentyUserRole : IdentityUserRole<string>
     {
+
         public string Id { get; set; }
 
 
@@ -18,6 +19,7 @@ namespace Intwenty.Data.Identity
             {
                 base.UserId = value;
                 Id = base.UserId + "#" + base.RoleId;
+             
             }
 
         }
@@ -29,6 +31,7 @@ namespace Intwenty.Data.Identity
             {
                 base.RoleId = value;
                 Id = base.UserId + "#" + base.RoleId;
+      
             }
 
         }

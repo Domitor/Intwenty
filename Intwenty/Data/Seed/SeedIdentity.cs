@@ -26,14 +26,20 @@ namespace Intwenty.Data.Seed
             var userManager = provider.GetRequiredService<UserManager<IntwentyUser>>();
             var roleManager = provider.GetRequiredService<RoleManager<IntwentyRole>>();
 
+        
 
             var u = userManager.FindByNameAsync("admin@intwenty.com");
             if (u.Result != null)
+            {
+                userManager.RemoveFromRoleAsync(u.Result, "Administrator");
                 userManager.DeleteAsync(u.Result);
-
+            }
             u = userManager.FindByNameAsync("user@intwenty.com");
             if (u.Result != null)
+            {
+                userManager.RemoveFromRoleAsync(u.Result, "User");
                 userManager.DeleteAsync(u.Result);
+            }
 
             var r = roleManager.FindByNameAsync("Administrator");
             if (r.Result != null)

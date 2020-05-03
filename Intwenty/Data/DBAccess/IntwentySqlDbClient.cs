@@ -379,7 +379,7 @@ namespace Intwenty.Data.DBAccess
 
 
 
-        public StringBuilder GetJSONArray(int minrow=0, int maxrow=0)
+        public StringBuilder GetJsonArray(int minrow=0, int maxrow=0)
         {
             var sb = new StringBuilder();
 
@@ -436,7 +436,7 @@ namespace Intwenty.Data.DBAccess
             return sb;
         }
 
-        public StringBuilder GetJSONArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJsonArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
@@ -496,7 +496,7 @@ namespace Intwenty.Data.DBAccess
             return sb;
         }
 
-        public StringBuilder GetJSONObject()
+        public StringBuilder GetJsonObject()
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
@@ -536,7 +536,7 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        public StringBuilder GetJSONObject(List<IIntwentyDataColum> columns)
+        public StringBuilder GetJsonObject(List<IIntwentyDataColum> columns)
         {
             if (columns == null)
                 throw new InvalidOperationException("Parameter columns can't be null");

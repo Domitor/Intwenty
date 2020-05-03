@@ -81,24 +81,24 @@ namespace Intwenty.Data.DBAccess
             return DBClient.ExecuteNonQuery();
         }
 
-        public StringBuilder GetJSONArray(List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJsonArray(List<IIntwentyDataColum> returnfields, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetJSONArray(returnfields, minrow, maxrow);
+            return DBClient.GetJsonArray(returnfields, minrow, maxrow);
         }
 
-        public StringBuilder GetJSONArray(int minrow = 0, int maxrow=0)
+        public StringBuilder GetJsonArray(int minrow = 0, int maxrow=0)
         {
-            return DBClient.GetJSONArray(minrow, maxrow);
+            return DBClient.GetJsonArray(minrow, maxrow);
         }
 
-        public StringBuilder GetJSONObject()
+        public StringBuilder GetJsonObject()
         {
-            return DBClient.GetJSONObject();
+            return DBClient.GetJsonObject();
         }
 
-        public StringBuilder GetJSONObject(List<IIntwentyDataColum> returnfields)
+        public StringBuilder GetJsonObject(List<IIntwentyDataColum> returnfields)
         {
-            return DBClient.GetJSONObject(returnfields);
+            return DBClient.GetJsonObject(returnfields);
         }
 
 
