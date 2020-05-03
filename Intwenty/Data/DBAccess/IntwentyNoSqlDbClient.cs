@@ -400,6 +400,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.LiteDb)
             {
+                //var result = LiteDbClient.GetCollection<T>(tablename).Find(p => true).ToList();
                 var result = LiteDbClient.GetCollection<T>(tablename).FindAll().ToList();
                 return result;
             }
