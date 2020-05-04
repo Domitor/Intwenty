@@ -15,6 +15,7 @@ using Intwenty.Data.Dto;
 using MongoDB.Bson.Serialization;
 using Intwenty.Data.Identity;
 using Microsoft.AspNetCore.Identity;
+using MongoDB.Bson.IO;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -811,6 +812,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.MongoDb)
             {
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
                 var projection = DBHelpers.GetMongoDbProjection(returnfields);
                 List<MongoDB.Bson.BsonDocument> result=null;
                 if (string.IsNullOrEmpty(projection))
@@ -836,9 +838,9 @@ namespace Intwenty.Data.DBAccess
 
 
                     if (rindex == 1)
-                        jsonresult.Append(doc.ToJson());
+                        jsonresult.Append(doc.ToJson(jsonWriterSettings));
                     else
-                        jsonresult.Append("," + doc.ToJson());
+                        jsonresult.Append("," + doc.ToJson(jsonWriterSettings));
 
                 }
               
@@ -894,6 +896,7 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.MongoDb)
             {
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
                 var projection = DBHelpers.GetMongoDbProjection(returnfields);
                 List<MongoDB.Bson.BsonDocument> result = null;
                 if (string.IsNullOrEmpty(projection))
@@ -916,9 +919,9 @@ namespace Intwenty.Data.DBAccess
                         doc.Remove("_id");
 
                     if (rindex==1)
-                        jsonresult.Append(doc.ToJson());
+                        jsonresult.Append(doc.ToJson(jsonWriterSettings));
                     else
-                        jsonresult.Append("," + doc.ToJson());
+                        jsonresult.Append("," + doc.ToJson(jsonWriterSettings));
                 }
               
 
