@@ -342,13 +342,24 @@ namespace Intwenty.Engine
 
         public virtual OperationResult GetListByOwnerUser(string owneruserid)
         {
-            return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id, OwnerUserId = owneruserid }, true, false, false);
+            //Postgresql must alwaus use columns in order to set correct case in jsonnames
+            if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id, OwnerUserId = owneruserid }, true, true, false);
+            else
+                return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id, OwnerUserId = owneruserid }, true, false, false);
+
+
         }
 
         public virtual OperationResult GetList()
         {
-            return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, false, false);
+            //Postgresql must alwaus use columns in order to set correct case in jsonnames
+            if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, true, false);
+            else
+                return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, false, false);
         }
+        
 
 
         private OperationResult GetListInternal(ListRetrivalArgs args, bool getbyowneruser, bool selectcolumns, bool usepaging)
@@ -445,6 +456,8 @@ namespace Intwenty.Engine
                     json = SqlClient.GetJsonArray(result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize)).ToString();
                 if (!selectcolumns && !usepaging)
                     json = SqlClient.GetJsonArray().ToString();
+                if (selectcolumns && !usepaging)
+                    json = SqlClient.GetJsonArray(columns).ToString();
 
                 SqlClient.Close();
 
@@ -529,9 +542,9 @@ namespace Intwenty.Engine
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":");
+                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
                     else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
@@ -612,9 +625,9 @@ namespace Intwenty.Engine
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":");
+                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
                     else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
@@ -937,8 +950,21 @@ namespace Intwenty.Engine
         {
 
             var model = new SystemID() { ApplicationId=this.Model.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= state.Properties };
-            var result = SqlClient.Insert(model, true);
+            SqlClient.Insert(model, true);
             return model.Id;
+        }
+
+        private DateTime GetApplicationTimeStamp()
+        {
+            return this.ApplicationSaveTimeStamp;
+
+            /*
+            if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                return this.ApplicationSaveTimeStamp.ToString("yyyy-MM-dd HH:mm:ss");
+            else
+                return this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+                */
+
         }
 
         private void InsertMainTable(ClientStateInfo state)
@@ -993,7 +1019,8 @@ namespace Intwenty.Engine
             SqlClient.AddParameter("@CreatedBy", state.UserId);
             SqlClient.AddParameter("@ChangedBy", state.UserId);
             SqlClient.AddParameter("@OwnedBy", state.OwnerUserId);
-            SqlClient.AddParameter("@ChangedDate", this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff"));
+            SqlClient.AddParameter("@ChangedDate", GetApplicationTimeStamp());
+           
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
 
@@ -1033,7 +1060,7 @@ namespace Intwenty.Engine
 
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + this.Model.Application.DbName);
-            sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_update.Append(" set ChangedDate='" + GetApplicationTimeStamp() + "'");
             sql_update.Append(",ChangedBy=@ChangedBy");
 
 
@@ -1122,7 +1149,7 @@ namespace Intwenty.Engine
             SqlClient.AddParameter("@CreatedBy", state.UserId);
             SqlClient.AddParameter("@ChangedBy", state.UserId);
             SqlClient.AddParameter("@OwnedBy", state.OwnerUserId);
-            SqlClient.AddParameter("@ChangedDate", this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff"));
+            SqlClient.AddParameter("@ChangedDate", GetApplicationTimeStamp());
             SqlClient.AddParameter("@ParentId", state.Id);
             SetParameters(paramlist);
             SqlClient.ExecuteNonQuery();
@@ -1268,7 +1295,7 @@ namespace Intwenty.Engine
             var model = new InformationStatus() { Id = state.Id, ApplicationId= this.Model.Application.Id, 
                                                   ChangedBy= state.UserId, ChangedDate = DateTime.Now, CreatedBy = state.UserId, 
                                                   MetaCode = this.Model.Application.MetaCode, OwnedBy = state.OwnerUserId, 
-                                                  PerformDate = DateTime.Now, Version = state.Version };
+                                                  PerformDate = DateTime.Now, Version = state.Version, EndDate = DateTime.Now, StartDate=DateTime.Now };
 
             SqlClient.Insert(model, true);
 

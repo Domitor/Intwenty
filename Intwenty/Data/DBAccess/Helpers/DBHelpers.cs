@@ -397,6 +397,9 @@ namespace Intwenty.Data.DBAccess.Helpers
             if (value == null)
                 return string.Empty;
 
+            if (value == DBNull.Value)
+                return string.Empty;
+
             if (column.IsNumeric && Convert.ToString(value).ToLower() == "true")
                 value = 1;
             if (column.IsNumeric && Convert.ToString(value).ToLower() == "false")
@@ -520,6 +523,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 
             var res = new List<SqlDataTypeMap>();
 
+            //STRING
             res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.MSSqlServer , DBMSDataType ="NVARCHAR(300)"  });
             res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.MSSqlServer, DBMSDataType = "NVARCHAR(max)", Length = StringLength.Long });
             res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.MSSqlServer, DBMSDataType = "NVARCHAR(30)", Length = StringLength.Short });
@@ -540,36 +544,41 @@ namespace Intwenty.Data.DBAccess.Helpers
             res.Add(new SqlDataTypeMap() { IntwentyType = "STRING", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT", Length = StringLength.Short });
             res.Add(new SqlDataTypeMap() { IntwentyType = "TEXT", NetType = "SYSTEM.STRING", DataDbType = DbType.String, DbEngine = DBMS.SQLite, DBMSDataType = "TEXT", Length = StringLength.Long });
 
-
+            //BOOLEAN
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.MSSqlServer, DBMSDataType = "INT" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.MariaDB, DBMSDataType = "TINYINT(1)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.MySql, DBMSDataType = "TINYINT(1)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.PostgreSQL, DBMSDataType = "BOOLEAN" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "BOOLEAN", NetType = "SYSTEM.BOOLEAN", DataDbType = DbType.Boolean, DbEngine = DBMS.SQLite, DBMSDataType = "INTEGER" });
 
+            //INT
             res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DbEngine = DBMS.MSSqlServer, DBMSDataType = "INT" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DbEngine = DBMS.MariaDB, DBMSDataType = "INTEGER(11)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DbEngine = DBMS.MySql, DBMSDataType = "INTEGER(11)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DbEngine = DBMS.PostgreSQL, DBMSDataType = "INTEGER" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "INTEGER", NetType = "SYSTEM.INT32", DataDbType = DbType.Int32, DbEngine = DBMS.SQLite, DBMSDataType = "INTEGER" });
 
+            //DATETIME
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.MariaDB, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.MySql, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.PostgreSQL, DBMSDataType = "TIMESTAMP" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIME", DataDbType = DbType.DateTime, DbEngine = DBMS.SQLite, DBMSDataType = "DATETIME" });
 
+            //DATETIMEOFSET
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MariaDB, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.MySql, DBMSDataType = "DATETIME" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.PostgreSQL, DBMSDataType = "TIMESTAMP" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "DATETIME", NetType = "SYSTEM.DATETIMEOFFSET", DataDbType = DbType.DateTime, DbEngine = DBMS.SQLite, DBMSDataType = "DATETIME" });
 
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+
+            //DECIMAL
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,2)" });
@@ -577,18 +586,18 @@ namespace Intwenty.Data.DBAccess.Helpers
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DECIMAL", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
-
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+            //SINGLE
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,2)" });
@@ -596,17 +605,19 @@ namespace Intwenty.Data.DBAccess.Helpers
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.SINGLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+
+            //DOUBLE
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,2)" });
@@ -614,11 +625,11 @@ namespace Intwenty.Data.DBAccess.Helpers
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,2)" });
             res.Add(new SqlDataTypeMap() { IntwentyType = "2DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,3)" });
-            res.Add(new SqlDataTypeMap() { IntwentyType = "3DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MSSqlServer, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MariaDB, DBMSDataType = "DECIMAL(18,1)DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.MySql, DBMSDataType = "DECIMAL(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.PostgreSQL, DBMSDataType = "NUMERIC(18,1)" });
+            res.Add(new SqlDataTypeMap() { IntwentyType = "1DECIMAL", NetType = "SYSTEM.DOUBLE", DataDbType = DbType.Decimal, DbEngine = DBMS.SQLite, DBMSDataType = "REAL" });
 
             _datatypemap = res;
 

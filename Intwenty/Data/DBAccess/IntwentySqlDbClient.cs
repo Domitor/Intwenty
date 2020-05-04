@@ -283,6 +283,7 @@ namespace Intwenty.Data.DBAccess
             }
             else if (DbEngine == DBMS.PostgreSQL)
             {
+              
                 var param = new NpgsqlParameter() { ParameterName = p.ParameterName, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
                     param.DbType = p.DataType;
@@ -296,6 +297,7 @@ namespace Intwenty.Data.DBAccess
                     param.DbType = p.DataType;
 
                 this.mysql_cmd.Parameters.Add(param);
+
             }
             else if (DbEngine == DBMS.SQLite)
             {
@@ -363,7 +365,7 @@ namespace Intwenty.Data.DBAccess
         {
             var result = new ApplicationTable();
             var ds = new DataSet();
-            FillDataset(ds, "NONE");
+            FillDataset(ds, "tempdt");
             foreach (DataRow t in ds.Tables[0].Rows)
             {
                 var row = new ApplicationTableRow();
@@ -438,6 +440,10 @@ namespace Intwenty.Data.DBAccess
 
         public StringBuilder GetJsonArray(List<IIntwentyDataColum> columns, int minrow = 0, int maxrow = 0)
         {
+
+            if (columns == null)
+                throw new InvalidOperationException("Parameter columns can't be null");
+
             var sb = new StringBuilder();
             var ds = new DataSet();
             FillDataset(ds, "NONE");
@@ -469,10 +475,11 @@ namespace Intwenty.Data.DBAccess
                 var firstcol = true;
                 foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
-                    if (!columns.Exists(p=> p.ColumnName.ToLower() == dc.ColumnName.ToLower()))
+                    var icol = columns.Find(p => p.ColumnName.ToLower() == dc.ColumnName.ToLower());
+                    if (icol == null)
                         continue;
 
-                    var val = DBHelpers.GetJSONValue(r, dc);
+                    var val = DBHelpers.GetJSONValue(r[dc], icol);
                     if (string.IsNullOrEmpty(val))
                         continue;
 
@@ -557,10 +564,11 @@ namespace Intwenty.Data.DBAccess
 
             foreach (DataColumn dc in ds.Tables[0].Columns)
             {
-                if (!columns.Exists(p => p.ColumnName.ToLower() == dc.ColumnName.ToLower()))
+                var icol = columns.Find(p => p.ColumnName.ToLower() == dc.ColumnName.ToLower());
+                if (icol == null)
                     continue;
 
-                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0], dc);
+                var val = DBHelpers.GetJSONValue(ds.Tables[0].Rows[0][dc], icol);
                 if (string.IsNullOrEmpty(val))
                     continue;
 
@@ -661,7 +669,7 @@ namespace Intwenty.Data.DBAccess
             }
             if (pk != null && (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql))
             {
-                sb.Append(colsep + string.Format("PRIMARY KEY (`{0}`)", pk.Columns));
+                sb.Append(colsep + string.Format("PRIMARY KEY ({0})", pk.Columns));
             }
             else if (pk != null && DbEngine == DBMS.PostgreSQL)
             {
@@ -669,7 +677,7 @@ namespace Intwenty.Data.DBAccess
             }
             else if (pk != null && DbEngine == DBMS.MSSqlServer)
             {
-                sb.Append(colsep + string.Format("CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED ([{1}] ASC)", tablename, pk.Columns));
+                sb.Append(colsep + string.Format("CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED ({1} ASC)", tablename, pk.Columns));
             }
             else if (pk != null && DbEngine == DBMS.SQLite && string.IsNullOrEmpty(autoinccolumn))
             {
@@ -740,7 +748,13 @@ namespace Intwenty.Data.DBAccess
 
         public T GetOne<T>(int id) where T : new()
         {
-            return GetOne<T>(Convert.ToString(id));
+            var parameters = new List<IntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { ParameterName = "@KEY1", Value = id });
+            var result = GetFromTableByType<T>(parameters, false);
+            if (result.Count > 0)
+                return result[0];
+            else
+                return default(T);
         }
 
         public T GetOne<T>(string id) where T : new()
@@ -823,7 +837,7 @@ namespace Intwenty.Data.DBAccess
                 foreach (var p in parameters)
                     AddParameter(p);
             }
-            FillDataset(ds, "NONE");
+            FillDataset(ds, "tempdt");
 
             if (!use_current_connection)
                 Close();
@@ -839,21 +853,24 @@ namespace Intwenty.Data.DBAccess
                     if (annot_colname != null && annot_colname.Length > 0)
                         colname = ((DbColumnName)annot_colname[0]).Name;
 
+                    if (DbEngine == DBMS.PostgreSQL)
+                        colname = colname.ToLower();
+
                     if (r[colname] == DBNull.Value)
                         continue;
 
                     if (!r.Table.Columns.Contains(colname))
                         continue;
 
-                    if (property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32" && DbEngine == DBMS.SQLite)
+                    if (property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32")
                         property.SetValue(m, Convert.ToInt32(r[colname]), null);
-                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN" && DbEngine == DBMS.SQLite)
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN")
                         property.SetValue(m, Convert.ToBoolean(r[colname]), null);
-                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL" && DbEngine == DBMS.SQLite)
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL")
                         property.SetValue(m, Convert.ToDecimal(r[colname]), null);
-                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE" && DbEngine == DBMS.SQLite)
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE")
                         property.SetValue(m, Convert.ToSingle(r[colname]), null);
-                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE" && DbEngine == DBMS.SQLite)
+                    else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE")
                         property.SetValue(m, Convert.ToDouble(r[colname]), null);
                     else
                         property.SetValue(m, r[colname], null);
@@ -872,7 +889,7 @@ namespace Intwenty.Data.DBAccess
 
         public int Insert<T>(T model, bool use_current_connection = false)
         {
-            var autoinccolumn = "";
+            var autoinccolumn = string.Empty;
             var colsep = "";
             var workingtype = typeof(T);
             var tname = workingtype.Name;
@@ -931,17 +948,10 @@ namespace Intwenty.Data.DBAccess
 
             if (!string.IsNullOrEmpty(autoinccolumn) && DbEngine == DBMS.MSSqlServer)
             {
-                //values.Append(" SELECT SCOPE_IDENTITY()");
                 values.Append(" select @NewId=Scope_Identity()");
                 parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
-            else if (!string.IsNullOrEmpty(autoinccolumn) && (DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql))
-            {
-                //values.Append(" SELECT LAST_INSERT_ID()");
-                values.Append(" select @NewId=LAST_INSERT_ID()");
-                parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
-            }
-           
+          
 
             if (!use_current_connection)
                 OpenIfNeeded();
@@ -954,34 +964,52 @@ namespace Intwenty.Data.DBAccess
 
             var res = ExecuteNonQuery();
            
-            var output = res.OutputParameters.Find(p => p.ParameterName == "@NewId");
-            if (output != null && !string.IsNullOrEmpty(autoinccolumn))
+            if (!string.IsNullOrEmpty(autoinccolumn))
             {
-                var property = workingtype.GetProperty(autoinccolumn);
-                if (property != null)
-                    property.SetValue(model, output.Value, null);
-            }
-
-            if (DbEngine == DBMS.PostgreSQL && !string.IsNullOrEmpty(autoinccolumn))
-            {
-                var property = workingtype.GetProperty(autoinccolumn);
-                if (property != null)
+                if (DbEngine == DBMS.MSSqlServer)
                 {
-                    CreateCommand(string.Format("SELECT currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
-                    property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
-                }  
-            }
-
-            if (DbEngine == DBMS.SQLite && !string.IsNullOrEmpty(autoinccolumn))
-            {
-                var property = workingtype.GetProperty(autoinccolumn);
-                if (property != null)
-                {
-                    CreateCommand(string.Format("SELECT Last_Insert_Rowid()"));
-                    property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
+                    var output = res.OutputParameters.Find(p => p.ParameterName == "@NewId");
+                    if (output != null)
+                    {
+                        var property = workingtype.GetProperty(autoinccolumn);
+                        if (property != null)
+                            property.SetValue(model, output.Value, null);
+                    }
                 }
 
+                if (DbEngine == DBMS.PostgreSQL)
+                {
+                    var property = workingtype.GetProperty(autoinccolumn);
+                    if (property != null)
+                    {
+                        CreateCommand(string.Format("SELECT currval('{0}')", tname.ToLower() + "_" + autoinccolumn.ToLower() + "_seq"));
+                        property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
+                    }
+                }
+
+                if (DbEngine == DBMS.SQLite)
+                {
+                    var property = workingtype.GetProperty(autoinccolumn);
+                    if (property != null)
+                    {
+                        CreateCommand(string.Format("SELECT Last_Insert_Rowid()"));
+                        property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
+                    }
+                }
+
+                if ((DbEngine == DBMS.MariaDB || DbEngine == DBMS.MySql))
+                {
+                    var property = workingtype.GetProperty(autoinccolumn);
+                    if (property != null)
+                    {
+                        CreateCommand(string.Format("SELECT LAST_INSERT_ID()"));
+                        property.SetValue(model, Convert.ToInt32(ExecuteScalarQuery()), null);
+                    }
+                }
+
+
             }
+
 
             if (!use_current_connection)
                 Close();
@@ -1319,12 +1347,6 @@ namespace Intwenty.Data.DBAccess
             {
                 var res = new NonQueryResult();
                 res.Value = mysql_cmd.ExecuteNonQuery();
-                foreach (MySqlParameter p in mysql_cmd.Parameters)
-                {
-                    if (p.Direction == ParameterDirection.Output)
-                        res.OutputParameters.Add(new IntwentySqlParameter() { ParameterName = p.ParameterName, Direction = ParameterDirection.Output, DataType = p.DbType, Value = p.Value });
-                }
-
                 return res;
             }
 

@@ -29,15 +29,14 @@ namespace Intwenty.Data.Seed
                 DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
 
 
-            if (Settings.Value.ReCreateModelOnStartUp)
-            {
-                DataRepository.DeleteRange(DataRepository.GetAll<ApplicationItem>());
-                DataRepository.DeleteRange(DataRepository.GetAll<DatabaseItem>());
-                DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
-                DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
-                DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
-                DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>());
-            }
+        
+            DataRepository.DeleteRange(DataRepository.GetAll<ApplicationItem>());
+            DataRepository.DeleteRange(DataRepository.GetAll<DatabaseItem>());
+            DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
+            DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
+            DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
+            DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>());
+            
 
 
             //APPLICATIONS

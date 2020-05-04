@@ -12,9 +12,7 @@ namespace Intwenty.Model
     public class IntwentySettings
     {
         public string DefaultConnection { get; set; }
-
         public DBMS DefaultConnectionDBMS { get; set; }
-        public bool ReCreateModelOnStartUp { get; set; }
         public bool IsDevelopment { get; set; }
         public string SiteLanguage { get; set; }
         public bool AllowExternalLogins { get; set; }

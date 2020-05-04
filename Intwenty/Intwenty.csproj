@@ -27,7 +27,7 @@
     <Content Remove="Pages\**" />
     <EmbeddedResource Remove="Pages\**" />
     <None Remove="Pages\**" />
-    <None Include="..\..\..\Users\johan\Downloads\intwenty_loggo_small.png">
+    <None Include="Build\intwenty_loggo_small.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
@@ -52,12 +52,7 @@
 
   
 <ItemGroup Label="Packaging">
-    <Content Include="build\Intwenty.targets" PackagePath="build\Intwenty.targets" />
-</ItemGroup>
-
-  
-<ItemGroup>
-  <Folder Include="build\" />
+    <Content Include="Build\Intwenty.targets" PackagePath="build\Intwenty.targets" />
 </ItemGroup>
 
   

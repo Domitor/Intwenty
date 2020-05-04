@@ -312,6 +312,7 @@ namespace Intwenty.Controllers
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
+                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATATABLE", MetaCode = "TESTAPP_SUBTABLE", DbName = "TestAppSubTable", ParentMetaCode = "ROOT" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINETEXT", DbName = "LineHeader", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINEDESCRIPTION", DbName = "LineDescription", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
@@ -473,7 +474,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test11UpdateIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, "Update intwenty application with new owner user");
+            OperationResult result = new OperationResult(true, "Update intwenty application");
             try
             {
                 var state = new ClientStateInfo();
@@ -489,13 +490,43 @@ namespace Intwenty.Controllers
 
                 newstate.OwnerUserId = "OTHERUSER2";
 
-                var v = newstate.Values.Find(p => p.DbName == "Description");
-                v.Value = "Updated test application";
+                var v1 = newstate.Values.Find(p => p.DbName == "Description");
+                v1.Value = "Updated test application";
+
+                var v2 = newstate.Values.Find(p => p.DbName == "DecValue");
+                v2.Value = 333.777M;
+
+                var v3 = newstate.Values.Find(p => p.DbName == "DecValue2");
+                if (v3 == null)
+                {
+                    v3 = new ApplicationValue() { DbName = "DecValue2" };
+                    newstate.Values.Add(v3);
+                }
+                v3.Value = 444.55;
 
                 var saveresult = _dataservice.Save(newstate);
                 if (!saveresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
+                var getbyidresult = _dataservice.GetLatestVersionById(state);
+                if (!getbyidresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
+
+                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
+                if (newstate.Values.Count < 1)
+                    throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
+
+                var checkupdate = newstate.Values.Find(p => p.DbName == "Description");
+                if (checkupdate.GetAsString() != "Updated test application")
+                    throw new InvalidOperationException("Updated application string value was not persisted");
+
+                checkupdate = newstate.Values.Find(p => p.DbName == "DecValue");
+                if (checkupdate.GetAsDecimal() != 333.777M)
+                    throw new InvalidOperationException("Updated application decimal value was not persisted");
+
+                checkupdate = newstate.Values.Find(p => p.DbName == "DecValue2");
+                if (Convert.ToDouble(checkupdate.GetAsDecimal()) != 444.55)
+                    throw new InvalidOperationException("Updated application decimal double value was not persisted");
 
             }
             catch (Exception ex)
@@ -548,8 +579,8 @@ namespace Intwenty.Controllers
                 else
                 {
                     var dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                    dbstore.CreateCommand("select * from sysdata_InformationStatus");
                     dbstore.Open();
+                    dbstore.CreateCommand("select * from sysdata_InformationStatus");
                     tbl = dbstore.GetDataSet();
                     dbstore.Close();
                 }
