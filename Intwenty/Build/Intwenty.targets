@@ -1,0 +1,14 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup>
+        <SourceJSFiles Include="$(MSBuildThisFileDirectory)..\content\wwwroot\js\*.js" />
+        <SourceCSSFiles Include="$(MSBuildThisFileDirectory)..\content\wwwroot\css\*.css" />
+        <SourceSQLite Include="$(MSBuildThisFileDirectory)..\content\wwwroot\sqlite\*.txt" />
+        <SourceLiteDB Include="$(MSBuildThisFileDirectory)..\content\wwwroot\litedb\*.txt" />
+    </ItemGroup>
+    <Target Name="CopyScriptsToProject" BeforeTargets="Build">
+        <Copy SourceFiles="@(SourceJSFiles)" DestinationFolder="$(ProjectDir)\wwwroot\js\"/>
+        <Copy SourceFiles="@(SourceCSSFiles)" DestinationFolder="$(ProjectDir)\wwwroot\css\"/>
+        <Copy SourceFiles="@(SourceSQLite)" DestinationFolder="$(ProjectDir)\wwwroot\sqlite\"/>
+        <Copy SourceFiles="@(SourceLiteDB)" DestinationFolder="$(ProjectDir)\wwwroot\litedb\"/>
+    </Target>
+</Project>
