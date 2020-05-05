@@ -271,7 +271,7 @@ namespace Intwenty.Data.DBAccess
             }
         }
 
-        public void AddParameter(IntwentySqlParameter p)
+        public void AddParameter(IntwentyParameter p)
         {
             if (DbEngine == DBMS.MSSqlServer)
             {
@@ -750,9 +750,9 @@ namespace Intwenty.Data.DBAccess
 
         public T GetOne<T>(int id, bool use_current_connection = false) where T : new()
         {
-            var parameters = new List<IntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter() { ParameterName = "@KEY1", Value = id });
-            var result = GetFromTableByType<T>(parameters, use_current_connection);
+            var parameters = new List<IntwentyParameter>();
+            parameters.Add(new IntwentyParameter() { ParameterName = "@KEY1", Value = id });
+            var result = GetFromTableByType<T>(parameters, string.Empty, use_current_connection);
             if (result.Count > 0)
                 return result[0];
             else
@@ -761,9 +761,9 @@ namespace Intwenty.Data.DBAccess
 
         public T GetOne<T>(int id) where T : new()
         {
-            var parameters = new List<IntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter() { ParameterName = "@KEY1", Value = id });
-            var result = GetFromTableByType<T>(parameters, false);
+            var parameters = new List<IntwentyParameter>();
+            parameters.Add(new IntwentyParameter() { ParameterName = "@KEY1", Value = id });
+            var result = GetFromTableByType<T>(parameters, string.Empty, false);
             if (result.Count > 0)
                 return result[0];
             else
@@ -772,9 +772,9 @@ namespace Intwenty.Data.DBAccess
 
         public T GetOne<T>(string id) where T : new()
         { 
-            var parameters = new List<IntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter() { ParameterName="@KEY1", Value=id });
-            var result = GetFromTableByType<T>(parameters, false);
+            var parameters = new List<IntwentyParameter>();
+            parameters.Add(new IntwentyParameter() { ParameterName="@KEY1", Value=id });
+            var result = GetFromTableByType<T>(parameters, string.Empty, false);
             if (result.Count > 0)
                 return result[0];
             else
@@ -783,20 +783,26 @@ namespace Intwenty.Data.DBAccess
 
         public List<T> GetAll<T>() where T : new()
         {
-            return GetFromTableByType<T>(new List<IntwentySqlParameter>(), false);
+            return GetFromTableByType<T>(new List<IntwentyParameter>(), string.Empty, false);
         }
 
         public List<T> GetAll<T>(bool use_current_connection = false) where T : new()
         {
-            return GetFromTableByType<T>(new List<IntwentySqlParameter>(), use_current_connection);
+            return GetFromTableByType<T>(new List<IntwentyParameter>(), string.Empty, use_current_connection);
         }
 
-        private List<T> GetFromTableByType<T>(List<IntwentySqlParameter> parameters, bool use_current_connection = false) where T : new()
+        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        {
+            return GetFromTableByType<T>(parameters, expression, false);
+        }
+
+        private List<T> GetFromTableByType<T>(List<IntwentyParameter> parameters, string expression = "", bool use_current_connection = false) where T : new()
         {
 
 
             var res = new List<T>();
 
+            string wherestmt = string.Empty;
             var isparameterized = false;
             var workingtype = typeof(T);
             var tname = workingtype.Name;
@@ -804,34 +810,50 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
-            DbTablePrimaryKey pk = null;
-            var annot_pk = workingtype.GetCustomAttributes(typeof(DbTablePrimaryKey), false);
-            if (annot_pk != null && annot_pk.Length > 0)
-                pk = ((DbTablePrimaryKey)annot_pk[0]);
+            if (string.IsNullOrEmpty(expression))
+            {
+                DbTablePrimaryKey pk = null;
+                var annot_pk = workingtype.GetCustomAttributes(typeof(DbTablePrimaryKey), false);
+                if (annot_pk != null && annot_pk.Length > 0)
+                    pk = ((DbTablePrimaryKey)annot_pk[0]);
 
-            if (pk == null && parameters != null && parameters.Count > 0)
-                throw new InvalidOperationException(string.Format("Can't query {0} with parameters, it has no primary key.", tname));
+                if (pk == null && parameters != null && parameters.Count > 0)
+                    throw new InvalidOperationException(string.Format("Can't query {0} with parameters, it has no primary key.", tname));
 
-            if (pk != null && !string.IsNullOrEmpty(pk.Columns) && parameters != null && parameters.Count > 0)
-                isparameterized = true;
+                if (pk != null && !string.IsNullOrEmpty(pk.Columns) && parameters != null && parameters.Count > 0)
+                    isparameterized = true;
 
-            string wherestmt = string.Empty; ;
-            if (isparameterized)
+
+                if (isparameterized)
+                {
+                    wherestmt = " WHERE";
+                    var keycols = pk.Columns.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < keycols.Length; i++)
+                    {
+                        if (parameters.Count > i)
+                        {
+                            var prm = parameters[i];
+                            prm.ParameterName = "@" + keycols[i];
+                            if (i == 0)
+                                wherestmt += string.Format(" {0}={1}", keycols[i], prm.ParameterName);
+                            else
+                                wherestmt += string.Format(" AND {0}={1}", keycols[i], prm.ParameterName);
+                        }
+                    }
+
+                }
+
+
+            }
+            else
             {
                 wherestmt = " WHERE";
-                var keycols = pk.Columns.Split(",", StringSplitOptions.RemoveEmptyEntries);
-                for(int i =0; i< keycols.Length; i++)
-                {
-                    if (parameters.Count > i)
-                    {
-                        var prm = parameters[i];
-                        prm.ParameterName = "@" + keycols[i];
-                        if (i==0)
-                           wherestmt += string.Format(" {0}={1}", keycols[i], prm.ParameterName);
-                        else
-                           wherestmt += string.Format(" AND {0}={1}", keycols[i], prm.ParameterName);
-                    }
-                }
+                if (parameters == null)
+                    throw new InvalidOperationException(string.Format("Can't query {0} with expression without parameters.", tname));
+                if (parameters.Count < 1)
+                    throw new InvalidOperationException(string.Format("Can't query {0} with expression without parameters.", tname));
+
+                wherestmt += " " + expression;
 
             }
 
@@ -912,7 +934,7 @@ namespace Intwenty.Data.DBAccess
 
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", tname));
             var values = new StringBuilder(" VALUES (");
-            var parameters = new List<IntwentySqlParameter>();
+            var parameters = new List<IntwentyParameter>();
 
             var memberproperties = workingtype.GetProperties();
             if (memberproperties.Length == 0)
@@ -933,7 +955,7 @@ namespace Intwenty.Data.DBAccess
                 }
               
                 var value = m.GetValue(model);
-                var prm = new IntwentySqlParameter();
+                var prm = new IntwentyParameter();
                 prm.ParameterName = "@" + colname;
 
                 if (value == null)
@@ -962,7 +984,7 @@ namespace Intwenty.Data.DBAccess
             if (!string.IsNullOrEmpty(autoinccolumn) && DbEngine == DBMS.MSSqlServer)
             {
                 values.Append(" select @NewId=Scope_Identity()");
-                parameters.Add(new IntwentySqlParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
+                parameters.Add(new IntwentyParameter() { ParameterName = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
             }
           
 
@@ -1052,8 +1074,8 @@ namespace Intwenty.Data.DBAccess
                 pk = ((DbTablePrimaryKey)annot_pk[0]);
 
             var query = new StringBuilder(string.Format("UPDATE {0} SET ", tname));
-            var parameters = new List<IntwentySqlParameter>();
-            var keyparameters = new List<IntwentySqlParameter>();
+            var parameters = new List<IntwentyParameter>();
+            var keyparameters = new List<IntwentyParameter>();
 
             var memberproperties = t.GetProperties();
             foreach (var m in memberproperties)
@@ -1070,7 +1092,7 @@ namespace Intwenty.Data.DBAccess
                 {
                     if (!keyparameters.Exists(p => p.ParameterName == colname) && value!=null)
                     {
-                        var keyprm = new IntwentySqlParameter() { ParameterName = colname, Value = value };
+                        var keyprm = new IntwentyParameter() { ParameterName = colname, Value = value };
                         keyparameters.Add(keyprm);
                     }
                 }
@@ -1084,7 +1106,7 @@ namespace Intwenty.Data.DBAccess
 
                         if (!keyparameters.Exists(p => p.ParameterName == colname) && value != null)
                         {
-                            var keyprm = new IntwentySqlParameter() { ParameterName = colname, Value = value };
+                            var keyprm = new IntwentyParameter() { ParameterName = colname, Value = value };
                             keyparameters.Add(keyprm);
                         }
                     }
@@ -1094,7 +1116,7 @@ namespace Intwenty.Data.DBAccess
                 if (keyparameters.Exists(p => p.ParameterName == colname))
                     continue;
 
-                var prm = new IntwentySqlParameter();
+                var prm = new IntwentyParameter();
                 prm.ParameterName = "@" + colname;
                 if (value == null)
                     prm.Value = DBNull.Value;
@@ -1187,7 +1209,7 @@ namespace Intwenty.Data.DBAccess
                 pk = ((DbTablePrimaryKey)annot_pk[0]);
 
             var query = new StringBuilder(string.Format("DELETE FROM {0} ", tname));
-            var keyparameters = new List<IntwentySqlParameter>();
+            var keyparameters = new List<IntwentyParameter>();
 
             var memberproperties = t.GetProperties();
             foreach (var m in memberproperties)
@@ -1204,7 +1226,7 @@ namespace Intwenty.Data.DBAccess
                 {
                     if (!keyparameters.Exists(p => p.ParameterName == colname) && value != null)
                     {
-                        var keyprm = new IntwentySqlParameter() { ParameterName = colname, Value = value };
+                        var keyprm = new IntwentyParameter() { ParameterName = colname, Value = value };
                         keyparameters.Add(keyprm);
                     }
                 }
@@ -1218,7 +1240,7 @@ namespace Intwenty.Data.DBAccess
 
                         if (!keyparameters.Exists(p => p.ParameterName == colname) && value != null)
                         {
-                            var keyprm = new IntwentySqlParameter() { ParameterName = colname, Value = value };
+                            var keyprm = new IntwentyParameter() { ParameterName = colname, Value = value };
                             keyparameters.Add(keyprm);
                         }
                     }
@@ -1339,7 +1361,7 @@ namespace Intwenty.Data.DBAccess
                 foreach (SqlParameter p in sql_cmd.Parameters)
                 {
                     if (p.Direction == ParameterDirection.Output)
-                        res.OutputParameters.Add(new IntwentySqlParameter() { ParameterName = p.ParameterName, Direction = ParameterDirection.Output, DataType = p.DbType, Value = p.Value });
+                        res.OutputParameters.Add(new IntwentyParameter() { ParameterName = p.ParameterName, Direction = ParameterDirection.Output, DataType = p.DbType, Value = p.Value });
                 }
 
                 return res;

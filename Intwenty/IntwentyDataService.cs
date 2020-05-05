@@ -27,6 +27,24 @@ namespace Intwenty
         /// <returns>An OperationResult including Id and Version for the saved application</returns>
         OperationResult Save(ClientStateInfo state);
 
+        /// <summary>
+        /// Deletes all application data (maintable and subtables) by id.
+        /// If the application uses versioning, all versions are deleted.
+        /// </summary>
+        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
+        OperationResult DeleteById(ClientStateInfo state);
+
+        /// <summary>
+        /// Deletes data by Id
+        /// Parameter Id can be an Id of an application subtable row, or an application Id
+        /// Parameter dbname can be an application  main tablename or a subtable name
+        /// If the dbname represents a main application table, all application data (maintable and subtables) is deleted.
+        /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
+        /// If the application uses versioning, all versions are deleted.
+        /// </summary>
+        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
+        OperationResult DeleteById(int applicationid, int id, string dbname);
+
 
         /// <summary>
         /// Get the latest version data for and application based on Id
@@ -306,6 +324,81 @@ namespace Intwenty
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Save Intwenty application failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
+            }
+        }
+
+        public OperationResult DeleteById(ClientStateInfo state)
+        {
+            try
+            {
+                if (state.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.DeleteById(state);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.DeleteById(state);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Delete Intwenty application by Id failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
+            }
+        }
+
+        public OperationResult DeleteById(int applicationid, int id, string dbname)
+        {
+            try
+            {
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must contain a valid ApplicationId");
+
+                if (id < 1)
+                    throw new InvalidOperationException("Parameter can not be zero");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.DeleteById(id, dbname);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.DeleteById(id, dbname);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("DeleteById(applicationid,id,dbname) failed"));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
                 return result;

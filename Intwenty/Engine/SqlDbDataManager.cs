@@ -186,7 +186,11 @@ namespace Intwenty.Engine
                 if (appjson.Length < 5)
                 {
                     jsonresult.Append("}");
+                    result.Messages.Clear();
                     result.Data = jsonresult.ToString();
+                    result.IsSuccess = false;
+                    result.AddMessage("USERERROR", string.Format("Get latest version for application {0} returned no data", this.Model.Application.Title));
+                    result.AddMessage("SYSTEMERROR", string.Format("Get latest version for application {0} returned no data", this.Model.Application.Title));
                     return result;
                 }
 
@@ -328,6 +332,146 @@ namespace Intwenty.Engine
 
             return result;
 
+        }
+
+        public virtual OperationResult DeleteById(ClientStateInfo state)
+        {
+            if (state == null)
+                return new OperationResult(false, "No client state found when performing DeleteById(state).", 0, 0);
+
+            if (state.Id < 1)
+                return new OperationResult(false, "No state.Id found when performing DeleteById(state).", 0, 0);
+
+            var result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), state.Id, 0);
+
+            try
+            {
+                SqlClient.Open();
+
+
+                SqlClient.CreateCommand("DELETE FROM " + this.Model.Application.DbName + " WHERE Id=@Id");
+                SqlClient.AddParameter("@Id", state.Id);
+                SqlClient.ExecuteNonQuery();
+
+                SqlClient.CreateCommand("DELETE FROM " + this.Model.Application.VersioningTableName + " WHERE Id=@Id");
+                SqlClient.AddParameter("@Id", state.Id);
+                SqlClient.ExecuteNonQuery();
+
+                foreach (var table in Model.DataStructure)
+                {
+                    if (table.IsMetaTypeDataTable)
+                    {
+                        SqlClient.CreateCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id");
+                        SqlClient.AddParameter("@Id", state.Id);
+                        SqlClient.ExecuteNonQuery();
+
+                        SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE ParentId=@Id");
+                        SqlClient.AddParameter("@Id", state.Id);
+                        SqlClient.ExecuteNonQuery();
+                    }
+                }
+
+               
+
+                SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                SqlClient.AddParameter("@Id", state.Id);
+                SqlClient.ExecuteNonQuery();
+
+                SqlClient.CreateCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id");
+                SqlClient.AddParameter("@Id", state.Id);
+                SqlClient.ExecuteNonQuery();
+
+                SqlClient.Close();
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Delete application {0} failed", this.Model.Application.Title));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+
+            return result;
+        }
+
+        public virtual OperationResult DeleteById(int id, string dbname)
+        {
+
+            if (id < 1)
+                return new OperationResult(false, "No id found when performing DeleteById(id, dbname).", 0, 0);
+            if (string.IsNullOrEmpty(dbname))
+                return new OperationResult(false, "No dbname found when performing DeleteById(id, dbname).", 0, 0);
+
+            var result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), id, 0);
+
+            try
+            {
+
+                SqlClient.Open();
+
+                if (dbname.ToLower() == this.Model.Application.DbName)
+                {
+                    SqlClient.CreateCommand("DELETE FROM " + this.Model.Application.DbName + " WHERE Id=@Id");
+                    SqlClient.AddParameter("@Id", id);
+                    SqlClient.ExecuteNonQuery();
+
+                    SqlClient.CreateCommand("DELETE FROM " + this.Model.Application.VersioningTableName + " WHERE Id=@Id");
+                    SqlClient.AddParameter("@Id", id);
+                    SqlClient.ExecuteNonQuery();
+
+
+                    foreach (var table in Model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable)
+                        {
+                            SqlClient.CreateCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id");
+                            SqlClient.AddParameter("@Id", id);
+                            SqlClient.ExecuteNonQuery();
+
+                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE ParentId=@Id");
+                            SqlClient.AddParameter("@Id", id);
+                            SqlClient.ExecuteNonQuery();
+
+                        }
+                    }
+
+                    SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                    SqlClient.AddParameter("@Id", id);
+                    SqlClient.ExecuteNonQuery();
+
+                    SqlClient.CreateCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id");
+                    SqlClient.AddParameter("@Id", id);
+                    SqlClient.ExecuteNonQuery();
+
+                }
+                else
+                {
+                    foreach (var table in Model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname)
+                        {
+                            SqlClient.CreateCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id");
+                            SqlClient.AddParameter("@Id", id);
+                            SqlClient.ExecuteNonQuery();
+
+                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                            SqlClient.AddParameter("@Id", id);
+                            SqlClient.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                SqlClient.Close();
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("DeleteById(id, dbaname) in application {0} failed", this.Model.Application.Title));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+
+            return result;
         }
 
         public virtual OperationResult GetListByOwnerUser(ListRetrivalArgs args)

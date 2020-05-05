@@ -110,6 +110,123 @@ namespace Intwenty.Engine
             throw new NotImplementedException();
         }
 
+        public virtual OperationResult DeleteById(ClientStateInfo state)
+        {
+            if (state == null)
+                return new OperationResult(false, "No client state found when performing DeleteById(state).", 0, 0);
+
+            if (state.Id < 1)
+                return new OperationResult(false, "No state.Id found when performing DeleteById(state).", 0, 0);
+
+            var result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), state.Id, 0);
+
+            try
+            {
+
+                NoSqlClient.DeleteIntwentyJsonObject(this.Model.Application.DbName, state.Id, state.Version);
+                NoSqlClient.DeleteIntwentyJsonObject(this.Model.Application.VersioningTableName, state.Id, state.Version);
+
+                foreach (var table in Model.DataStructure)
+                {
+                    if (table.IsMetaTypeDataTable)
+                    {
+                        var expression = "(";
+                        expression += string.Format("'[{0}]' = '{1}'", "ParentId", state.Id);
+                        expression += ")";
+                        var t = NoSqlClient.GetDataSet(table.DbName, expression);
+                        if (t == null)
+                            continue;
+
+                        foreach (var row in t.Rows)
+                        {
+                            NoSqlClient.DeleteIntwentyJsonObject(table.DbName, row.Id, row.Version);
+                            NoSqlClient.DeleteJsonDocument("sysdata_SystemID", row.Id);
+                        }
+                    }
+                }
+
+              
+                NoSqlClient.DeleteJsonDocument("sysdata_InformationStatus", state.Id);
+                NoSqlClient.DeleteJsonDocument("sysdata_SystemID", state.Id);
+
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Delete application {0} failed", this.Model.Application.Title));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+
+            return result;
+        }
+
+        public virtual OperationResult DeleteById(int id, string dbname)
+        {
+            if (id < 1)
+                return new OperationResult(false, "No id found when performing DeleteById(id, dbname).", 0, 0);
+            if (string.IsNullOrEmpty(dbname))
+                return new OperationResult(false, "No dbname found when performing DeleteById(id, dbname).", 0, 0);
+
+            var result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), id, 0);
+
+            try
+            {
+
+    
+
+                if (dbname.ToLower() == this.Model.Application.DbName)
+                {
+                    NoSqlClient.DeleteIntwentyJsonObject(this.Model.Application.DbName, id, 1);
+                    NoSqlClient.DeleteIntwentyJsonObject(this.Model.Application.VersioningTableName, id, 1);
+                    foreach (var table in Model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable)
+                        {
+                            var expression = "(";
+                            expression += string.Format("'[{0}]' = '{1}'", "ParentId", id);
+                            expression += ")";
+                            var t = NoSqlClient.GetDataSet(table.DbName, expression);
+                            if (t == null)
+                                continue;
+
+                            foreach (var row in t.Rows)
+                            {
+                                NoSqlClient.DeleteIntwentyJsonObject(table.DbName, row.Id, row.Version);
+                                NoSqlClient.DeleteJsonDocument("sysdata_SystemID", row.Id);
+                            }
+                        }
+                    }
+                    NoSqlClient.DeleteJsonDocument("sysdata_InformationStatus", id);
+                    NoSqlClient.DeleteJsonDocument("sysdata_SystemID", id);
+
+                }
+                else
+                {
+                    foreach (var table in Model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname)
+                        {
+                            NoSqlClient.DeleteIntwentyJsonObject(table.DbName, id, 1);
+                            NoSqlClient.DeleteJsonDocument("sysdata_SystemID", id);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("DeleteById(id, dbaname) in application {0} failed", this.Model.Application.Title));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+
+            return result;
+        }
+
+
         public OperationResult GetDataView(ListRetrivalArgs args)
         {
             var result = new OperationResult();

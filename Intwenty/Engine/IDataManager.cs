@@ -28,6 +28,10 @@ namespace Intwenty.Engine
 
         OperationResult Save(ClientStateInfo data);
 
+        OperationResult DeleteById(ClientStateInfo state);
+
+        OperationResult DeleteById(int id, string dbname);
+
         OperationResult GetApplicationValueDomains();
 
         OperationResult GetValueDomains();

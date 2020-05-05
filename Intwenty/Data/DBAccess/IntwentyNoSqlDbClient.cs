@@ -47,9 +47,6 @@ namespace Intwenty.Data.DBAccess
         private static BsonClassMap<ValueDomainItem> ValueDomainItemMongoDbMap { get; set; }
 
 
-        private static EntityBuilder<IntwentyUserRole> IntwentyUserRoleLiteDbMap { get; set; }
-
-
         public IntwentyNoSqlDbClient()
         {
             ConnectionString = string.Empty;
@@ -77,7 +74,6 @@ namespace Intwenty.Data.DBAccess
 
             if (DbEngine == DBMS.LiteDb && LiteDbClient == null)
             {
-                SetLiteDbClassMap();
 
                 SetLiteDbConnectionString();
                 LiteDbClient = new LiteDatabase(ConnectionString);
@@ -160,22 +156,7 @@ namespace Intwenty.Data.DBAccess
 
         }
 
-        private void SetLiteDbClassMap()
-        {
-            /*
-            if (IntwentyUserRoleLiteDbMap == null)
-            {
-
-                IntwentyUserRoleLiteDbMap = BsonMapper.Global.Entity<IntwentyUserRole>();
-                IntwentyUserRoleLiteDbMap.Id(p => p.Id);
      
-            }
-            */
-        }
-
-
-
-
 
         private void SetLiteDbConnectionString()
         {
@@ -409,6 +390,34 @@ namespace Intwenty.Data.DBAccess
             return null;
         }
 
+        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        {
+            if (string.IsNullOrEmpty(expression))
+                throw new InvalidOperationException("expression must not be empty");
+            if (parameters==null)
+                throw new InvalidOperationException("parameters must not be null");
+            if (parameters.Count == 0)
+                throw new InvalidOperationException("parameters must not be empty");
+            if (expression.IndexOf("[") > -1)
+                throw new InvalidOperationException("parameters must not contain the character [");
+            if (expression.IndexOf("]") > -1)
+                throw new InvalidOperationException("parameters must not contain the character ]");
+
+            foreach (var p in parameters)
+            {
+                var indexstart = expression.IndexOf(p.ParameterName);
+                if (indexstart < 0)
+                    throw new InvalidOperationException(string.Format("The parameter {0} must exist in the expression", p.ParameterName));
+
+                indexstart = expression.IndexOf(p.ParameterName.Substring(1));
+                if (indexstart < 0)
+                    throw new InvalidOperationException(string.Format("The field {0} must exist in the expression", p.ParameterName.Substring(1)));
+
+            }
+
+
+            throw new NotImplementedException();
+        }
 
         public int Insert<T>(T model)
         {
@@ -724,68 +733,7 @@ namespace Intwenty.Data.DBAccess
             return 0;
         }
 
-        /*
-        public int GetMaxIntValue(string collectionname, string expression, string fieldname)
-        {
-            if (string.IsNullOrEmpty(fieldname))
-                throw new InvalidOperationException("Parameter: fieldname must be specified");
-            if (string.IsNullOrEmpty(collectionname))
-                throw new InvalidOperationException("Parameter: collectionname must be specified");
-
-            if (DbEngine == DBMS.MongoDb)
-            {
-                var projection = "{" + string.Format("\"{0}\":1", fieldname) + "}";
-                var documents = MongoDbClient.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p=> true).Project(projection).ToList();
-                var result = -1;
-                foreach (var doc in documents)
-                {
-                    if (!IsValidByExpression(expression, doc))
-                        continue;
-
-                    var val = doc.GetValue(fieldname).AsInt32;
-                    if (val > result)
-                        result = val;
-                    
-                }
-
-                return result;
-            }
-
-            if (DbEngine == DBMS.LiteDb)
-            {
-                var count = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Count();
-                if (count < 1)
-                    return 0;
-
-                var documents = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).FindAll();
-                var result = -1;
-                foreach (var doc in documents)
-                {
-                   
-                    if (IsValidByExpression(expression, doc))
-                    {
-                        LiteDB.BsonValue docval = null;
-                        if (doc.TryGetValue(fieldname, out docval))
-                        {
-                            if (docval.AsInt32 > result)
-                                result = docval.AsInt32;
-
-                        }
-                    }
-
-                }
-
-
-                return result;
-               
-            }
-
-
-            return -1;
-
-        }
-        */
-
+    
         public ApplicationTable GetDataSet(string collectionname, string filterexpression = "")
         {
             StringBuilder s;

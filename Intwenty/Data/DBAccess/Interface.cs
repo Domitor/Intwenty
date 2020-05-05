@@ -26,6 +26,12 @@ namespace Intwenty.Data.DBAccess
         T GetOne<T>(int id) where T : new();
         T GetOne<T>(string id) where T : new();
         List<T> GetAll<T>() where T : new();
+        /// <summary>
+        /// Get a list of type T by expression.
+        /// Expression example: (((Field1=@Field1) AND (Field2<>@Field2)) OR (Field3=@Field3))
+        /// </summary>
+        /// <returns>A list of the type T</returns>
+        List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new();
         int Insert<T>(T model);
         int Update<T>(T model);
         int Delete<T>(T model);
@@ -89,7 +95,7 @@ namespace Intwenty.Data.DBAccess
         void CreateCommand(string sql);
         void CreateSPCommand(string procedurename);
         void AddParameter(string name, object value);
-        void AddParameter(IntwentySqlParameter p);
+        void AddParameter(IntwentyParameter p);
         object ExecuteScalarQuery();
         bool TableExist(string tablename);
         bool ColumnExist(string tablename, string columnname);

@@ -8,7 +8,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 {
     public enum StringLength { Standard, Long, Short };
 
-    public class IntwentySqlParameter
+    public class IntwentyParameter
     {
         public string ParameterName { get; set; }
 
@@ -18,7 +18,7 @@ namespace Intwenty.Data.DBAccess.Helpers
 
         public ParameterDirection Direction { get; set; }
 
-        public IntwentySqlParameter()
+        public IntwentyParameter()
         {
             Direction = ParameterDirection.Input;
             DataType = DbType.String;
@@ -27,13 +27,13 @@ namespace Intwenty.Data.DBAccess.Helpers
 
     public class NonQueryResult
     {
-        public List<IntwentySqlParameter> OutputParameters { get; set; }
+        public List<IntwentyParameter> OutputParameters { get; set; }
 
         public int Value { get; set; }
 
         public NonQueryResult()
         {
-            OutputParameters = new List<IntwentySqlParameter>();
+            OutputParameters = new List<IntwentyParameter>();
             Value = 0;
         }
     }

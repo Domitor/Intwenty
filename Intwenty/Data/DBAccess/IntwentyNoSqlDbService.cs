@@ -52,6 +52,12 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.GetAll<T>();
         }
+
+        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool DeleteIntwentyJsonObject(string collectionname, int id, int version)
         {
             return DBClient.DeleteIntwentyJsonObject(collectionname, id, version);
@@ -180,6 +186,8 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.GetDataSet(collectionname, filterexpression);
         }
+
+      
     }
 
       

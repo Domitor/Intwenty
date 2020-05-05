@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Collections.Generic;
 using Intwenty.Engine;
 using Microsoft.Extensions.Caching.Memory;
+using Intwenty.Data.DBAccess.Helpers;
 
 namespace Intwenty.Controllers
 {
@@ -115,8 +116,10 @@ namespace Intwenty.Controllers
             res.Add(Test9GetListOfIntwentyApplicationByOwnerUser());
             res.Add(Test10GetLatestVersionByOwnerUser());
             res.Add(Test11UpdateIntwentyApplication());
-            res.Add(Test12GetAllValueDomains());
-            res.Add(Test13GetDataSet());
+            res.Add(Test12DeleteIntwentyApplication());
+            res.Add(Test13GetAllValueDomains());
+            res.Add(Test14GetDataSet());
+            res.Add(Test15ORMGetByExpression());
 
             return new JsonResult(res);
 
@@ -537,7 +540,47 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test12GetAllValueDomains()
+        private OperationResult Test12DeleteIntwentyApplication()
+        {
+            OperationResult result = new OperationResult(true, "Delete an intwenty application");
+            try
+            {
+                var state = new ClientStateInfo();
+                state.ApplicationId = 10000;
+                state.OwnerUserId = "OTHERUSER";
+                var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
+                if (!getresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
+
+                var newstate = new ClientStateInfo();
+                newstate.ApplicationId = 10000;
+                newstate.Id = getresult.Id;
+
+                var deleteresult = _dataservice.DeleteById(newstate);
+                if (!deleteresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.DeleteById(state) failed: " + deleteresult.SystemError);
+
+
+                var getbyidresult = _dataservice.GetLatestVersionById(newstate);
+                if (getbyidresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returnded success but is deleted: " + getresult.SystemError);
+
+                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
+                if (newstate.Values.Count > 0)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returned values but is deleted");
+
+
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test13GetAllValueDomains()
         {
             OperationResult result = new OperationResult(true, "Get all value domain items");
             try
@@ -564,7 +607,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test13GetDataSet()
+        private OperationResult Test14GetDataSet()
         {
             OperationResult result = new OperationResult(true, "Get informationstatus dataset <InformationStatus>");
             try
@@ -590,6 +633,35 @@ namespace Intwenty.Controllers
 
                 if (tbl.Rows.Count == 0)
                     throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned 0 rows");
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test15ORMGetByExpression()
+        {
+            OperationResult result = new OperationResult(true, "GetByExpression<InformationStatus>(expression, parameters)");
+            try
+            {
+
+                var dbstore = _dataservice.GetDbObjectMapper();
+                var prms = new List<IntwentyParameter>();
+                prms.Add(new IntwentyParameter() { ParameterName = "@MetaCode", Value = "TESTAPP" });
+                prms.Add(new IntwentyParameter() { ParameterName = "@MetaType", Value = "APPLICATION" });
+                var tbl = dbstore.GetByExpression<InformationStatus>("(MetaCode=@MetaCode AND MetaType=@MetaType)", prms);
+
+
+
+                if (tbl == null)
+                    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned null");
+
+                if (tbl.Count == 0)
+                    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
 
             }
             catch (Exception ex)

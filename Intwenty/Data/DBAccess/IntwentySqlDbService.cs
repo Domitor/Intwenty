@@ -1,11 +1,11 @@
-using System.Data;
+using System;
 using Microsoft.Extensions.Options;
 using System.Text;
-using Intwenty.Data.DBAccess;
 using System.Collections.Generic;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
+
 
 namespace Intwenty.Data.DBAccess
 {
@@ -65,7 +65,7 @@ namespace Intwenty.Data.DBAccess
             DBClient.AddParameter(name, value);
         }
 
-        public void AddParameter(IntwentySqlParameter p)
+        public void AddParameter(IntwentyParameter p)
         {
             DBClient.AddParameter(p);
         }
@@ -135,6 +135,12 @@ namespace Intwenty.Data.DBAccess
         {
             return DBClient.GetAll<T>(use_current_connection);
         }
+
+        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        {
+            throw new NotImplementedException();
+        }
+
 
         public int Insert<T>(T model)
         {
