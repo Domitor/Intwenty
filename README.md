@@ -30,7 +30,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
 - Users/Developers can input metadata via a graphical UI, which allows for handling both the datamodel and the UI model. 
 - It comes as an RCL (Razor Clas Library) which can easily be included in any asp.net core web application.
 
-# An example
+# A simple example
 
 1. Get Intwenty from  github (SEE RELEASES) or use the nuget package
 2. If using the nuget package, include client dependencies
@@ -55,9 +55,33 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
                 "DefaultConnectionDBMS": "SQLite" // MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb
               }
             
+4. Inject services
+
+            Create a controller (or other class) where you inject the intwenty services needed.
+
+            //Example
+            public class MyIntwentyController : Controller
+            {
+        
+                    private readonly IIntwentyModelService _modelservice;
+                    private readonly IIntwentyDataService _dataservice;
+                    private readonly IntwentySettings _settings;
+                    private readonly IMemoryCache _cache;
+
+                    public MyIntwentyController(IIntwentyModelService modelservice, 
+                                                IIntwentyDataService dataservice, 
+                                                IOptions<IntwentySettings> settings,
+                                                IMemoryCache cache)
+                    {
+                        _modelservice = modelservice;
+                        _dataservice = dataservice;
+                        _settings = settings.Value;
+                        _cache = cache;
+                    }
+            }
 
 
-4. Create a DB Connection
+5. Create a DB Connection
 
             IIntwentyDbORM dbstore = null;
             if (_settings.IsNoSQL)
@@ -66,7 +90,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
                 dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
 
-5. Create a model for a new application
+6. Create a model for a new application
 
             //Only needed the first run, creates tables needed for storing the intwenty model
             _modelservice.CreateIntwentyDatabase();
@@ -104,8 +128,7 @@ Create metadata driven applications with java script and ASP.NET Core, a tool fo
                 //- Endpoint ~/Application/Save
             }
   
-# More Examples
-(https://github.com/Domitor/Intwenty/blob/master/Intwenty/Controllers/ExamplesController.cs)
+
 
 # Intentions
 1. Boost productivity
