@@ -405,13 +405,48 @@ namespace Intwenty.Data.DBAccess
 
             foreach (var p in parameters)
             {
-                var indexstart = expression.IndexOf(p.ParameterName);
-                if (indexstart < 0)
+                var indexparamstart = expression.IndexOf(p.ParameterName);
+                if (indexparamstart < 0)
                     throw new InvalidOperationException(string.Format("The parameter {0} must exist in the expression", p.ParameterName));
 
-                indexstart = expression.IndexOf(p.ParameterName.Substring(1));
-                if (indexstart < 0)
+                var counter = 0;
+                var check = false;
+                var startval = 0;
+                while (!check)
+                {
+                    counter += 1;
+                    if (counter > 10)
+                        check = true;
+
+                    var indexfldstart = expression.IndexOf(p.ParameterName.Substring(1), startval);
+                    if (indexfldstart < 0)
+                        continue;
+
+                    if (expression.Substring(indexfldstart - 1, 1) == "@")
+                        continue;
+
+                    var lastindex = expression.IndexOf(" ", indexfldstart + 1);
+                    var test = expression.IndexOf('=', indexfldstart + 1);
+                    if (test < lastindex)
+                        lastindex = test;
+                    test = expression.IndexOf('<', indexfldstart + 1);
+                    if (test < lastindex)
+                        lastindex = test;
+                    test = expression.IndexOf('>', indexfldstart + 1);
+                    if (test < lastindex)
+                        lastindex = test;
+
+                    expression = expression.Insert(indexfldstart, "'[");
+                    expression = expression.Insert(lastindex, "]'");
+
+                    startval = indexfldstart + p.ParameterName.Substring(1).Length - 1;
+                }
+
+                var indexfieldstart = expression.IndexOf(p.ParameterName.Substring(1));
+                if (indexfieldstart < 0)
                     throw new InvalidOperationException(string.Format("The field {0} must exist in the expression", p.ParameterName.Substring(1)));
+
+             
 
             }
 
