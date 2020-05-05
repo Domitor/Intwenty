@@ -268,97 +268,195 @@ namespace Intwenty
 
         public OperationResult Save(ClientStateInfo state)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-
-            var validation = Validate(model, state);
-            if (validation.IsSuccess)
+            try
             {
-                if (IsNoSql)
+                if (state.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+                var validation = Validate(model, state);
+                if (validation.IsSuccess)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    var result = t.Save(state);
-                    return result;
+                    if (IsNoSql)
+                    {
+                        var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                        var result = t.Save(state);
+                        return result;
+                    }
+                    else
+                    {
+                        var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                        var result = t.Save(state);
+                        return result;
+                    }
+
+
                 }
                 else
                 {
-                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    var result = t.Save(state);
-                    return result;
+                    return validation;
                 }
-
-       
             }
-            else
+            catch (Exception ex)
             {
-                return validation;
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("Save Intwenty application failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
             }
         }
 
 
         public OperationResult GetList(ListRetrivalArgs args)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+  
+            try
+            {
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetList(args);
+                if (args.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
+
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetList(args);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetList(args);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetList(args);
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetList(args) of Intwenty applications failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+                return result;
             }
-           
         }
 
         public OperationResult GetListByOwnerUser(ListRetrivalArgs args)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
 
-            if (IsNoSql)
+
+            try
             {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetListByOwnerUser(args);
+                if (args.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetListByOwnerUser(args);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetListByOwnerUser(args);
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetListByOwnerUser(args);
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetListByOwnerUser(args) of Intwenty applications failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+                return result;
             }
 
-        }
+}
 
         public OperationResult GetList(int applicationid)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            try
+            {
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetList();
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetList();
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetList();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetList();
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetList(applicationid) of Intwenty applications failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+                return result;
             }
 
         }
 
         public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            try
+            {
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetListByOwnerUser(owneruserid);
+                if (string.IsNullOrEmpty(owneruserid))
+                    throw new InvalidOperationException("Parameter owneruserid must not be empty");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetListByOwnerUser(owneruserid);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetListByOwnerUser(owneruserid);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetListByOwnerUser(owneruserid);
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "[]";
+                return result;
             }
 
         }
@@ -367,34 +465,70 @@ namespace Intwenty
 
         public OperationResult GetLatestVersionById(ClientStateInfo state)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            try
+            {
+                if (state.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter state must be a valid ApplicationId");
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersionById(state);
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetLatestVersionById(state);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetLatestVersionById(state);
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersionById(state);
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetLatestVersionById(state) of Intwenty application failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
             }
-          
         }
 
         public OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            try
+            {
+                if (state.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter state must be a valid ApplicationId");
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersionByOwnerUser(state);
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetLatestVersionByOwnerUser(state);
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetLatestVersionByOwnerUser(state);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersionByOwnerUser(state);
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
             }
 
         }
@@ -415,17 +549,36 @@ namespace Intwenty
 
         public OperationResult GetValueDomains(int applicationid)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            try
+            {
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetApplicationValueDomains();
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+                if (IsNoSql)
+                {
+                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetApplicationValueDomains();
+                }
+                else
+                {
+                    var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
+                    return t.GetApplicationValueDomains();
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetApplicationValueDomains();
+                var result = new OperationResult();
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage("USERERROR", string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
+                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.Data = "{}";
+                return result;
             }
 
         }
