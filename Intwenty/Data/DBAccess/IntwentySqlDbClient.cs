@@ -375,6 +375,19 @@ namespace Intwenty.Data.DBAccess
                 }
 
                 result.Rows.Add(row);
+
+                var dataid = row.Values.Find(p => p.DbName == "Id");
+                if (dataid != null)
+                    row.Id = dataid.GetAsInt().Value;
+
+                var dataversion = row.Values.Find(p => p.DbName == "Version");
+                if (dataversion != null)
+                    row.Version = dataversion.GetAsInt().Value;
+
+                var parentid = row.Values.Find(p => p.DbName == "ParentId");
+                if (parentid != null)
+                    row.ParentId = parentid.GetAsInt().Value;
+
             }
             return result;
         }
