@@ -53,9 +53,14 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetAll<T>();
         }
 
-        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        public List<T> GetByExpression<T>(IntwentyExpression expression) where T : new()
         {
             throw new NotImplementedException();
+        }
+
+        public bool DeleteIntwentyJsonObject(string collectionname, int id)
+        {
+            return DBClient.DeleteIntwentyJsonObject(collectionname, id);
         }
 
         public bool DeleteIntwentyJsonObject(string collectionname, int id, int version)
@@ -63,9 +68,19 @@ namespace Intwenty.Data.DBAccess
             return DBClient.DeleteIntwentyJsonObject(collectionname, id, version);
         }
 
+        public int InsertIntwentyJsonObject(string json, string collectionname, int id)
+        {
+            return DBClient.InsertIntwentyJsonObject(json, collectionname, id);
+        }
+
         public int InsertIntwentyJsonObject(string json, string collectionname, int id, int version)
         {
             return DBClient.InsertIntwentyJsonObject(json, collectionname,id, version);
+        }
+
+        public int UpdateIntwentyJsonObject(string json, string collectionname, int id)
+        {
+            return DBClient.UpdateIntwentyJsonObject(json, collectionname, id);
         }
 
         public int UpdateIntwentyJsonObject(string json, string collectionname, int id, int version)
@@ -73,9 +88,9 @@ namespace Intwenty.Data.DBAccess
             return DBClient.UpdateIntwentyJsonObject(json, collectionname, id, version);
         }
 
-        public int GetAutoIncrementalId(int applicationid = 0, string metatype = "INTERNAL", string metacode = "UNSPECIFIED", string properties = "")
+        public int GetAutoIncrementalId(int applicationid = 0, int parentid=0, string metatype = "INTERNAL", string metacode = "UNSPECIFIED", string properties = "")
         {
-            return DBClient.GetAutoIncrementalId(applicationid,metatype,metacode,properties);
+            return DBClient.GetAutoIncrementalId(applicationid, parentid, metatype, metacode,properties);
         }
 
         public int GetJsonDocumentCount(string collectionname)
@@ -83,16 +98,10 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetJsonDocumentCount(collectionname);
         }
 
-        /*
-        public int GetMaxIntValue(string collectionname, string expression, string fieldname)
-        {
-            return DBClient.GetMaxIntValue(collectionname, expression, fieldname);
-        }
-        */
 
-        public StringBuilder GetJsonArray(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields=null, int minrow = 0, int maxrow = 0)
+        public StringBuilder GetJsonArray(string collectionname, IntwentyExpression expression, List<IIntwentyDataColum> returnfields=null, int minrow = 0, int maxrow = 0)
         {
-            return DBClient.GetJsonArray(collectionname, filterexpression, returnfields, minrow, maxrow);
+            return DBClient.GetJsonArray(collectionname, expression, returnfields, minrow, maxrow);
         }
 
         public StringBuilder GetJsonArray(string collectionname, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0)
@@ -100,14 +109,19 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetJsonArray(collectionname, returnfields, minrow, maxrow);
         }
 
+        public StringBuilder GetIntwentyJsonObject(string collectionname, int id, List<IIntwentyDataColum> returnfields = null)
+        {
+            return DBClient.GetIntwentyJsonObject(collectionname, id, returnfields);
+        }
+
         public StringBuilder GetIntwentyJsonObject(string collectionname, int id, int version, List<IIntwentyDataColum> returnfields = null)
         {
             return DBClient.GetIntwentyJsonObject(collectionname, id, version, returnfields);
         }
 
-        public StringBuilder GetJsonObject(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields)
+        public StringBuilder GetJsonObject(string collectionname, IntwentyExpression expression, List<IIntwentyDataColum> returnfields)
         {
-            return DBClient.GetJsonObject(collectionname, filterexpression, returnfields);
+            return DBClient.GetJsonObject(collectionname, expression, returnfields);
         }
 
         public void CreateTable<T>(bool checkexisting = false)
@@ -152,24 +166,24 @@ namespace Intwenty.Data.DBAccess
             return DBClient.DeleteJsonDocument(collectionname, id);
         }
 
-        public bool UpdateJsonDocument(string collectionname, int id)
+        public int UpdateJsonDocument(string json, string collectionname, int id)
         {
-            return DBClient.UpdateJsonDocument(collectionname, id);
+            return DBClient.UpdateJsonDocument(json, collectionname, id);
         }
 
-        public bool UpdateJsonDocument(string collectionname, string id)
+        public int UpdateJsonDocument(string json, string collectionname, string id)
         {
-            return DBClient.UpdateJsonDocument(collectionname, id);
+            return DBClient.UpdateJsonDocument(json, collectionname, id);
         }
 
-        public bool InsertJsonDocument(string collectionname, int id)
+        public int InsertJsonDocument(string json, string collectionname, int id)
         {
-            return DBClient.InsertJsonDocument(collectionname, id);
+            return DBClient.InsertJsonDocument(json, collectionname, id);
         }
 
-        public bool InsertJsonDocument(string collectionname, string id)
+        public int InsertJsonDocument(string json, string collectionname, string id)
         {
-            return DBClient.InsertJsonDocument(collectionname, id);
+            return DBClient.InsertJsonDocument(json, collectionname, id);
         }
 
         public StringBuilder GetJsonObject(string collectionname, string id)
@@ -182,9 +196,9 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetJsonObject(collectionname, id);
         }
 
-        public ApplicationTable GetDataSet(string collectionname, string filterexpression = "")
+        public ApplicationTable GetDataSet(string collectionname, IntwentyExpression expression=null)
         {
-            return DBClient.GetDataSet(collectionname, filterexpression);
+            return DBClient.GetDataSet(collectionname, expression);
         }
 
       

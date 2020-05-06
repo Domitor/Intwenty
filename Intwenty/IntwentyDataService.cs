@@ -894,7 +894,10 @@ namespace Intwenty
                 }
 
             }
-            catch { }
+            catch (Exeption ex)
+            {
+                throw ex;
+            }
         }
 
        

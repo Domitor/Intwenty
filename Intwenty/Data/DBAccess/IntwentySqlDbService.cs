@@ -136,9 +136,9 @@ namespace Intwenty.Data.DBAccess
             return DBClient.GetAll<T>(use_current_connection);
         }
 
-        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        public List<T> GetByExpression<T>(IntwentyExpression expression) where T : new()
         {
-            throw new NotImplementedException();
+            return DBClient.GetByExpression<T>(expression);
         }
 
 

@@ -752,7 +752,7 @@ namespace Intwenty.Data.DBAccess
         {
             var parameters = new List<IntwentyParameter>();
             parameters.Add(new IntwentyParameter() { ParameterName = "@KEY1", Value = id });
-            var result = GetFromTableByType<T>(parameters, string.Empty, use_current_connection);
+            var result = GetFromTableByType<T>(parameters, null, use_current_connection);
             if (result.Count > 0)
                 return result[0];
             else
@@ -763,7 +763,7 @@ namespace Intwenty.Data.DBAccess
         {
             var parameters = new List<IntwentyParameter>();
             parameters.Add(new IntwentyParameter() { ParameterName = "@KEY1", Value = id });
-            var result = GetFromTableByType<T>(parameters, string.Empty, false);
+            var result = GetFromTableByType<T>(parameters, null, false);
             if (result.Count > 0)
                 return result[0];
             else
@@ -774,7 +774,7 @@ namespace Intwenty.Data.DBAccess
         { 
             var parameters = new List<IntwentyParameter>();
             parameters.Add(new IntwentyParameter() { ParameterName="@KEY1", Value=id });
-            var result = GetFromTableByType<T>(parameters, string.Empty, false);
+            var result = GetFromTableByType<T>(parameters, null, false);
             if (result.Count > 0)
                 return result[0];
             else
@@ -783,20 +783,20 @@ namespace Intwenty.Data.DBAccess
 
         public List<T> GetAll<T>() where T : new()
         {
-            return GetFromTableByType<T>(new List<IntwentyParameter>(), string.Empty, false);
+            return GetFromTableByType<T>(new List<IntwentyParameter>(), null, false);
         }
 
         public List<T> GetAll<T>(bool use_current_connection = false) where T : new()
         {
-            return GetFromTableByType<T>(new List<IntwentyParameter>(), string.Empty, use_current_connection);
+            return GetFromTableByType<T>(new List<IntwentyParameter>(), null, use_current_connection);
         }
 
-        public List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new()
+        public List<T> GetByExpression<T>(IntwentyExpression expression) where T : new()
         {
-            return GetFromTableByType<T>(parameters, expression, false);
+            return GetFromTableByType<T>(new List<IntwentyParameter>(), expression, false);
         }
 
-        private List<T> GetFromTableByType<T>(List<IntwentyParameter> parameters, string expression = "", bool use_current_connection = false) where T : new()
+        private List<T> GetFromTableByType<T>(List<IntwentyParameter> parameters, IntwentyExpression expression=null, bool use_current_connection = false) where T : new()
         {
 
 
@@ -810,7 +810,7 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
-            if (string.IsNullOrEmpty(expression))
+            if (expression==null)
             {
                 DbTablePrimaryKey pk = null;
                 var annot_pk = workingtype.GetCustomAttributes(typeof(DbTablePrimaryKey), false);
@@ -847,13 +847,13 @@ namespace Intwenty.Data.DBAccess
             }
             else
             {
-                wherestmt = " WHERE";
+                parameters = expression.GetParameters();
                 if (parameters == null)
                     throw new InvalidOperationException(string.Format("Can't query {0} with expression without parameters.", tname));
                 if (parameters.Count < 1)
                     throw new InvalidOperationException(string.Format("Can't query {0} with expression without parameters.", tname));
 
-                wherestmt += " " + expression;
+                wherestmt = expression.GetSqlWhere();
 
             }
 

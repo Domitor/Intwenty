@@ -35,7 +35,7 @@ namespace Intwenty.Engine
 
         protected List<DBMSCommandMap> Commands { get; set; }
 
-       
+        protected static List<OperationResult> Cache { get; set; }
 
 
         protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
@@ -47,6 +47,8 @@ namespace Intwenty.Engine
             ApplicationSaveTimeStamp = DateTime.Now;
             DataTypes = DBHelpers.GetDataTypeMap();
             Commands = DBHelpers.GetDBMSCommandMap();
+            if (Cache == null)
+                Cache = new List<OperationResult>();
         }
 
         public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
@@ -148,6 +150,11 @@ namespace Intwenty.Engine
 
             try
             {
+
+                var cachedresult = Cache.Find(p => p.Id == state.Id);
+                if (cachedresult != null)
+                    return cachedresult;
+
                 var columns = new List<IIntwentyDataColum>();
                 columns.Add(new IntwentyDataColumn() { ColumnName = "Id", DataType = DatabaseModelItem.DataTypeInt });
                 columns.Add(new IntwentyDataColumn() { ColumnName = "Version", DataType = DatabaseModelItem.DataTypeInt });
@@ -247,6 +254,9 @@ namespace Intwenty.Engine
 
                 result.Data = jsonresult.ToString();
 
+                Cache.Add(result);
+              
+
             }
             catch (Exception ex)
             {
@@ -276,6 +286,9 @@ namespace Intwenty.Engine
 
             try
             {
+                if (state.Id > 0)
+                    Cache.RemoveAll(p => p.Id == state.Id);
+
                 //CONNECT MODEL TO DATA
                 state.InferModel(Model);
 
@@ -346,6 +359,8 @@ namespace Intwenty.Engine
 
             try
             {
+                Cache.RemoveAll(p => p.Id == state.Id);
+
                 SqlClient.Open();
 
 
@@ -406,6 +421,7 @@ namespace Intwenty.Engine
 
             try
             {
+                Cache.RemoveAll(p => p.Id == id);
 
                 SqlClient.Open();
 
@@ -1092,9 +1108,14 @@ namespace Intwenty.Engine
 
         private int GetNewSystemID(string metatype, string metacode, ClientStateInfo state)
         {
-
-            var model = new SystemID() { ApplicationId=this.Model.Application.Id, GeneratedDate=DateTime.Now, MetaCode =metacode, MetaType = metatype, Properties= state.Properties };
+            var model = new SystemID() { ApplicationId = this.Model.Application.Id, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId=0 };
+            if (metatype == DatabaseModelItem.MetaTypeDataTable)
+            {
+                model.ParentId = state.Id;
+            }
+              
             SqlClient.Insert(model, true);
+
             return model.Id;
         }
 
@@ -1651,6 +1672,8 @@ namespace Intwenty.Engine
                 SqlDataTypeMap dt;
                 if (c.DataType == DatabaseModelItem.DataTypeString)
                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Short);
+                else if (c.DataType == DatabaseModelItem.DataTypeText)
+                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == SqlClient.DbEngine && p.Length == StringLength.Long);
                 else
                     dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == SqlClient.DbEngine);
 

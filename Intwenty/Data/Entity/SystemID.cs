@@ -3,12 +3,15 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
+    [DbTableIndex("sysid_idx_pid", false, "ParentId")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysdata_SystemId")]
     public class SystemID
     {
         [AutoIncrement]
         public int Id { get; set; }
+
+        public int ParentId { get; set; }
 
         public int ApplicationId { get; set; }
 

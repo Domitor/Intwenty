@@ -120,6 +120,7 @@ namespace Intwenty.Controllers
             res.Add(Test13GetAllValueDomains());
             res.Add(Test14GetDataSet());
             res.Add(Test15ORMGetByExpression());
+            res.Add(Test16CachePerformance());
 
             return new JsonResult(res);
 
@@ -308,8 +309,10 @@ namespace Intwenty.Controllers
                 else
                     dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
-
-                dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = false });
+                if (_settings.IsNoSQL)
+                    dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
+                else
+                    dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = false });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
@@ -612,7 +615,7 @@ namespace Intwenty.Controllers
             OperationResult result = new OperationResult(true, "Get informationstatus dataset <InformationStatus>");
             try
             {
-
+                var start = DateTime.Now;
                 ApplicationTable tbl = null;
                 if (_settings.IsNoSQL)
                 {
@@ -634,6 +637,8 @@ namespace Intwenty.Controllers
                 if (tbl.Rows.Count == 0)
                     throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned 0 rows");
 
+                _dataservice.LogInfo(string.Format("Performance GetDataSet: {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
             }
             catch (Exception ex)
             {
@@ -653,7 +658,9 @@ namespace Intwenty.Controllers
                 var prms = new List<IntwentyParameter>();
                 prms.Add(new IntwentyParameter() { ParameterName = "@MetaCode", Value = "TESTAPP" });
                 prms.Add(new IntwentyParameter() { ParameterName = "@MetaType", Value = "APPLICATION" });
-                var tbl = dbstore.GetByExpression<InformationStatus>("(MetaCode=@MetaCode AND MetaType=@MetaType)", prms);
+                prms.Add(new IntwentyParameter() { ParameterName = "@OwnedBy", Value = "OTHERUSER2" });
+                var expression = new IntwentyExpression("(MetaCode = @MetaCode AND MetaType  = @MetaType) OR OwnedBy =@OwnedBy", prms);
+                var tbl = dbstore.GetByExpression<InformationStatus>(expression);
 
 
 
@@ -662,6 +669,46 @@ namespace Intwenty.Controllers
 
                 if (tbl.Count == 0)
                     throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test16CachePerformance()
+        {
+            OperationResult result = new OperationResult(true, "Test logging and Intwenty application cache.");
+            try
+            {
+                var start = DateTime.Now;
+
+                var state = new ClientStateInfo();
+                state.ApplicationId = 10000;
+                state.OwnerUserId = "TESTUSER";
+                var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
+                if (!getresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
+
+                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0}", DateTime.Now.Subtract(start).TotalMilliseconds));
+
+                var newstate = new  ClientStateInfo();
+                newstate.Id = getresult.Id;
+                newstate.ApplicationId = 10000;
+
+                for (var i = 0; i < 10; i++)
+                {
+                     start = DateTime.Now;
+                     getresult = _dataservice.GetLatestVersionById(newstate);
+                    if (!getresult.IsSuccess)
+                        throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
+
+                    _dataservice.LogInfo(string.Format("Performance GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
+                }
 
             }
             catch (Exception ex)

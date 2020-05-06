@@ -31,7 +31,7 @@ namespace Intwenty.Data.DBAccess
         /// Expression example: (((Field1=@Field1) AND (Field2<>@Field2)) OR (Field3=@Field3))
         /// </summary>
         /// <returns>A list of the type T</returns>
-        List<T> GetByExpression<T>(string expression, List<IntwentyParameter> parameters) where T : new();
+        List<T> GetByExpression<T>(IntwentyExpression expression) where T : new();
         int Insert<T>(T model);
         int Update<T>(T model);
         int Delete<T>(T model);
@@ -44,9 +44,15 @@ namespace Intwenty.Data.DBAccess
 
         public void DropCollection(string collectionname);
 
+        public bool DeleteIntwentyJsonObject(string collectionname, int id);
+
         public bool DeleteIntwentyJsonObject(string collectionname, int id, int version);
 
+        public int InsertIntwentyJsonObject(string json, string collectionname, int id);
+
         public int InsertIntwentyJsonObject(string json, string collectionname, int id, int version);
+
+        public int UpdateIntwentyJsonObject(string json, string collectionname, int id);
 
         public int UpdateIntwentyJsonObject(string json, string collectionname, int id, int version);
 
@@ -54,17 +60,17 @@ namespace Intwenty.Data.DBAccess
 
         public bool DeleteJsonDocument(string collectionname, string id);
 
-        public bool UpdateJsonDocument(string collectionname, int id);
+        public int UpdateJsonDocument(string json, string collectionname, int id);
 
-        public bool UpdateJsonDocument(string collectionname, string id);
+        public int UpdateJsonDocument(string json, string collectionname, string id);
 
-        public bool InsertJsonDocument(string collectionname, int id);
+        public int InsertJsonDocument(string json, string collectionname, int id);
 
-        public bool InsertJsonDocument(string collectionname, string id);
+        public int InsertJsonDocument(string json, string collectionname, string id);
 
 
 
-        public int GetAutoIncrementalId(int applicationid=0, string metatype="INTERNAL", string metacode="UNSPECIFIED", string properties="");
+        public int GetAutoIncrementalId(int applicationid=0, int parentid=0, string metatype="INTERNAL", string metacode="UNSPECIFIED", string properties="");
 
         /// <summary>
         /// Counts the documents in the collection
@@ -74,7 +80,9 @@ namespace Intwenty.Data.DBAccess
 
         StringBuilder GetJsonArray(string collectionname, List<IIntwentyDataColum> returnfields=null, int minrow = 0, int maxrow = 0);
 
-        StringBuilder GetJsonArray(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0);
+        StringBuilder GetJsonArray(string collectionname, IntwentyExpression expression, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0);
+
+        StringBuilder GetIntwentyJsonObject(string collectionname, int id, List<IIntwentyDataColum> returnfields = null);
 
         StringBuilder GetIntwentyJsonObject(string collectionname, int id, int version, List<IIntwentyDataColum> returnfields = null);
 
@@ -82,9 +90,9 @@ namespace Intwenty.Data.DBAccess
 
         StringBuilder GetJsonObject(string collectionname, int id);
 
-        StringBuilder GetJsonObject(string collectionname, string filterexpression, List<IIntwentyDataColum> returnfields = null);
+        StringBuilder GetJsonObject(string collectionname, IntwentyExpression expression, List<IIntwentyDataColum> returnfields = null);
 
-        ApplicationTable GetDataSet(string collectionname, string filterexpression = "");
+        ApplicationTable GetDataSet(string collectionname, IntwentyExpression expression=null);
     }
 
 
