@@ -2,20 +2,13 @@
 
 
 # Intwenty
-Create metadata driven applications with java script and ASP.NET Core, a tool for lazy developers or users who wants to build quick web applications with minimal coding
-
-# Why
-- To minimize coding by reusing the same code with different sets of metadata.
-- To quickly produce web applications.
-- To allow for hot swapping UI and data model without recompile or publish.
-
-# Intends to
-1. Let the user or developer describe applications, user interface, data structures, and static data by inputing metadata.
-2. Let Intwenty generate database and database objects based on metadata.
-3. Let Intwenty generate UI based on metadata.
-4. Let Intwenty generate standard logic such as user input validation based on metadata.
-5. Let Intwenty generate standard logic for I/O operations against the database based on metadata.
-6. Let the user easily override all of the above when necessary.
+Create metadata driven applications with java script and ASP.NET Core. 
+- Define your metamodel and work seamless against six supported databases. (See list below)
+- Define metadata for your datamodel and let Intwenty generate your database structure along with  your needs for storing and retriving information.
+- Define metadata for your UI model and let intwenty generate your UI.
+- It can be seen as an ORM for dynamic data where the structure is described in meta data rather than strongly typed objects
+- It implements Asp.Net Core Identity, without any need of entity framework.
+- Can also be used as a tradiotional ORM with strongly typed objects.
 
 # Features
 - Includes admin UI for inputing application meta data. (Describe UI and datastructure).
