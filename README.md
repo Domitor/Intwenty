@@ -10,18 +10,24 @@ Create metadata driven applications with java script and ASP.NET Core.
 - It implements Asp.Net Core Identity, without any need of entity framework.
 - Can also be used as a tradiotional ORM with strongly typed objects.
 
-# Features
-- Includes admin UI for inputing application meta data. (Describe UI and datastructure).
-- Supports four sql databases and two nosql stores, se list below.
-- Use Asp.Net Core Identity with all supported dbms.
-- Forget about entity framework code first, database first, migrations etc. With intwenty it's possible to change both the UI and datamodel without recompile or even publish.
-- Easy import and export of metamodels which makes it possible for users to share models.
-- Generates documentation. 
+# How to ?
 
-# How
-- Intwenty does not work with strongly typed models. Instead it performs work both on the data and UI level based on the information in the metamodel.
-- Users/Developers can input metadata via a graphical UI, which allows for handling both the datamodel and the UI model. 
-- It comes as an RCL (Razor Clas Library) which can easily be included in any asp.net core web application.
+| Task | Solution |
+| ------------- | ------------- |
+| Set up Intwenty against LiteDb | -  |
+| Set up Intwenty against MariaDb | -  |
+| Set up Intwenty against MongoDb | -  |
+| Set up Intwenty against MS SQL Server | -  |
+| Set up Intwenty against Postgres | -  |
+| Run an Intwenty self test | -  |
+| Create an Intwenty Application |  -  |
+| Save an Intwenty Application |  -  |
+| Use Intwenty as a tradional ORM | -  |
+| Accessing the Admin UI | -  |
+| Sharing your model | -  |
+| Import a model | -  |
+| Generate model documentation | -  |
+
 
 # A simple example
 
