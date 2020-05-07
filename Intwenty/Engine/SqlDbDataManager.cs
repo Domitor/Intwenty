@@ -1355,7 +1355,7 @@ namespace Intwenty.Engine
         private int CreateVersionRecord(ClientStateInfo state)
         {
             int newversion = 0;
-            String sql = String.Empty;
+            string sql = String.Empty;
             sql = "select max(version) from " + this.Model.Application.VersioningTableName;
             sql += " where ID=" + Convert.ToString(state.Id);
             sql += " and MetaCode='" + this.Model.Application.MetaCode + "' and MetaType='APPLICATION'";

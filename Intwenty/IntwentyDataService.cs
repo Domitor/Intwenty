@@ -956,7 +956,7 @@ namespace Intwenty
                     var getdatecmd = DBHelpers.GetDBMSCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
                     var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                     client.Open();
-                    client.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
+                    client.CreateCommand("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
                     client.AddParameter("@Verbosity", verbosity);
                     client.AddParameter("@Message", message);
                     client.AddParameter("@AppMetaCode", appmetacode);

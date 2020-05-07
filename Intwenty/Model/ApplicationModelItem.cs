@@ -51,17 +51,6 @@ namespace Intwenty.Model
 
         public bool UseVersioning { get; set; }
 
-        [Obsolete]
-        public bool UseApplicationVersioning { get; set; }
-
-        [Obsolete]
-        public bool UseApplicationValueVersioning { get; set; }
-
-        [Obsolete]
-        public bool UseRowVersioning { get; set; }
-
-        [Obsolete]
-        public bool UseRowValueVersioning { get; set; }
 
         public MenuModelItem MainMenuItem { get; set; }
 

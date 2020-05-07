@@ -30,7 +30,7 @@
                     {
                         @await Html.PartialAsync("_IntwentyAppMenu")
                     }
-                    @if (User.IsInRole("Administrator"))
+                    @if (User.IsInRole("ADMINISTRATOR"))
                     {
                         @await Html.PartialAsync("_IntwentyAdminMenu")
                     }

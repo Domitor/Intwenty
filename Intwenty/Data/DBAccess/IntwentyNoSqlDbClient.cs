@@ -810,6 +810,8 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetJsonArray(string collectionname, IntwentyExpression expression, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0)
         {
             var jsonresult = new StringBuilder("[");
+            var sep = "";
+            var rindex = 0;
 
             if (DbEngine == DBMS.MongoDb)
             {
@@ -822,7 +824,6 @@ namespace Intwenty.Data.DBAccess
                     result = MongoDbClient.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p => true).Project(projection).ToList();
 
              
-                var rindex = 0;
                 foreach (var doc in result)
                 {
                     if (!expression.ComputeExpression(doc))
@@ -831,18 +832,18 @@ namespace Intwenty.Data.DBAccess
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {
-                        if (!(minrow <= rindex && maxrow > rindex))
+                        if (rindex <= minrow)
                             continue;
+                        if (rindex > maxrow)
+                            break;
                     }
 
                     if (doc.Contains("_id"))
                         doc.Remove("_id");
 
 
-                    if (rindex == 1)
-                        jsonresult.Append(doc.ToJson(jsonWriterSettings));
-                    else
-                        jsonresult.Append("," + doc.ToJson(jsonWriterSettings));
+                    jsonresult.Append(sep + doc.ToJson(jsonWriterSettings));
+                    sep = ",";
 
                 }
               
@@ -853,17 +854,20 @@ namespace Intwenty.Data.DBAccess
             if (DbEngine == DBMS.LiteDb)
             {
                 var result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(p => true).ToList();
-                var rindex = 0;
+
                 foreach (var doc in result)
                 {
+
                     if (!expression.ComputeExpression(doc))
                         continue;
 
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {
-                        if (!(minrow <= rindex && maxrow > rindex))
+                        if (rindex <= minrow)
                             continue;
+                        if (rindex > maxrow)
+                            break;
                     }
 
                     if (doc.ContainsKey("_id"))
@@ -879,10 +883,8 @@ namespace Intwenty.Data.DBAccess
                     }
 
 
-                    if (rindex == 1)
-                        jsonresult.Append(doc.ToString());
-                    else
-                        jsonresult.Append("," + doc.ToString());
+                    jsonresult.Append(sep + doc.ToString());
+                    sep = ",";
 
                 }
 
@@ -895,6 +897,8 @@ namespace Intwenty.Data.DBAccess
         public StringBuilder GetJsonArray(string collectionname, List<IIntwentyDataColum> returnfields = null, int minrow = 0, int maxrow = 0)
         {
             var jsonresult = new StringBuilder("[");
+            var sep = "";
+            var rindex = 0;
 
             if (DbEngine == DBMS.MongoDb)
             {
@@ -906,24 +910,23 @@ namespace Intwenty.Data.DBAccess
                 if (!string.IsNullOrEmpty(projection))
                     result = MongoDbClient.GetCollection<MongoDB.Bson.BsonDocument>(collectionname).Find(p => true).Project(projection).ToList();
 
-                var rindex = 0;
                 foreach (var doc in result)
                 {
-
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {
-                        if (!(minrow <= rindex && maxrow > rindex))
+                        if (rindex <= minrow)
                             continue;
+                        if (rindex > maxrow)
+                            break;
                     }
 
                     if (doc.Contains("_id"))
                         doc.Remove("_id");
 
-                    if (rindex==1)
-                        jsonresult.Append(doc.ToJson(jsonWriterSettings));
-                    else
-                        jsonresult.Append("," + doc.ToJson(jsonWriterSettings));
+                 
+                   jsonresult.Append(sep + doc.ToJson(jsonWriterSettings));
+                   sep = ",";
                 }
               
 
@@ -932,15 +935,17 @@ namespace Intwenty.Data.DBAccess
             if (DbEngine == DBMS.LiteDb)
             {
                 var result = LiteDbClient.GetCollection<LiteDB.BsonDocument>(collectionname).Find(f => true).ToList();
-                var rindex = 0;
+
                 foreach (var doc in result)
                 {
-                  
+
                     rindex += 1;
                     if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                     {
-                        if (!(minrow <= rindex && maxrow > rindex))
+                        if (rindex <= minrow)
                             continue;
+                        if (rindex > maxrow)
+                            break;
                     }
 
                     if (doc.ContainsKey("_id"))
@@ -955,10 +960,9 @@ namespace Intwenty.Data.DBAccess
                         }
                     }
 
-                    if (rindex == 1)
-                        jsonresult.Append(doc.ToString());
-                    else
-                        jsonresult.Append("," + doc.ToString());
+                    jsonresult.Append(sep + doc.ToString());
+                    sep = ",";
+
                 }
 
             }

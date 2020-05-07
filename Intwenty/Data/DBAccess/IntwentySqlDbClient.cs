@@ -409,10 +409,12 @@ namespace Intwenty.Data.DBAccess
             var sb = new StringBuilder();
 
             var ds = new DataSet();
+            var rindex = 0;
+            var sep1 = "";
+          
+
             FillDataset(ds, "NONE");
 
-            var firstrow = true;
-            var rindex = -1;
             sb.Append("[");
             foreach (DataRow r in ds.Tables[0].Rows)
             {
@@ -420,36 +422,24 @@ namespace Intwenty.Data.DBAccess
                 rindex += 1;
                 if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                 {
-                    if (!(minrow <= rindex && maxrow > rindex))
+                    if (rindex <= minrow)
                         continue;
+                    if (rindex > maxrow)
+                        break;
                 }
 
-                if (firstrow)
-                {
-                    firstrow = false;
-                    sb.Append("{");
-                }
-                else
-                {
-                    sb.Append(",{");
-                }
+                sb.Append(sep1 + "{");
+                sep1 = ",";
 
-                var firstcol = true;
+                var sep2 = "";
                 foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
                     var val = DBHelpers.GetJSONValue(r, dc);
                     if (string.IsNullOrEmpty(val))
                         continue;
 
-                    if (firstcol)
-                    {
-                        firstcol = false;
-                        sb.Append(val);
-                    }
-                    else
-                    {
-                        sb.Append("," + val);
-                    }
+                    sb.Append(sep2 + val);
+                    sep2 = ",";
                 }
 
                 sb.Append("}");
@@ -469,33 +459,31 @@ namespace Intwenty.Data.DBAccess
 
             var sb = new StringBuilder();
             var ds = new DataSet();
+            var rindex = 0;
+            var sep1 = "";
+           
+
             FillDataset(ds, "NONE");
 
-
-            var firstrow = true;
-            var rindex = -1;
             sb.Append("[");
             foreach (DataRow r in ds.Tables[0].Rows)
             {
 
+                
                 rindex += 1;
                 if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                 {
-                    if (!(minrow <= rindex && maxrow > rindex))
+                    if (rindex <= minrow)
                         continue;
+                    if (rindex > maxrow)
+                        break;
                 }
 
-                if (firstrow)
-                {
-                    firstrow = false;
-                    sb.Append("{");
-                }
-                else
-                {
-                    sb.Append(",{");
-                }
 
-                var firstcol = true;
+                sb.Append(sep1 + "{");
+                sep1 = ",";
+
+                var sep2 = "";
                 foreach (DataColumn dc in ds.Tables[0].Columns)
                 {
                     var icol = columns.Find(p => p.ColumnName.ToLower() == dc.ColumnName.ToLower());
@@ -506,15 +494,8 @@ namespace Intwenty.Data.DBAccess
                     if (string.IsNullOrEmpty(val))
                         continue;
 
-                    if (firstcol)
-                    {
-                        firstcol = false;
-                        sb.Append(val);
-                    }
-                    else
-                    {
-                        sb.Append("," + val);
-                    }
+                    sb.Append(sep2 + val);
+                    sep2 = ",";
                 }
 
                 sb.Append("}");
@@ -530,15 +511,15 @@ namespace Intwenty.Data.DBAccess
         {
             var sb = new StringBuilder();
             var ds = new DataSet();
-            FillDataset(ds, "NONE");
+            var sep = "";
 
+            FillDataset(ds, "NONE");
+            
             if (ds.Tables[0].Rows.Count == 0)
             {
                 sb.Append("{}");
                 return sb;
             }
-
-            var firstcol = true;
 
             sb.Append("{");
 
@@ -548,15 +529,9 @@ namespace Intwenty.Data.DBAccess
                 if (string.IsNullOrEmpty(val))
                     continue;
 
-                if (firstcol)
-                {
-                    sb.Append(val);
-                    firstcol = false;
-                }
-                else
-                {
-                    sb.Append("," + val);
-                }
+                sb.Append(sep + val);
+                sep = ",";
+
             }
 
             sb.Append("}");
@@ -573,6 +548,8 @@ namespace Intwenty.Data.DBAccess
 
             var sb = new StringBuilder();
             var ds = new DataSet();
+            var sep = "";
+
             FillDataset(ds, "NONE");
 
             if (ds.Tables[0].Rows.Count == 0)
@@ -581,7 +558,6 @@ namespace Intwenty.Data.DBAccess
                 return sb;
             }
 
-            var firstcol = true;
 
             sb.Append("{");
 
@@ -595,15 +571,8 @@ namespace Intwenty.Data.DBAccess
                 if (string.IsNullOrEmpty(val))
                     continue;
 
-                if (firstcol)
-                {
-                    sb.Append(val);
-                    firstcol = false;
-                }
-                else
-                {
-                    sb.Append("," + val);
-                }
+                sb.Append(sep + val);
+                sep = ",";
             }
 
             sb.Append("}");

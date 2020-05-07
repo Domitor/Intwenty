@@ -337,10 +337,8 @@ namespace Intwenty.Controllers
                 else
                     dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
-                if (_settings.IsNoSQL)
-                    dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
-                else
-                    dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = false });
+
+                dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
@@ -569,6 +567,12 @@ namespace Intwenty.Controllers
                 if (Convert.ToDouble(checkupdate.GetAsDecimal()) != 444.55)
                     throw new InvalidOperationException("Updated application decimal double value was not persisted");
 
+                if (_modelservice.GetApplicationModels().Exists(p => p.Application.Id == 10000 && p.Application.UseVersioning))
+                {
+                    if (newstate.Version < 2)
+                        throw new InvalidOperationException("Updated application did not recieve a new version id");
+                }
+
             }
             catch (Exception ex)
             {
@@ -767,7 +771,6 @@ namespace Intwenty.Controllers
                 args.ApplicationId = 10000;
                 args.BatchSize = 20;
 
-                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0}", DateTime.Now.Subtract(start).TotalMilliseconds));
                 var getlistresult = _dataservice.GetList(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
