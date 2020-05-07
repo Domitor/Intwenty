@@ -14,6 +14,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 
 | Task |
 | ------------- |
+|  <a href="https://github.com/Domitor/Intwenty/wiki/How-to-get-started">Quick start</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-LiteDb">Set up Intwenty against LiteDb</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MariaDb">Set up Intwenty against MariaDB or MySql</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MongoDb">Set up Intwenty against MongoDb</a> |  
