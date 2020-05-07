@@ -16,6 +16,7 @@ using MongoDB.Bson.Serialization;
 using Intwenty.Data.Identity;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson.IO;
+using System.Collections.Concurrent;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -30,7 +31,7 @@ namespace Intwenty.Data.DBAccess
 
         private static DataTable EvalDT { get; set; }
 
-
+        private static ConcurrentDictionary<string, object> Cache;
 
         //MongoDb Intwenty Class Maps
         private static BsonClassMap<IntwentyUser> IntwentyUserMongoDbMap { get; set; }
@@ -46,12 +47,6 @@ namespace Intwenty.Data.DBAccess
         private static BsonClassMap<UserInterfaceItem> UserInterfaceItemMongoDbMap { get; set; }
         private static BsonClassMap<ValueDomainItem> ValueDomainItemMongoDbMap { get; set; }
 
-
-        public IntwentyNoSqlDbClient()
-        {
-            ConnectionString = string.Empty;
-            DbEngine = DBMS.MongoDb;
-        }
 
         public IntwentyNoSqlDbClient(IntwentySettings settings)
         {
@@ -71,6 +66,9 @@ namespace Intwenty.Data.DBAccess
             DatabaseName = databasename;
             if (DbEngine != DBMS.MongoDb && DbEngine != DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentyNoSqlDbClient configured with wrong DBMS setting");
+
+            if (Cache == null)
+                Cache = new ConcurrentDictionary<string, object>();
 
             if (DbEngine == DBMS.LiteDb && LiteDbClient == null)
             {
@@ -259,6 +257,8 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tablename), out rm);
 
             string stringkey = "";
             int intkey = -1;
@@ -373,10 +373,20 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
+            object objectresult;
+            if (Cache.TryGetValue(string.Format("ALL_{0}", tablename), out objectresult))
+            {
+                return (List<T>)objectresult;
+            }
+
             if (DbEngine == DBMS.MongoDb)
             {
-                var result = MongoDbClient.GetCollection<T>(tablename);
-                return result.AsQueryable().ToList();
+                var result = MongoDbClient.GetCollection<T>(tablename).AsQueryable().ToList();
+                if (result.Count < 50000)
+                {
+                    Cache.TryAdd(string.Format("ALL_{0}", tablename), result);
+                }
+                return result;
 
             }
 
@@ -384,6 +394,10 @@ namespace Intwenty.Data.DBAccess
             {
                 //var result = LiteDbClient.GetCollection<T>(tablename).Find(p => true).ToList();
                 var result = LiteDbClient.GetCollection<T>(tablename).FindAll().ToList();
+                if (result.Count < 50000)
+                {
+                    Cache.TryAdd(string.Format("ALL_{0}", tablename), result);
+                }
                 return result;
             }
 
@@ -433,6 +447,9 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tablename), out rm);
+
             var newid = 0;
             var memberproperties = workingtype.GetProperties();
             foreach (var m in memberproperties)
@@ -470,6 +487,8 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tablename = ((DbTableName)annot_tablename[0]).Name;
 
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tablename), out rm);
 
             string stringkey = "";
             int intkey = -1;

@@ -12,6 +12,10 @@ using System.Collections.Generic;
 using Intwenty.Engine;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data.DBAccess.Helpers;
+using System.Linq;
+using Microsoft.AspNetCore.Identity;
+using Intwenty.Data.Identity;
+using System.Security.Claims;
 
 namespace Intwenty.Controllers
 {
@@ -24,16 +28,25 @@ namespace Intwenty.Controllers
         private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
         private readonly IMemoryCache _cache;
+        private readonly UserManager<IntwentyUser> _usermanager;
+        private readonly SignInManager<IntwentyUser> _signinmanager;
+        private readonly RoleManager<IntwentyRole> _rolemanager;
 
         public SystemTestController(IIntwentyModelService modelservice, 
                                     IIntwentyDataService dataservice, 
                                     IOptions<IntwentySettings> settings,
-                                    IMemoryCache cache)
+                                    IMemoryCache cache,
+                                    UserManager<IntwentyUser> usermgr,
+                                    SignInManager<IntwentyUser> signinmgr,
+                                    RoleManager<IntwentyRole> rolemgr)
         {
             _modelservice = modelservice;
             _dataservice = dataservice;
             _settings = settings.Value;
             _cache = cache;
+            _usermanager = usermgr;
+            _signinmanager = signinmgr;
+            _rolemanager = rolemgr;
         }
 
         public IActionResult RunTests()
@@ -121,6 +134,9 @@ namespace Intwenty.Controllers
             res.Add(Test14GetDataSet());
             res.Add(Test15ORMGetByExpression());
             res.Add(Test16CachePerformance());
+            res.Add(Test17GetLists());
+            res.Add(Test18TestIdentity());
+
 
             return new JsonResult(res);
 
@@ -129,6 +145,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test1ORMCreateTable()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.CreateTable<T>");
             try
             {
@@ -141,6 +158,8 @@ namespace Intwenty.Controllers
 
                 dbstore.CreateTable<TestDataAutoInc>(true);
 
+                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM.CreateTable {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
             }
             catch (Exception ex)
             {
@@ -152,7 +171,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test2ORMInsert()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.Insert(T) - 2 Records using auto increment");
+            var start = DateTime.Now;
+            OperationResult result = new OperationResult(true, "IIntwentyDbORM.Insert(T) - 100 Records using auto increment");
             try
             {
 
@@ -162,14 +182,18 @@ namespace Intwenty.Controllers
                 else
                     dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
-                var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777, DecimalValue = 666.66M, Description = "Test data record/document 1", Header = "Test2ORMInsertTable", FloatValue = 666.66F };
-                dbstore.Insert(t);
-                t = new TestDataAutoInc() { BoolValue = false, IntValue = 888, DecimalValue = 888.88M, Description = "Test data record/document 2", Header = "Test2ORMInsertTable", FloatValue = 888.88F };
-                dbstore.Insert(t);
+                for (int i = 0; i < 100; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777+i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
+                    dbstore.Insert(t);
+
+                }
+
+                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.Insert() 100 Records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 var check = dbstore.GetAll<TestDataAutoInc>();
-                if (check.Count < 2)
-                    throw new InvalidOperationException("Could not retrieve inserted records with IIntwentyDbORM.GetAll<T>");
+                if (check.Count != 100)
+                    throw new InvalidOperationException("Could not retrieve 100 inserted records with IIntwentyDbORM.GetAll<T>");
 
                 if (check.Exists(p=> p.Id < 1))
                     throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.Insert<T>");
@@ -187,6 +211,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test3ORMUpdate()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Update(T) - Retrieve last record and update");
             try
             {
@@ -199,13 +224,18 @@ namespace Intwenty.Controllers
 
 
                 var check = dbstore.GetAll<TestDataAutoInc>();
-                if (check.Count < 2)
+                if (check.Count < 100)
                     throw new InvalidOperationException("Test could not be performed beacause of dependency to previous test.");
 
+                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.GetAll() 100 Records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
                 var last = check[check.Count - 1];
+                start = DateTime.Now;
                 var checkone = dbstore.GetOne<TestDataAutoInc>(last.Id);
                 if (checkone == null)
                     throw new InvalidOperationException("Could not retrieve last inserted record with IIntwentyDbORM.GetOne<T>");
+
+                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.GetOne() {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 last.Header = "Test3ORMUpdateTable";
                 last.IntValue = 555;
@@ -255,14 +285,12 @@ namespace Intwenty.Controllers
 
 
                 var check = dbstore.GetAll<TestDataAutoInc>();
-                if (check.Count < 2)
+                if (check.Count < 100)
                     throw new InvalidOperationException("Test could not be performed beacause of dependency to previous test.");
 
                 foreach (var t in check)
                 {
-
                     dbstore.Delete(t);
-
                 }
 
                 check = dbstore.GetAll<TestDataAutoInc>();
@@ -358,17 +386,22 @@ namespace Intwenty.Controllers
 
         private OperationResult Test7CreateIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, "Create 5 intwenty application based on the created test model");
+            var start = DateTime.Now;
+            OperationResult result = new OperationResult(true, "Create 100 intwenty application based on the created test model");
             try
             {
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     var state = new ClientStateInfo();
                     state.ApplicationId = 10000;
                     state.UserId = "TESTUSER";
                     state.OwnerUserId = "TESTUSER";
-                    if (i > 2)
+                    if (i > 25)
                         state.OwnerUserId = "OTHERUSER";
+                    if (i > 50)
+                        state.OwnerUserId = "OTHERUSER1";
+                    if (i > 75)
+                        state.OwnerUserId = "OTHERUSER2";
 
                     state.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
                     state.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
@@ -392,6 +425,8 @@ namespace Intwenty.Controllers
 
 
                 }
+
+                _dataservice.LogInfo(string.Format("Performance IntwentyDataService.Save() 100 Applications {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -440,7 +475,7 @@ namespace Intwenty.Controllers
                 if (state.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                if (state.SubTables[0].Rows.Count != 2)
+                if (state.SubTables[0].Rows.Count < 20)
                     throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 2 records");
 
             }
@@ -612,7 +647,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test14GetDataSet()
         {
-            OperationResult result = new OperationResult(true, "Get informationstatus dataset <InformationStatus>");
+            OperationResult result = new OperationResult(true, "Get eventlog dataset <EventLog>");
             try
             {
                 var start = DateTime.Now;
@@ -620,24 +655,24 @@ namespace Intwenty.Controllers
                 if (_settings.IsNoSQL)
                 {
                     var dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                    tbl = dbstore.GetDataSet("sysdata_InformationStatus");
+                    tbl = dbstore.GetDataSet("sysdata_EventLog");
                 }
                 else
                 {
                     var dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
                     dbstore.Open();
-                    dbstore.CreateCommand("select * from sysdata_InformationStatus");
+                    dbstore.CreateCommand("select * from sysdata_EventLog");
                     tbl = dbstore.GetDataSet();
                     dbstore.Close();
                 }
 
                 if (tbl == null)
-                    throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned null");
+                    throw new InvalidOperationException("GetDataSet based sysdata_EventLog returned null");
 
                 if (tbl.Rows.Count == 0)
-                    throw new InvalidOperationException("GetDataSet on sysdata_InformationStatus returned 0 rows");
+                    throw new InvalidOperationException("GetDataSet on sysdata_EventLog returned 0 rows");
 
-                _dataservice.LogInfo(string.Format("Performance GetDataSet: {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Performance Get EventLog DataSet: {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -693,7 +728,7 @@ namespace Intwenty.Controllers
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
-                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0}", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 var newstate = new  ClientStateInfo();
                 newstate.Id = getresult.Id;
@@ -706,9 +741,160 @@ namespace Intwenty.Controllers
                     if (!getresult.IsSuccess)
                         throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
 
-                    _dataservice.LogInfo(string.Format("Performance GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
-
+                    if (i==0)
+                        _dataservice.LogInfo(string.Format("Performance GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                    else
+                        _dataservice.LogInfo(string.Format("Performance - CACHE- GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
                 }
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test17GetLists()
+        {
+            OperationResult result = new OperationResult(true, "Test GetList(args) and paging");
+            try
+            {
+
+                var start = DateTime.Now;
+                var args = new ListRetrivalArgs();
+                args.ApplicationId = 10000;
+                args.BatchSize = 20;
+
+                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0}", DateTime.Now.Subtract(start).TotalMilliseconds));
+                var getlistresult = _dataservice.GetList(args);
+                if (!getlistresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
+
+                _dataservice.LogInfo(string.Format("Performance GetList(args) {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
+                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                if (state.SubTables.Count < 1)
+                    throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
+
+                if (state.SubTables[0].Rows.Count != args.BatchSize)
+                    throw new InvalidOperationException("The returned amount of records was different from batch size");
+
+                var latestid = state.SubTables[0].Rows.Max(p => p.Id);
+
+                args.CurrentRowNum = 30;
+                args.BatchSize = 10;
+
+                getlistresult = _dataservice.GetList(args);
+                if (!getlistresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
+
+                state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                if (state.SubTables.Count < 1)
+                    throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
+
+                var newlatestid = state.SubTables[0].Rows.Min(p => p.Id);
+                if (latestid >= newlatestid)
+                    throw new InvalidOperationException("Paging not working properly");
+
+                if (state.SubTables[0].Rows.Count != args.BatchSize)
+                    throw new InvalidOperationException("The returned amount of records was different from batch size");
+
+
+                start = DateTime.Now;
+
+                getlistresult = _dataservice.GetList(10000);
+                if (!getlistresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetList(applicationid) failed: " + getlistresult.SystemError);
+
+                _dataservice.LogInfo(string.Format("Performance GetList(applicationid) 100 records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
+                start = DateTime.Now;
+
+                state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                if (state.SubTables.Count < 1)
+                    throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
+
+
+                _dataservice.LogInfo(string.Format("Performance ClientStateInfo.CreateFromJSON() 100 records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test18TestIdentity()
+        {
+            OperationResult result = new OperationResult(true, "Test Asp.Net.Core.Identity.");
+            try
+            {
+                var retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                if (retrievedrole != null)
+                    _rolemanager.DeleteAsync(retrievedrole);
+
+                var retrieveduser = _usermanager.FindByNameAsync("systemtest@systemtest.com").Result;
+                if (retrieveduser != null)
+                {
+                    _usermanager.RemoveFromRoleAsync(retrieveduser, "SYSROLE");
+                    _usermanager.DeleteAsync(retrieveduser);
+                }
+
+                var user = new IntwentyUser() { Email = "systemtest@systemtest.com", FirstName = "Testony", LastName = "Testson", UserName = "systemtest@systemtest.com" };
+                _usermanager.CreateAsync(user, "testpassword");
+
+                retrieveduser = _usermanager.FindByNameAsync(user.UserName).Result;
+                if (retrieveduser == null)
+                    throw new InvalidOperationException("The inserted user could not be retrieved, with FindByNameAsync");
+                if (string.IsNullOrEmpty(retrieveduser.Id))
+                    throw new InvalidOperationException("The inserted user has no id");
+
+                var role = new IntwentyRole() { Name = "SYSROLE", NormalizedName = "SYSROLE" };
+                _rolemanager.CreateAsync(role);
+                retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                if (retrievedrole == null)
+                    throw new InvalidOperationException("The inserted role could not be retrieved");
+                if (string.IsNullOrEmpty(retrievedrole.Id))
+                    throw new InvalidOperationException("The inserted role has no id");
+
+                _usermanager.AddToRoleAsync(retrieveduser, "SYSROLE");
+                if (!_usermanager.IsInRoleAsync(retrieveduser, "SYSROLE").Result)
+                    throw new InvalidOperationException("UserManager.IsInRoleAsync returned false for SysRole, despite it was assigned to the user");
+
+
+                var roles = _usermanager.GetRolesAsync(retrieveduser).Result;
+                if (roles.Count != 1)
+                    throw new InvalidOperationException("UserManager.GetRolesAsync() returned the wrong number of roles");
+
+                _usermanager.RemoveFromRoleAsync(retrieveduser, "SYSROLE");
+                roles = _usermanager.GetRolesAsync(retrieveduser).Result;
+                if (roles.Count > 0)
+                    throw new InvalidOperationException("UserManager.GetRolesAsync() returned a role, despite it was removed from the user");
+
+
+                _rolemanager.DeleteAsync(retrievedrole);
+                retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                if (retrievedrole != null)
+                    throw new InvalidOperationException("The delete role could be retrieved despite it was deleted");
+
+                _usermanager.DeleteAsync(retrieveduser);
+                retrieveduser = _usermanager.FindByNameAsync(user.UserName).Result;
+                if (retrieveduser != null)
+                    throw new InvalidOperationException("The delete user could be retrieved despite it was deleted");
+
+                /*
+                var signinresult = _signinmanager.PasswordSignInAsync(retrieveduser.UserName, "testpassword", false, false).Result;
+                if (!signinresult.Succeeded)
+                    throw new InvalidOperationException("The inserted user could not be signed in");
+
+                _signinmanager.SignOutAsync();
+                */
+
+
 
             }
             catch (Exception ex)

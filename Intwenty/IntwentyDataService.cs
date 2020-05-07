@@ -10,6 +10,7 @@ using Intwenty.Data.Entity;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.DBAccess;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Intwenty
 {
@@ -152,12 +153,15 @@ namespace Intwenty
 
         private IIntwentyModelService ModelRepository { get; }
 
-        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice)
+        private IMemoryCache ApplicationCache { get; }
+
+        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache)
         {
             Settings = settings.Value;
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
             IsNoSql = settings.Value.IsNoSQL;
+            ApplicationCache = cache;
         }
 
         public IIntwentyDbORM GetDbObjectMapper()
@@ -298,6 +302,8 @@ namespace Intwenty
                 var validation = Validate(model, state);
                 if (validation.IsSuccess)
                 {
+                    RemoveFromApplicationCache(state.ApplicationId, state.Id);
+
                     if (IsNoSql)
                     {
                         var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
@@ -341,6 +347,8 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
+                RemoveFromApplicationCache(state.ApplicationId, state.Id);
+
                 if (IsNoSql)
                 {
                     var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
@@ -379,6 +387,8 @@ namespace Intwenty
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
+
+                RemoveFromApplicationCache(applicationid, id);
 
                 if (IsNoSql)
                 {
@@ -485,6 +495,8 @@ namespace Intwenty
         {
             try
             {
+                OperationResult result = null;
+
                 if (applicationid < 1)
                     throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
@@ -492,15 +504,31 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
+               
+                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}", applicationid), out result))
+                {
+                    return result;
+                }
+
                 if (IsNoSql)
                 {
                     var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetList();
+                    result = t.GetList();
+
+                    if (result.IsSuccess)
+                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
+
+                    return result;
                 }
                 else
                 {
                     var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetList();
+                    result = t.GetList();
+
+                    if (result.IsSuccess)
+                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
+
+                    return result;
                 }
             }
             catch (Exception ex)
@@ -520,6 +548,8 @@ namespace Intwenty
         {
             try
             {
+                OperationResult result = null;
+
                 if (applicationid < 1)
                     throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
@@ -530,15 +560,37 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
+                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), out result))
+                {
+                    return result;
+                }
+
                 if (IsNoSql)
                 {
                     var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetListByOwnerUser(owneruserid);
+                    result = t.GetListByOwnerUser(owneruserid);
+
+                    if (result.IsSuccess)
+                    {
+                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
+                        AddCachedUser(owneruserid);
+
+                    }
+                    return result;
+
                 }
                 else
                 {
                     var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetListByOwnerUser(owneruserid);
+                    result = t.GetListByOwnerUser(owneruserid);
+
+                    if (result.IsSuccess)
+                    {
+                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
+                        AddCachedUser(owneruserid);
+                    }
+
+                    return result;
                 }
             }
             catch (Exception ex)
@@ -560,6 +612,8 @@ namespace Intwenty
         {
             try
             {
+                OperationResult result = null;
+
                 if (state.ApplicationId < 1)
                     throw new InvalidOperationException("Parameter state must be a valid ApplicationId");
 
@@ -567,15 +621,30 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
+                if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
+                {
+                    return result;
+                }
+
                 if (IsNoSql)
                 {
                     var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetLatestVersionById(state);
+                    result = t.GetLatestVersionById(state);
+                    if (result.IsSuccess)
+                    {
+                        ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
+                    }
+                    return result;
                 }
                 else
                 {
                     var t = SqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetLatestVersionById(state);
+                    result = t.GetLatestVersionById(state);
+                    if (result.IsSuccess)
+                    {
+                        ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
+                    }
+                    return result;
                 }
 
             }
@@ -874,16 +943,20 @@ namespace Intwenty
 
             try
             {
+              
+
                 if (IsNoSql)
                 {
-
-                    throw new NotImplementedException("LogEvent is not implemented for nosql");
+                    var t = new EventLog() { ApplicationId=applicationid, AppMetaCode=appmetacode, EventDate=DateTime.Now, Message=message, UserName=username, Verbosity=verbosity };
+                    var client = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection);
+                    client.Insert(t);
                 }
                 else
                 {
+                    var getdatecmd = DBHelpers.GetDBMSCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
                     var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
                     client.Open();
-                    client.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (getDate(), @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
+                    client.CreateCommand("INSERT INTO [sysdata_EventLog] (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
                     client.AddParameter("@Verbosity", verbosity);
                     client.AddParameter("@Message", message);
                     client.AddParameter("@AppMetaCode", appmetacode);
@@ -894,12 +967,46 @@ namespace Intwenty
                 }
 
             }
-            catch (Exeption ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
         }
 
-       
+        private void AddCachedUser(string userid)
+        {
+
+            List<string> users;
+            if (ApplicationCache.TryGetValue("CACHEDUSERS", out users))
+            {
+                if (!users.Contains(userid))
+                    users.Add(userid);
+            }
+            else
+            {
+                users = new List<string>();
+                users.Add(userid);
+            }
+
+            ApplicationCache.Set("CACHEDUSERS", users);
+        }
+
+        private void RemoveFromApplicationCache(int applicationid, int id)
+        {
+            ApplicationCache.Remove(string.Format("APP_APPID_{0}_ID_{1}", applicationid, id));
+            ApplicationCache.Remove(string.Format("APPLIST_APPID_{0}", applicationid));
+
+            List<string> users;
+            if (ApplicationCache.TryGetValue("CACHEDUSERS", out users))
+            {
+                foreach (var u in users)
+                {
+                    ApplicationCache.Remove(string.Format("APPLIST_APPID_{0}_OWNER_{1}",applicationid,u));
+                }
+            }
+           
+        }
+
+
     }
 }

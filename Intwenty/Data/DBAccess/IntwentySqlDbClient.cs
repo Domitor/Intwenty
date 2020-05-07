@@ -10,6 +10,7 @@ using Intwenty.Data.DBAccess.Annotations;
 using System.Data.SQLite;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
+using System.Collections.Concurrent;
 
 namespace Intwenty.Data.DBAccess
 {
@@ -30,11 +31,14 @@ namespace Intwenty.Data.DBAccess
         private SQLiteConnection sqlite_connection;
         private SQLiteCommand sqlite_cmd;
 
+        private static ConcurrentDictionary<string, object> Cache;
 
         public IntwentySqlDbClient()
         {
             ConnectionString = string.Empty;
             DbEngine = DBMS.MSSqlServer;
+            if (Cache == null)
+                Cache = new ConcurrentDictionary<string, object>();
         }
 
         public IntwentySqlDbClient(IntwentySettings settings)
@@ -43,6 +47,9 @@ namespace Intwenty.Data.DBAccess
             ConnectionString = settings.DefaultConnection;
             if (DbEngine == DBMS.MongoDb || DbEngine == DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentySqlDbClient configured with wrong DBMS setting");
+
+            if (Cache == null)
+                Cache = new ConcurrentDictionary<string, object>();
         }
 
         public IntwentySqlDbClient(DBMS d, string connectionstring)
@@ -51,6 +58,9 @@ namespace Intwenty.Data.DBAccess
             ConnectionString = connectionstring;
             if (DbEngine == DBMS.MongoDb || DbEngine == DBMS.LiteDb)
                 throw new InvalidOperationException("IntwentySqlDbClient configured with wrong DBMS setting");
+
+            if (Cache == null)
+                Cache = new ConcurrentDictionary<string, object>();
         }
 
 
@@ -783,7 +793,25 @@ namespace Intwenty.Data.DBAccess
 
         public List<T> GetAll<T>() where T : new()
         {
-            return GetFromTableByType<T>(new List<IntwentyParameter>(), null, false);
+            var workingtype = typeof(T);
+            var tname = workingtype.Name;
+            var annot_tablename = workingtype.GetCustomAttributes(typeof(DbTableName), false);
+            if (annot_tablename != null && annot_tablename.Length > 0)
+                tname = ((DbTableName)annot_tablename[0]).Name;
+
+            object objectresult;
+            if (Cache.TryGetValue(string.Format("ALL_{0}", tname), out objectresult))
+            {
+                return (List<T>)objectresult;
+            }
+
+            var result = GetFromTableByType<T>(new List<IntwentyParameter>(), null, false);
+
+            if (result.Count < 50000) 
+            {
+                Cache.TryAdd(string.Format("ALL_{0}", tname), result);
+            }
+            return result;
         }
 
         public List<T> GetAll<T>(bool use_current_connection = false) where T : new()
@@ -932,6 +960,9 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tname), out rm);
+
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", tname));
             var values = new StringBuilder(" VALUES (");
             var parameters = new List<IntwentyParameter>();
@@ -1068,6 +1099,9 @@ namespace Intwenty.Data.DBAccess
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
 
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tname), out rm);
+
             DbTablePrimaryKey pk = null;
             var annot_pk = t.GetCustomAttributes(typeof(DbTablePrimaryKey), false);
             if (annot_pk != null && annot_pk.Length > 0)
@@ -1202,6 +1236,9 @@ namespace Intwenty.Data.DBAccess
             var annot_tablename = t.GetCustomAttributes(typeof(DbTableName), false);
             if (annot_tablename != null && annot_tablename.Length > 0)
                 tname = ((DbTableName)annot_tablename[0]).Name;
+
+            object rm;
+            Cache.Remove(string.Format("ALL_{0}", tname), out rm);
 
             DbTablePrimaryKey pk = null;
             var annot_pk = t.GetCustomAttributes(typeof(DbTablePrimaryKey), false);

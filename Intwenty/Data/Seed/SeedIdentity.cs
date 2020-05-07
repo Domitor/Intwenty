@@ -31,31 +31,31 @@ namespace Intwenty.Data.Seed
             var u = userManager.FindByNameAsync("admin@intwenty.com");
             if (u.Result != null)
             {
-                userManager.RemoveFromRoleAsync(u.Result, "Administrator");
+                userManager.RemoveFromRoleAsync(u.Result, "ADMINISTRATOR");
                 userManager.DeleteAsync(u.Result);
             }
             u = userManager.FindByNameAsync("user@intwenty.com");
             if (u.Result != null)
             {
-                userManager.RemoveFromRoleAsync(u.Result, "User");
+                userManager.RemoveFromRoleAsync(u.Result, "USER");
                 userManager.DeleteAsync(u.Result);
             }
 
-            var r = roleManager.FindByNameAsync("Administrator");
+            var r = roleManager.FindByNameAsync("ADMINISTRATOR");
             if (r.Result != null)
                 roleManager.DeleteAsync(r.Result);
 
-            r = roleManager.FindByNameAsync("User");
+            r = roleManager.FindByNameAsync("USER");
             if (r.Result != null)
                 roleManager.DeleteAsync(r.Result);
 
 
             var role = new IntwentyRole();
-            role.Name = "Administrator";
+            role.Name = "ADMINISTRATOR";
             roleManager.CreateAsync(role);
 
             role = new IntwentyRole();
-            role.Name = "User";
+            role.Name = "USER";
             roleManager.CreateAsync(role);
 
             var user = new IntwentyUser();
@@ -65,7 +65,7 @@ namespace Intwenty.Data.Seed
             user.LastName = "Adminsson";
             user.EmailConfirmed = true;
             userManager.CreateAsync(user, "thriller");
-            userManager.AddToRoleAsync(user, "Administrator");
+            userManager.AddToRoleAsync(user, "ADMINISTRATOR");
 
 
             user = new IntwentyUser();
@@ -75,7 +75,7 @@ namespace Intwenty.Data.Seed
             user.LastName = "Usersson";
             user.EmailConfirmed = true;
             userManager.CreateAsync(user, "thriller");
-            userManager.AddToRoleAsync(user, "User");
+            userManager.AddToRoleAsync(user, "USER");
 
         }
 

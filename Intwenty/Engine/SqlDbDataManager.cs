@@ -35,8 +35,6 @@ namespace Intwenty.Engine
 
         protected List<DBMSCommandMap> Commands { get; set; }
 
-        protected static List<OperationResult> Cache { get; set; }
-
 
         protected SqlDbDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
         {
@@ -47,8 +45,6 @@ namespace Intwenty.Engine
             ApplicationSaveTimeStamp = DateTime.Now;
             DataTypes = DBHelpers.GetDataTypeMap();
             Commands = DBHelpers.GetDBMSCommandMap();
-            if (Cache == null)
-                Cache = new List<OperationResult>();
         }
 
         public static SqlDbDataManager GetDataManager(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IntwentySqlDbClient sqlclient)
@@ -151,10 +147,7 @@ namespace Intwenty.Engine
             try
             {
 
-                var cachedresult = Cache.Find(p => p.Id == state.Id);
-                if (cachedresult != null)
-                    return cachedresult;
-
+               
                 var columns = new List<IIntwentyDataColum>();
                 columns.Add(new IntwentyDataColumn() { ColumnName = "Id", DataType = DatabaseModelItem.DataTypeInt });
                 columns.Add(new IntwentyDataColumn() { ColumnName = "Version", DataType = DatabaseModelItem.DataTypeInt });
@@ -254,9 +247,6 @@ namespace Intwenty.Engine
 
                 result.Data = jsonresult.ToString();
 
-                Cache.Add(result);
-              
-
             }
             catch (Exception ex)
             {
@@ -286,8 +276,6 @@ namespace Intwenty.Engine
 
             try
             {
-                if (state.Id > 0)
-                    Cache.RemoveAll(p => p.Id == state.Id);
 
                 //CONNECT MODEL TO DATA
                 state.InferModel(Model);
@@ -359,7 +347,6 @@ namespace Intwenty.Engine
 
             try
             {
-                Cache.RemoveAll(p => p.Id == state.Id);
 
                 SqlClient.Open();
 
@@ -421,7 +408,6 @@ namespace Intwenty.Engine
 
             try
             {
-                Cache.RemoveAll(p => p.Id == id);
 
                 SqlClient.Open();
 
