@@ -12,22 +12,24 @@ Create metadata driven applications with java script and ASP.NET Core.
 
 # How to ?
 
-| Task | Solution |
-| ------------- | ------------- |
-| Set up Intwenty against LiteDb | -  |
-| Set up Intwenty against MariaDb | -  |
-| Set up Intwenty against MongoDb | -  |
-| Set up Intwenty against MS SQL Server | -  |
-| Set up Intwenty against Postgres | -  |
-| Configure Asp.Net Core Identity | -  |
-| Run an Intwenty self test | -  |
-| Create an Intwenty Application |  -  |
-| Save an Intwenty Application |  -  |
-| Use Intwenty as a tradional ORM | -  |
-| Accessing the Admin UI | -  |
-| Sharing your model | -  |
-| Import a model | -  |
-| Generate model documentation | -  |
+| Task |
+| ------------- |
+|  <a href="https://github.com/Domitor/Intwenty/wiki/How-to-get-started">Quick start</a> |  
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-LiteDb">Set up Intwenty against LiteDb</a> |  
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MariaDb">Set up Intwenty against MariaDB or MySql</a> |  
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MongoDb">Set up Intwenty against MongoDb</a> |  
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MS-SQL-Server">Set up Intwenty against MS SQL Server</a> | 
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-PostgreSQL">Set up Intwenty against PostgreSQL</a> | 
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-SQLite">Set up Intwenty against SQLite</a> | 
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Application-startup">Configure Asp.Net Core Identity with Intwenty</a> | 
+| Run an Intwenty self test |
+| Create an Intwenty Application |
+| Save an Intwenty Application |
+| Use Intwenty as a tradional ORM |
+| Accessing the Admin UI |
+| Sharing your model |
+| Import a model |
+| Generate model documentation |
 
 
 # A simple example
