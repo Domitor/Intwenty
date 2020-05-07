@@ -12,22 +12,22 @@ Create metadata driven applications with java script and ASP.NET Core.
 
 # How to ?
 
-| Task | Solution |
-| ------------- | ------------- |
-| Set up Intwenty against LiteDb | -  |
-| Set up Intwenty against MariaDb | -  |
-| Set up Intwenty against MongoDb | -  |
-| Set up Intwenty against MS SQL Server | -  |
-| Set up Intwenty against Postgres | -  |
-| Configure Asp.Net Core Identity | -  |
-| Run an Intwenty self test | -  |
-| Create an Intwenty Application |  -  |
-| Save an Intwenty Application |  -  |
-| Use Intwenty as a tradional ORM | -  |
-| Accessing the Admin UI | -  |
-| Sharing your model | -  |
-| Import a model | -  |
-| Generate model documentation | -  |
+| Task |
+| ------------- |
+|  <a href="https://github.com/Domitor/Intwenty/wiki/How-to#Set-up-Intwenty-against-LiteDb">Set up Intwenty against LiteDb</a> |  
+| Set up Intwenty against MariaDb |
+| Set up Intwenty against MongoDb |
+| Set up Intwenty against MS SQL Server | 
+| Set up Intwenty against Postgres |
+| Configure Asp.Net Core Identity |
+| Run an Intwenty self test |
+| Create an Intwenty Application |
+| Save an Intwenty Application |
+| Use Intwenty as a tradional ORM |
+| Accessing the Admin UI |
+| Sharing your model |
+| Import a model |
+| Generate model documentation |
 
 
 # A simple example
