@@ -19,6 +19,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 | Set up Intwenty against MongoDb | -  |
 | Set up Intwenty against MS SQL Server | -  |
 | Set up Intwenty against Postgres | -  |
+| Configure Asp.Net Core Identity | -  |
 | Run an Intwenty self test | -  |
 | Create an Intwenty Application |  -  |
 | Save an Intwenty Application |  -  |
