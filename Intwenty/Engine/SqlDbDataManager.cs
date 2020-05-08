@@ -411,7 +411,7 @@ namespace Intwenty.Engine
 
                 SqlClient.Open();
 
-                if (dbname.ToLower() == this.Model.Application.DbName)
+                if (dbname.ToLower() == this.Model.Application.DbName.ToLower())
                 {
                     result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), id);
 
@@ -452,7 +452,7 @@ namespace Intwenty.Engine
                 {
                     foreach (var table in Model.DataStructure)
                     {
-                        if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname)
+                        if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname.ToLower())
                         {
                             result = new OperationResult(true, string.Format("Deleted sub table row {0}", table.DbName), id);
 
