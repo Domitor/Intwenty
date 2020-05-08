@@ -404,7 +404,7 @@ namespace Intwenty.Engine
             if (string.IsNullOrEmpty(dbname))
                 return new OperationResult(false, "No dbname found when performing DeleteById(id, dbname).", 0, 0);
 
-            var result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), id, 0);
+            OperationResult result=null;
 
             try
             {
@@ -413,6 +413,8 @@ namespace Intwenty.Engine
 
                 if (dbname.ToLower() == this.Model.Application.DbName)
                 {
+                    result = new OperationResult(true, string.Format("Deleted application {0}", this.Model.Application.Title), id);
+
                     SqlClient.CreateCommand("DELETE FROM " + this.Model.Application.DbName + " WHERE Id=@Id");
                     SqlClient.AddParameter("@Id", id);
                     SqlClient.ExecuteNonQuery();
@@ -452,6 +454,8 @@ namespace Intwenty.Engine
                     {
                         if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname)
                         {
+                            result = new OperationResult(true, string.Format("Deleted sub table row {0}", table.DbName), id);
+
                             SqlClient.CreateCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id");
                             SqlClient.AddParameter("@Id", id);
                             SqlClient.ExecuteNonQuery();
@@ -464,9 +468,13 @@ namespace Intwenty.Engine
                 }
 
                 SqlClient.Close();
+
+                if (result == null)
+                    throw new InvalidOperationException("Found nothing to delete");
             }
             catch (Exception ex)
             {
+                result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("DeleteById(id, dbaname) in application {0} failed", this.Model.Application.Title));
