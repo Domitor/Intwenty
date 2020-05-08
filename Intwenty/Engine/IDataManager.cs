@@ -40,8 +40,6 @@ namespace Intwenty.Engine
 
         OperationResult GetDataViewRecord(ListRetrivalArgs args);
 
-        OperationResult GenerateTestData(int gencount, ClientStateInfo state);
-
     }
 
    

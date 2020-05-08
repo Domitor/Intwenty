@@ -52,54 +52,7 @@ namespace Intwenty.Engine
             return new OperationResult(true, string.Format("{0} configured for use with NoSql", Model.Application.Title));
         }
 
-        public OperationResult GenerateTestData(int gencount, ClientStateInfo state)
-        {
-            var rnd = new Random(9999999);
-
-            foreach (var t in this.Model.DataStructure)
-            {
-
-                if (t.IsMetaTypeDataColumn && t.IsRoot)
-                {
-                    if (t.HasPropertyWithValue("DEFVAL", "AUTO"))
-                    {
-                        //continue;
-                    }
-
-                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected && p.DataMetaCode == t.MetaCode);
-                    if (lookup != null)
-                    {
-                        //continue;
-
-                        var view = NoSqlClient.GetJsonArray(lookup.DataViewInfo.QueryTableDbName);
-                        var doc = System.Text.Json.JsonDocument.Parse(view.ToString());
-                        var array = doc.RootElement.EnumerateArray();
-                        if (array.Count() > 0)
-                        {
-                            var val = array.Last();
-                            state.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo.DbName, Value = val.GetProperty(lookup.DataViewColumnInfo.SQLQueryFieldName).GetString() });
-                            if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
-                            {
-                                state.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.DbName, Value = val.GetProperty(lookup.DataViewColumnInfo2.SQLQueryFieldName).GetString() });
-                            }
-
-                        }
-                    }
-                    else
-                    {
-
-                        var value = TestDataHelper.GetSemanticValue(this.Model, t, rnd, gencount);
-                        if (value != null)
-                            state.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
-
-                    }
-                }
-
-            }
-
-            return this.Save(state);
-        }
-
+       
         public OperationResult GetVersionListById(ClientStateInfo state)
         {
             throw new NotImplementedException();

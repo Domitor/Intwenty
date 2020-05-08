@@ -415,6 +415,10 @@ namespace Intwenty.Controllers
                     row.Values.Add(new ApplicationValue() { DbName = "LineHeader", Value = "Second Row" });
                     row.Values.Add(new ApplicationValue() { DbName = "LineDescription", Value = "Second Row Description" });
                     subtable.Rows.Add(row);
+                    row = new ApplicationTableRow() { Table = subtable };
+                    row.Values.Add(new ApplicationValue() { DbName = "LineHeader", Value = "Third Row" });
+                    row.Values.Add(new ApplicationValue() { DbName = "LineDescription", Value = "Third Row Description" });
+                    subtable.Rows.Add(row);
                     state.SubTables.Add(subtable);
 
                     var saveresult = _dataservice.Save(state);
@@ -594,18 +598,31 @@ namespace Intwenty.Controllers
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
-                var newstate = new ClientStateInfo();
-                newstate.ApplicationId = 10000;
-                newstate.Id = getresult.Id;
+                var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
+
+                //DELETE THE LAST SUBTABLE ROW IN APP
+                var rowid = newstate.SubTables[0].Rows.Last().Id;
+                var deleterowresult = _dataservice.DeleteById(newstate.ApplicationId, rowid, newstate.SubTables[0].DbName);
+                if (!deleterowresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
+
+                var getbyidresult = _dataservice.GetLatestVersionById(newstate);
+                if (!getbyidresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returned with failure: " + getresult.SystemError);
+
+                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
+                if (newstate.SubTables[0].Rows.Count != 2)
+                    throw new InvalidOperationException("The deleted subtable row was returned when using IntwentyDataService.GetLatestVersionById(state)");
 
                 var deleteresult = _dataservice.DeleteById(newstate);
                 if (!deleteresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(state) failed: " + deleteresult.SystemError);
 
 
-                var getbyidresult = _dataservice.GetLatestVersionById(newstate);
+                getbyidresult = _dataservice.GetLatestVersionById(newstate);
                 if (getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returnded success but is deleted: " + getresult.SystemError);
+
 
                 newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
                 if (newstate.Values.Count > 0)

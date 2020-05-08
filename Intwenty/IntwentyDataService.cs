@@ -37,8 +37,8 @@ namespace Intwenty
 
         /// <summary>
         /// Deletes data by Id
-        /// Parameter Id can be an Id of an application subtable row, or an application Id
-        /// Parameter dbname can be an application  main tablename or a subtable name
+        /// Parameter Id can be an Id of an application subtable row, or an application maintable Id
+        /// Parameter dbname can be an application  subtable name or main tablename
         /// If the dbname represents a main application table, all application data (maintable and subtables) is deleted.
         /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
         /// If the application uses versioning, all versions are deleted.
@@ -126,12 +126,7 @@ namespace Intwenty
 
         OperationResult Validate(ApplicationModel model, ClientStateInfo state);
 
-        /// <summary>
-        /// Generate TestData
-        /// </summary>
-        /// <returns>A description of the amount of testdata records created</returns>
-        OperationResult GenerateTestData();
-
+      
         void LogError(string message, int applicationid=0, string appmetacode="NONE", string username="");
 
         void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
@@ -382,14 +377,30 @@ namespace Intwenty
                     throw new InvalidOperationException("Parameter applicationid must contain a valid ApplicationId");
 
                 if (id < 1)
-                    throw new InvalidOperationException("Parameter can not be zero");
+                    throw new InvalidOperationException("Parameter id can not be zero");
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
 
-                RemoveFromApplicationCache(applicationid, id);
+                var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == dbname.ToLower());
+                if (modelitem == null)
+                    throw new InvalidOperationException("The dbname did not match the application {0} dbname or any of it's subtables");
+                if (modelitem.IsMetaTypeDataTable)
+                {
+                    var client = GetDbObjectMapper();
+                    var t = client.GetOne<SystemID>(id);
+                    if (t == null)
+                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
+                    if (t.ParentId < 1)
+                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
 
+                    RemoveFromApplicationCache(applicationid, t.ParentId);
+                }
+                else
+                {
+                    RemoveFromApplicationCache(applicationid, id);
+                }
                 if (IsNoSql)
                 {
                     var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
@@ -791,103 +802,6 @@ namespace Intwenty
             }
 
             return new OperationResult(true, "Successfully validated", state.Id, state.Version);
-        }
-
-     
-        public OperationResult GenerateTestData()
-        {
-
-
-            var res = new OperationResult();
-            var amount = 100;
-
-            try
-            {
-                IntwentyNoSqlDbClient nosqlclient=null;
-                IntwentySqlDbClient sqlclient=null;
-                if (IsNoSql)
-                {
-                    nosqlclient = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection);
-                }
-                else
-                {
-                    sqlclient = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
-                }
-
-                var apps = ModelRepository.GetApplicationModels();
-
-                var counter = 0;
-
-                var properties = "ISTESTDATA=TRUE#TESTDATABATCH=Test Batch - " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
-
-                //RUN APPS WITHOUT A LOOKUP CONTROL AS THEY MIGHT BE USED BY DATAVIEWS
-                foreach (var app in apps)
-                {
-                    if (app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
-                        continue;
-
-   
-
-                    for (int i = 0; i < amount; i++)
-                    {
-                        IDataManager manager;
-                        if (IsNoSql)
-                        {
-                            manager = NoSqlDbDataManager.GetDataManager(app, ModelRepository, Settings, nosqlclient);
-                        }
-                        else
-                        {
-
-                            manager = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, sqlclient);
-                        }
-
-                        var clientstate = new ClientStateInfo();
-                        clientstate.Properties = properties;
-                        var result = manager.GenerateTestData(i, clientstate);
-                        if (result.IsSuccess)
-                            counter += 1;
-
-
-                    }
-                }
-
-                //RUN APPS WITH A LOOKUP CONTROL AS THEY MIGHT BE USING DATAVIEWS
-                foreach (var app in apps)
-                {
-                    if (!app.UIStructure.Exists(p => p.IsMetaTypeLookUp))
-                        continue;
-
-                    for (int i = 0; i < amount; i++)
-                    {
-                        IDataManager manager;
-                        if (IsNoSql)
-                        {
-                            manager = NoSqlDbDataManager.GetDataManager(app, ModelRepository, Settings, nosqlclient);
-                        }
-                        else
-                        {
-
-                            manager = SqlDbDataManager.GetDataManager(app, ModelRepository, Settings, sqlclient);
-                        }
-
-                        var clientstate = new ClientStateInfo();
-                        clientstate.Properties = properties;
-                        var result = manager.GenerateTestData(i, clientstate);
-                        if (result.IsSuccess)
-                            counter += 1;
-
-                    }
-                }
-
-                res = new OperationResult(true, string.Format("Generated {0} test data applications.", counter), 0, 0);
-            }
-            catch (Exception ex)
-            {
-                res.SetError(ex.Message, "An error occured when generating testdata");
-            }
-
-
-            return res;
         }
 
        

@@ -91,11 +91,6 @@ namespace Intwenty
         public List<MenuModelItem> GetMenuModels();
 
 
-        public List<string> GetTestDataBatches();
-
-        public void DeleteTestDataBatch(string batchname);
-
-
         public OperationResult ValidateModel();
 
         public List<IntwentyDataColumn> GetDefaultMainTableColumns();
@@ -923,96 +918,6 @@ namespace Intwenty
 
         #region misc
 
-        public List<string> GetTestDataBatches()
-        {
-            var filtered = Client.GetAll<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
-
-            var res = new List<string>();
-            foreach (var s in filtered)
-            {
-                if (string.IsNullOrEmpty(s.BatchName))
-                    continue;
-
-                if (!res.Contains(s.BatchName))
-                    res.Add(s.BatchName);
-            }
-
-            return res;
-
-        }
-
-        public void DeleteTestDataBatch(string batchname)
-        {
-            var filtered = Client.GetAll<SystemID>().Where(p => !string.IsNullOrEmpty(p.Properties)).Select(p => new TestDataBatch(p)).ToList();
-
-            var SqlClient = Client as IntwentySqlDbClient;
-            if (SqlClient != null)
-            {
-
-
-                SqlClient.Open();
-                foreach (var t in filtered)
-                {
-                    if (string.IsNullOrEmpty(t.BatchName))
-                        continue;
-
-                    if (t.BatchName == batchname)
-                    {
-                        if (t.MetaType == "APPLICATION")
-                        {
-                            var app = GetAppModels().Find(p => p.MetaCode == t.MetaCode);
-                            if (app != null && t.Id > 0)
-                            {
-                                SqlClient.CreateCommand("delete from " + app.DbName + " where ID = " + t.Id);
-                                SqlClient.ExecuteNonQuery();
-
-                                SqlClient.CreateCommand("delete from " + app.VersioningTableName + " where ID = " + t.Id);
-                                SqlClient.ExecuteNonQuery();
-
-                                SqlClient.CreateCommand("delete from sysdata_InformationStatus where ID = " + t.Id);
-                                SqlClient.ExecuteNonQuery();
-
-                                SqlClient.CreateCommand("delete from sysdata_SystemID where ID = " + t.Id);
-                                SqlClient.ExecuteNonQuery();
-
-                            }
-                        }
-                    }
-
-                }
-                SqlClient.Close();
-
-            }
-            else
-            {
-                var NoSqlClient = Client as IntwentyNoSqlDbClient;
-
-                foreach (var t in filtered)
-                {
-                    if (string.IsNullOrEmpty(t.BatchName))
-                        continue;
-
-                    if (t.BatchName == batchname)
-                    {
-                        if (t.MetaType == "APPLICATION")
-                        {
-                            var app = GetAppModels().Find(p => p.MetaCode == t.MetaCode);
-                            if (app != null && t.Id > 0)
-                            {
-                                NoSqlClient.DeleteIntwentyJsonObject(app.DbName, t.Id, 1);
-                                NoSqlClient.DeleteIntwentyJsonObject(app.VersioningTableName, t.Id, 1);
-                                NoSqlClient.Delete(new InformationStatus() { Id=t.Id });
-                                NoSqlClient.Delete(new SystemID() { Id = t.Id });
-
-                            }
-                        }
-                    }
-
-                }
-
-            }
-
-        }
 
         public void CreateIntwentyDatabase()
         {

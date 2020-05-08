@@ -964,56 +964,7 @@ namespace Intwenty.Engine
 
         }
 
-        public OperationResult GenerateTestData(int gencount, ClientStateInfo state)
-        {
-            var rnd = new Random(9999999);
-
-
-            foreach (var t in this.Model.DataStructure)
-            {
-
-                if (t.IsMetaTypeDataColumn && t.IsRoot)
-                {
-                    if (t.HasPropertyWithValue("DEFVAL","AUTO"))
-                    {
-                        //continue;
-                    }
-
-                    var lookup = this.Model.UIStructure.Find(p => p.IsMetaTypeLookUp && p.IsDataViewConnected && p.IsDataViewColumnConnected && p.IsDataColumnConnected && p.DataMetaCode == t.MetaCode);
-                    if (lookup != null)
-                    {
-
-                        SqlClient.Open();
-                        SqlClient.CreateCommand(lookup.DataViewInfo.SQLQuery);
-                        var ds = SqlClient.GetDataSet();
-                        SqlClient.Close();
-                        if (ds.Rows.Count > 0)
-                        {
-                            var maxindex = ds.Rows.Count - 1;
-                            var rowindex = new Random(1).Next(0, maxindex);
-                            state.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = ds.Rows[rowindex].GetStringValue(lookup.DataViewColumnInfo.SQLQueryFieldName) });
-                            if (lookup.IsDataViewColumn2Connected && lookup.IsDataColumn2Connected)
-                            {
-                                state.Values.Add(new ApplicationValue() { DbName = lookup.DataColumnInfo2.MetaCode, Value = ds.Rows[rowindex].GetStringValue(lookup.DataViewColumnInfo2.SQLQueryFieldName) });
-                            }
-                        }
-
-                    }
-                    else
-                    {
-
-                        var value = TestDataHelper.GetSemanticValue(this.Model,t, rnd, gencount);
-                        if (value != null)
-                            state.Values.Add(new ApplicationValue() { DbName = t.DbName, Value = value });
-
-                    }
-                }
-
-            }
-
-            return this.Save(state);
-
-        }
+     
 
        
 
