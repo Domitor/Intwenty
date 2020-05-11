@@ -367,7 +367,7 @@ namespace Intwenty.Engine
                         SqlClient.AddParameter("@Id", state.Id);
                         SqlClient.ExecuteNonQuery();
 
-                        SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE ParentId=@Id");
+                        SqlClient.CreateCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id");
                         SqlClient.AddParameter("@Id", state.Id);
                         SqlClient.ExecuteNonQuery();
                     }
@@ -375,7 +375,7 @@ namespace Intwenty.Engine
 
                
 
-                SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                SqlClient.CreateCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id");
                 SqlClient.AddParameter("@Id", state.Id);
                 SqlClient.ExecuteNonQuery();
 
@@ -432,14 +432,14 @@ namespace Intwenty.Engine
                             SqlClient.AddParameter("@Id", id);
                             SqlClient.ExecuteNonQuery();
 
-                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE ParentId=@Id");
+                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id");
                             SqlClient.AddParameter("@Id", id);
                             SqlClient.ExecuteNonQuery();
 
                         }
                     }
 
-                    SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                    SqlClient.CreateCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id");
                     SqlClient.AddParameter("@Id", id);
                     SqlClient.ExecuteNonQuery();
 
@@ -460,7 +460,7 @@ namespace Intwenty.Engine
                             SqlClient.AddParameter("@Id", id);
                             SqlClient.ExecuteNonQuery();
 
-                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemID WHERE Id=@Id");
+                            SqlClient.CreateCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id");
                             SqlClient.AddParameter("@Id", id);
                             SqlClient.ExecuteNonQuery();
                         }
