@@ -144,7 +144,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 - System.Data.SQLite.Core 1.0.112.1
 - System.Data.SqlClient 4.8.1
 - MongoDB.Driver 2.10.3
-- MySql.Data 8.0.19
+- MySqlConnector 0.66.0
 - Npgsql 4.1.3.1
 
 # Frontend Dependencies
