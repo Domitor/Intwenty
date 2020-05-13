@@ -52,7 +52,7 @@
                 saveApplication: function ()
                 {
                     var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
+                    var baseurl = '@Url.Content("~/Model/API/")';
                     var endpointurl = baseurl + "Save";
 
 
@@ -75,7 +75,7 @@
             mounted: function ()
             {
                 var context = this;
-                var baseurl = '@Url.Content("~/Model/")';
+                var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetApplication/@ViewBag.SystemId";
                 $.get(endpointurl, function (response)
                 {

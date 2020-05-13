@@ -151,7 +151,7 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/Model/")';
+                        var baseurl = '@Url.Content("~/Model/API/")';
                         var endpointurl = baseurl + "RemoveValueDomain";
 
 
@@ -194,7 +194,7 @@
                                 list.push(context.valuedomains[i]);
                         }
 
-                        var baseurl = '@Url.Content("~/Model/")';
+                        var baseurl = '@Url.Content("~/Model/API/")';
                         var endpointurl = baseurl + "SaveValueDomains";
 
 
@@ -267,7 +267,7 @@
 
                 //Valuedomains
                 var context = this;
-                var baseurl = '@Url.Content("~/Model/")';
+                var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetValueDomains";
                 $.get(endpointurl, function (response) {
                     context.valuedomains = response;

@@ -63,7 +63,7 @@
                 {
 
                     var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
+                    var baseurl = '@Url.Content("~/Model/API/")';
                     var endpointurl = baseurl + "GenerateTestData";
 
                     if (context.model.isRunning)
@@ -98,7 +98,7 @@
                 {
 
                     var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
+                    var baseurl = '@Url.Content("~/Model/API/")';
                     var endpointurl = baseurl + "DeleteTestDataBatch";
 
                     if (context.model.isRunning)
@@ -132,7 +132,7 @@
             mounted: function ()
             {
                 var context = this;
-                var baseurl = '@Url.Content("~/Model/")';
+                var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetTestDataBatches";
                 $.get(endpointurl, function (response) {
                     context.batches = response;

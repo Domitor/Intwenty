@@ -780,12 +780,12 @@ namespace Intwenty
             {
                 if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
                 {
-                    var dv = state.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
+                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
                     if (dv != null && !dv.HasValue)
                     {
                         return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title),state.Id, state.Version);
                     }
-                    foreach (var table in state.SubTables)
+                    foreach (var table in state.Data.SubTables)
                     {
                         foreach (var row in table.Rows)
                         {

@@ -1,44 +1,39 @@
 ﻿
 
-function raiseValidationErrorModal(message)
-{
+function raiseValidationErrorModal(message) {
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(message);
     $('#msg_dlg_modal').modal();
 
 }
 
-function raiseErrorModal(operationresult)
-{
+function raiseErrorModal(operationresult) {
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(operationresult.userError);
     $('#msg_dlg_modal').modal();
 
 }
 
-function raiseYesNoModal(headertxt, bodytext, yes_callback)
-{
+function raiseYesNoModal(headertxt, bodytext, yes_callback) {
     $('#yesno_dlg_modal_hdr').text(headertxt);
     $('#yesno_dlg_modal_text').text(bodytext);
+    $('#yesno_dlg_modal_yesbtn').off('click', yes_callback);
     $('#yesno_dlg_modal_yesbtn').off().on('click', yes_callback);
     $('#yesno_dlg_modal').modal();
 
 }
 
-function hasRequiredValues(datalist, requiredlist)
-{
+function hasRequiredValues(datalist, requiredlist) {
 
-    for (var i = 0; i < datalist.length; i++)
-    {
-        for (var z = 0; z < requiredlist.length; z++)
-        {
+    for (var i = 0; i < datalist.length; i++) {
+        for (var z = 0; z < requiredlist.length; z++) {
             var fld = requiredlist[z];
             if (!datalist[i][fld])
                 return false;
             if (!datalist[i][fld] === "")
                 return false;
 
-        }          
+        }
     }
 
     return true;
@@ -47,8 +42,7 @@ function hasRequiredValues(datalist, requiredlist)
 
 
 
-function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
-{
+function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
 
     var app = new Vue({
         el: vueelement,
@@ -63,7 +57,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
         methods:
         {
             saveApplication() {
-                this.runSave();
+                if (this.runSave)
+                    this.runSave();
             },
             onFileUpload: function () {
 
@@ -85,7 +80,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
                         var fileref = JSON.parse(xhr.response);
                         context.model[dbtable][dbfield] = "/USERDOC/" + fileref.fileName;
                         context.$forceUpdate();
-                        var s = "";
+                        if (context.saveAfterUpload)
+                            context.saveAfterUpload();
                     }
                 }
                 xhr.open('POST', endpoint, true);
@@ -307,7 +303,9 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
             },
         },
         mounted: function () {
-            this.runMounted();
+            if (this.runMounted)
+                this.runMounted();
+
 
         }
     });

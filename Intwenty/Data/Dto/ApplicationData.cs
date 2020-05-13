@@ -4,6 +4,195 @@ using System.Collections.Generic;
 
 namespace Intwenty.Data.Dto
 {
+
+    public class ApplicationData : ValueCollectionBase
+    {
+        public int ApplicationId { get; set; }
+
+        public List<ApplicationTable> SubTables { get; set; }
+
+        public System.Text.Json.JsonElement JSON { get; set; }
+
+        public ApplicationData()
+        {
+            Values = new List<ApplicationValue>();
+            SubTables = new List<ApplicationTable>();
+        }
+
+        public bool HasData
+        {
+            get
+            {
+                return Values.Count > 0;
+            }
+        }
+
+        public bool HasDataAndModel
+        {
+            get
+            {
+                return Values.Count > 0 && Values.Exists(p => p.Model != null);
+            }
+        }
+
+        public static ApplicationData CreateFromJSON(System.Text.Json.JsonElement JSON)
+        {
+            var res = new ApplicationData();
+
+            if (JSON.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                res.JSON = JSON;
+                var jsonarr = JSON.EnumerateObject();
+                foreach (var j in jsonarr)
+                {
+                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        var jsonobjarr = j.Value.EnumerateObject();
+                        foreach (var av in jsonobjarr)
+                        {
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                                res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetString() });
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                                res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
+                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                                res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
+
+                        }
+                    }
+                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        var tabledata = new ApplicationTable() { DbName = j.Name };
+                        res.SubTables.Add(tabledata);
+                        var jsonrows = j.Value.EnumerateArray();
+                        foreach (var row in jsonrows)
+                        {
+                            var tablerow = new ApplicationTableRow() { Table = tabledata };
+                            tabledata.Rows.Add(tablerow);
+                            var jsonobjarr = row.EnumerateObject();
+                            foreach (var av in jsonobjarr)
+                            {
+                                if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                                    tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetString() });
+                                if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                                    tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
+                                if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                                    tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
+                            }
+                            var rowid = tablerow.Values.Find(p => p.DbName == "Id");
+                            if (rowid != null)
+                                tablerow.Id = rowid.GetAsInt().Value;
+
+                            var rowversion = tablerow.Values.Find(p => p.DbName == "Version");
+                            if (rowversion != null)
+                                tablerow.Version = rowversion.GetAsInt().Value;
+
+                            var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
+                            if (parentid != null)
+                                tablerow.ParentId = parentid.GetAsInt().Value;
+                        }
+
+                    }
+                }
+
+
+                var appid = res.Values.Find(p => p.DbName == "ApplicationId");
+                if (appid != null)
+                    res.ApplicationId = appid.GetAsInt().Value;
+
+                var dataid = res.Values.Find(p => p.DbName == "Id");
+                if (dataid != null)
+                    res.Id = dataid.GetAsInt().Value;
+
+                var dataversion = res.Values.Find(p => p.DbName == "Version");
+                if (dataversion != null)
+                    res.Version = dataversion.GetAsInt().Value;
+
+
+
+            }
+            else if (JSON.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                var tabledata = new ApplicationTable() { DbName = "List" };
+                res.SubTables.Add(tabledata);
+                var jsonrows = JSON.EnumerateArray();
+                foreach (var row in jsonrows)
+                {
+                    var tablerow = new ApplicationTableRow() { Table = tabledata };
+                    tabledata.Rows.Add(tablerow);
+                    var jsonobjarr = row.EnumerateObject();
+                    foreach (var av in jsonobjarr)
+                    {
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.String || av.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                            tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetString() });
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                            tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
+                        if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                            tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
+                    }
+                    var rowid = tablerow.Values.Find(p => p.DbName == "Id");
+                    if (rowid != null)
+                        tablerow.Id = rowid.GetAsInt().Value;
+
+                    var rowversion = tablerow.Values.Find(p => p.DbName == "Version");
+                    if (rowversion != null)
+                        tablerow.Version = rowversion.GetAsInt().Value;
+
+                    var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
+                    if (parentid != null)
+                        tablerow.ParentId = parentid.GetAsInt().Value;
+                }
+            }
+
+
+            return res;
+
+
+
+        }
+
+        public void InferModel(ApplicationModel model)
+        {
+            foreach (var rootitem in model.DataStructure)
+            {
+
+                if (rootitem.IsMetaTypeDataColumn && rootitem.IsRoot)
+                {
+                    var v = Values.Find(p => p.DbName == rootitem.DbName);
+                    if (v != null)
+                        v.Model = rootitem;
+
+                }
+
+                if (rootitem.IsMetaTypeDataTable && rootitem.IsRoot)
+                {
+                    var table = SubTables.Find(p => p.DbName == rootitem.DbName);
+                    if (table == null)
+                        continue;
+
+                    table.Model = rootitem;
+
+                    foreach (var row in table.Rows)
+                    {
+                        foreach (var item in model.DataStructure)
+                        {
+                            if (item.IsMetaTypeDataColumn && item.ParentMetaCode == rootitem.MetaCode)
+                            {
+                                var v = row.Values.Find(p => p.DbName == item.DbName);
+                                if (v != null)
+                                    v.Model = item;
+
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+    }
+
+
     public class ApplicationValue
     {
         public string DbName { get; set; }
@@ -99,14 +288,29 @@ namespace Intwenty.Data.Dto
             }
         }
 
-        public int GetFirstRowIntValue(string dbname)
+        public bool HasRows
         {
-            if (Rows == null)
-                return 0;
-            if (Rows.Count == 0)
+            get
+            {
+                if (Rows == null)
+                    return false;
+
+                if (Rows.Count == 0)
+                    return false;
+
+                return true;
+            }
+
+        }
+
+      
+
+        public int? FirstRowGetAsInt(string dbname)
+        {
+            if (!HasRows)
                 return 0;
 
-            var value = Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
                 return 0;
             if (!value.GetAsInt().HasValue)
@@ -115,19 +319,54 @@ namespace Intwenty.Data.Dto
             return value.GetAsInt().Value;
         }
 
-        public string GetFirstRowStringValue(string dbname)
+        public string FirstRowGetAsString(string dbname)
         {
-            if (Rows == null)
-                return string.Empty;
-            if (Rows.Count == 0)
+            if (!HasRows)
                 return string.Empty;
 
-            var value = Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
                 return string.Empty;
 
             return value.GetAsString();
         }
+
+        public bool? FirstRowGetAsBool(string dbname)
+        {
+            if (!HasRows)
+                return null;
+
+            var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsBool();
+        }
+
+        public decimal? FirstRowGetAsDecimal(string dbname)
+        {
+            if (!HasRows)
+                return null;
+
+            var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsDecimal();
+        }
+
+        public DateTime? FirstRowGetAsDateTime(string dbname)
+        {
+            if (!HasRows)
+                return null;
+
+            var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsDateTime();
+        }
+
 
         public ApplicationTable()
         {
@@ -136,26 +375,31 @@ namespace Intwenty.Data.Dto
 
     }
 
-    public class ApplicationTableRow
+    public class ApplicationTableRow : ValueCollectionBase
     {
-        public int Id { get; set; }
-
-        public int Version { get; set; }
 
         public int ParentId { get; set; }
 
         public ApplicationTable Table { get; set; }
-
-        public List<ApplicationValue> Values { get; set; }
 
         public ApplicationTableRow()
         {
             Values = new List<ApplicationValue>();
         }
 
-        public int GetIntValue(string dbname)
+
+    }
+
+    public class ValueCollectionBase
+    {
+        public int Id { get; set; }
+
+        public int Version { get; set; }
+
+        public List<ApplicationValue> Values { get; set; }
+
+        public int? GetAsInt(string dbname)
         {
-           
             var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
                 return 0;
@@ -165,7 +409,7 @@ namespace Intwenty.Data.Dto
             return value.GetAsInt().Value;
         }
 
-        public string GetStringValue(string dbname)
+        public string GetAsString(string dbname)
         {
             var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
@@ -174,5 +418,33 @@ namespace Intwenty.Data.Dto
             return value.GetAsString();
         }
 
+        public bool? GetAsBool(string dbname)
+        {
+            var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsBool();
+        }
+
+        public decimal? GetAsDecimal(string dbname)
+        {
+            var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsDecimal();
+        }
+
+        public DateTime? GetAsDateTime(string dbname)
+        {
+            var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (value == null)
+                return null;
+
+            return value.GetAsDateTime();
+        }
+
     }
+
 }

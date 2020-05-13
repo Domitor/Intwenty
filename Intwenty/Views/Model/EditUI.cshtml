@@ -635,7 +635,7 @@
                 {
 
                     var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
+                    var baseurl = '@Url.Content("~/Model/API/")';
                     var endpointurl = baseurl + "SaveUserInterfaceModel";
 
                     $.ajax({
@@ -691,7 +691,7 @@
                 saveListView: function ()
                 {
                     var context = this;
-                    var baseurl = '@Url.Content("~/Model/")';
+                    var baseurl = '@Url.Content("~/Model/API/")';
                     var endpointurl = baseurl + "SaveApplicationListView";
 
                     $.ajax({
@@ -766,7 +766,7 @@
             mounted: function () {
 
                 var context = this;
-                var baseurl = '@Url.Content("~/Model/")';
+                var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
 
                 //Application

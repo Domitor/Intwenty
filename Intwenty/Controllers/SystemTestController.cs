@@ -158,7 +158,7 @@ namespace Intwenty.Controllers
 
                 dbstore.CreateTable<TestDataAutoInc>(true);
 
-                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM.CreateTable {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (IIntwentyDbORM.CreateTable) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -189,7 +189,6 @@ namespace Intwenty.Controllers
 
                 }
 
-                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.Insert() 100 Records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 var check = dbstore.GetAll<TestDataAutoInc>();
                 if (check.Count != 100)
@@ -198,7 +197,8 @@ namespace Intwenty.Controllers
                 if (check.Exists(p=> p.Id < 1))
                     throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.Insert<T>");
 
-               
+                _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
 
             }
             catch (Exception ex)
@@ -227,7 +227,6 @@ namespace Intwenty.Controllers
                 if (check.Count < 100)
                     throw new InvalidOperationException("Test could not be performed beacause of dependency to previous test.");
 
-                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.GetAll() 100 Records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 var last = check[check.Count - 1];
                 start = DateTime.Now;
@@ -235,7 +234,6 @@ namespace Intwenty.Controllers
                 if (checkone == null)
                     throw new InvalidOperationException("Could not retrieve last inserted record with IIntwentyDbORM.GetOne<T>");
 
-                _dataservice.LogInfo(string.Format("Performance IIntwentyDbORM<T>.GetOne() {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
                 last.Header = "Test3ORMUpdateTable";
                 last.IntValue = 555;
@@ -260,7 +258,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Updated string value was not persisted.");
 
 
-
+                _dataservice.LogInfo(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -273,6 +271,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test4ORMDelete()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Delete(T) - Retrieve a list of inserted records and delete them one by one");
             try
             {
@@ -298,6 +297,8 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The deleted records was still present in the data store after deletion");
 
 
+                _dataservice.LogInfo(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+
             }
             catch (Exception ex)
             {
@@ -309,11 +310,14 @@ namespace Intwenty.Controllers
 
         private OperationResult Test5CreateIntwentyDb()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyModelService.CreateIntwentyDatabase()");
             try
             {
 
                 _modelservice.CreateIntwentyDatabase();
+
+                _dataservice.LogInfo(string.Format("Test Case: Test5CreateIntwentyDb lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -326,6 +330,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test6CreateIntwentyExampleModel()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Create an intwenty application (My test application)");
             try
             {
@@ -372,7 +377,7 @@ namespace Intwenty.Controllers
                 if (!configres.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
-
+                _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
             }
             catch (Exception ex)
             {
@@ -401,11 +406,11 @@ namespace Intwenty.Controllers
                     if (i > 75)
                         state.OwnerUserId = "OTHERUSER2";
 
-                    state.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
-                    state.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
-                    state.Values.Add(new ApplicationValue() { DbName = "BoolValue", Value = true });
-                    state.Values.Add(new ApplicationValue() { DbName = "IntValue", Value = 25 + i });
-                    state.Values.Add(new ApplicationValue() { DbName = "DecValue", Value = 777.77 });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "BoolValue", Value = true });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "IntValue", Value = 25 + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "DecValue", Value = 777.77 });
                     var subtable = new ApplicationTable() { DbName = "TestAppSubTable" };
                     var row = new ApplicationTableRow() { Table = subtable };
                     row.Values.Add(new ApplicationValue() { DbName = "LineHeader", Value = "First Row" });
@@ -419,7 +424,7 @@ namespace Intwenty.Controllers
                     row.Values.Add(new ApplicationValue() { DbName = "LineHeader", Value = "Third Row" });
                     row.Values.Add(new ApplicationValue() { DbName = "LineDescription", Value = "Third Row Description" });
                     subtable.Rows.Add(row);
-                    state.SubTables.Add(subtable);
+                    state.Data.SubTables.Add(subtable);
 
                     var saveresult = _dataservice.Save(state);
                     if (!saveresult.IsSuccess)
@@ -428,7 +433,7 @@ namespace Intwenty.Controllers
 
                 }
 
-                _dataservice.LogInfo(string.Format("Performance IntwentyDataService.Save() 100 Applications {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Test Case: Test7CreateIntwentyApplication (Create 100 applications) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -441,6 +446,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test8GetListOfIntwentyApplication()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get a list just of created intwenty applications");
             try
             {
@@ -449,12 +455,13 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetList(1000) failed: " + getlistresult.SystemError);
 
                 var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
-                if (state.SubTables.Count < 1)
+                if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                if (state.SubTables[0].Rows.Count < 5)
+                if (state.Data.SubTables[0].Rows.Count < 5)
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
+                _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
             }
             catch (Exception ex)
             {
@@ -466,6 +473,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test9GetListOfIntwentyApplicationByOwnerUser()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get a list of created intwenty applications by owner user");
             try
             {
@@ -474,11 +482,13 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetListByOwnerUser(1000, OTHERUSER) failed: " + getlistresult.SystemError);
 
                 var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
-                if (state.SubTables.Count < 1)
+                if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                if (state.SubTables[0].Rows.Count < 20)
+                if (state.Data.SubTables[0].Rows.Count < 20)
                     throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 2 records");
+
+                _dataservice.LogInfo(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -491,6 +501,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test10GetLatestVersionByOwnerUser()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get the latest version of an intwenty application by owner user");
             try
             {
@@ -502,8 +513,11 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
                 var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
-                if (newstate.Values.Count < 1)
+                if (newstate.Data.Values.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
+
+
+                _dataservice.LogInfo(string.Format("Test Case: Test10GetLatestVersionByOwnerUser lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
 
             }
@@ -517,6 +531,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test11UpdateIntwentyApplication()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Update intwenty application");
             try
             {
@@ -528,22 +543,22 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
                 var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
-                if (newstate.Values.Count < 1)
+                if (!newstate.Data.HasData)
                     throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
 
                 newstate.OwnerUserId = "OTHERUSER2";
 
-                var v1 = newstate.Values.Find(p => p.DbName == "Description");
+                var v1 = newstate.Data.Values.Find(p => p.DbName == "Description");
                 v1.Value = "Updated test application";
 
-                var v2 = newstate.Values.Find(p => p.DbName == "DecValue");
+                var v2 = newstate.Data.Values.Find(p => p.DbName == "DecValue");
                 v2.Value = 333.777M;
 
-                var v3 = newstate.Values.Find(p => p.DbName == "DecValue2");
+                var v3 = newstate.Data.Values.Find(p => p.DbName == "DecValue2");
                 if (v3 == null)
                 {
                     v3 = new ApplicationValue() { DbName = "DecValue2" };
-                    newstate.Values.Add(v3);
+                    newstate.Data.Values.Add(v3);
                 }
                 v3.Value = 444.55;
 
@@ -555,19 +570,19 @@ namespace Intwenty.Controllers
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
 
-                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
-                if (newstate.Values.Count < 1)
-                    throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
+                var appdata = getbyidresult.GetAsApplicationData();
+                if (!appdata.HasData)
+                    throw new InvalidOperationException("Could not create applicationdata from application json string");
 
-                var checkupdate = newstate.Values.Find(p => p.DbName == "Description");
+                var checkupdate = appdata.Values.Find(p => p.DbName == "Description");
                 if (checkupdate.GetAsString() != "Updated test application")
                     throw new InvalidOperationException("Updated application string value was not persisted");
 
-                checkupdate = newstate.Values.Find(p => p.DbName == "DecValue");
+                checkupdate = appdata.Values.Find(p => p.DbName == "DecValue");
                 if (checkupdate.GetAsDecimal() != 333.777M)
                     throw new InvalidOperationException("Updated application decimal value was not persisted");
 
-                checkupdate = newstate.Values.Find(p => p.DbName == "DecValue2");
+                checkupdate = appdata.Values.Find(p => p.DbName == "DecValue2");
                 if (Convert.ToDouble(checkupdate.GetAsDecimal()) != 444.55)
                     throw new InvalidOperationException("Updated application decimal double value was not persisted");
 
@@ -576,6 +591,18 @@ namespace Intwenty.Controllers
                     if (newstate.Version < 2)
                         throw new InvalidOperationException("Updated application did not recieve a new version id");
                 }
+
+                getbyidresult.AddApplicationJSON("AddedTestString", "TestString", false);
+                getbyidresult.AddApplicationJSON("AddedTestInt", 99, true);
+
+                appdata = getbyidresult.GetAsApplicationData();
+
+                getbyidresult.RemoveJSON("LineDescription");
+                getbyidresult.RemoveJSON("Version");
+
+                appdata = getbyidresult.GetAsApplicationData();
+
+                _dataservice.LogInfo(string.Format("Test Case: Test11UpdateIntwentyApplication (Get Application, Update, JSONOperations) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -588,6 +615,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test12DeleteIntwentyApplication()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Delete an intwenty application");
             try
             {
@@ -598,20 +626,21 @@ namespace Intwenty.Controllers
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
-                var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
+                var appdata = getresult.GetAsApplicationData();
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
-                var rowid = newstate.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.DeleteById(newstate.ApplicationId, rowid, newstate.SubTables[0].DbName);
+                var rowid = appdata.SubTables[0].Rows.Last().Id;
+                var deleterowresult = _dataservice.DeleteById(appdata.ApplicationId, rowid, appdata.SubTables[0].DbName);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 
+                var newstate = getresult.CreateClientState();
                 var getbyidresult = _dataservice.GetLatestVersionById(newstate);
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returned with failure: " + getresult.SystemError);
 
-                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
-                if (newstate.SubTables[0].Rows.Count != 2)
+                appdata = getbyidresult.GetAsApplicationData();
+                if (appdata.SubTables[0].Rows.Count != 2)
                     throw new InvalidOperationException("The deleted subtable row was returned when using IntwentyDataService.GetLatestVersionById(state)");
 
                 var deleteresult = _dataservice.DeleteById(newstate);
@@ -623,10 +652,12 @@ namespace Intwenty.Controllers
                 if (getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returnded success but is deleted: " + getresult.SystemError);
 
-
-                newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getbyidresult.Data).RootElement);
-                if (newstate.Values.Count > 0)
+                appdata = getbyidresult.GetAsApplicationData();
+                if (appdata.HasData)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returned values but is deleted");
+
+
+                _dataservice.LogInfo(string.Format("Test Case: Test12DeleteIntwentyApplication (Delete Subtable Row, Delete Application) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
 
 
@@ -641,6 +672,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test13GetAllValueDomains()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get all value domain items");
             try
             {
@@ -649,14 +681,15 @@ namespace Intwenty.Controllers
                 if (!vd.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetValueDomains() failed: " + vd.SystemError);
 
+                var data = vd.GetAsApplicationData();
                 var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(vd.Data).RootElement);
-                if (state.SubTables.Count < 1)
-                    throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
+                if (data.SubTables.Count < 1)
+                    throw new InvalidOperationException("Could not create ApplicationData.SubTable from string json array");
 
-                if (!state.SubTables.Exists(p=> p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
+                if (!data.SubTables.Exists(p=> p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
                     throw new InvalidOperationException("Could not get list of intwenty value domain items.");
 
-
+                _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
             }
             catch (Exception ex)
             {
@@ -668,10 +701,10 @@ namespace Intwenty.Controllers
 
         private OperationResult Test14GetDataSet()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get eventlog dataset <EventLog>");
             try
             {
-                var start = DateTime.Now;
                 ApplicationTable tbl = null;
                 if (_settings.IsNoSQL)
                 {
@@ -693,7 +726,7 @@ namespace Intwenty.Controllers
                 if (tbl.Rows.Count == 0)
                     throw new InvalidOperationException("GetDataSet on sysdata_EventLog returned 0 rows");
 
-                _dataservice.LogInfo(string.Format("Performance Get EventLog DataSet: {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Test Case: Test14GetDataSet (Eventlog records) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -706,6 +739,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test15ORMGetByExpression()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "GetByExpression<InformationStatus>(expression, parameters)");
             try
             {
@@ -725,6 +759,9 @@ namespace Intwenty.Controllers
 
                 if (tbl.Count == 0)
                     throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
+
+
+                _dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -749,8 +786,6 @@ namespace Intwenty.Controllers
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
-                _dataservice.LogInfo(string.Format("Performance GetLatestVersionByOwnerUser {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
-
                 var newstate = new  ClientStateInfo();
                 newstate.Id = getresult.Id;
                 newstate.ApplicationId = 10000;
@@ -762,11 +797,9 @@ namespace Intwenty.Controllers
                     if (!getresult.IsSuccess)
                         throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
 
-                    if (i==0)
-                        _dataservice.LogInfo(string.Format("Performance GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
-                    else
-                        _dataservice.LogInfo(string.Format("Performance - CACHE- GetLatestVersionById {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
                 }
+
+                _dataservice.LogInfo(string.Format("Test Case: Test16CachePerformance (GetGetLatestVersionById 10 times) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -779,11 +812,11 @@ namespace Intwenty.Controllers
 
         private OperationResult Test17GetLists()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Test GetList(args) and paging");
             try
             {
 
-                var start = DateTime.Now;
                 var args = new ListRetrivalArgs();
                 args.ApplicationId = 10000;
                 args.BatchSize = 20;
@@ -792,16 +825,14 @@ namespace Intwenty.Controllers
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
-                _dataservice.LogInfo(string.Format("Performance GetList(args) {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
-
                 var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
-                if (state.SubTables.Count < 1)
+                if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                if (state.SubTables[0].Rows.Count != args.BatchSize)
+                if (state.Data.SubTables[0].Rows.Count != args.BatchSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
-                var latestid = state.SubTables[0].Rows.Max(p => p.Id);
+                var latestid = state.Data.SubTables[0].Rows.Max(p => p.Id);
 
                 args.CurrentRowNum = 30;
                 args.BatchSize = 10;
@@ -811,33 +842,27 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
                 state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
-                if (state.SubTables.Count < 1)
+                if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                var newlatestid = state.SubTables[0].Rows.Min(p => p.Id);
+                var newlatestid = state.Data.SubTables[0].Rows.Min(p => p.Id);
                 if (latestid >= newlatestid)
                     throw new InvalidOperationException("Paging not working properly");
 
-                if (state.SubTables[0].Rows.Count != args.BatchSize)
+                if (state.Data.SubTables[0].Rows.Count != args.BatchSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
-
-
-                start = DateTime.Now;
 
                 getlistresult = _dataservice.GetList(10000);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(applicationid) failed: " + getlistresult.SystemError);
 
-                _dataservice.LogInfo(string.Format("Performance GetList(applicationid) 100 records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
-
-                start = DateTime.Now;
 
                 state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
-                if (state.SubTables.Count < 1)
+                if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
 
-                _dataservice.LogInfo(string.Format("Performance ClientStateInfo.CreateFromJSON() 100 records {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                _dataservice.LogInfo(string.Format("Test Case: Test17GetLists (GetLists, JSON Operations) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)
@@ -850,6 +875,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test18TestIdentity()
         {
+            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Test Asp.Net.Core.Identity.");
             try
             {
@@ -906,6 +932,7 @@ namespace Intwenty.Controllers
                 if (retrieveduser != null)
                     throw new InvalidOperationException("The delete user could be retrieved despite it was deleted");
 
+
                 /*
                 var signinresult = _signinmanager.PasswordSignInAsync(retrieveduser.UserName, "testpassword", false, false).Result;
                 if (!signinresult.Succeeded)
@@ -914,7 +941,7 @@ namespace Intwenty.Controllers
                 _signinmanager.SignOutAsync();
                 */
 
-
+                _dataservice.LogInfo(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
 
             }
             catch (Exception ex)

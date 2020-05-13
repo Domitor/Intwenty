@@ -47,7 +47,7 @@
         Vue.prototype.runMounted = function () {
 
            var context = this;
-            var baseurl = '@Url.Content("~/Application/")';
+            var baseurl = '@Url.Content("~/Application/API/")';
             var endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
             $.get(endpointurl, function (response) {
                 context.valuedomains = JSON.parse(response.data);
@@ -63,7 +63,7 @@
         Vue.prototype.runSave = function () {
 
             var context = this;
-            var baseurl = '@Url.Content("~/Application/")';
+            var baseurl = '@Url.Content("~/Application/API/")';
             var endpointurl = baseurl + "Save";
 
             this.model['@Model.Application.DbName'].ApplicationId = @Model.Application.Id;
@@ -81,8 +81,7 @@
                     if (response.isSuccess) {
                         context.model['@Model.Application.DbName'].Id = response.id;
                         context.model['@Model.Application.DbName'].Version = response.version;
-                        //endpointurl = baseurl + "Open/@Model.Application.Id/" + response.id;
-                        endpointurl = baseurl + "GetList/@Model.Application.Id";
+                        endpointurl = '@Url.Content("~/Application/GetList")' + "/@Model.Application.Id";
                         window.location.href = endpointurl;
                     }
                     else {
@@ -97,7 +96,7 @@
 
         };
 
-        var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/")');
+        var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/API/")');
 
 
     </script>

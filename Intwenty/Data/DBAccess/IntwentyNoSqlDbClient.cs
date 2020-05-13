@@ -799,7 +799,7 @@ namespace Intwenty.Data.DBAccess
                 s = GetJsonArray(collectionname, expression);
             }
 
-            var result = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(s.ToString()).RootElement);
+            var result = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(s.ToString()).RootElement);
             if (result.SubTables.Count > 0)
                 return result.SubTables[0];
             else

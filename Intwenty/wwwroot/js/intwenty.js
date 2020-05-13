@@ -63,8 +63,10 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
         },
         methods:
         {
-            saveApplication() {
-                this.runSave();
+            saveApplication()
+            {
+                if (this.runSave)
+                   this.runSave();
             },
             onFileUpload: function () {
 
@@ -86,7 +88,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
                         var fileref = JSON.parse(xhr.response);
                         context.model[dbtable][dbfield] = "/USERDOC/" + fileref.fileName;
                         context.$forceUpdate();
-                        var s = "";
+                        if (context.saveAfterUpload)
+                            context.saveAfterUpload();
                     }
                 }
                 xhr.open('POST', endpoint, true);
@@ -307,8 +310,11 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
                 context.$forceUpdate();
             },
         },
-        mounted: function () {
-            this.runMounted();
+        mounted: function ()
+        {
+            if (this.runMounted)
+                this.runMounted();
+           
 
         }
     });

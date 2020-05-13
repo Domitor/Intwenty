@@ -278,7 +278,7 @@ namespace Intwenty.Engine
             {
 
                 //CONNECT MODEL TO DATA
-                state.InferModel(Model);
+                state.Data.InferModel(Model);
 
                 SqlClient.Open();
 
@@ -711,10 +711,10 @@ namespace Intwenty.Engine
                         else
                             sb.Append(",{");
 
-                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetIntValue("Id")));
-                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetStringValue("DomainName")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetStringValue("Code")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
 
                         sb.Append("}");
                         rowindex += 1;
@@ -762,9 +762,9 @@ namespace Intwenty.Engine
                 {
 
                     SqlClient.CreateCommand("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
-                    SqlClient.AddParameter("@P1", d.GetStringValue("DomainName"));
+                    SqlClient.AddParameter("@P1", d.GetAsString("DomainName"));
                     var domainitems = SqlClient.GetDataSet();
-                    domainitems.DbName = d.GetStringValue("DomainName");
+                    domainitems.DbName = d.GetAsString("DomainName");
                     domaintables.Add(domainitems);
                 }
 
@@ -794,10 +794,10 @@ namespace Intwenty.Engine
                         else
                             sb.Append(",{");
 
-                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetIntValue("Id")));
-                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetStringValue("DomainName")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetStringValue("Code")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetStringValue("Value")));
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
 
                         sb.Append("}");
                         rowindex += 1;
@@ -1099,7 +1099,7 @@ namespace Intwenty.Engine
             sql_insert_value.Append(",@ChangedDate");
 
 
-            foreach (var t in state.Values)
+            foreach (var t in state.Data.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -1138,7 +1138,7 @@ namespace Intwenty.Engine
 
         private void HandleSubTables(ClientStateInfo state)
         {
-            foreach (var table in state.SubTables)
+            foreach (var table in state.Data.SubTables)
             {
                 if (!table.HasModel)
                     continue;
@@ -1174,7 +1174,7 @@ namespace Intwenty.Engine
             sql_update.Append(",ChangedBy=@ChangedBy");
 
 
-            foreach (var t in state.Values)
+            foreach (var t in state.Data.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -1378,8 +1378,8 @@ namespace Intwenty.Engine
                         return fail;
                     }
 
-                    result.Id = ds.GetFirstRowIntValue("Id");
-                    result.Version = ds.GetFirstRowIntValue("Version");
+                    result.Id = ds.FirstRowGetAsInt("Id").Value;
+                    result.Version = ds.FirstRowGetAsInt("Version").Value;
                 }
 
 

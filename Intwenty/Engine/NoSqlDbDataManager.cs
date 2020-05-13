@@ -660,7 +660,7 @@ namespace Intwenty.Engine
             try
             {
                 //CONNECT MODEL TO DATA
-                state.InferModel(Model);
+                state.Data.InferModel(Model);
 
                 BeforeSave();
 
@@ -816,7 +816,7 @@ namespace Intwenty.Engine
             json.Append("," + DBHelpers.GetJSONValue("OwnedBy", state.OwnerUserId));
             json.Append("," + DBHelpers.GetJSONValue("ChangedDate", DateTime.Now));
 
-            foreach (var t in state.Values)
+            foreach (var t in state.Data.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -851,7 +851,7 @@ namespace Intwenty.Engine
             json.Append("," + DBHelpers.GetJSONValue("ChangedDate", DateTime.Now));
 
 
-            foreach (var t in state.Values)
+            foreach (var t in state.Data.Values)
             {
                 if (!t.HasModel)
                     continue;
@@ -871,7 +871,7 @@ namespace Intwenty.Engine
 
         private void HandleSubTables(ClientStateInfo state)
         {
-            foreach (var table in state.SubTables)
+            foreach (var table in state.Data.SubTables)
             {
                 if (!table.HasModel)
                     continue;

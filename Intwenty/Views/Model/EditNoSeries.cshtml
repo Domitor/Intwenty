@@ -146,7 +146,7 @@
 
                 //NoSeries
                 var context = this;
-                var baseurl = '@Url.Content("~/Model/")';
+                var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetNoSeries";
                 $.get(endpointurl, function (response) {
                     context.noseries = response;
