@@ -35,7 +35,7 @@
 @section Scripts
 {
 
-    <script src="~/js/intwenty.js"></script>
+ 
     <script>
         Vue.prototype.runMounted = function () {
 
@@ -70,8 +70,15 @@
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(this.model),
-                success: function (response) {
-                    window.location.reload(true);
+                success: function (response)
+                {
+                    if (response.isSuccess) {
+                        window.location.reload(true);
+                    }
+                    else
+                    {
+                       raiseErrorModal(response);
+                    }
                 }
             });
 

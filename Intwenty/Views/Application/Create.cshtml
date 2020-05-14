@@ -42,7 +42,7 @@
 @section Scripts
     {
 
-    <script src="~/js/intwenty.js"></script>
+
     <script>
         Vue.prototype.runMounted = function () {
 
@@ -85,11 +85,7 @@
                         window.location.href = endpointurl;
                     }
                     else {
-                        $("#msg_dlg_modal_text").text("");
-                        $("#msg_dlg_modal_text").text(response.messages[0].message);
-                        $("#msg_dlg_modal").modal();
-
-                        //alert(response.messages[0].message);
+                        raiseErrorModal(response);
                     }
                 }
             });

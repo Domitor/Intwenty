@@ -9,6 +9,8 @@ namespace Intwenty.Data.Dto
     {
         public int ApplicationId { get; set; }
 
+        public string DbName { get; set; }
+
         public List<ApplicationTable> SubTables { get; set; }
 
         public System.Text.Json.JsonElement JSON { get; set; }
@@ -45,8 +47,15 @@ namespace Intwenty.Data.Dto
                 var jsonarr = JSON.EnumerateObject();
                 foreach (var j in jsonarr)
                 {
-                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.String || j.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetString() });
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetDecimal() });
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.False || j.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetBoolean() });
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
                     {
+                        res.DbName = j.Name;
                         var jsonobjarr = j.Value.EnumerateObject();
                         foreach (var av in jsonobjarr)
                         {
@@ -59,7 +68,7 @@ namespace Intwenty.Data.Dto
 
                         }
                     }
-                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
                     {
                         var tabledata = new ApplicationTable() { DbName = j.Name };
                         res.SubTables.Add(tabledata);

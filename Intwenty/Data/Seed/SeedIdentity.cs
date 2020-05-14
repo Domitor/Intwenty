@@ -20,7 +20,13 @@ namespace Intwenty.Data.Seed
 
             var Settings = provider.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.IsDevelopment)
+            if (!Settings.Value.IsDevelopment && Settings.Value.IsDemo)
+                return;
+
+            if (string.IsNullOrEmpty(Settings.Value.DemoAdminUser) ||
+                string.IsNullOrEmpty(Settings.Value.DemoUser) ||
+                string.IsNullOrEmpty(Settings.Value.DemoAdminPassword) ||
+                string.IsNullOrEmpty(Settings.Value.DemoUserPassword))
                 return;
 
             var userManager = provider.GetRequiredService<UserManager<IntwentyUser>>();
@@ -28,13 +34,13 @@ namespace Intwenty.Data.Seed
 
         
 
-            var u = userManager.FindByNameAsync("admin@intwenty.com");
+            var u = userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
             if (u.Result != null)
             {
                 userManager.RemoveFromRoleAsync(u.Result, "ADMINISTRATOR");
                 userManager.DeleteAsync(u.Result);
             }
-            u = userManager.FindByNameAsync("user@intwenty.com");
+            u = userManager.FindByNameAsync(Settings.Value.DemoUser);
             if (u.Result != null)
             {
                 userManager.RemoveFromRoleAsync(u.Result, "USER");
@@ -59,22 +65,22 @@ namespace Intwenty.Data.Seed
             roleManager.CreateAsync(role);
 
             var user = new IntwentyUser();
-            user.UserName = "admin@intwenty.com";
-            user.Email = "admin@intwenty.com";
+            user.UserName = Settings.Value.DemoAdminUser;
+            user.Email = Settings.Value.DemoAdminUser;
             user.FirstName = "Admin";
             user.LastName = "Adminsson";
             user.EmailConfirmed = true;
-            userManager.CreateAsync(user, "thriller");
+            userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
             userManager.AddToRoleAsync(user, "ADMINISTRATOR");
 
 
             user = new IntwentyUser();
-            user.UserName = "user@intwenty.com";
-            user.Email = "user@intwenty.com";
+            user.UserName = Settings.Value.DemoUser;
+            user.Email = Settings.Value.DemoUser;
             user.FirstName = "User";
             user.LastName = "Usersson";
             user.EmailConfirmed = true;
-            userManager.CreateAsync(user, "thriller");
+            userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
             userManager.AddToRoleAsync(user, "USER");
 
         }

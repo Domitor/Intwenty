@@ -333,11 +333,11 @@ function getVueListView(vueelement, applicationid, baseurl) {
         el: vueelement,
         data: {
             datalist: []
-            , model: { "filtervalue": "", "filterfield": "" }
-            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-            , currentSort: ''
-            , currentSortDir: 'asc'
-            , baseUrl: baseurl
+            ,model: { "filtervalue": "", "filterfield": "" }
+            ,listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            ,currentSort: ''
+            ,currentSortDir: 'asc'
+            ,baseUrl: baseurl
 
         },
         methods: {
@@ -419,6 +419,35 @@ function getVueListView(vueelement, applicationid, baseurl) {
                             });
                     }
                 });
+            },
+            deleteApplication: function (item)
+            {
+                var context = this;
+                var endpointurl = context.baseUrl + "Delete";
+
+                var deleteapp = function ()
+                { 
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(item),
+                        success: function (response)
+                        {
+                           
+                            if (response.isSuccess)
+                            {
+                                window.location.reload(true);
+                            }
+                            else
+                            {
+                                raiseErrorModal(response);
+                            }
+                        }
+                    });
+                };
+
+                raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
             }
         },
         computed: {

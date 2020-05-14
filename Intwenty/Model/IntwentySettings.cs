@@ -14,12 +14,22 @@ namespace Intwenty.Model
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
         public bool IsDevelopment { get; set; }
+        public bool IsDemo { get; set; }
+        public string DemoAdminUser { get; set; }
+        public string DemoAdminPassword { get; set; }
+        public string DemoUser { get; set; }
+        public string DemoUserPassword { get; set; }
         public string SiteLanguage { get; set; }
+        public string SiteName { get; set; }
+
+
         public bool AllowExternalLogins { get; set; }
         public bool AllowMFA { get; set; }
         public bool ForceMFA { get; set; }
         public bool EnableSMSMfa { get; set; }
         public bool EnableEMailVerification { get; set; }
+
+       
 
         //EMAIL
         public string MailServiceServer { get; set; }

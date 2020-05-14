@@ -99,15 +99,17 @@ namespace Intwenty.Controllers
         {
       
             var state = ClientStateInfo.CreateFromJSON(model);
-            if (!state.HasData)
-                return new JsonResult("{}");
-
-            if (state.ApplicationId < 1)
-                throw new InvalidOperationException("ApplicationId missing when saving...");
-
-
             var res = DataRepository.Save(state);
+            return new JsonResult(res);
 
+        }
+
+        [HttpPost("/Application/API/Delete")]
+        public JsonResult Delete([FromBody] System.Text.Json.JsonElement model)
+        {
+
+            var state = ClientStateInfo.CreateFromJSON(model);
+            var res = DataRepository.DeleteById(state);
             return new JsonResult(res);
 
         }

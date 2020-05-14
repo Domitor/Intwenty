@@ -55,13 +55,9 @@
 
 @section Scripts
 {
-    <script src="~/js/intwenty.js"></script>
+    
     <script>
-        Vue.prototype.test = function ()
-        {
-            var context = this;
-             alert( context.datalist[0].Id);
-        }
+       
         var app = getVueListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")');
 
 

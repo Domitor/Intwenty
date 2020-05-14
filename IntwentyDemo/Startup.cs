@@ -24,7 +24,8 @@ namespace IntwentyDemo
        
         public void ConfigureServices(IServiceCollection services)
         {
-           
+
+            services.AddSignalR();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -113,6 +114,7 @@ namespace IntwentyDemo
             {
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+                endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
         }
     }

@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
+using Intwenty.Model;
+using Microsoft.Extensions.Options;
 
 namespace IntwentyDemo.Areas.Identity.Pages.Account
 {
@@ -21,14 +23,17 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly IOptions<IntwentySettings> _settings;
 
         public LoginModel(SignInManager<IntwentyUser> signInManager, 
             ILogger<LoginModel> logger,
-            UserManager<IntwentyUser> userManager)
+            UserManager<IntwentyUser> userManager,
+            IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _settings = settings;
         }
 
         [BindProperty]
@@ -43,12 +48,12 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Display(Name = "Email (Demo: admin@intwenty.com)")]
+            [Display(Name = "Email")]
             [Required]
             [EmailAddress]
             public string Email { get; set; }
 
-            [Display(Name = "Password (Demo: thriller)")]
+            [Display(Name = "Password")]
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
@@ -59,6 +64,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+          
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);

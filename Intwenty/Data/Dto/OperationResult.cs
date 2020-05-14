@@ -76,16 +76,20 @@ namespace Intwenty.Data.Dto
 
         public string Data { get; set; }
 
-        private ApplicationData _appdata = null;
+        public DateTime StartTime { get; set; }
+
+        public DateTime EndTime { get; set; }
 
         public OperationResult()
         {
+            StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
             Data = "{}";
         }
 
         public OperationResult(bool success, string resultmessage="", int id=0, int version=0)
         {
+            StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
             IsSuccess = success;
             Id = id;
@@ -98,6 +102,22 @@ namespace Intwenty.Data.Dto
         public bool HasMessage
         {
             get { return Messages.Count > 0; }
+        }
+
+        public double Duration
+        {
+            get { return EndTime.Subtract(StartTime).TotalMilliseconds; }
+        }
+
+        public void Finish()
+        {
+            EndTime = DateTime.Now;
+        }
+
+        public void Finish(string code, string message)
+        {
+            EndTime = DateTime.Now;
+            Messages.Add(new OperationMessage(code, message));
         }
 
         public void AddMessage(string code, string message)

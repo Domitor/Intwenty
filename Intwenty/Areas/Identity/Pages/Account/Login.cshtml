@@ -1,8 +1,18 @@
 ﻿@page
 @model LoginModel
+@using Microsoft.Extensions.Options
+@using Intwenty.Model
+@inject IOptions<IntwentySettings> Settings
 
 @{
     ViewData["Title"] = "Log in";
+    var demouser = "";
+    var demopwd = "";
+    if (Settings.Value.IsDemo)
+    {
+        demouser = " (" + Settings.Value.DemoAdminUser + ")";
+        demopwd = " (" + Settings.Value.DemoAdminPassword + ")";
+    }
 }
 
 <br />
@@ -22,12 +32,12 @@
             <form id="account" method="post">
                 <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-group">
-                    <label asp-for="Input.Email"></label>
+                    <label>Email @demouser</label>
                     <input asp-for="Input.Email" class="form-control" />
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="Input.Password"></label>
+                    <label>Password @demopwd</label>
                     <input asp-for="Input.Password" class="form-control" />
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>

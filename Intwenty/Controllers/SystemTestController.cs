@@ -16,6 +16,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Intwenty.Data.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
+using Intwenty.PushData;
 
 namespace Intwenty.Controllers
 {
@@ -31,6 +33,7 @@ namespace Intwenty.Controllers
         private readonly UserManager<IntwentyUser> _usermanager;
         private readonly SignInManager<IntwentyUser> _signinmanager;
         private readonly RoleManager<IntwentyRole> _rolemanager;
+        private readonly IHubContext<ServerToClientPush> _hubContext;
 
         public SystemTestController(IIntwentyModelService modelservice, 
                                     IIntwentyDataService dataservice, 
@@ -38,7 +41,8 @@ namespace Intwenty.Controllers
                                     IMemoryCache cache,
                                     UserManager<IntwentyUser> usermgr,
                                     SignInManager<IntwentyUser> signinmgr,
-                                    RoleManager<IntwentyRole> rolemgr)
+                                    RoleManager<IntwentyRole> rolemgr,
+                                    IHubContext<ServerToClientPush> hubcontext)
         {
             _modelservice = modelservice;
             _dataservice = dataservice;
@@ -47,6 +51,8 @@ namespace Intwenty.Controllers
             _usermanager = usermgr;
             _signinmanager = signinmgr;
             _rolemanager = rolemgr;
+            _hubContext = hubcontext;
+
         }
 
         public IActionResult RunTests()
@@ -118,6 +124,27 @@ namespace Intwenty.Controllers
 
             }
 
+
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test2ORMInsert());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test3ORMUpdate());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test4ORMDelete());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test5CreateIntwentyDb());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test6CreateIntwentyExampleModel());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test7CreateIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test8GetListOfIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test9GetListOfIntwentyApplicationByOwnerUser());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test10GetLatestVersionByOwnerUser());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test11UpdateIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test12DeleteIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test13GetAllValueDomains());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test14GetDataSet());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test15ORMGetByExpression());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
+
+            /*
             res.Add(Test1ORMCreateTable());
             res.Add(Test2ORMInsert());
             res.Add(Test3ORMUpdate());
@@ -136,7 +163,7 @@ namespace Intwenty.Controllers
             res.Add(Test16CachePerformance());
             res.Add(Test17GetLists());
             res.Add(Test18TestIdentity());
-
+            */
 
             return new JsonResult(res);
 
@@ -145,7 +172,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test1ORMCreateTable()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.CreateTable<T>");
             try
             {
@@ -158,7 +184,8 @@ namespace Intwenty.Controllers
 
                 dbstore.CreateTable<TestDataAutoInc>(true);
 
-                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (IIntwentyDbORM.CreateTable) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (IIntwentyDbORM.CreateTable) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -171,7 +198,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test2ORMInsert()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Insert(T) - 100 Records using auto increment");
             try
             {
@@ -197,7 +223,8 @@ namespace Intwenty.Controllers
                 if (check.Exists(p=> p.Id < 1))
                     throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.Insert<T>");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", result.Duration));
 
 
             }
@@ -211,8 +238,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test3ORMUpdate()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Update(T) - Retrieve last record and update");
+
             try
             {
 
@@ -229,7 +256,6 @@ namespace Intwenty.Controllers
 
 
                 var last = check[check.Count - 1];
-                start = DateTime.Now;
                 var checkone = dbstore.GetOne<TestDataAutoInc>(last.Id);
                 if (checkone == null)
                     throw new InvalidOperationException("Could not retrieve last inserted record with IIntwentyDbORM.GetOne<T>");
@@ -257,8 +283,8 @@ namespace Intwenty.Controllers
                 if (checkone.Header != "Test3ORMUpdateTable")
                     throw new InvalidOperationException("Updated string value was not persisted.");
 
-
-                _dataservice.LogInfo(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -271,7 +297,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test4ORMDelete()
         {
-            var start = DateTime.Now;
+
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Delete(T) - Retrieve a list of inserted records and delete them one by one");
             try
             {
@@ -297,7 +323,8 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The deleted records was still present in the data store after deletion");
 
 
-                _dataservice.LogInfo(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -310,14 +337,14 @@ namespace Intwenty.Controllers
 
         private OperationResult Test5CreateIntwentyDb()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "IIntwentyModelService.CreateIntwentyDatabase()");
             try
             {
 
                 _modelservice.CreateIntwentyDatabase();
 
-                _dataservice.LogInfo(string.Format("Test Case: Test5CreateIntwentyDb lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test5CreateIntwentyDb lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -330,8 +357,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test6CreateIntwentyExampleModel()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Create an intwenty application (My test application)");
+
             try
             {
                 _cache.Remove("APPMODELS");
@@ -377,7 +404,8 @@ namespace Intwenty.Controllers
                 if (!configres.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
             }
             catch (Exception ex)
             {
@@ -389,7 +417,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test7CreateIntwentyApplication()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Create 100 intwenty application based on the created test model");
             try
             {
@@ -433,7 +460,8 @@ namespace Intwenty.Controllers
 
                 }
 
-                _dataservice.LogInfo(string.Format("Test Case: Test7CreateIntwentyApplication (Create 100 applications) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test7CreateIntwentyApplication (Create 100 applications) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -446,7 +474,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test8GetListOfIntwentyApplication()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get a list just of created intwenty applications");
             try
             {
@@ -461,7 +488,8 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count < 5)
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
             }
             catch (Exception ex)
             {
@@ -473,8 +501,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test9GetListOfIntwentyApplicationByOwnerUser()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get a list of created intwenty applications by owner user");
+
             try
             {
                 var getlistresult = _dataservice.GetListByOwnerUser(10000, "OTHERUSER");
@@ -488,7 +516,8 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count < 20)
                     throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 2 records");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -501,7 +530,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test10GetLatestVersionByOwnerUser()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get the latest version of an intwenty application by owner user");
             try
             {
@@ -516,8 +544,8 @@ namespace Intwenty.Controllers
                 if (newstate.Data.Values.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
 
-
-                _dataservice.LogInfo(string.Format("Test Case: Test10GetLatestVersionByOwnerUser lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test10GetLatestVersionByOwnerUser lasted  {0} ms", result.Duration));
 
 
             }
@@ -531,7 +559,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test11UpdateIntwentyApplication()
         {
-            var start = DateTime.Now;
+    
             OperationResult result = new OperationResult(true, "Update intwenty application");
             try
             {
@@ -602,7 +630,8 @@ namespace Intwenty.Controllers
 
                 appdata = getbyidresult.GetAsApplicationData();
 
-                _dataservice.LogInfo(string.Format("Test Case: Test11UpdateIntwentyApplication (Get Application, Update, JSONOperations) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test11UpdateIntwentyApplication (Get Application, Update, JSONOperations) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -615,8 +644,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test12DeleteIntwentyApplication()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Delete an intwenty application");
+
             try
             {
                 var state = new ClientStateInfo();
@@ -657,7 +686,8 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) returned values but is deleted");
 
 
-                _dataservice.LogInfo(string.Format("Test Case: Test12DeleteIntwentyApplication (Delete Subtable Row, Delete Application) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test12DeleteIntwentyApplication (Delete Subtable Row, Delete Application) lasted  {0} ms", result.Duration));
 
 
 
@@ -672,7 +702,6 @@ namespace Intwenty.Controllers
 
         private OperationResult Test13GetAllValueDomains()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get all value domain items");
             try
             {
@@ -689,7 +718,8 @@ namespace Intwenty.Controllers
                 if (!data.SubTables.Exists(p=> p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
                     throw new InvalidOperationException("Could not get list of intwenty value domain items.");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", result.Duration));
             }
             catch (Exception ex)
             {
@@ -701,8 +731,8 @@ namespace Intwenty.Controllers
 
         private OperationResult Test14GetDataSet()
         {
-            var start = DateTime.Now;
             OperationResult result = new OperationResult(true, "Get eventlog dataset <EventLog>");
+
             try
             {
                 ApplicationTable tbl = null;
@@ -726,7 +756,8 @@ namespace Intwenty.Controllers
                 if (tbl.Rows.Count == 0)
                     throw new InvalidOperationException("GetDataSet on sysdata_EventLog returned 0 rows");
 
-                _dataservice.LogInfo(string.Format("Test Case: Test14GetDataSet (Eventlog records) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test14GetDataSet (Eventlog records) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -739,7 +770,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test15ORMGetByExpression()
         {
-            var start = DateTime.Now;
+    
             OperationResult result = new OperationResult(true, "GetByExpression<InformationStatus>(expression, parameters)");
             try
             {
@@ -761,7 +792,8 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
 
 
-                _dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -775,9 +807,9 @@ namespace Intwenty.Controllers
         private OperationResult Test16CachePerformance()
         {
             OperationResult result = new OperationResult(true, "Test logging and Intwenty application cache.");
+
             try
             {
-                var start = DateTime.Now;
 
                 var state = new ClientStateInfo();
                 state.ApplicationId = 10000;
@@ -792,14 +824,14 @@ namespace Intwenty.Controllers
 
                 for (var i = 0; i < 10; i++)
                 {
-                     start = DateTime.Now;
                      getresult = _dataservice.GetLatestVersionById(newstate);
                     if (!getresult.IsSuccess)
                         throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
 
                 }
 
-                _dataservice.LogInfo(string.Format("Test Case: Test16CachePerformance (GetGetLatestVersionById 10 times) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test16CachePerformance (GetGetLatestVersionById 10 times) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -812,7 +844,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test17GetLists()
         {
-            var start = DateTime.Now;
+
             OperationResult result = new OperationResult(true, "Test GetList(args) and paging");
             try
             {
@@ -861,8 +893,8 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-
-                _dataservice.LogInfo(string.Format("Test Case: Test17GetLists (GetLists, JSON Operations) lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test17GetLists (GetLists, JSON Operations) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -875,8 +907,9 @@ namespace Intwenty.Controllers
 
         private OperationResult Test18TestIdentity()
         {
-            var start = DateTime.Now;
+          
             OperationResult result = new OperationResult(true, "Test Asp.Net.Core.Identity.");
+
             try
             {
                 var retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
@@ -941,7 +974,8 @@ namespace Intwenty.Controllers
                 _signinmanager.SignOutAsync();
                 */
 
-                _dataservice.LogInfo(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", DateTime.Now.Subtract(start).TotalMilliseconds));
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)

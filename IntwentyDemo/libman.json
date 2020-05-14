@@ -22,5 +22,14 @@
       "library": "xlsx@0.15.6",
       "destination": "wwwroot/lib/xlsx/"
     }
+  ,
+{
+  "provider": "unpkg",
+  "library": "@microsoft/signalr@3.1.4",
+  "destination": "wwwroot/lib/signalr/",
+  "files": [
+    "dist/browser/signalr.min.js"
   ]
+}
+]
 }

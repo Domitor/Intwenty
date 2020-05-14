@@ -38,7 +38,8 @@
 <table class="table table-responsive-sm">
     <thead>
         <tr>
-            <th style="width:10%"></th>
+            <th style="width:5%"></th>
+            <th style="width:5%"></th>
             @{
                 foreach (var c in Model.UIStructure)
                 {
@@ -53,7 +54,8 @@
         </tr>
     </thead>
     <tr v-for="item in sortedResults">
-        <td style="vertical-align:middle"><a v-bind:href="'/Application/Edit/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit"></span> Edit</a></td>
+        <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
+        <td style="vertical-align:middle"><a v-bind:href="'/Application/Edit/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
         @{
             foreach (var c in Model.UIStructure)
             {
@@ -63,7 +65,7 @@
                     if (c.HasProperty("IMAGE"))
                     {
                         <td>
-                            <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80"  class="rounded" />
+                            <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80" class="rounded" />
                         </td>
                     }
                     else

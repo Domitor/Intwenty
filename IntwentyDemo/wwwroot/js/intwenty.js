@@ -1,20 +1,23 @@
 ﻿
 
-function raiseValidationErrorModal(message) {
+function raiseValidationErrorModal(message)
+{
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(message);
     $('#msg_dlg_modal').modal();
 
 }
 
-function raiseErrorModal(operationresult) {
+function raiseErrorModal(operationresult)
+{
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(operationresult.userError);
     $('#msg_dlg_modal').modal();
 
 }
 
-function raiseYesNoModal(headertxt, bodytext, yes_callback) {
+function raiseYesNoModal(headertxt, bodytext, yes_callback)
+{
     $('#yesno_dlg_modal_hdr').text(headertxt);
     $('#yesno_dlg_modal_text').text(bodytext);
     $('#yesno_dlg_modal_yesbtn').off('click', yes_callback);
@@ -23,17 +26,20 @@ function raiseYesNoModal(headertxt, bodytext, yes_callback) {
 
 }
 
-function hasRequiredValues(datalist, requiredlist) {
+function hasRequiredValues(datalist, requiredlist)
+{
 
-    for (var i = 0; i < datalist.length; i++) {
-        for (var z = 0; z < requiredlist.length; z++) {
+    for (var i = 0; i < datalist.length; i++)
+    {
+        for (var z = 0; z < requiredlist.length; z++)
+        {
             var fld = requiredlist[z];
             if (!datalist[i][fld])
                 return false;
             if (!datalist[i][fld] === "")
                 return false;
 
-        }
+        }          
     }
 
     return true;
@@ -42,7 +48,8 @@ function hasRequiredValues(datalist, requiredlist) {
 
 
 
-function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
+function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
+{
 
     var app = new Vue({
         el: vueelement,
@@ -56,9 +63,10 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
         },
         methods:
         {
-            saveApplication() {
+            saveApplication()
+            {
                 if (this.runSave)
-                    this.runSave();
+                   this.runSave();
             },
             onFileUpload: function () {
 
@@ -302,10 +310,11 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 context.$forceUpdate();
             },
         },
-        mounted: function () {
+        mounted: function ()
+        {
             if (this.runMounted)
                 this.runMounted();
-
+           
 
         }
     });
@@ -324,11 +333,11 @@ function getVueListView(vueelement, applicationid, baseurl) {
         el: vueelement,
         data: {
             datalist: []
-            , model: { "filtervalue": "", "filterfield": "" }
-            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-            , currentSort: ''
-            , currentSortDir: 'asc'
-            , baseUrl: baseurl
+            ,model: { "filtervalue": "", "filterfield": "" }
+            ,listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            ,currentSort: ''
+            ,currentSortDir: 'asc'
+            ,baseUrl: baseurl
 
         },
         methods: {
@@ -410,6 +419,35 @@ function getVueListView(vueelement, applicationid, baseurl) {
                             });
                     }
                 });
+            },
+            deleteApplication: function (item)
+            {
+                var context = this;
+                var endpointurl = context.baseUrl + "Delete";
+
+                var deleteapp = function ()
+                { 
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(item),
+                        success: function (response)
+                        {
+                           
+                            if (response.isSuccess)
+                            {
+                                window.location.reload(true);
+                            }
+                            else
+                            {
+                                raiseErrorModal(response);
+                            }
+                        }
+                    });
+                };
+
+                raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
             }
         },
         computed: {

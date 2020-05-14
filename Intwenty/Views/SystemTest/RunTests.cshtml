@@ -34,8 +34,9 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:10%">Success</th>
-                    <th style="width:40%">Test case</th>
+                    <th style="width:5%">Success</th>
+                    <th style="width:35%">Test case</th>
+                    <th style="width:10%">Duration (ms)</th>
                     <th style="width:50%">Error</th>
                 </tr>
             </thead>
@@ -43,6 +44,7 @@
                 <tr v-for="item in testresults">
                     <td>{{item.isSuccess}}</td>
                     <td>{{item.result}}</td>
+                    <td>{{item.duration}}</td>
                     <td>{{item.systemError}}</td>
                 </tr>
             </tbody>
@@ -58,6 +60,10 @@
 @section Scripts
     {
     <script>
+
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/serverhub").build();
+        connection.start();
 
         var app = new Vue({
             el: '#app',
@@ -84,6 +90,7 @@
                     var endpointurl = baseurl + "RunSystemTests";
 
                     context.model.isRunning = true;
+                    context.testresults = [];
 
                     $.ajax({
                         url: endpointurl,
@@ -93,7 +100,8 @@
                         success: function (response)
                         {
                             context.model.isRunning = false;
-                            context.testresults = response;
+                            //use signal r instead
+                            //context.testresults = response;
                         }
                     });
 
@@ -103,7 +111,11 @@
             },
             mounted: function ()
             {
-               
+                var context = this;
+                connection.on("ReceiveMessage", function (message) {
+                    context.testresults.push(message);
+                });
+              
             }
         })
 
