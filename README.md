@@ -22,6 +22,8 @@ Create metadata driven applications with java script and ASP.NET Core.
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-PostgreSQL">Set up Intwenty against PostgreSQL</a> | 
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-SQLite">Set up Intwenty against SQLite</a> | 
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Application-startup">Configure Asp.Net Core Identity with Intwenty</a> | 
+| <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-DataService">The Intwenty DataService</a> |
+| <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-ModelService">The Intwenty ModelService</a> | |
 | Run an Intwenty self test |
 | Create an Intwenty Application |
 | Save an Intwenty Application |
