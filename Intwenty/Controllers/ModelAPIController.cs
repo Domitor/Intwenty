@@ -216,6 +216,71 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
+        /// Get intwenty properties used to configure metadata
+        /// </summary>
+        [HttpGet("/Model/API/GetIntwentyProperties")]
+        public JsonResult GetIntwentyProperties()
+        {
+            var result = new List<IntwentyPropertyVm>();
+            var t = ModelRepository.GetValueDomains().Where(p=> p.DomainName=="INTWENTYPROPERTY");
+            foreach (var prop in t)
+            {
+                var current = result.Find(p => p.PropertyName == prop.Code);
+                if (current == null)
+                {
+                    current = new IntwentyPropertyVm();
+                    result.Add(current);
+                }
+                current.PropertyName = prop.Code;
+                current.PropertyGroup = prop.DomainName;
+                current.Title = prop.Value;
+                current.ValueType = prop.GetPropertyValue("PROPERTYTYPE");
+                var vfor = prop.GetPropertyValue("VALIDFOR");
+                if (!string.IsNullOrEmpty(vfor) && vfor.Contains(","))
+                {
+                    current.ValidFor = vfor.Split(",".ToCharArray()).ToList();
+                }
+                else if(!string.IsNullOrEmpty(vfor) && !vfor.Contains(","))
+                {
+                    current.ValidFor.Add(vfor);
+                }
+
+
+                if (current.IsListType)
+                {
+                    var values = prop.GetPropertyValue("VALUES");
+                    if (!string.IsNullOrEmpty(values))
+                    {
+                        var split = values.Split(",".ToCharArray());
+                        foreach (var s in split)
+                        {
+                            if (s.Contains(":"))
+                            {
+                                var subsplit = s.Split(":".ToCharArray());
+                                current.ValidValues.Add(new PropertyPresentation() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.PropertyName });
+
+                            }
+                            else
+                            {
+                                current.ValidValues.Add(new PropertyPresentation() { PropertyValue = s, Title = s, PropertyCode = current.PropertyName });
+
+                            }
+                        }
+                        
+                    }
+                   
+                }
+
+            }
+            
+
+
+
+            return new JsonResult(result);
+
+        }
+
+        /// <summary>
         /// Create a json file containing the current model
         /// </summary>
         [HttpGet("/Model/API/ExportModel")]
@@ -409,18 +474,7 @@ namespace Intwenty.Controllers
             return GetValueDomains();
         }
 
-        /// <summary>
-        /// Get meta data for number series
-        /// </summary>
-        [Obsolete]
-        [HttpGet("/Model/API/GetNoSeries")]
-        public JsonResult GetNoSeries()
-        {
-            return new JsonResult(new List<NoSeriesVm>());
-
-        }
-
-
+       
         /// <summary>
         /// Get meta data for number series
         /// </summary>

@@ -15,10 +15,10 @@ namespace Intwenty.Data.Seed
     {
 
 
-        public static void Seed(IServiceProvider provider)
+        public static void Seed(IServiceProvider services)
         {
 
-            var Settings = provider.GetRequiredService<IOptions<IntwentySettings>>();
+            var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
             if (!Settings.Value.IsDevelopment && Settings.Value.IsDemo)
                 return;
@@ -29,8 +29,8 @@ namespace Intwenty.Data.Seed
                 string.IsNullOrEmpty(Settings.Value.DemoUserPassword))
                 return;
 
-            var userManager = provider.GetRequiredService<UserManager<IntwentyUser>>();
-            var roleManager = provider.GetRequiredService<RoleManager<IntwentyRole>>();
+            var userManager = services.GetRequiredService<UserManager<IntwentyUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IntwentyRole>>();
 
         
 

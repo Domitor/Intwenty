@@ -97,6 +97,7 @@
                     <div v-if="col.showSettings">
                         <b>Column settings</b>
                         <br />
+
                         <div class="form-check-inline">
                             <label class="form-check-label">
                                 <input type="checkbox" v-model="col.mandatory" class="form-check-input" />Mandatory
@@ -105,6 +106,83 @@
                         <br />
                         <br />
                         Domain <input type="text" class="form-control form-control-sm" v-model="col.domain" style="width:450px" />
+                        <br />
+                        <br />
+
+                        <div class="row">
+                            <div class="col-lg-3">
+                               Property
+                            </div>
+                            <div class="col-lg-3">
+                               Value
+                            </div>
+
+                            <div class="col-lg-3">
+                              Action
+                            </div>
+                            <div class="col-lg-3">
+
+                            </div>
+
+                            <hr />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <select id="propcbox"
+                                            name="propcbox"
+                                            v-model="active_property_selection"
+                                            class="form-control form-control-sm">
+                                        <option v-for="item in validProperties(col)" v-bind:value="item">{{item.title}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div v-if="active_property_selection.isBoolType">
+                                    <div class="form-group">
+                                    </div>
+                                </div>
+                                <div v-if="active_property_selection.isStringType">
+                                    <div class="form-group">
+                                        <input class="form-control-sm" v-model="active_property_selection.currentValue" type="text" />
+                                    </div>
+                                </div>
+                                <div v-if="active_property_selection.isNumericType">
+                                    <div class="form-group">
+                                        <input class="form-control-sm" v-model="active_property_selection.currentValue" type="number" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <button class="btn btn-sm btn-secondary">Add</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+
+                            </div>
+                        </div>
+
+
+                        <hr />
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Value</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in col.propertyPresentations">
+                                    <td>{{item.title}}</td>
+                                    <td>{{item.presentationValue}}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </td>
             </tr>
@@ -125,12 +203,17 @@
                 model: { tables: [], columns: [] },
                 datatypes: [],
                 valuedomains: [],
+                metaproperties: [],
+                active_property_selection: {},
                 idgen:-1
             },
             methods:
             {
                 handleSettings: function (item)
                 {
+
+
+                    this.active_property_selection = {};
                     item.showSettings = !item.showSettings;
                     this.$forceUpdate();
                     return false;
@@ -164,6 +247,36 @@
                         }
                     });
 
+                },
+                onPropertySelect: function (event) {
+                    var context = this;
+
+                   
+                   
+                },
+                validProperties: function (item)
+                {
+                    var context = this;
+
+                    if (!item.metaType)
+                        return [];
+
+                    var result = [];
+                    for (var i = 0; i < context.metaproperties.length; i++)
+                    {
+                        var isincluded = false;
+                        if (context.metaproperties[i].validFor) {
+                            for (var z = 0; z < context.metaproperties[i].validFor.length; z++) {
+
+                                if (item.metaType === context.metaproperties[i].validFor[z])
+                                    isincluded = true;
+                            }
+                        }
+                        if (isincluded)
+                            result.push(context.metaproperties[i]); 
+                    }
+                   
+                    return result;
                 },
                 addDbTable: function ()
                 {
@@ -228,18 +341,28 @@
                 //Application
                 $.get(endpointurl, function (response){
                     context.model = response;
+
+                    //DataTypes
+                    endpointurl = baseurl + "GetApplicationTableDataTypes";
+                    $.get(endpointurl, function (response) {
+                        context.datatypes = response;
+
+                        //Properties
+                        endpointurl = baseurl + "GetIntwentyProperties";
+                        $.get(endpointurl, function (response) {
+                            context.metaproperties = response;
+                        }).fail(function (response) {
+                            raiseErrorModal(response.responseJSON);
+                        });
+                    }).fail(function (response) {
+                        raiseErrorModal(response.responseJSON);
+                    });
                 }).fail(function (response){
                     raiseErrorModal(response.responseJSON);
                 });
 
 
-                //DataTypes
-                endpointurl = baseurl + "GetApplicationTableDataTypes";
-                $.get(endpointurl, function (response) {
-                    context.datatypes = response;
-                }).fail(function (response) {
-                    raiseErrorModal(response.responseJSON);
-                });
+             
 
 
             }

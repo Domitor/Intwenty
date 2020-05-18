@@ -94,7 +94,7 @@ namespace Intwenty.Model.DesignerVM
     }
 
 
-    public class DatabaseTableVm
+    public class DatabaseTableVm : HashTagPropertyObject
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -102,7 +102,6 @@ namespace Intwenty.Model.DesignerVM
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string MetaType { get; set; }
-        public string Properties { get; set; }
         public string Description { get; set; }
 
         public bool IsDefaultTable { get; set; }
@@ -121,7 +120,7 @@ namespace Intwenty.Model.DesignerVM
        
     }
 
-    public class DatabaseTableFieldVm
+    public class DatabaseTableFieldVm : HashTagPropertyObject
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -130,7 +129,6 @@ namespace Intwenty.Model.DesignerVM
         public string ParentMetaCode { get; set; }
         public bool Mandatory { get; set; }
         public string MetaType { get; set; }
-        public string Properties { get; set; }
         public string DataType { get; set; }
         public string Description { get; set; }
         public string Domain { get; set; }
@@ -150,6 +148,9 @@ namespace Intwenty.Model.DesignerVM
             TableName = "";
 
         }
+
+
+      
     }
 
 }

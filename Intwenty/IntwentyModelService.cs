@@ -11,6 +11,7 @@ using Intwenty.Data.DBAccess.Helpers;
 using MongoDB.Driver;
 using Intwenty.Data.Dto;
 using Intwenty.Engine;
+using Intwenty.Data.Identity;
 
 namespace Intwenty
 {
@@ -122,6 +123,8 @@ namespace Intwenty
         private static readonly string DefaultSubTableColumnsCacheKey = "DEFSUBTBLCOLS";
 
         private static readonly string DefaultVersioningTableColumnsCacheKey = "DEFVERTBLCOLS";
+
+        private static readonly string ValueDomainsCacheKey = "VALUEDOMAINS";
 
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
@@ -869,6 +872,7 @@ namespace Intwenty
 
         public void SaveValueDomains(List<ValueDomainModelItem> model)
         {
+            ModelCache.Remove(ValueDomainsCacheKey);
 
             foreach (var vd in model)
             {
@@ -897,12 +901,19 @@ namespace Intwenty
 
         public List<ValueDomainModelItem> GetValueDomains()
         {
+            List<ValueDomainModelItem> res;
+            if (ModelCache.TryGetValue(ValueDomainsCacheKey, out res))
+            {
+                return res;
+            }
+
             var t = Client.GetAll<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
             return t;
         }
 
         public void DeleteValueDomain(int id)
         {
+            ModelCache.Remove(ValueDomainsCacheKey);
             var existing = Client.GetAll<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
@@ -922,28 +933,100 @@ namespace Intwenty
         public void CreateIntwentyDatabase()
         {
 
-            if(Settings.IsNoSQL)
-                    return;
-
             if (!Settings.IsDevelopment)
                 return;
 
-            var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
-            client.CreateTable<ApplicationItem>(true, true);
-            client.CreateTable<DatabaseItem>(true, true);
-            client.CreateTable<DataViewItem>(true, true);
-            client.CreateTable<EventLog>(true, true);
-            client.CreateTable<InformationStatus>(true, true);
-            client.CreateTable<MenuItem>(true, true);
-            client.CreateTable<SystemID>(true, true);
-            client.CreateTable<UserInterfaceItem>(true, true);
-            client.CreateTable<ValueDomainItem>(true, true);
-            client.CreateTable<DefaultValue>(true, true);
-            client.Close();
-            client.Dispose();
+
+            if (Settings.IsNoSQL)
+            {
+                var client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
+                client.CreateTable<ApplicationItem>(true);
+                client.CreateTable<DatabaseItem>(true);
+                client.CreateTable<DataViewItem>(true);
+                client.CreateTable<EventLog>(true);
+                client.CreateTable<InformationStatus>(true);
+                client.CreateTable<MenuItem>(true);
+                client.CreateTable<SystemID>(true);
+                client.CreateTable<UserInterfaceItem>(true);
+                client.CreateTable<ValueDomainItem>(true);
+                client.CreateTable<DefaultValue>(true);
+
+                client.CreateTable<IntwentyUser>(true); //security_User
+                client.CreateTable<IntwentyRole>(true); //security_Role
+                client.CreateTable<IntwentyUserRole>(true); //security_UserRoles
+                                                            
+                //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
+                //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
+                //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims
+                //client.CreateTable<IdentityUserToken<string>>(true); //security_UserTokens
+
+                var currentprops = client.GetAll<ValueDomainItem>();
+                var defaultprops = GetIntentyProperties();
+                foreach (var p in defaultprops)
+                {
+                    if (!currentprops.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
+                        client.Insert(p);
+                }
+
+            }
+            else
+            {
+                var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
+                client.Open();
+                client.CreateTable<ApplicationItem>(true, true);
+                client.CreateTable<DatabaseItem>(true, true);
+                client.CreateTable<DataViewItem>(true, true);
+                client.CreateTable<EventLog>(true, true);
+                client.CreateTable<InformationStatus>(true, true);
+                client.CreateTable<MenuItem>(true, true);
+                client.CreateTable<SystemID>(true, true);
+                client.CreateTable<UserInterfaceItem>(true, true);
+                client.CreateTable<ValueDomainItem>(true, true);
+                client.CreateTable<DefaultValue>(true, true);
+
+                client.CreateTable<IntwentyUser>(true,true); //security_User
+                client.CreateTable<IntwentyRole>(true,true); //security_Role
+                client.CreateTable<IntwentyUserRole>(true,true); //security_UserRoles
+                //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
+                //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
+                //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims
+                //client.CreateTable<IdentityUserToken<string>>(true); //security_UserTokens
+
+                var currentprops = client.GetAll<ValueDomainItem>(true);
+                var defaultprops = GetIntentyProperties();
+                foreach (var p in defaultprops)
+                {
+                    if (!currentprops.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
+                        client.Insert(p, true);
+                }
+
+                client.Close();
+                client.Dispose();
+
+            }
+           
 
             
+        }
+
+        private List<ValueDomainItem> GetIntentyProperties()
+        {
+            var res = new List<ValueDomainItem>();
+
+
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "HIDEFILTER", Value = "Hide filter", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=LISTVIEW,DATAVIEW" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "COLLAPSIBLE", Value = "Collapsible", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "STARTEXPANDED", Value = "Start expanded", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
+
+
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE", Value = "Default value", Properties = "PROPERTYTYPE=LIST#VALIDFOR=DATACOLUMN#VALUES=NONE:None,AUTO:Automatic" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_START", Value = "Default value start", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUM" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_PREFIX", Value = "Default value prefix", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_SEED", Value = "Default value seed", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUMN" });
+
+            return res;
         }
 
         public List<OperationResult> ConfigureDatabase()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
@@ -15,9 +16,9 @@ namespace Intwenty.Data.Seed
     {
      
 
-        public static void Seed(IServiceProvider provider)
+        public static void Seed(IServiceProvider services)
         {
-            var Settings = provider.GetRequiredService<IOptions<IntwentySettings>>();
+            var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
             if (!Settings.Value.IsDevelopment)
                 return;
@@ -35,7 +36,7 @@ namespace Intwenty.Data.Seed
             DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
-            DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>());
+       
             
 
 
@@ -51,6 +52,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", OrderNo = 20, Action = "", Controller = "" });
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
+            DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>().Where(p=> p.DomainName == "ITEMCATEGORY"));
             DataRepository.Insert(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "A1", Value = "Primary" });
             DataRepository.Insert(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "A2", Value = "Secondary" });
 
@@ -159,6 +161,14 @@ namespace Intwenty.Data.Seed
             #endregion
 
 
+
+
+        }
+
+        public static void ConfigureDataBase(IServiceProvider services)
+        {
+            var modelservice = services.GetRequiredService<IIntwentyModelService>();
+            modelservice.ConfigureDatabase();
 
         }
 

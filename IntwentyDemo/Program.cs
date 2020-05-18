@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Intwenty.Data.Seed;
 using Microsoft.Extensions.Hosting;
+using Intwenty;
 
 namespace IntwentyDemo
 {
@@ -21,17 +22,24 @@ namespace IntwentyDemo
 
                 try
                 {
-                    CreateIntwentyDb.Run(services);
+                    var modelservice = services.GetRequiredService<IIntwentyModelService>();
 
-                    //Create admin account, and som roles
+                    //Create intwenty db objects and identity db objects
+                    modelservice.CreateIntwentyDatabase();
+
+
+                    //Create intwenty db objects and identity db objects
                     SeedIdentity.Seed(services);
                     SeedSalesOrderDemoModel.Seed(services);
-                   
+                    SeedSalesOrderDemoModel.ConfigureDataBase(services);
+
+
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred seeding the DB.");
+                    throw ex;
+                    //var logger = services.GetRequiredService<ILogger<Program>>();
+                    //logger.LogError(ex, "An error occurred seeding the DB.");
                 }
             }
 
