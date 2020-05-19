@@ -102,7 +102,7 @@ namespace Intwenty.Controllers
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving application database meta data.");
+                r.SetError(ex.Message, "An error occured when saving database model.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -122,9 +122,9 @@ namespace Intwenty.Controllers
             try
             {
                 if (model.Id < 1)
-                    throw new InvalidOperationException("Id is missing in model when removing db object");
+                    throw new InvalidOperationException("Id is missing in model when removing db model");
                 if (model.ApplicationId < 1)
-                    throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
+                    throw new InvalidOperationException("ApplicationId is missing when removing db model");
 
                 ModelRepository.DeleteDatabaseModel(model.Id);
 
@@ -132,7 +132,7 @@ namespace Intwenty.Controllers
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
+                r.SetError(ex.Message, "An error occured when deleting database model.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -179,6 +179,68 @@ namespace Intwenty.Controllers
 
         }
 
+
+        #endregion
+
+
+        #region Dataview Model
+
+        /// <summary>
+        /// Get meta data for data views
+        /// </summary>
+        [HttpGet("/Model/API/GetDataViewModels")]
+        public JsonResult GetDataViewModels()
+        {
+            var t = ModelRepository.GetDataViewModels();
+            var views = DataViewModelCreator.GetDataViewVm(t);
+            var res = new JsonResult(views);
+            return res;
+
+        }
+
+
+        [HttpPost("/Model/API/SaveDataViewModels")]
+        public JsonResult SaveDataViewModels([FromBody] DataViewVm model)
+        {
+            try
+            {
+
+                var dtolist = DataViewModelCreator.GetDataViewModel(model);
+                ModelRepository.SaveDataViewModels(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving dataview model.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDataViewModels();
+        }
+
+
+        [HttpPost("/Model/API/DeleteDataViewModel")]
+        public JsonResult DeleteDataViewModel([FromBody] DataViewVm model)
+        {
+            try
+            {
+                ModelRepository.DeleteDataViewModel(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application dataview model.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDataViewModels();
+        }
 
         #endregion
 
@@ -237,18 +299,7 @@ namespace Intwenty.Controllers
 
         }
 
-        /// <summary>
-        /// Get meta data for data views
-        /// </summary>
-        [HttpGet("/Model/API/GetDataViews")]
-        public JsonResult GetDataViews()
-        {
-            var t = ModelRepository.GetDataViewModels();
-            var views = DataViewModelCreator.GetDataViewVm(t);
-            var res = new JsonResult(views);
-            return res;
-
-        }
+     
 
         /// <summary>
         /// Get meta data for application ui declarations for application with id
@@ -580,27 +631,7 @@ namespace Intwenty.Controllers
 
        
 
-        [HttpPost("/Model/API/SaveDataView")]
-        public JsonResult SaveDataView([FromBody] DataViewVm model)
-        {
-            try
-            {
-
-                var dtolist = DataViewModelCreator.GetDataViewModel(model);
-                ModelRepository.SaveDataViewModels(dtolist);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetDataViews();
-        }
+       
 
         [HttpPost("/Model/API/SaveApplicationListView")]
         public JsonResult SaveApplicationListView([FromBody] ListViewVm model)

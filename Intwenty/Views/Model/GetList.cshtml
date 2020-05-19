@@ -36,7 +36,7 @@
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary">Manage database</a></td>
                 <td><a v-bind:href="'/Model/EditUI/' + item.id" role="button" class="btn btn-sm btn-secondary">Manage UI</a></td>
-                <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)">Delete</a></td>
+                <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
             </tr>
         </table>
 

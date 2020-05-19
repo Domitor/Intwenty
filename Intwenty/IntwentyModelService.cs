@@ -717,11 +717,13 @@ namespace Intwenty
                     {
                         existing.DataType = dbi.DataType;
                         existing.Domain = dbi.Domain;
+                        existing.IsUnique = dbi.IsUnique;
                         existing.MetaType = dbi.MetaType;
                         existing.Description = dbi.Description;
                         existing.ParentMetaCode = dbi.ParentMetaCode;
                         existing.DbName = dbi.DbName;
                         existing.Mandatory = dbi.Mandatory;
+                        existing.Properties = dbi.Properties;
                         Client.Update(existing);
                     }
 
@@ -773,7 +775,8 @@ namespace Intwenty
                 ParentMetaCode = dto.ParentMetaCode,
                 DbName = dto.DbName,
                 DataType = dto.DataType,
-                Mandatory = dto.Mandatory
+                Mandatory = dto.Mandatory,
+                Properties = dto.Properties
             };
 
 
@@ -837,6 +840,7 @@ namespace Intwenty
                 Title = dto.Title,
                 SQLQuery = dto.SQLQuery,
                 SQLQueryFieldName = dto.SQLQueryFieldName
+                
 
             };
 
@@ -1019,12 +1023,14 @@ namespace Intwenty
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "HIDEFILTER", Value = "Hide filter", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=LISTVIEW,DATAVIEW" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "COLLAPSIBLE", Value = "Collapsible", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "STARTEXPANDED", Value = "Start expanded", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
-
-
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE", Value = "Default value", Properties = "PROPERTYTYPE=LIST#VALIDFOR=DATACOLUMN#VALUES=NONE:None,AUTO:Automatic" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_START", Value = "Default value start", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUM" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_PREFIX", Value = "Default value prefix", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_SEED", Value = "Default value seed", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUMN" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "MANDATORY", Value = "Is Mandatory", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "UNIQUE", Value = "Unique Value", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DOMAIN", Value = "Validation Domain", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
+
 
             return res;
         }

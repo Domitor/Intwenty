@@ -72,128 +72,36 @@
                 <th style="width:8%"></th>
             </tr>
         </thead>
-        <tbody v-for="col in model.columns">
+        <tbody v-for="modelitem in model.columns">
             <tr>
-                <td><span class="fa fa-cog" v-on:click="handleSettings(col)" style="cursor:pointer"></span></td>
+                <td><span class="fa fa-cog" v-on:click="initializePropertyUI(modelitem)" style="cursor:pointer"></span></td>
                 <td>
-                    <select v-model="col.tableName" class="form-control form-control-sm">
+                    <select v-model="modelitem.tableName" class="form-control form-control-sm">
                         <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm" v-model="col.dbName" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="modelitem.dbName" /></td>
                 <td>
-                    <select v-model="col.dataType" class="form-control form-control-sm">
+                    <select v-model="modelitem.dataType" class="form-control form-control-sm">
                         <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control form-control-sm" v-model="col.description" />
+                    <input type="text" class="form-control form-control-sm" v-model="modelitem.description" />
                 </td>
-                <td><span v-on:click="deleteDbColumn(col)" class="fa fa-trash" style="cursor:pointer"></span></td>
+                <td class="mx-auto">
+                    <button class="btn btn-sm btn-danger float-sm-right" v-on:click="deleteDbColumn(modelitem)"><i class="fa fa-trash"></i></button>
+                </td>
             </tr>
             <tr>
                 <td colspan="1"></td>
                 <td colspan="5">
-                    <div v-if="col.showSettings">
+                    <div v-if="modelitem.showSettings">
                         <b>Column settings</b>
                         <br />
 
-                        <div class="form-check-inline">
-                            <label class="form-check-label">
-                                <input type="checkbox" v-model="col.mandatory" class="form-check-input" />Mandatory
-                            </label>
-                        </div>
-                        <br />
-                        <br />
-                        Domain <input type="text" class="form-control form-control-sm" v-model="col.domain" style="width:450px" />
-                        <br />
-                        <br />
+                      <partial name="_PropertyUI" />
 
-                        <div class="row">
-                            <div class="col-lg-3">
-                               Property
-                            </div>
-                            <div class="col-lg-3">
-                               Value
-                            </div>
-
-                            <div class="col-lg-3">
-                              Action
-                            </div>
-                            <div class="col-lg-3">
-
-                            </div>
-
-                            <hr />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <div class="form-group">
-                                    <select id="propcbox"
-                                            name="propcbox"
-                                            v-model="active_property_selection"
-                                            class="form-control form-control-sm">
-                                        <option v-for="item in validProperties(col)" v-bind:value="item">{{item.title}}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div v-if="active_property_selection.isBoolType">
-                                    <div class="form-group">
-                                        <p>TRUE</p>
-                                    </div>
-                                </div>
-                                <div v-if="active_property_selection.isStringType">
-                                    <div class="form-group">
-                                        <input class="form-control-sm" v-model="active_property_selection.currentValue" type="text" />
-                                    </div>
-                                </div>
-                                <div v-if="active_property_selection.isNumericType">
-                                    <div class="form-group">
-                                        <input class="form-control-sm" v-model="active_property_selection.currentValue" type="number" />
-                                    </div>
-                                </div>
-                                <div v-if="active_property_selection.isListType">
-                                    <div class="form-group">
-                                        <select id="cboxpropvalues"
-                                                name="cboxpropvalues"
-                                                v-model="active_property_selection.currentValue"
-                                                class="form-control form-control-sm">
-                                            <option v-for="item in active_property_selection.validValues" v-bind:value="item">{{item.title}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-3">
-                                <div class="form-group">
-                                    <button class="btn btn-sm btn-secondary" v-on:click="addProperty(active_property_selection, col)"><span class="fa fa-plus"></span> Add</button>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-
-                            </div>
-                        </div>
-
-
-                        <hr />
-                        <table class="table table-sm" style="width:50%">
-                            <thead>
-                                <tr>
-                                    <th>Property</th>
-                                    <th>Value</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="item in currentProperties(col)">
-                                    <td>{{item.title}}</td>
-                                    <td>{{item.presentationValue}}</td>
-                                    <td><span v-on:click="deleteProperty(item,col)" class="fa fa-trash" style="cursor:pointer"></span></td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </td>
             </tr>
@@ -213,20 +121,12 @@
             data: {
                 model: { tables: [], columns: [] },
                 datatypes: [],
-                valuedomains: [],
                 metaproperties: [],
-                active_property_selection: {},
                 idgen:-1
             },
             methods:
             {
-                handleSettings: function (item)
-                {
-                    this.active_property_selection = {};
-                    item.showSettings = !item.showSettings;
-                    this.$forceUpdate();
-                    return false;
-                },
+                
                 saveApplicationDB: function ()
                 {
                     var context = this;
@@ -320,7 +220,6 @@
                 //Application
                 $.get(endpointurl, function (response){
                     context.model = response;
-
                     //DataTypes
                     endpointurl = baseurl + "GetIntwentyDataTypes";
                     $.get(endpointurl, function (response) {

@@ -1,55 +1,194 @@
 ﻿
 
-function raiseValidationErrorModal(message)
-{
+
+Array.prototype.where = function (filter) {
+
+    var collection = this;
+
+    switch (typeof filter) {
+
+        case 'function':
+            return $.grep(collection, filter);
+
+        case 'object':
+            for (var property in filter) {
+                if (!filter.hasOwnProperty(property))
+                    continue; // ignore inherited properties
+
+                collection = $.grep(collection, function (item) {
+                    return item[property] === filter[property];
+                });
+            }
+            return collection.slice(0); // copy the array 
+        // (in case of empty object filter)
+
+        default:
+            throw new TypeError('func must be either a' +
+                'function or an object of properties and values to filter by');
+    }
+};
+
+
+Array.prototype.firstOrDefault = function (func) {
+    return this.where(func)[0] || null;
+};
+
+Vue.prototype.validProperties = function (item) {
+    var context = this;
+
+    if (!item.metaType)
+        return [];
+
+    if (!context.metaproperties)
+        return [];
+
+    var result = [];
+    for (var i = 0; i < context.metaproperties.length; i++) {
+        var isincluded = false;
+        if (context.metaproperties[i].validFor) {
+            for (var z = 0; z < context.metaproperties[i].validFor.length; z++) {
+
+                if (item.metaType === context.metaproperties[i].validFor[z])
+                    isincluded = true;
+            }
+        }
+        if (isincluded)
+            result.push(context.metaproperties[i]);
+    }
+
+    return result;
+};
+
+Vue.prototype.currentProperties = function (item) {
+    var context = this;
+
+    if (!item)
+        return [];
+
+    if (!item.propertyPresentations)
+        return [];
+
+    if (!context.metaproperties)
+        return item.propertyPresentations;
+
+    for (var i = 0; i < item.propertyPresentations.length; i++) {
+        var t = context.metaproperties.firstOrDefault({ name: item.propertyPresentations[i].propertyCode });
+        if (t != null) {
+            item.propertyPresentations[i].title = t.title;
+        }
+    }
+
+    return item.propertyPresentations;
+};
+
+Vue.prototype.addProperty = function (modelitem) {
+
+    if (!modelitem)
+        return;
+
+    if (!modelitem.currentProperty)
+        return;
+
+    if (!modelitem.propertyPresentations)
+        return;
+
+    if (modelitem.currentProperty.isBoolType)
+        modelitem.currentProperty.currentValue = "TRUE";
+
+    var t = modelitem.propertyPresentations.firstOrDefault({ propertyCode: modelitem.currentProperty.name });
+    if (t != null)
+        return;
+
+    if (!modelitem.currentProperty.currentValue)
+        return;
+
+
+    modelitem.propertyPresentations.push({ propertyCode: modelitem.currentProperty.name, title: modelitem.currentProperty.title, propertyValue: modelitem.currentProperty.currentValue, presentationValue: modelitem.currentProperty.currentValue });
+
+    modelitem.currentProperty.currentValue = "";
+};
+
+Vue.prototype.deleteProperty = function (property, modelitem) {
+
+    if (!property)
+        return;
+
+    if (!modelitem)
+        return;
+
+    if (!modelitem.propertyPresentations)
+        return;
+
+    for (var i = 0; i < modelitem.propertyPresentations.length; i++) {
+        if (modelitem.propertyPresentations[i].propertyCode === property.propertyCode) {
+            modelitem.propertyPresentations.splice(i, 1);
+            break;
+        }
+    }
+};
+
+Vue.prototype.initializePropertyUI = function (modelitem) {
+    if (!modelitem)
+        return;
+
+    modelitem.currentProperty = {};
+
+    if (!modelitem.hasOwnProperty("showSettings"))
+        modelitem.showSettings = false;
+
+    modelitem.showSettings = !modelitem.showSettings;
+
+    this.$forceUpdate();
+
+};
+
+
+
+
+
+function raiseValidationErrorModal(message) {
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(message);
     $('#msg_dlg_modal').modal();
 
-}
+};
 
-function raiseErrorModal(operationresult)
-{
+function raiseErrorModal(operationresult) {
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(operationresult.userError);
     $('#msg_dlg_modal').modal();
 
-}
+};
 
-function raiseYesNoModal(headertxt, bodytext, yes_callback)
-{
+function raiseYesNoModal(headertxt, bodytext, yes_callback) {
     $('#yesno_dlg_modal_hdr').text(headertxt);
     $('#yesno_dlg_modal_text').text(bodytext);
     $('#yesno_dlg_modal_yesbtn').off('click', yes_callback);
     $('#yesno_dlg_modal_yesbtn').off().on('click', yes_callback);
     $('#yesno_dlg_modal').modal();
 
-}
+};
 
-function hasRequiredValues(datalist, requiredlist)
-{
+function hasRequiredValues(datalist, requiredlist) {
 
-    for (var i = 0; i < datalist.length; i++)
-    {
-        for (var z = 0; z < requiredlist.length; z++)
-        {
+    for (var i = 0; i < datalist.length; i++) {
+        for (var z = 0; z < requiredlist.length; z++) {
             var fld = requiredlist[z];
             if (!datalist[i][fld])
                 return false;
             if (!datalist[i][fld] === "")
                 return false;
 
-        }          
+        }
     }
 
     return true;
 
-}
+};
 
 
 
-function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
-{
+function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
 
     var app = new Vue({
         el: vueelement,
@@ -63,10 +202,9 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
         },
         methods:
         {
-            saveApplication()
-            {
+            saveApplication() {
                 if (this.runSave)
-                   this.runSave();
+                    this.runSave();
             },
             onFileUpload: function () {
 
@@ -310,11 +448,10 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl)
                 context.$forceUpdate();
             },
         },
-        mounted: function ()
-        {
+        mounted: function () {
             if (this.runMounted)
                 this.runMounted();
-           
+
 
         }
     });
@@ -333,11 +470,11 @@ function getVueListView(vueelement, applicationid, baseurl) {
         el: vueelement,
         data: {
             datalist: []
-            ,model: { "filtervalue": "", "filterfield": "" }
-            ,listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
-            ,currentSort: ''
-            ,currentSortDir: 'asc'
-            ,baseUrl: baseurl
+            , model: { "filtervalue": "", "filterfield": "" }
+            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , currentSort: ''
+            , currentSortDir: 'asc'
+            , baseUrl: baseurl
 
         },
         methods: {
@@ -420,27 +557,22 @@ function getVueListView(vueelement, applicationid, baseurl) {
                     }
                 });
             },
-            deleteApplication: function (item)
-            {
+            deleteApplication: function (item) {
                 var context = this;
                 var endpointurl = context.baseUrl + "Delete";
 
-                var deleteapp = function ()
-                { 
+                var deleteapp = function () {
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(item),
-                        success: function (response)
-                        {
-                           
-                            if (response.isSuccess)
-                            {
+                        success: function (response) {
+
+                            if (response.isSuccess) {
                                 window.location.reload(true);
                             }
-                            else
-                            {
+                            else {
                                 raiseErrorModal(response);
                             }
                         }
@@ -472,4 +604,4 @@ function getVueListView(vueelement, applicationid, baseurl) {
     });
 
     return app;
-}
+};

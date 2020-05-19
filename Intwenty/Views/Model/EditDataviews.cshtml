@@ -13,7 +13,7 @@
 
     <div class="card">
         <div class="card-header"><h2>Dataview model designer</h2></div>
-        <div class="card-body">Dataviews are used to create on the fly list queries from database tables or views. They can be used together with custom UI:s or together with the 'Look Up' UI Control. A data view includes an sql query and a list of fields that the query is expected to generate.</div>
+        <div class="card-body">Dataviews are used to create on the fly list queries from database tables or views. They can be used together with custom UI:s or together with the 'Look Up' UI Control. A data view includes an sql query and a list of fields that the query is expected to return.</div>
     </div>
 
     <br />
@@ -27,15 +27,19 @@
 
     <br />
 
-    <div v-for="item in dataviews">
-
-        <div style="margin:15px">
+    <div v-for="item in dataviews" class="row">
+       
+        <div class="col-sm-8">
             <div style="padding: 5px; border:dotted 1px gray">
                 <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label class="control-label">Title <span style="color: red"> *</span></label>
+                    <div class="col-sm-6">
+                        <label class="control-label">Title <span style="color: red"> *</span></label>
+                        <div class="form-inline">
                             <input type="text" class="form-control form-control-sm" v-model="item.title" />
+                            <div class="btn btn-sm btn-primary ml-2" v-on:click="saveDataView(item)">
+                                <span class="fa fa-save"></span> Save
+                            </div>
+                            <button class="btn btn-sm btn-danger ml-2" v-on:click="deleteDataView(item, 'Delete dataview ?')"><i class="fa fa-trash"></i></button>
                         </div>
 
                         <div class="form-group">
@@ -44,17 +48,15 @@
                             <textarea style="width:100%" rows="4" v-model="item.sqlQuery"></textarea>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-sm-6">
 
-                        <div class="btn btn-sm btn-primary" v-on:click="saveDataView(item)" style="margin-top:23px">
-                            <span class="fa fa-save"></span> Save
-                        </div>
+                       
 
 
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-lg-12" style="margin: 5px">
+                    <div class="col-sm-12" style="margin: 5px">
                         <b>Fields: </b> {{getViewFieldsString(item)}}
                         <br />
                         <label class="control-label" v-if="!item.showSettings"><a href="#" v-on:click="handleSettings(item)">[Show field definitions]</a></label>
@@ -72,7 +74,8 @@
                                     <tr>
 
                                         <th style="width:30%">Title <span style="color: red"> *</span></th>
-                                        <th style="width:65%">SQL query field <span style="color: red"> *</span></th>
+                                        <th style="width:60%">SQL query field <span style="color: red"> *</span></th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="field in item.fields">
@@ -80,6 +83,7 @@
 
                                         <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
                                         <td><input type="text" class="form-control form-control-sm" v-model="field.sqlQueryFieldName" /></td>
+                                        <td><button class="btn btn-sm btn-danger ml-2" v-on:click="deleteDataView(field, 'Delete dataview column ?')"><i class="fa fa-trash"></i></button></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -91,6 +95,7 @@
 
             </div>
         </div>
+        <div class="col-sm-4"></div>
     </div>
 
 
@@ -118,7 +123,7 @@
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveDataView";
+                    var endpointurl = baseurl + "SaveDataViewModels";
 
 
                     $.ajax({
@@ -137,6 +142,33 @@
                             raiseErrorModal(response.responseJSON);
                         }
                     });
+
+                },
+                deleteDataView: function (item, msg)
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "DeleteDataViewModel";
+
+                    var yesfunc = function ()
+                    {
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+                                context.dataviews = response;
+                                for (var i = 0; i < context.dataviews.length; i++)
+                                    context.dataviews[i].showSettings = false;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    };
+
+                    raiseYesNoModal(msg, "", yesfunc);
 
                 },
                 addDataView: function () {
@@ -166,7 +198,7 @@
                 var baseurl = '@Url.Content("~/Model/API/")';
 
                 //DataViews
-                var endpointurl = baseurl + "GetDataViews";
+                var endpointurl = baseurl + "GetDataViewModels";
                 $.get(endpointurl, function (response)
                 {
                     context.dataviews = response;

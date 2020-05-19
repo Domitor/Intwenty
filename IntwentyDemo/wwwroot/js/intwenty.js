@@ -1,5 +1,6 @@
 ﻿
 
+
 Array.prototype.where = function (filter) {
 
     var collection = this;
@@ -82,43 +83,72 @@ Vue.prototype.currentProperties = function (item)
     return item.propertyPresentations;
 };
 
-Vue.prototype.addProperty = function (property, col) {
+Vue.prototype.addProperty = function (modelitem) {
 
-    if (!property)
+    if (!modelitem)
         return;
 
-    if (!col)
+    if (!modelitem.currentProperty)
         return;
 
-    if (!col.propertyPresentations)
+    if (!modelitem.propertyPresentations)
         return;
 
-    col.propertyPresentations.push({ propertyCode: property.name, title: property.title, propertyValue: property.currentValue, presentationValue: property.currentValue });
-   
+    if (modelitem.currentProperty.isBoolType)
+        modelitem.currentProperty.currentValue = "TRUE";
+
+    var t = modelitem.propertyPresentations.firstOrDefault({ propertyCode: modelitem.currentProperty.name });
+    if (t != null)
+        return;
+
+    if (!modelitem.currentProperty.currentValue)
+        return;
+    
+
+    modelitem.propertyPresentations.push({ propertyCode: modelitem.currentProperty.name, title: modelitem.currentProperty.title, propertyValue: modelitem.currentProperty.currentValue, presentationValue: modelitem.currentProperty.currentValue });
+
+    modelitem.currentProperty.currentValue = "";
 };
 
-Vue.prototype.deleteProperty = function (property, col) {
+Vue.prototype.deleteProperty = function (property, modelitem) {
 
     if (!property)
         return;
 
-    if (!col)
+    if (!modelitem)
         return;
 
-    if (!col.propertyPresentations)
+    if (!modelitem.propertyPresentations)
         return;
 
-    for (var i = 0; i < col.propertyPresentations.length; i++)
+    for (var i = 0; i < modelitem.propertyPresentations.length; i++)
     {
-        if (col.propertyPresentations[i].propertyCode === property.propertyCode) {
-            col.propertyPresentations[i].splice(i, 1);
+        if (modelitem.propertyPresentations[i].propertyCode === property.propertyCode) {
+            modelitem.propertyPresentations.splice(i, 1);
             break;
         }
     }
-
-
-
 };
+
+Vue.prototype.initializePropertyUI = function (modelitem)
+{
+    if (!modelitem)
+        return;
+
+    modelitem.currentProperty = {  };
+
+    if (!modelitem.hasOwnProperty("showSettings"))
+        modelitem.showSettings = false;
+
+    modelitem.showSettings = !modelitem.showSettings; 
+
+    this.$forceUpdate();
+    
+};
+
+
+
+
 
 function raiseValidationErrorModal(message)
 {

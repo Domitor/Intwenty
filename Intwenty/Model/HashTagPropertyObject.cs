@@ -17,6 +17,7 @@ namespace Intwenty.Model
 
         public List<PropertyPresentation> PropertyPresentations { get; set; }
 
+
         public void SetPresentationsFromPropertyString()
         {
             PropertyPresentations = new List<PropertyPresentation>();

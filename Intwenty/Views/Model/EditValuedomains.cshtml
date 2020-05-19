@@ -84,7 +84,7 @@
 
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.code" v-on:input="markChanged(entry)" /></td>
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.value" v-on:input="markChanged(entry)" /></td>
-                <td><div class="btn btn-sm btn-danger" v-on:click="deleteDomainValue(entry)"><span class="fa fa-remove"></span> Delete</div></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteDomainValue(entry)"><i class="fa fa-trash"></i></div></td>
             </tr>
         </tbody>
     </table>
@@ -224,6 +224,8 @@
                         return [];
                     if (context.model.domainName == "")
                         return [];
+                    if (context.model.domainName == "INTWENTYPROPERTY")
+                        return [];
 
                     var arr = [];
                     for (var i = 0; i < context.valuedomains.length; i++)
@@ -238,11 +240,15 @@
                 },
                 uniquedomains: function ()
                 {
+                  
 
                     var context = this;
                     var arr = [];
                     for (var i = 0; i < context.valuedomains.length; i++)
                     {
+                        if (context.valuedomains[i].domainName == "INTWENTYPROPERTY")
+                            continue;
+
                         var found = false;
                         for (var z = 0; z < arr.length; z++)
                         {

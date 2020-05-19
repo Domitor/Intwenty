@@ -14,7 +14,22 @@ namespace Intwenty.Model.DesignerVM
         {
             var res = new List<DatabaseModelItem>();
             res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.GetPropertyStringFromPresentations(), DataType = "", MetaCode = p.MetaCode,ParentMetaCode = "ROOT" }));
-            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Domain = p.Domain, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.GetPropertyStringFromPresentations(), TableName = p.TableName, MetaCode=p.MetaCode }));
+            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.GetPropertyStringFromPresentations(), TableName = p.TableName, MetaCode=p.MetaCode }));
+
+            foreach (var t in res)
+            {
+                if (t.IsMetaTypeDataColumn)
+                {
+                    if (t.HasProperty("UNIQUE"))
+                        t.IsUnique = true;
+
+                    t.Domain = t.GetPropertyValue("DOMAIN");
+
+                }
+
+            }
+
+            
             return res;
         }
 
@@ -54,7 +69,12 @@ namespace Intwenty.Model.DesignerVM
             {
                 if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, Domain = t.Domain, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id };
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id };
+                    if (t.IsUnique)
+                        col.AddUpdateProperty("UNIQUE", "TRUE");
+                    if (!string.IsNullOrEmpty(t.Domain))
+                        col.AddUpdateProperty("DOMAIN", t.Domain);
+
                     col.SetPresentationsFromPropertyString();
                     res[0].Columns.Add(col);
                 }
@@ -67,7 +87,11 @@ namespace Intwenty.Model.DesignerVM
                     {
                         if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                         {
-                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, Domain = col.Domain, TableName = t.DbName, ApplicationId = app.Application.Id };
+                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, TableName = t.DbName, ApplicationId = app.Application.Id };
+                            if (t.IsUnique)
+                                subtablecolumn.AddUpdateProperty("UNIQUE", "TRUE");
+                            if (!string.IsNullOrEmpty(t.Domain))
+                                subtablecolumn.AddUpdateProperty("DOMAIN", t.Domain);
                             subtablecolumn.SetPresentationsFromPropertyString();
                             subtable.Columns.Add(subtablecolumn);
                         }
@@ -89,18 +113,20 @@ namespace Intwenty.Model.DesignerVM
         public string Title { get; set; }
 
         public List<DatabaseTableVm> Tables { get; set; }
-        public List<DatabaseTableColumnVm> Columns { get; set; } 
+        public List<DatabaseTableColumnVm> Columns { get; set; }
+      
 
         public DBVm()
         {
             Title = "";
             Tables = new List<DatabaseTableVm>();
             Columns = new List<DatabaseTableColumnVm>();
+           
         }
     }
 
 
-    public class DatabaseTableVm : HashTagPropertyObject
+    public class DatabaseTableVm : BaseModelVm
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -111,7 +137,7 @@ namespace Intwenty.Model.DesignerVM
         public string Description { get; set; }
 
         public bool IsDefaultTable { get; set; }
-        public List<DatabaseTableColumnVm> Columns { get; set; } 
+        public List<DatabaseTableColumnVm> Columns { get; set; }
 
         public DatabaseTableVm()
         {
@@ -126,7 +152,7 @@ namespace Intwenty.Model.DesignerVM
        
     }
 
-    public class DatabaseTableColumnVm : HashTagPropertyObject
+    public class DatabaseTableColumnVm : BaseModelVm
     {
         public int Id { get; set; }
         public int ApplicationId { get; set; }
@@ -137,9 +163,8 @@ namespace Intwenty.Model.DesignerVM
         public string MetaType { get; set; }
         public string DataType { get; set; }
         public string Description { get; set; }
-        public string Domain { get; set; }
-
         public string TableName { get; set; }
+
 
         public DatabaseTableColumnVm()
         {
@@ -150,7 +175,6 @@ namespace Intwenty.Model.DesignerVM
             Properties = "";
             DataType = "";
             Description = "";
-            Domain = "";
             TableName = "";
 
         }
