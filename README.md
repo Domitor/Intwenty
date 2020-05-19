@@ -5,8 +5,8 @@
 Create metadata driven applications with java script and ASP.NET Core. 
 - Define your metamodel and work seamless against six supported databases. (See list below)
 - Define metadata for your datamodel and let Intwenty generate your database structure along with  your needs for storing and retriving information.
-- Define metadata for your UI model and let intwenty generate your UI.
-- It can be seen as an ORM for dynamic data where the structure is described in meta data rather than strongly typed objects
+- Define your UI model and let intwenty generate your UI.
+- It can be seen as an ORM for dynamic data where the structure is described in metadata rather than strongly typed objects
 - It implements Asp.Net Core Identity, without any need of entity framework.
 - Can also be used as a traditional ORM with strongly typed objects.
 
