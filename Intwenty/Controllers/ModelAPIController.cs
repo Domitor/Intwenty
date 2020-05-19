@@ -82,31 +82,70 @@ namespace Intwenty.Controllers
 
 
 
-        
+        #region Database Model
 
-       
-      
 
-      
 
-      
+        [HttpPost("/Model/API/SaveDatabaseModels")]
+        public JsonResult SaveDatabaseModels([FromBody] DBVm model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
+
+                var list = DatabaseModelCreator.GetDatabaseModel(model);
+
+                ModelRepository.SaveDatabaseModels(list, model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDatabaseModels(model.Id);
+        }
+
+
 
         /// <summary>
-        /// Get UI model for application with id
+        /// Removes one database object (column / table) from the UI meta data collection
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationUI/{applicationid}")]
-        public JsonResult GetApplicationUI(int applicationid)
+        [HttpPost("/Model/API/DeleteDatabaseModel")]
+        public JsonResult RemoveFromApplicationDB([FromBody] DatabaseTableColumnVm model)
         {
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(UIModelCreator.GetUIVm(t));
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("Id is missing in model when removing db object");
+                if (model.ApplicationId < 1)
+                    throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
 
+                ModelRepository.DeleteDatabaseModel(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetDatabaseModels(model.ApplicationId);
         }
 
         /// <summary>
         /// Get database model for application tables for application with id
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationDB/{applicationid}")]
-        public JsonResult GetApplicationDB(int applicationid)
+        [HttpGet("/Model/API/GetDatabaseModels/{applicationid}")]
+        public JsonResult GetDatabaseModels(int applicationid)
         {
 
             try
@@ -130,6 +169,33 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
+        /// Get meta data for available datatypes
+        /// </summary>
+        [HttpGet("/Model/API/GetIntwentyDataTypes")]
+        public JsonResult GetIntwentyDataTypes()
+        {
+            var t = new DatabaseModelItem();
+            return new JsonResult(DatabaseModelItem.DataTypes);
+
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// Get UI model for application with id
+        /// </summary>
+        [HttpGet("/Model/API/GetApplicationUI/{applicationid}")]
+        public JsonResult GetApplicationUI(int applicationid)
+        {
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(UIModelCreator.GetUIVm(t));
+
+        }
+
+      
+
+        /// <summary>
         /// Get meta data for application with id
         /// </summary>
         [HttpGet("/Model/API/GetApplicationListView/{applicationid}")]
@@ -141,16 +207,7 @@ namespace Intwenty.Controllers
         }
 
 
-        /// <summary>
-        /// Get meta data for available datatypes
-        /// </summary>
-        [HttpGet("/Model/API/GetApplicationTableDataTypes")]
-        public JsonResult GetApplicationTableDataTypes()
-        {
-            var t = new DatabaseModelItem();
-            return new JsonResult(DatabaseModelItem.DataTypes);
-
-        }
+       
 
         /// <summary>
         /// Get model data for all application tables
@@ -225,14 +282,13 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetValueDomains().Where(p=> p.DomainName=="INTWENTYPROPERTY");
             foreach (var prop in t)
             {
-                var current = result.Find(p => p.PropertyName == prop.Code);
+                var current = result.Find(p => p.Name == prop.Code);
                 if (current == null)
                 {
                     current = new IntwentyPropertyVm();
                     result.Add(current);
                 }
-                current.PropertyName = prop.Code;
-                current.PropertyGroup = prop.DomainName;
+                current.Name = prop.Code;
                 current.Title = prop.Value;
                 current.ValueType = prop.GetPropertyValue("PROPERTYTYPE");
                 var vfor = prop.GetPropertyValue("VALIDFOR");
@@ -257,12 +313,12 @@ namespace Intwenty.Controllers
                             if (s.Contains(":"))
                             {
                                 var subsplit = s.Split(":".ToCharArray());
-                                current.ValidValues.Add(new PropertyPresentation() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.PropertyName });
+                                current.ValidValues.Add(new PropertyPresentation() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.Name });
 
                             }
                             else
                             {
-                                current.ValidValues.Add(new PropertyPresentation() { PropertyValue = s, Title = s, PropertyCode = current.PropertyName });
+                                current.ValidValues.Add(new PropertyPresentation() { PropertyValue = s, Title = s, PropertyCode = current.Name });
 
                             }
                         }
@@ -522,60 +578,7 @@ namespace Intwenty.Controllers
 
 
 
-        [HttpPost("/Model/API/SaveApplicationDB")]
-        public JsonResult SaveApplicationDB([FromBody] DBVm model)
-        {
-            try
-            {
-                if (model.Id < 1)
-                    throw new InvalidOperationException("ApplicationId missing in model");
-
-                var list = DatabaseModelCreator.GetDatabaseModel(model);
-
-                ModelRepository.SaveDatabaseModels(list, model.Id);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving application database meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationDB(model.Id);
-        }
-
-
-
-        /// <summary>
-        /// Removes one database object (column / table) from the UI meta data collection
-        /// </summary>
-        [HttpPost("/Model/API/RemoveFromApplicationDB")]
-        public JsonResult RemoveFromApplicationDB([FromBody] DatabaseTableFieldVm model)
-        {
-            try
-            {
-                if (model.Id < 1)
-                    throw new InvalidOperationException("Id is missing in model when removing db object");
-                if (model.ApplicationId < 1)
-                    throw new InvalidOperationException("ApplicationId is missing in model when removing db object");
-
-                ModelRepository.DeleteDatabaseModel(model.Id);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting application database meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationDB(model.ApplicationId);
-        }
+       
 
         [HttpPost("/Model/API/SaveDataView")]
         public JsonResult SaveDataView([FromBody] DataViewVm model)

@@ -6,9 +6,7 @@ namespace Intwenty.Model
 {
     public class IntwentyPropertyVm
     {
-        public string PropertyGroup { get; set; }
-
-        public string PropertyName { get; set; }
+        public string Name { get; set; }
 
         public string Title { get; set; }
 
@@ -18,16 +16,12 @@ namespace Intwenty.Model
 
         public List<PropertyPresentation> ValidValues { get; set; }
 
-        public string CurrentValue { get; set; }
-
 
         public IntwentyPropertyVm()
         {
-            PropertyGroup = string.Empty;
-            PropertyName = string.Empty;
             Title = string.Empty;
             ValueType = string.Empty;
-            CurrentValue = string.Empty;
+            Name = string.Empty;
             ValidFor = new List<string>();
             ValidValues = new List<PropertyPresentation>();
         }

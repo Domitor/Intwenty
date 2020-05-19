@@ -138,9 +138,10 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
+                            <div class="col-lg-2">
                                 <div v-if="active_property_selection.isBoolType">
                                     <div class="form-group">
+                                        <p>TRUE</p>
                                     </div>
                                 </div>
                                 <div v-if="active_property_selection.isStringType">
@@ -153,21 +154,31 @@
                                         <input class="form-control-sm" v-model="active_property_selection.currentValue" type="number" />
                                     </div>
                                 </div>
+                                <div v-if="active_property_selection.isListType">
+                                    <div class="form-group">
+                                        <select id="cboxpropvalues"
+                                                name="cboxpropvalues"
+                                                v-model="active_property_selection.currentValue"
+                                                class="form-control form-control-sm">
+                                            <option v-for="item in active_property_selection.validValues" v-bind:value="item">{{item.title}}</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                    <button class="btn btn-sm btn-secondary">Add</button>
+                                    <button class="btn btn-sm btn-secondary" v-on:click="addProperty(active_property_selection, col)"><span class="fa fa-plus"></span> Add</button>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
+                            <div class="col-lg-4">
 
                             </div>
                         </div>
 
 
                         <hr />
-                        <table class="table table-sm">
+                        <table class="table table-sm" style="width:50%">
                             <thead>
                                 <tr>
                                     <th>Property</th>
@@ -176,10 +187,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in col.propertyPresentations">
+                                <tr v-for="item in currentProperties(col)">
                                     <td>{{item.title}}</td>
                                     <td>{{item.presentationValue}}</td>
-                                    <td></td>
+                                    <td><span v-on:click="deleteProperty(item,col)" class="fa fa-trash" style="cursor:pointer"></span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -211,8 +222,6 @@
             {
                 handleSettings: function (item)
                 {
-
-
                     this.active_property_selection = {};
                     item.showSettings = !item.showSettings;
                     this.$forceUpdate();
@@ -222,7 +231,7 @@
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveApplicationDB";
+                    var endpointurl = baseurl + "SaveDatabaseModels";
 
 
                     if (!hasRequiredValues(context.model.tables, ["dbName"]) ||
@@ -247,36 +256,6 @@
                         }
                     });
 
-                },
-                onPropertySelect: function (event) {
-                    var context = this;
-
-                   
-                   
-                },
-                validProperties: function (item)
-                {
-                    var context = this;
-
-                    if (!item.metaType)
-                        return [];
-
-                    var result = [];
-                    for (var i = 0; i < context.metaproperties.length; i++)
-                    {
-                        var isincluded = false;
-                        if (context.metaproperties[i].validFor) {
-                            for (var z = 0; z < context.metaproperties[i].validFor.length; z++) {
-
-                                if (item.metaType === context.metaproperties[i].validFor[z])
-                                    isincluded = true;
-                            }
-                        }
-                        if (isincluded)
-                            result.push(context.metaproperties[i]); 
-                    }
-                   
-                    return result;
                 },
                 addDbTable: function ()
                 {
@@ -311,7 +290,7 @@
                     {
 
                         var baseurl = '@Url.Content("~/Model/API/")';
-                        var endpointurl = baseurl + "RemoveFromApplicationDB";
+                        var endpointurl = baseurl + "DeleteDatabaseModel";
 
 
                         $.ajax({
@@ -337,13 +316,13 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
-                var endpointurl = baseurl + "GetApplicationDB/@ViewBag.SystemId";
+                var endpointurl = baseurl + "GetDatabaseModels/@ViewBag.SystemId";
                 //Application
                 $.get(endpointurl, function (response){
                     context.model = response;
 
                     //DataTypes
-                    endpointurl = baseurl + "GetApplicationTableDataTypes";
+                    endpointurl = baseurl + "GetIntwentyDataTypes";
                     $.get(endpointurl, function (response) {
                         context.datatypes = response;
 

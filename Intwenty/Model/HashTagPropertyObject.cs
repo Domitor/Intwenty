@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Intwenty.Model
@@ -7,48 +8,78 @@ namespace Intwenty.Model
     public class HashTagPropertyObject
     {
 
-        private List<PropertyPresentation> _presentationmap = new List<PropertyPresentation>();
-        private List<PropertyPresentation> _currentpresentations = new List<PropertyPresentation>();
-        private string _propertystore = string.Empty;
-
-        public string Properties
+        public HashTagPropertyObject()
         {
-            get
-            {
-                return _propertystore;
-            }
-            set
-            {
-                _propertystore = value;
-            }
+            PropertyPresentations = new List<PropertyPresentation>();
         }
 
-        public List<PropertyPresentation> PropertyPresentations
-        {
-            get
-            {
-                return GetPropertyList();
+        public string Properties { get; set; }
 
-            }
-            set
+        public List<PropertyPresentation> PropertyPresentations { get; set; }
+
+        public void SetPresentationsFromPropertyString()
+        {
+            PropertyPresentations = new List<PropertyPresentation>();
+
+            if (string.IsNullOrEmpty(Properties))
+                return;
+
+            var arr = Properties.Split("#".ToCharArray());
+
+            foreach (var v in arr)
             {
-                _currentpresentations = value;
-                if (_currentpresentations != null) 
+                var keyval = v.Split("=".ToCharArray());
+                if (keyval.Length == 2)
                 {
-                    _propertystore = string.Empty;
-                    foreach (var p in _currentpresentations) 
-                    {
-                        AddUpdateProperty(p.PropertyCode, p.PropertyValue);
-                    }
-                } 
+                    var t = new PropertyPresentation() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = keyval[0].ToUpper(), PresentationValue = keyval[1].ToUpper() };
+                    if (string.IsNullOrEmpty(t.PresentationValue))
+                        t.PresentationValue = t.PropertyValue;
+
+                    PropertyPresentations.Add(t);
+                }
             }
         }
 
-
-        public void SetPropertyPresentationMap(List<PropertyPresentation> map) 
+        public string GetPropertyStringFromPresentations()
         {
-            _presentationmap = map;
+            if (PropertyPresentations == null)
+                return string.Empty;
+
+            if (PropertyPresentations.Count == 0)
+                return string.Empty;
+
+            var res = string.Empty;
+
+            foreach (var t in PropertyPresentations)
+            {
+
+                var exists = false;
+                if (!string.IsNullOrEmpty(res))
+                {
+                    var arr = res.Split("#".ToCharArray());
+                    foreach (string v in arr)
+                    {
+                        string[] keyval = v.Split("=".ToCharArray());
+                        if (keyval[0].ToUpper() == t.PropertyCode.ToUpper())
+                            exists = true;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(res))
+                    res = t.PropertyCode + "=" + t.PropertyValue;
+                else
+                {
+                    if (!exists)
+                         res += "#" + t.PropertyCode + "=" + t.PropertyValue;
+                }
+            }
+
+
+            return res;
+
+
         }
+
 
         public void AddUpdateProperty(string key, string value)
         {
@@ -56,13 +87,12 @@ namespace Intwenty.Model
 
             try
             {
-
-                if (!string.IsNullOrEmpty(_propertystore))
+                if (!string.IsNullOrEmpty(Properties))
                 {
-                    var arr = _propertystore.Split("#".ToCharArray());
-                    foreach (String v in arr)
+                    var arr = Properties.Split("#".ToCharArray());
+                    foreach (string v in arr)
                     {
-                        String[] keyval = v.Split("=".ToCharArray());
+                        string[] keyval = v.Split("=".ToCharArray());
                         if (keyval[0].ToUpper() != key.ToUpper())
                         {
                             if (string.IsNullOrEmpty(res))
@@ -78,30 +108,26 @@ namespace Intwenty.Model
                 else
                     res += "#" + key + "=" + value;
 
-                _propertystore = res;
+                Properties = res;
             }
-            catch { }
+            catch(Exception ex)
+            { 
+            
+            }
 
         }
 
-        protected virtual List<PropertyPresentation> PropertyPresentationMap
-        {
-            get
-            {
-                return _presentationmap;
-
-            }
-        }
+      
 
         public string GetPropertyValue(string propertyname)
         {
-            if (string.IsNullOrEmpty(_propertystore))
+            if (string.IsNullOrEmpty(Properties))
                 return string.Empty;
 
             if (string.IsNullOrEmpty(propertyname))
                 return string.Empty;
 
-            var arr = _propertystore.Split("#".ToCharArray());
+            var arr = Properties.Split("#".ToCharArray());
 
             foreach (var pair in arr)
             {
@@ -126,9 +152,9 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(propertyname))
                     return false;
 
-                if (!string.IsNullOrEmpty(_propertystore))
+                if (!string.IsNullOrEmpty(Properties))
                 {
-                    var arr = _propertystore.Split("#".ToCharArray());
+                    var arr = Properties.Split("#".ToCharArray());
                     foreach (var v in arr)
                     {
                         var keyval = v.Split("=".ToCharArray());
@@ -166,10 +192,10 @@ namespace Intwenty.Model
 
             try
             {
-                if (string.IsNullOrEmpty(_propertystore))
+                if (string.IsNullOrEmpty(Properties))
                     return res;
 
-                var arr = _propertystore.Split("#".ToCharArray());
+                var arr = Properties.Split("#".ToCharArray());
 
                 foreach (var v in arr)
                 {
@@ -183,45 +209,7 @@ namespace Intwenty.Model
             return res;
         }
 
-        private List<PropertyPresentation> GetPropertyList()
-        {
-            _currentpresentations = new List<PropertyPresentation>();
-
-            if (string.IsNullOrEmpty(_propertystore))
-                return new List<PropertyPresentation>();
-
-            var arr = _propertystore.Split("#".ToCharArray());
-
-            foreach (var v in arr)
-            {
-                var keyval = v.Split("=".ToCharArray());
-                if (keyval.Length == 2)
-                {
-                    var prop = _presentationmap.Find(p => p.PropertyCode == keyval[0].ToUpper());
-                    if (prop != null)
-                    {
-                        var t = new PropertyPresentation() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = prop.Title, PresentationValue = prop.PresentationValue };
-                        if (string.IsNullOrEmpty(t.PresentationValue))
-                            t.PresentationValue = t.PropertyValue;
-                        _currentpresentations.Add(t);
-
-                    }
-                    else
-                    {
-                        var t = new PropertyPresentation() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = keyval[0].ToUpper(), PresentationValue = keyval[1].ToUpper() };
-                        if (string.IsNullOrEmpty(t.PresentationValue))
-                            t.PresentationValue = t.PropertyValue;
-                        _currentpresentations.Add(t);
-
-                    }
-
-
-                }
-            }
-
-            return _currentpresentations;
-
-        }
+      
 
 
     }

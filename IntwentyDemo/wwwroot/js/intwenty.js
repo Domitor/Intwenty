@@ -1,12 +1,132 @@
 ﻿
 
+Array.prototype.where = function (filter) {
+
+    var collection = this;
+
+    switch (typeof filter) {
+
+        case 'function':
+            return $.grep(collection, filter);
+
+        case 'object':
+            for (var property in filter) {
+                if (!filter.hasOwnProperty(property))
+                    continue; // ignore inherited properties
+
+                collection = $.grep(collection, function (item) {
+                    return item[property] === filter[property];
+                });
+            }
+            return collection.slice(0); // copy the array 
+        // (in case of empty object filter)
+
+        default:
+            throw new TypeError('func must be either a' +
+                'function or an object of properties and values to filter by');
+    }
+};
+
+
+Array.prototype.firstOrDefault = function (func) {
+    return this.where(func)[0] || null;
+};
+
+Vue.prototype.validProperties = function (item)
+{
+    var context = this;
+
+    if (!item.metaType)
+        return [];
+
+    if (!context.metaproperties)
+        return [];
+
+    var result = [];
+    for (var i = 0; i < context.metaproperties.length; i++) {
+        var isincluded = false;
+        if (context.metaproperties[i].validFor) {
+            for (var z = 0; z < context.metaproperties[i].validFor.length; z++) {
+
+                if (item.metaType === context.metaproperties[i].validFor[z])
+                    isincluded = true;
+            }
+        }
+        if (isincluded)
+            result.push(context.metaproperties[i]);
+    }
+
+    return result;
+};
+
+Vue.prototype.currentProperties = function (item)
+{
+    var context = this;
+
+    if (!item)
+        return [];
+
+    if (!item.propertyPresentations)
+        return [];
+
+    if (!context.metaproperties)
+        return item.propertyPresentations;
+
+    for (var i = 0; i < item.propertyPresentations.length; i++) {
+        var t = context.metaproperties.firstOrDefault({ name: item.propertyPresentations[i].propertyCode });
+        if (t != null) {
+            item.propertyPresentations[i].title = t.title;
+        }
+    }
+
+    return item.propertyPresentations;
+};
+
+Vue.prototype.addProperty = function (property, col) {
+
+    if (!property)
+        return;
+
+    if (!col)
+        return;
+
+    if (!col.propertyPresentations)
+        return;
+
+    col.propertyPresentations.push({ propertyCode: property.name, title: property.title, propertyValue: property.currentValue, presentationValue: property.currentValue });
+   
+};
+
+Vue.prototype.deleteProperty = function (property, col) {
+
+    if (!property)
+        return;
+
+    if (!col)
+        return;
+
+    if (!col.propertyPresentations)
+        return;
+
+    for (var i = 0; i < col.propertyPresentations.length; i++)
+    {
+        if (col.propertyPresentations[i].propertyCode === property.propertyCode) {
+            col.propertyPresentations[i].splice(i, 1);
+            break;
+        }
+    }
+
+
+
+};
+
 function raiseValidationErrorModal(message)
 {
     $('#msg_dlg_modal_hdr').text('Error');
     $('#msg_dlg_modal_text').text(message);
     $('#msg_dlg_modal').modal();
 
-}
+};
 
 function raiseErrorModal(operationresult)
 {
@@ -14,7 +134,7 @@ function raiseErrorModal(operationresult)
     $('#msg_dlg_modal_text').text(operationresult.userError);
     $('#msg_dlg_modal').modal();
 
-}
+};
 
 function raiseYesNoModal(headertxt, bodytext, yes_callback)
 {
@@ -24,7 +144,7 @@ function raiseYesNoModal(headertxt, bodytext, yes_callback)
     $('#yesno_dlg_modal_yesbtn').off().on('click', yes_callback);
     $('#yesno_dlg_modal').modal();
 
-}
+};
 
 function hasRequiredValues(datalist, requiredlist)
 {
@@ -44,7 +164,7 @@ function hasRequiredValues(datalist, requiredlist)
 
     return true;
 
-}
+};
 
 
 
@@ -472,4 +592,4 @@ function getVueListView(vueelement, applicationid, baseurl) {
     });
 
     return app;
-}
+};
