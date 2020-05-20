@@ -507,7 +507,7 @@ namespace Intwenty.Engine
 
         public virtual OperationResult GetList()
         {
-            //Postgresql must alwaus use columns in order to set correct case in jsonnames
+            //Postgresql must always use columns in order to set correct case in jsonnames
             if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
                 return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, true, false);
             else
@@ -557,12 +557,12 @@ namespace Intwenty.Engine
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.* ");
 
-                if (this.Model.UIStructure.Exists(p => p.IsMetaTypeListViewField && p.IsDataColumnConnected) && selectcolumns)
+                if (this.Model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) && selectcolumns)
                 {
 
                     foreach (var t in this.Model.UIStructure)
                     {
-                        if (t.IsMetaTypeListViewField && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
+                        if (t.IsMetaTypeListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
                         {
                             sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
                             columns.Add(t.DataColumnInfo);

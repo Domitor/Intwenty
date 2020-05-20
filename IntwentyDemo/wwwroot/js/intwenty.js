@@ -148,7 +148,13 @@ Vue.prototype.initializePropertyUI = function (modelitem)
 
 
 
+function raiseInformationModal(headertext, bodytext)
+{
+    $('#msg_dlg_modal_hdr').text(headertext);
+    $('#msg_dlg_modal_text').text(bodytext);
+    $('#msg_dlg_modal').modal();
 
+};
 
 function raiseValidationErrorModal(message)
 {

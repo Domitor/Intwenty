@@ -18,7 +18,7 @@ namespace Intwenty.Model.DesignerVM
            
             foreach (var f in model.Fields)
             {
-                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewField) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
+                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewColumn) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
                 if (string.IsNullOrEmpty(lf.MetaCode))
                     lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
 
@@ -26,7 +26,14 @@ namespace Intwenty.Model.DesignerVM
                 {
                     var dmc = app.DataStructure.Find(p => p.DbName == f.DbName && p.IsRoot);
                     if (dmc != null)
+                    {
                         lf.DataMetaCode = dmc.MetaCode;
+                    }
+                    else
+                    {
+                        //DEFAULT FIELD METACODE
+                        lf.DataMetaCode = f.DbName.ToUpper();
+                    }
                 }
 
                 res.Add(lf);
@@ -69,7 +76,7 @@ namespace Intwenty.Model.DesignerVM
 
                     foreach (var f in app.UIStructure)
                     {
-                        if (f.IsMetaTypeListViewField && f.ParentMetaCode == t.MetaCode)
+                        if (f.IsMetaTypeListViewColumn && f.ParentMetaCode == t.MetaCode)
                         {
                             if (f.IsDataColumnConnected)
                                 res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumnInfo.DbName });

@@ -119,8 +119,8 @@ namespace Intwenty.Model
                 return "TBL_TB";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeListView)
                 return "LV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeListViewField)
-                return "LV_FLD";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeListViewColumn)
+                return "LV_COL";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
                 return "LOOKUP";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeNumBox)
@@ -144,9 +144,9 @@ namespace Intwenty.Model
             if (item.MetaType == DataViewModelItem.MetaTypeDataView)
                 return "DV";
             if (item.MetaType == DataViewModelItem.MetaTypeDataViewColumn)
-                return "DV_FLD";
+                return "DV_COL";
             if (item.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn)
-                return "DV_KFLD";
+                return "DV_KFCOL";
             if (item.MetaType == MenuModelItem.MetaTypeMainMenu)
                 return "MAINMENU";
             if (item.MetaType == MenuModelItem.MetaTypeMenuItem)

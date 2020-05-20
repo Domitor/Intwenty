@@ -3,6 +3,7 @@ using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Intwenty.Data.DBAccess.Helpers;
 
 namespace Intwenty.Model.DesignerVM
 {
@@ -101,6 +102,37 @@ namespace Intwenty.Model.DesignerVM
             }
 
             return res;
+        }
+
+        public static DatabaseTableVm GetListViewTableVm(ApplicationModel app, List<IntwentyDataColumn> intwenty_main_table_columns)
+        {
+            var table = new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true };
+            table.SetPresentationsFromPropertyString();
+
+            foreach (var t in intwenty_main_table_columns)
+            {
+                 var col = new DatabaseTableColumnVm() { DbName = t.ColumnName, Id = 0, MetaCode = t.ColumnName.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, Mandatory = true, ApplicationId = app.Application.Id };
+                 table.Columns.Add(col);
+            }
+
+            foreach (var t in app.DataStructure)
+            {
+                if (t.IsMetaTypeDataColumn && t.IsRoot)
+                {
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id };
+                    if (t.IsUnique)
+                        col.AddUpdateProperty("UNIQUE", "TRUE");
+                    if (!string.IsNullOrEmpty(t.Domain))
+                        col.AddUpdateProperty("DOMAIN", t.Domain);
+
+                    col.SetPresentationsFromPropertyString();
+                    table.Columns.Add(col);
+                }
+
+               
+            }
+
+            return table;
         }
 
     }

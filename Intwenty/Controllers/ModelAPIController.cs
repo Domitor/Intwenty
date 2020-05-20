@@ -117,7 +117,7 @@ namespace Intwenty.Controllers
         /// Removes one database object (column / table) from the UI meta data collection
         /// </summary>
         [HttpPost("/Model/API/DeleteDatabaseModel")]
-        public JsonResult RemoveFromApplicationDB([FromBody] DatabaseTableColumnVm model)
+        public JsonResult DeleteDatabaseModel([FromBody] DatabaseTableColumnVm model)
         {
             try
             {
@@ -176,6 +176,29 @@ namespace Intwenty.Controllers
         {
             var t = new DatabaseModelItem();
             return new JsonResult(DatabaseModelItem.DataTypes);
+
+        }
+
+        /// <summary>
+        /// Get model data for application tables for application with id
+        /// </summary>
+        [HttpGet("/Model/API/GetDatabaseTables/{applicationid}")]
+        public JsonResult GetDatabaseTables(int applicationid)
+        {
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            return new JsonResult(DatabaseModelCreator.GetDatabaseTableVm(t));
+
+        }
+
+        /// <summary>
+        /// Get model data for application tables for application with id
+        /// </summary>
+        [HttpGet("/Model/API/GetListviewTable/{applicationid}")]
+        public JsonResult GetListviewTable(int applicationid)
+        {
+            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var defcols = ModelRepository.GetDefaultMainTableColumns();
+            return new JsonResult(DatabaseModelCreator.GetListViewTableVm(t, defcols));
 
         }
 
@@ -244,6 +267,9 @@ namespace Intwenty.Controllers
 
         #endregion
 
+        #region UI Model
+
+
         /// <summary>
         /// Get UI model for application with id
         /// </summary>
@@ -255,21 +281,91 @@ namespace Intwenty.Controllers
 
         }
 
-      
+        [HttpPost("/Model/API/SaveUserInterfaceModel")]
+        public JsonResult SaveUserInterfaceModel([FromBody] UIVm model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("ApplicationId missing in model");
+
+
+                var views = ModelRepository.GetDataViewModels();
+                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application");
+
+                var dtolist = UIModelCreator.GetUIModel(model, app, views);
+
+                ModelRepository.SaveUserInterfaceModels(dtolist);
+
+                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+                var vm = UIModelCreator.GetUIVm(t);
+                return new JsonResult(vm);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving user interface model.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
 
         /// <summary>
         /// Get meta data for application with id
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationListView/{applicationid}")]
-        public JsonResult GetApplicationListView(int applicationid)
+        [HttpGet("/Model/API/GetListViewModel/{applicationid}")]
+        public JsonResult GetListViewModel(int applicationid)
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(ListViewVm.GetListView(t));
 
         }
 
+        [HttpPost("/Model/API/SaveListViewModel")]
+        public JsonResult SaveListViewModel([FromBody] ListViewVm model)
+        {
+            try
+            {
 
-       
+                if (model.ApplicationId < 1)
+                    throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
+
+                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application");
+
+                var dtolist = MetaDataListViewCreator.GetMetaUIListView(model, app);
+                ModelRepository.SaveUserInterfaceModels(dtolist);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetListViewModel(model.ApplicationId);
+        }
+
+        #endregion
+
+
+
+
+
+
+
+
+
 
         /// <summary>
         /// Get model data for all application tables
@@ -288,16 +384,7 @@ namespace Intwenty.Controllers
         }
 
 
-        /// <summary>
-        /// Get model data for application tables for application with id
-        /// </summary>
-        [HttpGet("/Model/API/GetApplicationListOfDatabaseTables/{applicationid}")]
-        public JsonResult GetApplicationListOfDatabaseTables(int applicationid)
-        {
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(DatabaseModelCreator.GetDatabaseTableVm(t));
-
-        }
+      
 
      
 
@@ -593,39 +680,7 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost("/Model/API/SaveUserInterfaceModel")]
-        public JsonResult SaveUserInterfaceModel([FromBody] UIVm model)
-        {
-            try
-            {
-                if (model.Id < 1)
-                    throw new InvalidOperationException("ApplicationId missing in model");
-
-
-                var views = ModelRepository.GetDataViewModels();
-                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
-                if (app == null)
-                    throw new InvalidOperationException("Could not find application");
-
-                var dtolist = UIModelCreator.GetUIModel(model, app, views);
-
-                ModelRepository.SaveUserInterfaceModels(dtolist);
-
-                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-                var vm = UIModelCreator.GetUIVm(t);
-                return new JsonResult(vm);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving user interface model.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-        }
+       
 
 
 
@@ -633,34 +688,7 @@ namespace Intwenty.Controllers
 
        
 
-        [HttpPost("/Model/API/SaveApplicationListView")]
-        public JsonResult SaveApplicationListView([FromBody] ListViewVm model)
-        {
-            try
-            {
-
-                if (model.ApplicationId < 1)
-                    throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
-
-                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-                if (app == null)
-                    throw new InvalidOperationException("Could not find application");
-
-                var dtolist = MetaDataListViewCreator.GetMetaUIListView(model,app);
-                ModelRepository.SaveUserInterfaceModels(dtolist);
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationListView(model.ApplicationId);
-        }
+       
 
         /// <summary>
         /// Configure the database according to the model

@@ -245,7 +245,10 @@ namespace Intwenty
             ditems = Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
             uitems = Client.GetAll<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
             views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
-           
+
+            var maintable_default_cols = GetDefaultMainTableColumns();
+
+
             foreach (var app in apps)
             {
                 var t = new ApplicationModel();
@@ -293,6 +296,16 @@ namespace Intwenty
                             else if (dinf != null && dinf.IsMetaTypeDataTable)
                                 item.DataTableInfo = dinf;
 
+
+
+                            if (item.IsMetaTypeListViewColumn && item.DataColumnInfo == null)
+                            {
+                                var defcol = maintable_default_cols.Find(p => p.ColumnName.ToUpper() == item.DataMetaCode);
+                                if (defcol != null)
+                                    item.DataColumnInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.MetaCode, Id = 0, DbName = defcol.ColumnName, TableName = app.DbName, MetaCode = defcol.ColumnName.ToUpper(), ParentMetaCode = "ROOT", Title = defcol.ColumnName };
+
+                            }
+
                             if (item.DataColumnInfo != null && item.DataTableInfo == null)
                             {
                                 if (!item.DataColumnInfo.IsRoot)
@@ -307,6 +320,8 @@ namespace Intwenty
 
                                 }
                             }
+
+
 
                         }
 
@@ -1030,6 +1045,7 @@ namespace Intwenty
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "MANDATORY", Value = "Is Mandatory", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "UNIQUE", Value = "Unique Value", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DOMAIN", Value = "Validation Domain", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX" });
 
 
             return res;
@@ -1158,7 +1174,7 @@ namespace Intwenty
                     //if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
                     //    res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
 
-                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewField))
+                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewColumn))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 

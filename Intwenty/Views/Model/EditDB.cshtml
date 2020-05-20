@@ -100,7 +100,8 @@
                         <b>Column settings</b>
                         <br />
 
-                      <partial name="_PropertyUI" />
+                        @await Html.PartialAsync("_PropertyUI", "modelitem")
+
 
                     </div>
                 </td>

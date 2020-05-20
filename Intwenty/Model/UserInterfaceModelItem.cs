@@ -48,7 +48,7 @@ namespace Intwenty.Model
         public static readonly string MetaTypeCheckBox = "CHECKBOX";
         public static readonly string MetaTypeComboBox = "COMBOBOX";
         public static readonly string MetaTypeListView = "LISTVIEW";
-        public static readonly string MetaTypeListViewField = "LISTVIEWFIELD";
+        public static readonly string MetaTypeListViewColumn = "LISTVIEWCOLUMN";
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeEditGrid = "EDITGRID";
@@ -170,7 +170,7 @@ namespace Intwenty.Model
                 t.Add(MetaTypeComboBox);
                 t.Add(MetaTypeImageBox);
                 t.Add(MetaTypeListView);
-                t.Add(MetaTypeListViewField);
+                t.Add(MetaTypeListViewColumn);
                 t.Add(MetaTypePanel);
                 t.Add(MetaTypeDatePicker);
                 t.Add(MetaTypeEditGrid);
@@ -315,9 +315,9 @@ namespace Intwenty.Model
         }
 
 
-        public bool IsMetaTypeListViewField
+        public bool IsMetaTypeListViewColumn
         {
-            get { return MetaType == MetaTypeListViewField; }
+            get { return MetaType == MetaTypeListViewColumn; }
         }
 
        

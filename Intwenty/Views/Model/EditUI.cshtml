@@ -106,7 +106,7 @@
 
                                             <div v-bind:class="layoutClass(sect)" v-for="pnl in sect.layoutPanels" v-if="!pnl.isRemoved">
 
-                                                <div class="formpanel" v-for="input in lrow.userInputs" v-if="input.parentMetaCode==pnl.metaCode && !pnl.isRemoved && !input.isRemoved">
+                                                <div class="formpanel" v-for="input in lrow.userInputs" v-if="input.parentMetaCode===pnl.metaCode && !pnl.isRemoved && !input.isRemoved">
 
                                                     <div class="dropdown" v-if="input.metaType==''" style="text-align:center; margin-top:40px">
 
@@ -302,7 +302,7 @@
                                             <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
                                             <td>
                                                 <select v-model="field.dbName" class="form-control form-control-sm">
-                                                    <option v-for="col in dbColumns(dbtables[0].dbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                                    <option v-for="col in listviewtable.columns" v-bind:value="col.dbName">{{col.dbName}}</option>
                                                 </select>
 
                                             </td>
@@ -336,103 +336,119 @@
                 <div class="modal-body" id="ui_setting_modal_body">
 
                     <div class="settingpnl">
-
-                        <div class="form-group">
-                            <label class="control-label">Title</label>
-                            <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
-                        </div>
-
-                        <div class="form-group" v-if="showSettingDbTable">
-                            <label class="control-label">Set database table</label>
-                            <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
-                                <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="showSettingLookUp">
-                            <label class="control-label">Set data view</label>
-                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
-                                <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="showSettingValueDomain">
-                            <label class="control-label">Set value domain</label>
-                            <select v-model="active_setting_input.domain" class="form-control form-control-sm">
-                                <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="showSettingDbColumn">
-                            <label class="control-label">Set database column</label>
-                            <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
-                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="showSettingLookUp">
-                            <label class="model.control-label">Set view column (Key)</label>
-                            <select v-model="active_setting_input.viewColumnName" class="form-control form-control-sm">
-                                <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                            </select>
-                        </div>
-                        <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
-                            <label class="control-label">Set database column 2 (opt.)</label>
-                            <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
-                                <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                            </select>
-                        </div>
-                        <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
-                            <label class="control-label">Set view column 2 (opt.)</label>
-                            <select v-model="active_setting_input.viewColumnName2" class="form-control form-control-sm">
-                                <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
-                            <label class="control-label">Columns</label>
-                            <br />
-
-
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
-                                <div class="dropdown-menu dropdown-menu-lg-right">
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_TEXTBOX')">Textbox</a>
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_NUMBOX')">Numeric</a>
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_DATEPICKER')">Datepicker</a>
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_CHECKBOX')">Checkbox</a>
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_COMBOBOX')">Combobox</a>
-                                    <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_LOOKUP')">Lookup</a>
-                                </div>
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-bindings" role="tab" aria-controls="nav-bindings" aria-selected="true">Bindings</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-properties" role="tab" aria-controls="nav-properties" aria-selected="false">Properties</a>
                             </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-bindings" role="tabpanel" aria-labelledby="nav-bindings-tab">
+                                <div class="form-group">
+                                    <label class="control-label">Title</label>
+                                    <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
+                                </div>
 
-                            <br />
-                            <br />
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>Title</th>
-                                        <th>Order</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="tcol in active_setting_input.children">
-                                        <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group">
-                                                <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                <div class="form-group" v-if="showSettingDbTable">
+                                    <label class="control-label">Set database table</label>
+                                    <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
+                                        <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="showSettingLookUp">
+                                    <label class="control-label">Set data view</label>
+                                    <select v-model="active_setting_input.domain" class="form-control form-control-sm">
+                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="showSettingValueDomain">
+                                    <label class="control-label">Set value domain</label>
+                                    <select v-model="active_setting_input.domain" class="form-control form-control-sm">
+                                        <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="showSettingDbColumn">
+                                    <label class="control-label">Set database column</label>
+                                    <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="showSettingLookUp">
+                                    <label class="model.control-label">Set view column (Key)</label>
+                                    <select v-model="active_setting_input.viewColumnName" class="form-control form-control-sm">
+                                        <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
+                                    <label class="control-label">Set database column 2 (opt.)</label>
+                                    <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" v-if="active_setting_input.metaType=='LOOKUP'">
+                                    <label class="control-label">Set view column 2 (opt.)</label>
+                                    <select v-model="active_setting_input.viewColumnName2" class="form-control form-control-sm">
+                                        <option v-for="col in viewColumns(active_setting_input.domain)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
+                                    <label class="control-label">Columns</label>
+                                    <br />
+
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
+                                        <div class="dropdown-menu dropdown-menu-lg-right">
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_TEXTBOX')">Textbox</a>
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_NUMBOX')">Numeric</a>
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_DATEPICKER')">Datepicker</a>
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_CHECKBOX')">Checkbox</a>
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_COMBOBOX')">Combobox</a>
+                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_LOOKUP')">Lookup</a>
+                                        </div>
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Title</th>
+                                                <th>Order</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="tcol in active_setting_input.children">
+                                                <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
+                                @await Html.PartialAsync("_PropertyUI", "active_setting_input")
+                            </div>
                         </div>
+
+                        
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -464,7 +480,9 @@
                 valuedomains: [],
                 dataviews: [],
                 listview: {},
+                listviewtable: {},
                 active_setting_input: {},
+                metaproperties: [],
                 idgenerator: 0
             },
             methods:
@@ -480,6 +498,9 @@
                 openSettingsDlg(input)
                 {
                     this.active_setting_input = input;
+                    if (this.active_setting_input.metaType != "EDITGRID")
+                        this.active_setting_input.tableName = this.defaultTable.dbName;
+                    this.initializePropertyUI(this.active_setting_input);
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
                 },
@@ -520,7 +541,7 @@
                     this.addLayoutRow(sect);
                 },
                 addListViewField: function () {
-                    this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWFIELD" });
+                    this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWCOLUMN" });
                 },
                 addEditGridColumn: function (metatype)
                 {
@@ -646,10 +667,11 @@
                         success: function (response) {
                             context.model = response;
                             context.addUserInputSelects();
+                            raiseInformationModal("Success", "The UI model was successfully saved.");
                         },
                         error: function (response)
                         {
-                           raiseErrorModal(response.responseJSON);
+                            raiseErrorModal(response.responseJSON);
                         }
                     });
                 },
@@ -692,18 +714,20 @@
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveApplicationListView";
+                    var endpointurl = baseurl + "SaveListViewModel";
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(context.listview),
-                        success: function (response) {
+                        success: function (response)
+                        {
                             context.listview = response;
+                            raiseInformationModal("Success", "The Listview UI model was successfully saved.");
                         },
                         error: function (response) {
-                                raiseErrorModal(response.responseJSON);
+                             raiseErrorModal(response.responseJSON);
                         }
                     });
                 }
@@ -776,13 +800,13 @@
                 }).done(function () {
 
                     //Tables
-                    endpointurl = baseurl + "GetApplicationListOfDatabaseTables/@ViewBag.SystemId";
+                    endpointurl = baseurl + "GetDatabaseTables/@ViewBag.SystemId";
                     $.get(endpointurl, function (response) {
                         context.dbtables = response;
                     }).done(function () {
 
                         //DataViews
-                        endpointurl = baseurl + "GetDataViews";
+                        endpointurl = baseurl + "GetDataViewModels";
                         $.get(endpointurl, function (response) {
                             context.dataviews = response;
                         }).done(function () {
@@ -794,9 +818,22 @@
                             }).done(function () {
 
                                 //ListView
-                                endpointurl = baseurl + "GetApplicationListView/@ViewBag.SystemId";
+                                endpointurl = baseurl + "GetListViewModel/@ViewBag.SystemId";
                                 $.get(endpointurl, function (response) {
                                     context.listview = response;
+                                }).done(function () {
+
+                                    //Selectable listview columns
+                                    endpointurl = baseurl + "GetListviewTable/@ViewBag.SystemId";
+                                    $.get(endpointurl, function (response) {
+                                        context.listviewtable = response;
+                                    }).done(function () {
+                                        //Properties
+                                        endpointurl = baseurl + "GetIntwentyProperties";
+                                        $.get(endpointurl, function (response) {
+                                            context.metaproperties = response;
+                                        });
+                                    });
                                 });
                             });
                         });
