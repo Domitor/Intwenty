@@ -1147,11 +1147,6 @@ namespace Intwenty
 
                 foreach (var ui in a.UIStructure)
                 {
-                    if (string.IsNullOrEmpty(ui.Title) && !ui.IsMetaTypePanel)
-                    {
-                        res.AddMessage("ERROR", string.Format("The UI object with Id {0} in application {1} has no [Title].", ui.Id, a.Application.Title));
-                        return res;
-                    }
 
                     if (string.IsNullOrEmpty(ui.MetaCode))
                     {
@@ -1171,8 +1166,11 @@ namespace Intwenty
                         return res;
                     }
 
-                    //if (!string.IsNullOrEmpty(ui.MetaCode) && (ui.MetaCode.ToUpper() != ui.MetaCode))
-                    //    res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has a non uppercase [MetaCode].", ui.Title, a.Application.Title));
+                    if (string.IsNullOrEmpty(ui.Title) && !ui.IsMetaTypePanel && !ui.IsMetaTypeSection)
+                    {
+                        res.AddMessage("WARNING", string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
+                    }
+
 
                     if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewColumn))
                         res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
