@@ -28,6 +28,8 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
+        #region Applicaion models
+
         /// <summary>
         /// Get full model data for application with id
         /// </summary>
@@ -80,7 +82,7 @@ namespace Intwenty.Controllers
             return GetApplications();
         }
 
-
+        #endregion
 
         #region Database Model
 
@@ -204,7 +206,6 @@ namespace Intwenty.Controllers
 
 
         #endregion
-
 
         #region Dataview Model
 
@@ -358,35 +359,8 @@ namespace Intwenty.Controllers
 
         #endregion
 
+        #region Value Domains
 
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// Get model data for all application tables
-        /// </summary>
-        [HttpGet("/Model/API/GetListOfDatabaseTables/")]
-        public JsonResult GetListOfDatabaseTables()
-        {
-            var res = new List<DatabaseTableVm>();
-            var apps = ModelRepository.GetApplicationModels();
-            foreach (var t in apps)
-            {
-                res.AddRange(DatabaseModelCreator.GetDatabaseTableVm(t));
-            }
-            return new JsonResult(res);
-
-        }
-
-
-      
-
-     
 
         /// <summary>
         /// Get meta data for application ui declarations for application with id
@@ -409,6 +383,49 @@ namespace Intwenty.Controllers
             return new JsonResult(t.Select(p => p.DomainName).Distinct());
 
         }
+
+        [HttpPost("/Model/API/SaveValueDomains")]
+        public JsonResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)
+        {
+            try
+            {
+                ModelRepository.SaveValueDomains(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving value domain meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetValueDomains();
+        }
+
+
+        [HttpPost("/Model/API/RemoveValueDomain")]
+        public JsonResult RemoveValueDomain([FromBody] ValueDomainModelItem model)
+        {
+            try
+            {
+                if (model.Id < 1)
+                    throw new InvalidOperationException("Id is missing in model when removing value domain value");
+
+                ModelRepository.DeleteValueDomain(model.Id);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting value domain meta data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetValueDomains();
+        }
+
 
         /// <summary>
         /// Get intwenty properties used to configure metadata
@@ -473,6 +490,10 @@ namespace Intwenty.Controllers
             return new JsonResult(result);
 
         }
+
+        #endregion
+
+        #region Import/Export
 
         /// <summary>
         /// Create a json file containing the current model
@@ -626,49 +647,9 @@ namespace Intwenty.Controllers
         }
 
 
-        [HttpPost("/Model/API/SaveValueDomains")]
-        public JsonResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)
-        {
-            try
-            {
-                ModelRepository.SaveValueDomains(model);
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving value domain meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetValueDomains();
-        }
+        #endregion
 
 
-        [HttpPost("/Model/API/RemoveValueDomain")]
-        public JsonResult RemoveValueDomain([FromBody] ValueDomainModelItem model)
-        {
-            try
-            {
-                if (model.Id < 1)
-                    throw new InvalidOperationException("Id is missing in model when removing value domain value");
-
-                ModelRepository.DeleteValueDomain(model.Id);
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting value domain meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetValueDomains();
-        }
-
-       
         /// <summary>
         /// Get meta data for number series
         /// </summary>
