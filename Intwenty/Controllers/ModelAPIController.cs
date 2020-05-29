@@ -538,7 +538,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Create a json file containing all data registered with the current model
         /// </summary>
-        [HttpGet("/Application/API/ExportData")]
+        [HttpGet("/Model/API/ExportData")]
         public IActionResult ExportData()
         {
             var data = new StringBuilder("{\"IntwentyData\":[");

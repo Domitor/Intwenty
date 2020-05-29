@@ -72,6 +72,7 @@ namespace Intwenty.Data.Dto
             state.ApplicationId = state.Data.ApplicationId;
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
+            state.OwnerUserId = state.Data.OwnerUserId;
             return state;
         }
 
