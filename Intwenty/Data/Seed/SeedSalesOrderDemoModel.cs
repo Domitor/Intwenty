@@ -36,8 +36,9 @@ namespace Intwenty.Data.Seed
             DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
-       
-            
+            DataRepository.DeleteRange(DataRepository.GetAll<TranslationItem>());
+
+
 
 
             //APPLICATIONS
@@ -194,9 +195,12 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new DataViewItem() { MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName  from Item order by ItemId asc", Title = "Items", SQLQueryFieldName = "" });
             DataRepository.Insert(new DataViewItem() { MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId", SQLQueryFieldDataType = "STRING" });
             DataRepository.Insert(new DataViewItem() { MetaType = "DATAVIEWCOLUMN", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName", SQLQueryFieldDataType = "STRING" });
-            
+
             #endregion
 
+            #region translation
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key= "COPYRIGHT", Text= "2020 Intwenty" });
+            #endregion
 
 
 
