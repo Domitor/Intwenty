@@ -98,6 +98,10 @@ namespace Intwenty.Data.Dto
                             var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
                             if (parentid != null)
                                 tablerow.ParentId = parentid.GetAsInt().Value;
+
+                            var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
+                            if (rowownedby != null)
+                                tablerow.OwnerUserId = rowownedby.GetAsString();
                         }
 
                     }
@@ -115,6 +119,10 @@ namespace Intwenty.Data.Dto
                 var dataversion = res.Values.Find(p => p.DbName == "Version");
                 if (dataversion != null)
                     res.Version = dataversion.GetAsInt().Value;
+
+                var ownedby = res.Values.Find(p => p.DbName == "OwnedBy");
+                if (ownedby != null)
+                    res.OwnerUserId = ownedby.GetAsString();
 
 
 
@@ -149,6 +157,10 @@ namespace Intwenty.Data.Dto
                     var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
                     if (parentid != null)
                         tablerow.ParentId = parentid.GetAsInt().Value;
+
+                    var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
+                    if (rowownedby != null)
+                        tablerow.OwnerUserId = rowownedby.GetAsString();
                 }
             }
 
@@ -405,7 +417,14 @@ namespace Intwenty.Data.Dto
 
         public int Version { get; set; }
 
+        public string OwnerUserId { get; set; }
+
         public List<ApplicationValue> Values { get; set; }
+
+        public ValueCollectionBase()
+        {
+            OwnerUserId = "SYSTEM";
+        }
 
         public int? GetAsInt(string dbname)
         {

@@ -37,6 +37,28 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
+        /// Get the latest version data for the owning user and with applicationid 
+        /// </summary>
+        /// <param name="applicationid">The ID of the application in the meta model</param>
+        [HttpGet("/Application/API/GetLatestByLoggedInUser/{applicationid}")]
+        public JsonResult GetLatestByLoggedInUser(int applicationid)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                var r = new OperationResult();
+                r.SetError("Cannot get GetLatestByLoggedInUser since the user is not logged in", "User is not logged in");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            var state = new ClientStateInfo() { ApplicationId = applicationid, OwnerUserId = User.Identity.Name };
+            var data = DataRepository.GetLatestVersionByOwnerUser(state);
+            return new JsonResult(data);
+
+        }
+
+        /// <summary>
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost("/Application/API/GetListView")]
