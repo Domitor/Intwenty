@@ -13,6 +13,7 @@ namespace Intwenty.Data.Entity
 
         }
 
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string Key { get; set; }

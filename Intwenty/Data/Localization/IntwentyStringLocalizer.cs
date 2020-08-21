@@ -1,5 +1,6 @@
 ﻿using Intwenty.Data.Entity;
 using Intwenty.Model;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -27,10 +28,17 @@ namespace Intwenty.Data.Localization
         {
             get
             {
-                if (name == null) throw new ArgumentNullException(nameof(name));
+                if (name == null) 
+                    throw new ArgumentNullException(nameof(name));
+
+                var culture = Settings.SiteLanguage;
+
+
+                if (string.IsNullOrEmpty(culture))
+                    throw new InvalidOperationException("Missing culture in settingfile");
 
                 var list = DataRepository.GetDbObjectMapper().GetAll<TranslationItem>();
-                var trans = list.Find(p => p.Key == name);
+                var trans = list.Find(p => p.Key == name && p.Culture == culture);
                 if (trans == null)
                     return new LocalizedString(name, name);
 
@@ -45,10 +53,16 @@ namespace Intwenty.Data.Localization
         {
             get
             {
-                if (name == null) throw new ArgumentNullException(nameof(name));
+                if (name == null) 
+                    throw new ArgumentNullException(nameof(name));
+
+                var culture = Settings.SiteLanguage;
+
+                if (string.IsNullOrEmpty(culture))
+                    throw new InvalidOperationException("Missing culture in settingfile");
 
                 var list = DataRepository.GetDbObjectMapper().GetAll<TranslationItem>();
-                var trans = list.Find(p => p.Key == name);
+                var trans = list.Find(p => p.Key == name && p.Culture == culture);
                 if (trans == null)
                     return new LocalizedString(name, name);
 
@@ -61,7 +75,12 @@ namespace Intwenty.Data.Localization
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
-            return DataRepository.GetDbObjectMapper().GetAll<TranslationItem>().Select(p => new LocalizedString(p.Key, p.Text)).ToList();
+            var culture = Settings.SiteLanguage;
+
+            if (string.IsNullOrEmpty(culture))
+                throw new InvalidOperationException("Missing culture in settingfile");
+
+            return DataRepository.GetDbObjectMapper().GetAll<TranslationItem>().Where(z=> z.Culture==culture).Select(p => new LocalizedString(p.Key, p.Text)).ToList();
         }
 
         public IStringLocalizer WithCulture(CultureInfo culture)

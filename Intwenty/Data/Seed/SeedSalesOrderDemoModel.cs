@@ -199,7 +199,10 @@ namespace Intwenty.Data.Seed
             #endregion
 
             #region translation
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key= "COPYRIGHT", Text= "2020 Intwenty" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key=  "COPYRIGHT", Text = "2020 Intwenty - All rights reserved" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "COPYRIGHT", Text = "2020 Intwenty - Alla rättighter reserverade" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "METAMODELDOC", Text = "Meta model documentation" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "METAMODELDOC", Text = "Dokumentation över metamodellen" });
             #endregion
 
 

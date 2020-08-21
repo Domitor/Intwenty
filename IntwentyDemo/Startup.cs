@@ -108,7 +108,7 @@ namespace IntwentyDemo
             services.AddLocalization();
 
             services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
-            services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+            //services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
