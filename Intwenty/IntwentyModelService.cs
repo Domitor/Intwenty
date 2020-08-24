@@ -970,6 +970,7 @@ namespace Intwenty
                 client.CreateTable<UserInterfaceItem>(true);
                 client.CreateTable<ValueDomainItem>(true);
                 client.CreateTable<DefaultValue>(true);
+                client.CreateTable<TranslationItem>(true);
 
                 client.CreateTable<IntwentyUser>(true); //security_User
                 client.CreateTable<IntwentyRole>(true); //security_Role
@@ -1004,6 +1005,7 @@ namespace Intwenty
                 client.CreateTable<UserInterfaceItem>(true, true);
                 client.CreateTable<ValueDomainItem>(true, true);
                 client.CreateTable<DefaultValue>(true, true);
+                client.CreateTable<TranslationItem>(true);
 
                 client.CreateTable<IntwentyUser>(true,true); //security_User
                 client.CreateTable<IntwentyRole>(true,true); //security_Role

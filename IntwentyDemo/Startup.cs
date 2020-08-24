@@ -9,6 +9,11 @@ using Intwenty;
 using Intwenty.Data.Identity;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
+using Intwenty.Data.Localization;
 
 namespace IntwentyDemo
 {
@@ -79,10 +84,31 @@ namespace IntwentyDemo
                 });
             });
 
+            //Culture
+            services.Configure<RequestLocalizationOptions>(
+              options =>
+              {
+                  var supportedCultures = new List<CultureInfo>
+                      {
+                            new CultureInfo("en-GB"),
+                            new CultureInfo("sv-SE"),
+                      };
+
+                  options.DefaultRequestCulture = new RequestCulture(culture: "sv-SE", uiCulture: "sv-SE");
+                  options.SupportedCultures = supportedCultures;
+                  options.SupportedUICultures = supportedCultures;
+
+              });
+
+           
+
 
             //Remove this in production
-            services.AddRazorPages().AddRazorRuntimeCompilation();
+            services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+            services.AddLocalization();
 
+            services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
+            //services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
