@@ -24,7 +24,7 @@ namespace Intwenty.Model
         {
             Id = entity.Id;
             Title = entity.Title;
-            Title = entity.TitleLocalizationKey;
+            TitleLocalizationKey = entity.TitleLocalizationKey;
             MetaType = entity.MetaType;
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;
