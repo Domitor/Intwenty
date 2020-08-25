@@ -13,6 +13,7 @@ using Intwenty.Data.Dto;
 using Intwenty.Engine;
 using Intwenty.Data.Identity;
 using Microsoft.Extensions.Localization;
+using Intwenty.Data.Localization;
 
 namespace Intwenty
 {
@@ -117,7 +118,6 @@ namespace Intwenty
 
         private IntwentySettings Settings { get; }
 
-        private IStringLocalizer Localizer { get; }
 
         private static readonly string AppModelCacheKey = "APPMODELS";
 
@@ -130,11 +130,10 @@ namespace Intwenty
         private static readonly string ValueDomainsCacheKey = "VALUEDOMAINS";
 
 
-        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IStringLocalizer localizer)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             ModelCache = cache;
             Settings = settings.Value;
-            Localizer = localizer;
             if (Settings.IsNoSQL)
             {
                 Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
@@ -251,18 +250,27 @@ namespace Intwenty
             views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
 
             //Localization
+            var translations = Client.GetAll<TranslationItem>();
             foreach (var item in uitems)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
             }
             foreach (var item in views)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
             }
 
@@ -394,18 +402,27 @@ namespace Intwenty
            var menu = Client.GetAll<MenuItem>();
 
             //Localization
+            var translations = Client.GetAll<TranslationItem>();
             foreach (var item in apps)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
             }
             foreach (var item in menu)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
             }
 
@@ -447,11 +464,16 @@ namespace Intwenty
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
 
             //Localization
+            var translations = Client.GetAll<TranslationItem>();
             foreach (var item in apps)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
             }
 
@@ -856,11 +878,16 @@ namespace Intwenty
             var list = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
 
             //Localization
+            var translations = Client.GetAll<TranslationItem>();
             foreach (var item in list)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
                 }
 
             }
@@ -990,13 +1017,20 @@ namespace Intwenty
             }
 
             var t = Client.GetAll<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
+
             //Localization
+            var translations = Client.GetAll<TranslationItem>();
             foreach (var item in t)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    item.Title = Localizer[item.TitleLocalizationKey];
-                    item.Value = Localizer[item.TitleLocalizationKey];
+                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
+
+                    item.Value = item.Title;
                 }
 
             }
@@ -1515,6 +1549,7 @@ namespace Intwenty
 
 
         #endregion
+
 
 
     }
