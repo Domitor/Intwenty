@@ -16,6 +16,8 @@ namespace Intwenty.Data.Entity
 
         public string Title { get; set; }
 
+        public string TitleLocalizationKey { get; set; }
+
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }

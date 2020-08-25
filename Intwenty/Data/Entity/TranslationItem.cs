@@ -3,7 +3,7 @@ using Intwenty.Data.DBAccess.Annotations;
 
 namespace Intwenty.Data.Entity
 {
-
+    [DbTableIndex("TRANSITEM_IDX_1", true, "Key,Culture")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_TranslationItem")]
    public class TranslationItem

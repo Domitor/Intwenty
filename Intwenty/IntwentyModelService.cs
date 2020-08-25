@@ -12,6 +12,7 @@ using MongoDB.Driver;
 using Intwenty.Data.Dto;
 using Intwenty.Engine;
 using Intwenty.Data.Identity;
+using Microsoft.Extensions.Localization;
 
 namespace Intwenty
 {
@@ -116,6 +117,8 @@ namespace Intwenty
 
         private IntwentySettings Settings { get; }
 
+        private IStringLocalizer Localizer { get; }
+
         private static readonly string AppModelCacheKey = "APPMODELS";
 
         private static readonly string DefaultMainTableColumnsCacheKey = "DEFMAINTBLCOLS";
@@ -127,10 +130,11 @@ namespace Intwenty
         private static readonly string ValueDomainsCacheKey = "VALUEDOMAINS";
 
 
-        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IStringLocalizer localizer)
         {
             ModelCache = cache;
             Settings = settings.Value;
+            Localizer = localizer;
             if (Settings.IsNoSQL)
             {
                 Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
@@ -245,6 +249,22 @@ namespace Intwenty
             ditems = Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
             uitems = Client.GetAll<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
             views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+
+            //Localization
+            foreach (var item in uitems)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+            }
+            foreach (var item in views)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+            }
 
             var maintable_default_cols = GetDefaultMainTableColumns();
 
@@ -372,7 +392,22 @@ namespace Intwenty
 
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
            var menu = Client.GetAll<MenuItem>();
-          
+
+            //Localization
+            foreach (var item in apps)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+            }
+            foreach (var item in menu)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+            }
 
             var res = new List<MenuModelItem>();
             foreach (var m in menu.OrderBy(p=> p.OrderNo))
@@ -410,6 +445,16 @@ namespace Intwenty
 
 
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+
+            //Localization
+            foreach (var item in apps)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+            }
+
             var menu = GetMenuModels();
             foreach (var app in apps)
             {
@@ -477,6 +522,7 @@ namespace Intwenty
                 entity.Id = max;
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
+                entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
@@ -496,6 +542,7 @@ namespace Intwenty
 
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
+                entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
@@ -505,6 +552,7 @@ namespace Intwenty
                     menuitem.Action = model.MainMenuItem.Action;
                     menuitem.Controller = model.MainMenuItem.Controller;
                     menuitem.Title = model.MainMenuItem.Title;
+                    menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
           
                     Client.Update(menuitem);
                 
@@ -539,7 +587,7 @@ namespace Intwenty
                     max = menu.Max(p => p.Order);
                 }
 
-                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
+                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title, TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
@@ -606,6 +654,7 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
+                        existing.TitleLocalizationKey = uic.TitleLocalizationKey;
                         existing.RowOrder = uic.RowOrder;
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataMetaCode = uic.DataMetaCode;
@@ -647,6 +696,7 @@ namespace Intwenty
                 ParentMetaCode = dto.ParentMetaCode,
                 RowOrder = dto.RowOrder,
                 Title = dto.Title,
+                TitleLocalizationKey = dto.TitleLocalizationKey,
                 Properties = dto.Properties
                 
             };
@@ -803,7 +853,18 @@ namespace Intwenty
         #region Data Views
         public List<DataViewModelItem> GetDataViewModels()
         {
-            return Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            var list = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+
+            //Localization
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                }
+
+            }
+            return list;
         }
 
         public void SaveDataViewModels(List<DataViewModelItem> model)
@@ -834,6 +895,7 @@ namespace Intwenty
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
+                        existing.TitleLocalizationKey = dv.TitleLocalizationKey;
                         Client.Update(existing);
                     }
 
@@ -853,6 +915,7 @@ namespace Intwenty
                 MetaType = dto.MetaType,
                 ParentMetaCode = dto.ParentMetaCode,
                 Title = dto.Title,
+                TitleLocalizationKey = dto.TitleLocalizationKey,
                 SQLQuery = dto.SQLQuery,
                 SQLQueryFieldName = dto.SQLQueryFieldName
                 
@@ -927,6 +990,16 @@ namespace Intwenty
             }
 
             var t = Client.GetAll<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
+            //Localization
+            foreach (var item in t)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    item.Title = Localizer[item.TitleLocalizationKey];
+                    item.Value = Localizer[item.TitleLocalizationKey];
+                }
+
+            }
             return t;
         }
 

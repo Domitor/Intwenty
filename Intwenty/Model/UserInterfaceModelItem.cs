@@ -78,6 +78,7 @@ namespace Intwenty.Model
             Id = entity.Id;
             MetaType = entity.MetaType;
             Title = entity.Title;
+            Title = entity.TitleLocalizationKey;
             Description = entity.Description;
             AppMetaCode = entity.AppMetaCode;
             MetaCode = entity.MetaCode;
@@ -106,6 +107,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
         public string Description { get; set; }

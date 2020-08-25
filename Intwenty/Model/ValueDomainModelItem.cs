@@ -21,6 +21,7 @@ namespace Intwenty.Model
             Code = entity.Code;
             Value = entity.Value;
             Title = entity.Value;
+            TitleLocalizationKey = entity.ValueLocalizationKey;
             Properties = entity.Properties;
             MetaType = MetaTypeValueDomain;
             MetaCode = DomainName;
@@ -35,6 +36,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Value)) Value = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
         public static readonly string MetaTypeValueDomain = "VALUEDOMAIN";

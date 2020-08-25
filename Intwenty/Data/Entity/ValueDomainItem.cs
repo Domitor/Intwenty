@@ -18,6 +18,8 @@ namespace Intwenty.Data.Entity
 
         public string Properties { get; set; }
 
+        public string ValueLocalizationKey { get; set; }
+
     }
 
 }

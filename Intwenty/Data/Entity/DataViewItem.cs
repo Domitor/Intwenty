@@ -18,6 +18,8 @@ namespace Intwenty.Data.Entity
 
         public string Title { get; set; }
 
+        public string TitleLocalizationKey { get; set; }
+
         public string SQLQuery { get; set; }
 
         public string SQLQueryFieldName { get; set; }
