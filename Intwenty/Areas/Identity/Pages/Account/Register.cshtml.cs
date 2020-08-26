@@ -14,7 +14,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
-
+using Intwenty.Model;
+using Microsoft.Extensions.Options;
 
 namespace IntwentyDemo.Areas.Identity.Pages.Account
 {
@@ -25,17 +26,20 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IntwentySettings _settings;
 
         public RegisterModel(
             UserManager<IntwentyUser> userManager,
             SignInManager<IntwentyUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _settings = settings.Value;
         }
 
         [BindProperty]
@@ -47,6 +51,11 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+
+            [Required]
+            [Display(Name = "Language")]
+            public string Language { get; set; }
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -76,7 +85,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email };
+                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Language=Input.Language };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

@@ -70,6 +70,7 @@ namespace Intwenty.Data.Seed
             user.FirstName = "Admin";
             user.LastName = "Adminsson";
             user.EmailConfirmed = true;
+            user.Language = Settings.Value.SiteLanguage;
             userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
             userManager.AddToRoleAsync(user, "ADMINISTRATOR");
 
@@ -80,6 +81,7 @@ namespace Intwenty.Data.Seed
             user.FirstName = "User";
             user.LastName = "Usersson";
             user.EmailConfirmed = true;
+            user.Language = Settings.Value.SiteLanguage;
             userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
             userManager.AddToRoleAsync(user, "USER");
 

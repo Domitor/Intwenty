@@ -37,6 +37,8 @@
                     {
                         @await Html.PartialAsync("_IntwentyAdminMenu")
                     }
+
+                  
                 </ul>
                 <partial name="_LoginPartial" />
             </div>
@@ -51,7 +53,7 @@
         {
             <hr />
             <footer>
-                <p>&copy; @Localizer["COPYRIGHT"]</p>
+                <p>&copy; @Localizer["COPYRIGHT"] - @System.Globalization.CultureInfo.CurrentCulture.EnglishName</p>
             </footer>
         }
     </div>

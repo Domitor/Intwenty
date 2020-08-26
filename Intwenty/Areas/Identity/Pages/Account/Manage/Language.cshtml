@@ -1,0 +1,32 @@
+﻿@page
+@model LanguageModel
+@{
+    ViewData["Title"] = "Manage Email";
+    ViewData["ActivePage"] = ManageNavPages.Language;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="language-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Input.NewLanguage"></label>
+
+                <select asp-for="Input.NewLanguage" class="form-control">
+                    <option value="en-US">English</option>
+                    <option value="sv-SE">Swedish</option>
+                </select>
+
+
+            </div>
+            <button id="change-language-button" type="submit" asp-page-handler="ChangeLanguage" class="btn btn-primary">Set Language</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

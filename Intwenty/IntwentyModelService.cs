@@ -1112,7 +1112,7 @@ namespace Intwenty
                 client.CreateTable<UserInterfaceItem>(true, true);
                 client.CreateTable<ValueDomainItem>(true, true);
                 client.CreateTable<DefaultValue>(true, true);
-                client.CreateTable<TranslationItem>(true);
+                client.CreateTable<TranslationItem>(true,true);
 
                 client.CreateTable<IntwentyUser>(true,true); //security_User
                 client.CreateTable<IntwentyRole>(true,true); //security_Role
