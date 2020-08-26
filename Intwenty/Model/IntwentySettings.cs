@@ -19,7 +19,7 @@ namespace Intwenty.Model
         public string DemoAdminPassword { get; set; }
         public string DemoUser { get; set; }
         public string DemoUserPassword { get; set; }
-        public string SiteLanguage { get; set; }
+        public string DefaultCulture { get; set; }
         public string SiteName { get; set; }
 
 

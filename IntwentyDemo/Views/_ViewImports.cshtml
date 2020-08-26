@@ -4,6 +4,8 @@
 @using Intwenty.Data.Localization
 @using Microsoft.Extensions.Localization
 @inject IViewLocalizer Localizer
+@inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
+@inject Microsoft.AspNetCore.Identity.UserManager<Intwenty.Data.Identity.IntwentyUser> UserManager
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 

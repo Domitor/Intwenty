@@ -90,13 +90,15 @@ namespace IntwentyDemo
               {
                   var supportedCultures = new List<CultureInfo>
                       {
-                            new CultureInfo("en-GB"),
+                            new CultureInfo("en-US"),
                             new CultureInfo("sv-SE"),
                       };
 
-                  options.DefaultRequestCulture = new RequestCulture(culture: "sv-SE", uiCulture: "sv-SE");
+                  options.AddInitialRequestCultureProvider(new UserCultureProvider());
+                  options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
                   options.SupportedCultures = supportedCultures;
                   options.SupportedUICultures = supportedCultures;
+                  options.RequestCultureProviders.Insert(0, new UserCultureProvider());
 
               });
 
@@ -134,6 +136,8 @@ namespace IntwentyDemo
             app.UseAuthentication();
             app.UseAuthorization();
 
+            //Localization
+            app.UseRequestLocalization();
           
 
             app.UseEndpoints(endpoints =>

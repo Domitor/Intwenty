@@ -31,7 +31,7 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                var culture = Settings.SiteLanguage;
+                var culture = Settings.DefaultCulture;
 
 
                 if (string.IsNullOrEmpty(culture))
@@ -56,7 +56,7 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                var culture = Settings.SiteLanguage;
+                var culture = Settings.DefaultCulture;
 
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Missing culture in settingfile");
@@ -75,7 +75,7 @@ namespace Intwenty.Data.Localization
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
-            var culture = Settings.SiteLanguage;
+            var culture = Settings.DefaultCulture;
 
             if (string.IsNullOrEmpty(culture))
                 throw new InvalidOperationException("Missing culture in settingfile");

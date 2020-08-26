@@ -255,7 +255,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -266,7 +266,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -407,7 +407,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -418,7 +418,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -469,7 +469,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -883,7 +883,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -1024,7 +1024,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == Settings.SiteLanguage && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
