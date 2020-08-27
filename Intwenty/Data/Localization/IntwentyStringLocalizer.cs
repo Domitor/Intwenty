@@ -44,7 +44,7 @@ namespace Intwenty.Data.Localization
 
 
                 if (string.IsNullOrEmpty(culture))
-                    throw new InvalidOperationException("Missing default culture in settingfile");
+                    throw new InvalidOperationException("Can't get current culture");
 
                 var list = DataRepository.GetDbObjectMapper().GetAll<TranslationItem>();
                 var trans = list.Find(p => p.Key == name && p.Culture == culture);
@@ -68,7 +68,7 @@ namespace Intwenty.Data.Localization
                 var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
 
                 if (string.IsNullOrEmpty(culture))
-                    throw new InvalidOperationException("Missing culture in settingfile");
+                    throw new InvalidOperationException("Can't get current culture");
 
                 var list = DataRepository.GetDbObjectMapper().GetAll<TranslationItem>();
                 var trans = list.Find(p => p.Key == name && p.Culture == culture);
