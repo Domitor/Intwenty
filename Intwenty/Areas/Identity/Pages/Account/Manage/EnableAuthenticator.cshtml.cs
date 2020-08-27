@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
 
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class EnableAuthenticatorModel : PageModel
     {
@@ -101,16 +101,8 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 
             StatusMessage = "Your authenticator app has been verified.";
 
-            if (await _userManager.CountRecoveryCodesAsync(user) == 0)
-            {
-                var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-                RecoveryCodes = recoveryCodes.ToArray();
-                return RedirectToPage("./ShowRecoveryCodes");
-            }
-            else
-            {
-                return RedirectToPage("./TwoFactorAuthentication");
-            }
+            return RedirectToPage("./TwoFactorAuthentication");
+            
         }
 
         private async Task LoadSharedKeyAndQrCodeUriAsync(IntwentyUser user)

@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Intwenty.Data.Identity;
 
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public partial class EmailModel : PageModel
     {

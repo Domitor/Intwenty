@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Intwenty.Data.Identity;
 
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class SetPasswordModel : PageModel
     {

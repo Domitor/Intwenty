@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
 
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class Disable2faModel : PageModel
     {

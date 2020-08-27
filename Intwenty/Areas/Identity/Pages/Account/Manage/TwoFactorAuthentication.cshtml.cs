@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
 
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class TwoFactorAuthenticationModel : PageModel
     {
@@ -52,7 +52,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
             Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
             IsMachineRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user);
-            RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
+            //RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
 
             return Page();
         }

@@ -1,5 +1,6 @@
 ﻿using Intwenty.Data.DBAccess.Annotations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Intwenty.Data.Identity
@@ -19,5 +20,9 @@ namespace Intwenty.Data.Identity
 
         public string Culture { get; set; }
 
+        public string AuthenticatorKey { get; set; }
+
+  
+        
     }
 }

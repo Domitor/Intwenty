@@ -17,7 +17,7 @@ using Intwenty.Data.Identity;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account
+namespace Intwenty.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class RegisterModel : PageModel

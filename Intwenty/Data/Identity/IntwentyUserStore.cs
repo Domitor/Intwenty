@@ -2,13 +2,14 @@
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Intwenty.Data.Identity
 {
-    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>
+    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>, IUserAuthenticatorKeyStore<IntwentyUser>, IUserTwoFactorStore<IntwentyUser>
     {
         private IntwentySettings Settings { get; }
 
@@ -307,6 +308,30 @@ namespace Intwenty.Data.Identity
         {
             user.NormalizedEmail = normalizedEmail;
             return Task.CompletedTask;
+        }
+
+        
+
+        public Task SetAuthenticatorKeyAsync(IntwentyUser user, string key, CancellationToken cancellationToken)
+        {
+            user.AuthenticatorKey = key;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetAuthenticatorKeyAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.AuthenticatorKey);
+        }
+
+        public Task SetTwoFactorEnabledAsync(IntwentyUser user, bool enabled, CancellationToken cancellationToken)
+        {
+            user.TwoFactorEnabled = enabled;
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> GetTwoFactorEnabledAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.TwoFactorEnabled);
         }
     }
 }

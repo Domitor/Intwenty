@@ -14,7 +14,7 @@ using Intwenty.Data.Identity;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
+namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public partial class LanguageModel : PageModel
     {

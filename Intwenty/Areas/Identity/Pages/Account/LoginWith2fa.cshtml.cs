@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Intwenty.Data.Identity;
 
-namespace IntwentyDemo.Areas.Identity.Pages.Account
+namespace Intwenty.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
