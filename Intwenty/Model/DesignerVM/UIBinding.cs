@@ -1,4 +1,5 @@
 ﻿
+using Intwenty.Interface;
 using Intwenty.Model;
 
 namespace Intwenty.Model.DesignerVM

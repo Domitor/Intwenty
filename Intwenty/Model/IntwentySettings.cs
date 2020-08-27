@@ -72,5 +72,14 @@ namespace Intwenty.Model
 
         }
 
+        public List<IntwentyLanguage> SupportedLanguages { get; set; }
+
+    }
+
+    public class IntwentyLanguage
+    {
+        public string Name { get; set; }
+
+        public string Culture { get; set; }
     }
 }

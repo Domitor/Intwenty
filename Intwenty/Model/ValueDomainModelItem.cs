@@ -1,10 +1,11 @@
 ﻿using Intwenty.Data.Entity;
+using Intwenty.Interface;
 using System.Collections.Generic;
 
 
 namespace Intwenty.Model
 {
-    public class ValueDomainModelItem : BaseModelItem
+    public class ValueDomainModelItem : BaseModelItem, ILocalizableTitle
     {
 
         public ValueDomainModelItem()
@@ -60,6 +61,7 @@ namespace Intwenty.Model
             }
         }
 
+        public string TitleLocalizationKey { get; set; }
 
         public string DomainName { get; set; }
 

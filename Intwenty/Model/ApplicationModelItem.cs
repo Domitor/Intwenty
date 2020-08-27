@@ -1,4 +1,5 @@
 ﻿using Intwenty.Data.Entity;
+using Intwenty.Interface;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,7 +8,7 @@ using System.Runtime.Serialization;
 namespace Intwenty.Model
 {
 
-   public class ApplicationModelItem : BaseModelItem
+   public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
     {
         public static readonly string MetaTypeApplication = "APPLICATION";
 
@@ -40,9 +41,11 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
-       
+
+        public string TitleLocalizationKey { get; set; }
 
         public string Description { get; set; }
 

@@ -14,6 +14,7 @@ using Intwenty.Engine;
 using Intwenty.Data.Identity;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
+using Intwenty.Interface;
 
 namespace Intwenty
 {
@@ -89,6 +90,13 @@ namespace Intwenty
         public void DeleteValueDomain(int id);
 
 
+        public List<TranslationModelItem> GetTranslations();
+
+        public void SaveTranslations(List<TranslationModelItem> model);
+
+        public void DeleteTranslation(int id);
+
+
 
 
         public List<MenuModelItem> GetMenuModels();
@@ -118,8 +126,10 @@ namespace Intwenty
 
         private IntwentySettings Settings { get; }
 
+        private string CurrentCulture { get; }
 
-        private static readonly string AppModelCacheKey = "APPMODELS";
+
+        private string AppModelCacheKey = "APPMODELS";
 
         private static readonly string DefaultMainTableColumnsCacheKey = "DEFMAINTBLCOLS";
 
@@ -128,6 +138,8 @@ namespace Intwenty
         private static readonly string DefaultVersioningTableColumnsCacheKey = "DEFVERTBLCOLS";
 
         private static readonly string ValueDomainsCacheKey = "VALUEDOMAINS";
+
+        private static readonly string TranslationsCacheKey = "TRANSLATIONS";
 
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
@@ -142,7 +154,13 @@ namespace Intwenty
             {
                 Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             }
-           
+
+            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+                CurrentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+            else
+                CurrentCulture = Settings.DefaultCulture;
+
+            AppModelCacheKey += "-" + CurrentCulture.Replace("-", "").ToUpper();
         }
 
         public SystemModel GetSystemModel()
@@ -250,29 +268,9 @@ namespace Intwenty
             views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
 
             //Localization
-            var translations = Client.GetAll<TranslationItem>();
-            foreach (var item in uitems)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-            }
-            foreach (var item in views)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-            }
+            LocalizeTitles(uitems.ToList<ILocalizableTitle>());
+            LocalizeTitles(views.ToList<ILocalizableTitle>());
+           
 
             var maintable_default_cols = GetDefaultMainTableColumns();
 
@@ -399,59 +397,37 @@ namespace Intwenty
         {
 
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
-           var menu = Client.GetAll<MenuItem>();
+           var menu = Client.GetAll<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
 
             //Localization
-            var translations = Client.GetAll<TranslationItem>();
-            foreach (var item in apps)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-            }
-            foreach (var item in menu)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-            }
+            LocalizeTitles(apps.ToList<ILocalizableTitle>());
+            LocalizeTitles(menu.ToList<ILocalizableTitle>());
+           
 
             var res = new List<MenuModelItem>();
-            foreach (var m in menu.OrderBy(p=> p.OrderNo))
+            foreach (var m in menu)
             {
-                var s = new MenuModelItem(m);
 
                 //DEFAULTS
-                if (!string.IsNullOrEmpty(m.AppMetaCode) && s.IsMetaTypeMenuItem)
+                if (!string.IsNullOrEmpty(m.AppMetaCode) && m.IsMetaTypeMenuItem)
                 {
-                    if (string.IsNullOrEmpty(s.Controller))
-                        s.Controller = "Application";
+                    if (string.IsNullOrEmpty(m.Controller))
+                        m.Controller = "Application";
 
-                    if (string.IsNullOrEmpty(s.Action))
-                        s.Action = "GetList";
+                    if (string.IsNullOrEmpty(m.Action))
+                        m.Action = "GetList";
 
                     if (!string.IsNullOrEmpty(m.AppMetaCode))
                     {
                         var app = apps.Find(p => p.MetaCode == m.AppMetaCode);
                         if (app != null)
-                            s.Application = app;
+                            m.Application = app;
                     }
                 }
 
-                res.Add(s);
             }
 
-            return res;
+            return menu.OrderBy(p=> p.OrderNo).ToList();
         }
 
 
@@ -464,18 +440,7 @@ namespace Intwenty
            var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
 
             //Localization
-            var translations = Client.GetAll<TranslationItem>();
-            foreach (var item in apps)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-            }
+            LocalizeTitles(apps.ToList<ILocalizableTitle>());
 
             var menu = GetMenuModels();
             foreach (var app in apps)
@@ -544,7 +509,7 @@ namespace Intwenty
                 entity.Id = max;
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
-                entity.TitleLocalizationKey = model.TitleLocalizationKey;
+                //entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
@@ -564,7 +529,7 @@ namespace Intwenty
 
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
-                entity.TitleLocalizationKey = model.TitleLocalizationKey;
+                //entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
@@ -574,7 +539,7 @@ namespace Intwenty
                     menuitem.Action = model.MainMenuItem.Action;
                     menuitem.Controller = model.MainMenuItem.Controller;
                     menuitem.Title = model.MainMenuItem.Title;
-                    menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
+                    //menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
           
                     Client.Update(menuitem);
                 
@@ -606,10 +571,10 @@ namespace Intwenty
                 }
                 else
                 {
-                    max = menu.Max(p => p.Order);
+                    max = menu.Max(p => p.OrderNo);
                 }
 
-                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title, TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey };
+                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
@@ -676,7 +641,7 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
-                        existing.TitleLocalizationKey = uic.TitleLocalizationKey;
+                        //existing.TitleLocalizationKey = uic.TitleLocalizationKey;
                         existing.RowOrder = uic.RowOrder;
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataMetaCode = uic.DataMetaCode;
@@ -718,7 +683,7 @@ namespace Intwenty
                 ParentMetaCode = dto.ParentMetaCode,
                 RowOrder = dto.RowOrder,
                 Title = dto.Title,
-                TitleLocalizationKey = dto.TitleLocalizationKey,
+                //TitleLocalizationKey = dto.TitleLocalizationKey,
                 Properties = dto.Properties
                 
             };
@@ -876,21 +841,7 @@ namespace Intwenty
         public List<DataViewModelItem> GetDataViewModels()
         {
             var list = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
-
-            //Localization
-            var translations = Client.GetAll<TranslationItem>();
-            foreach (var item in list)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-                }
-
-            }
+            LocalizeTitles(list.ToList<ILocalizableTitle>());
             return list;
         }
 
@@ -922,7 +873,7 @@ namespace Intwenty
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
-                        existing.TitleLocalizationKey = dv.TitleLocalizationKey;
+                        //existing.TitleLocalizationKey = dv.TitleLocalizationKey;
                         Client.Update(existing);
                     }
 
@@ -942,7 +893,7 @@ namespace Intwenty
                 MetaType = dto.MetaType,
                 ParentMetaCode = dto.ParentMetaCode,
                 Title = dto.Title,
-                TitleLocalizationKey = dto.TitleLocalizationKey,
+                //TitleLocalizationKey = dto.TitleLocalizationKey,
                 SQLQuery = dto.SQLQuery,
                 SQLQueryFieldName = dto.SQLQueryFieldName
                 
@@ -1017,23 +968,7 @@ namespace Intwenty
             }
 
             var t = Client.GetAll<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
-
-            //Localization
-            var translations = Client.GetAll<TranslationItem>();
-            foreach (var item in t)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == Settings.DefaultCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-
-                    item.Value = item.Title;
-                }
-
-            }
+            LocalizeTitles(t.ToList<ILocalizableTitle>());
             return t;
         }
 
@@ -1052,6 +987,78 @@ namespace Intwenty
 
 
         #endregion
+
+        #region translations
+      
+
+        public List<TranslationModelItem> GetTranslations()
+        {
+            List<TranslationModelItem> res;
+            if (ModelCache.TryGetValue(TranslationsCacheKey, out res))
+            {
+                return res;
+            }
+
+            var t = Client.GetAll<TranslationItem>().Select(p => new TranslationModelItem(p)).ToList();
+            return t;
+        }
+
+        public void SaveTranslations(List<TranslationModelItem> model)
+        {
+            ModelCache.Remove(TranslationsCacheKey);
+
+            foreach (var trans in model)
+            {
+
+                if (trans.Id < 1)
+                {
+                    Client.Insert(new TranslationItem() { Culture = trans.Culture, Key = trans.Key, Text = trans.Text });
+                }
+                else
+                {
+                    var existing = Client.GetAll<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
+                    if (existing != null)
+                    {
+                        existing.Culture = trans.Culture;
+                        existing.Key = trans.Key;
+                        existing.Text = trans.Text;
+                        Client.Update(existing);
+                    }
+                }
+
+            }
+
+        }
+
+        public void DeleteTranslation(int id)
+        {
+            ModelCache.Remove(TranslationsCacheKey);
+            var existing = Client.GetAll<TranslationItem>().FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                Client.Delete(existing);
+            }
+        }
+        #endregion
+
+
+        private void LocalizeTitles(List<ILocalizableTitle> list)
+        {
+            //Localization
+            var translations = Client.GetAll<TranslationItem>();
+
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
+                }
+            }
+        }
 
         #region misc
 

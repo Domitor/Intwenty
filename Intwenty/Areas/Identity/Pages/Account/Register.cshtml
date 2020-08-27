@@ -1,4 +1,5 @@
 ﻿@page
+@inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
@@ -20,11 +21,17 @@
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
-            <label asp-for="Input.Language"></label>
-            <select asp-for="Input.Language" class="form-control">
-                <option value="en-US">English</option>
-                <option value="sv-SE">Swedish</option>
-            </select>
+            <div class="form-group">
+                <label asp-for="Input.Language"></label>
+                <select asp-for="Input.Language" class="form-control">
+                    @{
+                        foreach (var t in Settings.Value.SupportedLanguages)
+                        {
+                            <option value="@t.Culture">@t.Name</option>
+                        }
+                    }
+                </select>
+            </div>
             <div class="form-group">
                 <label asp-for="Input.Email"></label>
                 <input asp-for="Input.Email" class="form-control" />

@@ -1,42 +1,13 @@
 ﻿using Intwenty.Data.Entity;
+using Intwenty.Interface;
 using System.Collections.Generic;
 
 
 namespace Intwenty.Model
 {
 
-    public interface IUIBinding
-    {
-        string UIId { get; }
 
-        bool Mandatory { get; }
-
-        string Title { get;  }
-
-        string DataTableDbName { get; }
-
-        string DataColumnDbName { get; }
-
-    }
-
-    public interface IUIComplexBinding : IUIBinding
-    {
-
-        string ViewName { get; }
-
-        string DomainName { get; }
-
-        string DataColumn2DbName { get; }
-
-        string DataViewColumnDbName { get; }
-
-        string DataViewColumn2DbName { get; }
-
-    }
-
-
-
-    public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding
+    public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle
     {
         //META TYPES
         public static readonly string MetaTypeEmailBox = "EMAILBOX";
@@ -109,6 +80,8 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
+
+        public string TitleLocalizationKey { get; set; }
 
         public string Description { get; set; }
 

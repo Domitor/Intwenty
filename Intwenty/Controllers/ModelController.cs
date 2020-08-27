@@ -54,6 +54,11 @@ namespace Intwenty.Controllers
             return View();
         }
 
+        public IActionResult EditTranslations()
+        {
+            return View();
+        }
+
         public IActionResult EditDataviews()
         {
             return View();

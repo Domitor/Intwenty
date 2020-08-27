@@ -32,6 +32,9 @@ namespace Intwenty.Data.Localization
 
             UserManager<IntwentyUser> UserManager = httpContext.RequestServices.GetRequiredService<UserManager<IntwentyUser>>();
 
+            if (httpContext.Request.Path.HasValue && httpContext.Request.Path.Value.Contains("Model/"))
+                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+
             if (!httpContext.User.Identity.IsAuthenticated)
             {
                 return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
@@ -43,12 +46,12 @@ namespace Intwenty.Data.Localization
                 return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
             }
 
-            if (string.IsNullOrEmpty(user.Language))
+            if (string.IsNullOrEmpty(user.Culture))
             {
                 return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
             }
 
-            return Task.FromResult(new ProviderCultureResult(user.Language));
+            return Task.FromResult(new ProviderCultureResult(user.Culture));
         }
     }
 }

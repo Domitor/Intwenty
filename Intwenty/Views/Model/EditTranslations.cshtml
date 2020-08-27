@@ -1,0 +1,182 @@
+﻿
+
+@{
+    ViewData["Title"] = "Add / Edit Translations";
+}
+
+@await Html.PartialAsync("_Modals")
+
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>Translations</h2></div>
+        <div class="card-body">Translations is key value pairs to translate the intwenty UI between languages/cultures.</div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+    <div>
+        <div class="btn btn-sm btn-primary" v-on:click="saveChanges">
+            <span class="glyphicon glyphicon-save"></span> Save changes
+        </div>
+
+        <div class="btn btn-sm btn-secondary" v-on:click="addTranslation" style="float:right">
+            <span class="fa fa-plus"></span> Add translation
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:30%">Culture <span style="color: red"> *</span></th>
+                <th style="width:30%">Key <span style="color: red"> *</span></th>
+                <th style="width:30%">Text <span style="color: red"> *</span></th>
+                <th style="width:10%"></th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in translations">
+            <tr>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.culture" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.key" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.text" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteTranslation(entry)"><i class="fa fa-trash"></i></div></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {  },
+                translations: [],
+                idgen: -1
+            },
+            methods: {
+
+
+                addTranslation: function ()
+                {
+
+                    this.idgen -= 1;
+                    this.translations.unshift({ id: this.idgen, culture: "", key: "", text: "" });
+                },
+                deleteTranslation: function (entry)
+                {
+                    var context = this;
+
+                    if (entry.id < 1)
+                    {
+                        for (var i = 0; i < context.translations.length; i++)
+                        {
+                            if (context.translations[i].id === entry.id)
+                            {
+                                context.translations.splice(i, 1);
+                                break;
+                            }
+                        }
+                        return;
+                    }
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteTranslation";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.translations = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete translation ?", "A translation will be deleted, continue ?", yesfunc);
+
+                },
+                markChanged: function (entry)
+                {
+                    entry.properties = "CHANGED=TRUE";
+
+                },
+                saveChanges: function ()
+                {
+
+                        var list = [];
+                        var context = this;
+
+                    for (var i = 0; i < context.translations.length; i++)
+                        {
+                        if (context.translations[i].id < 1 || context.translations[i].properties.indexOf("CHANGED=TRUE") > -1)
+                            list.push(context.translations[i]);
+                        }
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "SaveTranslations";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(list),
+                            success: function (response)
+                            {
+                                context.translations = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+
+                }
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                //Translations
+                var context = this;
+                var baseurl = '@Url.Content("~/Model/API/")';
+                var endpointurl = baseurl + "GetTranslations";
+                $.get(endpointurl, function (response) {
+                    context.translations = response;
+                });
+
+            }
+        });
+    </script>
+
+}
+

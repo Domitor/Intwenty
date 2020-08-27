@@ -54,7 +54,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                NewLanguage = currentuser.Language,
+                NewLanguage = currentuser.Culture,
             };
 
             Language = Input.NewLanguage;
@@ -86,9 +86,9 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (Input.NewLanguage != user.Language && !string.IsNullOrEmpty(Input.NewLanguage))
+            if (Input.NewLanguage != user.Culture && !string.IsNullOrEmpty(Input.NewLanguage))
             {
-                user.Language = Input.NewLanguage;
+                user.Culture = Input.NewLanguage;
                 await _userManager.UpdateAsync(user);
 
                 StatusMessage = "Language settings changed.";

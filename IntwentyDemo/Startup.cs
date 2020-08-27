@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
+using System.Linq;
 
 namespace IntwentyDemo
 {
@@ -22,11 +23,13 @@ namespace IntwentyDemo
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            Settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
         }
 
         public IConfiguration Configuration { get; }
 
-       
+        public IntwentySettings Settings { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -85,37 +88,40 @@ namespace IntwentyDemo
             });
 
             //Culture
-            services.Configure<RequestLocalizationOptions>(
-              options =>
-              {
-                  var supportedCultures = new List<CultureInfo>
-                      {
-                            new CultureInfo("en-US"),
-                            new CultureInfo("sv-SE"),
-                      };
+            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+            {
+                var supportedCultures = Settings.SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
+                services.Configure<RequestLocalizationOptions>(
+                    options =>
+                    {
+                        options.AddInitialRequestCultureProvider(new UserCultureProvider());
+                        options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+                        options.SupportedCultures = supportedCultures;
+                        options.SupportedUICultures = supportedCultures;
+                        options.RequestCultureProviders.Insert(0, new UserCultureProvider());
 
-                  options.AddInitialRequestCultureProvider(new UserCultureProvider());
-                  options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
-                  options.SupportedCultures = supportedCultures;
-                  options.SupportedUICultures = supportedCultures;
-                  options.RequestCultureProviders.Insert(0, new UserCultureProvider());
-
-              });
-
-           
+                    });
+            }
 
 
-            //Remove this in production
-            services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
-            services.AddLocalization();
-
-            services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
-            //services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+            //Remove AddRazorRuntimeCompilation in production
+            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+            {
+                services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+                services.AddLocalization();
+                services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
+            }
+            else
+            {
+                services.AddRazorPages().AddRazorRuntimeCompilation();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var supportedCultures = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>().SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
+
             app.UseStaticFiles();
 
             if (env.IsDevelopment())
@@ -137,8 +143,10 @@ namespace IntwentyDemo
             app.UseAuthorization();
 
             //Localization
-            app.UseRequestLocalization();
-          
+            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+            {
+                app.UseRequestLocalization();
+            }
 
             app.UseEndpoints(endpoints =>
             {

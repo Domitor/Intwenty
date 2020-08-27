@@ -1,9 +1,10 @@
 ﻿using Intwenty.Data.Entity;
+using Intwenty.Interface;
 using System.Collections.Generic;
 
 namespace Intwenty.Model
 {
-    public class MenuModelItem : BaseModelItem
+    public class MenuModelItem : BaseModelItem, ILocalizableTitle
     {
 
         //META TYPES
@@ -20,7 +21,7 @@ namespace Intwenty.Model
             MetaType = metatype;
         }
 
-        public MenuModelItem(Data.Entity.MenuItem entity)
+        public MenuModelItem(MenuItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;
@@ -31,12 +32,19 @@ namespace Intwenty.Model
             Controller = entity.Controller;
             Action = entity.Action;
             Properties = entity.Properties;
+            OrderNo = entity.OrderNo;
+            AppMetaCode = entity.AppMetaCode;
+            
         }
 
 
         public ApplicationModelItem Application { get; set; }
 
-        public int Order { get; set; }
+        public string AppMetaCode { get; set; }
+
+        public string TitleLocalizationKey { get; set; }
+
+        public int OrderNo { get; set; }
 
         public string Controller { get; set; }
 

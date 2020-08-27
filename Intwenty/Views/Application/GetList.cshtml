@@ -9,7 +9,7 @@
 
 
         @{
-            var title = Model.Application.Title + " List";
+            var title = "";
             var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
             if (lv != null)
             {
@@ -29,7 +29,7 @@
 
                 <ul class="nav">
                     <li class="nav-item">
-                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> New</a>
+                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Localizer["New", new[] { Model.Application.Title }]</a>
                     </li>
                     <li class="nav-item">
                         <a href="#" v-on:click="exportToExcel()" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</a>

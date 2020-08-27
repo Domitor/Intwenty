@@ -85,7 +85,7 @@ namespace IntwentyDemo.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Language=Input.Language };
+                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Culture = Input.Language };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

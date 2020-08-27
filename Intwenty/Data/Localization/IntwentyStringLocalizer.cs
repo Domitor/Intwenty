@@ -31,11 +31,20 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                var culture = Settings.DefaultCulture;
+                /*
+                 * HOW TO GET CURRENT CULTURE
+                System.Threading.Thread.CurrentThread.CurrentUICulture 
+                System.Threading.Thread.CurrentThread.CurrentCulture      
+                System.Globalization.CultureInfo.CurrentUICulture 
+                System.Globalization.CultureInfo.CurrentCulture 
+                Settings.Value.DefaultCulture 
+                */ 
+
+                var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
 
 
                 if (string.IsNullOrEmpty(culture))
-                    throw new InvalidOperationException("Missing culture in settingfile");
+                    throw new InvalidOperationException("Missing default culture in settingfile");
 
                 var list = DataRepository.GetDbObjectMapper().GetAll<TranslationItem>();
                 var trans = list.Find(p => p.Key == name && p.Culture == culture);
@@ -56,7 +65,7 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                var culture = Settings.DefaultCulture;
+                var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
 
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Missing culture in settingfile");
@@ -69,7 +78,10 @@ namespace Intwenty.Data.Localization
                 if (string.IsNullOrEmpty(trans.Text))
                     return new LocalizedString(name, name);
 
-                return new LocalizedString(name, trans.Text);
+                if (arguments != null)
+                    return new LocalizedString(name, String.Format(trans.Text, arguments));
+                else
+                    return new LocalizedString(name, trans.Text);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿@page
+@inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @model LanguageModel
 @{
     ViewData["Title"] = "Manage Email";
@@ -16,8 +17,12 @@
                 <label asp-for="Input.NewLanguage"></label>
 
                 <select asp-for="Input.NewLanguage" class="form-control">
-                    <option value="en-US">English</option>
-                    <option value="sv-SE">Swedish</option>
+                    @{
+                        foreach (var t in Settings.Value.SupportedLanguages)
+                        {
+                            <option value="@t.Culture">@t.Name</option>
+                        }
+                    }
                 </select>
 
 

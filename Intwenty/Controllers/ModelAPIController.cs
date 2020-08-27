@@ -649,6 +649,64 @@ namespace Intwenty.Controllers
 
         #endregion
 
+        #region Translations
+
+      
+
+        /// <summary>
+        /// Get meta data for data views
+        /// </summary>
+        [HttpGet("/Model/API/GetTranslations")]
+        public JsonResult GetTranslations()
+        {
+            var t = ModelRepository.GetTranslations();
+            var res = new JsonResult(t);
+            return res;
+
+        }
+
+
+        [HttpPost("/Model/API/SaveTranslations")]
+        public JsonResult SaveTranslations([FromBody] List<TranslationModelItem> model)
+        {
+            try
+            {
+                ModelRepository.SaveTranslations(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving translations.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetTranslations();
+        }
+
+
+        [HttpPost("/Model/API/DeleteTranslation")]
+        public JsonResult DeleteTranslation([FromBody] TranslationModelItem model)
+        {
+            try
+            {
+                ModelRepository.DeleteTranslation(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting a translation.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetTranslations();
+        }
+
+        #endregion
 
         /// <summary>
         /// Get meta data for number series
@@ -661,15 +719,7 @@ namespace Intwenty.Controllers
 
         }
 
-       
-
-
-
-       
-
-       
-
-       
+      
 
         /// <summary>
         /// Configure the database according to the model

@@ -13,7 +13,6 @@
 
     var currentpath = Context.Request.Path.ToUriComponent();
     var ishomepath = string.IsNullOrEmpty(currentpath) || currentpath.Length < 5 || currentpath.Contains("Home/Index");
-    var userculture = "";
 }
 
 
@@ -33,9 +32,6 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         @await Html.PartialAsync("_IntwentyAppMenu")
-                        var currentuser = UserManager.GetUserAsync(User).Result;
-                        if (currentuser != null)
-                            userculture = currentuser.Language;
                     }
                     @if (User.IsInRole("ADMINISTRATOR"))
                     {
@@ -49,15 +45,7 @@
         </nav>
     </div>
 
-    <div>
-        <p>CurrentThread.CurrentUICulture: @System.Threading.Thread.CurrentThread.CurrentUICulture</p>
-        <p>CurrentThread.CurrentCulture: @System.Threading.Thread.CurrentThread.CurrentCulture</p>
-        <p>CultureInfo.CurrentUICulture: @System.Globalization.CultureInfo.CurrentUICulture</p>
-        <p>CultureInfo.CurrentCulture: @System.Globalization.CultureInfo.CurrentCulture</p>
-        <p>User Culture: @userculture</p>
-        <p>Intwenty Default Culture Culture: @Settings.Value.DefaultCulture</p>
-
-    </div>
+    
 
 
     <div class="container body-content">

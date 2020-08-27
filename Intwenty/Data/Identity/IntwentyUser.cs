@@ -17,7 +17,7 @@ namespace Intwenty.Data.Identity
 
         public string APIKey { get; set; }
 
-        public string Language { get; set; }
+        public string Culture { get; set; }
 
     }
 }

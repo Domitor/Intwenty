@@ -43,17 +43,18 @@ namespace Intwenty.Data.Seed
 
             //APPLICATIONS
             DataRepository.Insert(new ApplicationItem() { Id = 10, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning = false });
-            DataRepository.Insert(new ApplicationItem() { Id = 20, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false });
-            DataRepository.Insert(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", MetaCode = "SALESORDER", Title = "Sales Order", DbName = "SalesHeader", IsHierarchicalApplication = false, UseVersioning = false });
-            DataRepository.Insert(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false });
+            DataRepository.Insert(new ApplicationItem() { Id = 20, Description = "An app for managing items", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "Item", IsHierarchicalApplication = false, UseVersioning = false });
+            DataRepository.Insert(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "SalesHeader", IsHierarchicalApplication = false, UseVersioning = false });
+            DataRepository.Insert(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "Vendor", IsHierarchicalApplication = false, UseVersioning = false });
 
 
             //MENU
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", OrderNo = 1, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", OrderNo = 10, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", OrderNo = 20, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", OrderNo = 30, Action = "", Controller = "" });
-            DataRepository.Insert(new MenuItem() { AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VEND", ParentMetaCode = "SYSMENU", Title = "Vendor", OrderNo = 40, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", TitleLocalizationKey = "MENU", OrderNo = 1, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VEND", ParentMetaCode = "SYSMENU", Title = "Vendor", TitleLocalizationKey = "VENDOR", OrderNo = 40, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", TitleLocalizationKey = "CUSTOMER", OrderNo = 10, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", TitleLocalizationKey = "ITEM", OrderNo = 20, Action = "", Controller = "" });
+            DataRepository.Insert(new MenuItem() { AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", OrderNo = 30, Action = "", Controller = "" });
+           
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
             DataRepository.DeleteRange(DataRepository.GetAll<ValueDomainItem>().Where(p=> p.DomainName == "ITEMCATEGORY"));
@@ -81,7 +82,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "NUMBOX", MetaCode = "TBCUSTPHONE", DataMetaCode = "CUSTOMEREMAIL", Title = "Email", TitleLocalizationKey = "CUSTOMEREMAIL", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2 });
 
             //LISTVIEW
-            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Customer List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_CUSTID", DataMetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_CUSTNAME", DataMetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
@@ -116,7 +117,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LOOKUP", MetaCode = "LOOKUPVEND", DataMetaCode = "VENDORCODE", DataMetaCode2= "VENDORTXT", ViewMetaCode= "VF_VENDID", ViewMetaCode2 = "VF_VENDNAME", Title = "Vendor", ParentMetaCode = "ITMPNL_B", RowOrder = 4, ColumnOrder = 2, Domain = "DATAVIEW.VENDORVIEW" });
 
             //LISTVIEW
-            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Item List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Item List", TitleLocalizationKey = "ITEMLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ITEMID", DataMetaCode = "ITEMID", Title = "Item ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "ITEM", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ITEMNAME", DataMetaCode = "NAME", Title = "Item Name", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
@@ -137,7 +138,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new DatabaseItem() { AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "QTY", DbName = "Qty", ParentMetaCode = "DTORDLINE", DataType = "INTEGER" });
 
             //LISTVIEW
-            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Sales Orders", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
+            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Sales Orders", TitleLocalizationKey = "SALESORDERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LF_ORDERID", DataMetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "SALESORDER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LF_CUSTNAME", DataMetaCode = "CUSTNAME", Title = "Customer", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
@@ -170,7 +171,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "TEXTBOX", MetaCode = "TB_VENDNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
             
             //LISTVIEW
-            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Vendor List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Vendor List", TitleLocalizationKey = "VENDORLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_VENDID", DataMetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             DataRepository.Insert(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_VENDNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
@@ -205,6 +206,8 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "METAMODELDOC", Text = "Dokumentation över metamodellen" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMER", Text = "Customer" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMER", Text = "Kund" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERLIST", Text = "Customer list" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERLIST", Text = "Kunder" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERID", Text = "Customer ID" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERID", Text = "Kund ID" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERNAME", Text = "Customer Name" });
@@ -217,6 +220,28 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMEREMAIL", Text = "E-Post" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "NAME", Text = "Name" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "NAME", Text = "Namn" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "MENU", Text = "Menu" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "MENU", Text = "Meny" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "ITEM", Text = "Item" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "ITEM", Text = "Artikel" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "ITEMLIST", Text = "Item list" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "ITEMLIST", Text = "Artiklar" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "SALESORDER", Text = "Sales Order" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDER", Text = "Säljorder" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "SALESORDERLIST", Text = "Sales Orders" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDERLIST", Text = "Säljordrar" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "VENDOR", Text = "Vendor" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDOR", Text = "Tillverkare" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "VENDORLIST", Text = "Vendors" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDORLIST", Text = "Tillverkare" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Create new", Text = "Create new" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Create new", Text = "Skapa ny" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "New", Text = "New {0}" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "New", Text = "Ny {0}" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Save", Text = "Save" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Save", Text = "Spara" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Edit", Text = "Edit" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Edit", Text = "Ändra" });
             #endregion
 
 
