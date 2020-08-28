@@ -1,6 +1,7 @@
 ﻿<li class="nav-item dropdown">
     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> System Administration</span> <span class="caret"></span></a>
     <div class="dropdown-menu">
+        <a class="dropdown-item" asp-controller="IdentityAdmin" asp-action="UserAdministration"><span class="fa fa-cogs"></span> Manage Users</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="GetList"><span class="fa fa-cogs"></span> Manage applications</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="EditTranslations"><span class="fas fa-globe-europe"></span> Manage Translations</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>

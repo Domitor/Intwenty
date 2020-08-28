@@ -20,19 +20,16 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        private readonly UserManager<IntwentyUser> _userManager;
+        public readonly IIntwentyDataService _dataService;
         private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly ILogger<LoginModel> _logger;
         private readonly IOptions<IntwentySettings> _settings;
 
-        public LoginModel(SignInManager<IntwentyUser> signInManager, 
-            ILogger<LoginModel> logger,
-            UserManager<IntwentyUser> userManager,
+        public LoginModel(SignInManager<IntwentyUser> signInManager,
+            IIntwentyDataService dataservice,
             IOptions<IntwentySettings> settings)
         {
-            _userManager = userManager;
+            _dataService = dataservice;
             _signInManager = signInManager;
-            _logger = logger;
             _settings = settings;
         }
 
@@ -88,19 +85,35 @@ namespace Intwenty.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    _dataService.LogInfo(String.Format("User {0} logged in with password",Input.Email), username: Input.Email);
+                    var signedinuser = _dataService.GetDbObjectMapper().GetAll<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    if (signedinuser != null)
+                    {
+                        signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        _dataService.GetDbObjectMapper().Update(signedinuser);
+                    }
+
+                    if (_settings.Value.ForceMFA)
+                        return RedirectToPage("./Manage/EnableAuthenticator");
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
+                    var signedinuser = _dataService.GetDbObjectMapper().GetAll<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    if (signedinuser != null)
+                    {
+                        signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        _dataService.GetDbObjectMapper().Update(signedinuser);
+                    }
+
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");
                 }
                 else

@@ -24,9 +24,7 @@ namespace Intwenty.Model
 
 
         public bool AllowExternalLogins { get; set; }
-        public bool AllowMFA { get; set; }
         public bool ForceMFA { get; set; }
-        public bool EnableSMSMfa { get; set; }
         public bool EnableEMailVerification { get; set; }
 
        

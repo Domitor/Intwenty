@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 namespace Intwenty.Data.Identity
 {
@@ -22,7 +23,8 @@ namespace Intwenty.Data.Identity
 
         public string AuthenticatorKey { get; set; }
 
-  
-        
+        public string LastLogin { get; set; }
+
+
     }
 }

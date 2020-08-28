@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Data.Identity
 {
-    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>, IUserAuthenticatorKeyStore<IntwentyUser>, IUserTwoFactorStore<IntwentyUser>
+    public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>, IUserAuthenticatorKeyStore<IntwentyUser>, IUserTwoFactorStore<IntwentyUser>, IUserLockoutStore<IntwentyUser>
     {
         private IntwentySettings Settings { get; }
 
@@ -332,6 +332,45 @@ namespace Intwenty.Data.Identity
         public Task<bool> GetTwoFactorEnabledAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.TwoFactorEnabled);
+        }
+
+        public Task<DateTimeOffset?> GetLockoutEndDateAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.LockoutEnd);
+        }
+
+        public Task SetLockoutEndDateAsync(IntwentyUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
+        {
+            user.LockoutEnd = lockoutEnd;
+            return Task.CompletedTask;
+        }
+
+        public Task<int> IncrementAccessFailedCountAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            user.AccessFailedCount +=1;
+            return Task.FromResult(user.AccessFailedCount);
+        }
+
+        public Task ResetAccessFailedCountAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            user.AccessFailedCount = 0;
+            return Task.CompletedTask;
+        }
+
+        public Task<int> GetAccessFailedCountAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.AccessFailedCount);
+        }
+
+        public Task<bool> GetLockoutEnabledAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.LockoutEnabled);
+        }
+
+        public Task SetLockoutEnabledAsync(IntwentyUser user, bool enabled, CancellationToken cancellationToken)
+        {
+            user.LockoutEnabled = enabled;
+            return Task.CompletedTask;
         }
     }
 }

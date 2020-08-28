@@ -1,0 +1,204 @@
+﻿
+
+@{
+    ViewData["Title"] = "User administration";
+}
+
+@await Html.PartialAsync("_Modals")
+
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>User administration</h2></div>
+        <div class="card-body">Manage users.</div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+    <div>
+        
+        <div class="btn btn-sm btn-secondary" v-on:click="addUser">
+            <span class="fa fa-plus"></span> Add user
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:25%">User Name</th>
+                <th style="width:15%">IsBlocked</th>
+                <th style="width:15%">MFA Active</th>
+                <th style="width:25%">Last login</th>
+                <th style="width:5%">Edit</th>
+                <th style="width:5%">Block</th>
+                <th style="width:5%">Reset MFA</th>
+                <th style="width:5%">Delete</th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in users">
+            <tr>
+                <td>{{entry.userName}}</td>
+                <td>{{entry.isBlocked}}</td>
+                <td>{{entry.mfaActive}}</td>
+                <td>{{entry.lastLogin}}</td>
+                <td><div class="btn btn-sm btn-secondary" v-on:click="editUser(entry)" title="Edit"><i class="fas fa-edit"></i></div></td>
+                <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
+                <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
+                <td><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteUser(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {  },
+                users: [],
+                idgen: -1
+            },
+            methods: {
+
+
+                addUser: function ()
+                {
+
+
+                },
+                blockUser: function (entry)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var endpointurl = baseurl + "BlockUser";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Block user ?", "The user will be blocked, continue ?", yesfunc);
+
+                },
+                unblockUser: function (entry)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var endpointurl = baseurl + "UnblockUser";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Unblock user ?", "The user will gain access again, continue ?", yesfunc);
+
+                },
+                resetMFA: function () {
+
+                    var yesfunc = function () {
+                        return true;
+                    }
+
+                    raiseYesNoModal("Reset two factor authentication ?", "Continue ?", yesfunc);
+
+                },
+                editUser: function () {
+
+
+                },
+                deleteUser: function (entry)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var endpointurl = baseurl + "DeleteUser";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete user ?", "The user will be deleted, continue ?", yesfunc);
+
+                }
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                //Translations
+                var context = this;
+                var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                var endpointurl = baseurl + "GetUsers";
+                $.get(endpointurl, function (response) {
+                    context.users = response;
+                });
+
+            }
+        });
+    </script>
+
+}
+

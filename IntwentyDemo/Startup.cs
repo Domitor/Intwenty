@@ -68,6 +68,14 @@ namespace IntwentyDemo
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 5;
                 options.Password.RequireNonAlphanumeric = false;
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+
+                options.User.RequireUniqueEmail = true;
+
+              
             })
              .AddRoles<IntwentyRole>()
              .AddUserStore<IntwentyUserStore>()
@@ -154,6 +162,61 @@ namespace IntwentyDemo
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
+
+            if (Configuration.GetSection("IntwentySettings").Get<IntwentySettings>().ForceMFA)
+            {
+                //TODO: CHECK IF USER HAS ENABLED MFA, OTHERWISE REDIRECT TO ENABLEMFA
+
+                /*
+     
+                public class UserDestroyerMiddleware
+                {
+                    private readonly RequestDelegate _next;
+
+                    public UserDestroyerMiddleware(RequestDelegate next)
+                    {
+                        _next = next;
+                    }
+
+                    public async Task Invoke(HttpContext httpContext,
+                        UserManager<ApplicationUser> userManager,
+                        SignInManager<ApplicationUser> signInManager)
+                    {
+                        if (!string.IsNullOrEmpty(httpContext.User.Identity.Name))
+                        {
+                            var user = await userManager.FindByNameAsync(httpContext.User.Identity.Name);
+
+                            if (user.LockoutEnd > DateTimeOffset.Now)
+                            {
+                                //Log the user out and redirect back to homepage
+                                await signInManager.SignOutAsync();
+                                httpContext.Response.Redirect("/");
+                            }
+                        }
+                        await _next(httpContext);
+                    }
+                }
+              
+                public static class UserDestroyerMiddlewareExtensions
+                {
+                    public static IApplicationBuilder UseUserDestroyer(this IApplicationBuilder builder)
+                    {
+                        return builder.UseMiddleware<UserDestroyerMiddleware>();
+                    }
+                }
+
+                */
+            }
+
+
+
+
+
+
+
+
+
+
         }
     }
 }

@@ -904,9 +904,12 @@ namespace Intwenty.Data.DBAccess
                         property.SetValue(m, Convert.ToSingle(r[colname]), null);
                     else if (property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE")
                         property.SetValue(m, Convert.ToDouble(r[colname]), null);
+                    else if (property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && DbEngine == DBMS.SQLite)
+                        property.SetValue(m, new DateTimeOffset(Convert.ToDateTime(r[colname])), null);
                     else
                         property.SetValue(m, r[colname], null);
                 }
+               
 
                 res.Add(m);
             }
@@ -955,6 +958,13 @@ namespace Intwenty.Data.DBAccess
                 }
               
                 var value = m.GetValue(model);
+
+                //SPECIAL SINCE SQL LITE CANT HANDLE DATETIMEOFFSET
+                if (value != null && value != DBNull.Value && m.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && DbEngine == DBMS.SQLite)
+                {
+                    value = ((DateTimeOffset)value).DateTime;
+                }
+
                 var prm = new IntwentyParameter();
                 prm.ParameterName = "@" + colname;
 
@@ -1090,6 +1100,9 @@ namespace Intwenty.Data.DBAccess
 
                 var value = m.GetValue(model);
 
+              
+                
+
                 var annot_autoinc = m.GetCustomAttributes(typeof(AutoIncrement), false);
                 if (annot_autoinc != null && annot_autoinc.Length > 0)
                 {
@@ -1118,6 +1131,12 @@ namespace Intwenty.Data.DBAccess
 
                 if (keyparameters.Exists(p => p.ParameterName == colname))
                     continue;
+
+                //SPECIAL SINCE SQL LITE CANT HANDLE DATETIMEOFFSET
+                if (value != null && value != DBNull.Value && m.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && DbEngine == DBMS.SQLite)
+                {
+                    value = ((DateTimeOffset)value).DateTime;
+                }
 
                 var prm = new IntwentyParameter();
                 prm.ParameterName = "@" + colname;
