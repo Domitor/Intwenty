@@ -1,4 +1,5 @@
 ﻿using Intwenty.Model;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,14 @@ using System.Threading.Tasks;
 
 namespace IntwentyDemo
 {
+    /*
     public interface IEmailSender
     {
         Task SendEmail(string sendto, string subject, string message);
 
         Task SendEmailAsync(string sendto, string subject, string message);
     }
+    */
 
     public class EmailSender : IEmailSender
     {
