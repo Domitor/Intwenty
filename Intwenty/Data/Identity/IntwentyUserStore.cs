@@ -326,6 +326,9 @@ namespace Intwenty.Data.Identity
         public Task SetTwoFactorEnabledAsync(IntwentyUser user, bool enabled, CancellationToken cancellationToken)
         {
             user.TwoFactorEnabled = enabled;
+            if (!enabled)
+                user.AuthenticatorKey = "";
+
             return Task.CompletedTask;
         }
 

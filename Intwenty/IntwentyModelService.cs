@@ -1044,6 +1044,9 @@ namespace Intwenty
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
         {
+            if (!Settings.EnableLocalization)
+                return;
+
             //Localization
             var translations = Client.GetAll<TranslationItem>();
 
@@ -1066,7 +1069,7 @@ namespace Intwenty
         public void CreateIntwentyDatabase()
         {
 
-            if (!Settings.IsDevelopment)
+            if (!Settings.ReCreateDatabaseOnStartup)
                 return;
 
 

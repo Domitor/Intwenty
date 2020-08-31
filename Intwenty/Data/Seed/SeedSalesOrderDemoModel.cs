@@ -20,7 +20,8 @@ namespace Intwenty.Data.Seed
         {
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.IsDevelopment)
+            if (!Settings.Value.SeedDatabaseOnStartUp ||
+                !Settings.Value.ReCreateDatabaseOnStartup)
                 return;
 
             IIntwentyDbORM DataRepository = null;

@@ -52,7 +52,8 @@
                 <td><div class="btn btn-sm btn-secondary" v-on:click="editUser(entry)" title="Edit"><i class="fas fa-edit"></i></div></td>
                 <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
                 <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
-                <td><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
+                <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
+                <td v-if="!entry.mfaActive"></td>
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteUser(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
             </tr>
         </tbody>
@@ -135,25 +136,41 @@
                     raiseYesNoModal("Unblock user ?", "The user will gain access again, continue ?", yesfunc);
 
                 },
-                resetMFA: function () {
+                resetMFA: function ()
+                {
+                    var context = this;
+                    var yesfunc = function ()
+                    {
 
-                    var yesfunc = function () {
-                        return true;
+                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var endpointurl = baseurl + "ResetMFA";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
                     }
 
-                    raiseYesNoModal("Reset two factor authentication ?", "Continue ?", yesfunc);
+                    raiseYesNoModal("Reset Twofactor Authentication ?", "Twofactor authentication will be removed from the user. The user can configure it again.", yesfunc);
 
                 },
-                editUser: function () {
-
-
+                editUser: function ()
+                {
+                    raiseYesNoModal("Not implemented", "Editing user details is not implemented");
                 },
                 deleteUser: function (entry)
                 {
                     var context = this;
-
-                    var yesfunc = function ()
-                    {
+                    var yesfunc = function () {
 
                         var baseurl = '@Url.Content("~/IdentityAdmin/")';
                         var endpointurl = baseurl + "DeleteUser";
@@ -174,7 +191,6 @@
                     }
 
                     raiseYesNoModal("Delete user ?", "The user will be deleted, continue ?", yesfunc);
-
                 }
             },
             computed:

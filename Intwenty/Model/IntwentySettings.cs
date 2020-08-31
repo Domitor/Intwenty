@@ -13,21 +13,38 @@ namespace Intwenty.Model
     {
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
-        public bool IsDevelopment { get; set; }
-        public bool IsDemo { get; set; }
+        public bool ReCreateDatabaseOnStartup { get; set; }
+
+        public bool SeedDatabaseOnStartUp { get; set; }
+
+        public bool UseDemoSettings { get; set; }
+
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }
         public string DemoUser { get; set; }
         public string DemoUserPassword { get; set; }
+
+        public bool EnableLocalization { get; set; }
         public string DefaultCulture { get; set; }
-        public string SiteName { get; set; }
+        public List<IntwentyLanguage> SupportedLanguages { get; set; }
+
+        /// <summary>
+        /// The title of the site where intwenty is used
+        /// </summary>
+        public string SiteTitle { get; set; }
+
+        /// <summary>
+        /// The title to show in authenticator apps
+        /// </summary>
+        public string AuthenticatorTitle { get; set; }
 
 
-        public bool AllowExternalLogins { get; set; }
-        public bool ForceMFA { get; set; }
-        public bool EnableEMailVerification { get; set; }
+        public bool EnableExternalLogins { get; set; }
+        public bool EnableEMailVerivication { get; set; }
+        public bool EnableTwoFactorAuthentication { get; set; }
+        public bool ForceTwoFactorAuthentication { get; set; }
 
-       
+
 
         //EMAIL
         public string MailServiceServer { get; set; }
@@ -70,7 +87,7 @@ namespace Intwenty.Model
 
         }
 
-        public List<IntwentyLanguage> SupportedLanguages { get; set; }
+      
 
     }
 

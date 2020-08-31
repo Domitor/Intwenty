@@ -20,7 +20,9 @@ namespace Intwenty.Data.Seed
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.IsDevelopment && Settings.Value.IsDemo)
+            if (!Settings.Value.SeedDatabaseOnStartUp ||
+                !Settings.Value.UseDemoSettings ||
+                !Settings.Value.ReCreateDatabaseOnStartup)
                 return;
 
             if (string.IsNullOrEmpty(Settings.Value.DemoAdminUser) ||

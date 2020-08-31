@@ -78,6 +78,34 @@ namespace Intwenty.Controllers
             return GetUsers();
         }
 
+        [HttpPost("/IdentityAdmin/ResetMFA")]
+        public JsonResult ResetMFA([FromBody] IntwentyUserVm model)
+        {
+
+            //Requires SetLockoutEnabled in startup.cs
+            var user = UserManager.FindByIdAsync(model.Id).Result;
+            if (user != null)
+            {
+                UserManager.SetTwoFactorEnabledAsync(user, false);
+            }
+
+
+            return GetUsers();
+        }
+
+        [HttpPost("/IdentityAdmin/DeleteUser")]
+        public JsonResult DeleteUser([FromBody] IntwentyUserVm model)
+        {
+            var user = UserManager.FindByIdAsync(model.Id).Result;
+            if (user != null)
+                UserManager.DeleteAsync(user);
+
+
+            return GetUsers();
+        }
+
+
+
 
     }
 }

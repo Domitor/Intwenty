@@ -95,9 +95,16 @@ namespace IntwentyDemo
                 });
             });
 
-            //Culture
-            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+            //Use Intwenty Localization
+            if (Settings.EnableLocalization)
             {
+                if (string.IsNullOrEmpty(Settings.DefaultCulture))
+                    throw new InvalidOperationException("Could not find DefaultCulture in setting file");
+                if (Settings.SupportedLanguages == null)
+                    throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
+                if (Settings.SupportedLanguages.Count == 0)
+                    throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
+
                 var supportedCultures = Settings.SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
                 services.Configure<RequestLocalizationOptions>(
                     options =>
@@ -109,26 +116,20 @@ namespace IntwentyDemo
                         options.RequestCultureProviders.Insert(0, new UserCultureProvider());
 
                     });
-            }
 
-
-            //Remove AddRazorRuntimeCompilation in production
-            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
-            {
-                services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
                 services.AddLocalization();
                 services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
             }
-            else
-            {
-                services.AddRazorPages().AddRazorRuntimeCompilation();
-            }
+           
+
+            services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var supportedCultures = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>().SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
 
             app.UseStaticFiles();
 
@@ -151,9 +152,14 @@ namespace IntwentyDemo
             app.UseAuthorization();
 
             //Localization
-            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+            if (Settings.EnableLocalization)
             {
                 app.UseRequestLocalization();
+            }
+
+            if (Settings.ForceTwoFactorAuthentication)
+            {
+                app.UseForceMFAMiddleware();
             }
 
             app.UseEndpoints(endpoints =>
@@ -163,59 +169,7 @@ namespace IntwentyDemo
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
 
-            if (Configuration.GetSection("IntwentySettings").Get<IntwentySettings>().ForceMFA)
-            {
-                //TODO: CHECK IF USER HAS ENABLED MFA, OTHERWISE REDIRECT TO ENABLEMFA
-
-                /*
-     
-                public class UserDestroyerMiddleware
-                {
-                    private readonly RequestDelegate _next;
-
-                    public UserDestroyerMiddleware(RequestDelegate next)
-                    {
-                        _next = next;
-                    }
-
-                    public async Task Invoke(HttpContext httpContext,
-                        UserManager<ApplicationUser> userManager,
-                        SignInManager<ApplicationUser> signInManager)
-                    {
-                        if (!string.IsNullOrEmpty(httpContext.User.Identity.Name))
-                        {
-                            var user = await userManager.FindByNameAsync(httpContext.User.Identity.Name);
-
-                            if (user.LockoutEnd > DateTimeOffset.Now)
-                            {
-                                //Log the user out and redirect back to homepage
-                                await signInManager.SignOutAsync();
-                                httpContext.Response.Redirect("/");
-                            }
-                        }
-                        await _next(httpContext);
-                    }
-                }
-              
-                public static class UserDestroyerMiddlewareExtensions
-                {
-                    public static IApplicationBuilder UseUserDestroyer(this IApplicationBuilder builder)
-                    {
-                        return builder.UseMiddleware<UserDestroyerMiddleware>();
-                    }
-                }
-
-                */
-            }
-
-
-
-
-
-
-
-
-
+          
 
         }
     }

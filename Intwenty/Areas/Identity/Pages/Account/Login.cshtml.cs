@@ -96,8 +96,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         _dataService.GetDbObjectMapper().Update(signedinuser);
                     }
 
-                    if (_settings.Value.ForceMFA)
-                        return RedirectToPage("./Manage/EnableAuthenticator");
+                    //if (_settings.Value.ForceMFA)
+                      //  return RedirectToPage("./Manage/EnableAuthenticator");
 
                     return LocalRedirect(returnUrl);
                 }
