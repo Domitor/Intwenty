@@ -1,0 +1,45 @@
+﻿@page
+@model APIKeyModel
+@{
+    ViewData["Title"] = "Manage API Keys";
+    ViewData["ActivePage"] = ManageNavPages.APIKey;
+}
+<h4>@ViewData["Title"]</h4>
+<br />
+<p>@Localizer["APIKEYINFO"]</p>
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form id="apikey-form" method="post">
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group">
+
+                @if (Model.Input.HasAPIKey)
+                {
+                    <b>Your current API Key:</b> @Model.Input.APIKey
+                    <br />
+                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">Renew Key</button>
+                }
+                else
+                {
+                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">Create Key</button>
+                }
+
+
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

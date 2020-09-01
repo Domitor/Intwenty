@@ -243,6 +243,8 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Save", Text = "Spara" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Edit", Text = "Edit" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Edit", Text = "Ändra" });
+            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
+            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
             #endregion
 
 

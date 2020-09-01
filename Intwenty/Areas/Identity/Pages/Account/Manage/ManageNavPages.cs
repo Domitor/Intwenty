@@ -22,9 +22,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
 
+        public static string APIKey => "APIKey";
+
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 
         public static string LanguageNavClass(ViewContext viewContext) => PageNavClass(viewContext, Language);
+
+        public static string APIKeyNavClass(ViewContext viewContext) => PageNavClass(viewContext, APIKey);
 
         public static string EmailNavClass(ViewContext viewContext) => PageNavClass(viewContext, Email);
 
