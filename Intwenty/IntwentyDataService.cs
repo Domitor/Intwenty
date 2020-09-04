@@ -113,6 +113,18 @@ namespace Intwenty
         OperationResult GetValueDomains();
 
         /// <summary>
+        /// Get all value domain items.
+        /// </summary>
+        /// <returns>A list of ValueDomainModelItem</returns>
+        List<ValueDomainModelItem> GetValueDomainItems();
+
+        /// <summary>
+        /// Get all value domain items for one domain.
+        /// </summary>
+        /// <returns>A list of ValueDomainModelItem</returns>
+        List<ValueDomainModelItem> GetValueDomainItems(string domainname);
+
+        /// <summary>
         /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
@@ -771,6 +783,16 @@ namespace Intwenty
                 return t.GetValueDomains();
             }
 
+        }
+
+        public List<ValueDomainModelItem> GetValueDomainItems()
+        {
+            return ModelRepository.GetValueDomains();
+        }
+
+        public List<ValueDomainModelItem> GetValueDomainItems(string domainname)
+        {
+            return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
 
         public OperationResult Validate(ApplicationModel app, ClientStateInfo state)

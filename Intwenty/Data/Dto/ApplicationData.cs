@@ -236,6 +236,11 @@ namespace Intwenty.Data.Dto
             }
         }
 
+        public void SetValue(object value)
+        {
+            Value = value;
+        }
+
         public int? GetAsInt()
         {
             if (HasValue)
@@ -471,6 +476,19 @@ namespace Intwenty.Data.Dto
                 return null;
 
             return value.GetAsDateTime();
+        }
+
+        public void SetValue(string dbname, object value)
+        {
+            var t = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (t != null)
+            {
+                t.SetValue(value);
+            }
+            else
+            {
+                this.Values.Add(new ApplicationValue() { DbName = dbname, Value = value });
+            }
         }
 
     }

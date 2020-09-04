@@ -45,6 +45,8 @@ namespace Intwenty.Model
         public bool ForceTwoFactorAuthentication { get; set; }
 
 
+        public bool EnableAPIKeyGeneration { get; set; }
+
 
         //EMAIL
         public string MailServiceServer { get; set; }

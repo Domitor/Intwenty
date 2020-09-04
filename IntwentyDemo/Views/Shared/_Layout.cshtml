@@ -20,6 +20,12 @@
 
 
     <div class="container">
+        @if (ishomepath)
+        {
+            <partial name="_CookieConsentPartial" />
+
+        }
+
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="/">Intwenty</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,13 +55,19 @@
 
 
     <div class="container body-content">
+
+
         @RenderBody()
+
         @if (!ishomepath)
         {
             <hr />
             <footer>
                 <p>&copy; @Localizer["COPYRIGHT"]</p>
             </footer>
+            <br />
+            <br />
+            <partial name="_CookieConsentPartial" />
         }
     </div>
 
