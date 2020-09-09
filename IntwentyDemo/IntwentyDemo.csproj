@@ -23,9 +23,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Identity\Views\Shared\" />
     <Folder Include="wwwroot\litedb\" />
     <Folder Include="wwwroot\sqlite\" />
     <Folder Include="wwwroot\USERDOC\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Areas\Identity\Views\_ViewImports.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Areas\Identity\Views\_ViewStart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   

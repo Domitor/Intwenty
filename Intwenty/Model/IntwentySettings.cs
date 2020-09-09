@@ -8,7 +8,9 @@ namespace Intwenty.Model
 
     public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
 
- 
+    public enum LocalizationMethods { SiteLocalization, UserLocalization };
+
+
     public class IntwentySettings
     {
         public string DefaultConnection { get; set; }
@@ -24,29 +26,48 @@ namespace Intwenty.Model
         public string DemoUser { get; set; }
         public string DemoUserPassword { get; set; }
 
+
+        /// <summary>
+        /// Enable localization
+        /// </summary>
         public bool EnableLocalization { get; set; }
+        /// <summary>
+        /// SiteLocalization = Always use DefaultCulture to look up localization keys
+        /// UserLocalization = Always use UserCulture to  look up localization keys
+        /// </summary>
+        public LocalizationMethods LocalizationMethod { get; set; }
         public string DefaultCulture { get; set; }
         public List<IntwentyLanguage> SupportedLanguages { get; set; }
+
 
         /// <summary>
         /// The title of the site where intwenty is used
         /// </summary>
         public string SiteTitle { get; set; }
 
+
+        public bool EnableExternalLogins { get; set; }
+        public bool EnableEMailVerivication { get; set; }
+
         /// <summary>
         /// The title to show in authenticator apps
         /// </summary>
         public string AuthenticatorTitle { get; set; }
-
-
-        public bool EnableExternalLogins { get; set; }
-        public bool EnableEMailVerivication { get; set; }
         public bool EnableTwoFactorAuthentication { get; set; }
         public bool ForceTwoFactorAuthentication { get; set; }
 
 
         public bool EnableAPIKeyGeneration { get; set; }
 
+
+        /// <summary>
+        /// if true new users can create organization accounts and invite others to be member users, or users can join an aorganization
+        /// Users can ask an organization administrator to join an organization
+        /// An organization administartor can accept or reject user requests
+        /// An organization administrator can invite users to the organization
+        /// </summary>
+        public bool EnableUserInvites { get; set; }
+     
 
         //EMAIL
         public string MailServiceServer { get; set; }

@@ -30,10 +30,13 @@ namespace Intwenty.Data.Localization
 
             IntwentySettings Settings = httpContext.RequestServices.GetRequiredService<IOptions<IntwentySettings>>().Value;
 
-            UserManager<IntwentyUser> UserManager = httpContext.RequestServices.GetRequiredService<UserManager<IntwentyUser>>();
+            if (Settings.LocalizationMethod == LocalizationMethods.SiteLocalization)
+                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
 
             if (httpContext.Request.Path.HasValue && httpContext.Request.Path.Value.Contains("Model/"))
                 return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+
+            UserManager<IntwentyUser> UserManager = httpContext.RequestServices.GetRequiredService<UserManager<IntwentyUser>>();
 
             if (!httpContext.User.Identity.IsAuthenticated)
             {

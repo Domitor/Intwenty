@@ -88,7 +88,7 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
                         var endpointurl = baseurl + "BlockUser";
 
 
@@ -115,7 +115,7 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
                         var endpointurl = baseurl + "UnblockUser";
 
 
@@ -142,7 +142,7 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
                         var endpointurl = baseurl + "ResetMFA";
 
 
@@ -172,7 +172,7 @@
                     var context = this;
                     var yesfunc = function () {
 
-                        var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
                         var endpointurl = baseurl + "DeleteUser";
 
 
@@ -206,7 +206,7 @@
 
                 //Translations
                 var context = this;
-                var baseurl = '@Url.Content("~/IdentityAdmin/")';
+                var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
                 var endpointurl = baseurl + "GetUsers";
                 $.get(endpointurl, function (response) {
                     context.users = response;

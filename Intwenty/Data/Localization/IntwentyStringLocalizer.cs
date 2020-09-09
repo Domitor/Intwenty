@@ -38,10 +38,15 @@ namespace Intwenty.Data.Localization
                 System.Globalization.CultureInfo.CurrentUICulture 
                 System.Globalization.CultureInfo.CurrentCulture 
                 Settings.Value.DefaultCulture 
-                */ 
+                */
 
-                var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+                if (!Settings.EnableLocalization)
+                    return new LocalizedString(name, name);
 
+                string culture = Settings.DefaultCulture;
+
+                if (Settings.LocalizationMethod != LocalizationMethods.SiteLocalization)
+                   culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
 
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Can't get current culture");
@@ -65,7 +70,13 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+                if (!Settings.EnableLocalization)
+                    return new LocalizedString(name, name);
+
+                string culture = Settings.DefaultCulture;
+
+                if (Settings.LocalizationMethod != LocalizationMethods.SiteLocalization)
+                    culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
 
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Can't get current culture");

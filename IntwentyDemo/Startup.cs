@@ -75,11 +75,12 @@ namespace IntwentyDemo
 
                 options.User.RequireUniqueEmail = true;
 
-              
+
             })
              .AddRoles<IntwentyRole>()
              .AddUserStore<IntwentyUserStore>()
-             .AddRoleStore<IntwentyRoleStore>();
+             .AddRoleStore<IntwentyRoleStore>()
+             .AddUserManager<IntwentyUserManager>();
 
             services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
             services.AddAuthorization(options =>
@@ -164,8 +165,10 @@ namespace IntwentyDemo
 
             app.UseEndpoints(endpoints =>
             {
+              
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
 

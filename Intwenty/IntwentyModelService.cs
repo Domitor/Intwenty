@@ -155,10 +155,16 @@ namespace Intwenty
                 Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             }
 
-            if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
-                CurrentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
-            else
-                CurrentCulture = Settings.DefaultCulture;
+
+           CurrentCulture = Settings.DefaultCulture;
+           if (Settings.EnableLocalization && Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
+           {
+
+                if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+                    CurrentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+                else
+                    CurrentCulture = Settings.DefaultCulture;
+            }
 
             AppModelCacheKey += "-" + CurrentCulture.Replace("-", "").ToUpper();
         }
@@ -1092,7 +1098,9 @@ namespace Intwenty
                 client.CreateTable<IntwentyUser>(true); //security_User
                 client.CreateTable<IntwentyRole>(true); //security_Role
                 client.CreateTable<IntwentyUserRole>(true); //security_UserRoles
-                                                            
+                client.CreateTable<IntwentyGroup>(true); //security_Group
+                client.CreateTable<IntwentyUserGroup>(true); //security_UserGroup
+
                 //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
                 //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
                 //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims
@@ -1127,6 +1135,9 @@ namespace Intwenty
                 client.CreateTable<IntwentyUser>(true,true); //security_User
                 client.CreateTable<IntwentyRole>(true,true); //security_Role
                 client.CreateTable<IntwentyUserRole>(true,true); //security_UserRoles
+                client.CreateTable<IntwentyGroup>(true, true); //security_Group
+                client.CreateTable<IntwentyUserGroup>(true, true); //security_UserGroup
+
                 //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
                 //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
                 //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims

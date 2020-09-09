@@ -23,13 +23,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly IntwentyUserManager _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IntwentySettings _settings;
 
         public RegisterModel(
-            UserManager<IntwentyUser> userManager,
+            IntwentyUserManager userManager,
             SignInManager<IntwentyUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
@@ -52,9 +52,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
         public class InputModel
         {
 
-            [Required]
             [Display(Name = "Language")]
             public string Language { get; set; }
+
+            [Display(Name = "Account Type")]
+            public string AccountType { get; set; }
+
+
+            public string GroupName { get; set; }
 
             [Required]
             [EmailAddress]
@@ -85,7 +90,48 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+
+
+                if (_settings.EnableUserInvites)
+                {
+                    if (string.IsNullOrEmpty(Input.AccountType))
+                    {
+                        ModelState.AddModelError("AccountType", "Account Type must not be empty");
+                        return Page();
+                    }
+
+                    if (string.IsNullOrEmpty(Input.GroupName))
+                    {
+                        ModelState.AddModelError("GroupName", "Companyname / Groupname must not be empty");
+                        return Page();
+                    }
+
+                    if (Input.AccountType == "GROUPADMIN")
+                    {
+                        if (_userManager.GroupExists(Input.GroupName).Result)
+                        {
+                            ModelState.AddModelError("GroupName", "Groupname is not valid since it's already present");
+                            return Page();
+                        }
+
+                    }
+
+                    if (Input.AccountType == "GROUPMEMBER")
+                    {
+                        if (!_userManager.GroupExists(Input.GroupName).Result)
+                        {
+                            ModelState.AddModelError("GroupName", "There is no such group to join");
+                            return Page();
+                        }
+
+                    }
+
+                }
+
                 var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Culture = Input.Language };
+                if (string.IsNullOrEmpty(user.Culture))
+                    user.Culture = _settings.DefaultCulture;
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

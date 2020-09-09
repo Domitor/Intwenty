@@ -14,10 +14,12 @@ using System.Text;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Identity;
 using Microsoft.AspNetCore.Identity;
+using Intwenty;
 
-namespace Intwenty.Controllers
+namespace IntwentyDemo.Areas.Identity.Controllers
 {
 
+    [Area("Identity")]
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class IdentityAdminController : Controller
     {
@@ -33,13 +35,13 @@ namespace Intwenty.Controllers
             UserManager = umgr;
         }
 
-        [HttpGet("/IdentityAdmin/UserAdministration")]
+        [HttpGet("Identity/IdentityAdmin/UserAdministration")]
         public IActionResult UserAdministration()
         {
             return View();
         }
 
-        [HttpGet("/IdentityAdmin/GetUsers")]
+        [HttpGet("Identity/IdentityAdmin/GetUsers")]
         public JsonResult GetUsers()
         {
             var mapper = DataRepository.GetDbObjectMapper();

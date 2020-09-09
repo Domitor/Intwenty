@@ -25,6 +25,7 @@ namespace Intwenty.Data.Identity
 
         public string LastLogin { get; set; }
 
+      
 
     }
 }
