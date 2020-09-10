@@ -1,4 +1,5 @@
-﻿using Intwenty.Model;
+﻿using Intwenty.Areas.Identity.Models;
+using Intwenty.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Data
 {
   
     public class ForceMFAMiddleware

@@ -1,4 +1,5 @@
-﻿using Intwenty.Data.DBAccess;
+﻿using Intwenty.Areas.Identity.Models;
+using Intwenty.Data.DBAccess;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Data
 {
     public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, IUserEmailStore<IntwentyUser>, IUserAuthenticatorKeyStore<IntwentyUser>, IUserTwoFactorStore<IntwentyUser>, IUserLockoutStore<IntwentyUser>
     {

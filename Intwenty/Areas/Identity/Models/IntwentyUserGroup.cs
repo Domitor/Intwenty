@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Models
 {
     [DbTableName("security_UserGroup")]
     [DbTablePrimaryKey("Id")]
@@ -14,6 +14,8 @@ namespace Intwenty.Data.Identity
         public string UserId { get; set; }
 
         public string UserName { get; set; }
+
+        public string GroupId { get; set; }
 
         public string GroupName { get; set; }
 

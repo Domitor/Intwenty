@@ -21,7 +21,7 @@
            
                 <hr />
           
-                @if (Settings.Value.EnableLocalization && Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
+                @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
                 {
                     <div class="form-group">
                         <label>Language</label>
@@ -36,13 +36,13 @@
                     </div>
                 }
 
-                @if (Settings.Value.EnableUserInvites)
+                @if (Settings.Value.EnableUserGroups)
                 {
 
                     <div class="form-group">
                         <label>Account Type<span style="color: red"> *</span></label>
                         <select class="form-control" v-model="model.accountType" id="acctype" v-on:input="onUserInput(event)" data-required="True">
-                            <option value="GROUPADMIN">Organization Account</option>
+                            <option value="GROUPADMIN">Group Account</option>
                             <option value="GROUPMEMBER">Member Account</option>
                         </select>
                         <div v-if="model.accountType=='GROUPADMIN'" class="alert alert-primary">This creates an account where you register a new company/group/team and may invite other users to collaborate.</div>
@@ -137,7 +137,7 @@
                     var baseurl = '@Url.Content("~/Identity/Account/API/")';
                     var endpointurl = baseurl + "Register";
                     var valid = true;
-                    @if (Settings.Value.EnableLocalization)
+                    @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
                     {
                         <text>
                         if (!context.model.language)
@@ -148,7 +148,7 @@
                         </text>
                     }
 
-                    @if (Settings.Value.EnableUserInvites)
+                    @if (Settings.Value.EnableUserGroups)
                     {
                         <text>
                         if (!context.model.accountType)
@@ -191,7 +191,14 @@
                         data: JSON.stringify(context.model),
                         success: function (response)
                         {
-                            window.location.href = response.returnUrl;
+                            if (response.message != "") {
+                                raiseInformationModal("Information", response.message, function () { window.location.href = response.returnUrl; });
+                            } else {
+                                window.location.href = response.returnUrl; 
+                            }
+                           
+                           
+                            
                         },
                         error: function (response) {
                              raiseErrorModal(response.responseJSON);

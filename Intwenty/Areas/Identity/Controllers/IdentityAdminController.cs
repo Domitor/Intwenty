@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
 using Intwenty.Data.DBAccess.Helpers;
-using Intwenty.Data.Identity;
 using Microsoft.AspNetCore.Identity;
 using Intwenty;
+using Intwenty.Areas.Identity.Models;
 
-namespace IntwentyDemo.Areas.Identity.Controllers
+namespace Intwenty.Areas.Identity.Controllers
 {
 
     [Area("Identity")]
@@ -49,7 +49,7 @@ namespace IntwentyDemo.Areas.Identity.Controllers
             return new JsonResult(list);
         }
 
-        [HttpPost("/IdentityAdmin/BlockUser")]
+        [HttpPost("Identity/IdentityAdmin/BlockUser")]
         public JsonResult BlockUser([FromBody] IntwentyUserVm model)
         {
 
@@ -64,7 +64,7 @@ namespace IntwentyDemo.Areas.Identity.Controllers
             return GetUsers();
         }
 
-        [HttpPost("/IdentityAdmin/UnblockUser")]
+        [HttpPost("Identity/IdentityAdmin/UnblockUser")]
         public JsonResult UnblockUser([FromBody] IntwentyUserVm model)
         {
 
@@ -80,7 +80,7 @@ namespace IntwentyDemo.Areas.Identity.Controllers
             return GetUsers();
         }
 
-        [HttpPost("/IdentityAdmin/ResetMFA")]
+        [HttpPost("Identity/IdentityAdmin/ResetMFA")]
         public JsonResult ResetMFA([FromBody] IntwentyUserVm model)
         {
 
@@ -95,7 +95,7 @@ namespace IntwentyDemo.Areas.Identity.Controllers
             return GetUsers();
         }
 
-        [HttpPost("/IdentityAdmin/DeleteUser")]
+        [HttpPost("Identity/IdentityAdmin/DeleteUser")]
         public JsonResult DeleteUser([FromBody] IntwentyUserVm model)
         {
             var user = UserManager.FindByIdAsync(model.Id).Result;

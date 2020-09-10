@@ -10,25 +10,22 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Intwenty.Data.Identity;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
+using Intwenty.Areas.Identity.Models;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public partial class APIKeyModel : PageModel
     {
         private readonly UserManager<IntwentyUser> _userManager;
-        private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly IntwentySettings _settings;
 
         public APIKeyModel(
             UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager,
             IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _settings = settings.Value;
         }
 

@@ -1,11 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Data.DBAccess;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Data
 {
 
 

@@ -13,9 +13,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -55,12 +56,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
             [Display(Name = "Language")]
             public string Language { get; set; }
 
-            [Display(Name = "Account Type")]
-            public string AccountType { get; set; }
-
-
-            public string GroupName { get; set; }
-
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -90,43 +85,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-
-
-                if (_settings.EnableUserInvites)
-                {
-                    if (string.IsNullOrEmpty(Input.AccountType))
-                    {
-                        ModelState.AddModelError("AccountType", "Account Type must not be empty");
-                        return Page();
-                    }
-
-                    if (string.IsNullOrEmpty(Input.GroupName))
-                    {
-                        ModelState.AddModelError("GroupName", "Companyname / Groupname must not be empty");
-                        return Page();
-                    }
-
-                    if (Input.AccountType == "GROUPADMIN")
-                    {
-                        if (_userManager.GroupExists(Input.GroupName).Result)
-                        {
-                            ModelState.AddModelError("GroupName", "Groupname is not valid since it's already present");
-                            return Page();
-                        }
-
-                    }
-
-                    if (Input.AccountType == "GROUPMEMBER")
-                    {
-                        if (!_userManager.GroupExists(Input.GroupName).Result)
-                        {
-                            ModelState.AddModelError("GroupName", "There is no such group to join");
-                            return Page();
-                        }
-
-                    }
-
-                }
 
                 var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Culture = Input.Language };
                 if (string.IsNullOrEmpty(user.Culture))

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Models
 {
     [DbTableName("security_UserRoles")]
     [DbTablePrimaryKey("UserId,RoleId")]

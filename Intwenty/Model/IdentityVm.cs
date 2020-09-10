@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.Identity;
+﻿using Intwenty.Areas.Identity.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;

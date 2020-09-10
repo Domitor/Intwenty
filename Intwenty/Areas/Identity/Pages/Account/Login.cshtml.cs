@@ -11,9 +11,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using Intwenty.Data.Identity;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
+using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -22,15 +23,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
     {
         public readonly IIntwentyDataService _dataService;
         private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly IntwentyUserManager _userManager;
         private readonly IOptions<IntwentySettings> _settings;
 
         public LoginModel(SignInManager<IntwentyUser> signInManager,
             IIntwentyDataService dataservice,
-            IOptions<IntwentySettings> settings)
+            IOptions<IntwentySettings> settings,
+            IntwentyUserManager userManager)
         {
             _dataService = dataservice;
             _signInManager = signInManager;
             _settings = settings;
+            _userManager = userManager;
         }
 
         [BindProperty]
@@ -83,6 +87,20 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                if (_settings.Value.EnableUserGroups)
+                {
+                    var user = _userManager.FindByEmailAsync(Input.Email);
+                    if (user != null && user.Result != null)
+                    {
+                        if (_userManager.IsWaitingToJoinGroup(user.Result.UserName).Result)
+                        {
+                            ModelState.AddModelError(string.Empty, "Your account is not verified by your group administrator yet, please come back later.");
+                            return Page();
+                        }
+                    }
+
+                }
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);

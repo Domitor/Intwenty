@@ -11,7 +11,7 @@ using Intwenty.Data.DBAccess.Helpers;
 using MongoDB.Driver;
 using Intwenty.Data.Dto;
 using Intwenty.Engine;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using Intwenty.Interface;
@@ -157,7 +157,7 @@ namespace Intwenty
 
 
            CurrentCulture = Settings.DefaultCulture;
-           if (Settings.EnableLocalization && Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
+           if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
            {
 
                 if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
@@ -1050,8 +1050,6 @@ namespace Intwenty
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
         {
-            if (!Settings.EnableLocalization)
-                return;
 
             //Localization
             var translations = Client.GetAll<TranslationItem>();

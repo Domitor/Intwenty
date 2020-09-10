@@ -27,10 +27,7 @@ namespace Intwenty.Model
         public string DemoUserPassword { get; set; }
 
 
-        /// <summary>
-        /// Enable localization
-        /// </summary>
-        public bool EnableLocalization { get; set; }
+
         /// <summary>
         /// SiteLocalization = Always use DefaultCulture to look up localization keys
         /// UserLocalization = Always use UserCulture to  look up localization keys
@@ -61,12 +58,12 @@ namespace Intwenty.Model
 
 
         /// <summary>
-        /// if true new users can create organization accounts and invite others to be member users, or users can join an aorganization
-        /// Users can ask an organization administrator to join an organization
-        /// An organization administartor can accept or reject user requests
-        /// An organization administrator can invite users to the organization
+        /// if true a new user can create a group account and invite others to be member users, or users can join a group
+        /// Users can ask a group administrator to join a group
+        /// A group admin can accept or reject user requests to join
+        /// A group admin can invite users to the group
         /// </summary>
-        public bool EnableUserInvites { get; set; }
+        public bool EnableUserGroups { get; set; }
      
 
         //EMAIL

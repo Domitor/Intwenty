@@ -1,7 +1,7 @@
 ﻿using System;
 using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data.DBAccess.Helpers;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using Intwenty.PushData;

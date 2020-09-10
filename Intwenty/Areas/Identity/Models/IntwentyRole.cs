@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Models
 {
     [DbTableName("security_Role")]
     [DbTablePrimaryKey("Id")]

@@ -30,6 +30,7 @@ namespace IntwentyDemo
 
                     //Create intwenty db objects and identity db objects
                     SeedIdentity.Seed(services);
+                    SeedDefaultLocalization.Seed(services);
                     SeedSalesOrderDemoModel.Seed(services);
                     SeedSalesOrderDemoModel.ConfigureDataBase(services);
 

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Models
 {
     [DbTableName("security_Group")]
     [DbTablePrimaryKey("Id")]

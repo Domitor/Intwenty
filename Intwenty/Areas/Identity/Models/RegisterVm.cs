@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace IntwentyDemo.Areas.Identity.Models
+namespace Intwenty.Areas.Identity.Models
 {
     public class RegisterVm
     {
@@ -25,6 +25,8 @@ namespace IntwentyDemo.Areas.Identity.Models
         public string ConfirmPassword { get; set; }
 
         public string ReturnUrl { get; set; }
+
+        public string Message { get; set; }
 
     }
 }

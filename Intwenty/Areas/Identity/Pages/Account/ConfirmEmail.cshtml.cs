@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Intwenty.Data.Identity;
+
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {

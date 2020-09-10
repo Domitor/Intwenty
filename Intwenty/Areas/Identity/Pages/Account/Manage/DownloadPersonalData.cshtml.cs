@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage

@@ -3,7 +3,7 @@ using System.Linq;
 using Intwenty.Data.DBAccess;
 using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -201,10 +201,7 @@ namespace Intwenty.Data.Seed
             #endregion
 
             #region translation
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key=  "COPYRIGHT", Text = "2020 Intwenty - All rights reserved" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "COPYRIGHT", Text = "2020 Intwenty - Alla rättighter reserverade" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "METAMODELDOC", Text = "Meta model documentation" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "METAMODELDOC", Text = "Dokumentation över metamodellen" });
+         
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMER", Text = "Customer" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMER", Text = "Kund" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERLIST", Text = "Customer list" });
@@ -235,16 +232,7 @@ namespace Intwenty.Data.Seed
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDOR", Text = "Tillverkare" });
             DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "VENDORLIST", Text = "Vendors" });
             DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDORLIST", Text = "Tillverkare" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Create new", Text = "Create new" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Create new", Text = "Skapa ny" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "New", Text = "New {0}" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "New", Text = "Ny {0}" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Save", Text = "Save" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Save", Text = "Spara" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "Edit", Text = "Edit" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "Edit", Text = "Ändra" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
+
             #endregion
 
 

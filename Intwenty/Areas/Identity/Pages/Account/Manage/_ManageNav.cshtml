@@ -1,7 +1,19 @@
 ﻿
 @inject SignInManager<IntwentyUser> SignInManager
+@inject IntwentyUserManager UserMgr
+
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    var user = UserMgr.GetUserAsync(User).Result;
+    var group = UserMgr.GetUserGroup(user);
+    var isgroupadmin = false;
+    if (group != null && group.Result != null)
+    {
+        if (group.Result.MembershipType == "GROUPADMIN")
+        {
+            isgroupadmin = true;
+        }
+    }
 }
 <ul class="nav nav-pills bg-light flex-column" style="padding:10px">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
@@ -19,6 +31,10 @@
     @if (Settings.Value.EnableAPIKeyGeneration)
     {
         <li class="nav-item"><a class="nav-link @ManageNavPages.APIKeyNavClass(ViewContext)" id="apikey-data" asp-page="./APIKey">API Keys</a></li>
+    }
+    @if (Settings.Value.EnableUserGroups && isgroupadmin)
+    {
+        <li class="nav-item"><a class="nav-link @ManageNavPages.GroupMembersClass(ViewContext)" id="apikey-data" asp-page="./GroupMembers">Group Members</a></li>
     }
     <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
 </ul>

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 
-namespace Intwenty.Data.Identity
+namespace Intwenty.Areas.Identity.Models
 {
     [DbTableName("security_User")]
     [DbTablePrimaryKey("Id")]

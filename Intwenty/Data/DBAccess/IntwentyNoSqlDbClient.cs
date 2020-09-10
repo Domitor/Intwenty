@@ -13,7 +13,7 @@ using System.Data;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 using MongoDB.Bson.Serialization;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson.IO;
 using System.Collections.Concurrent;

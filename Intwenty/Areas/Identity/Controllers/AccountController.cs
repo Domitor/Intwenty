@@ -1,20 +1,18 @@
-﻿
-
+﻿using System;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using Intwenty.Data.Dto;
-using Intwenty.Data.Identity;
 using Intwenty.Model;
-using IntwentyDemo.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Data;
 
-namespace IntwentyDemo.Areas.Identity.Controllers
+namespace Intwenty.Areas.Identity.Controllers
 {
 
     [Area("Identity")]
@@ -48,10 +46,41 @@ namespace IntwentyDemo.Areas.Identity.Controllers
             try
             {
 
+
+                model.Message = "";
                 model.ReturnUrl = Url.Content("~/");
+
                 var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };
                 if (string.IsNullOrEmpty(user.Culture))
                     user.Culture = _settings.DefaultCulture;
+
+                var is_waiting_for_group_adm = false;
+                IntwentyGroup group=null;
+
+                if (_settings.EnableUserGroups)
+                {
+                    if (model.AccountType == "GROUPADMIN")
+                    {
+                        if (_userManager.GroupExists(model.GroupName).Result)
+                        {
+                            throw new InvalidOperationException(string.Format("The group '{0}' already exists, please use another groupname", model.GroupName));
+                        }
+
+                        group = _userManager.AddGroupAsync(model.GroupName).Result;
+                        _userManager.AddGroupMembershipAsync(user, group, model.AccountType, "ACCEPTED");
+                    }
+
+                    if (model.AccountType == "GROUPMEMBER")
+                    {
+                        if (!_userManager.GroupExists(model.GroupName).Result)
+                        {
+                            throw new InvalidOperationException(string.Format("The group '{0}' does not exists, please type an existing group", model.GroupName));
+                        }
+                        group = _userManager.GetGroupByNameAsync(model.GroupName).Result;
+                        _userManager.AddGroupMembershipAsync(user, group, model.AccountType, "WAITING");
+                        is_waiting_for_group_adm = true;
+                    }
+                }
 
                 var result = _userManager.CreateAsync(user, model.Password).Result;
                 if (result.Succeeded)
@@ -79,7 +108,13 @@ namespace IntwentyDemo.Areas.Identity.Controllers
                     }
                     else
                     {
-                        _signInManager.SignInAsync(user, isPersistent: false);
+                        if (!is_waiting_for_group_adm)
+                            _signInManager.SignInAsync(user, isPersistent: false);
+                        else
+                        {
+                            if (group != null)
+                                 model.Message = String.Format("Your account was created but must be verified by the {0} group administrator before you can log in", group.Name);
+                        }
                         return new JsonResult(model);
                     }
                 }

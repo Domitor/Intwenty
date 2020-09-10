@@ -142,10 +142,18 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
+function getIntwentyAntiForgeryToken()
+{
+    return $('input:hidden[name="__RequestVerificationToken"]').val();
+}
 
-function raiseInformationModal(headertext, bodytext) {
+function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);
     $('#msg_dlg_modal_text').text(bodytext);
+    if (close_callback) {
+        $('#msg_dlg_modal_closebtn').off('click', close_callback);
+        $('#msg_dlg_modal_closebtn').off().on('click', close_callback);
+    }
     $('#msg_dlg_modal').modal();
 
 };

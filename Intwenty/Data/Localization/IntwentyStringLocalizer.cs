@@ -40,8 +40,6 @@ namespace Intwenty.Data.Localization
                 Settings.Value.DefaultCulture 
                 */
 
-                if (!Settings.EnableLocalization)
-                    return new LocalizedString(name, name);
 
                 string culture = Settings.DefaultCulture;
 
@@ -70,8 +68,6 @@ namespace Intwenty.Data.Localization
                 if (name == null) 
                     throw new ArgumentNullException(nameof(name));
 
-                if (!Settings.EnableLocalization)
-                    return new LocalizedString(name, name);
 
                 string culture = Settings.DefaultCulture;
 

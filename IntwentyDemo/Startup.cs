@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Intwenty;
-using Intwenty.Data.Identity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using System.Globalization;
@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using System.Linq;
+using Intwenty.Areas.Identity.Data;
 
 namespace IntwentyDemo
 {
@@ -96,35 +97,30 @@ namespace IntwentyDemo
                 });
             });
 
-            //Use Intwenty Localization
-            if (Settings.EnableLocalization)
-            {
-                if (string.IsNullOrEmpty(Settings.DefaultCulture))
-                    throw new InvalidOperationException("Could not find DefaultCulture in setting file");
-                if (Settings.SupportedLanguages == null)
-                    throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
-                if (Settings.SupportedLanguages.Count == 0)
-                    throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
+         
+            if (string.IsNullOrEmpty(Settings.DefaultCulture))
+                throw new InvalidOperationException("Could not find DefaultCulture in setting file");
+            if (Settings.SupportedLanguages == null)
+                throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
+            if (Settings.SupportedLanguages.Count == 0)
+                throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
 
-                var supportedCultures = Settings.SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
-                services.Configure<RequestLocalizationOptions>(
-                    options =>
-                    {
-                        options.AddInitialRequestCultureProvider(new UserCultureProvider());
-                        options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
-                        options.SupportedCultures = supportedCultures;
-                        options.SupportedUICultures = supportedCultures;
-                        options.RequestCultureProviders.Insert(0, new UserCultureProvider());
+            var supportedCultures = Settings.SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
+            services.Configure<RequestLocalizationOptions>(
+                options =>
+                {
+                    options.AddInitialRequestCultureProvider(new UserCultureProvider());
+                    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+                    options.SupportedCultures = supportedCultures;
+                    options.SupportedUICultures = supportedCultures;
+                    options.RequestCultureProviders.Insert(0, new UserCultureProvider());
 
-                    });
+                });
 
-                services.AddLocalization();
-                services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
-            }
-           
-
+            services.AddLocalization();
+            services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
+  
             services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
-
 
         }
 
@@ -151,12 +147,8 @@ namespace IntwentyDemo
             //Needed only if Identity is used
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //Localization
-            if (Settings.EnableLocalization)
-            {
-                app.UseRequestLocalization();
-            }
+            app.UseRequestLocalization();
+           
 
             if (Settings.ForceTwoFactorAuthentication)
             {

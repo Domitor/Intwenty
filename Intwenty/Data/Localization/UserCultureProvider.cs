@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.Identity;
+﻿using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

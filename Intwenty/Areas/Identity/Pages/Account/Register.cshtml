@@ -21,7 +21,7 @@
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
-            @if (Settings.Value.EnableLocalization && Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
+            @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
             {
                 <div class="form-group">
                     <label asp-for="Input.Language"></label>
@@ -36,33 +36,6 @@
                 </div>
             }
 
-            @if (Settings.Value.EnableUserInvites)
-            {
-
-                <div class="form-group">
-                    <label asp-for="Input.AccountType"></label>
-                    <select asp-for="Input.AccountType" class="form-control" v-model="model.accountType">
-                        <option value="GROUPADMIN">Organization Account</option>
-                        <option value="GROUPMEMBER">Member Account</option>
-                    </select>
-                    <div v-if="model.accountType=='GROUPADMIN'" class="alert alert-primary">This creates an account where you register a new company/group/team and may invite other users to collaborate.</div>
-                    <div v-if="model.accountType=='GROUPMEMBER'" class="alert alert-primary">This creates an account where you join an existing company/group/team.</div>
-                </div>
-
-                <div class="form-group" v-if="model.accountType=='GROUPADMIN'">
-                    <label>Companyname / Groupname to create</label>
-                    <input asp-for="Input.GroupName" class="form-control" />
-                    <span asp-validation-for="Input.GroupName" class="text-danger"></span>
-                    
-                </div>
-
-                <div class="form-group" v-if="model.accountType=='GROUPMEMBER'">
-                    <label>Companyname / Groupname to join</label>
-                    <input asp-for="Input.GroupName" class="form-control" />
-                    <span asp-validation-for="Input.GroupName" class="text-danger"></span>
-                </div>
-
-            }
 
             <div class="form-group">
                 <label asp-for="Input.Email"></label>
