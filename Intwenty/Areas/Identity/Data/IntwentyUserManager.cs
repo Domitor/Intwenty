@@ -196,7 +196,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(t);
         }
 
-        public Task<IntwentyUserGroup> GetUserGroup(IntwentyUser user)
+        public Task<List<IntwentyUserGroup>> GetUserGroups(IntwentyUser user)
         {
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
@@ -204,7 +204,7 @@ namespace Intwenty.Areas.Identity.Data
             else
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
-            var t = client.GetAll<IntwentyUserGroup>().Find(p => p.UserId == user.Id);
+            var t = client.GetAll<IntwentyUserGroup>().Where(p => p.UserId == user.Id).ToList();
             return Task.FromResult(t);
 
         }
@@ -232,8 +232,26 @@ namespace Intwenty.Areas.Identity.Data
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var t = client.GetAll<IntwentyUserGroup>().Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "WAITING");
+            if (client.GetAll<IntwentyUserGroup>().Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "ACCEPTED"))
+                t = false;
 
             return Task.FromResult(t);
+
+        }
+
+        public Task<IdentityResult> RemoveFromGroupAsync(string userid, string groupid)
+        {
+            IIntwentyDbORM client;
+            if (Settings.IsNoSQL)
+                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            else
+                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
+            var t = client.GetAll<IntwentyUserGroup>().Find(p => p.UserId == userid && p.GroupId == groupid);
+
+            client.Delete(t);
+
+            return Task.FromResult(IdentityResult.Success);
 
         }
 
@@ -252,10 +270,11 @@ namespace Intwenty.Areas.Identity.Data
                     else
                         client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
+                    /*
                     var usergroup = GetUserGroup(user);
                     if (usergroup!= null && usergroup.Result != null)
                         client.Delete(usergroup.Result);
-
+                    */
                 }
 
                 return t;

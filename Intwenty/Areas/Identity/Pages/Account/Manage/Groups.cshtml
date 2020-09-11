@@ -1,0 +1,402 @@
+﻿@page
+@model GroupsModel
+@{
+    ViewData["Title"] = "Manage Groups";
+    ViewData["ActivePage"] = ManageNavPages.Groups;
+}
+<h4>@ViewData["Title"]</h4>
+
+<br />
+
+@await Html.PartialAsync("_Modals")
+
+<div class="row" id="app">
+
+    <div class="col-md-12">
+
+        <h6>Create or Join</h6>
+        <hr />
+        <label>Groupname</label>
+        <div class="row">
+            <div class="col-md-3"><input type="text" class="form-control form-control-sm" v-model="model.groupName" data-required="True" id="tbgroup" v-on:input="onUserInput(event)"></div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3"><button type="button" class="btn btn-sm btn-primary" v-on:click="createGroup()" style="min-width:110px">Create Group</button></div>
+            <div class="col-md-3"><button type="button" class="btn btn-sm btn-primary" v-on:click="joinGroup()" style="min-width:110px">Join Group</button></div>
+        </div>
+
+        <br />
+        <br />
+        <h6>My Groups</h6>
+        <hr />
+        <div class="row mt-2 mb-2" v-for="entry in model.groupconnection.myGroups">
+            <div class="col-md-3">{{entry.groupName}}</div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3"><button class="btn btn-sm btn-primary" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button></div>
+            <div class="col-md-3"><button class="btn btn-sm btn-primary" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button></div>
+        </div>
+
+        <br />
+        <br />
+        <h6>Members of my groups</h6>
+        <hr />
+        <div v-for="entry in model.groupconnection.myGroupsMembers">
+            <label>{{entry.groupName}}</label>
+            <div class="row mt-2 mb-2" v-for="user in entry.members">
+                <div class="col-md-3">{{user.userName}}</div>
+                <div class="col-md-3"><b>{{userStatus(user)}}</b></div>
+                <div class="col-md-3"><button class="btn btn-sm btn-success" v-on:click="setMembership(user, 'ACCEPTED')" title="Accept" v-if="canAccept(user)" style="min-width:110px">Accept</button></div>
+                <div class="col-md-3"><button class="btn btn-sm btn-danger" v-on:click="setMembership(user, 'REMOVE')" title="Remove" v-if="canRemove(user)" style="min-width:110px">Remove</button></div>
+            </div>
+            <hr />
+        </div>
+
+
+
+
+    </div>
+
+    <div class="modal" id="editgroup_dlg_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="editgroup_dlg_modal_hdr" class="modal-title">Group</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">{{model.groupDlgInfo}}</div>
+                    <br />
+                    <div class="form-group">
+                        <label class="control-label">{{model.groupDlgLabel}}</label>
+                        <input type="text" class="form-control form-control-sm" v-model="model.groupDlgValue">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="editgroup_dlg_modal_okbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal" v-on:click="handleGroup()">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {
+                    groupName: "", groupconnection: {}  }
+
+            },
+            methods:
+            {
+                setMembership: function (usergroup,status)
+                {
+
+                    var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                    var endpointurl = baseurl + "Groups?handler=MembershipChange";
+                    var antiforgerytoken = getIntwentyAntiForgeryToken();
+                    var data = { "userId": usergroup.userId, "status": status, "groupId": usergroup.groupId }
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.loadGroups();
+                        },
+                        error: function (response) {
+                            raiseErrorModal(response.responseJSON);
+                        }
+                    });
+                },
+                createGroup: function ()
+                {
+                    var context = this;
+
+                    if (!context.model.groupName)
+                    {
+                        $("#tbgroup").addClass('requiredNotValid');
+                        return;
+                    }
+
+                    var question = "Do you want to create the group " + context.model.groupName + " ?";
+
+                    var yes_func = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                        var endpointurl = baseurl + "Groups?handler=CreateGroup";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var data = { "groupName": context.model.groupName }
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(data),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.model.groupname = "";
+                                context.loadGroups();
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+
+                    };
+
+                    raiseYesNoModal("Create Group ?", question , yes_func);
+
+                },
+                joinGroup: function ()
+                {
+                    var context = this;
+
+                    if (!context.model.groupName)
+                    {
+                        $("#tbgroup").addClass('requiredNotValid');
+                        return;
+                    }
+
+                    var question = "Do you want to become a meber of the group " + context.model.groupName + " ?";
+
+                    var yes_func = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                        var endpointurl = baseurl + "Groups?handler=JoinGroup";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var data = { "groupName": context.model.groupName }
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(data),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                raiseInformationModal("Information", "A request to join the group has been sent to the administrator.");
+                                context.model.groupname = "";
+                                context.loadGroups();
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+
+                    };
+
+                    raiseYesNoModal("Join Group ?", question , yes_func);
+
+                },
+                inviteUser: function (group) {
+
+                    var context = this;
+                    context.model.groupDlgGroup = group;
+                    context.model.groupDlgStyle = "INVITE";
+                    context.model.groupDlgInfo = "Type the email of a person to invite";
+                    context.model.groupDlgLabel = "Email";
+                    context.model.groupDlgValue = "";
+                    this.$forceUpdate();
+                    $('#editgroup_dlg_modal').modal();
+
+                },
+                renameGroup: function (group) {
+
+                    var context = this;
+                    context.model.groupDlgGroup = group;
+                    context.model.groupDlgStyle = "RENAME";
+                    context.model.groupDlgInfo = "Type a new groupname";
+                    context.model.groupDlgLabel = "New groupname";
+                    context.model.groupDlgValue = "";
+                    this.$forceUpdate();
+                    $('#editgroup_dlg_modal').modal();
+                },
+                handleGroup: function () {
+
+                    var context = this;
+
+                    if (context.model.groupDlgStyle == "INVITE")
+                    {
+
+                        if (!context.model.groupDlgValue)
+                        {
+                            raiseValidationErrorModal("You must type a valid email");
+                            return;
+                        }
+
+                        var question = "Do you want to invite " + context.model.groupDlgValue + " to " + context.model.groupDlgGroup.groupName + " ?";
+
+                        var yes_func = function ()
+                        {
+                            var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                            var endpointurl = baseurl + "Groups?handler=InviteToGroup";
+                            var antiforgerytoken = getIntwentyAntiForgeryToken();
+                            var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, email: context.model.groupDlgValue };
+
+
+                            $.ajax({
+                                url: endpointurl,
+                                type: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify(data),
+                                headers: {
+                                    RequestVerificationToken: antiforgerytoken
+                                },
+                                success: function (response) {
+                                    raiseInformationModal("Information", "An invite to join the group has been sent to " + context.model.groupDlgValue);
+                                    context.loadGroups();
+                                },
+                                error: function (response) {
+                                    raiseErrorModal(response.responseJSON);
+                                }
+                            });
+
+                        };
+
+                        raiseYesNoModal("Invite member", question , yes_func);
+
+                    }
+
+                    if (context.model.groupDlgStyle == "RENAME")
+                    {
+                        if (!context.model.groupDlgValue) {
+                            raiseValidationErrorModal("You must type a new groupname");
+                            return;
+                        }
+
+                        var question = "Do you want to rename the group " + context.model.groupDlgGroup.groupName + " to " + context.model.groupDlgValue + " ?";
+
+                        var yes_func = function ()
+                        {
+                            var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                            var endpointurl = baseurl + "Groups?handler=RenameGroup";
+                            var antiforgerytoken = getIntwentyAntiForgeryToken();
+                            var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, newName: context.model.groupDlgValue };
+
+
+                            $.ajax({
+                                url: endpointurl,
+                                type: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify(data),
+                                headers: {
+                                    RequestVerificationToken: antiforgerytoken
+                                },
+                                success: function (response) {
+                                    context.loadGroups();
+                                },
+                                error: function (response) {
+                                    raiseErrorModal(response.responseJSON);
+                                }
+                            });
+
+                        };
+
+                        raiseYesNoModal("Rename group", question , yes_func);
+
+                    }
+
+                    /*
+                    context.model.groupDlgGroup = {};
+                    context.model.groupDlgStyle = "";
+                    context.model.groupDlgInfo = "";
+                    context.model.groupDlgLabel = "";
+                    context.model.groupDlgValue = "";
+                    this.$forceUpdate();
+                    */
+                },
+                onUserInput: function (event) {
+                    if (!event)
+                        return;
+
+                    var elementId = event.srcElement.id;
+                    if (!elementId)
+                        return;
+
+                    //Remove requiredNotValid if the input is valid
+                    $("[data-required]").each(function () {
+                        var required = $(this).data('required');
+                        var id = $(this).attr('id');
+                        if (required === "True" && id === elementId) {
+                            var val = event.srcElement.value;
+                            if (val) {
+                                if (val.length > 0)
+                                    $("#" + elementId).removeClass('requiredNotValid');
+                            }
+                        }
+                    });
+                },
+                userStatus: function (entry)
+                {
+                    if (entry.membershipStatus == 'WAITING' && entry.membershipType == 'GROUPMEMBER')
+                        return "Waiting Member";
+                    if (entry.membershipStatus == 'ACCEPTED' && entry.membershipType == 'GROUPMEMBER')
+                        return "Member";
+                    if (entry.membershipType == 'GROUPADMIN')
+                        return "Owner";
+
+                    return "";
+                },
+                canAccept: function (entry)
+                {
+                    if (entry.membershipStatus == 'WAITING' && entry.membershipType == 'GROUPMEMBER')
+                        return true;
+
+                    return false;
+                },
+                canRemove: function (entry) {
+                    if (entry.membershipStatus == 'ACCEPTED' && entry.membershipType == 'GROUPMEMBER')
+                        return true;
+
+                    return false;
+                },
+                loadGroups()
+                {
+                     var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                    var endpointurl = baseurl + "Groups?handler=LoadGroups";
+                    $.get(endpointurl, function (response) {
+                        context.model.groupconnection = response;
+                    });
+
+                }
+
+            },
+            computed:
+            {
+
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                context.loadGroups();
+
+
+
+            }
+        });
+    </script>
+}
+

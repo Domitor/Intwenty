@@ -87,6 +87,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                
                 if (_settings.Value.EnableUserGroups)
                 {
                     var user = _userManager.FindByEmailAsync(Input.Email);
@@ -100,6 +101,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     }
 
                 }
+                
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
