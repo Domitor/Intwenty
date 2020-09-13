@@ -56,6 +56,10 @@ namespace Intwenty.Model
 
         public bool EnableAPIKeyGeneration { get; set; }
 
+        /// <summary>
+        /// Comma separated  roles to assign new users
+        /// </summary>
+        public string NewUserRoles  { get; set; }
 
         /// <summary>
         /// if true a new user can create a group account and invite others to be member users, or users can join a group

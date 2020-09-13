@@ -88,21 +88,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 
-                if (_settings.Value.EnableUserGroups)
-                {
-                    var user = _userManager.FindByEmailAsync(Input.Email);
-                    if (user != null && user.Result != null)
-                    {
-                        if (_userManager.IsWaitingToJoinGroup(user.Result.UserName).Result)
-                        {
-                            ModelState.AddModelError(string.Empty, "Your account is not verified by your group administrator yet, please come back later.");
-                            return Page();
-                        }
-                    }
-
-                }
-                
-
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
@@ -115,9 +100,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                         _dataService.GetDbObjectMapper().Update(signedinuser);
                     }
-
-                    //if (_settings.Value.ForceMFA)
-                      //  return RedirectToPage("./Manage/EnableAuthenticator");
 
                     return LocalRedirect(returnUrl);
                 }
