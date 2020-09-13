@@ -17,6 +17,7 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Data;
+using Intwenty.Data.Dto;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -79,23 +80,34 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public IActionResult OnPostAsync([FromBody] RegisterVm model)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+            try
             {
 
-                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email, Culture = Input.Language };
+
+                model.Message = "";
+                model.ReturnUrl = Url.Content("~/");
+
+                var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };
                 if (string.IsNullOrEmpty(user.Culture))
                     user.Culture = _settings.DefaultCulture;
 
-                var result = await _userManager.CreateAsync(user, Input.Password);
+
+                var result = _userManager.CreateAsync(user, model.Password).Result;
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                    {
+                        var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                        foreach (var r in roles)
+                        {
+                            _userManager.AddToRoleAsync(user, r);
+                        }
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    }
+
+                    var code = _userManager.GenerateEmailConfirmationTokenAsync(user).Result;
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
@@ -103,27 +115,43 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = user.Id, code = code },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email });
+                        var confurl = Url.Page(
+                        "/Account/RegisterConfirmation",
+                        pageHandler: null,
+                        values: new { area = "Identity", email = model.Email },
+                        protocol: Request.Scheme);
+                        model.ReturnUrl = HtmlEncoder.Default.Encode(confurl);
+                        return new JsonResult(model);
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        _signInManager.SignInAsync(user, isPersistent: false);
                     }
                 }
-                foreach (var error in result.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    foreach (var error in result.Errors)
+                    {
+                        throw new InvalidOperationException(error.Description);
+                    }
                 }
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError("", ex.Message);
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
             }
 
-            // If we got this far, something failed, redisplay form
-            return Page();
+            return new JsonResult(model);
+
         }
     }
 }

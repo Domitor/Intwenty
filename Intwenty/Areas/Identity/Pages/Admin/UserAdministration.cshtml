@@ -1,4 +1,4 @@
-﻿
+﻿@page
 
 @{
     ViewData["Title"] = "User administration";
@@ -22,7 +22,7 @@
     <br />
     <br />
     <div>
-        
+
         <div class="btn btn-sm btn-secondary" v-on:click="addUser">
             <span class="fa fa-plus"></span> Add user
         </div>
@@ -88,15 +88,18 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
-                        var endpointurl = baseurl + "BlockUser";
-
+                        var baseurl = '@Url.Content("~/Identity/Admin/")';
+                        var endpointurl = baseurl + "UserAdministration?handler=BlockUser";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
 
                         $.ajax({
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
                             data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
                             success: function (response) {
                                 context.users = response;
                             },
@@ -115,15 +118,18 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
-                        var endpointurl = baseurl + "UnblockUser";
-
+                        var baseurl = '@Url.Content("~/Identity/Admin/")';
+                        var endpointurl = baseurl + "UserAdministration?handler=UnblockUser";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
 
                         $.ajax({
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
                             data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
                             success: function (response) {
                                 context.users = response;
                             },
@@ -142,15 +148,18 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
-                        var endpointurl = baseurl + "ResetMFA";
-
+                        var baseurl = '@Url.Content("~/Identity/Admin/")';
+                        var endpointurl = baseurl + "UserAdministration?handler=ResetMFA";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
 
                         $.ajax({
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
                             data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
                             success: function (response) {
                                 context.users = response;
                             },
@@ -172,15 +181,18 @@
                     var context = this;
                     var yesfunc = function () {
 
-                        var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
-                        var endpointurl = baseurl + "DeleteUser";
-
+                        var baseurl = '@Url.Content("~/Identity/Admin/")';
+                        var endpointurl = baseurl + "UserAdministration?handler=DeleteUser";
+                        var antiforgerytoken = getIntwentyAntiForgeryToken();
 
                         $.ajax({
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
                             data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
                             success: function (response) {
                                 context.users = response;
                             },
@@ -203,11 +215,9 @@
             },
             mounted: function ()
             {
-
-                //Translations
                 var context = this;
-                var baseurl = '@Url.Content("~/Identity/IdentityAdmin/")';
-                var endpointurl = baseurl + "GetUsers";
+                var baseurl = '@Url.Content("~/Identity/Admin/")';
+                var endpointurl = baseurl + "UserAdministration?handler=GetUsers";
                 $.get(endpointurl, function (response) {
                     context.users = response;
                 });

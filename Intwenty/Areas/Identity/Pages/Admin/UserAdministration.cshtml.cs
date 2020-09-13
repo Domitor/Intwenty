@@ -1,56 +1,45 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Intwenty.Model.DesignerVM;
+using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
-using Intwenty.Data.Dto;
-using Intwenty.Data.Entity;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Text;
-using Intwenty.Data.DBAccess.Helpers;
 using Microsoft.AspNetCore.Identity;
-using Intwenty;
-using Intwenty.Areas.Identity.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Intwenty.Areas.Identity.Controllers
+namespace Intwenty.Areas.Identity.Pages.Account.Admin
 {
-
-    [Area("Identity")]
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class IdentityAdminController : Controller
+    public class UserAdministrationModel : PageModel
     {
+
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
 
         private UserManager<IntwentyUser> UserManager { get; }
 
-        public IdentityAdminController(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
+        public UserAdministrationModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
         {
             DataRepository = ms;
             ModelRepository = sr;
             UserManager = umgr;
         }
 
-        [HttpGet("Identity/IdentityAdmin/UserAdministration")]
-        public IActionResult UserAdministration()
+        public IActionResult OnGet()
         {
-            return View();
+            return Page();
         }
 
-        [HttpGet("Identity/IdentityAdmin/GetUsers")]
-        public JsonResult GetUsers()
+        public JsonResult OnGetUsers()
         {
             var mapper = DataRepository.GetDbObjectMapper();
-            var list = mapper.GetAll<IntwentyUser>().Select(p=> new IntwentyUserVm(p));
+            var list = mapper.GetAll<IntwentyUser>().Select(p => new IntwentyUserVm(p));
             return new JsonResult(list);
         }
 
-        [HttpPost("Identity/IdentityAdmin/BlockUser")]
-        public JsonResult BlockUser([FromBody] IntwentyUserVm model)
+        public JsonResult OnPostBlockUser([FromBody] IntwentyUserVm model)
         {
 
             //Requires SetLockoutEnabled in startup.cs
@@ -59,13 +48,13 @@ namespace Intwenty.Areas.Identity.Controllers
             {
                 UserManager.SetLockoutEndDateAsync(user, DateTime.Now.AddYears(100));
             }
-            
 
-            return GetUsers();
+
+            return OnGetUsers();
         }
 
-        [HttpPost("Identity/IdentityAdmin/UnblockUser")]
-        public JsonResult UnblockUser([FromBody] IntwentyUserVm model)
+
+        public JsonResult OnPostUnblockUser([FromBody] IntwentyUserVm model)
         {
 
             //Requires SetLockoutEnabled in startup.cs
@@ -77,11 +66,10 @@ namespace Intwenty.Areas.Identity.Controllers
             }
 
 
-            return GetUsers();
+            return OnGetUsers();
         }
 
-        [HttpPost("Identity/IdentityAdmin/ResetMFA")]
-        public JsonResult ResetMFA([FromBody] IntwentyUserVm model)
+        public JsonResult OnPostResetMFA([FromBody] IntwentyUserVm model)
         {
 
             //Requires SetLockoutEnabled in startup.cs
@@ -92,22 +80,18 @@ namespace Intwenty.Areas.Identity.Controllers
             }
 
 
-            return GetUsers();
+            return OnGetUsers();
         }
 
-        [HttpPost("Identity/IdentityAdmin/DeleteUser")]
-        public JsonResult DeleteUser([FromBody] IntwentyUserVm model)
+        public JsonResult OnPostDeleteUser([FromBody] IntwentyUserVm model)
         {
             var user = UserManager.FindByIdAsync(model.Id).Result;
             if (user != null)
                 UserManager.DeleteAsync(user);
 
 
-            return GetUsers();
+            return OnGetUsers();
         }
-
-
-
 
     }
 }
