@@ -8,7 +8,7 @@ using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-
+using System.Collections.Generic;
 
 namespace Intwenty.Data.Seed
 {
@@ -37,9 +37,6 @@ namespace Intwenty.Data.Seed
             DataRepository.DeleteRange(DataRepository.GetAll<DataViewItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<MenuItem>());
             DataRepository.DeleteRange(DataRepository.GetAll<UserInterfaceItem>());
-            DataRepository.DeleteRange(DataRepository.GetAll<TranslationItem>());
-
-
 
 
             //APPLICATIONS
@@ -201,37 +198,46 @@ namespace Intwenty.Data.Seed
             #endregion
 
             #region translation
-         
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMER", Text = "Customer" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMER", Text = "Kund" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERLIST", Text = "Customer list" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERLIST", Text = "Kunder" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERID", Text = "Customer ID" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERID", Text = "Kund ID" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERNAME", Text = "Customer Name" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERNAME", Text = "Kund namn" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERCONTACT", Text = "Contact" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERCONTACT", Text = "Kontakt" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERPHONE", Text = "Phone" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERPHONE", Text = "Telefon" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "CUSTOMEREMAIL", Text = "E-Mail" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMEREMAIL", Text = "E-Post" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "NAME", Text = "Name" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "NAME", Text = "Namn" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "MENU", Text = "Menu" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "MENU", Text = "Meny" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "ITEM", Text = "Item" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "ITEM", Text = "Artikel" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "ITEMLIST", Text = "Item list" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "ITEMLIST", Text = "Artiklar" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "SALESORDER", Text = "Sales Order" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDER", Text = "Säljorder" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "SALESORDERLIST", Text = "Sales Orders" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDERLIST", Text = "Säljordrar" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "VENDOR", Text = "Vendor" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDOR", Text = "Tillverkare" });
-            DataRepository.Insert(new TranslationItem() { Culture = "en-US", Key = "VENDORLIST", Text = "Vendors" });
-            DataRepository.Insert(new TranslationItem() { Culture = "sv-SE", Key = "VENDORLIST", Text = "Tillverkare" });
+
+            var temp = new List<TranslationItem>();
+
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMER", Text = "Customer" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMER", Text = "Kund" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERLIST", Text = "Customer list" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERLIST", Text = "Kunder" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERID", Text = "Customer ID" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERID", Text = "Kund ID" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERNAME", Text = "Customer Name" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERNAME", Text = "Kund namn" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERCONTACT", Text = "Contact" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERCONTACT", Text = "Kontakt" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERPHONE", Text = "Phone" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERPHONE", Text = "Telefon" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMEREMAIL", Text = "E-Mail" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMEREMAIL", Text = "E-Post" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "NAME", Text = "Name" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "NAME", Text = "Namn" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "MENU", Text = "Menu" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "MENU", Text = "Meny" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "ITEM", Text = "Item" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "ITEM", Text = "Artikel" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "ITEMLIST", Text = "Item list" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "ITEMLIST", Text = "Artiklar" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "SALESORDER", Text = "Sales Order" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDER", Text = "Säljorder" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "SALESORDERLIST", Text = "Sales Orders" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDERLIST", Text = "Säljordrar" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "VENDOR", Text = "Vendor" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "VENDOR", Text = "Tillverkare" });
+             temp.Add(new TranslationItem() { Culture = "en-US", Key = "VENDORLIST", Text = "Vendors" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "VENDORLIST", Text = "Tillverkare" });
+
+            var existing = DataRepository.GetAll<TranslationItem>();
+            foreach (var t in temp)
+            {
+                if (!existing.Exists(p => p.Culture == t.Culture && p.Key == t.Key))
+                    DataRepository.Insert(t);
+            }
 
             #endregion
 

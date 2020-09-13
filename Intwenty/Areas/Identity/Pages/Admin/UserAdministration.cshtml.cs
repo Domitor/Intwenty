@@ -27,9 +27,16 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             UserManager = umgr;
         }
 
-        public IActionResult OnGet()
+        public void OnGet()
         {
-            return Page();
+           
+        }
+
+        public JsonResult OnGetLoadUsers()
+        {
+            var mapper = DataRepository.GetDbObjectMapper();
+            var list = mapper.GetAll<IntwentyUser>().Select(p => new IntwentyUserVm(p));
+            return new JsonResult(list);
         }
 
         public JsonResult LoadUsers()

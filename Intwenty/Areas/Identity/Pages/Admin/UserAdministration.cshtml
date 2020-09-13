@@ -1,5 +1,5 @@
 ﻿@page
-
+@model UserAdministrationModel
 @{
     ViewData["Title"] = "User administration";
 }
@@ -215,11 +215,12 @@
             },
             mounted: function ()
             {
+
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/Admin/")';
                 var endpointurl = baseurl + "UserAdministration?handler=LoadUsers";
                 $.get(endpointurl, function (response) {
-                    context.users = response;
+                  context.users = response;
                 });
 
             }
