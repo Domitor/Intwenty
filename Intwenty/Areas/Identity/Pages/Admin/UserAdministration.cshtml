@@ -90,7 +90,7 @@
                     {
                         var baseurl = '@Url.Content("~/Identity/Admin/")';
                         var endpointurl = baseurl + "UserAdministration?handler=BlockUser";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
                             url: endpointurl,
@@ -120,7 +120,7 @@
                     {
                         var baseurl = '@Url.Content("~/Identity/Admin/")';
                         var endpointurl = baseurl + "UserAdministration?handler=UnblockUser";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
                             url: endpointurl,
@@ -150,7 +150,7 @@
 
                         var baseurl = '@Url.Content("~/Identity/Admin/")';
                         var endpointurl = baseurl + "UserAdministration?handler=ResetMFA";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
                             url: endpointurl,
@@ -183,7 +183,7 @@
 
                         var baseurl = '@Url.Content("~/Identity/Admin/")';
                         var endpointurl = baseurl + "UserAdministration?handler=DeleteUser";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
                             url: endpointurl,
@@ -217,7 +217,7 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/Admin/")';
-                var endpointurl = baseurl + "UserAdministration?handler=GetUsers";
+                var endpointurl = baseurl + "UserAdministration?handler=LoadUsers";
                 $.get(endpointurl, function (response) {
                     context.users = response;
                 });

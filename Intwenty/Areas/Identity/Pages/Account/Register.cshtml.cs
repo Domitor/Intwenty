@@ -74,13 +74,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task  OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public IActionResult OnPostAsync([FromBody] RegisterVm model)
+        public IActionResult OnPost([FromBody] RegisterVm model)
         {
             try
             {

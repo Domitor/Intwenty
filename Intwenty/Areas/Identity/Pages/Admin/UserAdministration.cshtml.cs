@@ -32,7 +32,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             return Page();
         }
 
-        public JsonResult OnGetUsers()
+        public JsonResult LoadUsers()
         {
             var mapper = DataRepository.GetDbObjectMapper();
             var list = mapper.GetAll<IntwentyUser>().Select(p => new IntwentyUserVm(p));
@@ -50,7 +50,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             }
 
 
-            return OnGetUsers();
+            return LoadUsers();
         }
 
 
@@ -66,7 +66,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             }
 
 
-            return OnGetUsers();
+            return LoadUsers();
         }
 
         public JsonResult OnPostResetMFA([FromBody] IntwentyUserVm model)
@@ -80,7 +80,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             }
 
 
-            return OnGetUsers();
+            return LoadUsers();
         }
 
         public JsonResult OnPostDeleteUser([FromBody] IntwentyUserVm model)
@@ -90,7 +90,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
                 UserManager.DeleteAsync(user);
 
 
-            return OnGetUsers();
+            return LoadUsers();
         }
 
     }

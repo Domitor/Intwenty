@@ -142,10 +142,6 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
-function getIntwentyAntiForgeryToken()
-{
-    return $('input:hidden[name="__RequestVerificationToken"]').val();
-}
 
 function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);

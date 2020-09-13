@@ -102,7 +102,7 @@
 
                     var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                     var endpointurl = baseurl + "Groups?handler=MembershipChange";
-                    var antiforgerytoken = getIntwentyAntiForgeryToken();
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
                     var data = { "userId": usergroup.userId, "status": status, "groupId": usergroup.groupId }
 
 
@@ -139,7 +139,7 @@
                     {
                         var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                         var endpointurl = baseurl + "Groups?handler=CreateGroup";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
                         var data = { "groupName": context.model.groupName }
 
 
@@ -181,7 +181,7 @@
                     {
                         var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                         var endpointurl = baseurl + "Groups?handler=JoinGroup";
-                        var antiforgerytoken = getIntwentyAntiForgeryToken();
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
                         var data = { "groupName": context.model.groupName }
 
 
@@ -250,7 +250,7 @@
                         {
                             var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                             var endpointurl = baseurl + "Groups?handler=InviteToGroup";
-                            var antiforgerytoken = getIntwentyAntiForgeryToken();
+                            var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
                             var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, email: context.model.groupDlgValue };
 
 
@@ -290,7 +290,7 @@
                         {
                             var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                             var endpointurl = baseurl + "Groups?handler=RenameGroup";
-                            var antiforgerytoken = getIntwentyAntiForgeryToken();
+                            var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
                             var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, newName: context.model.groupDlgValue };
 
 

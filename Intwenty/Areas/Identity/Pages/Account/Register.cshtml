@@ -1,5 +1,4 @@
 ﻿@page
-@inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
@@ -98,7 +97,7 @@
 
 @section Scripts
     {
-
+  
     <script>
 
         var app = new Vue({
@@ -152,7 +151,7 @@
                     if (!valid)
                         return;
 
-                    var antiforgerytoken = getIntwentyAntiForgeryToken();
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                     $.ajax({
                         url: endpointurl,
