@@ -20,19 +20,30 @@
         <div class="row">
             <div class="col-md-3"><input type="text" class="form-control form-control-sm" v-model="model.groupName" data-required="True" id="tbgroup" v-on:input="onUserInput(event)"></div>
             <div class="col-md-3"></div>
-            <div class="col-md-3"><button type="button" class="btn btn-sm btn-primary" v-on:click="createGroup()" style="min-width:110px">Create Group</button></div>
-            <div class="col-md-3"><button type="button" class="btn btn-sm btn-primary" v-on:click="joinGroup()" style="min-width:110px">Join Group</button></div>
+            <div class="col-md-6">
+                <div class="d-flex flex-row">
+                    <button type="button" class="btn btn-sm btn-primary p-2 m-2" v-on:click="createGroup()" style="min-width:110px">Create Group</button>
+                    <button type="button" class="btn btn-sm btn-primary p-2 m-2" v-on:click="joinGroup()" style="min-width:110px">Join Group</button>
+                </div>
+            </div>
+          
         </div>
 
         <br />
         <br />
-        <h6>My Groups</h6>
+        <h6>Group Membership</h6>
         <hr />
         <div class="row mt-2 mb-2" v-for="entry in model.groupconnection.myGroups">
             <div class="col-md-3">{{entry.groupName}}</div>
-            <div class="col-md-3"></div>
-            <div class="col-md-3"><button class="btn btn-sm btn-primary" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button></div>
-            <div class="col-md-3"><button class="btn btn-sm btn-primary" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button></div>
+            <div class="col-md-3">{{entry.userRole}}</div>
+            <div class="col-md-6">
+                <div class="d-flex flex-row">
+                    <button v-if="entry.canInviteToGroup" class="btn btn-sm btn-primary p-2 m-2" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button>
+                    <button v-if="entry.canRenameGroup" class="btn btn-sm btn-primary p-2 m-2" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button>
+                    <button v-if="entry.canLeave" class="btn btn-sm btn-danger p-2 m-2" v-on:click="leaveGroup(entry)" title="Rename" style="min-width:110px">Leave</button>
+                    <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-primary p-2 m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Rename" style="min-width:110px">Accept</button>
+                </div>
+            </div>
         </div>
 
         <br />
@@ -43,9 +54,15 @@
             <label>{{entry.groupName}}</label>
             <div class="row mt-2 mb-2" v-for="user in entry.members">
                 <div class="col-md-3">{{user.userName}}</div>
-                <div class="col-md-3"><b>{{userStatus(user)}}</b></div>
-                <div class="col-md-3"><button class="btn btn-sm btn-success" v-on:click="setMembership(user, 'ACCEPTED')" title="Accept" v-if="canAccept(user)" style="min-width:110px">Accept</button></div>
-                <div class="col-md-3"><button class="btn btn-sm btn-danger" v-on:click="setMembership(user, 'REMOVE')" title="Remove" v-if="canRemove(user)" style="min-width:110px">Remove</button></div>
+                <div class="col-md-3">{{user.userRole}}</div>
+                <div class="col-md-6">
+                    <div class="d-flex flex-row">
+                        <button v-if="user.canAcceptJoinRequest" class="btn btn-sm btn-success p-2 m-2" v-on:click="setMembership(user, 'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
+                        <button v-if="user.canRemoveMember" class="btn btn-sm btn-danger p-2 m-2" v-on:click="setMembership(user, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
+                    </div>
+
+                </div>
+                
             </div>
             <hr />
         </div>
@@ -231,6 +248,16 @@
                     this.$forceUpdate();
                     $('#editgroup_dlg_modal').modal();
                 },
+                leaveGroup: function (group) {
+
+                    var context = this;
+                   
+                },
+                acceptInvitation: function (group) {
+
+                    var context = this;
+
+                },
                 handleGroup: function () {
 
                     var context = this;
@@ -345,30 +372,6 @@
                             }
                         }
                     });
-                },
-                userStatus: function (entry)
-                {
-                    if (entry.membershipStatus == 'WAITING' && entry.membershipType == 'GROUPMEMBER')
-                        return "Waiting Member";
-                    if (entry.membershipStatus == 'ACCEPTED' && entry.membershipType == 'GROUPMEMBER')
-                        return "Member";
-                    if (entry.membershipType == 'GROUPADMIN')
-                        return "Owner";
-
-                    return "";
-                },
-                canAccept: function (entry)
-                {
-                    if (entry.membershipStatus == 'WAITING' && entry.membershipType == 'GROUPMEMBER')
-                        return true;
-
-                    return false;
-                },
-                canRemove: function (entry) {
-                    if (entry.membershipStatus == 'ACCEPTED' && entry.membershipType == 'GROUPMEMBER')
-                        return true;
-
-                    return false;
                 },
                 loadGroups()
                 {

@@ -16,6 +16,8 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Data.Dto;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
@@ -62,13 +64,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         public class MyGroupConnections
         {
-            public List<IntwentyUserGroup> MyGroups  { get; set; }
+            public List<IntwentyUserGroupVm> MyGroups  { get; set; }
 
             public List<GroupMemberShip> MyGroupsMembers { get; set; }
 
             public MyGroupConnections()
             {
-                MyGroups = new List<IntwentyUserGroup>();
+                MyGroups = new List<IntwentyUserGroupVm>();
                 MyGroupsMembers = new List<GroupMemberShip>();
             }
         }
@@ -79,12 +81,72 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             public string GroupName { get; set; }
 
-            public List<IntwentyUserGroup> Members { get; set; }
+            public List<IntwentyUserGroupVm> Members { get; set; }
 
             public GroupMemberShip()
             {
-                Members = new List<IntwentyUserGroup>();
+                Members = new List<IntwentyUserGroupVm>();
             }
+        }
+
+        public class IntwentyUserGroupVm : IntwentyUserGroup
+        {
+            public string UserRole { get; set; }
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanInviteToGroup { get; set; }
+
+            /// <summary>
+            /// If curent user is waiting member
+            /// </summary>
+            public bool CanAcceptInvitation { get; set; }
+
+            /// <summary>
+            /// If curent user is member
+            /// </summary>
+            public bool CanLeave{ get; set; }
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanRemoveMember { get; set; }
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanRemoveGroup { get; set; }
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanAcceptJoinRequest { get; set; }
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanRenameGroup { get; set; }
+
+            public IntwentyUserGroupVm(IntwentyUserGroup model)
+            {
+                this.GroupId = model.GroupId;
+                this.GroupName = model.GroupName;
+                this.UserId = model.UserId;
+                this.UserName = model.UserName;
+                this.Id = model.Id;
+                this.MembershipStatus = model.MembershipStatus;
+                this.MembershipType = model.MembershipType;
+                if (model.MembershipType == "GROUPADMIN")
+                    this.UserRole = "Owner";
+                if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "ACCEPTED")
+                    this.UserRole = "Member";
+                if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "WAITING")
+                    this.UserRole = "Waiting Member";
+
+
+            }
+
         }
 
         public IActionResult OnGetAsync()
@@ -95,7 +157,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public IActionResult OnGetLoadGroups()
         {
             var result = new MyGroupConnections();
-
+           
             try
             {
                 var user = _userManager.GetUserAsync(User).Result;
@@ -103,24 +165,50 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 {
                     throw new InvalidOperationException("Could not find the user when listing groups");
                 }
+         
 
                 var usergroups = _userManager.GetUserGroups(user).Result;
                 foreach (var ug in usergroups)
                 {
-                    if (ug.MembershipType == "GROUPADMIN")
+                    var vm = new IntwentyUserGroupVm(ug);
+                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPADMIN")
                     {
-                        result.MyGroups.Add(ug);
-                        result.MyGroupsMembers.Add(new GroupMemberShip() { GroupId = ug.GroupId, GroupName = ug.GroupName }); 
-
+                        vm.CanInviteToGroup = true;
+                        vm.CanRenameGroup = true;
                     }
+
+                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER" && ug.MembershipStatus == "ACCEPTED")
+                    {
+                        vm.CanLeave = true;
+                    }
+
+                    /*
+                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER" && ug.MembershipStatus == "WAITING")
+                    {
+                        vm.CanAcceptInvitation = true;
+                    }
+                    */
+                    result.MyGroups.Add(vm);
+                    result.MyGroupsMembers.Add(new GroupMemberShip() { GroupId = ug.GroupId, GroupName = ug.GroupName }); 
                 }
                 foreach (var group in result.MyGroupsMembers) 
                 {
                     var groupmembers = _userManager.GetGroupMembers(new IntwentyGroup() { Id = group.GroupId, Name=group.GroupName }).Result;
                     foreach (var gm in groupmembers)
                     {
-                        group.Members.Add(gm);
-                        
+                        group.Members.Add(new IntwentyUserGroupVm(gm));
+                    }
+                }
+
+                foreach (var g in result.MyGroupsMembers)
+                {
+                    if (result.MyGroups.Exists(p => p.GroupId == g.GroupId && p.UserId == user.Id && p.MembershipType == "GROUPADMIN"))
+                    {
+                        foreach (var member in g.Members.Where(p => p.MembershipType == "GROUPMEMBER" && p.UserId != user.Id).ToList())
+                        {
+                            member.CanRemoveMember = true;
+                            member.CanAcceptJoinRequest = true;
+                        }
                     }
                 }
 
