@@ -16,6 +16,7 @@ using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using System.Linq;
 using Intwenty.Areas.Identity.Data;
+using Intwenty.SystemEvents;
 
 namespace IntwentyDemo
 {
@@ -48,6 +49,7 @@ namespace IntwentyDemo
             //Required for Intwenty: Services
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
+            services.AddTransient<IIntwentySystemEventService, IntwentySystemEventService>();
 
             //Required for Intwenty services to work correctly
             services.AddControllersWithViews().AddJsonOptions(options =>

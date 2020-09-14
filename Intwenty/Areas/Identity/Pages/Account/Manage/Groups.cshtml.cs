@@ -18,6 +18,7 @@ using Intwenty.Data.Dto;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Intwenty.SystemEvents;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
@@ -25,14 +26,16 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
+        private readonly IIntwentySystemEventService _eventservice;
 
         public GroupsModel(
             IntwentyUserManager userManager,
-            SignInManager<IntwentyUser> signInManager,
-            IOptions<IntwentySettings> settings)
+            IOptions<IntwentySettings> settings,
+            IIntwentySystemEventService eventservice)
         {
             _userManager = userManager;
             _settings = settings.Value;
+            _eventservice = eventservice;
         }
 
         public class SetMembershipModel
@@ -261,7 +264,17 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             {
                 if (model.Status == "REMOVE")
                 {
-                    _userManager.RemoveFromGroupAsync(user.Id, model.GroupId);
+                    var t = _userManager.RemoveFromGroupAsync(user.Id, model.GroupId);
+                    if (t.Result == IdentityResult.Success)
+                    {
+                        try
+                        {
+                            var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
+                            var me = _userManager.GetUserAsync(User).Result;
+                            _eventservice.UserRemovedFromGroup(new UserRemovedFromGroupData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                        }
+                        catch { }
+                   }
                 }
                 else
                 {
@@ -285,7 +298,16 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
                 if (group != null)
                 {
-                    _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
+                    var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
+                    if (t.Result == IdentityResult.Success)
+                    {
+                        try
+                        {
+                            var me = _userManager.GetUserAsync(User).Result;
+                            _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                        }
+                        catch { }
+                    }
                 }
             }
 
@@ -353,7 +375,16 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                     throw new InvalidOperationException("You are already a member or admin of this group.");
 
                 var group = _userManager.GetGroupByNameAsync(model.GroupName).Result;
-                _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "REQUESTED");
+                var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "REQUESTED");
+                if (t.Result == IdentityResult.Success)
+                {
+                    try
+                    {
+                        var owner = _userManager.GetGroupMembers(group).Result.Find(p => p.MembershipType == "GROUPADMIN");
+                        _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = user.UserName, ReceiverUserName = owner.UserName });
+                    }
+                    catch { }
+                }
 
             }
             catch (Exception ex)

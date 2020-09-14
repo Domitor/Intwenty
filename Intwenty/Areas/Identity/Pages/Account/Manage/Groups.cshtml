@@ -46,8 +46,8 @@
                 <div class="d-flex flex-row">
                     <button v-if="entry.canInviteToGroup" class="btn btn-sm btn-primary m-2" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button>
                     <button v-if="entry.canRenameGroup" class="btn btn-sm btn-primary m-2" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button>
-                    <button v-if="entry.canLeave" class="btn btn-sm btn-danger m-2" v-on:click="leaveGroup(entry)" title="Leave" style="min-width:110px">Leave</button>
-                    <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-success m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
+                    <button v-if="entry.canLeave" class="btn btn-sm btn-danger m-2" v-on:click="leaveGroup(entry)" title="Leave" style="min-width:110px"><i class="fas fa-user-minus"></i> Leave</button>
+                    <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-success m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
                 </div>
             </div>
         </div>
@@ -69,9 +69,9 @@
                 <div class="col-md-3">{{member.userRole}}</div>
                 <div class="col-md-6">
                     <div class="d-flex flex-row">
-                        <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
-                        <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
-                        <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
+                        <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
+                        <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+                        <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
                     </div>
 
                 </div>
@@ -243,7 +243,7 @@
                     var context = this;
                     context.model.groupDlgGroup = group;
                     context.model.groupDlgStyle = "INVITE";
-                    context.model.groupDlgInfo = "Type the email of a person to invite";
+                    context.model.groupDlgInfo = "Type the email of a person to invite to " + group.groupName;
                     context.model.groupDlgLabel = "Email";
                     context.model.groupDlgValue = "";
                     this.$forceUpdate();
@@ -255,7 +255,7 @@
                     var context = this;
                     context.model.groupDlgGroup = group;
                     context.model.groupDlgStyle = "RENAME";
-                    context.model.groupDlgInfo = "Type a new groupname";
+                    context.model.groupDlgInfo = "Type a new groupname for the group " + group.groupName;
                     context.model.groupDlgLabel = "New groupname";
                     context.model.groupDlgValue = "";
                     this.$forceUpdate();
