@@ -62,6 +62,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             public string GroupName { get; set; }
         }
 
+        public class LeaveGroupModel
+        {
+            public string GroupId { get; set; }
+
+            public string UserId { get; set; }
+        }
+
         public class MyGroupConnections
         {
             public List<IntwentyUserGroupVm> MyGroups  { get; set; }
@@ -103,6 +110,12 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             /// </summary>
             public bool CanAcceptInvitation { get; set; }
 
+
+            /// <summary>
+            /// If curent user is owner
+            /// </summary>
+            public bool CanRemoveInvitation { get; set; }
+
             /// <summary>
             /// If curent user is member
             /// </summary>
@@ -141,8 +154,10 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                     this.UserRole = "Owner";
                 if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "ACCEPTED")
                     this.UserRole = "Member";
-                if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "WAITING")
-                    this.UserRole = "Waiting Member";
+                if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "REQUESTED")
+                    this.UserRole = "Requested to join";
+                if (model.MembershipType == "GROUPMEMBER" && model.MembershipStatus == "INVITED")
+                    this.UserRole = "Invited member";
 
 
             }
@@ -177,17 +192,17 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                         vm.CanRenameGroup = true;
                     }
 
-                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER" && ug.MembershipStatus == "ACCEPTED")
+                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER")
                     {
                         vm.CanLeave = true;
                     }
 
-                    /*
-                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER" && ug.MembershipStatus == "WAITING")
+
+                    if (ug.UserId == user.Id && ug.MembershipType == "GROUPMEMBER" && ug.MembershipStatus == "INVITED")
                     {
                         vm.CanAcceptInvitation = true;
                     }
-                    */
+                    
                     result.MyGroups.Add(vm);
                     result.MyGroupsMembers.Add(new GroupMemberShip() { GroupId = ug.GroupId, GroupName = ug.GroupName }); 
                 }
@@ -206,8 +221,20 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                     {
                         foreach (var member in g.Members.Where(p => p.MembershipType == "GROUPMEMBER" && p.UserId != user.Id).ToList())
                         {
-                            member.CanRemoveMember = true;
-                            member.CanAcceptJoinRequest = true;
+                            if (member.MembershipStatus == "REQUESTED")
+                            {
+                                member.CanRemoveMember = true;
+                                member.CanAcceptJoinRequest = true;
+                            }
+
+                            if (member.MembershipStatus == "INVITED")
+                            {
+                                member.CanRemoveInvitation = true;
+                            }
+
+                            if (member.MembershipStatus == "ACCEPTED")
+                                member.CanRemoveMember = true;
+
                         }
                     }
                 }
@@ -252,17 +279,25 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
        public IActionResult OnPostInviteToGroup([FromBody] InviteToGroupModel model)
        {
 
-           var x = ""!;
+            var user = _userManager.FindByEmailAsync(model.Email).Result;
+            if (user != null)
+            {
+                var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
+                if (group != null)
+                {
+                    _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
+                }
+            }
 
-           return new JsonResult("{}");
+
+            return new JsonResult("{}");
 
        }
 
         public IActionResult OnPostRenameGroup([FromBody] RenameGroupModel model)
         {
 
-            var x = ""!;
-
+            _userManager.ChangeGroupNameAsync(model.GroupId, model.NewName);
             return new JsonResult("{}");
 
         }
@@ -283,7 +318,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                     throw new InvalidOperationException("The group already exists, type another name.");
 
                 var group = _userManager.AddGroupAsync(model.GroupName).Result;
-                _userManager.AddGroupMembershipAsync(user, group, "GROUPADMIN", "ACCEPTED");
+                _userManager.AddGroupMemberAsync(user, group, "GROUPADMIN", "ACCEPTED");
 
             }
             catch (Exception ex)
@@ -318,13 +353,34 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                     throw new InvalidOperationException("You are already a member or admin of this group.");
 
                 var group = _userManager.GetGroupByNameAsync(model.GroupName).Result;
-                _userManager.AddGroupMembershipAsync(user, group, "GROUPMEMBER", "WAITING");
+                _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "REQUESTED");
 
             }
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError("There was an error when asdding a group.", ex.Message);
+                r.SetError("There was an error when adding a group.", ex.Message);
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return new JsonResult("{}");
+
+        }
+
+        public IActionResult OnPostLeaveGroup([FromBody] LeaveGroupModel model)
+        {
+
+            try
+            {
+                _userManager.RemoveFromGroupAsync(model.UserId, model.GroupId);
+               
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError("There was an error when leaving a group.", ex.Message);
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;

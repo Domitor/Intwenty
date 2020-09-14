@@ -22,26 +22,32 @@
             <div class="col-md-3"></div>
             <div class="col-md-6">
                 <div class="d-flex flex-row">
-                    <button type="button" class="btn btn-sm btn-primary p-2 m-2" v-on:click="createGroup()" style="min-width:110px">Create Group</button>
-                    <button type="button" class="btn btn-sm btn-primary p-2 m-2" v-on:click="joinGroup()" style="min-width:110px">Join Group</button>
+                    <button type="button" class="btn btn-sm btn-primary m-2" v-on:click="createGroup()" style="min-width:110px">Create Group</button>
+                    <button type="button" class="btn btn-sm btn-primary m-2" v-on:click="joinGroup()" style="min-width:110px">Join Group</button>
                 </div>
             </div>
-          
+
         </div>
 
         <br />
         <br />
-        <h6>Group Membership</h6>
+        <h6>My groups</h6>
+        <hr />
+        <div class="row mt-2 mb-2">
+            <div class="col-md-3"><b>Groupname</b></div>
+            <div class="col-md-3"><b>My role</b></div>
+            <div class="col-md-6"></div>
+        </div>
         <hr />
         <div class="row mt-2 mb-2" v-for="entry in model.groupconnection.myGroups">
             <div class="col-md-3">{{entry.groupName}}</div>
             <div class="col-md-3">{{entry.userRole}}</div>
             <div class="col-md-6">
                 <div class="d-flex flex-row">
-                    <button v-if="entry.canInviteToGroup" class="btn btn-sm btn-primary p-2 m-2" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button>
-                    <button v-if="entry.canRenameGroup" class="btn btn-sm btn-primary p-2 m-2" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button>
-                    <button v-if="entry.canLeave" class="btn btn-sm btn-danger p-2 m-2" v-on:click="leaveGroup(entry)" title="Rename" style="min-width:110px">Leave</button>
-                    <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-primary p-2 m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Rename" style="min-width:110px">Accept</button>
+                    <button v-if="entry.canInviteToGroup" class="btn btn-sm btn-primary m-2" v-on:click="inviteUser(entry)" title="Invite" style="min-width:110px">Invite Member</button>
+                    <button v-if="entry.canRenameGroup" class="btn btn-sm btn-primary m-2" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button>
+                    <button v-if="entry.canLeave" class="btn btn-sm btn-danger m-2" v-on:click="leaveGroup(entry)" title="Leave" style="min-width:110px">Leave</button>
+                    <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-success m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
                 </div>
             </div>
         </div>
@@ -51,18 +57,25 @@
         <h6>Members of my groups</h6>
         <hr />
         <div v-for="entry in model.groupconnection.myGroupsMembers">
-            <label>{{entry.groupName}}</label>
-            <div class="row mt-2 mb-2" v-for="user in entry.members">
-                <div class="col-md-3">{{user.userName}}</div>
-                <div class="col-md-3">{{user.userRole}}</div>
+            <b>{{entry.groupName}}</b>
+            <div class="row mt-2 mb-2">
+                <div class="col-md-3"><b>Username</b></div>
+                <div class="col-md-3"><b>User role</b></div>
+                <div class="col-md-6"></div>
+            </div>
+            <hr />
+            <div class="row mt-2 mb-2" v-for="member in entry.members">
+                <div class="col-md-3">{{member.userName}}</div>
+                <div class="col-md-3">{{member.userRole}}</div>
                 <div class="col-md-6">
                     <div class="d-flex flex-row">
-                        <button v-if="user.canAcceptJoinRequest" class="btn btn-sm btn-success p-2 m-2" v-on:click="setMembership(user, 'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
-                        <button v-if="user.canRemoveMember" class="btn btn-sm btn-danger p-2 m-2" v-on:click="setMembership(user, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
+                        <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px">Accept</button>
+                        <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
+                        <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px">Remove</button>
                     </div>
 
                 </div>
-                
+
             </div>
             <hr />
         </div>
@@ -116,7 +129,7 @@
             {
                 setMembership: function (usergroup,status)
                 {
-
+                    var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                     var endpointurl = baseurl + "Groups?handler=MembershipChange";
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
@@ -169,7 +182,7 @@
                                 RequestVerificationToken: antiforgerytoken
                             },
                             success: function (response) {
-                                context.model.groupname = "";
+                                context.model.groupName = "";
                                 context.loadGroups();
                             },
                             error: function (response) {
@@ -211,8 +224,8 @@
                                 RequestVerificationToken: antiforgerytoken
                             },
                             success: function (response) {
-                                raiseInformationModal("Information", "A request to join the group has been sent to the administrator.");
-                                context.model.groupname = "";
+                                raiseInformationModal("Information", "A request to join the group has been sent to the owner.");
+                                context.model.groupName = "";
                                 context.loadGroups();
                             },
                             error: function (response) {
@@ -251,7 +264,37 @@
                 leaveGroup: function (group) {
 
                     var context = this;
-                   
+
+                    var question = "Do you want to leave the group " + group.groupName + " ?";
+
+                    var yes_func = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                        var endpointurl = baseurl + "Groups?handler=LeaveGroup";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+                        var data = { "groupId": group.groupId, "userId": group.userId }
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(data),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.loadGroups();
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+
+                    };
+
+                    raiseYesNoModal("Leave Group ?", question , yes_func);
+
                 },
                 acceptInvitation: function (group) {
 

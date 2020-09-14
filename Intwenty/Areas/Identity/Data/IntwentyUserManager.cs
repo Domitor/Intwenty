@@ -78,10 +78,10 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(t);
         }
 
-        public Task<IdentityResult> AddGroupMembershipAsync(IntwentyUser user, IntwentyGroup group, string membershiptype, string membershipstatus)
+        public Task<IdentityResult> AddGroupMemberAsync(IntwentyUser user, IntwentyGroup group, string membershiptype, string membershipstatus)
         {
             if (user == null || group == null)
-                throw new InvalidOperationException("Error when creating mebership to group.");
+                throw new InvalidOperationException("Error when adding member to group.");
 
             IIntwentyDbORM client;
             if (Settings.IsNoSQL)
@@ -160,7 +160,7 @@ namespace Intwenty.Areas.Identity.Data
                 client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             var result = IdentityResult.Success;
-            var t = client.GetOne<IntwentyGroup>(newgroupname);
+            var t = client.GetOne<IntwentyGroup>(groupid);
             if (t != null)
             {
                 t.Name = newgroupname;
