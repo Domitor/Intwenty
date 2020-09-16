@@ -6,6 +6,7 @@ namespace Intwenty.SystemEvents
 {
     public interface IIntwentySystemEventService
     {
+        void NewUserCreated(NewUserCreatedData data);
         void UserInvitedToGroup(UserInvitedData data);
         void UserRemovedFromGroup(UserRemovedFromGroupData data);
         void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data);
@@ -13,6 +14,7 @@ namespace Intwenty.SystemEvents
 
     public class IntwentySystemEventService : IIntwentySystemEventService
     {
+        public virtual void NewUserCreated(NewUserCreatedData data) { }
         public virtual void UserInvitedToGroup(UserInvitedData data){}
         public virtual void UserRemovedFromGroup(UserRemovedFromGroupData data) { }
         public virtual void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { }
@@ -39,6 +41,13 @@ namespace Intwenty.SystemEvents
     public class UserRequestedToJoinGroupData : SenderReceiverUserData
     {
         public string GroupName { get; set; }
+    }
+
+    public class NewUserCreatedData
+    {
+       public string UserName { get; set; }
+
+       public string ConfirmCallbackUrl { get; set; }
     }
 
 

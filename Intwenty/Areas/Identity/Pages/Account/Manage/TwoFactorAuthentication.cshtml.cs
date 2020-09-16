@@ -17,16 +17,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly ILogger<TwoFactorAuthenticationModel> _logger;
 
         public TwoFactorAuthenticationModel(
             UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager,
-            ILogger<TwoFactorAuthenticationModel> logger)
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         public bool HasAuthenticator { get; set; }

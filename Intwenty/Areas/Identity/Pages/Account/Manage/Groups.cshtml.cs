@@ -246,7 +246,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "There was an error when asdding a group.");
+                r.SetError(ex.Message, "There was an error when adding a group.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -291,26 +291,47 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         
        public IActionResult OnPostInviteToGroup([FromBody] InviteToGroupModel model)
        {
-
-            var user = _userManager.FindByEmailAsync(model.Email).Result;
-            if (user != null)
+            try
             {
-                var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
-                if (group != null)
+
+                var user = _userManager.FindByEmailAsync(model.Email).Result;
+                if (user != null)
                 {
-                    var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
-                    if (t.Result == IdentityResult.Success)
+                    var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
+                    if (group != null)
                     {
-                        try
+                        var members = _userManager.GetGroupMembers(group).Result;
+                        if (members != null)
                         {
-                            var me = _userManager.GetUserAsync(User).Result;
-                            _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                            if (members.Exists(p => p.UserName.ToUpper() == model.Email.ToUpper()))
+                                throw new InvalidOperationException("The user " +  model.Email + " is already a member of " + group.Name);
                         }
-                        catch { }
+                        var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
+                        if (t.Result == IdentityResult.Success)
+                        {
+                            try
+                            {
+                                var me = _userManager.GetUserAsync(User).Result;
+                                _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                            }
+                            catch { }
+                        }
                     }
                 }
-            }
+                else
+                {
+                    throw new InvalidOperationException(model.Email + " is not a user of this service. Contact the user and ask him/her to create an account first.");
+                }
 
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError("There was an error when inviting a user a group.", ex.Message);
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
 
             return new JsonResult("{}");
 
@@ -346,7 +367,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError("There was an error when asdding a group.", ex.Message);
+                r.SetError("There was an error when creating a group.", ex.Message);
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -390,7 +411,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError("There was an error when adding a group.", ex.Message);
+                r.SetError("There was an error when joining a group.", ex.Message);
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;

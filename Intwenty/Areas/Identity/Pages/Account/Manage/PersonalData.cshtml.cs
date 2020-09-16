@@ -11,14 +11,11 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     public class PersonalDataModel : PageModel
     {
         private readonly UserManager<IntwentyUser> _userManager;
-        private readonly ILogger<PersonalDataModel> _logger;
 
         public PersonalDataModel(
-            UserManager<IntwentyUser> userManager,
-            ILogger<PersonalDataModel> logger)
+            UserManager<IntwentyUser> userManager)
         {
             _userManager = userManager;
-            _logger = logger;
         }
 
         public async Task<IActionResult> OnGet()

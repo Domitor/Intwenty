@@ -22,19 +22,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly UserManager<IntwentyUser> _userManager;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger<ExternalLoginModel> _logger;
+
 
         public ExternalLoginModel(
             SignInManager<IntwentyUser> signInManager,
-            UserManager<IntwentyUser> userManager,
-            ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            UserManager<IntwentyUser> userManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _logger = logger;
-            _emailSender = emailSender;
         }
 
         [BindProperty]
@@ -86,7 +81,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor : true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -129,7 +123,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
@@ -147,8 +141,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         return LocalRedirect(returnUrl);
                     }

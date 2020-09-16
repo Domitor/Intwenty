@@ -15,16 +15,14 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly ILogger<ChangePasswordModel> _logger;
+
 
         public ChangePasswordModel(
             UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager,
-            ILogger<ChangePasswordModel> logger)
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         [BindProperty]
@@ -93,7 +91,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            _logger.LogInformation("User changed their password successfully.");
+
             StatusMessage = "Your password has been changed.";
 
             return RedirectToPage();

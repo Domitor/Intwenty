@@ -13,16 +13,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         UserManager<IntwentyUser> _userManager;
         private readonly SignInManager<IntwentyUser> _signInManager;
-        ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
             UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager,
-            ILogger<ResetAuthenticatorModel> logger)
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         [TempData]
@@ -49,7 +46,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
+      
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.";

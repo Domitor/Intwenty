@@ -18,6 +18,7 @@ using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Data.Dto;
+using Intwenty.SystemEvents;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -26,21 +27,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly IntwentyUserManager _userManager;
-        private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
         private readonly IntwentySettings _settings;
+        private readonly IIntwentySystemEventService _eventservice;
 
         public RegisterModel(
             IntwentyUserManager userManager,
             SignInManager<IntwentyUser> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender,
+            IIntwentySystemEventService eventservice,
             IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
-            _emailSender = emailSender;
+            _eventservice = eventservice;
             _settings = settings.Value;
         }
 
@@ -115,7 +113,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = user.Id, code = code },
                         protocol: Request.Scheme);
 
-                    _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
+                    //_emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

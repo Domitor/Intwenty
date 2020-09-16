@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Manage Groups";
     ViewData["ActivePage"] = ManageNavPages.Groups;
+    var showmembers_on_page = false;
 }
 <h4>@ViewData["Title"]</h4>
 
@@ -48,38 +49,41 @@
                     <button v-if="entry.canRenameGroup" class="btn btn-sm btn-primary m-2" v-on:click="renameGroup(entry)" title="Rename" style="min-width:110px">Rename</button>
                     <button v-if="entry.canLeave" class="btn btn-sm btn-danger m-2" v-on:click="leaveGroup(entry)" title="Leave" style="min-width:110px"><i class="fas fa-user-minus"></i> Leave</button>
                     <button v-if="entry.canAcceptInvitation" class="btn btn-sm btn-success m-2" v-on:click="setMembership(entry,'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
+                    <button class="btn btn-sm btn-primary m-2" v-on:click="showMembers(entry)" title="Members" style="min-width:110px"><i class="fas fa-users"></i> Members</button>
                 </div>
             </div>
         </div>
 
-        <br />
-        <br />
-        <h6>Members of my groups</h6>
-        <hr />
-        <div v-for="entry in model.groupconnection.myGroupsMembers">
-            <b>{{entry.groupName}}</b>
-            <div class="row mt-2 mb-2">
-                <div class="col-md-3"><b>Username</b></div>
-                <div class="col-md-3"><b>User role</b></div>
-                <div class="col-md-6"></div>
-            </div>
+        @if (showmembers_on_page)
+        {
+            <br />
+            <br />
+            <h6>Members of my groups</h6>
             <hr />
-            <div class="row mt-2 mb-2" v-for="member in entry.members">
-                <div class="col-md-3">{{member.userName}}</div>
-                <div class="col-md-3">{{member.userRole}}</div>
-                <div class="col-md-6">
-                    <div class="d-flex flex-row">
-                        <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
-                        <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
-                        <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+            <div v-for="entry in model.groupconnection.myGroupsMembers">
+                <b>{{entry.groupName}}</b>
+                <div class="row mt-2 mb-2">
+                    <div class="col-md-3"><b>Username</b></div>
+                    <div class="col-md-3"><b>User role</b></div>
+                    <div class="col-md-6"></div>
+                </div>
+                <hr />
+                <div class="row mt-2 mb-2" v-for="member in entry.members">
+                    <div class="col-md-3">{{member.userName}}</div>
+                    <div class="col-md-3">{{member.userRole}}</div>
+                    <div class="col-md-6">
+                        <div class="d-flex flex-row">
+                            <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
+                            <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+                            <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+                        </div>
+
                     </div>
 
                 </div>
-
+                <hr />
             </div>
-            <hr />
-        </div>
-
+        }
 
 
 
@@ -95,16 +99,56 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-info">{{model.groupDlgInfo}}</div>
+                    <div class="alert alert-info">{{model.editdlg.groupDlgInfo}}</div>
                     <br />
                     <div class="form-group">
-                        <label class="control-label">{{model.groupDlgLabel}}</label>
-                        <input type="text" class="form-control form-control-sm" v-model="model.groupDlgValue">
+                        <label class="control-label">{{model.editdlg.groupDlgLabel}}</label>
+                        <input type="text" class="form-control form-control-sm" v-model="model.editdlg.groupDlgValue">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button id="editgroup_dlg_modal_okbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal" v-on:click="handleGroup()">Ok</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="groupmembers_dlg_modal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="groupmembers_dlg_modal_hdr" class="modal-title">Group members for {{model.memberdlg.groupName}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="row mt-2 mb-2">
+                            <div class="col-md-3"><b>Username</b></div>
+                            <div class="col-md-3"><b>User role</b></div>
+                            <div class="col-md-6"></div>
+                        </div>
+                        <hr />
+                        <div class="row mt-2 mb-2" v-for="member in model.memberdlg.members">
+                            <div class="col-md-3">{{member.userName}}</div>
+                            <div class="col-md-3">{{member.userRole}}</div>
+                            <div class="col-md-6">
+                                <div class="d-flex flex-row">
+                                    <button v-if="member.canAcceptJoinRequest" class="btn btn-sm btn-success m-2" v-on:click="setMembership(member, 'ACCEPTED')" title="Accept" style="min-width:110px"><i class="fas fa-user-plus"></i> Accept</button>
+                                    <button v-if="member.canRemoveMember" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+                                    <button v-if="member.canRemoveInvitation" class="btn btn-sm btn-danger m-2" v-on:click="setMembership(member, 'REMOVE')" title="Remove" style="min-width:110px"><i class="fas fa-user-minus"></i> Remove</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <hr />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" v-on:click="onCloseMemberDlg()">Close</button>
                 </div>
             </div>
         </div>
@@ -122,7 +166,8 @@
             data:
             {
                 model: {
-                    groupName: "", groupconnection: {}  }
+                    groupconnection: {}, memberdlg: {}, editdlg: {}
+                }
 
             },
             methods:
@@ -205,7 +250,7 @@
                         return;
                     }
 
-                    var question = "Do you want to become a meber of the group " + context.model.groupName + " ?";
+                    var question = "Do you want to become a member of the group " + context.model.groupName + " ?";
 
                     var yes_func = function ()
                     {
@@ -241,11 +286,11 @@
                 inviteUser: function (group) {
 
                     var context = this;
-                    context.model.groupDlgGroup = group;
-                    context.model.groupDlgStyle = "INVITE";
-                    context.model.groupDlgInfo = "Type the email of a person to invite to " + group.groupName;
-                    context.model.groupDlgLabel = "Email";
-                    context.model.groupDlgValue = "";
+                    context.model.editdlg.groupDlgGroup = group;
+                    context.model.editdlg.groupDlgStyle = "INVITE";
+                    context.model.editdlg.groupDlgInfo = "Type the email of a person to invite to " + group.groupName;
+                    context.model.editdlg.groupDlgLabel = "Email";
+                    context.model.editdlg.groupDlgValue = "";
                     this.$forceUpdate();
                     $('#editgroup_dlg_modal').modal();
 
@@ -253,11 +298,11 @@
                 renameGroup: function (group) {
 
                     var context = this;
-                    context.model.groupDlgGroup = group;
-                    context.model.groupDlgStyle = "RENAME";
-                    context.model.groupDlgInfo = "Type a new groupname for the group " + group.groupName;
-                    context.model.groupDlgLabel = "New groupname";
-                    context.model.groupDlgValue = "";
+                    context.model.editdlg.groupDlgGroup = group;
+                    context.model.editdlg.groupDlgStyle = "RENAME";
+                    context.model.editdlg.groupDlgInfo = "Type a new groupname for the group " + group.groupName;
+                    context.model.editdlg.groupDlgLabel = "New groupname";
+                    context.model.editdlg.groupDlgValue = "";
                     this.$forceUpdate();
                     $('#editgroup_dlg_modal').modal();
                 },
@@ -296,32 +341,52 @@
                     raiseYesNoModal("Leave Group ?", question , yes_func);
 
                 },
-                acceptInvitation: function (group) {
+                showMembers: function (group) {
 
+                    
                     var context = this;
+                    context.model.memberdlg = {};
+                    for (i = 0; i < context.model.groupconnection.myGroupsMembers.length; i++)
+                    {
+                        if (group.groupId == context.model.groupconnection.myGroupsMembers[i].groupId)
+                        {
+                            context.model.memberdlg = context.model.groupconnection.myGroupsMembers[i];
+                            break;
+                        }
+                    }
 
+                    if (context.model.memberdlg)
+                    {
+                        $('#groupmembers_dlg_modal').modal();
+                    }
+
+                },
+                onCloseMemberDlg: function ()
+                {
+                    var context = this;
+                    context.model.memberdlg = {};
                 },
                 handleGroup: function () {
 
                     var context = this;
 
-                    if (context.model.groupDlgStyle == "INVITE")
+                    if (context.model.editdlg.groupDlgStyle == "INVITE")
                     {
 
-                        if (!context.model.groupDlgValue)
+                        if (!context.model.editdlg.groupDlgValue)
                         {
                             raiseValidationErrorModal("You must type a valid email");
                             return;
                         }
 
-                        var question = "Do you want to invite " + context.model.groupDlgValue + " to " + context.model.groupDlgGroup.groupName + " ?";
+                        var question = "Do you want to invite " + context.model.editdlg.groupDlgValue + " to " + context.model.editdlg.groupDlgGroup.groupName + " ?";
 
                         var yes_func = function ()
                         {
                             var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                             var endpointurl = baseurl + "Groups?handler=InviteToGroup";
                             var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
-                            var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, email: context.model.groupDlgValue };
+                            var data = { groupName: context.model.editdlg.groupDlgGroup.groupName, groupId: context.model.editdlg.groupDlgGroup.groupId, email: context.model.editdlg.groupDlgValue };
 
 
                             $.ajax({
@@ -333,7 +398,7 @@
                                     RequestVerificationToken: antiforgerytoken
                                 },
                                 success: function (response) {
-                                    raiseInformationModal("Information", "An invite to join the group has been sent to " + context.model.groupDlgValue);
+                                    raiseInformationModal("Information", "An invite to join the group has been sent to " + context.model.editdlg.groupDlgValue);
                                     context.loadGroups();
                                 },
                                 error: function (response) {
@@ -347,21 +412,21 @@
 
                     }
 
-                    if (context.model.groupDlgStyle == "RENAME")
+                    if (context.model.editdlg.groupDlgStyle == "RENAME")
                     {
-                        if (!context.model.groupDlgValue) {
+                        if (!context.model.editdlg.groupDlgValue) {
                             raiseValidationErrorModal("You must type a new groupname");
                             return;
                         }
 
-                        var question = "Do you want to rename the group " + context.model.groupDlgGroup.groupName + " to " + context.model.groupDlgValue + " ?";
+                        var question = "Do you want to rename the group " + context.model.editdlg.groupDlgGroup.groupName + " to " + context.model.editdlg.groupDlgValue + " ?";
 
                         var yes_func = function ()
                         {
                             var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                             var endpointurl = baseurl + "Groups?handler=RenameGroup";
                             var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
-                            var data = { groupName: context.model.groupDlgGroup.groupName, groupId: context.model.groupDlgGroup.groupId, newName: context.model.groupDlgValue };
+                            var data = { groupName: context.model.groupDlgGroup.editdlg.groupName, groupId: context.model.editdlg.groupDlgGroup.groupId, newName: context.model.editdlg.groupDlgValue };
 
 
                             $.ajax({
@@ -421,9 +486,24 @@
                      var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
                     var endpointurl = baseurl + "Groups?handler=LoadGroups";
-                    $.get(endpointurl, function (response) {
+                    $.get(endpointurl, function (response)
+                    {
+
                         context.model.groupconnection = response;
+
+                        if (context.model.memberdlg)
+                        {
+                            for (i = 0; i < context.model.groupconnection.myGroupsMembers.length; i++) {
+                                if (context.model.memberdlg.groupId == context.model.groupconnection.myGroupsMembers[i].groupId) {
+                                    context.model.memberdlg = context.model.groupconnection.myGroupsMembers[i];
+                                    this.$forceUpdate();
+                                    break;
+                                }
+                            }
+                        }
                     });
+
+                   
 
                 }
 

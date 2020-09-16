@@ -13,16 +13,13 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly ILogger<DeletePersonalDataModel> _logger;
 
         public DeletePersonalDataModel(
             UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            SignInManager<IntwentyUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         [BindProperty]
@@ -76,7 +73,6 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.SignOutAsync();
 
-            _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
 
             return Redirect("~/");
         }
