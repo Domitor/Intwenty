@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Intwenty.Data.Seed;
 using Microsoft.Extensions.Hosting;
 using Intwenty;
+using Microsoft.Extensions.Configuration;
 
 namespace IntwentyDemo
 {
@@ -51,10 +52,16 @@ namespace IntwentyDemo
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
          Host.CreateDefaultBuilder(args)
+             .ConfigureAppConfiguration((hostingContext, config) =>
+              {
+                   config.AddUserSecrets("b77e8d87-d3be-4daf-9074-ec3ccd53ed21");
+              })
              .ConfigureWebHostDefaults(webBuilder =>
              {
+                 
                  webBuilder.UseStaticWebAssets();
                  webBuilder.UseStartup<Startup>();
+                
              });
 
 

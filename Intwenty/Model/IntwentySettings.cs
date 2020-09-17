@@ -98,6 +98,12 @@ namespace Intwenty.Model
 
         public string StorageConnectionString { get; set; }
 
+        public bool EnableFacebookLogin { get; set; }
+
+        public string FacebookAppId { get; set; }
+
+        public string FacebookAppSecret { get; set; }
+
         public bool IsNoSQL
         {
 

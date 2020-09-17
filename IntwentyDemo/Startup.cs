@@ -85,6 +85,16 @@ namespace IntwentyDemo
              .AddRoleStore<IntwentyRoleStore>()
              .AddUserManager<IntwentyUserManager>();
 
+            if (Settings.EnableFacebookLogin)
+            {
+                services.AddAuthentication().AddFacebook(facebookOptions =>
+                {
+                    facebookOptions.AppId = Settings.FacebookAppId;
+                    facebookOptions.AppSecret = Settings.FacebookAppSecret;
+
+                });
+            }
+
             services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
             services.AddAuthorization(options =>
             {
@@ -166,7 +176,7 @@ namespace IntwentyDemo
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
 
-          
+       
 
         }
     }
