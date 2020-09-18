@@ -15,6 +15,7 @@ using Intwenty.Areas.Identity.Models;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using Intwenty.Interface;
+using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty
 {
@@ -1099,10 +1100,10 @@ namespace Intwenty
                 client.CreateTable<IntwentyGroup>(true); //security_Group
                 client.CreateTable<IntwentyUserGroup>(true); //security_UserGroup
 
-                //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
-                //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
-                //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims
-                //client.CreateTable<IdentityUserToken<string>>(true); //security_UserTokens
+                client.CreateTable<IntwentyUserClaim>(true); //security_UserClaims
+                client.CreateTable<IntwentyUserLogin>(true); //security_UserLogins
+                //client.CreateTable<IntwentyRoleClaim>(true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserToken>(true); //security_UserTokens
 
                 var currentprops = client.GetAll<ValueDomainItem>();
                 var defaultprops = GetIntentyProperties();
@@ -1136,10 +1137,10 @@ namespace Intwenty
                 client.CreateTable<IntwentyGroup>(true, true); //security_Group
                 client.CreateTable<IntwentyUserGroup>(true, true); //security_UserGroup
 
-                //client.CreateTable<IdentityUserClaim<string>>(true); //security_UserClaims
-                //client.CreateTable<IdentityUserLogin<string>>(true); //security_UserLogins
-                //client.CreateTable<IdentityRoleClaim<string>>(true); //security_RoleClaims
-                //client.CreateTable<IdentityUserToken<string>>(true); //security_UserTokens
+                client.CreateTable<IntwentyUserClaim>(true, true); //security_UserClaims
+                client.CreateTable<IntwentyUserLogin>(true, true); //security_UserLogins
+                //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 
                 var currentprops = client.GetAll<ValueDomainItem>(true);
                 var defaultprops = GetIntentyProperties();

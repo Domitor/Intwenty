@@ -32,6 +32,21 @@ namespace Intwenty.Areas.Identity.Data
             Settings = settings.Value;
         }
 
+        public override Task<IntwentyUser> FindByLoginAsync(string loginProvider, string providerKey)
+        {
+            ThrowIfDisposed();
+            var loginStore = Store as IUserLoginStore<IntwentyUser>;
+            if (loginProvider == null)
+            {
+                throw new ArgumentNullException(nameof(loginProvider));
+            }
+            if (providerKey == null)
+            {
+                throw new ArgumentNullException(nameof(providerKey));
+            }
+            return loginStore.FindByLoginAsync(loginProvider, providerKey, CancellationToken);
+        }
+
 
 
         public Task<IntwentyGroup> AddGroupAsync(string groupname)

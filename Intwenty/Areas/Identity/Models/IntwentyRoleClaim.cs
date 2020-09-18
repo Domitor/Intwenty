@@ -1,14 +1,15 @@
 ﻿using Intwenty.Data.DBAccess.Annotations;
 using Microsoft.AspNetCore.Identity;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Intwenty.Areas.Identity.Models
 {
-    [DbTableName("security_Role")]
+    [DbTableName("security_RoleClaim")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyRole : IdentityRole
+    public class IntwentyRoleClaim : IdentityRoleClaim<string>
     {
-       
        
     }
 }

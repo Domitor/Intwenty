@@ -17,6 +17,7 @@ using Intwenty.Data.Localization;
 using System.Linq;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.SystemEvents;
+using Microsoft.AspNetCore.Identity;
 
 namespace IntwentyDemo
 {
@@ -83,7 +84,8 @@ namespace IntwentyDemo
              .AddRoles<IntwentyRole>()
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>()
-             .AddUserManager<IntwentyUserManager>();
+             .AddUserManager<IntwentyUserManager>()
+             .AddSignInManager<IntwentySignInManager>();
 
             if (Settings.EnableFacebookLogin)
             {
