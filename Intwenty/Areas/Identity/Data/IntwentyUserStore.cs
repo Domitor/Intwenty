@@ -666,7 +666,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(result);
         }
 
-        public Task<IntwentyUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public async Task<IntwentyUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -680,7 +680,7 @@ namespace Intwenty.Areas.Identity.Data
             if (login != null)
             {
                 var user = client.GetOne<IntwentyUser>(login.UserId);
-                return Task.FromResult(user);
+                return await Task.FromResult(user);
             }
 
             return null;

@@ -84,8 +84,8 @@ namespace IntwentyDemo
              .AddRoles<IntwentyRole>()
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>()
-             .AddUserManager<IntwentyUserManager>()
-             .AddSignInManager<IntwentySignInManager>();
+             .AddUserManager<IntwentyUserManager>();
+            
 
             if (Settings.EnableFacebookLogin)
             {
