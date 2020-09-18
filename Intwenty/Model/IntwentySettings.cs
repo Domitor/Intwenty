@@ -8,11 +8,15 @@ namespace Intwenty.Model
 
     public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
 
+    public enum AllowedAccountTypes { All, Social, Manual, SocialFb, SocialGoogle };
+
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
 
     public class IntwentySettings
     {
+        public AllowedAccountTypes AllowedAccounts { get; set; }
+
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
         public bool ReCreateDatabaseOnStartup { get; set; }
@@ -43,7 +47,6 @@ namespace Intwenty.Model
         public string SiteTitle { get; set; }
 
 
-        public bool EnableExternalLogins { get; set; }
         public bool EnableEMailVerivication { get; set; }
 
         /// <summary>
@@ -98,11 +101,13 @@ namespace Intwenty.Model
 
         public string StorageConnectionString { get; set; }
 
-        public bool EnableFacebookLogin { get; set; }
-
         public string FacebookAppId { get; set; }
 
         public string FacebookAppSecret { get; set; }
+
+        public string GoogleClientId { get; set; }
+
+        public string GoogleClientSecret { get; set; }
 
         public bool IsNoSQL
         {
@@ -117,7 +122,71 @@ namespace Intwenty.Model
 
         }
 
-      
+        public bool UseExternalLogins
+        {
+
+            get
+            {
+                if (AllowedAccounts == AllowedAccountTypes.SocialGoogle ||
+                    AllowedAccounts == AllowedAccountTypes.SocialFb ||
+                    AllowedAccounts == AllowedAccountTypes.Social ||
+                    AllowedAccounts == AllowedAccountTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseManualLogins
+        {
+
+            get
+            {
+                if (AllowedAccounts == AllowedAccountTypes.Manual ||
+                    AllowedAccounts == AllowedAccountTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseFacebookLogin
+        {
+
+            get
+            {
+                if (AllowedAccounts == AllowedAccountTypes.SocialFb ||
+                    AllowedAccounts == AllowedAccountTypes.Social ||
+                    AllowedAccounts == AllowedAccountTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseGoogleLogin
+        {
+
+            get
+            {
+                if (AllowedAccounts == AllowedAccountTypes.SocialGoogle ||
+                    AllowedAccounts == AllowedAccountTypes.Social ||
+                    AllowedAccounts == AllowedAccountTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+
 
     }
 

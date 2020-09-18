@@ -269,6 +269,11 @@ namespace Intwenty.Areas.Identity.Data
                     else
                         client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
+                    var logins = client.GetAll<IntwentyUserLogin>().Where(p => p.UserId == user.Id);
+                    foreach (var l in logins)
+                    {
+                        client.Delete(l);
+                    }
                     /*
                     var usergroup = GetUserGroup(user);
                     if (usergroup!= null && usergroup.Result != null)

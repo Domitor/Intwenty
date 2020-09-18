@@ -85,14 +85,24 @@ namespace IntwentyDemo
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyRoleStore>()
              .AddUserManager<IntwentyUserManager>();
-            
 
-            if (Settings.EnableFacebookLogin)
+
+            if (Settings.UseExternalLogins && Settings.UseFacebookLogin)
             {
-                services.AddAuthentication().AddFacebook(facebookOptions =>
+                services.AddAuthentication().AddFacebook(options =>
                 {
-                    facebookOptions.AppId = Settings.FacebookAppId;
-                    facebookOptions.AppSecret = Settings.FacebookAppSecret;
+                    options.AppId = Settings.FacebookAppId;
+                    options.AppSecret = Settings.FacebookAppSecret;
+
+                });
+            }
+
+            if (Settings.UseExternalLogins && Settings.UseGoogleLogin)
+            {
+                services.AddAuthentication().AddGoogle(options =>
+                {
+                    options.ClientId = Settings.GoogleClientId;
+                    options.ClientSecret = Settings.GoogleClientSecret;
 
                 });
             }

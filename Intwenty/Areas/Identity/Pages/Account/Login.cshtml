@@ -27,7 +27,10 @@
 <br />
 
 <div class="row">
+
     <div class="col-md-4">
+        @if (Settings.Value.UseManualLogins)
+        {
         <section>
             <form id="account" method="post">
                 <div asp-validation-summary="All" class="text-danger"></div>
@@ -62,42 +65,46 @@
                 </div>
             </form>
         </section>
+
+      }
     </div>
     
-    @if (Settings.Value.EnableExternalLogins)
-    {
-        <div class="col-md-6 col-md-offset-2">
-            <section>
-                <h4>Use another service to log in.</h4>
-                <hr />
-                @{
-                    if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                    {
-                        <div>
-                            <p>
-                                There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                                for details on setting up this ASP.NET application to support logging in via external services.
-                            </p>
-                        </div>
-                    }
-                    else
-                    {
-                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                            <div>
-                                <p>
-                                    @foreach (var provider in Model.ExternalLogins)
-                                    {
-                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                    }
-                                </p>
-                            </div>
-                        </form>
-                    }
-                }
-            </section>
-        </div>
-    }
+   
+    <div class="col-md-6 col-md-offset-2">
 
+        @if (Settings.Value.UseExternalLogins)
+        {
+            <section>
+               
+               
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                    <div class="d-flex flex-wrap">
+
+
+                        @foreach (var provider in Model.ExternalLogins)
+                        {
+                            <div class="p-2">
+                                @if (provider.Name.ToUpper().Contains("FACE"))
+                                {
+                                    <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
+
+                                }
+                                @if (provider.Name.ToUpper().Contains("GOOGLE"))
+                                {
+                                    <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
+                                }
+                            </div>
+                        }
+
+                    </div>
+
+                  
+                </form>
+                    
+                    
+                </section>
+        }
+     </div>
 
 </div>
 
