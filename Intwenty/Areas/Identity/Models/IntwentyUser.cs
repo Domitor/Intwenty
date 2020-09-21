@@ -25,7 +25,7 @@ namespace Intwenty.Areas.Identity.Models
 
         public string LastLogin { get; set; }
 
-      
+        public bool CreatedWithExternalProvider { get; set; }
 
     }
 }

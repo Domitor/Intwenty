@@ -10,22 +10,14 @@ using System.Threading.Tasks;
 
 
 
-namespace IntwentyDemo.Services
+namespace Intwenty.Services
 {
-    /*
-    public interface IEmailSender
-    {
-        Task SendEmail(string sendto, string subject, string message);
-
-        Task SendEmailAsync(string sendto, string subject, string message);
-    }
-    */
-
-    public class EmailSender : IEmailSender
+   
+    public class EmailService : IEmailSender
     {
         private IntwentySettings Settings { get; }
 
-        public EmailSender(IOptions<IntwentySettings> settings)
+        public EmailService(IOptions<IntwentySettings> settings)
         {
             Settings = settings.Value;
         }

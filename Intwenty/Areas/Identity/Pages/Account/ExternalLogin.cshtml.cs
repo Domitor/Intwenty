@@ -115,7 +115,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                var user = new IntwentyUser { UserName = email, Email = email };
+                var user = new IntwentyUser { UserName = email, Email = email, CreatedWithExternalProvider = true };
                 var createaccount_result = await _userManager.CreateAsync(user);
                 if (createaccount_result.Succeeded)
                 {
@@ -132,12 +132,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     createaccount_result = await _userManager.AddLoginAsync(user, info);
                     if (createaccount_result.Succeeded)
                     {
-
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = email });
-                        }
 
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         var userId = await _userManager.GetUserIdAsync(user);

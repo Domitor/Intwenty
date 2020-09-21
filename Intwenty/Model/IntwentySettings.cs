@@ -57,9 +57,6 @@ namespace Intwenty.Model
         /// The title to show in authenticator apps
         /// </summary>
         public string AuthenticatorTitle { get; set; }
-
-        public bool EnableEMailVerification { get; set; }
-
         public bool EnableTwoFactorAuthentication { get; set; }
         public bool ForceTwoFactorAuthentication { get; set; }
 

@@ -111,7 +111,7 @@ namespace Intwenty.Model
 
                 Properties = res;
             }
-            catch(Exception ex)
+            catch
             { 
             
             }

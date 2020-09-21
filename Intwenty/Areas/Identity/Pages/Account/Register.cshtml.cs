@@ -114,22 +114,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         protocol: Request.Scheme);
 
                     _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
-                    //_emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    _signInManager.SignInAsync(user, isPersistent: false);
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        var confurl = Url.Page(
-                        "/Account/RegisterConfirmation",
-                        pageHandler: null,
-                        values: new { area = "Identity", email = model.Email },
-                        protocol: Request.Scheme);
-                        model.ReturnUrl = HtmlEncoder.Default.Encode(confurl);
-                        return new JsonResult(model);
-                    }
-                    else
-                    {
-                        _signInManager.SignInAsync(user, isPersistent: false);
-                    }
+                  
                 }
                 else
                 {

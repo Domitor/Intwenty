@@ -1,19 +1,33 @@
 ﻿
 @inject SignInManager<IntwentyUser> SignInManager
+@inject IntwentyUserManager UserManager
 
 @{
+    var currentuser = UserManager.GetUserAsync(User);
+    var isexternal = false;
+    if (currentuser != null && currentuser.Result != null)
+    {
+        isexternal = currentuser.Result.CreatedWithExternalProvider;
+    }
 
-  
 }
 
 
 <ul class="nav nav-pills bg-light flex-column" style="padding:10px">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
+
     <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">Language</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
-   
-    @if (Settings.Value.EnableTwoFactorAuthentication)
+
+
+    <!--  li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li    -->
+
+    @if (!isexternal)
+    {
+
+        <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+    }
+
+    @if (Settings.Value.EnableTwoFactorAuthentication && !isexternal)
     {
         <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
     }
@@ -25,5 +39,9 @@
     {
         <li class="nav-item"><a class="nav-link @ManageNavPages.GroupsClass(ViewContext)" id="apikey-data" asp-page="./Groups">Groups</a></li>
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+
+    @if (!isexternal)
+    {
+        <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+    }
 </ul>

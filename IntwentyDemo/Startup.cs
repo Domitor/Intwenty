@@ -19,7 +19,7 @@ using Intwenty.Areas.Identity.Data;
 using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using IntwentyDemo.Services;
+using Intwenty.Services;
 
 namespace IntwentyDemo
 {
@@ -52,8 +52,8 @@ namespace IntwentyDemo
             //Required for Intwenty: Services
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
-            services.AddTransient<IIntwentySystemEventService, EventService>();
-            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IIntwentySystemEventService, IntwentySystemEventService>();
+            services.AddTransient<IEmailSender, EmailService>();
 
             //Required for Intwenty services to work correctly
             services.AddControllersWithViews().AddJsonOptions(options =>
