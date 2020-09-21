@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 
 
-namespace IntwentyDemo
+namespace IntwentyDemo.Services
 {
     /*
     public interface IEmailSender
@@ -54,7 +54,10 @@ namespace IntwentyDemo
 
         private async Task Send(string sendto, string subject, string message)
         {
-          
+
+            if (string.IsNullOrEmpty(Settings.MailServiceServer))
+                return;
+
                 var mail = new MailMessage();
 
                 mail.To.Add(sendto);

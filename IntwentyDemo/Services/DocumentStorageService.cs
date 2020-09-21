@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Azure.Storage.Blobs.Specialized;
 using Intwenty;
 
-namespace IntwentyDemo
+namespace IntwentyDemo.Services
 {
 
     public interface IDocumentStorageService

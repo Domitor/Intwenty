@@ -15,21 +15,28 @@ namespace Intwenty.Model
 
     public class IntwentySettings
     {
-        public AllowedAccountTypes AllowedAccounts { get; set; }
 
-        public string DefaultConnection { get; set; }
-        public DBMS DefaultConnectionDBMS { get; set; }
+        //FOR DEBUG AND DEMO MODE
         public bool ReCreateDatabaseOnStartup { get; set; }
-
         public bool SeedDatabaseOnStartUp { get; set; }
-
         public bool UseDemoSettings { get; set; }
-
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }
         public string DemoUser { get; set; }
         public string DemoUserPassword { get; set; }
+        public string RedirectAllOutgoingMailTo { get; set; }
+        public string RedirectAllOutgoingSMSTo { get; set; }
 
+        /// <summary>
+        /// What kind of logins should be allowed
+        /// </summary>
+        public AllowedAccountTypes AllowedAccounts { get; set; }
+
+        /// <summary>
+        /// Database connection
+        /// </summary>
+        public string DefaultConnection { get; set; }
+        public DBMS DefaultConnectionDBMS { get; set; }
 
 
         /// <summary>
@@ -46,13 +53,13 @@ namespace Intwenty.Model
         /// </summary>
         public string SiteTitle { get; set; }
 
-
-        public bool EnableEMailVerivication { get; set; }
-
         /// <summary>
         /// The title to show in authenticator apps
         /// </summary>
         public string AuthenticatorTitle { get; set; }
+
+        public bool EnableEMailVerification { get; set; }
+
         public bool EnableTwoFactorAuthentication { get; set; }
         public bool ForceTwoFactorAuthentication { get; set; }
 
@@ -75,31 +82,26 @@ namespace Intwenty.Model
 
         //EMAIL
         public string MailServiceServer { get; set; }
-
         public int MailServicePort { get; set; }
-
         public string MailServiceUser { get; set; }
-
         public string MailServicePwd { get; set; }
-
         public string MailServiceAPIKey { get; set; }
-
         public string MailServiceFromEmail { get; set; }
+        public string SystemAdminEmail { get; set; }
+        public string UserAdminEmail { get; set; }
 
-        //FOR DEBUG MODE
-        public string RedirectAllOutgoingMailTo { get; set; }
 
-        //FOR DEBUG MODE
-        public string RedirectAllOutgoingSMSTo { get; set; }
-
+        //STORAGE
         public bool StorageUseFileSystem { get; set; }
 
         public bool StorageUseStorageAccount { get; set; }
-
-        //AZURE STORAGE
+      
         public string StorageContainer { get; set; }
 
         public string StorageConnectionString { get; set; }
+
+
+        //SOCIAL LOGINS
 
         public string FacebookAppId { get; set; }
 

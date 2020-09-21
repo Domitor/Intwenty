@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using System;
 using System.Collections.Generic;
 using System.Text;
+
 
 namespace Intwenty.SystemEvents
 {
@@ -14,8 +16,17 @@ namespace Intwenty.SystemEvents
 
     public class IntwentySystemEventService : IIntwentySystemEventService
     {
-        public virtual void NewUserCreated(NewUserCreatedData data) { }
-        public virtual void UserInvitedToGroup(UserInvitedData data){}
+        protected readonly IEmailSender EmailService;
+        protected readonly IIntwentyDataService DataService;
+
+        public IntwentySystemEventService(IEmailSender emailsender, IIntwentyDataService dataservice)
+        {
+            EmailService = emailsender;
+            DataService = dataservice;
+        }
+
+        public virtual void NewUserCreated(NewUserCreatedData data)  { }
+        public virtual void UserInvitedToGroup(UserInvitedData data) { }
         public virtual void UserRemovedFromGroup(UserRemovedFromGroupData data) { }
         public virtual void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { }
         
