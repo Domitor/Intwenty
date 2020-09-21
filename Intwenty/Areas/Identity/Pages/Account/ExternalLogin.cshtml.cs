@@ -5,7 +5,10 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.Model;
+using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -13,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Extensions.Options;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -22,14 +25,19 @@ namespace Intwenty.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly UserManager<IntwentyUser> _userManager;
-
+        private readonly IntwentySettings _settings;
+        private readonly IIntwentySystemEventService _eventservice;
 
         public ExternalLoginModel(
-            SignInManager<IntwentyUser> signInManager,
-            UserManager<IntwentyUser> userManager)
+          IntwentyUserManager userManager,
+          SignInManager<IntwentyUser> signInManager,
+          IIntwentySystemEventService eventservice,
+          IOptions<IntwentySettings> settings)
         {
-            _signInManager = signInManager;
             _userManager = userManager;
+            _signInManager = signInManager;
+            _eventservice = eventservice;
+            _settings = settings.Value;
         }
 
         [BindProperty]
@@ -89,46 +97,46 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
-                ReturnUrl = returnUrl;
                 LoginProvider = info.LoginProvider;
+
+                var email = "";
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
-                    Input = new InputModel
-                    {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                    };
+                    email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 }
-                return Page();
-            }
-        }
 
-        public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
-        {
-            returnUrl = returnUrl ?? Url.Content("~/");
-            // Get the information about the user from the external login provider
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                ErrorMessage = "Error loading external login information during confirmation.";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
-            }
-
-            if (ModelState.IsValid)
-            {
-                var user = new IntwentyUser { UserName = Input.Email, Email = Input.Email };
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+                if (string.IsNullOrEmpty(email))
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
-                    {
+                    return Page();
+                }
 
+                if (!email.Contains("@") || !email.Contains("."))
+                {
+                    return Page();
+                }
+
+                var user = new IntwentyUser { UserName = email, Email = email };
+                var createaccount_result = await _userManager.CreateAsync(user);
+                if (createaccount_result.Succeeded)
+                {
+                    if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                    {
+                        var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                        foreach (var r in roles)
+                        {
+                           await _userManager.AddToRoleAsync(user, r);
+                        }
+
+                    }
+
+                    createaccount_result = await _userManager.AddLoginAsync(user, info);
+                    if (createaccount_result.Succeeded)
+                    {
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                            return RedirectToPage("./RegisterConfirmation", new { Email = email });
                         }
 
                         await _signInManager.SignInAsync(user, isPersistent: false);
@@ -141,21 +149,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = email, ConfirmCallbackUrl = callbackUrl });
 
                         return LocalRedirect(returnUrl);
                     }
                 }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
+              
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                
 
-            LoginProvider = info.LoginProvider;
-            ReturnUrl = returnUrl;
-            return Page();
+            }
         }
+
+    
     }
 }
