@@ -37,6 +37,12 @@ namespace Intwenty.Data.DBAccess
         private static BsonClassMap<IntwentyUser> IntwentyUserMongoDbMap { get; set; }
         private static BsonClassMap<IntwentyRole> IntwentyRoleMongoDbMap { get; set; }
         private static BsonClassMap<IntwentyUserRole> IntwentyUserRoleMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyGroup> IntwentyGroupMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyRoleClaim> IntwentyRoleClaimMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyUserClaim> IntwentyUserClaimMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyUserGroup> IntwentyUserGroupMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyUserLogin> IntwentyUserLoginMongoDbMap { get; set; }
+        private static BsonClassMap<IntwentyUserToken> IntwentyUserTokenMongoDbMap { get; set; }
         private static BsonClassMap<ApplicationItem> ApplicationItemMongoDbMap { get; set; }
         private static BsonClassMap<DataViewItem> DataViewItemMongoDbMap { get; set; }
         private static BsonClassMap<DefaultValue> DefaultValueMongoDbMap { get; set; }
@@ -46,6 +52,7 @@ namespace Intwenty.Data.DBAccess
         private static BsonClassMap<SystemID> SystemIDMongoDbMap { get; set; }
         private static BsonClassMap<UserInterfaceItem> UserInterfaceItemMongoDbMap { get; set; }
         private static BsonClassMap<ValueDomainItem> ValueDomainItemMongoDbMap { get; set; }
+        private static BsonClassMap<TranslationItem> TranslationItemMongoDbMap { get; set; }
 
 
         public IntwentyNoSqlDbClient(IntwentySettings settings)
@@ -98,22 +105,52 @@ namespace Intwenty.Data.DBAccess
 
             if (IntwentyUserMongoDbMap == null)
             {
-                //IntwentyUserMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUser>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
                 BsonClassMap.RegisterClassMap<IdentityUser<string>>(cm =>{cm.AutoMap();cm.MapIdMember(p => p.Id);cm.SetIsRootClass(true); });
                 IntwentyUserMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUser>();
             }
             if (IntwentyRoleMongoDbMap == null)
             {
-                //IntwentyRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyRole>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
                 BsonClassMap.RegisterClassMap<IdentityRole<string>>(cm => { cm.AutoMap(); cm.MapIdMember(p => p.Id); cm.SetIsRootClass(true); });
                 IntwentyRoleMongoDbMap=BsonClassMap.RegisterClassMap<IntwentyRole>();
             }
             if (IntwentyUserRoleMongoDbMap == null)
             {
-                //IntwentyUserRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserRole>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
                 BsonClassMap.RegisterClassMap<IdentityUserRole<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
                 IntwentyUserRoleMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserRole>(cm => { cm.MapIdMember(c => c.Id); });
             }
+           
+            if (IntwentyRoleClaimMongoDbMap == null)
+            {
+                BsonClassMap.RegisterClassMap<IdentityRoleClaim<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+                IntwentyRoleClaimMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyRoleClaim>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (IntwentyUserClaimMongoDbMap == null)
+            {
+                BsonClassMap.RegisterClassMap<IdentityUserClaim<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+                IntwentyUserClaimMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserClaim>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+           
+            if (IntwentyUserLoginMongoDbMap == null)
+            {
+                BsonClassMap.RegisterClassMap<IdentityUserLogin<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+                IntwentyUserLoginMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserLogin>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+            if (IntwentyUserTokenMongoDbMap == null)
+            {
+                BsonClassMap.RegisterClassMap<IdentityUserToken<string>>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+                IntwentyUserTokenMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserToken>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+
+            if (IntwentyGroupMongoDbMap == null)
+            {
+                IntwentyGroupMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyGroup>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+
+            if (IntwentyUserGroupMongoDbMap == null)
+            {
+                IntwentyUserGroupMongoDbMap = BsonClassMap.RegisterClassMap<IntwentyUserGroup>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
+            }
+
             if (ApplicationItemMongoDbMap == null)
             {
                 ApplicationItemMongoDbMap = BsonClassMap.RegisterClassMap<ApplicationItem>(cm => { cm.AutoMap(); cm.MapIdMember(c => c.Id); });
