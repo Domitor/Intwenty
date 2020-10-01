@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Intwenty.DataClient
 {
@@ -28,19 +29,37 @@ namespace Intwenty.DataClient
                 InternalClient = new Databases.MariaDb(connectionstring);
         }
 
-        public void Open()
+        public void BeginTransaction() 
         {
-            InternalClient.Open();
+            InternalClient.BeginTransaction();
+        }
+        public void CommitTransaction()
+        {
+            InternalClient.CommitTransaction();
+        }
+        public void RollbackTransaction()
+        {
+            InternalClient.RollbackTransaction();
         }
 
-        public void Close()
+        public void CreateTable<T>(bool checkExisting = false, bool useCurrentConnection = false)
         {
-            InternalClient.Close();
+            InternalClient.CreateTable<T>(checkExisting, useCurrentConnection);
         }
 
         public T GetOne<T>(int id) where T : new() 
         {
             return InternalClient.GetOne<T>(id);
+        }
+
+        public List<T> GetMany<T>(string sqlcommand, bool isStoredProcedure) where T : new()
+        {
+            return InternalClient.GetMany<T>(sqlcommand, isStoredProcedure);
+        }
+
+        public int Insert<T>(T model)
+        {
+            return InternalClient.Insert(model);
         }
 
     }

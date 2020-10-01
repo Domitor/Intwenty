@@ -4,13 +4,12 @@ using System.Text;
 
 namespace Intwenty.DataClient.Databases
 {
-    public class BaseNoSqlDb
+    public abstract class BaseNoSqlDb : BaseDb
     {
-        protected string ConnectionString { get; set; }
 
-        public BaseNoSqlDb(string connectionstring)
+        public BaseNoSqlDb(string connectionstring) : base(connectionstring)
         {
-            ConnectionString = connectionstring;
+         
         }
 
         public virtual T GetOne<T>(int id) where T : new() { return default; }

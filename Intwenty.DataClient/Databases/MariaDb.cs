@@ -1,42 +1,80 @@
-﻿using MySqlConnector;
+﻿using Intwenty.DataClient.Model;
+using MySqlConnector;
+using System.Collections.Generic;
 using System.Data;
 
 
 
 namespace Intwenty.DataClient.Databases
 {
-    public class MariaDb : BaseSqlDb, ISqlClient
+    public sealed class MariaDb : BaseSqlDb, ISqlClient
     {
 
         private MySqlConnection connection;
         private MySqlCommand command;
+        private MySqlTransaction transaction;
 
         public MariaDb(string connectionstring) : base(connectionstring)
         {
 
         }
 
-        protected override IDbConnection GetConnection()
+        public override void Dispose()
         {
+            transaction = null;
+            command = null;
+            transaction = null;
+            IsInTransaction = false;
+
+        }
+
+        private MySqlConnection GetConnection()
+        {
+
+            if (connection != null && connection.State == ConnectionState.Open)
+                return connection;
+
+            connection = new MySqlConnection();
+            connection.ConnectionString = this.ConnectionString;
+            connection.Open();
             return connection;
         }
 
         protected override IDbCommand GetCommand()
         {
+            command = new MySqlCommand();
+            command.Connection = GetConnection();
+            if (IsInTransaction && transaction != null)
+                command.Transaction = transaction;
+
             return command;
         }
 
-        public override void Open()
+        protected override IDbTransaction GetTransaction()
         {
-            connection = new MySqlConnection();
-            connection.ConnectionString = ConnectionString;
-            connection.Open();
+            return transaction;
         }
 
-        public override void AddParameter(string name, object value)
+        protected override void AddCommandParameters(List<IntwentySqlParameter> parameters)
         {
-            this.command.Parameters.Add(new MySqlParameter() { Value = value, ParameterName = name });
+            foreach (var p in parameters)
+            {
+                var param = new MySqlParameter() { ParameterName = p.Name, Value = p.Value, Direction = p.Direction };
+                if (param.Direction == ParameterDirection.Output)
+                    param.DbType = p.DataType;
+
+                command.Parameters.Add(param);
+
+            }
         }
+
+        protected override void SetInsertQueryAutoIncResult<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T instance)
+        {
+           
+        }
+
+
+
 
     }
 }

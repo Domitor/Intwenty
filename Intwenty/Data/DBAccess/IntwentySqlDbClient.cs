@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using MySql.Data.MySqlClient;
 using Npgsql;
 using System.Text;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using System.Data.SQLite;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 using System.Collections.Concurrent;
+using MySqlConnector;
 
 namespace Intwenty.Data.DBAccess
 {

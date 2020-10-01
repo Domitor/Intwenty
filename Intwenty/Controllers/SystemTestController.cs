@@ -18,6 +18,7 @@ using Intwenty.Areas.Identity.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using Intwenty.PushData;
+using Intwenty.DataClient;
 
 namespace Intwenty.Controllers
 {
@@ -143,6 +144,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test30IntwentyDataClientInsert());
 
             /*
             res.Add(Test1ORMCreateTable());
@@ -976,6 +978,60 @@ namespace Intwenty.Controllers
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", result.Duration));
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+
+        private OperationResult Test30IntwentyDataClientInsert()
+        {
+            OperationResult result = new OperationResult(true, "DataClient.Insert(T) - 100 Records using auto increment times 3");
+            try
+            {
+
+
+                IIntwentyDbORM dbstore = null;
+                if (_settings.IsNoSQL)
+                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+                else
+                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+
+                var remove = dbstore.GetAll<TestDataAutoInc>();
+                foreach (var t in remove)
+                {
+                    dbstore.Delete(t);
+                }
+
+
+                var client = new DataClient.SqlClient(SqlDBMS.SQLite, _settings.DefaultConnection);
+
+                client.BeginTransaction();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
+                    client.Insert(t);
+
+                }
+
+                client.CommitTransaction();
+
+                var check = dbstore.GetAll<TestDataAutoInc>();
+                if (check.Count != 10)
+                    throw new InvalidOperationException("Could not retrieve 10 inserted records with IIntwentyDbORM.GetAll<T>");
+
+                if (check.Exists(p => p.Id < 1))
+                    throw new InvalidOperationException("AutoInc failed on DataClient.Insert(T)");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: DataClient.Insert(T)  (Create 10 records in transaction and retrieve them) lasted  {0} ms", result.Duration));
+
 
             }
             catch (Exception ex)

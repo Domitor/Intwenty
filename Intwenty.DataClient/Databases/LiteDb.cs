@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Databases
 {
-    public class LiteDb : BaseNoSqlDb, INoSqlClient
+    public sealed class LiteDb : BaseNoSqlDb, INoSqlClient
     {
         public LiteDb(string connectionstring) : base(connectionstring)
         {
