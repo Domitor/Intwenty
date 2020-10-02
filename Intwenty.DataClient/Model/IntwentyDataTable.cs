@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    public class IntwentyDataTable : DbBaseObject
+    sealed class IntwentyDataTable : DbBaseObject
     {
        
 

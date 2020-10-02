@@ -3,10 +3,11 @@ using System.Data;
 using Intwenty.DataClient.Model;
 using System;
 using System.Collections.Generic;
+using Intwenty.DataClient.SQLBuilder;
 
-namespace Intwenty.DataClient.Databases
+namespace Intwenty.DataClient.Databases.Sql
 {
-    public sealed class SqlLite : BaseSqlDb, ISqlClient
+    sealed class SqlLite : BaseSqlDb, ISqlClient
     {
 
         private SQLiteConnection connection;
@@ -72,20 +73,7 @@ namespace Intwenty.DataClient.Databases
             }
         }
 
-        protected override object GetObjectValue<T>(IntwentyDataColumn column, T instance)
-        {
-            var value = column.Property.GetValue(instance);
-            if (value == null)
-                return value;
-
-            if (column.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET"))
-            {
-                return ((DateTimeOffset)value).DateTime;
-            }
-         
-           return base.GetObjectValue(column,  instance);
-            
-        }
+      
 
         protected override void AddCommandParameters(List<IntwentySqlParameter> parameters)
         {
@@ -100,7 +88,7 @@ namespace Intwenty.DataClient.Databases
             }
         }
 
-        protected override void SetInsertQueryAutoIncResult<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T instance)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T entity)
         {
             var autoinccol = info.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
@@ -110,10 +98,27 @@ namespace Intwenty.DataClient.Databases
             command.CommandText = "SELECT LAST_INSERT_ID()";
             command.CommandType = CommandType.Text;
 
-            autoinccol.Property.SetValue(instance, Convert.ToInt32(command.ExecuteScalar()), null);
+            autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);
 
         }
 
-       
+        protected override BaseSqlBuilder GetSqlBuilder()
+        {
+            return new SqlLiteSqlBuilder();
+        }
+
+        public override void Open()
+        {
+            
+        }
+
+        public override void Close()
+        {
+            if (connection != null && connection.State != ConnectionState.Closed)
+            {
+                connection.Close();
+                Dispose();
+            }
+        }
     }
 }

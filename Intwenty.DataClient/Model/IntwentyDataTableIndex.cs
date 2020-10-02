@@ -4,10 +4,12 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    public class IntwentyDataTableIndex : DbBaseObject
+    sealed class IntwentyDataTableIndex : DbBaseObject
     {
 
         public bool IsUnique { get; set; }
+
+        public string TableName { get; set; }
 
         public string ColumnNames
         {

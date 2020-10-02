@@ -996,41 +996,32 @@ namespace Intwenty.Controllers
             {
 
 
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-
-                var remove = dbstore.GetAll<TestDataAutoInc>();
-                foreach (var t in remove)
-                {
-                    dbstore.Delete(t);
-                }
-
-
                 var client = new DataClient.SqlClient(SqlDBMS.SQLite, _settings.DefaultConnection);
+                client.Open();
+                client.CreateTable<TestData2AutoInc>();
+                client.Close();
 
+                client.Open();
                 client.BeginTransaction();
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
-                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
-                    client.Insert(t);
+                    var t = new TestData2AutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
+                    client.InsertEntity(t);
 
                 }
 
                 client.CommitTransaction();
 
-                var check = dbstore.GetAll<TestDataAutoInc>();
-                if (check.Count != 10)
-                    throw new InvalidOperationException("Could not retrieve 10 inserted records with IIntwentyDbORM.GetAll<T>");
+                var check = client.GetEntities<TestData2AutoInc>();
+                if (check.Count != 100)
+                    throw new InvalidOperationException("Could not retrieve 100 inserted records with DataClient.GetEntities<T>");
 
                 if (check.Exists(p => p.Id < 1))
-                    throw new InvalidOperationException("AutoInc failed on DataClient.Insert(T)");
+                    throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity(T)");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: DataClient.Insert(T)  (Create 10 records in transaction and retrieve them) lasted  {0} ms", result.Duration));
+                _dataservice.LogInfo(string.Format("Test Case: DataClient.Insert(T)  (Create 100 records in transaction and retrieve them) lasted  {0} ms", result.Duration));
 
 
             }
@@ -1046,11 +1037,33 @@ namespace Intwenty.Controllers
 
     }
 
-   
+
+    [DataClient.Reflection.DbTablePrimaryKey("Id")]
+    [DataClient.Reflection.DbTableName("tests_TestData2AutoInc")]
+    public class TestData2AutoInc
+    {
+
+        [DataClient.Reflection.AutoIncrement]
+        public int Id { get; set; }
+
+        public string Header { get; set; }
+
+        public string Description { get; set; }
+
+        public int IntValue { get; set; }
+
+        public bool BoolValue { get; set; }
+
+        public decimal DecimalValue { get; set; }
+
+        public float FloatValue { get; set; }
+
+        public double DoubleValue { get; set; }
+
+    }
 
 
 
-    
     [DbTablePrimaryKey("Id")]
     [DbTableName("tests_TestDataAutoInc")]
     public class TestDataAutoInc {

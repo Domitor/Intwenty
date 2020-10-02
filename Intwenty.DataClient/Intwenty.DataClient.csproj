@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="1.0.1" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.1" />
+    <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

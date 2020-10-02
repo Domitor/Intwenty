@@ -6,6 +6,7 @@ namespace Intwenty.DataClient.Model
 {
     public class DbBaseObject
     {
+        public int Order { get; set; }
 
         public string Id { get; set; }
 

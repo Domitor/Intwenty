@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    public class IntwentyDataColumn : DbBaseObject
+    sealed class IntwentyDataColumn : DbBaseObject
     {
         public int Order { get; set; }
 
@@ -22,6 +22,23 @@ namespace Intwenty.DataClient.Model
         public PropertyInfo Property { get; set; }
 
         public bool IsInQueryResult { get; set; }
+
+        public string GetNetType()
+        {
+            if (Property == null)
+                return string.Empty;
+
+            var typestring = Property.PropertyType.ToString();
+
+            if (typestring.Contains("["))
+            {
+                var index1 = typestring.IndexOf("[");
+                var index2 = typestring.IndexOf("]");
+                typestring = typestring.Substring(index1 + 1, (index2) - (index1 + 1));
+            }
+
+            return typestring.ToUpper();
+        }
 
     }
 }

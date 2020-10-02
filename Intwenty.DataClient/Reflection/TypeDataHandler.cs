@@ -1,44 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using Intwenty.DataClient.Model;
-
+using System.Runtime.Caching;
 
 namespace Intwenty.DataClient.Reflection
 {
-    public sealed class TypesCache
+
+    static class TypeDataHandler
     {
-        private TypesCache()
-        {
-            List = new List<IntwentyDataTable>();
-        }
-
-        private static readonly object padlock = new object();
-        private static TypesCache instance = null;
-        public static TypesCache Instance
-        {
-            get
-            {
-                lock (padlock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new TypesCache();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-
-        public List<IntwentyDataTable> List { get; private set; }
-
-    }
-
-    public static class TypeDataHandler
-    {
-
-       
+        private static string CACHETYPE = "TYPES";
 
         public static IntwentyDataTable GetTableInfoByTypeAndUsage<T>(string key)
         {
@@ -80,16 +50,23 @@ namespace Intwenty.DataClient.Reflection
 
         }
 
+
         private static IntwentyDataTable GetTableInfoByTypeAndUsageInternal<T>(string key, Type currenttype)
         {
 
-            IntwentyDataTable result = TypesCache.Instance.List.Find(p => p.Id == key);
+            IntwentyDataTable result;
+
+            var cachekey = CACHETYPE + "_" + key;
+            var cache = MemoryCache.Default;
+
+          
+            result = cache.Get(cachekey) as IntwentyDataTable;
             if (result != null)
             {
                 if (result.Name.ToUpper() == currenttype.Name.ToUpper())
                     return result;
 
-                TypesCache.Instance.List.Remove(result);
+                cache.Remove(cachekey);
             }
 
             result = new IntwentyDataTable() { Id = key, Name = currenttype.Name };
@@ -105,10 +82,12 @@ namespace Intwenty.DataClient.Reflection
             var indexes = currenttype.GetCustomAttributes(typeof(DbTableIndex), false);
             if (indexes != null && indexes.Length > 0)
             {
+                var idxcnt = -1;
                 foreach (var a in indexes)
                 {
+                    idxcnt++;
                     var idx = (DbTableIndex)a;
-                    var tblindex = new IntwentyDataTableIndex() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique };
+                    var tblindex = new IntwentyDataTableIndex() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique, Order = idxcnt, TableName = result.Name };
                     result.Indexes.Add(tblindex);
                 }
             }
@@ -149,7 +128,10 @@ namespace Intwenty.DataClient.Reflection
                 else
                 {
                     if (result.PrimaryKeyColumnNamesList.Exists(p => p.ToUpper() == membername.ToUpper()))
+                    {
                         column.IsPrimaryKeyColumn = true;
+                        column.IsNullNotAllowed = true;
+                    }
                 }
 
                 if (!column.IsIgnore)
@@ -161,7 +143,7 @@ namespace Intwenty.DataClient.Reflection
 
             }
 
-            TypesCache.Instance.List.Add(result);
+            cache.Add(cachekey, result, DateTime.Now.AddYears(1));
 
             return result;
 

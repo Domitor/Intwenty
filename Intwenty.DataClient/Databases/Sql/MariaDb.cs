@@ -1,13 +1,14 @@
 ﻿using Intwenty.DataClient.Model;
+using Intwenty.DataClient.SQLBuilder;
 using MySqlConnector;
 using System.Collections.Generic;
 using System.Data;
 
 
 
-namespace Intwenty.DataClient.Databases
+namespace Intwenty.DataClient.Databases.Sql
 {
-    public sealed class MariaDb : BaseSqlDb, ISqlClient
+    sealed class MariaDb : BaseSqlDb, ISqlClient
     {
 
         private MySqlConnection connection;
@@ -26,6 +27,20 @@ namespace Intwenty.DataClient.Databases
             transaction = null;
             IsInTransaction = false;
 
+        }
+
+        public override void Open()
+        {
+
+        }
+
+        public override void Close()
+        {
+            if (connection != null && connection.State != ConnectionState.Closed)
+            {
+                connection.Close();
+                Dispose();
+            }
         }
 
         private MySqlConnection GetConnection()
@@ -68,13 +83,17 @@ namespace Intwenty.DataClient.Databases
             }
         }
 
-        protected override void SetInsertQueryAutoIncResult<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T instance)
+
+        protected override BaseSqlBuilder GetSqlBuilder()
         {
-           
+            return new MariaDbSqlBuilder();
         }
 
+       
 
-
-
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T instance)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

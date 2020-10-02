@@ -22,11 +22,11 @@ namespace Intwenty.DataClient
             ConnectionString = connectionstring;
 
             if (DBMSType == SqlDBMS.SQLite)
-                InternalClient = new Databases.SqlLite(connectionstring);
+                InternalClient = new Databases.Sql.SqlLite(connectionstring);
             if (DBMSType == SqlDBMS.MySql)
-                InternalClient = new Databases.MariaDb(connectionstring);
+                InternalClient = new Databases.Sql.MariaDb(connectionstring);
             if (DBMSType == SqlDBMS.MariaDB)
-                InternalClient = new Databases.MariaDb(connectionstring);
+                InternalClient = new Databases.Sql.MariaDb(connectionstring);
         }
 
         public void BeginTransaction() 
@@ -42,24 +42,49 @@ namespace Intwenty.DataClient
             InternalClient.RollbackTransaction();
         }
 
-        public void CreateTable<T>(bool checkExisting = false, bool useCurrentConnection = false)
+        public void Open()
         {
-            InternalClient.CreateTable<T>(checkExisting, useCurrentConnection);
+            InternalClient.Open();
         }
 
-        public T GetOne<T>(int id) where T : new() 
+        public void Close()
         {
-            return InternalClient.GetOne<T>(id);
+            InternalClient.Close();
         }
 
-        public List<T> GetMany<T>(string sqlcommand, bool isStoredProcedure) where T : new()
+        public void CreateTable<T>()
         {
-            return InternalClient.GetMany<T>(sqlcommand, isStoredProcedure);
+            InternalClient.CreateTable<T>();
         }
 
-        public int Insert<T>(T model)
+        public bool TableExists<T>()
         {
-            return InternalClient.Insert(model);
+            return InternalClient.TableExists<T>();
+        }
+
+        public T GetEntity<T>(string id) where T : new()
+        {
+            return InternalClient.GetEntity<T>(id);
+        }
+
+        public T GetEntity<T>(int id) where T : new() 
+        {
+            return InternalClient.GetEntity<T>(id);
+        }
+
+        public List<T> GetEntities<T>() where T : new()
+        {
+            return InternalClient.GetEntities<T>();
+        }
+
+        public List<T> GetEntities<T>(string sqlcommand, bool isStoredProcedure) where T : new()
+        {
+            return InternalClient.GetEntities<T>(sqlcommand, isStoredProcedure);
+        }
+
+        public int InsertEntity<T>(T model)
+        {
+            return InternalClient.InsertEntity(model);
         }
 
     }
@@ -79,7 +104,7 @@ namespace Intwenty.DataClient
             ConnectionString = connectionstring;
 
             if (DBMSType == NoSqlDBMS.LiteDb)
-                InternalClient = new Databases.LiteDb(connectionstring);
+                InternalClient = new Databases.NoSql.LiteDb(connectionstring);
         }
 
         public T GetOne<T>(int id) where T : new()
