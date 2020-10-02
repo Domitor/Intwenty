@@ -30,13 +30,14 @@ namespace Intwenty.DataClient.Databases.Sql
 
         public void CommitTransaction()
         {
-            IsInTransaction = false;
             var transaction = GetTransaction();
             if (IsInTransaction && transaction != null)
             {
+                IsInTransaction = false;
                 transaction.Commit();
                 Close();
             }
+           
         }
 
         public void RollbackTransaction() 
@@ -105,7 +106,7 @@ namespace Intwenty.DataClient.Databases.Sql
             if (info.PrimaryKeyColumnNamesList.Count == 0)
                 throw new InvalidOperationException("No primary key column found");
             if (info.PrimaryKeyColumnNamesList.Count > 1)
-                throw new InvalidOperationException(string.Format("The table {0} does use a composite primary key", info.Name));
+                throw new InvalidOperationException(string.Format("The table {0} uses a composite primary key", info.Name));
 
             var command = GetCommand();
             command.CommandText = string.Format("SELECT * FROM {0} WHERE {1}={2}", new[] {info.Name,info.PrimaryKeyColumnNamesList[0], id });

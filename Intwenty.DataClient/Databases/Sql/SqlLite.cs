@@ -88,14 +88,14 @@ namespace Intwenty.DataClient.Databases.Sql
             }
         }
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable model, List<IntwentySqlParameter> parameters, T entity)
         {
-            var autoinccol = info.Columns.Find(p => p.IsAutoIncremental);
+            var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
                 return;
 
             var command = GetCommand();
-            command.CommandText = "SELECT LAST_INSERT_ID()";
+            command.CommandText = "SELECT Last_Insert_Rowid()";
             command.CommandType = CommandType.Text;
 
             autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);

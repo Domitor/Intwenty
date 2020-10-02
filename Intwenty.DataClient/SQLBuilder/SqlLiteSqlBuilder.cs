@@ -29,7 +29,10 @@ namespace Intwenty.DataClient.SQLBuilder
             }
 
             //IF SQLLITE, PK ONLY IF NOT AUTOINC. IF AUTOINC THAT COL IS PK.
-            sb.Append(", " + string.Format("PRIMARY KEY ({0})", model.PrimaryKeyColumnNames) + ")");
+            if (!model.Columns.Exists(p=> p.IsAutoIncremental))
+                sb.Append(", " + string.Format("PRIMARY KEY ({0})", model.PrimaryKeyColumnNames));
+
+            sb.Append(")");
 
             result = sb.ToString();
 
@@ -106,6 +109,7 @@ namespace Intwenty.DataClient.SQLBuilder
                 return result;
             }
 
+            var separator = "";
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
@@ -127,17 +131,11 @@ namespace Intwenty.DataClient.SQLBuilder
                 else
                     prm.Value = value;
 
-                if (col.Order == 0)
-                    query.Append(string.Format("{0}", col.Name));
-                else
-                    query.Append(string.Format(",{0}", col.Name));
-
-                if (col.Order == 0)
-                    values.Append(string.Format("@{0}", col.Name));
-                else
-                    values.Append(string.Format(",@{0}", col.Name));
-
                 parameters.Add(prm);
+
+                query.Append(string.Format("{0}{1}", separator, col.Name));
+                values.Append(string.Format("{0}@{1}", separator, col.Name));
+                separator = ",";
 
             }
             query.Append(") ");

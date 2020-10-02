@@ -107,6 +107,12 @@ namespace Intwenty.Controllers
                     db.ExecuteNonQuery();
                 }
 
+                if (db.TableExist("tests_TestData2AutoInc"))
+                {
+                    db.CreateCommand("DROP TABLE tests_TestData2AutoInc");
+                    db.ExecuteNonQuery();
+                }
+
                 db.Close();
             }
             else
@@ -992,11 +998,10 @@ namespace Intwenty.Controllers
         private OperationResult Test30IntwentyDataClientInsert()
         {
             OperationResult result = new OperationResult(true, "DataClient.Insert(T) - 100 Records using auto increment times 3");
+            var client = new DataClient.SqlClient(SqlDBMS.SQLite, _settings.DefaultConnection);
+
             try
             {
-
-
-                var client = new DataClient.SqlClient(SqlDBMS.SQLite, _settings.DefaultConnection);
                 client.Open();
                 client.CreateTable<TestData2AutoInc>();
                 client.Close();
@@ -1012,7 +1017,9 @@ namespace Intwenty.Controllers
                 }
 
                 client.CommitTransaction();
+                client.Close();
 
+                client.Open();
                 var check = client.GetEntities<TestData2AutoInc>();
                 if (check.Count != 100)
                     throw new InvalidOperationException("Could not retrieve 100 inserted records with DataClient.GetEntities<T>");
@@ -1020,13 +1027,17 @@ namespace Intwenty.Controllers
                 if (check.Exists(p => p.Id < 1))
                     throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity(T)");
 
+                client.Close();
+
                 result.Finish();
+                
                 _dataservice.LogInfo(string.Format("Test Case: DataClient.Insert(T)  (Create 100 records in transaction and retrieve them) lasted  {0} ms", result.Duration));
 
 
             }
             catch (Exception ex)
             {
+                client.Close();
                 result.SetError(ex.Message, "Test failed");
             }
 
