@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    sealed class IntwentyDataTable : DbBaseObject
+    sealed class IntwentyDbTableDefinition : DbBaseDefinition
     {
        
 
@@ -20,9 +20,9 @@ namespace Intwenty.DataClient.Model
 
         public List<string> PrimaryKeyColumnNamesList { get; private set; }
 
-        public List<IntwentyDataTableIndex> Indexes { get; set; }
+        public List<IntwentyDbIndexDefinition> Indexes { get; set; }
 
-        public List<IntwentyDataColumn> Columns { get; set; }
+        public List<IntwentyDbColumnDefinition> Columns { get; set; }
 
 
 
@@ -31,11 +31,11 @@ namespace Intwenty.DataClient.Model
 
        
 
-        public IntwentyDataTable()
+        public IntwentyDbTableDefinition()
         {
 
-            Columns = new List<IntwentyDataColumn>();
-            Indexes = new List<IntwentyDataTableIndex>();
+            Columns = new List<IntwentyDbColumnDefinition>();
+            Indexes = new List<IntwentyDbIndexDefinition>();
             pkcolnames = string.Empty;
             PrimaryKeyColumnNamesList = new List<string>();
         }

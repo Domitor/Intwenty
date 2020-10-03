@@ -12,7 +12,7 @@ namespace Intwenty.DataClient.SQLBuilder
     {
         private static string CACHETYPE = "SQLITE_SQL";
 
-        public override string GetCreateTableSql(IntwentyDataTable model)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;
@@ -41,7 +41,7 @@ namespace Intwenty.DataClient.SQLBuilder
             return result;
         }
 
-        public override string GetCreateIndexSql(IntwentyDataTableIndex model)
+        public override string GetCreateIndexSql(IntwentyDbIndexDefinition model)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATEINDEX_" + model.Id;
@@ -75,7 +75,7 @@ namespace Intwenty.DataClient.SQLBuilder
             return result;
         }
 
-        public override string GetInsertSql<T>(IntwentyDataTable model, T instance, List<IntwentySqlParameter> parameters)
+        public override string GetInsertSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters)
         {
             string result;
             var cachekey = CACHETYPE + "_INSERT_" + model.Id;
@@ -149,7 +149,7 @@ namespace Intwenty.DataClient.SQLBuilder
         }
 
 
-        protected override string GetCreateColumnSql(IntwentyDataColumn model)
+        protected override string GetCreateColumnSql(IntwentyDbColumnDefinition model)
         {
             var result = string.Empty;
             var allownullvalue = "NULL";

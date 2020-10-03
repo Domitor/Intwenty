@@ -14,13 +14,13 @@ namespace Intwenty.DataClient.SQLBuilder
           
         }
 
-        public abstract string GetCreateTableSql(IntwentyDataTable model);
+        public abstract string GetCreateTableSql(IntwentyDbTableDefinition model);
 
-        public abstract string GetCreateIndexSql(IntwentyDataTableIndex model);
+        public abstract string GetCreateIndexSql(IntwentyDbIndexDefinition model);
 
-        public abstract string GetInsertSql<T>(IntwentyDataTable model, T instance, List<IntwentySqlParameter> parameters);
+        public abstract string GetInsertSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters);
 
-        protected abstract string GetCreateColumnSql(IntwentyDataColumn model);
+        protected abstract string GetCreateColumnSql(IntwentyDbColumnDefinition model);
 
     }
 }

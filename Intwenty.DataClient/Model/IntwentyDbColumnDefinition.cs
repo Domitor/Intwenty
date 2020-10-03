@@ -5,9 +5,8 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    sealed class IntwentyDataColumn : DbBaseObject
+    sealed class IntwentyDbColumnDefinition : DbBaseDefinition
     {
-        public int Order { get; set; }
 
         public bool IsPrimaryKeyColumn { get; set; }
 

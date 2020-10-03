@@ -7,22 +7,22 @@ namespace Intwenty.DataClient.SQLBuilder
 {
     sealed class MariaDbSqlBuilder : BaseSqlBuilder
     {
-        public override string GetCreateIndexSql(IntwentyDataTableIndex model)
+        public override string GetCreateIndexSql(IntwentyDbIndexDefinition model)
         {
             throw new NotImplementedException();
         }
 
-        public override string GetCreateTableSql(IntwentyDataTable model)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
         {
             throw new NotImplementedException();
         }
 
-        public override string GetInsertSql<T>(IntwentyDataTable model, T instance, List<IntwentySqlParameter> parameters)
+        public override string GetInsertSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters)
         {
             throw new NotImplementedException();
         }
 
-        protected override string GetCreateColumnSql(IntwentyDataColumn model)
+        protected override string GetCreateColumnSql(IntwentyDbColumnDefinition model)
         {
             throw new NotImplementedException();
         }

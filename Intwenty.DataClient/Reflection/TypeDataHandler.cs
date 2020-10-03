@@ -10,21 +10,21 @@ namespace Intwenty.DataClient.Reflection
     {
         private static string CACHETYPE = "TYPES";
 
-        public static IntwentyDataTable GetTableInfoByTypeAndUsage<T>(string key)
+        public static IntwentyDbTableDefinition GetDbTableDefinition<T>(string key)
         {
             var currenttype = typeof(T);
             var compositekey = currenttype.Name.ToUpper() + "_" + key.Replace(" ", "").ToUpper();
             return GetTableInfoByTypeAndUsageInternal<T>(compositekey, currenttype);
         }
 
-        public static IntwentyDataTable GetTableInfoByTypeAndUsage<T>()
+        public static IntwentyDbTableDefinition GetDbTableDefinition<T>()
         {
             var currenttype = typeof(T);
             var key = currenttype.Name.ToUpper();
             return GetTableInfoByTypeAndUsageInternal<T>(key, currenttype);
         }
 
-        public static void AdjustColumnsToUserQuery(IntwentyDataTable t, IDataReader reader)
+        public static void AdjustColumnDefinitionToQueryResult(IntwentyDbTableDefinition t, IDataReader reader)
         {
             if (reader == null)
                 return;
@@ -51,16 +51,16 @@ namespace Intwenty.DataClient.Reflection
         }
 
 
-        private static IntwentyDataTable GetTableInfoByTypeAndUsageInternal<T>(string key, Type currenttype)
+        private static IntwentyDbTableDefinition GetTableInfoByTypeAndUsageInternal<T>(string key, Type currenttype)
         {
 
-            IntwentyDataTable result;
+            IntwentyDbTableDefinition result;
 
             var cachekey = CACHETYPE + "_" + key;
             var cache = MemoryCache.Default;
 
           
-            result = cache.Get(cachekey) as IntwentyDataTable;
+            result = cache.Get(cachekey) as IntwentyDbTableDefinition;
             if (result != null)
             {
                 if (result.Name.ToUpper() == currenttype.Name.ToUpper())
@@ -69,7 +69,7 @@ namespace Intwenty.DataClient.Reflection
                 cache.Remove(cachekey);
             }
 
-            result = new IntwentyDataTable() { Id = key, Name = currenttype.Name };
+            result = new IntwentyDbTableDefinition() { Id = key, Name = currenttype.Name };
 
             var tablename = currenttype.GetCustomAttributes(typeof(DbTableName), false);
             if (tablename != null && tablename.Length > 0)
@@ -87,7 +87,7 @@ namespace Intwenty.DataClient.Reflection
                 {
                     idxcnt++;
                     var idx = (DbTableIndex)a;
-                    var tblindex = new IntwentyDataTableIndex() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique, Order = idxcnt, TableName = result.Name };
+                    var tblindex = new IntwentyDbIndexDefinition() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique, Order = idxcnt, TableName = result.Name };
                     result.Indexes.Add(tblindex);
                 }
             }
@@ -101,7 +101,7 @@ namespace Intwenty.DataClient.Reflection
                 if (columnname != null && columnname.Length > 0)
                     membername = ((DbColumnName)columnname[0]).Name;
 
-                var column = new IntwentyDataColumn() { Id=membername,  Name = membername, Property = property };
+                var column = new IntwentyDbColumnDefinition() { Id=membername,  Name = membername, Property = property };
 
                 var autoinc = property.GetCustomAttributes(typeof(AutoIncrement), false);
                 if (autoinc != null && autoinc.Length > 0)

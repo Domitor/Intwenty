@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Databases.Sql
 {
-    abstract class BaseSqlDb : BaseDb, IDisposable
+    abstract class BaseSqlDb : BaseDb, IDisposable, ISqlClient
     {
 
         public BaseSqlDb(string connectionstring) : base(connectionstring)
@@ -51,9 +51,75 @@ namespace Intwenty.DataClient.Databases.Sql
             }
         }
 
+
+        public void RunCommand(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null)
+        {
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            command.ExecuteNonQuery();
+        }
+
+        public string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            var reader = command.ExecuteReader();
+
+            var separator = "";
+            var sb = new StringBuilder();
+            sb.Append("{");
+            while (reader.Read())
+            {
+                if (resultcolumns == null)
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        var val = GetJSONValue(reader, i);
+                        if (string.IsNullOrEmpty(val))
+                            continue;
+
+                        sb.Append(separator + val);
+                        separator = ",";
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        var val = GetJSONValue(reader, i);
+                        if (string.IsNullOrEmpty(val))
+                            continue;
+
+                        sb.Append(separator + val);
+                        separator = ",";
+                    }
+
+                }
+                break;
+            }
+            sb.Append("}");
+
+            return sb.ToString();
+        }
+
+
         public void CreateTable<T>()
         {
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>();
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
 
             if (TableExists<T>())
                 return;
@@ -76,7 +142,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
         public bool TableExists<T>()
         {
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>();
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
 
             try
             {
@@ -101,7 +167,7 @@ namespace Intwenty.DataClient.Databases.Sql
         public virtual T GetEntity<T>(string id) where T : new() 
         {
             var res = new T();
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>();
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
 
             if (info.PrimaryKeyColumnNamesList.Count == 0)
                 throw new InvalidOperationException("No primary key column found");
@@ -134,7 +200,7 @@ namespace Intwenty.DataClient.Databases.Sql
         public virtual List<T> GetEntities<T>() where T : new()
         {
             var res = new List<T>();
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>();
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
 
             var command = GetCommand();
             command.CommandText = string.Format("SELECT * FROM {0}", info.Name);
@@ -160,21 +226,23 @@ namespace Intwenty.DataClient.Databases.Sql
             return res;
         }
 
-        public virtual List<T> GetEntities<T>(string sqlcommand, bool isStoredProcedure) where T : new()
+        public virtual List<T> GetEntities<T>(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null) where T : new()
         {
             var res = new List<T>();
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>(sqlcommand);
+            var info = TypeDataHandler.GetDbTableDefinition<T>(sql);
 
             var command = GetCommand();
-            command.CommandText = sqlcommand;
-            if (isStoredProcedure)
+            command.CommandText = sql;
+            if (isprocedure)
                 command.CommandType = CommandType.StoredProcedure;
             else
                 command.CommandType = CommandType.Text;
 
+            AddCommandParameters(parameters);
+
             var reader = command.ExecuteReader();
 
-            TypeDataHandler.AdjustColumnsToUserQuery(info, reader);
+            TypeDataHandler.AdjustColumnDefinitionToQueryResult(info, reader);
 
             while (reader.Read())
             {
@@ -194,11 +262,10 @@ namespace Intwenty.DataClient.Databases.Sql
             return res;
         }
 
-        public virtual List<T> GetEntities<T>(string sqlcommand, bool isStoredProcedure, List<IntwentySqlParameter> parameters) where T : new() { return default; }
 
         public virtual int InsertEntity<T>(T entity)
         {
-            var info = TypeDataHandler.GetTableInfoByTypeAndUsage<T>();
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
             var parameters = new List<IntwentySqlParameter>();
 
 
@@ -206,7 +273,7 @@ namespace Intwenty.DataClient.Databases.Sql
             command.CommandText = GetSqlBuilder().GetInsertSql(info, entity, parameters);
             command.CommandType = CommandType.Text;
 
-            AddCommandParameters(parameters);
+            AddCommandParameters(parameters.ToArray());
 
             var res = command.ExecuteNonQuery();
 
@@ -220,7 +287,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
         protected abstract IDbTransaction GetTransaction();
 
-        protected virtual void SetPropertyValues<T>(IDataReader reader, IntwentyDataColumn column, T instance)
+        protected virtual void SetPropertyValues<T>(IDataReader reader, IntwentyDbColumnDefinition column, T instance)
         {
             if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32")
                 column.Property.SetValue(instance, reader.GetInt32(column.Order), null);
@@ -236,12 +303,62 @@ namespace Intwenty.DataClient.Databases.Sql
                 column.Property.SetValue(instance, reader.GetValue(column.Order), null);
         }
 
-        protected abstract void AddCommandParameters(List<IntwentySqlParameter> parameters);
+        protected abstract void AddCommandParameters(IIntwentySqlParameter[] parameters);
             
 
-        protected abstract void HandleInsertAutoIncrementation<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T entity);
+        protected abstract void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T entity);
 
-      
-       
+        protected string GetJSONValue(IDataReader r, int i, IIntwentyResultColumn[] resultcols = null)
+        {
+            if (r.IsDBNull(i))
+                return string.Empty;
+
+            var columnname = r.GetName(i);
+            var datatypename = r.GetDataTypeName(i);
+            IIntwentyResultColumn resultcolumn=null;
+            if (resultcols != null)
+            {
+                resultcolumn = resultcols.FirstOrDefault(p => p.Name.ToLower() == columnname.ToLower());
+                if (resultcolumn != null)
+                    columnname = resultcolumn.Name;
+                else
+                    return string.Empty;
+
+            }
+
+
+            if (IsNumeric(datatypename, resultcolumn))
+            {
+                return "\"" + columnname + "\":" + Convert.ToString(r.GetValue(i)).Replace(",", ".");
+            }
+            else if (IsDateTime(datatypename, resultcolumn))
+            {
+                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r.GetValue(i)).ToString("yyyy-MM-dd")).ToString() + "\"";
+            }
+            else
+            {
+                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r.GetValue(i))).ToString() + "\"";
+            }
+        }
+
+        protected bool IsNumeric(string datatypename, IIntwentyResultColumn resultcolumn)
+        {
+            if (resultcolumn != null)
+                return resultcolumn.IsNumeric;
+
+            var t = datatypename;
+            return false;
+        }
+
+        protected bool IsDateTime(string datatypename, IIntwentyResultColumn resultcolumn)
+        {
+            if (resultcolumn != null)
+                return resultcolumn.IsDateTime;
+
+            var t = datatypename;
+            return false;
+        }
+
+
     }
 }

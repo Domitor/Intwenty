@@ -70,8 +70,11 @@ namespace Intwenty.DataClient.Databases.Sql
             return transaction;
         }
 
-        protected override void AddCommandParameters(List<IntwentySqlParameter> parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
         {
+            if (parameters == null)
+                return;
+
             foreach (var p in parameters)
             {
                 var param = new MySqlParameter() { ParameterName = p.Name, Value = p.Value, Direction = p.Direction };
@@ -91,7 +94,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
        
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable info, List<IntwentySqlParameter> parameters, T instance)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T instance)
         {
             throw new System.NotImplementedException();
         }

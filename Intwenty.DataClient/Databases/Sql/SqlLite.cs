@@ -61,7 +61,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
      
 
-        protected override void SetPropertyValues<T>(IDataReader reader, IntwentyDataColumn column, T instance)
+        protected override void SetPropertyValues<T>(IDataReader reader, IntwentyDbColumnDefinition column, T instance)
         {
             if (column.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET"))
             {
@@ -75,8 +75,11 @@ namespace Intwenty.DataClient.Databases.Sql
 
       
 
-        protected override void AddCommandParameters(List<IntwentySqlParameter> parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
         {
+            if (parameters == null)
+                return;
+
             foreach (var p in parameters)
             {
                 var param = new SQLiteParameter() { ParameterName = p.Name, Value = p.Value, Direction = p.Direction };
@@ -88,7 +91,7 @@ namespace Intwenty.DataClient.Databases.Sql
             }
         }
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDataTable model, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
         {
             var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)

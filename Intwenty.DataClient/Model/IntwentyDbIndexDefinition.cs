@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    sealed class IntwentyDataTableIndex : DbBaseObject
+    sealed class IntwentyDbIndexDefinition : DbBaseDefinition
     {
 
         public bool IsUnique { get; set; }
@@ -25,7 +25,7 @@ namespace Intwenty.DataClient.Model
 
         private string colnames { get; set; }
 
-        public IntwentyDataTableIndex()
+        public IntwentyDbIndexDefinition()
         {
             colnames = string.Empty;
         }

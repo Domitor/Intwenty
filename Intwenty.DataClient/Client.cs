@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Intwenty.DataClient.Model;
+using System;
 using System.Collections.Generic;
 
 namespace Intwenty.DataClient
@@ -50,6 +51,11 @@ namespace Intwenty.DataClient
         public void Close()
         {
             InternalClient.Close();
+        }
+
+        public void RunCommand(string sql, bool isprocedure = false, IntwentySqlParameter[] parameters = null)
+        {
+            InternalClient.RunCommand(sql, isprocedure, parameters);
         }
 
         public void CreateTable<T>()

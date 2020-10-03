@@ -3,7 +3,7 @@
 
 namespace Intwenty.DataClient.Model
 {
-    public class IntwentySqlParameter
+    public class IntwentySqlParameter : IIntwentySqlParameter
     {
         public string Name { get; set; }
 
