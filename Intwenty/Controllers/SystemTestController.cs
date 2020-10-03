@@ -19,6 +19,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using Intwenty.PushData;
 using Intwenty.DataClient;
+using Intwenty.DataClient.Model;
 
 namespace Intwenty.Controllers
 {
@@ -1026,6 +1027,10 @@ namespace Intwenty.Controllers
 
                 if (check.Exists(p => p.Id < 1))
                     throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity(T)");
+
+                var json = client.GetJSONObject("select * from tests_TestData2AutoInc where Id=@P1", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name="@P1", Value = check[50].Id }  } );
+                if (string.IsNullOrEmpty(json))
+                    throw new InvalidOperationException("DataClient.GetJSONObject() failed");
 
                 client.Close();
 

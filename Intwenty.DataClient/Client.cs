@@ -93,6 +93,11 @@ namespace Intwenty.DataClient
             return InternalClient.InsertEntity(model);
         }
 
+        public string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            return InternalClient.GetJSONObject(sql,isprocedure,parameters,resultcolumns);
+        }
+
     }
 
     public class NoSqlClient

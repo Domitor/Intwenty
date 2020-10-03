@@ -7,7 +7,9 @@ namespace Intwenty.DataClient.Model
 {
     public class IntwentyResultColumn : IIntwentyResultColumn
     {
-        public string Name { get; }
+        public int Index { get; set; }
+
+        public string Name { get; set; }
 
         public bool IsNumeric { get; set; }
 

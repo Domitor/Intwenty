@@ -20,6 +20,7 @@ namespace Intwenty.DataClient
         List<T> GetEntities<T>(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null) where T : new();
         int InsertEntity<T>(T entity);
         string GetJSONObject(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null, IIntwentyResultColumn[] resultcolumns=null);
+        string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
 
 
 

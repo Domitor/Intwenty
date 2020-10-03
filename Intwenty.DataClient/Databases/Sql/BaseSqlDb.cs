@@ -79,35 +79,25 @@ namespace Intwenty.DataClient.Databases.Sql
 
             var reader = command.ExecuteReader();
 
+            var adjusted_columns = new List<IntwentyResultColumn>();
             var separator = "";
             var sb = new StringBuilder();
             sb.Append("{");
             while (reader.Read())
             {
-                if (resultcolumns == null)
+                var names = new List<string>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                    names.Add(reader.GetName(i));
+
+                adjusted_columns = AdjustResultColumns(names, resultcolumns);
+
+                foreach (var rc in adjusted_columns)
                 {
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        var val = GetJSONValue(reader, i);
-                        if (string.IsNullOrEmpty(val))
-                            continue;
+                    if (reader.IsDBNull(rc.Index))
+                        continue;
 
-                        sb.Append(separator + val);
-                        separator = ",";
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        var val = GetJSONValue(reader, i);
-                        if (string.IsNullOrEmpty(val))
-                            continue;
-
-                        sb.Append(separator + val);
-                        separator = ",";
-                    }
-
+                    sb.Append(separator + GetJSONValue(reader, rc));
+                    separator = ",";
                 }
                 break;
             }
@@ -116,6 +106,60 @@ namespace Intwenty.DataClient.Databases.Sql
             return sb.ToString();
         }
 
+        public string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            var reader = command.ExecuteReader();
+
+            var adjusted_columns = new List<IntwentyResultColumn>();
+            var rindex = 0;
+            var objectseparator = "";
+            var valueseparator = "";
+            var sb = new StringBuilder();
+            sb.Append("[");
+            while (reader.Read())
+            {
+                rindex += 1;
+                if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                {
+                    if (rindex <= minrow)
+                        continue;
+                    if (rindex > maxrow)
+                        break;
+                }
+                if (rindex == 1)
+                {
+                    var names = new List<string>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                        names.Add(reader.GetName(i));
+
+                    adjusted_columns = AdjustResultColumns(names, resultcolumns);
+                }
+
+                sb.Append(objectseparator + "{");
+                foreach (var rc in adjusted_columns)
+                {
+                    if (reader.IsDBNull(rc.Index))
+                        continue;
+
+                    sb.Append(valueseparator + GetJSONValue(reader, rc));
+                    valueseparator = ",";
+                }
+                sb.Append("}");
+                objectseparator = ",";
+            }
+            sb.Append("]");
+
+            return sb.ToString();
+        }
 
         public void CreateTable<T>()
         {
@@ -308,57 +352,78 @@ namespace Intwenty.DataClient.Databases.Sql
 
         protected abstract void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T entity);
 
-        protected string GetJSONValue(IDataReader r, int i, IIntwentyResultColumn[] resultcols = null)
+        protected string GetJSONValue(IDataReader r, IntwentyResultColumn resultcol)
         {
-            if (r.IsDBNull(i))
+            if (r.IsDBNull(resultcol.Index))
                 return string.Empty;
 
-            var columnname = r.GetName(i);
-            var datatypename = r.GetDataTypeName(i);
-            IIntwentyResultColumn resultcolumn=null;
-            if (resultcols != null)
-            {
-                resultcolumn = resultcols.FirstOrDefault(p => p.Name.ToLower() == columnname.ToLower());
-                if (resultcolumn != null)
-                    columnname = resultcolumn.Name;
-                else
-                    return string.Empty;
+            var columnname = r.GetName(resultcol.Index);
+            var datatypename = r.GetDataTypeName(resultcol.Index);
 
-            }
+            if (IsNumeric(datatypename, resultcol))
+                return "\"" + columnname + "\":" + Convert.ToString(r.GetValue(resultcol.Index)).Replace(",", ".");
+            else if (IsDateTime(datatypename, resultcol))
+                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r.GetValue(resultcol.Index)).ToString("yyyy-MM-dd")).ToString() + "\"";
+            else
+                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r.GetValue(resultcol.Index))).ToString() + "\"";
 
+        }
 
-            if (IsNumeric(datatypename, resultcolumn))
+        protected bool IsNumeric(string datatypename, IntwentyResultColumn resultcolumn)
+        {
+            //if (resultcolumn != null)
+            //    return resultcolumn.IsNumeric;
+
+            if (datatypename.ToUpper() == "REAL")
+                return true;
+            if (datatypename.ToUpper() == "INTEGER")
+                return true;
+
+ 
+            return false;
+        }
+
+        protected bool IsDateTime(string datatypename, IntwentyResultColumn resultcolumn)
+        {
+            //if (resultcolumn != null)
+            //    return resultcolumn.IsDateTime;
+
+            if (datatypename.ToUpper() == "DATETIME")
+                return true;
+           
+
+            return false;
+        }
+
+        private List<IntwentyResultColumn> AdjustResultColumns(List<string> schema, IIntwentyResultColumn[] resultcolumns)
+        {
+            var res = new List<IntwentyResultColumn>();
+            if (resultcolumns == null || (resultcolumns != null && resultcolumns.Count() == 0))
             {
-                return "\"" + columnname + "\":" + Convert.ToString(r.GetValue(i)).Replace(",", ".");
-            }
-            else if (IsDateTime(datatypename, resultcolumn))
-            {
-                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToDateTime(r.GetValue(i)).ToString("yyyy-MM-dd")).ToString() + "\"";
+                for (int i = 0; i < schema.Count; i++)
+                {
+                    var rc = new IntwentyResultColumn() { Name = schema[i], Index = i };
+                    //TODO: IsNumeric, IsDateTime
+                    res.Add(rc);
+                }
             }
             else
             {
-                return "\"" + columnname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(r.GetValue(i))).ToString() + "\"";
+                for (int i = 0; i < schema.Count; i++)
+                {
+                    var col = resultcolumns.FirstOrDefault(p => p.Name.ToLower() == schema[i].ToLower());
+                    if (col != null)
+                    {
+                        var rc = new IntwentyResultColumn() { Name = schema[i], Index = i };
+                        //TODO: IsNumeric, IsDateTime
+                        res.Add(rc);
+                    }
+                }
             }
+
+            return res;
         }
 
-        protected bool IsNumeric(string datatypename, IIntwentyResultColumn resultcolumn)
-        {
-            if (resultcolumn != null)
-                return resultcolumn.IsNumeric;
-
-            var t = datatypename;
-            return false;
-        }
-
-        protected bool IsDateTime(string datatypename, IIntwentyResultColumn resultcolumn)
-        {
-            if (resultcolumn != null)
-                return resultcolumn.IsDateTime;
-
-            var t = datatypename;
-            return false;
-        }
-
-
+       
     }
 }
