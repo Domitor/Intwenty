@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace Intwenty.DataClient.Databases.Sql
@@ -187,20 +188,39 @@ namespace Intwenty.DataClient.Databases.Sql
         public bool TableExists<T>()
         {
             var info = TypeDataHandler.GetDbTableDefinition<T>();
+            return TableExists(info.Name);
+        }
 
+        public bool TableExists(string tablename)
+        {
             try
             {
                 var checkcommand = GetCommand();
-                checkcommand.CommandText = string.Format("select 1 from {0}", info.Name);
+                checkcommand.CommandText = string.Format("SELECT 1 FROM {0}", tablename);
                 checkcommand.CommandType = CommandType.Text;
                 checkcommand.ExecuteScalar();
 
                 return true;
             }
-            catch {  }
+            catch { }
 
             return false;
-     
+        }
+
+        public bool ColumnExists(string tablename, string columnname)
+        {
+            try
+            {
+                var checkcommand = GetCommand();
+                checkcommand.CommandText = string.Format("SELECT {0} FROM {1} WHERE 1=2", columnname,tablename);
+                checkcommand.CommandType = CommandType.Text;
+                checkcommand.ExecuteScalar();
+
+                return true;
+            }
+            catch { }
+
+            return false;
         }
 
         public virtual T GetEntity<T>(int id) where T : new()
@@ -327,6 +347,58 @@ namespace Intwenty.DataClient.Databases.Sql
 
         }
 
+        public int UpdateEntity<T>(T entity)
+        {
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
+            var parameters = new List<IntwentySqlParameter>();
+            var keyparameters = new List<IntwentySqlParameter>();
+
+            var sql = GetSqlBuilder().GetUpdateSql(info, entity, parameters,keyparameters);
+            if (keyparameters.Count == 0)
+                throw new InvalidOperationException("Can't update a table without 'Primary Key' or an 'Auto Increment' column, please use annotations.");
+
+            var command = GetCommand();
+            command.CommandText = sql;
+            command.CommandType = CommandType.Text;
+
+            AddCommandParameters(keyparameters.ToArray());
+            AddCommandParameters(parameters.ToArray());
+
+            var res = command.ExecuteNonQuery();
+
+            return res;
+        }
+
+        public int DeleteEntities<T>(List<T> entities)
+        {
+            var res = 0;
+            foreach (var t in entities)
+            {
+                res += DeleteEntity(t);
+            }
+            return res;
+        }
+
+        public int DeleteEntity<T>(T entity)
+        {
+            var info = TypeDataHandler.GetDbTableDefinition<T>();
+            var parameters = new List<IntwentySqlParameter>();
+
+            var sql = GetSqlBuilder().GetDeleteSql(info, entity, parameters);
+            if (parameters.Count == 0)
+                throw new InvalidOperationException("Can't delete rows in a table without 'Primary Key' or an 'Auto Increment' column, please use annotations.");
+
+            var command = GetCommand();
+            command.CommandText = sql;
+            command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters.ToArray());
+
+            var res = command.ExecuteNonQuery();
+
+            return res;
+        }
+
         protected abstract IDbCommand GetCommand();
 
         protected abstract IDbTransaction GetTransaction();
@@ -424,6 +496,6 @@ namespace Intwenty.DataClient.Databases.Sql
             return res;
         }
 
-       
+      
     }
 }

@@ -148,6 +148,157 @@ namespace Intwenty.DataClient.SQLBuilder
             return result;
         }
 
+        public override string GetUpdateSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters, List<IntwentySqlParameter> keyparameters)
+        {
+            string result;
+            var cachekey = CACHETYPE + "_UPDATE_" + model.Id;
+            var cache = MemoryCache.Default;
+            result = cache.Get(cachekey) as string;
+            if (!string.IsNullOrEmpty(result))
+            {
+                foreach (var col in model.Columns)
+                {
+
+                    var value = col.Property.GetValue(model);
+                    if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                        value = ((DateTimeOffset)value).DateTime;
+
+                    if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
+                        keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+
+
+                    if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsPrimaryKeyColumn)
+                        keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+
+                    if (keyparameters.Exists(p => p.Name == col.Name))
+                        continue;
+
+                    var prm = new IntwentySqlParameter() { Name = "@" + col.Name };
+                    if (value == null)
+                        prm.Value = DBNull.Value;
+                    else
+                        prm.Value = value;
+
+                    parameters.Add(prm);
+
+                }
+
+
+                return result;
+
+            }
+
+
+            var separator = "";
+            var query = new StringBuilder(string.Format("UPDATE {0} SET ", model.Name));
+
+            foreach (var col in model.Columns)
+            {
+
+                var value = col.Property.GetValue(model);
+                if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                    value = ((DateTimeOffset)value).DateTime;
+
+                if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
+                    keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+      
+
+                if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsPrimaryKeyColumn)
+                    keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+  
+                if (keyparameters.Exists(p => p.Name == col.Name))
+                    continue;
+
+
+                var prm = new IntwentySqlParameter() { Name = "@" + col.Name };
+                if (value == null)
+                    prm.Value = DBNull.Value;
+                else
+                    prm.Value = value;
+
+                parameters.Add(prm);
+
+                query.Append(separator + string.Format("{0}=@{0}", col.Name));
+                separator = ", ";
+            }
+
+
+
+            query.Append(" WHERE ");
+            var wheresep = "";
+            foreach (var p in keyparameters)
+            {
+                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
+                wheresep = " AND ";
+            }
+
+            result = query.ToString();
+            cache.Add(cachekey, result, DateTime.Now.AddYears(1));
+
+            return result;
+
+        }
+
+        public override string GetDeleteSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters)
+        {
+            string result;
+            var cachekey = CACHETYPE + "_DELETE_" + model.Id;
+            var cache = MemoryCache.Default;
+            result = cache.Get(cachekey) as string;
+            if (!string.IsNullOrEmpty(result))
+            {
+                foreach (var col in model.Columns)
+                {
+
+                    var value = col.Property.GetValue(model);
+                    if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                        value = ((DateTimeOffset)value).DateTime;
+
+                    if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
+                        parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+
+
+                    if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsPrimaryKeyColumn)
+                        parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+                }
+
+                return result;
+
+            }
+
+            var query = new StringBuilder(string.Format("DELETE FROM {0} WHERE ", model.Name));
+
+            foreach (var col in model.Columns)
+            {
+
+                var value = col.Property.GetValue(model);
+                if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                    value = ((DateTimeOffset)value).DateTime;
+
+                if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
+                    parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+
+
+                if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsPrimaryKeyColumn)
+                    parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
+
+            }
+
+            query.Append(" WHERE ");
+            var wheresep = "";
+            foreach (var p in parameters)
+            {
+                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
+                wheresep = " AND ";
+            }
+
+            result = query.ToString();
+            cache.Add(cachekey, result, DateTime.Now.AddYears(1));
+
+            return result;
+
+        }
+
 
         protected override string GetCreateColumnSql(IntwentyDbColumnDefinition model)
         {

@@ -17,7 +17,17 @@ namespace Intwenty.DataClient.SQLBuilder
             throw new NotImplementedException();
         }
 
+        public override string GetDeleteSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         public override string GetInsertSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetUpdateSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters, List<IntwentySqlParameter> keyparameters)
         {
             throw new NotImplementedException();
         }

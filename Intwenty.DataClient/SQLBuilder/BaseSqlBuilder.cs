@@ -20,6 +20,10 @@ namespace Intwenty.DataClient.SQLBuilder
 
         public abstract string GetInsertSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters);
 
+        public abstract string GetUpdateSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters, List<IntwentySqlParameter> keyparameters);
+
+        public abstract string GetDeleteSql<T>(IntwentyDbTableDefinition model, T instance, List<IntwentySqlParameter> parameters);
+
         protected abstract string GetCreateColumnSql(IntwentyDbColumnDefinition model);
 
     }
