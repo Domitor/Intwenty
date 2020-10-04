@@ -13,6 +13,7 @@ namespace Intwenty.DataClient.Databases.Sql
 {
     abstract class BaseSqlDb : BaseDb, IDisposable, ISqlClient
     {
+        protected bool IsInTransaction { get; set; }
 
         public BaseSqlDb(string connectionstring) : base(connectionstring)
         {
@@ -160,6 +161,16 @@ namespace Intwenty.DataClient.Databases.Sql
             sb.Append("]");
 
             return sb.ToString();
+        }
+
+        public ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            throw new NotImplementedException();
         }
 
         public void CreateTable<T>()
@@ -369,7 +380,7 @@ namespace Intwenty.DataClient.Databases.Sql
             return res;
         }
 
-        public int DeleteEntities<T>(List<T> entities)
+        public int DeleteEntities<T>(IEnumerable<T> entities)
         {
             var res = 0;
             foreach (var t in entities)

@@ -1,14 +1,11 @@
-﻿using Intwenty.DataClient.Model;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Data;
 
 namespace Intwenty.DataClient
 {
     public enum SqlDBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
 
-    public enum NoSqlDBMS { MongoDb, LiteDb };
-
-    public class SqlClient
+    public class SqlClient : ISqlClient
     {
 
         public SqlDBMS DBMSType { get; }
@@ -53,7 +50,8 @@ namespace Intwenty.DataClient
             InternalClient.Close();
         }
 
-        public void RunCommand(string sql, bool isprocedure = false, IntwentySqlParameter[] parameters = null)
+
+        public void RunCommand(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null)
         {
             InternalClient.RunCommand(sql, isprocedure, parameters);
         }
@@ -98,31 +96,53 @@ namespace Intwenty.DataClient
             return InternalClient.GetJSONObject(sql,isprocedure,parameters,resultcolumns);
         }
 
-    }
-
-    public class NoSqlClient
-    {
-
-        public NoSqlDBMS DBMSType { get; }
-
-        public string ConnectionString { get; }
-
-        private INoSqlClient InternalClient { get; }
-
-        public NoSqlClient(NoSqlDBMS database, string connectionstring)
+        public bool TableExists(string tablename)
         {
-            DBMSType = database;
-            ConnectionString = connectionstring;
-
-            if (DBMSType == NoSqlDBMS.LiteDb)
-                InternalClient = new Databases.NoSql.LiteDb(connectionstring);
+            return InternalClient.TableExists(tablename);
         }
 
-        public T GetOne<T>(int id) where T : new()
+        public bool ColumnExists(string tablename, string columnname)
         {
-            return InternalClient.GetOne<T>(id);
+            return InternalClient.ColumnExists(tablename, columnname);
         }
 
+       
+
+        public List<T> GetEntities<T>(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null) where T : new()
+        {
+            return InternalClient.GetEntities<T>(sql,isprocedure,parameters);
+        }
+
+        public int UpdateEntity<T>(T entity)
+        {
+            return InternalClient.UpdateEntity<T>(entity);
+        }
+
+        public int DeleteEntity<T>(T entity)
+        {
+            return InternalClient.DeleteEntity<T>(entity);
+        }
+
+        public int DeleteEntities<T>(IEnumerable<T> entities)
+        {
+            return InternalClient.DeleteEntities<T>(entities);
+        }
+
+        public string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            return InternalClient.GetJSONArray(sql,minrow,maxrow,isprocedure,parameters,resultcolumns);
+        }
+
+        public ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            return InternalClient.GetResultSet(sql, minrow, maxrow, isprocedure, parameters, resultcolumns);
+        }
+
+        public DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        {
+            return InternalClient.GetDataTable(sql, minrow, maxrow, isprocedure, parameters, resultcolumns);
+        }
     }
+
 
 }

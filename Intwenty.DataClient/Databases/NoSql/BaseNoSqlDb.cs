@@ -6,12 +6,12 @@ namespace Intwenty.DataClient.Databases.NoSql
 {
     public abstract class BaseNoSqlDb : BaseDb
     {
+        public string DatabaseName { get; }
 
-        public BaseNoSqlDb(string connectionstring) : base(connectionstring)
+        public BaseNoSqlDb(string connectionstring, string databasename) : base(connectionstring)
         {
-         
+            DatabaseName = databasename;
         }
 
-        public virtual T GetOne<T>(int id) where T : new() { return default; }
     }
 }

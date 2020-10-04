@@ -6,8 +6,7 @@ namespace Intwenty.DataClient.Databases
 {
     public class BaseDb
     {
-        protected bool IsInTransaction { get; set; }
-
+      
         protected string ConnectionString { get; set; }
 
         public BaseDb(string connectionstring)

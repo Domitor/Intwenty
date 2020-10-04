@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Intwenty.DataClient.Databases.NoSql
 {
-    public sealed class LiteDb : BaseNoSqlDb, INoSqlClient
+    public sealed class MongoDb : BaseNoSqlDb, INoSqlClient
     {
-        public LiteDb(string connectionstring, string databasename) : base(connectionstring, databasename)
+        public MongoDb(string connectionstring, string databasename) : base(connectionstring, databasename)
         {
 
         }
