@@ -2,6 +2,7 @@
 using Intwenty.DataClient.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
@@ -100,6 +101,8 @@ namespace Intwenty.DataClient.SQLBuilder
                     parameters.Add(prm);
                 }
 
+                if (model.HasAutoIncrementalColumn)
+                    parameters.Add(new IntwentySqlParameter() { Name = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
 
                 return result;
             }
@@ -131,6 +134,12 @@ namespace Intwenty.DataClient.SQLBuilder
             }
             query.Append(") ");
             values.Append(")");
+
+            if(model.HasAutoIncrementalColumn)
+            {
+                values.Append(" select @NewId=Scope_Identity()");
+                parameters.Add(new IntwentySqlParameter() { Name = "@NewId", Direction = ParameterDirection.Output, DataType = DbType.Int32 });
+            }
 
             result = query.Append(values).ToString();
 
