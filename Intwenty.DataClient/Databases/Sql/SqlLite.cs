@@ -107,7 +107,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
         protected override BaseSqlBuilder GetSqlBuilder()
         {
-            return new SqlLiteSqlBuilder();
+            return new SqlLiteBuilder();
         }
 
         public override void Open()

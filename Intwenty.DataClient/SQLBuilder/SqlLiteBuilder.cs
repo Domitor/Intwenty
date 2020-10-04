@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.SQLBuilder
 {
-    sealed class SqlLiteSqlBuilder : BaseSqlBuilder
+    sealed class SqlLiteBuilder : BaseSqlBuilder
     {
         private static string CACHETYPE = "SQLITE_SQL";
 
@@ -29,7 +29,7 @@ namespace Intwenty.DataClient.SQLBuilder
             }
 
             //IF SQLLITE, PK ONLY IF NOT AUTOINC. IF AUTOINC THAT COL IS PK.
-            if (!model.Columns.Exists(p=> p.IsAutoIncremental))
+            if (!model.Columns.Exists(p=> p.IsAutoIncremental) && model.HasPrimaryKeyColumn)
                 sb.Append(", " + string.Format("PRIMARY KEY ({0})", model.PrimaryKeyColumnNames));
 
             sb.Append(")");

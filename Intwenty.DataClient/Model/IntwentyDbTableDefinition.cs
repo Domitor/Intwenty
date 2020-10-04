@@ -24,7 +24,9 @@ namespace Intwenty.DataClient.Model
 
         public List<IntwentyDbColumnDefinition> Columns { get; set; }
 
+        public bool HasPrimaryKeyColumn { get { return PrimaryKeyColumnNamesList.Count > 0; } }
 
+        public bool HasAutoIncrementalColumn { get { return Columns.Exists(p=> p.IsAutoIncremental); } }
 
 
         private string pkcolnames { get; set; }

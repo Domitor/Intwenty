@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace Intwenty.DataClient
@@ -25,6 +26,12 @@ namespace Intwenty.DataClient
                 InternalClient = new Databases.Sql.MariaDb(connectionstring);
             if (DBMSType == SqlDBMS.MariaDB)
                 InternalClient = new Databases.Sql.MariaDb(connectionstring);
+            if (DBMSType == SqlDBMS.MSSqlServer)
+                InternalClient = new Databases.Sql.SqlServer(connectionstring);
+            if (DBMSType == SqlDBMS.PostgreSQL)
+                InternalClient = new Databases.Sql.Postgres(connectionstring);
+
+           
         }
 
         public void BeginTransaction() 

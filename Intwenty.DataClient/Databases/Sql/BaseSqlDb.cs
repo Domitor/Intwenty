@@ -81,7 +81,6 @@ namespace Intwenty.DataClient.Databases.Sql
 
             var reader = command.ExecuteReader();
 
-            var adjusted_columns = new List<IntwentyResultColumn>();
             var separator = "";
             var sb = new StringBuilder();
             sb.Append("{");
@@ -91,7 +90,7 @@ namespace Intwenty.DataClient.Databases.Sql
                 for (int i = 0; i < reader.FieldCount; i++)
                     names.Add(reader.GetName(i));
 
-                adjusted_columns = AdjustResultColumns(names, resultcolumns);
+                var adjusted_columns = AdjustResultColumns(names, resultcolumns);
 
                 foreach (var rc in adjusted_columns)
                 {
