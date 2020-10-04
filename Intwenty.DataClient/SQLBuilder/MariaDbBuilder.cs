@@ -204,8 +204,8 @@ namespace Intwenty.DataClient.SQLBuilder
                     prm.Value = value;
 
                 parameters.Add(prm);
-
-                query.Append(separator + string.Format("{0}=@{0}", col.Name));
+             
+                query.Append(separator + string.Format("`{0}`=@{0}", col.Name));
                 separator = ", ";
             }
 
@@ -215,7 +215,7 @@ namespace Intwenty.DataClient.SQLBuilder
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
+                query.Append(wheresep + string.Format("`{0}`=@{0}", p.Name));
                 wheresep = " AND ";
             }
 
@@ -271,7 +271,7 @@ namespace Intwenty.DataClient.SQLBuilder
             var wheresep = "";
             foreach (var p in parameters)
             {
-                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
+                query.Append(wheresep + string.Format("`{0}`=@{0}", p.Name));
                 wheresep = " AND ";
             }
 

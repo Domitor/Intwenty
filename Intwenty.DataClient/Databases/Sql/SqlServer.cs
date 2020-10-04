@@ -90,11 +90,10 @@ namespace Intwenty.DataClient.Databases.Sql
             return new SqlServerBuilder();
         }
 
-       
-
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T instance)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
         {
-            throw new System.NotImplementedException();
         }
+
+
     }
 }

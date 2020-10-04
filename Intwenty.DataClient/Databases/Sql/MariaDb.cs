@@ -1,8 +1,9 @@
-﻿using Intwenty.DataClient.Model;
-using Intwenty.DataClient.SQLBuilder;
-using MySqlConnector;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Intwenty.DataClient.Model;
+using Intwenty.DataClient.SQLBuilder;
+using MySqlConnector;
 
 
 
@@ -92,11 +93,20 @@ namespace Intwenty.DataClient.Databases.Sql
             return new MariaDbSqlBuilder();
         }
 
-       
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T instance)
+
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
         {
-            throw new System.NotImplementedException();
+            var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
+            if (autoinccol == null)
+                return;
+
+            var command = GetCommand();
+            command.CommandText = "SELECT LAST_INSERT_ID()";
+            command.CommandType = CommandType.Text;
+
+            autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);
+
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using Intwenty.DataClient.Model;
-using Intwenty.DataClient.SQLBuilder;
-using Npgsql;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-
+using Intwenty.DataClient.Model;
+using Intwenty.DataClient.SQLBuilder;
+using Npgsql;
 
 namespace Intwenty.DataClient.Databases.Sql
 {
@@ -91,11 +91,20 @@ namespace Intwenty.DataClient.Databases.Sql
             return new PostgresBuilder();
         }
 
-       
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T instance)
+
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
         {
-            throw new System.NotImplementedException();
+            var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
+            if (autoinccol == null)
+                return;
+
+            var command = GetCommand();
+            command.CommandText = string.Format("SELECT currval('{0}')", model.Name.ToLower() + "_" + autoinccol.Name.ToLower() + "_seq");
+            command.CommandType = CommandType.Text;
+
+            autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);
+
         }
     }
 }
