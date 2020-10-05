@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Text.Json;
 
 namespace Intwenty.DataClient
 {
     public enum SqlDBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
 
-    public class SqlClient : ISqlClient
+    public class DataClient : ISqlClient
     {
 
         public SqlDBMS DBMSType { get; }
@@ -15,21 +16,21 @@ namespace Intwenty.DataClient
 
         private ISqlClient InternalClient { get; }
 
-        public SqlClient(SqlDBMS database, string connectionstring)
+        public DataClient(SqlDBMS database, string connectionstring)
         {
             DBMSType = database;
             ConnectionString = connectionstring;
 
             if (DBMSType == SqlDBMS.SQLite)
-                InternalClient = new Databases.Sql.SqlLite(connectionstring);
+                InternalClient = new Databases.SQLite.SQLiteClient(connectionstring);
             if (DBMSType == SqlDBMS.MySql)
-                InternalClient = new Databases.Sql.MariaDb(connectionstring);
+                InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
             if (DBMSType == SqlDBMS.MariaDB)
-                InternalClient = new Databases.Sql.MariaDb(connectionstring);
+                InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
             if (DBMSType == SqlDBMS.MSSqlServer)
-                InternalClient = new Databases.Sql.SqlServer(connectionstring);
+                InternalClient = new Databases.SqlServer.SqlServerClient(connectionstring);
             if (DBMSType == SqlDBMS.PostgreSQL)
-                InternalClient = new Databases.Sql.Postgres(connectionstring);
+                InternalClient = new Databases.Postgres.PostgresClient(connectionstring);
 
            
         }
@@ -98,6 +99,16 @@ namespace Intwenty.DataClient
             return InternalClient.InsertEntity(model);
         }
 
+        public int InsertEntity(string json, IIntwentyJSONObjectSchema schema)
+        {
+            return InternalClient.InsertEntity(json, schema);
+        }
+
+        public int InsertEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        {
+            return InternalClient.InsertEntity(json, schema);
+        }
+
         public string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
             return InternalClient.GetJSONObject(sql,isprocedure,parameters,resultcolumns);
@@ -122,7 +133,17 @@ namespace Intwenty.DataClient
 
         public int UpdateEntity<T>(T entity)
         {
-            return InternalClient.UpdateEntity<T>(entity);
+            return InternalClient.UpdateEntity(entity);
+        }
+
+        public int UpdateEntity(string json, IIntwentyJSONObjectSchema schema)
+        {
+            return InternalClient.UpdateEntity(json, schema);
+        }
+
+        public int UpdateEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        {
+            return InternalClient.UpdateEntity(json, schema);
         }
 
         public int DeleteEntity<T>(T entity)
@@ -149,6 +170,10 @@ namespace Intwenty.DataClient
         {
             return InternalClient.GetDataTable(sql, minrow, maxrow, isprocedure, parameters, resultcolumns);
         }
+
+       
+
+       
     }
 
 

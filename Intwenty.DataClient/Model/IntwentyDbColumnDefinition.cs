@@ -22,6 +22,8 @@ namespace Intwenty.DataClient.Model
 
         public bool IsInQueryResult { get; set; }
 
+        public bool IsJSONStorage { get; set; }
+
         public string GetNetType()
         {
             if (Property == null)

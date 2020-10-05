@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.DataClient.SQLBuilder
+namespace Intwenty.DataClient.Databases
 {
     abstract class BaseSqlBuilder
     {
@@ -14,7 +14,7 @@ namespace Intwenty.DataClient.SQLBuilder
           
         }
 
-        public abstract string GetCreateTableSql(IntwentyDbTableDefinition model);
+        public abstract string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage);
 
         public abstract string GetCreateIndexSql(IntwentyDbIndexDefinition model);
 

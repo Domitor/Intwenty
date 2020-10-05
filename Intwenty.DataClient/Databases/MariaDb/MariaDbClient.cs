@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Data;
 using Intwenty.DataClient.Model;
-using Intwenty.DataClient.SQLBuilder;
-using Npgsql;
+using MySqlConnector;
 
-namespace Intwenty.DataClient.Databases.Sql
+
+
+namespace Intwenty.DataClient.Databases.MariaDb
 {
-    sealed class Postgres : BaseSqlDb, ISqlClient
+    sealed class MariaDbClient : BaseDb, ISqlClient
     {
 
-        private NpgsqlConnection connection;
-        private NpgsqlCommand command;
-        private NpgsqlTransaction transaction;
+        private MySqlConnection connection;
+        private MySqlCommand command;
+        private MySqlTransaction transaction;
 
-        public Postgres(string connectionstring) : base(connectionstring)
+        public MariaDbClient(string connectionstring) : base(connectionstring)
         {
 
         }
@@ -42,13 +43,13 @@ namespace Intwenty.DataClient.Databases.Sql
             }
         }
 
-        private NpgsqlConnection GetConnection()
+        private MySqlConnection GetConnection()
         {
 
             if (connection != null && connection.State == ConnectionState.Open)
                 return connection;
 
-            connection = new NpgsqlConnection();
+            connection = new MySqlConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
             return connection;
@@ -56,7 +57,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
         protected override IDbCommand GetCommand()
         {
-            command = new NpgsqlCommand();
+            command = new MySqlCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
@@ -76,7 +77,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
             foreach (var p in parameters)
             {
-                var param = new NpgsqlParameter() { ParameterName = p.Name, Value = p.Value, Direction = p.Direction };
+                var param = new MySqlParameter() { ParameterName = p.Name, Value = p.Value, Direction = p.Direction };
                 if (param.Direction == ParameterDirection.Output)
                     param.DbType = p.DataType;
 
@@ -88,7 +89,7 @@ namespace Intwenty.DataClient.Databases.Sql
 
         protected override BaseSqlBuilder GetSqlBuilder()
         {
-            return new PostgresBuilder();
+            return new MariaDbSqlBuilder();
         }
 
 
@@ -100,7 +101,7 @@ namespace Intwenty.DataClient.Databases.Sql
                 return;
 
             var command = GetCommand();
-            command.CommandText = string.Format("SELECT currval('{0}')", model.Name.ToLower() + "_" + autoinccol.Name.ToLower() + "_seq");
+            command.CommandText = "SELECT LAST_INSERT_ID()";
             command.CommandType = CommandType.Text;
 
             autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);

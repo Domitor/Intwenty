@@ -118,8 +118,6 @@ namespace Intwenty.DataClient.Reflection
                 if (property.PropertyType.IsArray)
                     column.IsIgnore = true;
 
-             
-
                 if (result.PrimaryKeyColumnNames.Length == 0 && membername.ToUpper() == "ID")
                 {
                     column.IsPrimaryKeyColumn = true;

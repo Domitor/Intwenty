@@ -1,18 +1,17 @@
-﻿using Intwenty.DataClient.Databases;
-using Intwenty.DataClient.Model;
+﻿using Intwenty.DataClient.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 
-namespace Intwenty.DataClient.SQLBuilder
+namespace Intwenty.DataClient.Databases.SQLite
 {
-    sealed class MariaDbSqlBuilder : BaseSqlBuilder
+    sealed class SqlLiteBuilder : BaseSqlBuilder
     {
-        private static string CACHETYPE = "MARIADB_SQL";
+        private static string CACHETYPE = "SQLITE_SQL";
 
-        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;
@@ -28,7 +27,8 @@ namespace Intwenty.DataClient.SQLBuilder
                 sb.Append(GetCreateColumnSql(m));
             }
 
-            if (model.HasPrimaryKeyColumn)
+            //IF SQLLITE, PK ONLY IF NOT AUTOINC. IF AUTOINC THAT COL IS PK.
+            if (!model.Columns.Exists(p=> p.IsAutoIncremental) && model.HasPrimaryKeyColumn)
                 sb.Append(", " + string.Format("PRIMARY KEY ({0})", model.PrimaryKeyColumnNames));
 
             sb.Append(")");
@@ -56,12 +56,12 @@ namespace Intwenty.DataClient.SQLBuilder
             if (!model.IsUnique)
                 sb.Append(string.Format("CREATE INDEX {0} ON {1} (", model.Name, model.TableName));
 
-            for (int i = 0; i < model.ColumnNamesList.Count; i++)
+            for(int i=0; i< model.ColumnNamesList.Count; i++)
             {
 
                 if (i == 0)
                     sb.Append(string.Format("{0}", model.ColumnNamesList[i]));
-                else
+               else
                     sb.Append("," + string.Format("{0}", model.ColumnNamesList[i]));
 
             }
@@ -89,6 +89,10 @@ namespace Intwenty.DataClient.SQLBuilder
                         continue;
 
                     var value = col.Property.GetValue(instance);
+
+                    if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                        value = ((DateTimeOffset)value).DateTime;
+
                     var prm = new IntwentySqlParameter();
                     prm.Name = "@" + col.Name;
 
@@ -114,6 +118,10 @@ namespace Intwenty.DataClient.SQLBuilder
                     continue;
 
                 var value = col.Property.GetValue(instance);
+
+                if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                    value = ((DateTimeOffset)value).DateTime;
+
                 var prm = new IntwentySqlParameter();
                 prm.Name = "@" + col.Name;
 
@@ -124,7 +132,7 @@ namespace Intwenty.DataClient.SQLBuilder
 
                 parameters.Add(prm);
 
-                query.Append(string.Format("{0}`{1}`", col.Name));
+                query.Append(string.Format("{0}{1}", separator, col.Name));
                 values.Append(string.Format("{0}@{1}", separator, col.Name));
                 separator = ",";
 
@@ -151,6 +159,8 @@ namespace Intwenty.DataClient.SQLBuilder
                 {
 
                     var value = col.Property.GetValue(model);
+                    if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                        value = ((DateTimeOffset)value).DateTime;
 
                     if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -185,14 +195,16 @@ namespace Intwenty.DataClient.SQLBuilder
             {
 
                 var value = col.Property.GetValue(model);
+                if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                    value = ((DateTimeOffset)value).DateTime;
 
                 if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
-
+      
 
                 if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsPrimaryKeyColumn)
                     keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
-
+  
                 if (keyparameters.Exists(p => p.Name == col.Name))
                     continue;
 
@@ -204,8 +216,8 @@ namespace Intwenty.DataClient.SQLBuilder
                     prm.Value = value;
 
                 parameters.Add(prm);
-             
-                query.Append(separator + string.Format("`{0}`=@{0}", col.Name));
+
+                query.Append(separator + string.Format("{0}=@{0}", col.Name));
                 separator = ", ";
             }
 
@@ -215,7 +227,7 @@ namespace Intwenty.DataClient.SQLBuilder
             var wheresep = "";
             foreach (var p in keyparameters)
             {
-                query.Append(wheresep + string.Format("`{0}`=@{0}", p.Name));
+                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
                 wheresep = " AND ";
             }
 
@@ -238,6 +250,8 @@ namespace Intwenty.DataClient.SQLBuilder
                 {
 
                     var value = col.Property.GetValue(model);
+                    if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                        value = ((DateTimeOffset)value).DateTime;
 
                     if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -257,6 +271,8 @@ namespace Intwenty.DataClient.SQLBuilder
             {
 
                 var value = col.Property.GetValue(model);
+                if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
+                    value = ((DateTimeOffset)value).DateTime;
 
                 if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -271,7 +287,7 @@ namespace Intwenty.DataClient.SQLBuilder
             var wheresep = "";
             foreach (var p in parameters)
             {
-                query.Append(wheresep + string.Format("`{0}`=@{0}", p.Name));
+                query.Append(wheresep + string.Format("{0}=@{0}", p.Name));
                 wheresep = " AND ";
             }
 
@@ -290,26 +306,25 @@ namespace Intwenty.DataClient.SQLBuilder
             var autoinccommand = string.Empty;
             var datatype = string.Empty;
             var longtext = false;
-            var defaultvalue = "DEFAULT NULL";
 
-            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.MariaDB);
+
+            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.SQLite);
             if (dtmap == null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.MariaDB));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.SQLite));
 
             datatype = dtmap.DBMSDataType;
 
             var autoincmap = new CommandMapItem() { Key = "AUTOINC" };
             if (model.IsAutoIncremental)
             {
-                defaultvalue = "";
                 allownullvalue = "NOT NULL";
-                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.MariaDB && p.Key == "AUTOINC").Command;
+                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.SQLite && p.Key == "AUTOINC").Command;   
             }
 
             if (model.IsNullNotAllowed)
                 allownullvalue = "NOT NULL";
 
-            result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { model.Name, datatype, allownullvalue, autoinccommand, defaultvalue });
+            result = string.Format("{0} {1} {2} {3}", new object[] { model.Name, datatype, allownullvalue, autoinccommand });
             if (model.Order > 0)
                 result = ", " + result;
 
@@ -319,5 +334,6 @@ namespace Intwenty.DataClient.SQLBuilder
             return result;
         }
 
+      
     }
 }

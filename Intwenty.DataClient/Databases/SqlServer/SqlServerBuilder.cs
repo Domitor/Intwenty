@@ -7,13 +7,13 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 
-namespace Intwenty.DataClient.SQLBuilder
+namespace Intwenty.DataClient.Databases.SqlServer
 {
     sealed class SqlServerBuilder : BaseSqlBuilder
     {
         private static string CACHETYPE = "SQLSERVER_SQL";
 
-        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;

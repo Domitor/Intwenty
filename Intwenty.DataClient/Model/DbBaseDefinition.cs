@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.DataClient.Model
 {
-    public class DbBaseDefinition
+    class DbBaseDefinition
     {
         public int Order { get; set; }
 

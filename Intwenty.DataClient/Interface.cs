@@ -1,6 +1,7 @@
 ﻿using Intwenty.DataClient.Model;
 using System.Collections.Generic;
 using System.Data;
+using System.Text.Json;
 
 namespace Intwenty.DataClient
 {
@@ -20,39 +21,38 @@ namespace Intwenty.DataClient
         T GetEntity<T>(int id) where T : new();
         List<T> GetEntities<T>() where T : new();
         List<T> GetEntities<T>(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null) where T : new();
-        int InsertEntity<T>(T entity);
-        int UpdateEntity<T>(T entity);
-        int DeleteEntity<T>(T entity);
-        int DeleteEntities<T>(IEnumerable<T> entities);
-        string GetJSONObject(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null, IIntwentyResultColumn[] resultcolumns=null);
+        string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
-
-
+        int InsertEntity<T>(T entity);
+        int InsertEntity(string json, IIntwentyJSONObjectSchema schema);
+        int InsertEntity(JsonElement json, IIntwentyJSONObjectSchema schema);
+        int UpdateEntity<T>(T entity);
+        int UpdateEntity(string json, IIntwentyJSONObjectSchema schema);
+        int UpdateEntity(JsonElement json, IIntwentyJSONObjectSchema schema);
+        int DeleteEntity<T>(T entity);
+        int DeleteEntities<T>(IEnumerable<T> entities);
 
 
     }
 
-    public interface INoSqlClient
+    public interface IIntwentyJSONObjectSchema
     {
-        void CreateCollection<T>();
-        void DropCollection(string collectionname);
-        T GetEntity<T>(int id) where T : new();
-        T GetEntity<T>(string id) where T : new();
-        List<T> GetEntities<T>(string expression="") where T : new();
-        int InsertEntity<T>(T model);
-        int UpdateEntity<T>(T model);
-        int DeleteEntity<T>(T model);
-        int DeleteEntities<T>(IEnumerable<T> model);
-        bool DeleteJSONObject(string collectionname, int id, int version=1);
-        int InsertJSONObject(string json, string collectionname, int id, int version=1);
-        int UpdateJSONObject(string json, string collectionname, int id, int version=1);
-        int Count(string collectionname);
-        string GetJSONArray(string collectionname, string expression="", int minrow = 0, int maxrow = 0, IIntwentyResultColumn[] resultcolumns = null);
-        string GetJSONObject(string collectionname, int id, int version=1, IIntwentyResultColumn[] resultcolumns = null);
-        ResultSet GetResultSet(string collectionname, string expression = "", int minrow = 0, int maxrow = 0, IIntwentyResultColumn[] resultcolumns = null);
+        string TableName { get; }
+        string JSONStoreColumnName { get; }
+        IEnumerable<IIntwentyJSONField> Fields { get; }
     }
+
+    public interface IIntwentyJSONField
+    {
+        public string Name { get; }
+        public bool IsAutoIncremental { get; }
+        public bool IsPrimaryKey { get; }
+        public IntwentyJSONFieldDataType DataType { get; }
+    }
+
+  
 
     public interface IIntwentyResultColumn
     {
