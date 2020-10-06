@@ -94,22 +94,22 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _dataService.LogInfo(String.Format("User {0} logged in with password",Input.Email), username: Input.Email);
-                    var signedinuser = _dataService.GetDbObjectMapper().GetAll<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    var signedinuser = _dataService.GetDataClient().GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
                     {
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        _dataService.GetDbObjectMapper().Update(signedinuser);
+                        _dataService.GetDataClient().UpdateEntity(signedinuser);
                     }
 
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
-                    var signedinuser = _dataService.GetDbObjectMapper().GetAll<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    var signedinuser = _dataService.GetDataClient().GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
                     {
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        _dataService.GetDbObjectMapper().Update(signedinuser);
+                        _dataService.GetDataClient().UpdateEntity(signedinuser);
                     }
 
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });

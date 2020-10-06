@@ -266,7 +266,6 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
             }
 
-            query.Append(" WHERE ");
             var wheresep = "";
             foreach (var p in parameters)
             {

@@ -276,7 +276,6 @@ namespace Intwenty.DataClient.Databases.SqlServer
 
             }
 
-            query.Append(" WHERE ");
             var wheresep = "";
             foreach (var p in parameters)
             {

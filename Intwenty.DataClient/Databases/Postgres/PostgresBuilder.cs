@@ -257,7 +257,6 @@ namespace Intwenty.DataClient.Databases.Postgres
 
             }
 
-            query.Append(" WHERE ");
             var wheresep = "";
             foreach (var p in parameters)
             {

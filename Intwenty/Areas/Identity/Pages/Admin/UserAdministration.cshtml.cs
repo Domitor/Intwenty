@@ -34,15 +34,15 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
 
         public JsonResult OnGetLoadUsers()
         {
-            var mapper = DataRepository.GetDbObjectMapper();
-            var list = mapper.GetAll<IntwentyUser>().Select(p => new IntwentyUserVm(p));
+            var mapper = DataRepository.GetDataClient();
+            var list = mapper.GetEntities<IntwentyUser>().Select(p => new IntwentyUserVm(p));
             return new JsonResult(list);
         }
 
         public JsonResult LoadUsers()
         {
-            var mapper = DataRepository.GetDbObjectMapper();
-            var list = mapper.GetAll<IntwentyUser>().Select(p => new IntwentyUserVm(p));
+            var mapper = DataRepository.GetDataClient();
+            var list = mapper.GetEntities<IntwentyUser>().Select(p => new IntwentyUserVm(p));
             return new JsonResult(list);
         }
 

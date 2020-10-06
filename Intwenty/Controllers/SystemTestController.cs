@@ -155,7 +155,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test1ORMCreateTable()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.CreateTable<T>");
+            OperationResult result = new OperationResult(true, "DataClient.CreateTable<T>");
             try
             {
 
@@ -165,7 +165,7 @@ namespace Intwenty.Controllers
                 dbstore.Close();
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (IIntwentyDbORM.CreateTable) lasted  {0} ms", result.Duration));
+                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (DataClient.CreateTable) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -178,7 +178,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test2ORMInsert()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.InsertEntity(T) - 100 Records using auto increment");
+            OperationResult result = new OperationResult(true, "DataClient.InsertEntity(T) - 100 Records using auto increment");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -196,7 +196,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not retrieve 100 inserted records with IIntwentyDbORM.GetAll<T>");
 
                 if (check.Exists(p => p.Id < 1))
-                    throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.InsertEntity<T>");
+                    throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity<T>");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", result.Duration));
@@ -214,7 +214,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test3ORMUpdate()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.Update(T) - Retrieve last record and update");
+            OperationResult result = new OperationResult(true, "DataClient.Update(T) - Retrieve last record and update");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -271,7 +271,7 @@ namespace Intwenty.Controllers
         private OperationResult Test4ORMDelete()
         {
 
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.Delete(T) - Retrieve a list of inserted records and delete them one by one");
+            OperationResult result = new OperationResult(true, "DataClient.Delete(T) - Retrieve a list of inserted records and delete them one by one");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try

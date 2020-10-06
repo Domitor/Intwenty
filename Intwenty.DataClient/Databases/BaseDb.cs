@@ -154,12 +154,13 @@ namespace Intwenty.DataClient.Databases
 
             var adjusted_columns = new List<IntwentyResultColumn>();
             var rindex = 0;
-            var objectseparator = "";
-            var valueseparator = "";
+            char objectseparator = ' ';
+            char valueseparator=' ';
             var sb = new StringBuilder();
             sb.Append("[");
             while (reader.Read())
             {
+                valueseparator = ' ';
                 rindex += 1;
                 if (maxrow > minrow && (minrow > 0 || maxrow > 0))
                 {
@@ -185,10 +186,10 @@ namespace Intwenty.DataClient.Databases
                         continue;
 
                     sb.Append(valueseparator + GetJSONValue(reader, rc));
-                    valueseparator = ",";
+                    valueseparator = ',';
                 }
                 sb.Append("}");
-                objectseparator = ",";
+                objectseparator = ',';
             }
             sb.Append("]");
 
@@ -197,7 +198,58 @@ namespace Intwenty.DataClient.Databases
 
         public IResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
-            throw new NotImplementedException();
+            var res = new ResultSet();
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            var reader = command.ExecuteReader();
+
+
+            var adjusted_columns = new List<IntwentyResultColumn>();
+            var rindex = 0;
+
+            while (reader.Read())
+            {
+
+                rindex += 1;
+                if (maxrow > minrow && (minrow > 0 || maxrow > 0))
+                {
+                    if (rindex <= minrow)
+                        continue;
+                    if (rindex > maxrow)
+                        break;
+                }
+                if (rindex == 1)
+                {
+                    var names = new List<string>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        names.Add(reader.GetName(i));
+                    }
+                    adjusted_columns = AdjustResultColumns(names, resultcolumns);
+                }
+
+                var row = new ResultSetRow();
+                foreach (var rc in adjusted_columns)
+                {
+                    if (reader.IsDBNull(rc.Index))
+                        continue;
+
+                    row.SetValue(rc.Name, reader.GetValue(rc.Index));
+                    
+                }
+                res.Rows.Add(row);
+        
+            }
+     
+
+            return res;
         }
 
         public DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
@@ -295,8 +347,10 @@ namespace Intwenty.DataClient.Databases
                 throw new InvalidOperationException(string.Format("The table {0} uses a composite primary key", info.Name));
 
             var command = GetCommand();
-            command.CommandText = string.Format("SELECT * FROM {0} WHERE {1}={2}", new[] {info.Name,info.PrimaryKeyColumnNamesList[0], id });
+            command.CommandText = string.Format("SELECT * FROM {0} WHERE {1}=@P1", info.Name,info.PrimaryKeyColumnNamesList[0] );
             command.CommandType = CommandType.Text;
+
+            AddCommandParameters(new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", id) });
 
             var reader = command.ExecuteReader();
 

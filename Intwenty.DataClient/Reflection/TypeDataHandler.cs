@@ -54,13 +54,12 @@ namespace Intwenty.DataClient.Reflection
         private static IntwentyDbTableDefinition GetTableInfoByTypeAndUsageInternal<T>(string key, Type currenttype)
         {
 
-            IntwentyDbTableDefinition result;
-
+   
             var cachekey = CACHETYPE + "_" + key;
             var cache = MemoryCache.Default;
 
-          
-            result = cache.Get(cachekey) as IntwentyDbTableDefinition;
+
+            IntwentyDbTableDefinition result = cache.Get(cachekey) as IntwentyDbTableDefinition;
             if (result != null)
             {
                 if (result.Name.ToUpper() == currenttype.Name.ToUpper())

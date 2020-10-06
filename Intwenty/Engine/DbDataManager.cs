@@ -249,6 +249,7 @@ namespace Intwenty.Engine
             }
             catch (Exception ex)
             {
+                Client.Close();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Get latest version for application {0} failed", this.Model.Application.Title));
@@ -324,6 +325,7 @@ namespace Intwenty.Engine
             }
             catch (Exception ex)
             {
+                Client.Close();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Save application {0} failed", this.Model.Application.Title));
@@ -1214,7 +1216,7 @@ namespace Intwenty.Engine
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
 
-            Client.RunCommand(sql_insert.ToString());
+            Client.RunCommand(sql_insert.ToString(), parameters: parameters.ToArray());
            
 
         }

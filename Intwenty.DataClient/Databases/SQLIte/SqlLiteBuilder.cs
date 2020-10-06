@@ -158,7 +158,7 @@ namespace Intwenty.DataClient.Databases.SQLite
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
                     if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
                         value = ((DateTimeOffset)value).DateTime;
 
@@ -194,7 +194,7 @@ namespace Intwenty.DataClient.Databases.SQLite
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
                 if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
                     value = ((DateTimeOffset)value).DateTime;
 
@@ -249,7 +249,7 @@ namespace Intwenty.DataClient.Databases.SQLite
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
                     if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
                         value = ((DateTimeOffset)value).DateTime;
 
@@ -270,7 +270,7 @@ namespace Intwenty.DataClient.Databases.SQLite
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
                 if (col.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET") && value != null)
                     value = ((DateTimeOffset)value).DateTime;
 
@@ -283,7 +283,6 @@ namespace Intwenty.DataClient.Databases.SQLite
 
             }
 
-            query.Append(" WHERE ");
             var wheresep = "";
             foreach (var p in parameters)
             {
