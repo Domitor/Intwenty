@@ -291,9 +291,9 @@ namespace Intwenty.DataClient.Databases.MariaDb
             var longtext = false;
             var defaultvalue = "DEFAULT NULL";
 
-            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.MariaDB);
+            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DBMS.MariaDB);
             if (dtmap == null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.MariaDB));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), DBMS.MariaDB));
 
             datatype = dtmap.DBMSDataType;
 
@@ -302,7 +302,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             {
                 defaultvalue = "";
                 allownullvalue = "NOT NULL";
-                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.MariaDB && p.Key == "AUTOINC").Command;
+                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == DBMS.MariaDB && p.Key == "AUTOINC").Command;
             }
 
             if (model.IsNullNotAllowed)

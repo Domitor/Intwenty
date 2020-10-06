@@ -158,8 +158,6 @@ namespace Intwenty
 
         private DBMS DBMSType { get; }
 
-        private bool IsNoSql { get; }
-
         private IIntwentyModelService ModelRepository { get; }
 
         private IMemoryCache ApplicationCache { get; }
@@ -169,7 +167,6 @@ namespace Intwenty
             Settings = settings.Value;
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
-            IsNoSql = settings.Value.IsNoSQL;
             ApplicationCache = cache;
         }
 

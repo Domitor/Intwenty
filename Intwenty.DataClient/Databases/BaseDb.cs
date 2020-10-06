@@ -15,6 +15,7 @@ namespace Intwenty.DataClient.Databases
 
         protected bool IsInTransaction { get; set; }
 
+        public abstract DBMS Database { get; }
 
         public BaseDb(string connectionstring) 
         {

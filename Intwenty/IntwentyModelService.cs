@@ -43,7 +43,6 @@ namespace Intwenty
 
         public List<OperationResult> ConfigureDatabase();
 
-        public void ConfigureDatabaseIfNeeded();
 
         /// <summary>
         /// Get all application models
@@ -144,9 +143,9 @@ namespace Intwenty
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
-            ModelCache = cache;
-            Settings = settings.Value;
-            Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+           ModelCache = cache;
+           Settings = settings.Value;
+           Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
            CurrentCulture = Settings.DefaultCulture;
            if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
            {
@@ -162,6 +161,7 @@ namespace Intwenty
 
         public SystemModel GetSystemModel()
         {
+            Client.Open();
             var t = new SystemModel();
             var apps = Client.GetEntities<ApplicationItem>();
             foreach (var a in apps)
@@ -182,6 +182,7 @@ namespace Intwenty
             foreach (var a in valuedomainitems)
                 t.ValueDomains.Add(a);
 
+            Client.Close();
 
             return t;
 
@@ -201,6 +202,8 @@ namespace Intwenty
             try
             {
                 ModelCache.Remove(AppModelCacheKey);
+
+                Client.Open();
 
                 if (model.DeleteCurrentModel)
                 {
@@ -232,9 +235,12 @@ namespace Intwenty
 
                 result.IsSuccess = true;
                 result.AddMessage("RESULT", "The model was imported successfully");
+
+                Client.Close();
             }
             catch (Exception ex)
             {
+                Client.Close();
                 result.IsSuccess = false;
                 if (!model.DeleteCurrentModel)
                     result.SetError(ex.Message, "Error importing model, this is probably due to conflict with the current model. Try to upload with the delete option.");
@@ -260,9 +266,11 @@ namespace Intwenty
             List<UserInterfaceModelItem> uitems;
             List<DataViewModelItem> views;
             var apps =  GetAppModels();
-            ditems = Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
-            uitems = Client.GetAll<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
-            views = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            Client.Open();
+            ditems = Client.GetEntities<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            uitems = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
+            views = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            Client.Close();
 
             //Localization
             LocalizeTitles(uitems.ToList<ILocalizableTitle>());
@@ -323,9 +331,9 @@ namespace Intwenty
 
                             if (item.IsMetaTypeListViewColumn && item.DataColumnInfo == null)
                             {
-                                var defcol = maintable_default_cols.Find(p => p.ColumnName.ToUpper() == item.DataMetaCode);
+                                var defcol = maintable_default_cols.Find(p => p.Name.ToUpper() == item.DataMetaCode);
                                 if (defcol != null)
-                                    item.DataColumnInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.MetaCode, Id = 0, DbName = defcol.ColumnName, TableName = app.DbName, MetaCode = defcol.ColumnName.ToUpper(), ParentMetaCode = "ROOT", Title = defcol.ColumnName };
+                                    item.DataColumnInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.MetaCode, Id = 0, DbName = defcol.Name, TableName = app.DbName, MetaCode = defcol.Name.ToUpper(), ParentMetaCode = "ROOT", Title = defcol.Name };
 
                             }
 
@@ -392,9 +400,10 @@ namespace Intwenty
 
         public List<MenuModelItem> GetMenuModels()
         {
-
-           var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
-           var menu = Client.GetAll<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
+            Client.Open();
+            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
+            Client.Close();
 
             //Localization
             LocalizeTitles(apps.ToList<ILocalizableTitle>());
@@ -433,8 +442,9 @@ namespace Intwenty
         public List<ApplicationModelItem> GetAppModels()
         {
 
-
-           var apps = Client.GetAll<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            Client.Open();
+            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            Client.Close();
 
             //Localization
             LocalizeTitles(apps.ToList<ILocalizableTitle>());
@@ -459,26 +469,27 @@ namespace Intwenty
             if (model.Id < 1 || string.IsNullOrEmpty(model.MetaCode))
                 throw new InvalidOperationException("Missing required information when deleting application model.");
 
-            var existing = Client.GetAll<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
+            var existing = Client.GetEntities<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
             if (existing == null)
                 return; //throw new InvalidOperationException("Could not find application model when deleting application model.");
 
 
          
-            var dbitems = Client.GetAll<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var dbitems = Client.GetEntities<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (dbitems != null && dbitems.Count() > 0)
-                Client.DeleteRange(dbitems);
+                Client.DeleteEntities(dbitems);
 
-            var uiitems = Client.GetAll<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var uiitems = Client.GetEntities<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (uiitems != null && uiitems.Count() > 0)
-                Client.DeleteRange(uiitems);
+                Client.DeleteEntities(uiitems);
 
-            var menuitems = Client.GetAll<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var menuitems = Client.GetEntities<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (menuitems != null && menuitems.Count() > 0)
-                Client.DeleteRange(menuitems);
+                Client.DeleteEntities(menuitems);
 
-            Client.Delete(existing);
-          
+            Client.DeleteEntity(existing);
+
+            Client.Close();
 
             ModelCache.Remove(AppModelCacheKey);
 
@@ -488,7 +499,7 @@ namespace Intwenty
         {
             ModelCache.Remove(AppModelCacheKey);
 
-            var apps = Client.GetAll<ApplicationItem>();
+            var apps = Client.GetEntities<ApplicationItem>();
 
             if (model == null)
                 return null;
@@ -510,7 +521,8 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                Client.Insert(entity);
+                Client.InsertEntity(entity);
+                Client.Close();
 
                 CreateApplicationMenuItem(model);
 
@@ -530,7 +542,7 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
 
-                var menuitem = Client.GetAll<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
+                var menuitem = Client.GetEntities<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
                 if (menuitem != null)
                 {
                     menuitem.Action = model.MainMenuItem.Action;
@@ -538,8 +550,9 @@ namespace Intwenty
                     menuitem.Title = model.MainMenuItem.Title;
                     //menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
           
-                    Client.Update(menuitem);
-                
+                    Client.UpdateEntity(menuitem);
+                    Client.Close();
+
                 }
                 else
                 {
@@ -563,7 +576,8 @@ namespace Intwenty
                 if (root == null)
                 {
                     var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", OrderNo = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
-                    Client.Insert(main);
+                    Client.InsertEntity(main);
+                    Client.Close();
                     max = 1;
                 }
                 else
@@ -575,7 +589,8 @@ namespace Intwenty
                 appmi.Action = model.MainMenuItem.Action;
                 appmi.Controller = model.MainMenuItem.Controller;
                 appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
-                Client.Insert(appmi);
+                Client.InsertEntity(appmi);
+                Client.Close();
 
             }
 
@@ -605,10 +620,11 @@ namespace Intwenty
             {
                 if (t.Id > 0 && t.HasProperty("REMOVED"))
                 {
-                    var existing = Client.GetAll<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
+                    var existing = Client.GetEntities<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
                     if (existing != null)
                     {
-                        Client.Delete(existing);
+                        Client.DeleteEntity(existing);
+                        Client.Close();
                     }
                 }
             }
@@ -629,12 +645,12 @@ namespace Intwenty
                     if (string.IsNullOrEmpty(uic.MetaCode))
                         throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
 
-                    Client.Insert(CreateMetaUIItem(uic));
+                    Client.InsertEntity(CreateMetaUIItem(uic));
 
                 }
                 else
                 {
-                    var existing = Client.GetAll<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
+                    var existing = Client.GetEntities<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
@@ -648,14 +664,16 @@ namespace Intwenty
                         existing.Domain = uic.Domain;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
-                        Client.Update(existing);
+                        Client.UpdateEntity(existing);
                     }
 
                 }
 
             }
 
-           
+            Client.Close();
+
+
         }
 
       
@@ -694,7 +712,10 @@ namespace Intwenty
 
         public List<DatabaseModelItem> GetDatabaseModels()
         {
-            return Client.GetAll<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            Client.Open();
+            var res = Client.GetEntities<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
+            Client.Close();
+            return res;
         }
 
         public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid)
@@ -754,14 +775,14 @@ namespace Intwenty
                     if (dbi.IsMetaTypeDataTable && dbi.DbName == app.Application.DbName)
                         continue;
 
-                    Client.Insert(t);
+                    Client.InsertEntity(t);
 
                 }
                 else
                 {
                   
 
-                    var existing = Client.GetAll<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
+                    var existing = Client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
                     if (existing != null)
                     {
                         existing.DataType = dbi.DataType;
@@ -773,12 +794,14 @@ namespace Intwenty
                         existing.DbName = dbi.DbName;
                         existing.Mandatory = dbi.Mandatory;
                         existing.Properties = dbi.Properties;
-                        Client.Update(existing);
+                        Client.UpdateEntity(existing);
                     }
 
                 }
 
             }
+
+            Client.Close();
 
 
             ModelCache.Remove(AppModelCacheKey);
@@ -789,7 +812,7 @@ namespace Intwenty
         {
            
 
-            var existing = Client.GetAll<DatabaseItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DatabaseModelItem(existing);
@@ -799,13 +822,17 @@ namespace Intwenty
 
                 if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
                 {
-                    var childlist = Client.GetAll<DatabaseItem>().Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    Client.Delete(existing);
-                    Client.DeleteRange(childlist);
+                    Client.Open();
+                    var childlist = Client.GetEntities<DatabaseItem>().Where(p => (p.MetaType == "DATACOLUMN") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    Client.DeleteEntity(existing);
+                    Client.DeleteEntities(childlist);
+                    Client.Close();
                 }
                 else
                 {
-                    Client.Delete(existing);
+                    Client.Open();
+                    Client.DeleteEntity(existing);
+                    Client.Close();
                 }
 
                 ModelCache.Remove(AppModelCacheKey);
@@ -837,7 +864,9 @@ namespace Intwenty
         #region Data Views
         public List<DataViewModelItem> GetDataViewModels()
         {
-            var list = Client.GetAll<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            Client.Open();
+            var list = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            Client.Close();
             LocalizeTitles(list.ToList<ILocalizableTitle>());
             return list;
         }
@@ -855,28 +884,30 @@ namespace Intwenty
 
             }
 
+            Client.Open();
             foreach (var dv in model)
             {
                 if (dv.Id < 1)
                 {
                     var t = CreateMetaDataView(dv);
-                    Client.Insert(t);
+                    Client.InsertEntity(t);
                 }
                 else
                 {
-                    var existing = Client.GetAll<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
+                    var existing = Client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
                     if (existing != null)
                     {
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
                         //existing.TitleLocalizationKey = dv.TitleLocalizationKey;
-                        Client.Update(existing);
+                        Client.UpdateEntity(existing);
                     }
 
                 }
 
             }
+            Client.Close();
 
         }
 
@@ -907,21 +938,23 @@ namespace Intwenty
 
         public void DeleteDataViewModel(int id)
         {
-            var existing = Client.GetAll<DataViewItem>().FirstOrDefault(p => p.Id == id);
+            Client.Open();
+            var existing = Client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new DataViewModelItem(existing);
                 if (dto.IsMetaTypeDataView)
                 {
-                    var childlist = Client.GetAll<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    Client.Delete(existing);
-                    Client.DeleteRange(childlist);
+                    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
+                    Client.DeleteEntity(existing);
+                    Client.DeleteEntities(childlist);
                 }
                 else
                 {
-                    Client.Delete(existing);
+                    Client.DeleteEntity(existing);
                 }
             }
+            Client.Close();
         }
         #endregion
 
@@ -931,6 +964,7 @@ namespace Intwenty
         {
             ModelCache.Remove(ValueDomainsCacheKey);
 
+            Client.Open();
             foreach (var vd in model)
             {
                 if (!vd.IsValid)
@@ -938,22 +972,23 @@ namespace Intwenty
 
                 if (vd.Id < 1)
                 {
-                    Client.Insert(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
+                    Client.InsertEntity(new ValueDomainItem() { DomainName = vd.DomainName, Value = vd.Value, Code = vd.Code });
                 }
                 else
                 {
-                    var existing = Client.GetAll<ValueDomainItem>().FirstOrDefault(p => p.Id == vd.Id);
+                    var existing = Client.GetEntities<ValueDomainItem>().FirstOrDefault(p => p.Id == vd.Id);
                     if (existing != null)
                     {
                         existing.Code = vd.Code;
                         existing.Value = vd.Value;
                         existing.DomainName = vd.DomainName;
-                        Client.Update(existing);
+                        Client.UpdateEntity(existing);
                     }
 
                 }
 
             }
+            Client.Close();
         }
 
         public List<ValueDomainModelItem> GetValueDomains()
@@ -964,18 +999,23 @@ namespace Intwenty
                 return res;
             }
 
-            var t = Client.GetAll<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
+            Client.Open();
+            var t = Client.GetEntities<ValueDomainItem>().Select(p => new ValueDomainModelItem(p)).ToList();
+            Client.Close();
             LocalizeTitles(t.ToList<ILocalizableTitle>());
+           
             return t;
         }
 
         public void DeleteValueDomain(int id)
         {
             ModelCache.Remove(ValueDomainsCacheKey);
-            var existing = Client.GetAll<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.GetEntities<ValueDomainItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                Client.Delete(existing);
+                Client.Open();
+                Client.DeleteEntity(existing);
+                Client.Close();
             }
         }
 
@@ -995,8 +1035,9 @@ namespace Intwenty
             {
                 return res;
             }
-
-            var t = Client.GetAll<TranslationItem>().Select(p => new TranslationModelItem(p)).ToList();
+            Client.Open();
+            var t = Client.GetEntities<TranslationItem>().Select(p => new TranslationModelItem(p)).ToList();
+            Client.Close();
             return t;
         }
 
@@ -1004,36 +1045,40 @@ namespace Intwenty
         {
             ModelCache.Remove(TranslationsCacheKey);
 
+            Client.Open();
             foreach (var trans in model)
             {
 
                 if (trans.Id < 1)
                 {
-                    Client.Insert(new TranslationItem() { Culture = trans.Culture, Key = trans.Key, Text = trans.Text });
+                    Client.InsertEntity(new TranslationItem() { Culture = trans.Culture, Key = trans.Key, Text = trans.Text });
                 }
                 else
                 {
-                    var existing = Client.GetAll<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
+                    var existing = Client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
                     if (existing != null)
                     {
                         existing.Culture = trans.Culture;
                         existing.Key = trans.Key;
                         existing.Text = trans.Text;
-                        Client.Update(existing);
+                        Client.UpdateEntity(existing);
                     }
                 }
 
             }
+            Client.Close();
 
         }
 
         public void DeleteTranslation(int id)
         {
             ModelCache.Remove(TranslationsCacheKey);
-            var existing = Client.GetAll<TranslationItem>().FirstOrDefault(p => p.Id == id);
+            var existing = Client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                Client.Delete(existing);
+                Client.Open();
+                Client.DeleteEntity(existing);
+                Client.Close();
             }
         }
         #endregion
@@ -1043,7 +1088,7 @@ namespace Intwenty
         {
 
             //Localization
-            var translations = Client.GetAll<TranslationItem>();
+            var translations = Client.GetEntities<TranslationItem>();
 
             foreach (var item in list)
             {
@@ -1068,84 +1113,42 @@ namespace Intwenty
                 return;
 
 
-            if (Settings.IsNoSQL)
-            {
-                var client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-                client.CreateTable<ApplicationItem>(true);
-                client.CreateTable<DatabaseItem>(true);
-                client.CreateTable<DataViewItem>(true);
-                client.CreateTable<EventLog>(true);
-                client.CreateTable<InformationStatus>(true);
-                client.CreateTable<MenuItem>(true);
-                client.CreateTable<SystemID>(true);
-                client.CreateTable<UserInterfaceItem>(true);
-                client.CreateTable<ValueDomainItem>(true);
-                client.CreateTable<DefaultValue>(true);
-                client.CreateTable<TranslationItem>(true);
-
-                client.CreateTable<IntwentyUser>(true); //security_User
-                client.CreateTable<IntwentyRole>(true); //security_Role
-                client.CreateTable<IntwentyUserRole>(true); //security_UserRoles
-                client.CreateTable<IntwentyGroup>(true); //security_Group
-                client.CreateTable<IntwentyUserGroup>(true); //security_UserGroup
-
-                client.CreateTable<IntwentyUserClaim>(true); //security_UserClaims
-                client.CreateTable<IntwentyUserLogin>(true); //security_UserLogins
-                //client.CreateTable<IntwentyRoleClaim>(true); //security_RoleClaims
-                //client.CreateTable<IntwentyUserToken>(true); //security_UserTokens
-
-                var currentprops = client.GetAll<ValueDomainItem>();
-                var defaultprops = GetIntentyProperties();
-                foreach (var p in defaultprops)
-                {
-                    if (!currentprops.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
-                        client.Insert(p);
-                }
-
-            }
-            else
-            {
-                var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+           
+                var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
                 client.Open();
-                client.CreateTable<ApplicationItem>(true, true);
-                client.CreateTable<DatabaseItem>(true, true);
-                client.CreateTable<DataViewItem>(true, true);
-                client.CreateTable<EventLog>(true, true);
-                client.CreateTable<InformationStatus>(true, true);
-                client.CreateTable<MenuItem>(true, true);
-                client.CreateTable<SystemID>(true, true);
-                client.CreateTable<UserInterfaceItem>(true, true);
-                client.CreateTable<ValueDomainItem>(true, true);
-                client.CreateTable<DefaultValue>(true, true);
-                client.CreateTable<TranslationItem>(true,true);
+                client.CreateTable<ApplicationItem>();
+                client.CreateTable<DatabaseItem>();
+                client.CreateTable<DataViewItem>();
+                client.CreateTable<EventLog>();
+                client.CreateTable<InformationStatus>();
+                client.CreateTable<MenuItem>();
+                client.CreateTable<SystemID>();
+                client.CreateTable<UserInterfaceItem>();
+                client.CreateTable<ValueDomainItem>();
+                client.CreateTable<DefaultValue>();
+                client.CreateTable<TranslationItem>();
 
-                client.CreateTable<IntwentyUser>(true,true); //security_User
-                client.CreateTable<IntwentyRole>(true,true); //security_Role
-                client.CreateTable<IntwentyUserRole>(true,true); //security_UserRoles
-                client.CreateTable<IntwentyGroup>(true, true); //security_Group
-                client.CreateTable<IntwentyUserGroup>(true, true); //security_UserGroup
+                client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyRole>(); //security_Role
+                client.CreateTable<IntwentyUserRole>(); //security_UserRoles
+                client.CreateTable<IntwentyGroup>(); //security_Group
+                client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
 
-                client.CreateTable<IntwentyUserClaim>(true, true); //security_UserClaims
-                client.CreateTable<IntwentyUserLogin>(true, true); //security_UserLogins
+                client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
+                client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
                 //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
                 //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 
-                var currentprops = client.GetAll<ValueDomainItem>(true);
+                var currentprops = client.GetEntities<ValueDomainItem>();
                 var defaultprops = GetIntentyProperties();
                 foreach (var p in defaultprops)
                 {
                     if (!currentprops.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
-                        client.Insert(p, true);
+                        client.InsertEntity(p);
                 }
 
                 client.Close();
-                client.Dispose();
-
-            }
-           
-
             
         }
 
@@ -1178,51 +1181,15 @@ namespace Intwenty
             var l = GetApplicationModels();
             foreach (var model in l)
             {
-                if (Settings.IsNoSQL)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, this, Settings, new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
-                    res.Add(t.ConfigureDatabase());
-
-
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, this, Settings, new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
-                    res.Add(t.ConfigureDatabase());
-                }
+               
+                var t = DbDataManager.GetDataManager(model, this, Settings, new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
+                res.Add(t.ConfigureDatabase());
+                
             }
 
             return res;
         }
 
-        public void ConfigureDatabaseIfNeeded()
-        {
-
-            if (Settings.IsNoSQL)
-                return;
-
-            ModelCache.Remove(AppModelCacheKey);
-
-            var l = GetApplicationModels();
-            if (l.Count > 0)
-            {
-                try
-                {
-                    var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-                    client.Open();
-                    client.CreateCommand("SELECT 1 FROM " + l[0].Application.DbName);
-                    client.ExecuteScalarQuery();
-                    client.Close();
-                }
-                catch
-                {
-                    ConfigureDatabase();
-                }
-
-            }
-        }
-
- 
 
         public OperationResult ValidateModel()
         {
@@ -1362,19 +1329,19 @@ namespace Intwenty
                         res.AddMessage("WARNING", string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
                     }
 
-                    if (db.IsMetaTypeDataColumn && GetDefaultMainTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    if (db.IsMetaTypeDataColumn && GetDefaultMainTableColumns().Exists(p => p.Name == db.DbName))
                     {
                         res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
                     }
 
-                    if (db.IsMetaTypeDataColumn && GetDefaultSubTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    if (db.IsMetaTypeDataColumn && GetDefaultSubTableColumns().Exists(p => p.Name == db.DbName))
                     {
                         res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
                     }
 
-                    if (db.IsMetaTypeDataColumn && GetDefaultVersioningTableColumns().Exists(p => p.ColumnName == db.DbName))
+                    if (db.IsMetaTypeDataColumn && GetDefaultVersioningTableColumns().Exists(p => p.Name == db.DbName))
                     {
                         res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
@@ -1444,20 +1411,17 @@ namespace Intwenty
                     }
                     else
                     {
+                        var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
                         try
                         {
-                            if (!Settings.IsNoSQL)
-                            {
-                                var client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-                                client.Open();
-                                client.CreateCommand(v.SQLQuery);
-                                var t = client.ExecuteScalarQuery();
-
-                            }
+                            client.Open();
+                            var t =client.GetScalarValue(v.SQLQuery);
+                            client.Close();
 
                         }
                         catch
                         {
+                            client.Close();
                             res.AddMessage("WARNING", string.Format("The sql query defined for dataview {0} returned an error.", v.Title));
                         }
                     }
@@ -1490,13 +1454,13 @@ namespace Intwenty
 
           
             var DefaultMainTableColumns = new List<IntwentyDataColumn>();
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "CreatedBy" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "ChangedBy" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "OwnedBy" });
-            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Id" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Version" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "ApplicationId" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "CreatedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "ChangedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "OwnedBy" });
+            DefaultMainTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, Name = "ChangedDate" });
 
 
             ModelCache.Set(DefaultMainTableColumnsCacheKey, DefaultMainTableColumns);
@@ -1516,14 +1480,14 @@ namespace Intwenty
 
            
             var DefaultSubTableColumns = new List<IntwentyDataColumn>();
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "CreatedBy" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "ChangedBy" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "OwnedBy" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
-            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ParentId" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Id" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Version" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "ApplicationId" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "CreatedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "ChangedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "OwnedBy" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, Name = "ChangedDate" });
+            DefaultSubTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "ParentId" });
 
             ModelCache.Set(DefaultSubTableColumnsCacheKey, DefaultSubTableColumns);
 
@@ -1541,13 +1505,13 @@ namespace Intwenty
 
           
             var DefaultVersioningTableColumns = new List<IntwentyDataColumn>();
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Id" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "Version" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ApplicationId" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "MetaCode" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, ColumnName = "MetaType" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, ColumnName = "ChangedDate" });
-            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, ColumnName = "ParentId" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Id" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "Version" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "ApplicationId" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "MetaCode" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeString, Name = "MetaType" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeDateTime, Name = "ChangedDate" });
+            DefaultVersioningTableColumns.Add(new IntwentyDataColumn() { DataType = DatabaseModelItem.DataTypeInt, Name = "ParentId" });
             
 
             ModelCache.Set(DefaultVersioningTableColumnsCacheKey, DefaultVersioningTableColumns);

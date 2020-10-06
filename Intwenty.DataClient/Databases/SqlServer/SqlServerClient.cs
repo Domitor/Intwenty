@@ -17,7 +17,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
 
         }
 
-        public DBMS Database { get { return DBMS.MSSqlServer; } }
+        public override DBMS Database { get { return DBMS.MSSqlServer; } }
 
         public override void Dispose()
         {

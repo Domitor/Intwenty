@@ -308,9 +308,9 @@ namespace Intwenty.DataClient.Databases.SQLite
             var longtext = false;
 
 
-            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.SQLite);
+            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DBMS.SQLite);
             if (dtmap == null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.SQLite));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), DBMS.SQLite));
 
             datatype = dtmap.DBMSDataType;
 
@@ -318,7 +318,7 @@ namespace Intwenty.DataClient.Databases.SQLite
             if (model.IsAutoIncremental)
             {
                 allownullvalue = "NOT NULL";
-                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.SQLite && p.Key == "AUTOINC").Command;   
+                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == DBMS.SQLite && p.Key == "AUTOINC").Command;   
             }
 
             if (model.IsNullNotAllowed)

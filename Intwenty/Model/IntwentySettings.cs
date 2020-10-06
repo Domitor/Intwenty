@@ -107,18 +107,6 @@ namespace Intwenty.Model
 
         public string GoogleClientSecret { get; set; }
 
-        public bool IsNoSQL
-        {
-
-            get
-            {
-                if (DefaultConnectionDBMS == DBMS.MongoDb  || DefaultConnectionDBMS == DBMS.LiteDb)
-                    return true;
-
-                return false;
-            }
-
-        }
 
         public bool UseExternalLogins
         {

@@ -281,9 +281,9 @@ namespace Intwenty.DataClient.Databases.Postgres
             var longtext = false;
 
 
-            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.PostgreSQL);
+            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DBMS.PostgreSQL);
             if (dtmap == null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.PostgreSQL));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), DBMS.PostgreSQL));
 
             datatype = dtmap.DBMSDataType;
 
@@ -291,7 +291,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             if (model.IsAutoIncremental)
             {
                 allownullvalue = "NOT NULL";
-                datatype = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.PostgreSQL && p.Key == "AUTOINC").Command;
+                datatype = CommandMap.GetCommandMap().Find(p => p.DbEngine == DBMS.PostgreSQL && p.Key == "AUTOINC").Command;
             }
 
             if (model.IsNullNotAllowed)

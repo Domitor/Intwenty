@@ -301,9 +301,9 @@ namespace Intwenty.DataClient.Databases.SqlServer
             var longtext = false;
 
 
-            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == SqlDBMS.MSSqlServer);
+            var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DBMS.MSSqlServer);
             if (dtmap == null)
-                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), SqlDBMS.MSSqlServer));
+                throw new InvalidOperationException(string.Format("Could not find DBMS specific datatype for {0} and {1}", model.GetNetType(), DBMS.MSSqlServer));
 
             datatype = dtmap.DBMSDataType;
 
@@ -311,7 +311,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             if (model.IsAutoIncremental)
             {
                 allownullvalue = "NOT NULL";
-                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == SqlDBMS.MSSqlServer && p.Key == "AUTOINC").Command;
+                autoinccommand = CommandMap.GetCommandMap().Find(p => p.DbEngine == DBMS.MSSqlServer && p.Key == "AUTOINC").Command;
             }
 
             if (model.IsNullNotAllowed)

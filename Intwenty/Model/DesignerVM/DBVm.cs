@@ -110,7 +110,7 @@ namespace Intwenty.Model.DesignerVM
 
             foreach (var t in intwenty_main_table_columns)
             {
-                 var col = new DatabaseTableColumnVm() { DbName = t.ColumnName, Id = 0, MetaCode = t.ColumnName.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, Mandatory = true, ApplicationId = app.Application.Id };
+                 var col = new DatabaseTableColumnVm() { DbName = t.Name, Id = 0, MetaCode = t.Name.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, Mandatory = true, ApplicationId = app.Application.Id };
                  table.Columns.Add(col);
             }
 
