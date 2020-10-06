@@ -20,6 +20,8 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
         }
 
+        public DBMS Database { get { return DBMS.MariaDB; } }
+
         public override void Dispose()
         {
             transaction = null;

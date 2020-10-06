@@ -19,6 +19,8 @@ namespace Intwenty.DataClient.Databases.SQLite
 
         }
 
+        public DBMS Database { get { return DBMS.SQLite; } }
+
         public override void Dispose()
         {
             transaction = null;

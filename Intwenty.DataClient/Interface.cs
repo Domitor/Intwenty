@@ -8,6 +8,7 @@ namespace Intwenty.DataClient
 {
     public interface IDataClient
     {
+        DBMS Database { get; }
         void Open();
         void Close();
         void BeginTransaction();
@@ -18,6 +19,7 @@ namespace Intwenty.DataClient
         bool TableExists(string tablename);
         bool ColumnExists(string tablename, string columnname);
         void RunCommand(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null);
+        object GetScalarValue(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null);
         T GetEntity<T>(string id) where T : new();
         T GetEntity<T>(int id) where T : new();
         List<T> GetEntities<T>() where T : new();

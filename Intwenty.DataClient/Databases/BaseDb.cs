@@ -80,6 +80,21 @@ namespace Intwenty.DataClient.Databases
             command.ExecuteNonQuery();
         }
 
+        public object GetScalarValue(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null)
+        {
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            return command.ExecuteScalar();
+        }
+
+
         public string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
             var command = GetCommand();

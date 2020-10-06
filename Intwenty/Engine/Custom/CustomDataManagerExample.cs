@@ -10,7 +10,7 @@ namespace Intwenty.Engine.Custom
     public class CustomDataManagerExample : DbDataManager
     {
 
-        public CustomDataManagerExample(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, Connection client) : base(model,modelservice,settings, sqlclient)
+        public CustomDataManagerExample(ApplicationModel model, IIntwentyModelService modelservice, IntwentySettings settings, IDataClient client) : base(model,modelservice,settings, client)
         {
         }
 

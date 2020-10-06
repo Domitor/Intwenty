@@ -146,16 +146,7 @@ namespace Intwenty
         {
             ModelCache = cache;
             Settings = settings.Value;
-            if (Settings.IsNoSQL)
-            {
-                Client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            }
-            else
-            {
-                Client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            }
-
-
+            Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
            CurrentCulture = Settings.DefaultCulture;
            if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
            {
@@ -172,22 +163,22 @@ namespace Intwenty
         public SystemModel GetSystemModel()
         {
             var t = new SystemModel();
-            var apps = Client.GetAll<ApplicationItem>();
+            var apps = Client.GetEntities<ApplicationItem>();
             foreach (var a in apps)
                 t.Applications.Add(a);
-            var dbitems = Client.GetAll<DatabaseItem>();
+            var dbitems = Client.GetEntities<DatabaseItem>();
             foreach (var a in dbitems)
                 t.DatabaseItems.Add(a);
-            var viewitems = Client.GetAll<DataViewItem>();
+            var viewitems = Client.GetEntities<DataViewItem>();
             foreach (var a in viewitems)
                 t.DataViewItems.Add(a);
-            var menuitems = Client.GetAll<MenuItem>();
+            var menuitems = Client.GetEntities<MenuItem>();
             foreach (var a in menuitems)
                 t.MenuItems.Add(a);
-            var uiitems = Client.GetAll<UserInterfaceItem>();
+            var uiitems = Client.GetEntities<UserInterfaceItem>();
             foreach (var a in uiitems)
                 t.UserInterfaceItems.Add(a);
-            var valuedomainitems = Client.GetAll<ValueDomainItem>();
+            var valuedomainitems = Client.GetEntities<ValueDomainItem>();
             foreach (var a in valuedomainitems)
                 t.ValueDomains.Add(a);
 
@@ -213,31 +204,31 @@ namespace Intwenty
 
                 if (model.DeleteCurrentModel)
                 {
-                    Client.DeleteRange(Client.GetAll<ApplicationItem>());
-                    Client.DeleteRange(Client.GetAll<DatabaseItem>());
-                    Client.DeleteRange(Client.GetAll<DataViewItem>());
-                    Client.DeleteRange(Client.GetAll<MenuItem>());
-                    Client.DeleteRange(Client.GetAll<UserInterfaceItem>());
-                    Client.DeleteRange(Client.GetAll<ValueDomainItem>());
+                    Client.DeleteEntities(Client.GetEntities<ApplicationItem>());
+                    Client.DeleteEntities(Client.GetEntities<DatabaseItem>());
+                    Client.DeleteEntities(Client.GetEntities<DataViewItem>());
+                    Client.DeleteEntities(Client.GetEntities<MenuItem>());
+                    Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
+                    Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                 }
 
                 foreach (var a in model.Applications)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.DatabaseItems)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.DataViewItems)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.MenuItems)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.UserInterfaceItems)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.ValueDomains)
-                    Client.Insert(a);
+                    Client.InsertEntity(a);
 
                 result.IsSuccess = true;
                 result.AddMessage("RESULT", "The model was imported successfully");

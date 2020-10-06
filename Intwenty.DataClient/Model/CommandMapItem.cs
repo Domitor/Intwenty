@@ -8,7 +8,7 @@ namespace Intwenty.DataClient.Model
     {
         public string Key { get; set; }
 
-        public SqlDBMS DbEngine { get; set; }
+        public DBMS DbEngine { get; set; }
 
         public string Command { get; set; }
 

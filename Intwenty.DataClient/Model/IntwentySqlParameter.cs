@@ -18,5 +18,13 @@ namespace Intwenty.DataClient.Model
             Direction = ParameterDirection.Input;
             DataType = DbType.String;
         }
+
+        public IntwentySqlParameter(string name, object value)
+        {
+            Name = name;
+            Value = value;
+            Direction = ParameterDirection.Input;
+            DataType = DbType.String;
+        }
     }
 }

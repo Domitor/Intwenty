@@ -17,7 +17,7 @@ namespace Intwenty.DataClient.Model
 
         public DbType DataDbType { get; set; }
 
-        public SqlDBMS DbEngine { get; set; }
+        public DBMS DbEngine { get; set; }
 
         public string DBMSDataType { get; set; }
 

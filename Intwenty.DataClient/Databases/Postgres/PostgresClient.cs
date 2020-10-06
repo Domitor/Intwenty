@@ -18,6 +18,8 @@ namespace Intwenty.DataClient.Databases.Postgres
 
         }
 
+        public DBMS Database { get { return DBMS.PostgreSQL; } }
+
         public override void Dispose()
         {
             transaction = null;

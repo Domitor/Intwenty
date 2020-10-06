@@ -7,9 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Intwenty.Data.Dto;
 using Intwenty.Data.Entity;
+using Intwenty.Data.Helpers;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;
+using System.Runtime.InteropServices;
+using Intwenty.DataClient.Model;
 
 namespace Intwenty
 {
@@ -235,6 +238,9 @@ namespace Intwenty
             if (model == null)
                 return new List<DefaultValue>();
 
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
             foreach (var dbcol in model.DataStructure)
             {
                 if (dbcol.IsMetaTypeDataColumn && dbcol.IsRoot)
@@ -247,21 +253,14 @@ namespace Intwenty
                         int istart = Convert.ToInt32(start);
                         int iseed = Convert.ToInt32(seed);
 
-                        IIntwentyDbORM client = null;
-                        if (IsNoSql)
-                            client = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection);
-                        else
-                            client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
-
-
-                        var result = client.GetAll<DefaultValue>();
+                        var result = client.GetEntities<DefaultValue>();
                         var current = result.Find(p => p.ApplicationId == model.Application.Id && p.ColumnName == dbcol.DbName);
                         if (current == null)
                         {
 
                             var firstval = string.Format("{0}{1}", prefix, (istart));
                             current = new DefaultValue() { ApplicationId = model.Application.Id, ColumnName = dbcol.DbName, GeneratedDate = DateTime.Now, TableName = model.Application.DbName, Count = istart, LatestValue = firstval };
-                            client.Insert(current);
+                            client.InsertEntity(current);
                             res.Add(current);
 
                         }
@@ -269,7 +268,7 @@ namespace Intwenty
                         {
                             current.Count += iseed;
                             current.LatestValue = string.Format("{0}{1}", prefix, current.Count);
-                            client.Update(current);
+                            client.UpdateEntity(current);
                             res.Add(current);
                         }
                     }
@@ -277,6 +276,8 @@ namespace Intwenty
                 }
 
             }
+
+            client.Close();
 
             return res;
 
@@ -300,19 +301,9 @@ namespace Intwenty
                 {
                     RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                    if (IsNoSql)
-                    {
-                        var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                        var result = t.Save(state);
-                        return result;
-                    }
-                    else
-                    {
-                        var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                        var result = t.Save(state);
-                        return result;
-                    }
-
+                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                    var result = t.Save(state);
+                    return result;
 
                 }
                 else
@@ -345,17 +336,10 @@ namespace Intwenty
 
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.DeleteById(state);
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.DeleteById(state);
-                }
-
+             
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                return t.DeleteById(state);
+                
 
             }
             catch (Exception ex)
@@ -389,31 +373,25 @@ namespace Intwenty
                     throw new InvalidOperationException("The dbname did not match the application {0} dbname or any of it's subtables");
                 if (modelitem.IsMetaTypeDataTable)
                 {
-                    var client = GetDbObjectMapper();
-                    var t = client.GetOne<SystemID>(id);
-                    if (t == null)
+                    var client = GetDataClient();
+                    client.Open();
+                    var sysid = client.GetEntity<SystemID>(id);
+                    client.Close();
+                    if (sysid == null)
                         throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
-                    if (t.ParentId < 1)
+                    if (sysid.ParentId < 1)
                         throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
 
-                    RemoveFromApplicationCache(applicationid, t.ParentId);
+                    RemoveFromApplicationCache(applicationid, sysid.ParentId);
                 }
                 else
                 {
                     RemoveFromApplicationCache(applicationid, id);
                 }
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.DeleteById(id, dbname);
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.DeleteById(id, dbname);
-                }
-
-
+              
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                return t.DeleteById(id, dbname);
+                
             }
             catch (Exception ex)
             {
@@ -442,16 +420,10 @@ namespace Intwenty
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetList(args);
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetList(args);
-                }
+               
+                 var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                 return t.GetList(args);
+                
             }
             catch (Exception ex)
             {
@@ -478,16 +450,10 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetListByOwnerUser(args);
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetListByOwnerUser(args);
-                }
+               
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                return t.GetListByOwnerUser(args);
+                
 
             }
             catch (Exception ex)
@@ -522,26 +488,15 @@ namespace Intwenty
                     return result;
                 }
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetList();
+            
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                result = t.GetList();
 
-                    if (result.IsSuccess)
-                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
+                if (result.IsSuccess)
+                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
 
-                    return result;
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetList();
-
-                    if (result.IsSuccess)
-                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
-
-                    return result;
-                }
+                return result;
+                
             }
             catch (Exception ex)
             {
@@ -577,33 +532,18 @@ namespace Intwenty
                     return result;
                 }
 
-                if (IsNoSql)
+               
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                result = t.GetListByOwnerUser(owneruserid);
+
+                if (result.IsSuccess)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetListByOwnerUser(owneruserid);
-
-                    if (result.IsSuccess)
-                    {
-                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
-                        AddCachedUser(owneruserid);
-
-                    }
-                    return result;
-
+                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
+                    AddCachedUser(owneruserid);
                 }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetListByOwnerUser(owneruserid);
 
-                    if (result.IsSuccess)
-                    {
-                        ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
-                        AddCachedUser(owneruserid);
-                    }
-
-                    return result;
-                }
+                return result;
+                
             }
             catch (Exception ex)
             {
@@ -638,26 +578,15 @@ namespace Intwenty
                     return result;
                 }
 
-                if (IsNoSql)
+              
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                result = t.GetLatestVersionById(state);
+                if (result.IsSuccess)
                 {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetLatestVersionById(state);
-                    if (result.IsSuccess)
-                    {
-                        ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
-                    }
-                    return result;
+                    ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
                 }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    result = t.GetLatestVersionById(state);
-                    if (result.IsSuccess)
-                    {
-                        ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
-                    }
-                    return result;
-                }
+                return result;
+                
 
             }
             catch (Exception ex)
@@ -683,16 +612,10 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetLatestVersionByOwnerUser(state);
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetLatestVersionByOwnerUser(state);
-                }
+               
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                return t.GetLatestVersionByOwnerUser(state);
+                
             }
             catch (Exception ex)
             {
@@ -732,16 +655,10 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
-                if (IsNoSql)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetApplicationValueDomains();
-                }
-                else
-                {
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                    return t.GetApplicationValueDomains();
-                }
+               
+                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+                return t.GetApplicationValueDomains();
+                
 
             }
             catch (Exception ex)
@@ -760,17 +677,8 @@ namespace Intwenty
         public OperationResult GetValueDomains()
         {
    
-
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetValueDomains();
-            }
-            else
-            {
-                var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetValueDomains();
-            }
+            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+            return t.GetValueDomains();
 
         }
 
@@ -819,32 +727,18 @@ namespace Intwenty
 
         public OperationResult GetDataView(ListRetrivalArgs args)
         {
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataView(args);
-            }
-            else
-            {
-                var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataView(args);
-            }
-
-          
+           
+            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+            return t.GetDataView(args);
+            
         }
 
         public OperationResult GetDataViewRecord(ListRetrivalArgs args)
         {
-            if (IsNoSql)
-            {
-                var t = NoSqlDbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataViewRecord(args);
-            }
-            else
-            {
-                var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection));
-                return t.GetDataViewRecord(args);
-            }
+          
+            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
+            return t.GetDataViewRecord(args);
+            
 
         }
 
@@ -868,28 +762,23 @@ namespace Intwenty
 
             try
             {
-              
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
+                parameters.Add(new IntwentySqlParameter("@Message", message));
+                parameters.Add(new IntwentySqlParameter("@AppMetaCode", appmetacode));
+                parameters.Add(new IntwentySqlParameter("@ApplicationId", applicationid));
+                parameters.Add(new IntwentySqlParameter("@UserName", username));
 
-                if (IsNoSql)
-                {
-                    var t = new EventLog() { ApplicationId=applicationid, AppMetaCode=appmetacode, EventDate=DateTime.Now, Message=message, UserName=username, Verbosity=verbosity };
-                    var client = new IntwentyNoSqlDbClient(DBMSType, Settings.DefaultConnection);
-                    client.Insert(t);
-                }
-                else
-                {
-                    var getdatecmd = DBHelpers.GetDBMSCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
-                    var client = new IntwentySqlDbClient(DBMSType, Settings.DefaultConnection);
-                    client.Open();
-                    client.CreateCommand("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)");
-                    client.AddParameter("@Verbosity", verbosity);
-                    client.AddParameter("@Message", message);
-                    client.AddParameter("@AppMetaCode", appmetacode);
-                    client.AddParameter("@ApplicationId", applicationid);
-                    client.AddParameter("@UserName", username);
-                    client.ExecuteNonQuery();
-                    client.Close();
-                }
+                var client = new Connection(DBMSType, Settings.DefaultConnection);
+                client.Open();
+
+
+                var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
+               
+                client.RunCommand("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)", parameters:parameters.ToArray());
+
+                client.Close();
+                
 
             }
             catch (Exception ex)

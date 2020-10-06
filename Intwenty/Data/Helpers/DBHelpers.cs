@@ -7,9 +7,7 @@ using System.Linq;
 
 namespace Intwenty.Data.Helpers
 {
-    public enum StringLength { Standard, Long, Short };
 
-   
     public static class DBHelpers
     {
 

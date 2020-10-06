@@ -11,7 +11,7 @@ namespace Intwenty.DataClient
 
     public class Connection : IDataClient
     {
-        public DBMS DBMSType { get; }
+        public DBMS Database { get; }
 
         public string ConnectionString { get; }
 
@@ -19,18 +19,18 @@ namespace Intwenty.DataClient
 
         public Connection(DBMS database, string connectionstring)
         {
-            DBMSType = database;
+            Database = database;
             ConnectionString = connectionstring;
 
-            if (DBMSType == DBMS.SQLite)
+            if (Database == DBMS.SQLite)
                 InternalClient = new Databases.SQLite.SQLiteClient(connectionstring);
-            if (DBMSType == DBMS.MySql)
+            if (Database == DBMS.MySql)
                 InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
-            if (DBMSType == DBMS.MariaDB)
+            if (Database == DBMS.MariaDB)
                 InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
-            if (DBMSType == DBMS.MSSqlServer)
+            if (Database == DBMS.MSSqlServer)
                 InternalClient = new Databases.SqlServer.SqlServerClient(connectionstring);
-            if (DBMSType == DBMS.PostgreSQL)
+            if (Database == DBMS.PostgreSQL)
                 InternalClient = new Databases.Postgres.PostgresClient(connectionstring);
 
         }
@@ -62,6 +62,11 @@ namespace Intwenty.DataClient
         public void RunCommand(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null)
         {
             InternalClient.RunCommand(sql, isprocedure, parameters);
+        }
+
+        public object GetScalarValue(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null)
+        {
+            return InternalClient.GetScalarValue(sql, isprocedure, parameters);
         }
 
         public void CreateTable<T>()
