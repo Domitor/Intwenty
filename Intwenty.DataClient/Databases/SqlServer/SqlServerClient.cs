@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 
 namespace Intwenty.DataClient.Databases.SqlServer
 {
-    sealed class SqlServerClient : BaseDb, ISqlClient
+    sealed class SqlServerClient : BaseDb, IDataClient
     {
 
         private SqlConnection connection;

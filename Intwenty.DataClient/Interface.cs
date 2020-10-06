@@ -1,11 +1,12 @@
 ﻿using Intwenty.DataClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 
 namespace Intwenty.DataClient
 {
-    public interface ISqlClient
+    public interface IDataClient
     {
         void Open();
         void Close();
@@ -23,36 +24,20 @@ namespace Intwenty.DataClient
         List<T> GetEntities<T>(string sql, bool isprocedure=false, IIntwentySqlParameter[] parameters=null) where T : new();
         string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
-        ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
+        IResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null);
         int InsertEntity<T>(T entity);
-        int InsertEntity(string json, IIntwentyJSONObjectSchema schema);
-        int InsertEntity(JsonElement json, IIntwentyJSONObjectSchema schema);
+        int InsertEntity(string json, string tablename);
+        int InsertEntity(JsonElement json, string tablename);
         int UpdateEntity<T>(T entity);
-        int UpdateEntity(string json, IIntwentyJSONObjectSchema schema);
-        int UpdateEntity(JsonElement json, IIntwentyJSONObjectSchema schema);
+        int UpdateEntity(string json, string tablename);
+        int UpdateEntity(JsonElement json, string tablename);
         int DeleteEntity<T>(T entity);
         int DeleteEntities<T>(IEnumerable<T> entities);
 
 
     }
 
-    public interface IIntwentyJSONObjectSchema
-    {
-        string TableName { get; }
-        string JSONStoreColumnName { get; }
-        IEnumerable<IIntwentyJSONField> Fields { get; }
-    }
-
-    public interface IIntwentyJSONField
-    {
-        public string Name { get; }
-        public bool IsAutoIncremental { get; }
-        public bool IsPrimaryKey { get; }
-        public IntwentyJSONFieldDataType DataType { get; }
-    }
-
-  
 
     public interface IIntwentyResultColumn
     {
@@ -67,5 +52,42 @@ namespace Intwenty.DataClient
         public object Value { get; }
         public DbType DataType { get; }
         public ParameterDirection Direction { get; }
+    }
+
+    public interface IResultSet
+    {
+        string Name { get; }
+        List<IResultSetRow> Rows { get;}
+        public bool HasRows { get; }
+        int? FirstRowGetAsInt(string name);
+        string FirstRowGetAsString(string name);
+        bool? FirstRowGetAsBool(string name);
+        decimal? FirstRowGetAsDecimal(string name);
+        DateTime? FirstRowGetAsDateTime(string name);
+    }
+
+    public interface IResultSetRow
+    {
+        List<IResultSetValue> Values { get; }
+        int? GetAsInt(string name);
+        string GetAsString(string name);
+        bool? GetAsBool(string name);
+        decimal? GetAsDecimal(string name);
+        DateTime? GetAsDateTime(string name);
+        void SetValue(string name, object value);
+    }
+
+    public interface IResultSetValue
+    {
+        string Name { get; }
+        bool HasValue { get; }
+        int? GetAsInt();
+        string GetAsString();
+        bool? GetAsBool();
+        decimal? GetAsDecimal();
+        DateTime? GetAsDateTime();
+        void SetValue(object value);
+
+      
     }
 }

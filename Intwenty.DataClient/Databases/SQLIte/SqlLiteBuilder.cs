@@ -11,7 +11,7 @@ namespace Intwenty.DataClient.Databases.SQLite
     {
         private static string CACHETYPE = "SQLITE_SQL";
 
-        public override string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;

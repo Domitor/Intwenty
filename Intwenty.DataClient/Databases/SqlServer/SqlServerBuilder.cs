@@ -13,7 +13,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
     {
         private static string CACHETYPE = "SQLSERVER_SQL";
 
-        public override string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;

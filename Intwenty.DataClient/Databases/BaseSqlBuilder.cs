@@ -14,7 +14,7 @@ namespace Intwenty.DataClient.Databases
           
         }
 
-        public abstract string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage);
+        public abstract string GetCreateTableSql(IntwentyDbTableDefinition model);
 
         public abstract string GetCreateIndexSql(IntwentyDbIndexDefinition model);
 

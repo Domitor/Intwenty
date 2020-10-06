@@ -9,21 +9,16 @@ using System.Text.Json;
 
 namespace Intwenty.DataClient.Databases
 {
-    abstract class BaseDb : IDisposable, ISqlClient
+    abstract class BaseDb : IDisposable, IDataClient
     {
         protected string ConnectionString { get; set; }
 
         protected bool IsInTransaction { get; set; }
 
-        protected bool UseJSONStorage { get; set; }
-
-        protected string JSONStorageName { get; set; }
 
         public BaseDb(string connectionstring) 
         {
             ConnectionString = connectionstring;
-            UseJSONStorage = true;
-            JSONStorageName = "jsonstorage";
         }
 
 
@@ -88,7 +83,6 @@ namespace Intwenty.DataClient.Databases
 
             var reader = command.ExecuteReader();
 
-            var jsonstorage = -1;
             var separator = "";
             var sb = new StringBuilder();
           
@@ -97,47 +91,23 @@ namespace Intwenty.DataClient.Databases
                 var names = new List<string>();
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    var columnname = reader.GetName(i);
-                    names.Add(columnname);
-                    if (columnname.ToLower() == JSONStorageName.ToLower() && UseJSONStorage)
-                        jsonstorage = i;
-                        
-                    
+                    names.Add(reader.GetName(i));
                 }
 
-                if (jsonstorage == -1)
+                var adjusted_columns = AdjustResultColumns(names, resultcolumns);
+                sb.Append("{");
+                foreach (var rc in adjusted_columns)
                 {
+                    if (reader.IsDBNull(rc.Index))
+                        continue;
 
-                    var adjusted_columns = AdjustResultColumns(names, resultcolumns);
-                    sb.Append("{");
-                    foreach (var rc in adjusted_columns)
-                    {
-                        if (reader.IsDBNull(rc.Index))
-                            continue;
-
-                        sb.Append(separator + GetJSONValue(reader, rc));
-                        separator = ",";
-                    }
-                    sb.Append("}");
-                    break;
+                    sb.Append(separator + GetJSONValue(reader, rc));
+                    separator = ",";
                 }
-                else
-                {
-                    if (!reader.IsDBNull(jsonstorage))
-                    {
-                        var json = reader.GetString(jsonstorage);
-                        if (!string.IsNullOrEmpty(json))
-                            sb.Append(json);
-                    }
-                    if (sb.Length < 2)
-                        sb.Append("{}");
-
-
-                }
+                sb.Append("}");
+                break;
             }
 
-         
-           
 
             return sb.ToString();
         }
@@ -155,7 +125,7 @@ namespace Intwenty.DataClient.Databases
 
             var reader = command.ExecuteReader();
 
-            var jsonstorage = -1;
+
             var adjusted_columns = new List<IntwentyResultColumn>();
             var rindex = 0;
             var objectseparator = "";
@@ -177,39 +147,21 @@ namespace Intwenty.DataClient.Databases
                     var names = new List<string>();
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        var columnname = reader.GetName(i);
-                        names.Add(columnname);
-                        if (columnname.ToLower() == JSONStorageName.ToLower() && UseJSONStorage)
-                            jsonstorage = i;
-
+                        names.Add(reader.GetName(i));
                     }
                     adjusted_columns = AdjustResultColumns(names, resultcolumns);
                 }
 
-                if (jsonstorage == -1)
+                sb.Append(objectseparator + "{");
+                foreach (var rc in adjusted_columns)
                 {
+                    if (reader.IsDBNull(rc.Index))
+                        continue;
 
-                    sb.Append(objectseparator + "{");
-                    foreach (var rc in adjusted_columns)
-                    {
-                        if (reader.IsDBNull(rc.Index))
-                            continue;
-
-                        sb.Append(valueseparator + GetJSONValue(reader, rc));
-                        valueseparator = ",";
-                    }
-                    sb.Append("}");
+                    sb.Append(valueseparator + GetJSONValue(reader, rc));
+                    valueseparator = ",";
                 }
-                else
-                {
-                    if (!reader.IsDBNull(jsonstorage))
-                    {
-                        var json = reader.GetString(jsonstorage);
-                        if (!string.IsNullOrEmpty(json))
-                            sb.Append(objectseparator + json);
-                    }
-
-                }
+                sb.Append("}");
                 objectseparator = ",";
             }
             sb.Append("]");
@@ -217,14 +169,27 @@ namespace Intwenty.DataClient.Databases
             return sb.ToString();
         }
 
-        public ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        public IResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
             throw new NotImplementedException();
         }
 
         public DataTable GetDataTable(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
-            throw new NotImplementedException();
+            var command = GetCommand();
+            command.CommandText = sql;
+            if (isprocedure)
+                command.CommandType = CommandType.StoredProcedure;
+            else
+                command.CommandType = CommandType.Text;
+
+            AddCommandParameters(parameters);
+
+            var reader = command.ExecuteReader();
+
+            var table = new DataTable();
+            table.Load(reader);
+            return table;
         }
 
         public void CreateTable<T>()
@@ -235,7 +200,7 @@ namespace Intwenty.DataClient.Databases
                 return;
 
             var command = GetCommand();
-            command.CommandText = GetSqlBuilder().GetCreateTableSql(info, UseJSONStorage);
+            command.CommandText = GetSqlBuilder().GetCreateTableSql(info);
             command.CommandType = CommandType.Text;
             command.ExecuteNonQuery();
 
@@ -412,12 +377,12 @@ namespace Intwenty.DataClient.Databases
 
         }
 
-        public int InsertEntity(string json, IIntwentyJSONObjectSchema schema)
+        public int InsertEntity(string json, string tablename)
         {
             throw new NotImplementedException();
         }
 
-        public int InsertEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        public int InsertEntity(JsonElement json, string tablename)
         {
             throw new NotImplementedException();
         }
@@ -445,12 +410,12 @@ namespace Intwenty.DataClient.Databases
             return res;
         }
 
-        public int UpdateEntity(string json, IIntwentyJSONObjectSchema schema)
+        public int UpdateEntity(string json, string tablename)
         {
             throw new NotImplementedException();
         }
 
-        public int UpdateEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        public int UpdateEntity(JsonElement json, string tablename)
         {
             throw new NotImplementedException();
         }
@@ -561,8 +526,7 @@ namespace Intwenty.DataClient.Databases
                 for (int i = 0; i < schema.Count; i++)
                 {
                     var rc = new IntwentyResultColumn() { Name = schema[i], Index = i };
-                    if (rc.Name.ToLower() == JSONStorageName.ToLower() && UseJSONStorage)
-                        continue;
+                  
                     //TODO: IsNumeric, IsDateTime
                     res.Add(rc);
                 }
@@ -575,8 +539,7 @@ namespace Intwenty.DataClient.Databases
                     if (col != null)
                     {
                         var rc = new IntwentyResultColumn() { Name = col.Name, Index = i };
-                        if (rc.Name.ToLower() == JSONStorageName.ToLower() && UseJSONStorage)
-                            continue;
+                      
                         //TODO: IsNumeric, IsDateTime
                         res.Add(rc);
                     }

@@ -11,7 +11,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
     {
         private static string CACHETYPE = "MARIADB_SQL";
 
-        public override string GetCreateTableSql(IntwentyDbTableDefinition model, bool usejsonstorage)
+        public override string GetCreateTableSql(IntwentyDbTableDefinition model)
         {
             string result;
             var cachekey = CACHETYPE + "_CREATE_" + model.Id;

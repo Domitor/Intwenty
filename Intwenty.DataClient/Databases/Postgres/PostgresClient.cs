@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace Intwenty.DataClient.Databases.Postgres
 {
-    sealed class PostgresClient : BaseDb, ISqlClient
+    sealed class PostgresClient : BaseDb, IDataClient
     {
 
         private NpgsqlConnection connection;

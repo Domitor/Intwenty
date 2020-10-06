@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Intwenty.DataClient.Databases.SQLite
 {
-    sealed class SQLiteClient : BaseDb, ISqlClient
+    sealed class SQLiteClient : BaseDb, IDataClient
     {
 
         private SQLiteConnection connection;

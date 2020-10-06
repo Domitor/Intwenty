@@ -8,7 +8,7 @@ using MySqlConnector;
 
 namespace Intwenty.DataClient.Databases.MariaDb
 {
-    sealed class MariaDbClient : BaseDb, ISqlClient
+    sealed class MariaDbClient : BaseDb, IDataClient
     {
 
         private MySqlConnection connection;

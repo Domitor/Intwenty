@@ -7,14 +7,14 @@ namespace Intwenty.DataClient
 {
     public enum SqlDBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
 
-    public class DataClient : ISqlClient
+    public class DataClient : IDataClient
     {
 
         public SqlDBMS DBMSType { get; }
 
         public string ConnectionString { get; }
 
-        private ISqlClient InternalClient { get; }
+        private IDataClient InternalClient { get; }
 
         public DataClient(SqlDBMS database, string connectionstring)
         {
@@ -32,7 +32,6 @@ namespace Intwenty.DataClient
             if (DBMSType == SqlDBMS.PostgreSQL)
                 InternalClient = new Databases.Postgres.PostgresClient(connectionstring);
 
-           
         }
 
         public void BeginTransaction() 
@@ -99,14 +98,14 @@ namespace Intwenty.DataClient
             return InternalClient.InsertEntity(model);
         }
 
-        public int InsertEntity(string json, IIntwentyJSONObjectSchema schema)
+        public int InsertEntity(string json, string tablename)
         {
-            return InternalClient.InsertEntity(json, schema);
+            return InternalClient.InsertEntity(json, tablename);
         }
 
-        public int InsertEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        public int InsertEntity(JsonElement json, string tablename)
         {
-            return InternalClient.InsertEntity(json, schema);
+            return InternalClient.InsertEntity(json, tablename);
         }
 
         public string GetJSONObject(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
@@ -124,8 +123,6 @@ namespace Intwenty.DataClient
             return InternalClient.ColumnExists(tablename, columnname);
         }
 
-       
-
         public List<T> GetEntities<T>(string sql, bool isprocedure = false, IIntwentySqlParameter[] parameters = null) where T : new()
         {
             return InternalClient.GetEntities<T>(sql,isprocedure,parameters);
@@ -136,24 +133,24 @@ namespace Intwenty.DataClient
             return InternalClient.UpdateEntity(entity);
         }
 
-        public int UpdateEntity(string json, IIntwentyJSONObjectSchema schema)
+        public int UpdateEntity(string json, string tablename)
         {
-            return InternalClient.UpdateEntity(json, schema);
+            return InternalClient.UpdateEntity(json, tablename);
         }
 
-        public int UpdateEntity(JsonElement json, IIntwentyJSONObjectSchema schema)
+        public int UpdateEntity(JsonElement json, string tablename)
         {
-            return InternalClient.UpdateEntity(json, schema);
+            return InternalClient.UpdateEntity(json, tablename);
         }
 
         public int DeleteEntity<T>(T entity)
         {
-            return InternalClient.DeleteEntity<T>(entity);
+            return InternalClient.DeleteEntity(entity);
         }
 
         public int DeleteEntities<T>(IEnumerable<T> entities)
         {
-            return InternalClient.DeleteEntities<T>(entities);
+            return InternalClient.DeleteEntities(entities);
         }
 
         public string GetJSONArray(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
@@ -161,7 +158,7 @@ namespace Intwenty.DataClient
             return InternalClient.GetJSONArray(sql,minrow,maxrow,isprocedure,parameters,resultcolumns);
         }
 
-        public ResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
+        public IResultSet GetResultSet(string sql, int minrow = 0, int maxrow = 0, bool isprocedure = false, IIntwentySqlParameter[] parameters = null, IIntwentyResultColumn[] resultcolumns = null)
         {
             return InternalClient.GetResultSet(sql, minrow, maxrow, isprocedure, parameters, resultcolumns);
         }
