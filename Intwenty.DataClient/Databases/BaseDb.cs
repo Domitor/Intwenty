@@ -27,6 +27,16 @@ namespace Intwenty.DataClient.Databases
         public abstract void Close();
         protected abstract BaseSqlBuilder GetSqlBuilder();
 
+        public List<TypeMapItem> GetDbTypeMap()
+        {
+            return TypeMap.GetTypeMap();
+        }
+
+        public List<CommandMapItem> GetDbCommandMap()
+        {
+            return CommandMap.GetCommandMap();
+        }
+
         public void BeginTransaction()
         {
             IsInTransaction = true;

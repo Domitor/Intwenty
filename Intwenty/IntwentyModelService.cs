@@ -6,8 +6,6 @@ using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data;
 using Microsoft.Extensions.Options;
-using Intwenty.Data.DBAccess;
-using Intwenty.Data.DBAccess.Helpers;
 using MongoDB.Driver;
 using Intwenty.Data.Dto;
 using Intwenty.Engine;
@@ -16,6 +14,7 @@ using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using Intwenty.Interface;
 using Microsoft.AspNetCore.Identity;
+using Intwenty.DataClient;
 
 namespace Intwenty
 {
@@ -121,7 +120,7 @@ namespace Intwenty
     public class IntwentyModelService : IIntwentyModelService
     {
 
-        private IIntwentyDbORM Client { get; }
+        private IDataClient Client { get; }
 
         private IMemoryCache ModelCache { get; }
 
@@ -1197,7 +1196,7 @@ namespace Intwenty
                 }
                 else
                 {
-                    var t = SqlDbDataManager.GetDataManager(model, this, Settings, new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
+                    var t = DbDataManager.GetDataManager(model, this, Settings, new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
                     res.Add(t.ConfigureDatabase());
                 }
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Intwenty.Data.DBAccess.Helpers
+namespace Intwenty.Data.XDBAccess.Helpers
 {
     public class IntwentyExpression
     {

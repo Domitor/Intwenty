@@ -1,6 +1,4 @@
 ﻿using System;
-using Intwenty.Data.DBAccess;
-using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Areas.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using Intwenty.Model;
 using Intwenty.Data.Entity;
+using Intwenty.DataClient;
 
 namespace Intwenty.Data.Seed
 {
@@ -21,12 +20,7 @@ namespace Intwenty.Data.Seed
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            IIntwentyDbORM DataRepository = null;
-            if (Settings.Value.IsNoSQL)
-                DataRepository = new IntwentyNoSqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
-            else
-                DataRepository = new IntwentySqlDbClient(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
-
+           
 
             var temp = new List<TranslationItem>();
 
@@ -46,12 +40,14 @@ namespace Intwenty.Data.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
 
 
-
-            var existing = DataRepository.GetAll<TranslationItem>();
+            var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
+            client.Open();
+            var existing = client.GetEntities<TranslationItem>();
+            client.Close();
             foreach (var t in temp)
             {
                 if (!existing.Exists(p => p.Culture == t.Culture && p.Key == t.Key))
-                    DataRepository.Insert(t);
+                    client.InsertEntity(t);
             }
 
 

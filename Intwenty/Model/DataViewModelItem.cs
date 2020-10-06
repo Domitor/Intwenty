@@ -1,12 +1,12 @@
 ﻿
-using Intwenty.Data.DBAccess.Helpers;
 using Intwenty.Data.Entity;
+using Intwenty.DataClient;
 using Intwenty.Interface;
 using System.Collections.Generic;
 
 namespace Intwenty.Model
 {
-    public class DataViewModelItem : BaseModelItem, IIntwentyDataColum, ILocalizableTitle
+    public class DataViewModelItem : BaseModelItem, IIntwentyResultColumn, ILocalizableTitle
     {
         //META TYPES
         public static readonly string MetaTypeDataView = "DATAVIEW";
@@ -49,6 +49,10 @@ namespace Intwenty.Model
 
         public string SQLQueryFieldDataType { get; set; }
 
+        public string Name
+        {
+            get { return SQLQueryFieldName; }
+        }
 
         public int OrderNo { get; set; }
 

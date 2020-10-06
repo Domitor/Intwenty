@@ -1,5 +1,5 @@
-﻿using Intwenty.Data.DBAccess.Annotations;
-using Intwenty.Data.DBAccess.Helpers;
+﻿using Intwenty.Data.XDBAccess.Annotations;
+using Intwenty.Data.XDBAccess.Helpers;
 using MongoDB.Driver;
 using LiteDB;
 using System;
@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson.IO;
 using System.Collections.Concurrent;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.XDBAccess
 {
     public class IntwentyNoSqlDbClient : IntwentyDbClient, IIntwentyDbNoSql
     {

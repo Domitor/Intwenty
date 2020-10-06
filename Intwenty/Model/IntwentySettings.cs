@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Intwenty.DataClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Intwenty.Model
 {
-
-    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb };
 
     public enum AllowedAccountTypes { All, Social, Manual, SocialFb, SocialGoogle };
 

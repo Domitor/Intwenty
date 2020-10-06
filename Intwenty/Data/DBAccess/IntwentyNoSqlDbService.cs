@@ -2,12 +2,12 @@ using System;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Collections.Generic;
-using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.XDBAccess.Helpers;
 using Intwenty.Data.Entity;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.XDBAccess
 {
 
 

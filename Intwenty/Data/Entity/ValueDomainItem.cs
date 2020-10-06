@@ -1,4 +1,6 @@
-﻿using Intwenty.Data.DBAccess.Annotations;
+﻿
+
+using Intwenty.DataClient.Reflection;
 
 namespace Intwenty.Data.Entity
 {

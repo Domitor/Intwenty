@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Models;
-using Intwenty.Data.DBAccess;
+using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -24,27 +24,19 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> CreateAsync(IntwentyRole role, CancellationToken cancellationToken)
         {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            client.Insert(role);
-
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            client.InsertEntity(role);
+            client.Close();
             return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<IdentityResult> DeleteAsync(IntwentyRole role, CancellationToken cancellationToken)
         {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            client.Delete(role);
-
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            client.DeleteEntity(role);
+            client.Close();
             return Task.FromResult(IdentityResult.Success);
         }
 
@@ -55,27 +47,19 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IntwentyRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            var role = client.GetOne<IntwentyRole>(roleId);
-
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var role = client.GetEntity<IntwentyRole>(roleId);
+            client.Close();
             return Task.FromResult(role);
         }
 
         public Task<IntwentyRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            var role = client.GetAll<IntwentyRole>().Find(p => p.NormalizedName == normalizedRoleName);
-
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var role = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == normalizedRoleName);
+            client.Close();
             return Task.FromResult(role);
         }
 
@@ -108,15 +92,10 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> UpdateAsync(IntwentyRole role, CancellationToken cancellationToken)
         {
-            IIntwentyDbORM client;
-            if (Settings.IsNoSQL)
-                client = new IntwentyNoSqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            else
-                client = new IntwentySqlDbClient(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-
-            client.Update(role);
-
-
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            client.UpdateEntity(role);
+            client.Close();
             return Task.FromResult(IdentityResult.Success);
         }
     }

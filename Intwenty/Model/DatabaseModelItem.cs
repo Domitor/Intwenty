@@ -1,11 +1,11 @@
-﻿using Intwenty.Data.DBAccess.Helpers;
-using Intwenty.Data.Entity;
+﻿using Intwenty.Data.Entity;
+using Intwenty.DataClient;
 using System.Collections.Generic;
 using System.Data;
 
 namespace Intwenty.Model
 {
-    public class DatabaseModelItem : BaseModelItem, IIntwentyDataColum
+    public class DatabaseModelItem : BaseModelItem, IIntwentyResultColumn
     {
         //DATATYPES
         public static readonly string DataTypeBool = "BOOLEAN";
@@ -85,6 +85,10 @@ namespace Intwenty.Model
 
         public bool IsUnique { get; set; }
 
+        public string Name
+        {
+            get { return DbName;  }
+        }
 
         public static List<string> DataTypes
         {

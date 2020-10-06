@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
-using Intwenty.Data.DBAccess.Helpers;
+
 
 namespace Intwenty.Controllers
 {
@@ -119,7 +119,7 @@ namespace Intwenty.Controllers
 
                 foreach (var defcol in main)
                 {
-                    m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode=app.Application.MetaCode, DbName = defcol.ColumnName, DataType = defcol.DataType, MetaCode = defcol.ColumnName.ToUpper(), ParentMetaCode = DatabaseModelItem.MetaTypeRoot, Title = defcol.ColumnName, TableName = app.Application.DbName, Properties= "INTWENTYDEFAULTCOLUMN=TRUE" });
+                    m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode=app.Application.MetaCode, DbName = defcol.Name, DataType = defcol.DataType, MetaCode = defcol.Name.ToUpper(), ParentMetaCode = DatabaseModelItem.MetaTypeRoot, Title = defcol.Name, TableName = app.Application.DbName, Properties= "INTWENTYDEFAULTCOLUMN=TRUE" });
                 }
                 foreach (var ds in app.DataStructure.Where(p=> p.IsMetaTypeDataColumn && p.IsRoot))
                 {
@@ -130,7 +130,7 @@ namespace Intwenty.Controllers
                     m.DataStructure.Add(ds);
                     foreach (var defcol in subs)
                     {
-                        m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.Application.MetaCode, DbName = defcol.ColumnName, DataType = defcol.DataType, MetaCode = defcol.ColumnName.ToUpper(), ParentMetaCode = ds.MetaCode, Title = defcol.ColumnName, TableName = app.Application.DbName, Properties = "INTWENTYDEFAULTCOLUMN=TRUE" });
+                        m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.Application.MetaCode, DbName = defcol.Name, DataType = defcol.DataType, MetaCode = defcol.Name.ToUpper(), ParentMetaCode = ds.MetaCode, Title = defcol.Name, TableName = app.Application.DbName, Properties = "INTWENTYDEFAULTCOLUMN=TRUE" });
                     }
                     foreach (var subtblcol in app.DataStructure.Where(p => p.IsMetaTypeDataColumn && p.ParentMetaCode == ds.MetaCode))
                     {

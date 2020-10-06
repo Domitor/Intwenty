@@ -1,5 +1,5 @@
 ﻿using System;
-using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.XDBAccess.Helpers;
 using Intwenty.Data.Entity;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +7,7 @@ using System.Text;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.XDBAccess
 {
 
     public interface IIntwentyDb

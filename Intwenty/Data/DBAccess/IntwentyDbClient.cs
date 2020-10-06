@@ -1,7 +1,7 @@
 ﻿
 using Intwenty.Model;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.XDBAccess
 {
     public abstract class IntwentyDbClient : IIntwentyDb
     {

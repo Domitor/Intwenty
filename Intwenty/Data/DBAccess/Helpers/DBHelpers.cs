@@ -1,10 +1,11 @@
-﻿using Intwenty.Model;
+﻿using Intwenty.DataClient;
+using Intwenty.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace Intwenty.Data.DBAccess.Helpers
+namespace Intwenty.Data.XDBAccess.Helpers
 {
     public enum StringLength { Standard, Long, Short };
 

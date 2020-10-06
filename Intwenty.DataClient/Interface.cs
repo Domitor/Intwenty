@@ -34,8 +34,8 @@ namespace Intwenty.DataClient
         int UpdateEntity(JsonElement json, string tablename);
         int DeleteEntity<T>(T entity);
         int DeleteEntities<T>(IEnumerable<T> entities);
-
-
+        List<TypeMapItem> GetDbTypeMap();
+        List<CommandMapItem> GetDbCommandMap();
     }
 
 

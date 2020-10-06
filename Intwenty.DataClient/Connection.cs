@@ -1,35 +1,36 @@
-﻿using System;
+﻿using Intwenty.DataClient.Databases;
+using Intwenty.DataClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 
 namespace Intwenty.DataClient
 {
-    public enum SqlDBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
+    public enum DBMS { MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite };
 
-    public class DataClient : IDataClient
+    public class Connection : IDataClient
     {
-
-        public SqlDBMS DBMSType { get; }
+        public DBMS DBMSType { get; }
 
         public string ConnectionString { get; }
 
         private IDataClient InternalClient { get; }
 
-        public DataClient(SqlDBMS database, string connectionstring)
+        public Connection(DBMS database, string connectionstring)
         {
             DBMSType = database;
             ConnectionString = connectionstring;
 
-            if (DBMSType == SqlDBMS.SQLite)
+            if (DBMSType == DBMS.SQLite)
                 InternalClient = new Databases.SQLite.SQLiteClient(connectionstring);
-            if (DBMSType == SqlDBMS.MySql)
+            if (DBMSType == DBMS.MySql)
                 InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
-            if (DBMSType == SqlDBMS.MariaDB)
+            if (DBMSType == DBMS.MariaDB)
                 InternalClient = new Databases.MariaDb.MariaDbClient(connectionstring);
-            if (DBMSType == SqlDBMS.MSSqlServer)
+            if (DBMSType == DBMS.MSSqlServer)
                 InternalClient = new Databases.SqlServer.SqlServerClient(connectionstring);
-            if (DBMSType == SqlDBMS.PostgreSQL)
+            if (DBMSType == DBMS.PostgreSQL)
                 InternalClient = new Databases.Postgres.PostgresClient(connectionstring);
 
         }
@@ -168,9 +169,15 @@ namespace Intwenty.DataClient
             return InternalClient.GetDataTable(sql, minrow, maxrow, isprocedure, parameters, resultcolumns);
         }
 
-       
+        public List<TypeMapItem> GetDbTypeMap()
+        {
+            return TypeMap.GetTypeMap();
+        }
 
-       
+        public List<CommandMapItem> GetDbCommandMap()
+        {
+            return CommandMap.GetCommandMap();
+        }
     }
 
 

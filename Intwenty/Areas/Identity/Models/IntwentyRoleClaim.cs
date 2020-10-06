@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.DBAccess.Annotations;
+﻿using Intwenty.DataClient.Reflection;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;

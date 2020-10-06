@@ -21,16 +21,16 @@ namespace Intwenty.DataClient.Databases
 
             result = new List<CommandMapItem>();
 
-            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = SqlDBMS.MSSqlServer, Command = "IDENTITY(1,1)" });
-            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = SqlDBMS.MariaDB, Command = "AUTO_INCREMENT" });
-            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = SqlDBMS.MySql, Command = "AUTO_INCREMENT" });
-            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = SqlDBMS.PostgreSQL, Command = "SERIAL" });
-            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = SqlDBMS.SQLite, Command = "PRIMARY KEY AUTOINCREMENT" });
-            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = SqlDBMS.MSSqlServer, Command = "GETDATE()" });
-            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = SqlDBMS.MariaDB, Command = "NOW()" });
-            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = SqlDBMS.MySql, Command = "NOW()" });
-            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = SqlDBMS.PostgreSQL, Command = "now()" });
-            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = SqlDBMS.SQLite, Command = "DATETIME('now', 'localtime')" });
+            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = DBMS.MSSqlServer, Command = "IDENTITY(1,1)" });
+            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = DBMS.MariaDB, Command = "AUTO_INCREMENT" });
+            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = DBMS.MySql, Command = "AUTO_INCREMENT" });
+            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = DBMS.PostgreSQL, Command = "SERIAL" });
+            result.Add(new CommandMapItem() { Key = "AUTOINC", DbEngine = DBMS.SQLite, Command = "PRIMARY KEY AUTOINCREMENT" });
+            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = DBMS.MSSqlServer, Command = "GETDATE()" });
+            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = DBMS.MariaDB, Command = "NOW()" });
+            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = DBMS.MySql, Command = "NOW()" });
+            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = DBMS.PostgreSQL, Command = "now()" });
+            result.Add(new CommandMapItem() { Key = "GETDATE", DbEngine = DBMS.SQLite, Command = "DATETIME('now', 'localtime')" });
 
             cache.Add(CACHETYPE, result, DateTime.Now.AddYears(1));
 

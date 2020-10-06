@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
-using Intwenty.Data.DBAccess.Helpers;
+using Intwenty.Data.Helpers;
 
 namespace Intwenty.Controllers
 {
@@ -546,8 +546,8 @@ namespace Intwenty.Controllers
             var sep = "";
             foreach (var app in apps)
             {
-                var client = DataRepository.GetDbObjectMapper();
-                var infostatuslist = client.GetAll<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
+                var client = DataRepository.GetDataClient();
+                var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
 
                 foreach (var istat in infostatuslist)
                 {

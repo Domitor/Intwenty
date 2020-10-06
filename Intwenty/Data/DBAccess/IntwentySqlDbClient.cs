@@ -4,15 +4,15 @@ using System.Data.SqlClient;
 using Npgsql;
 using System.Text;
 using System.Collections.Generic;
-using Intwenty.Data.DBAccess.Helpers;
-using Intwenty.Data.DBAccess.Annotations;
+using Intwenty.Data.XDBAccess.Helpers;
+using Intwenty.Data.XDBAccess.Annotations;
 using System.Data.SQLite;
 using Intwenty.Model;
 using Intwenty.Data.Dto;
 using System.Collections.Concurrent;
 using MySqlConnector;
 
-namespace Intwenty.Data.DBAccess
+namespace Intwenty.Data.XDBAccess
 {
    
 

@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Intwenty.Model;
-using Intwenty.Data.DBAccess;
 using Intwenty.Data.Entity;
 using Microsoft.Extensions.Options;
 using Intwenty.Data.Dto;
 using System;
-using Intwenty.Data.DBAccess.Annotations;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json;
 using System.Collections.Generic;
 using Intwenty.Engine;
 using Microsoft.Extensions.Caching.Memory;
-using Intwenty.Data.DBAccess.Helpers;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Intwenty.Areas.Identity.Models;
@@ -20,10 +17,11 @@ using Microsoft.AspNetCore.SignalR;
 using Intwenty.PushData;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
+using Intwenty.DataClient.Reflection;
 
 namespace Intwenty.Controllers
 {
-    
+
 
     public class SystemTestController : Controller
     {
@@ -37,8 +35,8 @@ namespace Intwenty.Controllers
         private readonly RoleManager<IntwentyRole> _rolemanager;
         private readonly IHubContext<ServerToClientPush> _hubContext;
 
-        public SystemTestController(IIntwentyModelService modelservice, 
-                                    IIntwentyDataService dataservice, 
+        public SystemTestController(IIntwentyModelService modelservice,
+                                    IIntwentyDataService dataservice,
                                     IOptions<IntwentySettings> settings,
                                     IMemoryCache cache,
                                     UserManager<IntwentyUser> usermgr,
@@ -63,7 +61,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-   
+
         [HttpPost]
         public JsonResult RunSystemTests()
         {
@@ -74,63 +72,39 @@ namespace Intwenty.Controllers
             if (model != null)
                 _modelservice.DeleteAppModel(model);
 
-            if (!_settings.IsNoSQL)
+            var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+            db.Open();
+
+            db.RunCommand("DELETE FROM sysmodel_ValueDomainItem WHERE DOMAINNAME = 'TESTDOMAIN'");
+
+            if (db.TableExists("TestApp"))
             {
-                var db = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                db.Open();
-
-                db.CreateCommand("DELETE FROM sysmodel_ValueDomainItem WHERE DOMAINNAME = 'TESTDOMAIN'");
-                db.ExecuteNonQuery();
-
-                if (db.TableExist("TestApp"))
-                {
-                    db.CreateCommand("DROP TABLE TestApp");
-                    db.ExecuteNonQuery();
-                }
-                if (db.TableExist("TestApp_Versioning"))
-                {
-                    db.CreateCommand("DROP TABLE TestApp_Versioning");
-                    db.ExecuteNonQuery();
-                }
-                if (db.TableExist("TestAppSubTable"))
-                {
-                    db.CreateCommand("DROP TABLE TestAppSubTable");
-                    db.ExecuteNonQuery();
-                }
-                if (db.TableExist("tests_TestDataAutoInc"))
-                {
-                    db.CreateCommand("DROP TABLE tests_TestDataAutoInc");
-                    db.ExecuteNonQuery();
-                }
-                if (db.TableExist("tests_TestDataIndexNoAutoInc"))
-                {
-                    db.CreateCommand("DROP TABLE tests_TestDataIndexNoAutoInc");
-                    db.ExecuteNonQuery();
-                }
-
-                if (db.TableExist("tests_TestData2AutoInc"))
-                {
-                    db.CreateCommand("DROP TABLE tests_TestData2AutoInc");
-                    db.ExecuteNonQuery();
-                }
-
-                db.Close();
+                db.RunCommand("DROP TABLE TestApp");
             }
-            else
+            if (db.TableExists("TestApp_Versioning"))
             {
-                var db = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                var list = db.GetAll<ValueDomainItem>();
-                foreach (var item in list)
-                    if (item.DomainName == "TESTDOMAIN")
-                        db.Delete(item);
-
-                db.DropCollection("TestApp");
-                db.DropCollection("TestApp_Versioning");
-                db.DropCollection("TestAppSubTable");
-                db.DropCollection("tests_TestDataAutoInc");
-                db.DropCollection("tests_TestDataIndexNoAutoInc");
-
+                db.RunCommand("DROP TABLE TestApp_Versioning");
             }
+            if (db.TableExists("TestAppSubTable"))
+            {
+                db.RunCommand("DROP TABLE TestAppSubTable");
+            }
+            if (db.TableExists("tests_TestDataAutoInc"))
+            {
+                db.RunCommand("DROP TABLE tests_TestDataAutoInc");
+            }
+            if (db.TableExists("tests_TestDataIndexNoAutoInc"))
+            {
+                db.RunCommand("DROP TABLE tests_TestDataIndexNoAutoInc");
+            }
+
+            if (db.TableExists("tests_TestData2AutoInc"))
+            {
+                db.RunCommand("DROP TABLE tests_TestData2AutoInc");
+            }
+
+            db.Close();
+
 
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
@@ -151,7 +125,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test30IntwentyDataClientInsert());
+
 
             /*
             res.Add(Test1ORMCreateTable());
@@ -185,13 +159,10 @@ namespace Intwenty.Controllers
             try
             {
 
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-
-                dbstore.CreateTable<TestDataAutoInc>(true);
+                var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+                dbstore.Open();
+                dbstore.CreateTable<TestDataAutoInc>();
+                dbstore.Close();
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (IIntwentyDbORM.CreateTable) lasted  {0} ms", result.Duration));
@@ -207,38 +178,34 @@ namespace Intwenty.Controllers
 
         private OperationResult Test2ORMInsert()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyDbORM.Insert(T) - 100 Records using auto increment");
+            OperationResult result = new OperationResult(true, "IIntwentyDbORM.InsertEntity(T) - 100 Records using auto increment");
+            var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+
             try
             {
-
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-
+                dbstore.Open();
                 for (int i = 0; i < 100; i++)
                 {
-                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777+i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
-                    dbstore.Insert(t);
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
+                    dbstore.InsertEntity(t);
 
                 }
 
-
-                var check = dbstore.GetAll<TestDataAutoInc>();
+                var check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count != 100)
                     throw new InvalidOperationException("Could not retrieve 100 inserted records with IIntwentyDbORM.GetAll<T>");
 
-                if (check.Exists(p=> p.Id < 1))
-                    throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.Insert<T>");
+                if (check.Exists(p => p.Id < 1))
+                    throw new InvalidOperationException("AutoInc failed on IIntwentyDbORM.InsertEntity<T>");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", result.Duration));
 
-
+                dbstore.Close();
             }
             catch (Exception ex)
             {
+                dbstore.Close();
                 result.SetError(ex.Message, "Test failed");
             }
 
@@ -248,24 +215,20 @@ namespace Intwenty.Controllers
         private OperationResult Test3ORMUpdate()
         {
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Update(T) - Retrieve last record and update");
+            var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
             {
 
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-
-
-                var check = dbstore.GetAll<TestDataAutoInc>();
+               
+                dbstore.Open();
+                var check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count < 100)
                     throw new InvalidOperationException("Test could not be performed beacause of dependency to previous test.");
 
 
                 var last = check[check.Count - 1];
-                var checkone = dbstore.GetOne<TestDataAutoInc>(last.Id);
+                var checkone = dbstore.GetEntity<TestDataAutoInc>(last.Id);
                 if (checkone == null)
                     throw new InvalidOperationException("Could not retrieve last inserted record with IIntwentyDbORM.GetOne<T>");
 
@@ -276,8 +239,8 @@ namespace Intwenty.Controllers
                 last.DecimalValue = 555.55M;
                 last.BoolValue = true;
 
-                dbstore.Update(last);
-                checkone = dbstore.GetOne<TestDataAutoInc>(last.Id);
+                dbstore.UpdateEntity(last);
+                checkone = dbstore.GetEntity<TestDataAutoInc>(last.Id);
                 if (checkone == null)
                     throw new InvalidOperationException("Could not retrieve inserted record with IIntwentyDbORM.GetOne<T> after update");
 
@@ -294,10 +257,11 @@ namespace Intwenty.Controllers
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", result.Duration));
-
+                dbstore.Close();
             }
             catch (Exception ex)
             {
+                dbstore.Close();
                 result.SetError(ex.Message, "Test failed");
             }
 
@@ -308,36 +272,33 @@ namespace Intwenty.Controllers
         {
 
             OperationResult result = new OperationResult(true, "IIntwentyDbORM.Delete(T) - Retrieve a list of inserted records and delete them one by one");
+            var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+
             try
             {
 
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-
-
-                var check = dbstore.GetAll<TestDataAutoInc>();
+                dbstore.Open();
+                var check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count < 100)
                     throw new InvalidOperationException("Test could not be performed beacause of dependency to previous test.");
 
                 foreach (var t in check)
                 {
-                    dbstore.Delete(t);
+                    dbstore.DeleteEntity(t);
                 }
 
-                check = dbstore.GetAll<TestDataAutoInc>();
+                check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count > 0)
                     throw new InvalidOperationException("The deleted records was still present in the data store after deletion");
 
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", result.Duration));
-
+                dbstore.Close();
             }
             catch (Exception ex)
             {
+                dbstore.Close();
                 result.SetError(ex.Message, "Test failed");
             }
 
@@ -367,57 +328,44 @@ namespace Intwenty.Controllers
         private OperationResult Test6CreateIntwentyExampleModel()
         {
             OperationResult result = new OperationResult(true, "Create an intwenty application (My test application)");
+            var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
             {
                 _cache.Remove("APPMODELS");
 
-                IIntwentyDbORM dbstore = null;
-                if (_settings.IsNoSQL)
-                    dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                else
-                    dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+               
+                dbstore.Open();
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATATABLE", MetaCode = "TESTAPP_SUBTABLE", DbName = "TestAppSubTable", ParentMetaCode = "ROOT" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINETEXT", DbName = "LineHeader", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
+                dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINEDESCRIPTION", DbName = "LineDescription", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
 
-
-                dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATATABLE", MetaCode = "TESTAPP_SUBTABLE", DbName = "TestAppSubTable", ParentMetaCode = "ROOT" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINETEXT", DbName = "LineHeader", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINEDESCRIPTION", DbName = "LineDescription", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
-
-                dbstore.Insert(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 1", Code = "1" });
-                dbstore.Insert(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
-                dbstore.Insert(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
+                dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 1", Code = "1" });
+                dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
+                dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
 
-                OperationResult configres;
-                if (_settings.IsNoSQL)
-                {
-                    var t = NoSqlDbDataManager.GetDataManager(model, _modelservice, _settings, (IntwentyNoSqlDbClient)dbstore);
-                    configres = t.ConfigureDatabase();
-
-
-                }
-                else
-                {
-                    var t = SqlDbDataManager.GetDataManager(model, _modelservice, _settings, (IntwentySqlDbClient)dbstore);
-                    configres = t.ConfigureDatabase();
-                }
-
+                var t = DbDataManager.GetDataManager(model, _modelservice, _settings, dbstore);
+                OperationResult configres = t.ConfigureDatabase();
+                
                 if (!configres.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
+                dbstore.Close();
             }
             catch (Exception ex)
             {
+                dbstore.Close();
                 result.SetError(ex.Message, "Test failed");
             }
 
@@ -568,7 +516,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test11UpdateIntwentyApplication()
         {
-    
+
             OperationResult result = new OperationResult(true, "Update intwenty application");
             try
             {
@@ -724,7 +672,7 @@ namespace Intwenty.Controllers
                 if (data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ApplicationData.SubTable from string json array");
 
-                if (!data.SubTables.Exists(p=> p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
+                if (!data.SubTables.Exists(p => p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
                     throw new InvalidOperationException("Could not get list of intwenty value domain items.");
 
                 result.Finish();
@@ -744,20 +692,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                ApplicationTable tbl = null;
-                if (_settings.IsNoSQL)
-                {
-                    var dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                    tbl = dbstore.GetDataSet("sysdata_EventLog");
-                }
-                else
-                {
-                    var dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
-                    dbstore.Open();
-                    dbstore.CreateCommand("select * from sysdata_EventLog");
-                    tbl = dbstore.GetDataSet();
-                    dbstore.Close();
-                }
+
+                var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+                dbstore.Open();
+                var tbl = dbstore.GetResultSet("select * from sysdata_EventLog");
+                dbstore.Close();
+             
 
                 if (tbl == null)
                     throw new InvalidOperationException("GetDataSet based sysdata_EventLog returned null");
@@ -779,30 +719,30 @@ namespace Intwenty.Controllers
 
         private OperationResult Test15ORMGetByExpression()
         {
-    
+
             OperationResult result = new OperationResult(true, "GetByExpression<InformationStatus>(expression, parameters)");
             try
             {
 
-                var dbstore = _dataservice.GetDbObjectMapper();
-                var prms = new List<IntwentyParameter>();
-                prms.Add(new IntwentyParameter() { ParameterName = "@MetaCode", Value = "TESTAPP" });
-                prms.Add(new IntwentyParameter() { ParameterName = "@MetaType", Value = "APPLICATION" });
-                prms.Add(new IntwentyParameter() { ParameterName = "@OwnedBy", Value = "OTHERUSER2" });
-                var expression = new IntwentyExpression("(MetaCode = @MetaCode AND MetaType  = @MetaType) OR OwnedBy =@OwnedBy", prms);
-                var tbl = dbstore.GetByExpression<InformationStatus>(expression);
+                //var dbstore = _dataservice.GetDataClient();
+                //var prms = new List<IntwentyParameter>();
+                //prms.Add(new IntwentyParameter() { ParameterName = "@MetaCode", Value = "TESTAPP" });
+                //prms.Add(new IntwentyParameter() { ParameterName = "@MetaType", Value = "APPLICATION" });
+                //prms.Add(new IntwentyParameter() { ParameterName = "@OwnedBy", Value = "OTHERUSER2" });
+                //var expression = new IntwentyExpression("(MetaCode = @MetaCode AND MetaType  = @MetaType) OR OwnedBy =@OwnedBy", prms);
+                //var tbl = dbstore.GetByExpression<InformationStatus>(expression);
 
 
 
-                if (tbl == null)
-                    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned null");
+                //if (tbl == null)
+                //    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned null");
 
-                if (tbl.Count == 0)
-                    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
+                //if (tbl.Count == 0)
+                //    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
 
 
-                result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", result.Duration));
+                //result.Finish();
+                //_dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -827,13 +767,13 @@ namespace Intwenty.Controllers
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
-                var newstate = new  ClientStateInfo();
+                var newstate = new ClientStateInfo();
                 newstate.Id = getresult.Id;
                 newstate.ApplicationId = 10000;
 
                 for (var i = 0; i < 10; i++)
                 {
-                     getresult = _dataservice.GetLatestVersionById(newstate);
+                    getresult = _dataservice.GetLatestVersionById(newstate);
                     if (!getresult.IsSuccess)
                         throw new InvalidOperationException("IntwentyDataService.GetLatestVersionById(state) failed: " + getresult.SystemError);
 
@@ -916,7 +856,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test18TestIdentity()
         {
-          
+
             OperationResult result = new OperationResult(true, "Test Asp.Net.Core.Identity.");
 
             try
@@ -996,87 +936,10 @@ namespace Intwenty.Controllers
         }
 
 
-        private OperationResult Test30IntwentyDataClientInsert()
-        {
-            OperationResult result = new OperationResult(true, "DataClient.Insert(T) - 100 Records using auto increment times 3");
-            var client = new DataClient.DataClient(SqlDBMS.SQLite, _settings.DefaultConnection);
-
-            try
-            {
-                client.Open();
-                client.CreateTable<TestData2AutoInc>();
-                client.Close();
-
-                client.Open();
-                client.BeginTransaction();
-
-                for (int i = 0; i < 100; i++)
-                {
-                    var t = new TestData2AutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test2ORMInsertTable", FloatValue = 666.66F };
-                    client.InsertEntity(t);
-
-                }
-
-                client.CommitTransaction();
-                client.Close();
-
-                client.Open();
-                var check = client.GetEntities<TestData2AutoInc>();
-                if (check.Count != 100)
-                    throw new InvalidOperationException("Could not retrieve 100 inserted records with DataClient.GetEntities<T>");
-
-                if (check.Exists(p => p.Id < 1))
-                    throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity(T)");
-
-                var json = client.GetJSONObject("select * from tests_TestData2AutoInc where Id=@P1", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name="@P1", Value = check[50].Id }  } );
-                if (string.IsNullOrEmpty(json))
-                    throw new InvalidOperationException("DataClient.GetJSONObject() failed");
-
-                client.Close();
-
-                result.Finish();
-                
-                _dataservice.LogInfo(string.Format("Test Case: DataClient.Insert(T)  (Create 100 records in transaction and retrieve them) lasted  {0} ms", result.Duration));
-
-
-            }
-            catch (Exception ex)
-            {
-                client.Close();
-                result.SetError(ex.Message, "Test failed");
-            }
-
-            return result;
-        }
-
-
-
     }
 
 
-    [DataClient.Reflection.DbTablePrimaryKey("Id")]
-    [DataClient.Reflection.DbTableName("tests_TestData2AutoInc")]
-    public class TestData2AutoInc
-    {
-
-        [DataClient.Reflection.AutoIncrement]
-        public int Id { get; set; }
-
-        public string Header { get; set; }
-
-        public string Description { get; set; }
-
-        public int IntValue { get; set; }
-
-        public bool BoolValue { get; set; }
-
-        public decimal DecimalValue { get; set; }
-
-        public float FloatValue { get; set; }
-
-        public double DoubleValue { get; set; }
-
-    }
+   
 
 
 
