@@ -1051,7 +1051,7 @@ namespace Intwenty
 
                 if (trans.Id < 1)
                 {
-                    Client.InsertEntity(new TranslationItem() { Culture = trans.Culture, Key = trans.Key, Text = trans.Text });
+                    Client.InsertEntity(new TranslationItem() { Culture = trans.Culture, TransKey = trans.Key, Text = trans.Text });
                 }
                 else
                 {
@@ -1059,7 +1059,7 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.Culture = trans.Culture;
-                        existing.Key = trans.Key;
+                        existing.TransKey = trans.Key;
                         existing.Text = trans.Text;
                         Client.UpdateEntity(existing);
                     }
@@ -1094,7 +1094,7 @@ namespace Intwenty
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.TransKey == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else

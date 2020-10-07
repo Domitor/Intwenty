@@ -88,7 +88,7 @@ namespace Intwenty.Data.Seed
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "NAME", DbName = "ItemName", ParentMetaCode = "ROOT", DataType = "STRING" });
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "CATCODE", DbName = "ItemCategoryCode", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.CODE" });
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "CATVALUE", DbName = "ItemCategoryValue", ParentMetaCode = "ROOT", DataType = "STRING", Domain = "VALUEDOMAIN.ITEMCATEGORY.VALUE" });
-            client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "MODIFIED", DbName = "Modified", ParentMetaCode = "ROOT", DataType = "DATETIME", Properties = "DEFVALUE=AUTO" });
+            client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "MODIFIED", DbName = "Modified", ParentMetaCode = "ROOT", DataType = "DATETIME" });
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "ACTIVE", DbName = "Active", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "PURCHASEPRICE", DbName = "PurchasePrice", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
             client.InsertEntity(new DatabaseItem() { AppMetaCode = "ITEM", MetaType = "DATACOLUMN", MetaCode = "SALESPRICE", DbName = "SalesPrice", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
@@ -195,41 +195,41 @@ namespace Intwenty.Data.Seed
 
             var temp = new List<TranslationItem>();
 
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMER", Text = "Customer" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMER", Text = "Kund" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERLIST", Text = "Customer list" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERLIST", Text = "Kunder" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERID", Text = "Customer ID" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERID", Text = "Kund ID" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERNAME", Text = "Customer Name" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERNAME", Text = "Kund namn" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERCONTACT", Text = "Contact" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERCONTACT", Text = "Kontakt" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMERPHONE", Text = "Phone" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMERPHONE", Text = "Telefon" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "CUSTOMEREMAIL", Text = "E-Mail" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "CUSTOMEREMAIL", Text = "E-Post" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "NAME", Text = "Name" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "NAME", Text = "Namn" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "MENU", Text = "Menu" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "MENU", Text = "Meny" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "ITEM", Text = "Item" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "ITEM", Text = "Artikel" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "ITEMLIST", Text = "Item list" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "ITEMLIST", Text = "Artiklar" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "SALESORDER", Text = "Sales Order" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDER", Text = "Säljorder" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "SALESORDERLIST", Text = "Sales Orders" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "SALESORDERLIST", Text = "Säljordrar" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "VENDOR", Text = "Vendor" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "VENDOR", Text = "Tillverkare" });
-             temp.Add(new TranslationItem() { Culture = "en-US", Key = "VENDORLIST", Text = "Vendors" });
-             temp.Add(new TranslationItem() { Culture = "sv-SE", Key = "VENDORLIST", Text = "Tillverkare" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERLIST", Text = "Customer list" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERLIST", Text = "Kunder" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERID", Text = "Customer ID" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERID", Text = "Kund ID" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERNAME", Text = "Customer Name" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERNAME", Text = "Kund namn" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERCONTACT", Text = "Contact" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERCONTACT", Text = "Kontakt" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERPHONE", Text = "Phone" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERPHONE", Text = "Telefon" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMEREMAIL", Text = "E-Mail" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMEREMAIL", Text = "E-Post" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "NAME", Text = "Name" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "NAME", Text = "Namn" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MENU", Text = "Menu" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MENU", Text = "Meny" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEM", Text = "Item" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEM", Text = "Artikel" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEMLIST", Text = "Item list" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEMLIST", Text = "Artiklar" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDER", Text = "Sales Order" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDER", Text = "Säljorder" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDERLIST", Text = "Sales Orders" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDERLIST", Text = "Säljordrar" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDOR", Text = "Vendor" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDOR", Text = "Tillverkare" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDORLIST", Text = "Vendors" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDORLIST", Text = "Tillverkare" });
 
             var existing = client.GetEntities<TranslationItem>();
             foreach (var t in temp)
             {
-                if (!existing.Exists(p => p.Culture == t.Culture && p.Key == t.Key))
+                if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
                     client.InsertEntity(t);
             }
 

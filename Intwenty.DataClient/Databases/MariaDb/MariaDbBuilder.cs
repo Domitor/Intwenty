@@ -236,7 +236,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -255,7 +255,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });

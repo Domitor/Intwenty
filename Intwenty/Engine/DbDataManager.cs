@@ -648,7 +648,7 @@ namespace Intwenty.Engine
                 var domainindex = 0;
                 var rowindex = 0;
                 var valuedomains = new List<string>();
-                var domaintables = new List<IResultSet>();
+                var domains = new List<IResultSet>();
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
                 foreach (var t in this.Model.UIStructure)
@@ -669,8 +669,9 @@ namespace Intwenty.Engine
                 foreach (var d in valuedomains)
                 {
                     var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = d } };
-                    var domaindata = Client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1");
-                    domaintables.Add(domaindata);
+                    var domainset = Client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
+                    domainset.Name = d;
+                    domains.Add(domainset);
                 }
 
 
@@ -678,19 +679,19 @@ namespace Intwenty.Engine
                 sb.Append("{");
 
 
-                foreach (IResultSet table in domaintables)
+                foreach (IResultSet set in domains)
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + table.Name + "\":[");
+                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
                     else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + table.Name + "\":[");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
                    
 
-                    foreach (var row in table.Rows)
+                    foreach (var row in set.Rows)
                     {
                         if (rowindex == 0)
                             sb.Append("{");
@@ -743,38 +744,35 @@ namespace Intwenty.Engine
 
                 var domainindex = 0;
                 var rowindex = 0;
-                var domaintables = new List<IResultSet>();
+                var domains = new List<IResultSet>();
 
                 Client.Open();
 
-                var domains = Client.GetResultSet("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
-                foreach (var d in domains.Rows)
+                var names = Client.GetResultSet("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
+                foreach (var d in names.Rows)
                 {
-                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = d.GetAsString("DomainName") } };
-                    var domainitems =  Client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
-                    domaintables.Add(domainitems);
+                    var domainname = d.GetAsString("DomainName");
+                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = domainname } };
+                    var domainset =  Client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
+                    domainset.Name = domainname;
+                    domains.Add(domainset);
                 }
-
-
-
-               
 
                 sb.Append("{");
 
-
-                foreach (IResultSet table in domaintables)
+                foreach (IResultSet set in domains)
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + table.Name + "\":[");
+                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
                     else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + table.Name + "\":[");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
 
 
-                    foreach (var row in table.Rows)
+                    foreach (var row in set.Rows)
                     {
                         if (rowindex == 0)
                             sb.Append("{");

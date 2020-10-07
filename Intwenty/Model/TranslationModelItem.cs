@@ -25,7 +25,7 @@ namespace Intwenty.Model
         {
             Id = entity.Id;
             Culture = entity.Culture;
-            Key = entity.Key;
+            Key = entity.TransKey;
             Text = entity.Text;
             SetEmptyStrings();
         }

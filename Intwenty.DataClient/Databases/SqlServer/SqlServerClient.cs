@@ -1,4 +1,5 @@
 ﻿using Intwenty.DataClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -20,7 +21,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
 
         public override void Dispose()
         {
-            transaction = null;
+            connection = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -34,10 +35,9 @@ namespace Intwenty.DataClient.Databases.SqlServer
         public override void Close()
         {
             if (connection != null && connection.State != ConnectionState.Closed)
-            {
                 connection.Close();
-                Dispose();
-            }
+
+            Dispose();
         }
 
         private SqlConnection GetConnection()
@@ -89,8 +89,64 @@ namespace Intwenty.DataClient.Databases.SqlServer
             return new SqlServerBuilder();
         }
 
+        protected override void SetPropertyValues<T>(IDataReader reader, IntwentyDbColumnDefinition column, T instance)
+        {
+            if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32")
+                column.Property.SetValue(instance, reader.GetInt32(column.Order), null);
+            else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN")
+                column.Property.SetValue(instance, Convert.ToBoolean(reader.GetInt32(column.Order)), null);
+            else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL")
+                column.Property.SetValue(instance, Convert.ToDecimal(reader.GetValue(column.Order)), null);
+            else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE")
+                column.Property.SetValue(instance, Convert.ToSingle(reader.GetValue(column.Order)), null);
+            else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE")
+                column.Property.SetValue(instance, Convert.ToDouble(reader.GetValue(column.Order)), null);
+            else
+                column.Property.SetValue(instance, reader.GetValue(column.Order), null);
+
+          
+        }
+
         protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
+            if (model == null)
+                return;
+
+            if (command == null)
+                return;
+
+            if (command.Parameters == null || parameters == null)
+                return;
+
+            var output = parameters.Find(p => p.Direction == ParameterDirection.Output);
+            if (output == null)
+                return;
+
+            foreach (SqlParameter p in command.Parameters)
+            {
+                if (p.Direction == ParameterDirection.Output && p.ParameterName.ToLower() == output.Name.ToLower())
+                {
+                    
+
+                    if (!model.HasAutoIncrementalColumn)
+                        return;
+
+                    var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
+                    if (autoinccol == null)
+                        return;
+
+                    autoinccol.Property.SetValue(entity, p.Value);
+
+                    break;
+
+                }
+                   
+            }
+
+
+
+          
+
         }
 
 

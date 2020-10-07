@@ -58,7 +58,7 @@ namespace Intwenty.DataClient
 
     public interface IResultSet
     {
-        string Name { get; }
+        string Name { get; set; }
         List<IResultSetRow> Rows { get;}
         public bool HasRows { get; }
         int? FirstRowGetAsInt(string name);
@@ -81,7 +81,7 @@ namespace Intwenty.DataClient
 
     public interface IResultSetValue
     {
-        string Name { get; }
+        string Name { get; set; }
         bool HasValue { get; }
         int? GetAsInt();
         string GetAsString();

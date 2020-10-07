@@ -3,7 +3,7 @@ using System;
 
 namespace Intwenty.Data.Entity
 {
-    [DbTableIndex("TRANSITEM_IDX_1", true, "Key,Culture")]
+    [DbTableIndex("TRANSITEM_IDX_1", true, "TransKey,Culture")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_TranslationItem")]
    public class TranslationItem
@@ -16,7 +16,7 @@ namespace Intwenty.Data.Entity
         [AutoIncrement]
         public int Id { get; set; }
 
-        public string Key { get; set; }
+        public string TransKey { get; set; }
 
         public string Culture { get; set; }
 

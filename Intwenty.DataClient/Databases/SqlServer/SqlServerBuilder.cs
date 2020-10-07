@@ -159,7 +159,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -193,7 +193,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -246,7 +246,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -265,7 +265,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -298,7 +298,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             var autoinccommand = string.Empty;
             var datatype = string.Empty;
             var longtext = false;
-
+            var columnname = model.Name;
 
             var dtmap = TypeMap.GetTypeMap().Find(p => p.NetType == model.GetNetType() && ((longtext && p.Length == StringLength.Long) || (!longtext && p.Length == StringLength.Standard)) && p.DbEngine == DBMS.MSSqlServer);
             if (dtmap == null)
@@ -316,7 +316,11 @@ namespace Intwenty.DataClient.Databases.SqlServer
             if (model.IsNullNotAllowed)
                 allownullvalue = "NOT NULL";
 
-            result = string.Format("{0} {1} {2} {3}", new object[] { model.Name, datatype, autoinccommand, allownullvalue });
+            //HANDLE RESERVED WORDS
+            if (columnname.ToUpper() == "KEY")
+                columnname = string.Format("{0}{1}{2}", new[]{"[",columnname,"]"});
+
+            result = string.Format("{0} {1} {2} {3}", new object[] { columnname, datatype, autoinccommand, allownullvalue });
             if (model.Order > 0)
                 result = ", " + result;
 

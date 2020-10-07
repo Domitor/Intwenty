@@ -121,7 +121,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test12DeleteIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test13GetAllValueDomains());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test14GetDataSet());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test15ORMGetByExpression());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test15Transactions());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
@@ -532,20 +532,11 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
 
                 newstate.OwnerUserId = "OTHERUSER2";
+                newstate.Data.SetValue("Description", "Updated test application");
+                newstate.Data.SetValue("DecValue", 333.777M);
+                newstate.Data.SetValue("DecValue2", 444.55);
 
-                var v1 = newstate.Data.Values.Find(p => p.DbName == "Description");
-                v1.Value = "Updated test application";
-
-                var v2 = newstate.Data.Values.Find(p => p.DbName == "DecValue");
-                v2.Value = 333.777M;
-
-                var v3 = newstate.Data.Values.Find(p => p.DbName == "DecValue2");
-                if (v3 == null)
-                {
-                    v3 = new ApplicationValue() { DbName = "DecValue2" };
-                    newstate.Data.Values.Add(v3);
-                }
-                v3.Value = 444.55;
+   
 
                 var saveresult = _dataservice.Save(newstate);
                 if (!saveresult.IsSuccess)
@@ -717,33 +708,53 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test15ORMGetByExpression()
+        private OperationResult Test15Transactions()
         {
 
-            OperationResult result = new OperationResult(true, "GetByExpression<InformationStatus>(expression, parameters)");
+            OperationResult result = new OperationResult(true, "DataClient.Transactions");
             try
             {
 
-                //var dbstore = _dataservice.GetDataClient();
-                //var prms = new List<IntwentyParameter>();
-                //prms.Add(new IntwentyParameter() { ParameterName = "@MetaCode", Value = "TESTAPP" });
-                //prms.Add(new IntwentyParameter() { ParameterName = "@MetaType", Value = "APPLICATION" });
-                //prms.Add(new IntwentyParameter() { ParameterName = "@OwnedBy", Value = "OTHERUSER2" });
-                //var expression = new IntwentyExpression("(MetaCode = @MetaCode AND MetaType  = @MetaType) OR OwnedBy =@OwnedBy", prms);
-                //var tbl = dbstore.GetByExpression<InformationStatus>(expression);
+                var client = _dataservice.GetDataClient();
+                client.Open();
+                client.DeleteEntities<TestDataAutoInc>(client.GetEntities<TestDataAutoInc>());
+                var count = (long)client.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (count > 0)
+                    throw new InvalidOperationException("Prepare test delete operation failed.");
+
+                client.Close();
 
 
+                client.Open();
+                client.BeginTransaction();
 
-                //if (tbl == null)
-                //    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned null");
+                client.InsertEntity<TestDataAutoInc>(new TestDataAutoInc() { Description = "TRANS TEST 1" });
+                client.InsertEntity<TestDataAutoInc>(new TestDataAutoInc() { Description = "TRANS TEST 2" });
 
-                //if (tbl.Count == 0)
-                //    throw new InvalidOperationException("GetByExpression<InformationStatus>(expression, parameters) returned 0 rows");
+                client.RollbackTransaction();
+
+                count = (long)client.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                client.Close();
+
+                if (count > 0)
+                    throw new InvalidOperationException("The table tests_TestDataAutoInc should be empty since transaction were rollbacked");
+
+                client.Open();
+                client.BeginTransaction();
+
+                client.InsertEntity<TestDataAutoInc>(new TestDataAutoInc() { Description = "TRANS TEST 3" });
+                client.InsertEntity<TestDataAutoInc>(new TestDataAutoInc() { Description = "TRANS TEST 4" });
+
+                client.CommitTransaction();
+
+                count = (long)client.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                client.Close();
+
+                if (count < 2)
+                    throw new InvalidOperationException("The table tests_TestDataAutoInc should not be empty since transaction were commited");
 
 
-                //result.Finish();
-                //_dataservice.LogInfo(string.Format("Test Case: Test15ORMGetByExpression lasted  {0} ms", result.Duration));
-
+                result.Finish();
             }
             catch (Exception ex)
             {

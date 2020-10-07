@@ -145,13 +145,9 @@ namespace Intwenty.DataClient.Databases
 
                     while (reader.Read())
                     {
-                        var names = new List<string>();
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            names.Add(reader.GetName(i));
-                        }
+                        
+                         var adjusted_columns = AdjustResultColumns(reader, resultcolumns);
 
-                        var adjusted_columns = AdjustResultColumns(names, resultcolumns);
                         sb.Append("{");
                         foreach (var rc in adjusted_columns)
                         {
@@ -217,15 +213,10 @@ namespace Intwenty.DataClient.Databases
                             if (rindex > maxrow)
                                 break;
                         }
-                        if (rindex == 1)
-                        {
-                            var names = new List<string>();
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                names.Add(reader.GetName(i));
-                            }
-                            adjusted_columns = AdjustResultColumns(names, resultcolumns);
-                        }
+                      
+                        if (adjusted_columns.Count == 0)
+                            adjusted_columns = AdjustResultColumns(reader, resultcolumns);
+
 
                         sb.Append(objectseparator + "{");
                         foreach (var rc in adjusted_columns)
@@ -288,15 +279,8 @@ namespace Intwenty.DataClient.Databases
                             if (rindex > maxrow)
                                 break;
                         }
-                        if (rindex == 1)
-                        {
-                            var names = new List<string>();
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                names.Add(reader.GetName(i));
-                            }
-                            adjusted_columns = AdjustResultColumns(names, resultcolumns);
-                        }
+                        if (adjusted_columns.Count == 0)
+                            adjusted_columns = AdjustResultColumns(reader, resultcolumns);
 
                         var row = new ResultSetRow();
                         foreach (var rc in adjusted_columns)
@@ -756,22 +740,26 @@ namespace Intwenty.DataClient.Databases
 
         protected bool IsNumeric(string datatypename, IntwentyResultColumn resultcolumn)
         {
-            //if (resultcolumn != null)
-            //    return resultcolumn.IsNumeric;
+            if (resultcolumn.IsNumeric)
+                return true;
 
             if (datatypename.ToUpper() == "REAL")
                 return true;
             if (datatypename.ToUpper() == "INTEGER")
                 return true;
+            if (datatypename.ToUpper() == "INT")
+                return true;
+            if (datatypename.ToUpper().Contains("DECIMAL"))
+                return true;
 
- 
+
             return false;
         }
 
         protected bool IsDateTime(string datatypename, IntwentyResultColumn resultcolumn)
         {
-            //if (resultcolumn != null)
-            //    return resultcolumn.IsDateTime;
+            if (resultcolumn.IsDateTime)
+                return true;
 
             if (datatypename.ToUpper() == "DATETIME")
                 return true;
@@ -780,16 +768,21 @@ namespace Intwenty.DataClient.Databases
             return false;
         }
 
-        private List<IntwentyResultColumn> AdjustResultColumns(List<string> schema, IIntwentyResultColumn[] resultcolumns)
+        private List<IntwentyResultColumn> AdjustResultColumns(IDataReader reader, IIntwentyResultColumn[] resultcolumns)
         {
             var res = new List<IntwentyResultColumn>();
+
+            var schema = new List<string>();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                schema.Add(reader.GetName(i));
+            }
+
             if (resultcolumns == null || (resultcolumns != null && resultcolumns.Count() == 0))
             {
                 for (int i = 0; i < schema.Count; i++)
                 {
                     var rc = new IntwentyResultColumn() { Name = schema[i], Index = i };
-                  
-                    //TODO: IsNumeric, IsDateTime
                     res.Add(rc);
                 }
             }
@@ -800,14 +793,13 @@ namespace Intwenty.DataClient.Databases
                     var col = resultcolumns.FirstOrDefault(p => p.Name.ToLower() == schema[i].ToLower());
                     if (col != null)
                     {
-                        var rc = new IntwentyResultColumn() { Name = col.Name, Index = i };
-                      
-                        //TODO: IsNumeric, IsDateTime
+                        var rc = new IntwentyResultColumn() { Name = col.Name, Index = i  };
                         res.Add(rc);
                     }
                 }
             }
 
+         
             return res;
         }
 

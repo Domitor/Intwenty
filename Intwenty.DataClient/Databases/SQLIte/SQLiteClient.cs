@@ -31,10 +31,9 @@ namespace Intwenty.DataClient.Databases.SQLite
         private SQLiteConnection GetConnection()
         {
 
-            //if (connection != null && connection.State == ConnectionState.Open)
-            //    return connection;
+            if (connection != null && connection.State == ConnectionState.Open)
+               return connection;
 
-            connection = null;
             connection = new SQLiteConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
@@ -48,7 +47,7 @@ namespace Intwenty.DataClient.Databases.SQLite
         protected override IDbCommand GetCommand()
         {
 
-             var command = new SQLiteCommand();
+            var command = new SQLiteCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
