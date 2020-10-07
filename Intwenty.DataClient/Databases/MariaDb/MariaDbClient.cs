@@ -94,7 +94,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
 
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
+        protected override void InferAutoIncrementalValue<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
             var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
@@ -102,7 +102,6 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
             command.CommandText = "SELECT LAST_INSERT_ID()";
             command.CommandType = CommandType.Text;
-
             autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);
 
         }

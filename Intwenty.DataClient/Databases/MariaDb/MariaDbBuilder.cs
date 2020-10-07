@@ -103,7 +103,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
                 return result;
             }
 
-            var separator = "";
+            char separator=' ';
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
@@ -123,9 +123,9 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
                 parameters.Add(prm);
 
-                query.Append(string.Format("{0}`{1}`", col.Name));
+                query.Append(string.Format("{0}`{1}`", separator,col.Name));
                 values.Append(string.Format("{0}@{1}", separator, col.Name));
-                separator = ",";
+                separator = ',';
 
             }
             query.Append(") ");
@@ -149,7 +149,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -183,7 +183,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -305,7 +305,10 @@ namespace Intwenty.DataClient.Databases.MariaDb
             }
 
             if (model.IsNullNotAllowed)
+            {
+                defaultvalue = "";
                 allownullvalue = "NOT NULL";
+            }
 
             result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { model.Name, datatype, allownullvalue, autoinccommand, defaultvalue });
             if (model.Order > 0)

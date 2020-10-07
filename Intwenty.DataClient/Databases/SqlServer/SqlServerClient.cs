@@ -107,7 +107,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
           
         }
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
+        protected override void InferAutoIncrementalValue<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
             if (model == null)
                 return;

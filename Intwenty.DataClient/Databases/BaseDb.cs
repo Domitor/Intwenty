@@ -584,7 +584,7 @@ namespace Intwenty.DataClient.Databases
 
                     res = command.ExecuteNonQuery();
 
-                    HandleInsertAutoIncrementation(info, parameters, entity, command);
+                    InferAutoIncrementalValue(info, parameters, entity, command);
 
                 }
 
@@ -719,7 +719,7 @@ namespace Intwenty.DataClient.Databases
         protected abstract void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command);
             
 
-        protected abstract void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T entity, IDbCommand command);
+        protected abstract void InferAutoIncrementalValue<T>(IntwentyDbTableDefinition info, List<IntwentySqlParameter> parameters, T entity, IDbCommand command);
 
         protected string GetJSONValue(IDataReader r, IntwentyResultColumn resultcol)
         {
