@@ -11,7 +11,6 @@ namespace Intwenty.DataClient.Databases.SQLite
     {
 
         private SQLiteConnection connection;
-        private SQLiteCommand command;
         private SQLiteTransaction transaction;
 
         public SQLiteClient(string connectionstring) : base(connectionstring)
@@ -24,8 +23,7 @@ namespace Intwenty.DataClient.Databases.SQLite
         public override void Dispose()
         {
             transaction = null;
-            command = null;
-            transaction = null;
+            connection = null;
             IsInTransaction = false;
              
         }
@@ -33,9 +31,10 @@ namespace Intwenty.DataClient.Databases.SQLite
         private SQLiteConnection GetConnection()
         {
 
-            if (connection != null && connection.State == ConnectionState.Open)
-                return connection;
+            //if (connection != null && connection.State == ConnectionState.Open)
+            //    return connection;
 
+            connection = null;
             connection = new SQLiteConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
@@ -48,7 +47,8 @@ namespace Intwenty.DataClient.Databases.SQLite
 
         protected override IDbCommand GetCommand()
         {
-            command = new SQLiteCommand();
+
+             var command = new SQLiteCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
@@ -77,7 +77,7 @@ namespace Intwenty.DataClient.Databases.SQLite
 
       
 
-        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command)
         {
             if (parameters == null)
                 return;
@@ -93,18 +93,17 @@ namespace Intwenty.DataClient.Databases.SQLite
             }
         }
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
             var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
                 return;
 
-            var command = GetCommand();
+
             command.CommandText = "SELECT Last_Insert_Rowid()";
             command.CommandType = CommandType.Text;
-
             autoinccol.Property.SetValue(entity, Convert.ToInt32(command.ExecuteScalar()), null);
-
+            
         }
 
         protected override BaseSqlBuilder GetSqlBuilder()
@@ -119,11 +118,10 @@ namespace Intwenty.DataClient.Databases.SQLite
 
         public override void Close()
         {
-            if (connection != null && connection.State != ConnectionState.Closed)
-            {
+            if (connection!= null && connection.State != ConnectionState.Closed)
                 connection.Close();
-                Dispose();
-            }
+
+            Dispose();
         }
     }
 }

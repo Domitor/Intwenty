@@ -757,8 +757,12 @@ namespace Intwenty
         private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
 
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
             try
             {
+
                 var parameters = new List<IIntwentySqlParameter>();
                 parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
                 parameters.Add(new IntwentySqlParameter("@Message", message));
@@ -766,9 +770,7 @@ namespace Intwenty
                 parameters.Add(new IntwentySqlParameter("@ApplicationId", applicationid));
                 parameters.Add(new IntwentySqlParameter("@UserName", username));
 
-                var client = new Connection(DBMSType, Settings.DefaultConnection);
-                client.Open();
-
+               
 
                 var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
                
@@ -776,10 +778,10 @@ namespace Intwenty
 
                 client.Close();
                 
-
             }
             catch (Exception ex)
             {
+                client.Close();
                 throw ex;
             }
         }

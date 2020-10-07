@@ -12,7 +12,6 @@ namespace Intwenty.DataClient.Databases.MariaDb
     {
 
         private MySqlConnection connection;
-        private MySqlCommand command;
         private MySqlTransaction transaction;
 
         public MariaDbClient(string connectionstring) : base(connectionstring)
@@ -25,7 +24,6 @@ namespace Intwenty.DataClient.Databases.MariaDb
         public override void Dispose()
         {
             transaction = null;
-            command = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -59,7 +57,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
         protected override IDbCommand GetCommand()
         {
-            command = new MySqlCommand();
+            var command = new MySqlCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
@@ -72,7 +70,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             return transaction;
         }
 
-        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command)
         {
             if (parameters == null)
                 return;
@@ -96,13 +94,12 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
 
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
             var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
                 return;
 
-            var command = GetCommand();
             command.CommandText = "SELECT LAST_INSERT_ID()";
             command.CommandType = CommandType.Text;
 

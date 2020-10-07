@@ -10,7 +10,6 @@ namespace Intwenty.DataClient.Databases.Postgres
     {
 
         private NpgsqlConnection connection;
-        private NpgsqlCommand command;
         private NpgsqlTransaction transaction;
 
         public PostgresClient(string connectionstring) : base(connectionstring)
@@ -23,7 +22,6 @@ namespace Intwenty.DataClient.Databases.Postgres
         public override void Dispose()
         {
             transaction = null;
-            command = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -57,7 +55,7 @@ namespace Intwenty.DataClient.Databases.Postgres
 
         protected override IDbCommand GetCommand()
         {
-            command = new NpgsqlCommand();
+            var command = new NpgsqlCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
@@ -70,7 +68,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             return transaction;
         }
 
-        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command)
         {
             if (parameters == null)
                 return;
@@ -94,13 +92,12 @@ namespace Intwenty.DataClient.Databases.Postgres
 
 
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
             var autoinccol = model.Columns.Find(p => p.IsAutoIncremental);
             if (autoinccol == null)
                 return;
 
-            var command = GetCommand();
             command.CommandText = string.Format("SELECT currval('{0}')", model.Name.ToLower() + "_" + autoinccol.Name.ToLower() + "_seq");
             command.CommandType = CommandType.Text;
 

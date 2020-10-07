@@ -13,21 +13,22 @@ namespace Intwenty.DataClient.Model
 
         public string ColumnNames
         {
-            get { return colnames; }
+            get { return IndexColumns; }
             set
             {
-                colnames = value;
-                CreateStringList(ColumnNamesList, colnames);
+                IndexColumns = value;
+                CreateStringList(ColumnNamesList, IndexColumns);
             }
         }
 
         public List<string> ColumnNamesList { get; private set; }
 
-        private string colnames { get; set; }
+        private string IndexColumns;
 
         public IntwentyDbIndexDefinition()
         {
-            colnames = string.Empty;
+            IndexColumns = string.Empty;
+            ColumnNamesList = new List<string>();
         }
     }
 }

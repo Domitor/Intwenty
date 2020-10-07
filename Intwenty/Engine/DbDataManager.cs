@@ -77,6 +77,7 @@ namespace Intwenty.Engine
 
             try
             {
+                Client.Open();
                 CreateMainTable(res);
                 CreateApplicationVersioningTable(res);
 
@@ -99,6 +100,10 @@ namespace Intwenty.Engine
             catch (Exception ex)
             {
                 res.SetError(ex.Message, "");
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return res;
@@ -148,7 +153,8 @@ namespace Intwenty.Engine
             try
             {
 
-               
+                Client.Open();
+
                 var columns = new List<IIntwentyResultColumn>();
                 columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
                 columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
@@ -179,9 +185,8 @@ namespace Intwenty.Engine
                 jsonresult.Append("{");
 
                 var ds = new DataSet();
-                Client.Open();
+              
                 var appjson = Client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray());
-                Client.Close();
                
                 if (appjson.Length < 5)
                 {
@@ -233,9 +238,9 @@ namespace Intwenty.Engine
                         sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
                         sql_stmt.Append("WHERE t1.ApplicationId = " + this.Model.Application.Id + " ");
                         sql_stmt.Append("AND t1.Id = " + state.Id);
-                        Client.Open();
+
                         var tablearray = Client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray());
-                        Client.Close();
+
 
                         jsonresult.Append(", \""+t.DbName+"\": " + tablearray.ToString());
 
@@ -256,6 +261,10 @@ namespace Intwenty.Engine
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
 
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -315,8 +324,7 @@ namespace Intwenty.Engine
                     result.Status = LifecycleStatus.EXISTING_SAVED;
                 }
 
-                Client.Close();
-
+              
                 result.Id = state.Id;
                 result.Version = state.Version;
 
@@ -325,11 +333,14 @@ namespace Intwenty.Engine
             }
             catch (Exception ex)
             {
-                Client.Close();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Save application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -370,7 +381,7 @@ namespace Intwenty.Engine
                 Client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 Client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
-                Client.Close();
+
             }
             catch (Exception ex)
             {
@@ -378,6 +389,10 @@ namespace Intwenty.Engine
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Delete application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -434,7 +449,6 @@ namespace Intwenty.Engine
                     }
                 }
 
-                Client.Close();
 
                 if (result == null)
                     throw new InvalidOperationException("Found nothing to delete");
@@ -446,6 +460,10 @@ namespace Intwenty.Engine
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("DeleteById(id, dbaname) in application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -474,6 +492,7 @@ namespace Intwenty.Engine
 
         public virtual OperationResult GetList()
         {
+    
             //Postgresql must always use columns in order to set correct case in jsonnames
             if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
                 return GetListInternal(new ListRetrivalArgs() { ApplicationId = this.Model.Application.Id }, false, true, false);
@@ -489,17 +508,18 @@ namespace Intwenty.Engine
                 return new OperationResult(false, "Can't get list without ListRetrivalArgs",0,0);
 
             var result = new OperationResult(true, string.Format("Fetched list for application {0}", this.Model.Application.Title),0,0);
-          
+
+            Client.Open();
+
             if (args.MaxCount == 0 && usepaging)
             {
-                Client.Open();
+
                 var max = Client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + this.Model.Application.Id);
                 if (max == DBNull.Value)
                     args.MaxCount = 0;
                 else
                     args.MaxCount = Convert.ToInt32(max);
 
-                Client.Close();
             }
 
             result.RetriveListArgs = new ListRetrivalArgs();
@@ -569,7 +589,7 @@ namespace Intwenty.Engine
                 if (getbyowneruser)
                     parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
 
-                Client.Open();
+             
 
                 if (selectcolumns && usepaging)
                     json = Client.GetJSONArray(sql_list_stmt.ToString(),result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
@@ -580,7 +600,6 @@ namespace Intwenty.Engine
                 if (selectcolumns && !usepaging)
                     json = Client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).ToString();
 
-                Client.Close();
 
                 result.Data = json;
 
@@ -593,6 +612,10 @@ namespace Intwenty.Engine
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
 
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -650,7 +673,6 @@ namespace Intwenty.Engine
                     domaintables.Add(domaindata);
                 }
 
-                Client.Close();
 
 
                 sb.Append("{");
@@ -697,7 +719,11 @@ namespace Intwenty.Engine
                 result.AddMessage("USERERROR", string.Format("Fetch valuedomains for application {0} failed", this.Model.Application.Title));
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
- 
+
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -720,6 +746,7 @@ namespace Intwenty.Engine
                 var domaintables = new List<IResultSet>();
 
                 Client.Open();
+
                 var domains = Client.GetResultSet("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
                 foreach (var d in domains.Rows)
                 {
@@ -728,20 +755,20 @@ namespace Intwenty.Engine
                     domaintables.Add(domainitems);
                 }
 
-                Client.Close();
+
 
                
 
                 sb.Append("{");
 
 
-                foreach (ApplicationTable table in domaintables)
+                foreach (IResultSet table in domaintables)
                 {
 
                     if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
+                        sb.Append("\"" + "VALUEDOMAIN_" + table.Name + "\":[");
                     else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + table.DbName + "\":[");
+                        sb.Append(",\"" + "VALUEDOMAIN_" + table.Name + "\":[");
 
                     domainindex += 1;
                     rowindex = 0;
@@ -775,7 +802,11 @@ namespace Intwenty.Engine
                 result.AddMessage("USERERROR", "Fetch all valuedomains failed");
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "[]";
- 
+
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -837,8 +868,9 @@ namespace Intwenty.Engine
                 }
 
                 Client.Open();
+
                 result.Data = Client.GetJSONArray(sql, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), resultcolumns:columns.ToArray());
-                Client.Close();
+
 
             }
             catch (Exception ex)
@@ -848,6 +880,10 @@ namespace Intwenty.Engine
                 result.AddMessage("USERERROR", "Fetch dataview failed");
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -899,8 +935,9 @@ namespace Intwenty.Engine
                 }
 
                 Client.Open();
+
                 result.Data = Client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValue) }, resultcolumns: columns.ToArray());
-                Client.Close();
+
 
             }
             catch (Exception ex)
@@ -910,6 +947,10 @@ namespace Intwenty.Engine
                 result.AddMessage("USERERROR", "Fetch dataview failed");
                 result.AddMessage("SYSTEMERROR", ex.Message);
                 result.Data = "{}";
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;
@@ -1334,11 +1375,12 @@ namespace Intwenty.Engine
                     result.Id = resultset.FirstRowGetAsInt("Id").Value;
                     result.Version = resultset.FirstRowGetAsInt("Version").Value;
                 }
-
+                Client.Close();
 
             }
             catch (Exception ex)
             {
+                Client.Close();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage("USERERROR", string.Format("Fetched latest id for application {0} for Owner {1} failed", this.Model.Application.Title, state.OwnerUserId));
@@ -1387,9 +1429,7 @@ namespace Intwenty.Engine
         {
 
             var table_exist = false;
-            Client.Open();
             table_exist = Client.TableExists(this.Model.Application.DbName);
-            Client.Close();
             if (table_exist)
             {
                 o.AddMessage("DBCONFIG", "Main table " + this.Model.Application.DbName + " for application: " + this.Model.Application.Title + " is already present");
@@ -1398,11 +1438,7 @@ namespace Intwenty.Engine
             {
     
                 string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultMainTableColumns(), this.Model.Application.DbName);
-
-                Client.Open();
                 Client.RunCommand(create_sql);
-                Client.Close();
-
                 o.AddMessage("DBCONFIG", "Main table: " + this.Model.Application.DbName + " for application: " + this.Model.Application.Title + "  was created successfully");
 
             }
@@ -1411,9 +1447,7 @@ namespace Intwenty.Engine
         private void CreateApplicationVersioningTable(OperationResult o)
         {
             var table_exist = false;
-            Client.Open();
             table_exist = Client.TableExists(this.Model.Application.VersioningTableName);
-            Client.Close();
             if (table_exist)
             {
                 //o.AddMessage("DBCONFIG", "Found versioning table (" + this.Model.Application.VersioningTableName + ") for application:" + this.Model.Application.Title);
@@ -1422,10 +1456,7 @@ namespace Intwenty.Engine
             {
 
                 string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultVersioningTableColumns(), this.Model.Application.VersioningTableName);
-
-                Client.Open();
                 Client.RunCommand(create_sql);
-                Client.Close();
 
                 //o.AddMessage("DBCONFIG", "Versioning table: " + this.Model.Application.VersioningTableName + " was created successfully");
 
@@ -1442,10 +1473,8 @@ namespace Intwenty.Engine
 
 
             var colexist = false;
-            Client.Open();
             colexist = Client.ColumnExists(tablename, column.DbName);
-            Client.Close();
-       
+
             if (colexist)
             {
                o.AddMessage("DBCONFIG", "Column: " + column.DbName + " in table: " + tablename + " is already present.");
@@ -1454,11 +1483,7 @@ namespace Intwenty.Engine
             {
                 var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DbEngine == Client.Database);
                 string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
-
-                Client.Open();
                 Client.RunCommand(create_sql);
-                Client.Close();
-
                 o.AddMessage("DBCONFIG", "Column: " + column.DbName + " ("+coldt.DBMSDataType+") was created successfully in table: " + tablename);
 
             }
@@ -1477,9 +1502,7 @@ namespace Intwenty.Engine
 
 
             var table_exist = false;
-            Client.Open();
             table_exist = Client.TableExists(table.DbName);
-            Client.Close();
             if (table_exist)
             {
                 o.AddMessage("DBCONFIG", "Table: " + table.DbName + " in application: " + this.Model.Application.Title + " is already present.");
@@ -1488,11 +1511,7 @@ namespace Intwenty.Engine
             {
 
                 string create_sql = GetCreateTableStmt(ModelRepository.GetDefaultSubTableColumns(), table.DbName);
-
-                Client.Open();
                 Client.RunCommand(create_sql);
-                Client.Close();
-
                 o.AddMessage("DBCONFIG", "Subtable: " + table.DbName + " in application: " + this.Model.Application.Title + "  was created successfully");
 
             }
@@ -1509,46 +1528,48 @@ namespace Intwenty.Engine
         {
             string sql = string.Empty;
 
-            Client.Open();
-
-            try
-            {
-
-                //Ctreate index on main application table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", this.Model.Application.DbName);
-                Client.RunCommand(sql);
-
-                //Create index on versioning table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Model.Application.VersioningTableName);
-                Client.RunCommand(sql);
-
-                //Create index on subtables
-                foreach (var t in this.Model.DataStructure)
+           
+                try
                 {
-                    if (t.IsMetaTypeDataTable)
+                    //Ctreate index on main application table
+                    sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", this.Model.Application.DbName);
+                    Client.RunCommand(sql);
+                }
+                catch { }
+
+                try
+                {
+                    //Create index on versioning table
+                    sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", this.Model.Application.VersioningTableName);
+                    Client.RunCommand(sql);
+                }
+                catch { }
+
+            //Create index on subtables
+            foreach (var t in this.Model.DataStructure)
+            {
+                if (t.IsMetaTypeDataTable)
+                {
+                    try
                     {
                         sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", t.DbName);
                         Client.RunCommand(sql);
+                    }
+                    catch { }
 
-
+                    try
+                    {
                         sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
                         Client.RunCommand(sql);
-
                     }
+                    catch { }
+
                 }
-
-                o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Model.Application.Title);
-
-            }
-            catch
-            {
-               
             }
 
-            Client.Close();
+           o.AddMessage("DBCONFIG", "Database Indexes was created successfully for application " + this.Model.Application.Title);
 
-
-
+          
 
         }
 

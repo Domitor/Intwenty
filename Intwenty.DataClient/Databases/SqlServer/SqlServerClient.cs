@@ -9,7 +9,6 @@ namespace Intwenty.DataClient.Databases.SqlServer
     {
 
         private SqlConnection connection;
-        private SqlCommand command;
         private SqlTransaction transaction;
 
         public SqlServerClient(string connectionstring) : base(connectionstring)
@@ -22,7 +21,6 @@ namespace Intwenty.DataClient.Databases.SqlServer
         public override void Dispose()
         {
             transaction = null;
-            command = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -56,7 +54,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
 
         protected override IDbCommand GetCommand()
         {
-            command = new SqlCommand();
+            var command = new SqlCommand();
             command.Connection = GetConnection();
             if (IsInTransaction && transaction != null)
                 command.Transaction = transaction;
@@ -69,7 +67,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             return transaction;
         }
 
-        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters)
+        protected override void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command)
         {
             if (parameters == null)
                 return;
@@ -91,7 +89,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             return new SqlServerBuilder();
         }
 
-        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity)
+        protected override void HandleInsertAutoIncrementation<T>(IntwentyDbTableDefinition model, List<IntwentySqlParameter> parameters, T entity, IDbCommand command)
         {
         }
 

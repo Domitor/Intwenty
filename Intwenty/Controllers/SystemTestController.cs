@@ -471,7 +471,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
                 if (state.Data.SubTables[0].Rows.Count < 20)
-                    throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 2 records");
+                    throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 20 records");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", result.Duration));
