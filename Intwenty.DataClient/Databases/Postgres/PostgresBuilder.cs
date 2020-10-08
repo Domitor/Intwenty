@@ -1,11 +1,9 @@
-﻿using Intwenty.DataClient.Databases;
-using Intwenty.DataClient.Model;
+﻿using Intwenty.DataClient.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
-using System.Xml;
 
 namespace Intwenty.DataClient.Databases.Postgres
 {

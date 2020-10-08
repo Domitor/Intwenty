@@ -1,5 +1,4 @@
-﻿using Intwenty.DataClient.Databases;
-using Intwenty.DataClient.Model;
+﻿using Intwenty.DataClient.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;

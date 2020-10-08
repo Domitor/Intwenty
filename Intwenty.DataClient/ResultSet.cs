@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Intwenty.DataClient
 {
-
-
     public class ResultSet : IResultSet
     {
         public string Name { get; set; }
