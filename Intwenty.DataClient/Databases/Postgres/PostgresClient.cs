@@ -21,7 +21,7 @@ namespace Intwenty.DataClient.Databases.Postgres
 
         public override void Dispose()
         {
-            transaction = null;
+            connection = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -50,6 +50,10 @@ namespace Intwenty.DataClient.Databases.Postgres
             connection = new NpgsqlConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
+
+            if (IsInTransaction && transaction == null)
+                transaction = connection.BeginTransaction();
+
             return connection;
         }
 

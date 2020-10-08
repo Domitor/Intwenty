@@ -84,7 +84,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             if (!string.IsNullOrEmpty(result))
             {
 
-                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                 {
                     if (col.IsAutoIncremental)
                         continue;
@@ -111,7 +111,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
-            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
             {
                 if (col.IsAutoIncremental)
                     continue;
@@ -321,7 +321,7 @@ namespace Intwenty.DataClient.Databases.SqlServer
                 columnname = string.Format("{0}{1}{2}", new[]{"[",columnname,"]"});
 
             result = string.Format("{0} {1} {2} {3}", new object[] { columnname, datatype, autoinccommand, allownullvalue });
-            if (model.Order > 0)
+            if (model.Index > 0)
                 result = ", " + result;
 
             if (string.IsNullOrEmpty(result))

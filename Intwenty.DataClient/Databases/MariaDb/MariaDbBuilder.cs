@@ -82,7 +82,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             if (!string.IsNullOrEmpty(result))
             {
 
-                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                 {
                     if (col.IsAutoIncremental)
                         continue;
@@ -107,7 +107,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
-            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
             {
                 if (col.IsAutoIncremental)
                     continue;
@@ -311,7 +311,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
             }
 
             result = string.Format("`{0}` {1} {2} {3} {4}", new object[] { model.Name, datatype, allownullvalue, autoinccommand, defaultvalue });
-            if (model.Order > 0)
+            if (model.Index > 0)
                 result = ", " + result;
 
             if (string.IsNullOrEmpty(result))

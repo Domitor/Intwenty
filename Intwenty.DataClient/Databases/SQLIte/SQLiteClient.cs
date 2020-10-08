@@ -66,7 +66,7 @@ namespace Intwenty.DataClient.Databases.SQLite
         {
             if (column.Property.PropertyType.FullName.ToUpper().Contains("SYSTEM.DATETIMEOFFSET"))
             {
-                column.Property.SetValue(instance, new DateTimeOffset(reader.GetDateTime(column.Order)), null);
+                column.Property.SetValue(instance, new DateTimeOffset(reader.GetDateTime(column.Index)), null);
             }
             else
             {

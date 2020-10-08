@@ -72,6 +72,13 @@ namespace Intwenty.Controllers
             if (model != null)
                 _modelservice.DeleteAppModel(model);
 
+            var dvmodel = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG");
+            if (model != null)
+            {
+                foreach (var dv in dvmodel)
+                    _modelservice.DeleteDataViewModel(dv.Id);
+            }
+
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
             db.Open();
 
@@ -125,6 +132,56 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test500GetDataView());
+
+
+            //TEST ALL SUPPORTED DB
+            if (!string.IsNullOrEmpty(_settings.TestDbConnectionSqlite))
+            {
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test100SqliteInsertPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test101SqliteGetJSONArrayPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test102SqliteGetEntitiesPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test103SqliteGetResultSetPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test104SqliteGetDataTablePerformance());
+            }
+
+            if (!string.IsNullOrEmpty(_settings.TestDbConnectionSqlServer))
+            {
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test200SqlServerInsertPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test201SqlServerGetJSONArrayPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test202SqlServerGetEntitiesPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test203SqlServerGetResultSetPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test204SqlServerGetDataTablePerformance());
+            }
+
+            if (!string.IsNullOrEmpty(_settings.TestDbConnectionMariaDb))
+            {
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test300MariaDbInsertPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test301MariaDbGetJSONArrayPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test302MariaDbGetEntitiesPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test303MariaDbGetResultSetPerformance());
+                _hubContext.Clients.All.SendAsync("ReceiveMessage", Test304MariaDbGetDataTablePerformance());
+            }
+
+            if (!string.IsNullOrEmpty(_settings.TestDbConnectionPostgres))
+            {
+                int expected = 5000;
+                for (int i = 0; i < 5; i++)
+                {
+                    if (i==0)
+                        _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(true));
+                    else
+                        _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(false));
+
+                    _hubContext.Clients.All.SendAsync("ReceiveMessage", Test401PostgresGetJSONArrayPerformance(expected));
+                    _hubContext.Clients.All.SendAsync("ReceiveMessage", Test402PostgresGetEntitiesPerformance(expected));
+                    _hubContext.Clients.All.SendAsync("ReceiveMessage", Test403PostgresGetResultSetPerformance(expected));
+                    _hubContext.Clients.All.SendAsync("ReceiveMessage", Test404PostgresGetDataTablePerformance(expected));
+                    expected += 5000;
+                }
+            }
+
+
 
 
             /*
@@ -351,6 +408,12 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
+
+                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog" });
+                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
+                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
+                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
+
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
 
                 var t = DbDataManager.GetDataManager(model, _modelservice, _settings, dbstore);
@@ -447,6 +510,8 @@ namespace Intwenty.Controllers
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
+
+                
             }
             catch (Exception ex)
             {
@@ -946,11 +1011,676 @@ namespace Intwenty.Controllers
             return result;
         }
 
+        //SQLite performance
+        private OperationResult Test100SqliteInsertPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLite performance - Insert 5000 - Autoincrementation");
+            var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
+
+            try
+            {
+                dbstore.Open();
+
+                dbstore.RunCommand("delete from tests_TestDataAutoInc");
+
+                for (int i = 0; i < 5000; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test19SqlitePerformanec", FloatValue = 666.66F };
+                    dbstore.InsertEntity(t);
+
+                }
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Insert 5000 failed");
+
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test101SqliteGetJSONArrayPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLite performance - GetJSONArray 5000");
+            var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.Length < 100)
+                    throw new InvalidOperationException("JSON could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test102SqliteGetEntitiesPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLite performance - GetEntities 5000");
+            var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetEntities<TestDataAutoInc>();
+                if (res.Count < 5000)
+                    throw new InvalidOperationException("Entities could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test103SqliteGetResultSetPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLite performance - GetResultSet 5000");
+            var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetResultSet("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("ResultSet could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test104SqliteGetDataTablePerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLite performance - GetDataTable 5000");
+            var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetDataTable("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("DataTable could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        //SQL Server performance
+        private OperationResult Test200SqlServerInsertPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLServer performance - Insert 5000 - Autoincrementation");
+            var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
+
+            try
+            {
+                dbstore.Open();
+
+                dbstore.RunCommand("delete from tests_TestDataAutoInc");
+
+                for (int i = 0; i < 5000; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test200SqServerInsertPerformance", FloatValue = 666.66F };
+                    dbstore.InsertEntity(t);
+
+                }
+
+                var check = (int)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Insert 5000 failed");
+
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test201SqlServerGetJSONArrayPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLServer performance - GetJSONArray 5000");
+            var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (int)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.Length < 100)
+                    throw new InvalidOperationException("JSON could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test202SqlServerGetEntitiesPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLServer performance - GetEntities 5000");
+            var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (int)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetEntities<TestDataAutoInc>();
+                if (res.Count < 5000)
+                    throw new InvalidOperationException("Entities could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test203SqlServerGetResultSetPerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLServer performance - GetResultSet 5000");
+            var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (int)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetResultSet("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("ResultSet could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test204SqlServerGetDataTablePerformance()
+        {
+            OperationResult result = new OperationResult(true, "SQLServer performance - GetDataTable 5000");
+            var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (int)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetDataTable("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("DataTable could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+
+        //MariaDB performance
+        private OperationResult Test300MariaDbInsertPerformance()
+        {
+            OperationResult result = new OperationResult(true, "MariaDb performance - Insert 5000 - Autoincrementation");
+            var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
+
+            try
+            {
+                dbstore.Open();
+
+                dbstore.RunCommand("delete from tests_TestDataAutoInc");
+
+                for (int i = 0; i < 5000; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test300SMariaDbInsertPerformance", FloatValue = 666.66F };
+                    dbstore.InsertEntity(t);
+
+                }
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Insert 5000 failed");
+
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test301MariaDbGetJSONArrayPerformance()
+        {
+            OperationResult result = new OperationResult(true, "MariaDb performance - GetJSONArray 5000");
+            var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.Length < 100)
+                    throw new InvalidOperationException("JSON could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test302MariaDbGetEntitiesPerformance()
+        {
+            OperationResult result = new OperationResult(true, "MariaDb performance - GetEntities 5000");
+            var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetEntities<TestDataAutoInc>();
+                if (res.Count < 5000)
+                    throw new InvalidOperationException("Entities could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test303MariaDbGetResultSetPerformance()
+        {
+            OperationResult result = new OperationResult(true, "MariaDb performance - GetResultSet 5000");
+            var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetResultSet("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("ResultSet could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test304MariaDbGetDataTablePerformance()
+        {
+            OperationResult result = new OperationResult(true, "MariaDb performance - GetDataTable 5000");
+            var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < 5000)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetDataTable("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < 5000)
+                    throw new InvalidOperationException("DataTable could not be feteched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        //Postgres performance
+        private OperationResult Test400PostgresInsertPerformance(bool deleteprev)
+        {
+            OperationResult result = new OperationResult(true, string.Format("Postgres performance - Insert {0} - Autoincrementation", 5000));
+            var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
+
+            try
+            {
+                dbstore.Open();
+
+                if (deleteprev)
+                    dbstore.RunCommand("delete from tests_TestDataAutoInc");
+
+                for (int i = 0; i < 5000; i++)
+                {
+                    var t = new TestDataAutoInc() { BoolValue = true, IntValue = 777 + i, DecimalValue = 666.66M, Description = "Test data record/document " + i, Header = "Test400SPostgresInsertPerformance", FloatValue = 666.66F };
+                    dbstore.InsertEntity(t);
+
+                }
+
+                if (deleteprev)
+                {
+                    var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                    if (check < 5000)
+                        throw new InvalidOperationException("Insert 5000 failed");
+                }
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - Insert {0} - Autoincrementation, lasted  {1} ms", 5000, result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test401PostgresGetJSONArrayPerformance(int expectedtotal)
+        {
+            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetJSONArray {0}", expectedtotal));
+            var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < expectedtotal)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.Length < 100)
+                    throw new InvalidOperationException("JSON could not be fetched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetJSONArray {0}, lasted  {1} ms", expectedtotal, result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test402PostgresGetEntitiesPerformance(int expectedtotal)
+        {
+            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetEntities {0}", expectedtotal));
+            var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < expectedtotal)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetEntities<TestDataAutoInc>();
+                if (res.Count < expectedtotal)
+                    throw new InvalidOperationException("Entities could not be fetched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetEntities {0}, lasted  {1} ms", expectedtotal, result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test403PostgresGetResultSetPerformance(int expectedtotal)
+        {
+            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetResultSet {0}", expectedtotal));
+            var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < expectedtotal)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetResultSet("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < expectedtotal)
+                    throw new InvalidOperationException("ResultSet could not be fetched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetResultSet {0}, lasted  {1} ms", expectedtotal, result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test404PostgresGetDataTablePerformance(int expectedtotal)
+        {
+            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetDataTable {0}", expectedtotal));
+            var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
+
+            try
+            {
+                dbstore.Open();
+
+                var check = (long)dbstore.GetScalarValue("select count(*) from tests_TestDataAutoInc");
+                if (check < expectedtotal)
+                    throw new InvalidOperationException("Cannot run since prevoius case failed");
+
+                var res = dbstore.GetDataTable("select * from tests_TestDataAutoInc");
+                if (res.Rows.Count < expectedtotal)
+                    throw new InvalidOperationException("DataTable could not be fetched");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetDataTable {0}, lasted  {1} ms", expectedtotal, result.Duration));
+
+                dbstore.Close();
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private OperationResult Test500GetDataView()
+        {
+            OperationResult result = new OperationResult(true, "Get an intwenty DataView");
+
+            try
+            {
+
+                var res = _dataservice.GetDataView(new ListRetrivalArgs() { BatchSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException("DataView could not execute");
+
+
+                result.Finish();
+
+                _dataservice.LogInfo(string.Format("Test Case: Get an intwenty DataView lasted  {0} ms", result.Duration));
+
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+
+
+
+
+
+
+
 
     }
 
 
-   
+
 
 
 

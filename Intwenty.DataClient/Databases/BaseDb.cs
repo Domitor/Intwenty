@@ -424,10 +424,15 @@ namespace Intwenty.DataClient.Databases
 
         public virtual T GetEntity<T>(int id) where T : new()
         {
-            return GetEntity<T>(Convert.ToString(id));
+            return GetEntityInternal<T>(id);
         }
 
-        public virtual T GetEntity<T>(string id) where T : new() 
+        public virtual T GetEntity<T>(string id) where T : new()
+        {
+            return GetEntityInternal<T>(id);
+        }
+
+        private T GetEntityInternal<T>(object id) where T : new() 
         {
             var res = new T();
             var info = TypeDataHandler.GetDbTableDefinition<T>();
@@ -450,10 +455,10 @@ namespace Intwenty.DataClient.Databases
 
                     while (reader.Read())
                     {
-                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                         {
 
-                            if (reader.IsDBNull(col.Order))
+                            if (reader.IsDBNull(col.Index))
                                 continue;
 
                             SetPropertyValues(reader, col, res);
@@ -492,10 +497,10 @@ namespace Intwenty.DataClient.Databases
                     while (reader.Read())
                     {
                         var m = new T();
-                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                         {
 
-                            if (reader.IsDBNull(col.Order))
+                            if (reader.IsDBNull(col.Index))
                                 continue;
 
                             SetPropertyValues(reader, col, m);
@@ -541,10 +546,10 @@ namespace Intwenty.DataClient.Databases
                     while (reader.Read())
                     {
                         var m = new T();
-                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                        foreach (var col in info.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                         {
 
-                            if (reader.IsDBNull(col.Order))
+                            if (reader.IsDBNull(col.Index))
                                 continue;
 
                             SetPropertyValues(reader, col, m);
@@ -703,17 +708,17 @@ namespace Intwenty.DataClient.Databases
         protected virtual void SetPropertyValues<T>(IDataReader reader, IntwentyDbColumnDefinition column, T instance)
         {
             if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32")
-                column.Property.SetValue(instance, reader.GetInt32(column.Order), null);
+                column.Property.SetValue(instance, reader.GetInt32(column.Index), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN")
-                column.Property.SetValue(instance, reader.GetBoolean(column.Order), null);
+                column.Property.SetValue(instance, reader.GetBoolean(column.Index), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL")
-                column.Property.SetValue(instance, reader.GetDecimal(column.Order), null);
+                column.Property.SetValue(instance, reader.GetDecimal(column.Index), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE")
-                column.Property.SetValue(instance, reader.GetFloat(column.Order), null);
+                column.Property.SetValue(instance, reader.GetFloat(column.Index), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE")
-                column.Property.SetValue(instance, reader.GetDouble(column.Order), null);
+                column.Property.SetValue(instance, reader.GetDouble(column.Index), null);
             else
-                column.Property.SetValue(instance, reader.GetValue(column.Order), null);
+                column.Property.SetValue(instance, reader.GetValue(column.Index), null);
         }
 
         protected abstract void AddCommandParameters(IIntwentySqlParameter[] parameters, IDbCommand command);
@@ -726,7 +731,7 @@ namespace Intwenty.DataClient.Databases
             if (r.IsDBNull(resultcol.Index))
                 return string.Empty;
 
-            var columnname = r.GetName(resultcol.Index);
+            var columnname = resultcol.Name;
             var datatypename = r.GetDataTypeName(resultcol.Index);
 
             if (IsNumeric(datatypename, resultcol))
@@ -743,6 +748,8 @@ namespace Intwenty.DataClient.Databases
             if (resultcolumn.IsNumeric)
                 return true;
 
+            if (datatypename.ToUpper().Contains("NUMERIC"))
+                return true;
             if (datatypename.ToUpper() == "REAL")
                 return true;
             if (datatypename.ToUpper() == "INTEGER")
@@ -761,6 +768,9 @@ namespace Intwenty.DataClient.Databases
             if (resultcolumn.IsDateTime)
                 return true;
 
+            if (datatypename.ToUpper() == "TIMESTAMP")
+                return true;
+
             if (datatypename.ToUpper() == "DATETIME")
                 return true;
            
@@ -772,31 +782,30 @@ namespace Intwenty.DataClient.Databases
         {
             var res = new List<IntwentyResultColumn>();
 
-            var schema = new List<string>();
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                schema.Add(reader.GetName(i));
-            }
 
             if (resultcolumns == null || (resultcolumns != null && resultcolumns.Count() == 0))
             {
-                for (int i = 0; i < schema.Count; i++)
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    var rc = new IntwentyResultColumn() { Name = schema[i], Index = i };
+                    var rc = new IntwentyResultColumn() { Name = reader.GetName(i), Index = i };
                     res.Add(rc);
                 }
             }
             else
             {
-                for (int i = 0; i < schema.Count; i++)
+                for (int c = 0; c < resultcolumns.Length; c++)
                 {
-                    var col = resultcolumns.FirstOrDefault(p => p.Name.ToLower() == schema[i].ToLower());
-                    if (col != null)
+                    var col = resultcolumns[c];
+                    for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        var rc = new IntwentyResultColumn() { Name = col.Name, Index = i  };
-                        res.Add(rc);
+                        if (reader.GetName(i).ToLower() == col.Name.ToLower())
+                        {
+                            res.Add(new IntwentyResultColumn() { Name = col.Name, Index = i });
+                            break;
+                        }
                     }
-                }
+
+                 }
             }
 
          

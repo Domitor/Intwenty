@@ -49,6 +49,10 @@ namespace Intwenty.DataClient.Databases.SqlServer
             connection = new SqlConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
+
+            if (IsInTransaction && transaction == null)
+                transaction = connection.BeginTransaction();
+
             return connection;
         }
 
@@ -92,17 +96,17 @@ namespace Intwenty.DataClient.Databases.SqlServer
         protected override void SetPropertyValues<T>(IDataReader reader, IntwentyDbColumnDefinition column, T instance)
         {
             if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.INT32")
-                column.Property.SetValue(instance, reader.GetInt32(column.Order), null);
+                column.Property.SetValue(instance, reader.GetInt32(column.Index), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.BOOLEAN")
-                column.Property.SetValue(instance, Convert.ToBoolean(reader.GetInt32(column.Order)), null);
+                column.Property.SetValue(instance, Convert.ToBoolean(reader.GetInt32(column.Index)), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DECIMAL")
-                column.Property.SetValue(instance, Convert.ToDecimal(reader.GetValue(column.Order)), null);
+                column.Property.SetValue(instance, Convert.ToDecimal(reader.GetValue(column.Index)), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.SINGLE")
-                column.Property.SetValue(instance, Convert.ToSingle(reader.GetValue(column.Order)), null);
+                column.Property.SetValue(instance, Convert.ToSingle(reader.GetValue(column.Index)), null);
             else if (column.Property.PropertyType.ToString().ToUpper() == "SYSTEM.DOUBLE")
-                column.Property.SetValue(instance, Convert.ToDouble(reader.GetValue(column.Order)), null);
+                column.Property.SetValue(instance, Convert.ToDouble(reader.GetValue(column.Index)), null);
             else
-                column.Property.SetValue(instance, reader.GetValue(column.Order), null);
+                column.Property.SetValue(instance, reader.GetValue(column.Index), null);
 
           
         }

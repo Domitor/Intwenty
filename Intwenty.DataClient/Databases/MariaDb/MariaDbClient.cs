@@ -23,7 +23,7 @@ namespace Intwenty.DataClient.Databases.MariaDb
 
         public override void Dispose()
         {
-            transaction = null;
+            connection = null;
             transaction = null;
             IsInTransaction = false;
 
@@ -52,6 +52,10 @@ namespace Intwenty.DataClient.Databases.MariaDb
             connection = new MySqlConnection();
             connection.ConnectionString = this.ConnectionString;
             connection.Open();
+
+            if (IsInTransaction && transaction == null)
+                transaction = connection.BeginTransaction();
+
             return connection;
         }
 

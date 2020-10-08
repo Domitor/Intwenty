@@ -1162,7 +1162,7 @@ namespace Intwenty.Engine
 
             StringBuilder sql_update = new StringBuilder();
             sql_update.Append("UPDATE " + this.Model.Application.DbName);
-            sql_update.Append(" set ChangedDate='" + GetApplicationTimeStamp() + "'");
+            sql_update.Append(" set ChangedDate=@ChangedDate");
             sql_update.Append(",ChangedBy=@ChangedBy");
 
 
@@ -1189,6 +1189,7 @@ namespace Intwenty.Engine
             parameters.Add(new IntwentySqlParameter("@ID", state.Id));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(paramlist, parameters);
 
             Client.RunCommand(sql_update.ToString(), parameters: parameters.ToArray());

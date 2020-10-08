@@ -15,6 +15,14 @@ namespace Intwenty.Model
     public class IntwentySettings
     {
 
+        /// <summary>
+        /// Database connection
+        /// </summary>
+        public string DefaultConnection { get; set; }
+        public DBMS DefaultConnectionDBMS { get; set; }
+
+
+
         //FOR DEBUG AND DEMO MODE
         public bool ReCreateDatabaseOnStartup { get; set; }
         public bool SeedDatabaseOnStartUp { get; set; }
@@ -31,11 +39,7 @@ namespace Intwenty.Model
         /// </summary>
         public AllowedAccountTypes AllowedAccounts { get; set; }
 
-        /// <summary>
-        /// Database connection
-        /// </summary>
-        public string DefaultConnection { get; set; }
-        public DBMS DefaultConnectionDBMS { get; set; }
+       
 
 
         /// <summary>
@@ -106,6 +110,16 @@ namespace Intwenty.Model
         public string GoogleClientId { get; set; }
 
         public string GoogleClientSecret { get; set; }
+
+
+
+        /// <summary>
+        /// TEST DB CONNECTIONS
+        /// </summary>
+        public string TestDbConnectionSqlite { get; set; }
+        public string TestDbConnectionMariaDb { get; set; }
+        public string TestDbConnectionSqlServer { get; set; }
+        public string TestDbConnectionPostgres { get; set; }
 
 
         public bool UseExternalLogins

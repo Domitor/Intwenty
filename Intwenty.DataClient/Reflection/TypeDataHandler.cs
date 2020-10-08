@@ -32,19 +32,21 @@ namespace Intwenty.DataClient.Reflection
             foreach (var c in t.Columns)
                 c.IsInQueryResult = false;
 
-            var schematable = reader.GetSchemaTable();
-         
-            for (int i = 0; i < schematable.Columns.Count; i++)
+            for (int c = 0; c < t.Columns.Count; c++)
             {
-                var resultcolname = schematable.Columns[i].ColumnName;
-                var column = t.Columns.Find(p => p.Name.ToUpper() == resultcolname.ToUpper() && !p.IsIgnore);
-                if (column != null)
+                var col = t.Columns[c];
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    column.IsInQueryResult = true;
-                    column.Order = i;
+                    if (reader.GetName(i).ToLower() == col.Name.ToLower())
+                    {
+                        col.IsInQueryResult = true;
+                        col.Index = i;
+                        break;
+                    }
                 }
-               
+
             }
+
 
             t.Columns.RemoveAll(p => !p.IsInQueryResult);
 
@@ -86,7 +88,7 @@ namespace Intwenty.DataClient.Reflection
                 {
                     idxcnt++;
                     var idx = (DbTableIndex)a;
-                    var tblindex = new IntwentyDbIndexDefinition() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique, Order = idxcnt, TableName = result.Name };
+                    var tblindex = new IntwentyDbIndexDefinition() { Id = idx.Name, Name = idx.Name, ColumnNames = idx.Columns, IsUnique = idx.IsUnique, Index = idxcnt, TableName = result.Name };
                     result.Indexes.Add(tblindex);
                 }
             }
@@ -134,7 +136,7 @@ namespace Intwenty.DataClient.Reflection
                 if (!column.IsIgnore)
                     order += 1;
 
-                column.Order = order;
+                column.Index = order;
                 result.Columns.Add(column);
                
 

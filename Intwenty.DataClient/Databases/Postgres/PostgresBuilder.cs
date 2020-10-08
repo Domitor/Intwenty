@@ -73,7 +73,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             if (!string.IsNullOrEmpty(result))
             {
 
-                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                 {
                     if (col.IsAutoIncremental)
                         continue;
@@ -98,7 +98,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
-            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
             {
                 if (col.IsAutoIncremental)
                     continue;
@@ -140,7 +140,7 @@ namespace Intwenty.DataClient.Databases.Postgres
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -174,7 +174,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!keyparameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     keyparameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -227,7 +227,7 @@ namespace Intwenty.DataClient.Databases.Postgres
                 foreach (var col in model.Columns)
                 {
 
-                    var value = col.Property.GetValue(model);
+                    var value = col.Property.GetValue(instance);
 
                     if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                         parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -246,7 +246,7 @@ namespace Intwenty.DataClient.Databases.Postgres
             foreach (var col in model.Columns)
             {
 
-                var value = col.Property.GetValue(model);
+                var value = col.Property.GetValue(instance);
 
                 if (!parameters.Exists(p => p.Name == col.Name) && value != null && col.IsAutoIncremental)
                     parameters.Add(new IntwentySqlParameter() { Name = col.Name, Value = value });
@@ -297,7 +297,7 @@ namespace Intwenty.DataClient.Databases.Postgres
                 allownullvalue = "NOT NULL";
 
             result = string.Format("{0} {1} {2}", new object[] { model.Name, datatype, allownullvalue });
-            if (model.Order > 0)
+            if (model.Index > 0)
                 result = ", " + result;
 
             if (string.IsNullOrEmpty(result))

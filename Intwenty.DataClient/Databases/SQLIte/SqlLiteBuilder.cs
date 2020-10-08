@@ -83,7 +83,7 @@ namespace Intwenty.DataClient.Databases.SQLite
             if (!string.IsNullOrEmpty(result))
             {
 
-                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+                foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
                 {
                     if (col.IsAutoIncremental)
                         continue;
@@ -112,7 +112,7 @@ namespace Intwenty.DataClient.Databases.SQLite
             var query = new StringBuilder(string.Format("INSERT INTO {0} (", model.Name));
             var values = new StringBuilder(" VALUES (");
 
-            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Order))
+            foreach (var col in model.Columns.Where(p => !p.IsIgnore).OrderBy(p => p.Index))
             {
                 if (col.IsAutoIncremental)
                     continue;
@@ -324,7 +324,7 @@ namespace Intwenty.DataClient.Databases.SQLite
                 allownullvalue = "NOT NULL";
 
             result = string.Format("{0} {1} {2} {3}", new object[] { model.Name, datatype, allownullvalue, autoinccommand });
-            if (model.Order > 0)
+            if (model.Index > 0)
                 result = ", " + result;
 
             if (string.IsNullOrEmpty(result))

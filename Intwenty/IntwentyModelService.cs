@@ -111,6 +111,7 @@ namespace Intwenty
 
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
 
+
     }
 
 
