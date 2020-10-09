@@ -28,103 +28,69 @@ Create metadata driven applications with java script and ASP.NET Core.
 | Generate model documentation |
 
 
-# A simple example
+# Create a model using the management UI
 
-1. Get Intwenty from  github (SEE RELEASES) or use the nuget package
-2. If using the nuget package, include client dependencies
+## Create application
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_applications.png)
 
-            - bootstrap 4.3.7  
-            - popper.js 1.16.1
-            - vue.js 2.6.11 
-            - jquery 3.3.1  )
-            - alasql 0.5.5 
-            - fontawesome-free-5.12.1-web
-            - Intwenty.js
-            - Intwenty.css
-            
+## Add database model to the application
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_db.png)
 
-3. Ensure you have an appsetting.json with the IntwentySettings included.
-            
-             "IntwentySettings": 
-             {
-                "DefaultConnection": "Data Source=wwwroot/sqlite/IntwentyDb.db",
-                "DefaultConnectionDBMS": "SQLite" // MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite
-                ...
-              }
-            
-4. Inject services
+## Add a listview UI to the application
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_ui_list.png)
 
-            Create a controller (or other class) where you inject the intwenty services needed.
+## Add create/edit UI to the application
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_ui.png)
 
-            //Example
-            public class MyIntwentyController : Controller
-            {
-        
-                    private readonly IIntwentyModelService _modelservice;
-                    private readonly IIntwentyDataService _dataservice;
-                    private readonly IntwentySettings _settings;
-                    private readonly IMemoryCache _cache;
+# Create a model programmaticly
 
-                    public MyIntwentyController(IIntwentyModelService modelservice, 
-                                                IIntwentyDataService dataservice, 
-                                                IOptions<IntwentySettings> settings,
-                                                IMemoryCache cache)
-                    {
-                        _modelservice = modelservice;
-                        _dataservice = dataservice;
-                        _settings = settings.Value;
-                        _cache = cache;
-                    }
-            }
+## Create application
+```
+client.InsertEntity(new ApplicationItem() { Id = 10, Description = "An app for managing customers", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "Customer", IsHierarchicalApplication = false, UseVersioning = false });
+```
+## Add database model to the application
+```
+client.InsertEntity(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING", Mandatory = true, IsUnique = true, Properties= "DEFVALUE=AUTO#DEFVALUE_START=1000#DEFVALUE_PREFIX=CUST#DEFVALUE_SEED=100" });
+client.InsertEntity(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
+client.InsertEntity(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERPHONE", DbName = "CustomerPhone", ParentMetaCode = "ROOT", DataType = "STRING" });
+client.InsertEntity(new DatabaseItem() { AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMEREMAIL", DbName = "CustomerEmail", ParentMetaCode = "ROOT", DataType = "STRING" });
+ ```
+ 
+ ## Add a listview UI to the application
+ ```
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_CUSTID", DataMetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "LISTVIEWCOLUMN", MetaCode = "LV_CUSTNAME", DataMetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+ ```
+ ## Add create/edit UI to the application
+  ```
+  client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataMetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataMetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "CUSTPNL1", RowOrder = 2, ColumnOrder = 1 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL2", DataMetaCode = "", Title = "Contact", TitleLocalizationKey = "CUSTOMERCONTACT", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 2 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "EMAILBOX", MetaCode = "TBCUSTMAIL", DataMetaCode = "CUSTOMEREMAIL", Title = "Email", TitleLocalizationKey = "CUSTOMERPHONE", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2 });
+client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType = "NUMBOX", MetaCode = "TBCUSTPHONE", DataMetaCode = "CUSTOMERPHONE", Title = "Phone", TitleLocalizationKey = "CUSTOMEREMAIL", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2 });
+ ```
 
+# Generated UI
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/app_list.png)
+![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/app_create.png)
 
-5. Create a DB Connection
-
-
-              dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection, "IntwentyDb");
-     
-
-
-6. Create a model for a new application
-
-            //Only needed the first run, creates tables needed for storing the intwenty model
-            _modelservice.CreateIntwentyDatabase();
-
-             var models = _modelservice.GetApplicationModels();
-            if (!models.Exists(p => p.Application.MetaCode == "MYNEWAPP"))
-            {
-                //ADD THE APP DESCRIPTION
-                dbstore.Insert(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "MYNEWAPP", Title = "My test application", DbName = "MyNewApp", IsHierarchicalApplication = false, UseVersioning = false });
-
-                //ADD TWO DB COLUMNS NAMED Header and Description in the application table: MyNewApp 
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "MYNEWAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
-                dbstore.Insert(new DatabaseItem() { AppMetaCode = "MYNEWAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
-
-                //ADD UI, A Textbox and a Textarea, connect the to the DataBaseItem (DataMetaCode)
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "TEXTBOX", MetaCode = "TB_HDR", DataMetaCode = "HEADER", Title = "Header", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1 });
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "TEXTAREA", MetaCode = "TA_DESC", DataMetaCode = "DESCRIPTION", Title = "Description", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
-
-                //ADD LISTVIEW
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "LISTVIEW", MetaCode = "MAIN_LISTVIEW", DataMetaCode = "", Title = "My New App List", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "LISTVIEWFIELD", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 1 });
-                dbstore.Insert(new UserInterfaceItem() { AppMetaCode = "MYNEWAPP", MetaType = "LISTVIEWFIELD", MetaCode = "LV_HDR", DataMetaCode = "HEADER", Title = "Header", ParentMetaCode = "MAIN_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
-
-                //Configure database, eg. create table and columns according to the model, not needed for nosql
-                var result = _modelservice.ConfigureDatabase();
-              
-
-                //Done, your new app is now available
-                //- A table named MyNewApp in your database, with two columns
-                //- UI ~/Application/GetList/10000 
-                //- UI ~/Application/Create/10000 
-                //- UI ~/Application/Edit/10000/1 
-                //- Endpoint ~/Application/Save
-            }
-  
-
-
+# Endpoints supporting the generated application
+ ```
+/Application/GetList/{applicationid} 
+/Application/Create/{applicationid} 
+/Application/Edit/{applicationid}/{id}
+/Application/API/Save
+/Application/API/Delete
+/Application/API/GetLatestVersion/{applicationid}/{id}
+/Application/API/GetLatestByLoggedInUser/{applicationid}
+/Application/API/GetListView
+/Application/API/GetValueDomains/{id}
+ ```
+ 
 # Intentions
 1. Boost productivity
 2. To be lightweight
