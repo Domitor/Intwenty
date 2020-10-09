@@ -3,21 +3,18 @@
 
 # Intwenty
 Create metadata driven applications with java script and ASP.NET Core. 
-- Define your metamodel and work seamless against six supported databases. (See list below)
-- Define metadata for your datamodel and let Intwenty generate your database structure along with  your needs for storing and retriving information.
+- Define metadata for your datamodel and let Intwenty generate your database structure along with your needs for storing and retriving information.
 - Define your UI model and let intwenty generate your UI.
-- It can be seen as an ORM for dynamic data where the structure is described in metadata rather than strongly typed objects
-- It implements Asp.Net Core Identity, without any need of entity framework.
-- Can also be used as a traditional ORM with strongly typed objects.
+- Implements Asp.Net Core Identity, without any need of entity framework.
+- Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
+
 
 # How to ?
 
 | Task |
 | ------------- |
 |  <a href="https://github.com/Domitor/Intwenty/wiki/How-to-get-started">Quick start</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-LiteDb">Set up Intwenty against LiteDb</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MariaDb">Set up Intwenty against MariaDB or MySql</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MongoDb">Set up Intwenty against MongoDb</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MS-SQL-Server">Set up Intwenty against MS SQL Server</a> | 
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-PostgreSQL">Set up Intwenty against PostgreSQL</a> | 
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-SQLite">Set up Intwenty against SQLite</a> | 
@@ -54,9 +51,8 @@ Create metadata driven applications with java script and ASP.NET Core.
              "IntwentySettings": 
              {
                 "DefaultConnection": "Data Source=wwwroot/sqlite/IntwentyDb.db",
-                "IsDevelopment": true,
-                "ReCreateModelOnStartUp": true,
-                "DefaultConnectionDBMS": "SQLite" // MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite, MongoDb, LiteDb
+                "DefaultConnectionDBMS": "SQLite" // MSSqlServer, MySql, MariaDB, PostgreSQL, SQLite
+                ...
               }
             
 4. Inject services
@@ -87,11 +83,9 @@ Create metadata driven applications with java script and ASP.NET Core.
 
 5. Create a DB Connection
 
-            IIntwentyDbORM dbstore = null;
-            if (_settings.IsNoSQL)
-                dbstore = new IntwentyNoSqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection, "IntwentyDb");
-            else
-                dbstore = new IntwentySqlDbClient(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+
+              dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection, "IntwentyDb");
+     
 
 
 6. Create a model for a new application
@@ -142,12 +136,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 # Backend Dependencies
 - asp.net core 3.1
 - Microsoft.AspNetCore.Mvc 2.2.0
-- Microsoft.Data.Sqlite.Core 3.1.3
-- System.Data.SQLite.Core 1.0.112.1
-- System.Data.SqlClient 4.8.1
-- MongoDB.Driver 2.10.3
-- MySqlConnector 0.66.0
-- Npgsql 4.1.3.1
+- Intwenty.DataClient
 
 # Frontend Dependencies
 - bootstrap 4.3.7
@@ -163,8 +152,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 - Maria DB
 - PostgreSQL
 - SQLite
-- MongoDB
-- LiteDB
+
 
 # How to get started
 <a href="https://github.com/Domitor/Intwenty/wiki">Consult the Wiki</a>
@@ -175,9 +163,6 @@ Create metadata driven applications with java script and ASP.NET Core.
 - Use the nuget package.
 
 
-
-# Status
-Weekly updates, but not ready for production use.
 
 
 
