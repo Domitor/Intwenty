@@ -14,10 +14,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 | Task |
 | ------------- |
 |  <a href="https://github.com/Domitor/Intwenty/wiki/How-to-get-started">Quick start</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MariaDb">Set up Intwenty against MariaDB or MySql</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-MS-SQL-Server">Set up Intwenty against MS SQL Server</a> | 
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-PostgreSQL">Set up Intwenty against PostgreSQL</a> | 
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Database-settings#Set-up-Intwenty-against-SQLite">Set up Intwenty against SQLite</a> | 
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Intwenty-Settings">Configure intwenty</a> |  
 |  <a href="https://github.com/Domitor/Intwenty/wiki/Application-startup">Configure Asp.Net Core Identity with Intwenty</a> | 
 | <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-DataService">The Intwenty DataService</a> |
 | <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-ModelService">The Intwenty ModelService</a> | |
