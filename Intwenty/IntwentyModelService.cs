@@ -6,7 +6,6 @@ using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Intwenty.Data.Dto;
 using Intwenty.Engine;
 using Intwenty.Areas.Identity.Models;

@@ -1,7 +1,6 @@
 ﻿using Intwenty.DataClient.Reflection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using MongoDB.Bson.Serialization.Attributes;
 using System;
 
 namespace Intwenty.Areas.Identity.Models

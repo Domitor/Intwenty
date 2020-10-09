@@ -4,7 +4,6 @@ using Intwenty.Data.Entity;
 using Microsoft.Extensions.Options;
 using Intwenty.Data.Dto;
 using System;
-using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json;
 using System.Collections.Generic;
 using Intwenty.Engine;
@@ -1688,7 +1687,6 @@ namespace Intwenty.Controllers
     [DbTableName("tests_TestDataAutoInc")]
     public class TestDataAutoInc {
 
-        [BsonId]
         [AutoIncrement]
         public int Id { get; set; }
 
@@ -1715,7 +1713,6 @@ namespace Intwenty.Controllers
     public class TestData
     {
 
-        [BsonId]
         public int Id { get; set; }
 
         public string Type { get; set; }
