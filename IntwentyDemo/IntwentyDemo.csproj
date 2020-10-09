@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\litedb\" />
     <Folder Include="wwwroot\sqlite\" />
     <Folder Include="wwwroot\USERDOC\" />
   </ItemGroup>
