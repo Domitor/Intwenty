@@ -28,7 +28,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 | Generate model documentation |
 
 
-# Create a model using the built in designers
+# Create a model using the management UI
 
 ## Create application
 ![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_applications.png)
@@ -42,7 +42,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 ## Add create/edit UI to the application
 ![alt text](https://github.com/Domitor/Intwenty/blob/master/IntwentyDemo/wwwroot/images/manage_ui.png)
 
-# Create an application model programmaticly
+# Create a model programmaticly
 
 ## Create application
 ```
