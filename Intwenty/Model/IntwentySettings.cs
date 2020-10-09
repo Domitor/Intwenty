@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Intwenty.Model
 {
 
-    public enum AllowedAccountTypes { All, Social, Manual, SocialFb, SocialGoogle };
+    public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
@@ -139,12 +139,12 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseManualLogins
+        public bool UseLocalLogins
         {
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.Manual ||
+                if (AllowedAccounts == AllowedAccountTypes.Local ||
                     AllowedAccounts == AllowedAccountTypes.All)
                 {
                     return true;
