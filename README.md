@@ -19,10 +19,7 @@ Create metadata driven applications with java script and ASP.NET Core.
 | <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-DataService">The Intwenty DataService</a> |
 | <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-ModelService">The Intwenty ModelService</a> | |
 | Run an Intwenty self test |
-| Create an Intwenty Application |
-| Save an Intwenty Application |
-| Use Intwenty as a tradional ORM |
-| Accessing the Admin UI |
+| The Admin UI |
 | Sharing your model |
 | Import a model |
 | Generate model documentation |
