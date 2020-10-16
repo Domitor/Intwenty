@@ -1,4 +1,5 @@
-﻿using Intwenty.Model;
+﻿using Intwenty.Interface;
+using Intwenty.Model;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using System;

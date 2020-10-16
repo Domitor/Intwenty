@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using Intwenty.DataClient;
+using Intwenty.Interface;
 
 namespace Intwenty.Data.Seed
 {

@@ -7,114 +7,17 @@ using Microsoft.Extensions.Caching.Memory;
 using Intwenty.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Data.Dto;
-using Intwenty.Engine;
 using Intwenty.Areas.Identity.Models;
 using Microsoft.Extensions.Localization;
 using Intwenty.Data.Localization;
 using Intwenty.Interface;
 using Microsoft.AspNetCore.Identity;
 using Intwenty.DataClient;
+using Intwenty.DataClient.Model;
 
 namespace Intwenty
 {
-    /// <summary>
-    /// Interface for operations on meta data
-    /// </summary>
-    public interface IIntwentyModelService
-    {
-        /// <summary>
-        /// Get a complete system model, used for export model
-        /// </summary>
-        /// <returns></returns>
-        public SystemModel GetSystemModel();
-
-        /// <summary>
-        /// Insert a complete system model, used for import model
-        /// </summary>
-        public OperationResult InsertSystemModel(SystemModel model);
-
-
-        /// <summary>
-        /// Create database objects used for persisting the intwenty model
-        /// </summary>
-        public void CreateIntwentyDatabase();
-
-
-        public List<OperationResult> ConfigureDatabase();
-
-
-        /// <summary>
-        /// Get all application models
-        /// </summary>
-        public List<ApplicationModel> GetApplicationModels();
-
-      
-
-        public List<ApplicationModelItem> GetAppModels();
-
-        public ApplicationModelItem SaveAppModel(ApplicationModelItem model);
-
-        public void DeleteAppModel(ApplicationModelItem model);
-
-
-
-        public List<DatabaseModelItem> GetDatabaseModels();
-
-        public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid);
-
-        public void DeleteDatabaseModel(int id);
-
-
-
-
-        public List<UserInterfaceModelItem> GetUserInterfaceModels();
-
-        public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model);
-
-
-
-
-        public List<DataViewModelItem> GetDataViewModels();
-
-        public void SaveDataViewModels(List<DataViewModelItem> model);
-
-        public void DeleteDataViewModel(int id);
-
-
-
-        public List<ValueDomainModelItem> GetValueDomains();
-        public void SaveValueDomains(List<ValueDomainModelItem> model);
-
-        public void DeleteValueDomain(int id);
-
-
-        public List<TranslationModelItem> GetTranslations();
-
-        public void SaveTranslations(List<TranslationModelItem> model);
-
-        public void DeleteTranslation(int id);
-
-
-
-
-        public List<MenuModelItem> GetMenuModels();
-
-
-        public OperationResult ValidateModel();
-
-        public List<IntwentyDataColumn> GetDefaultMainTableColumns();
-
-
-        public List<IntwentyDataColumn> GetDefaultSubTableColumns();
-
-
-        public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
-
-
-    }
-
-
-
+   
 
     public class IntwentyModelService : IIntwentyModelService
     {
@@ -127,6 +30,7 @@ namespace Intwenty
 
         private string CurrentCulture { get; }
 
+        private List<TypeMapItem> DataTypes { get; set; }
 
         private string AppModelCacheKey = "APPMODELS";
 
@@ -143,11 +47,12 @@ namespace Intwenty
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
-           ModelCache = cache;
-           Settings = settings.Value;
-           Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-           CurrentCulture = Settings.DefaultCulture;
-           if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
+            ModelCache = cache;
+            Settings = settings.Value;
+            Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            DataTypes = Client.GetDbTypeMap();
+            CurrentCulture = Settings.DefaultCulture;
+            if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
            {
 
                 if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
@@ -234,7 +139,7 @@ namespace Intwenty
                     Client.InsertEntity(a);
 
                 result.IsSuccess = true;
-                result.AddMessage("RESULT", "The model was imported successfully");
+                result.AddMessage(MessageCode.RESULT, "The model was imported successfully");
 
                 Client.Close();
             }
@@ -1181,10 +1086,45 @@ namespace Intwenty
             var l = GetApplicationModels();
             foreach (var model in l)
             {
-               
-                var t = DbDataManager.GetDataManager(model, this, Settings, new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection));
-                res.Add(t.ConfigureDatabase());
-                
+                res.Add(ConfigureDatabase(model));
+            }
+
+            return res;
+        }
+
+        public OperationResult ConfigureDatabase(ApplicationModel model)
+        {
+            var res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0}", model.Application.Title));
+
+            try
+            {
+                Client.Open();
+                CreateMainTable(model, res);
+                CreateApplicationVersioningTable(model, res);
+
+                foreach (var t in model.DataStructure)
+                {
+                    if (t.IsMetaTypeDataColumn && t.IsRoot)
+                    {
+                        CreateDBColumn(res, t, model.Application.DbName);
+                    }
+
+                    if (t.IsMetaTypeDataTable)
+                    {
+                        CreateDBTable(model, res, t);
+                    }
+                }
+
+                CreateIndexes(model, res);
+
+            }
+            catch (Exception ex)
+            {
+                res.SetError(ex.Message, "");
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return res;
@@ -1203,7 +1143,7 @@ namespace Intwenty
             if (apps.Count == 0)
             {
                 res.IsSuccess = false;
-                res.AddMessage("ERROR", "The model doesn't seem to exist");
+                res.AddMessage(MessageCode.SYSTEMERROR, "The model doesn't seem to exist");
             }
 
             foreach (var a in apps)
@@ -1211,24 +1151,24 @@ namespace Intwenty
 
                 if (string.IsNullOrEmpty(a.Application.Title))
                 {
-                    res.AddMessage("ERROR", string.Format("The application with Id: {0} has no [Title].", a.Application.Id));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application with Id: {0} has no [Title].", a.Application.Id));
                     return res;
                 }
 
                 if (string.IsNullOrEmpty(a.Application.MetaCode))
-                    res.AddMessage("ERROR", string.Format("The application: {0} has no [MetaCode].", a.Application.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [MetaCode].", a.Application.Title));
 
                 if (string.IsNullOrEmpty(a.Application.DbName))
-                    res.AddMessage("ERROR", string.Format("The application: {0} has no [DbName].", a.Application.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [DbName].", a.Application.Title));
 
                 if (!string.IsNullOrEmpty(a.Application.MetaCode) && (a.Application.MetaCode.ToUpper() != a.Application.MetaCode))
-                    res.AddMessage("ERROR", string.Format("The application: {0} has a non uppercase [MetaCode].", a.Application.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has a non uppercase [MetaCode].", a.Application.Title));
 
                 if (a.DataStructure.Count == 0)
-                    res.AddMessage("WARNING", string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
+                    res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
 
                 if (a.UIStructure.Count == 0)
-                    res.AddMessage("WARNING", string.Format("The application {0} has no UI objects.", a.Application.Title));
+                    res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no UI objects.", a.Application.Title));
 
 
                 foreach (var ui in a.UIStructure)
@@ -1236,60 +1176,60 @@ namespace Intwenty
 
                     if (string.IsNullOrEmpty(ui.MetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has no [MetaCode].", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has no [MetaCode].", ui.Title, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(ui.ParentMetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has no [ParentMetaCode].", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has no [ParentMetaCode].", ui.Title, a.Application.Title));
                         return res;
                     }
 
                     if (!ui.HasValidMetaType)
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object {0} in application: {1} has not a valid [MetaType].", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has not a valid [MetaType].", ui.Title, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(ui.Title) && !ui.IsMetaTypePanel && !ui.IsMetaTypeSection)
                     {
-                        res.AddMessage("WARNING", string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
+                        res.AddMessage(MessageCode.WARNING, string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
                     }
 
 
                     if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewColumn))
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumnConnected)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
 
                     if (ui.IsMetaTypeLookUp && ui.IsDataViewColumnConnected && ui.DataViewColumnInfo.IsMetaTypeDataViewColumn)
                     {
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} has a connection (ViewMetaCode) to a DATAVIEWCOLUMN, it should be a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has a connection (ViewMetaCode) to a DATAVIEWCOLUMN, it should be a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
                     }
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewConnected)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
 
                     if (!ui.IsMetaTypeEditGrid)
                     {
                         if (!ui.IsDataColumnConnected && !string.IsNullOrEmpty(ui.DataMetaCode) && ui.DataMetaCode.ToUpper() != "ID" && ui.DataMetaCode.ToUpper() != "VERSION")
-                            res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
                     }
                     else
                     {
                         if (!ui.IsDataTableConnected)
-                            res.AddMessage("ERROR", string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database table [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database table [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
                     }
 
                     if (ui.IsMetaTypeEditGridLookUp && !ui.IsDataViewColumnConnected)
-                        res.AddMessage("ERROR", string.Format("The UI object {0} of type EDITGRID_LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITGRID_LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
 
                     if (!ui.HasValidProperties)
                     {
-                        res.AddMessage("WARNING", string.Format("One or more properties on the UI object: {0} of type {1} in application {2} is not valid and may not be implemented.", new object[] { ui.Title, ui.MetaType, a.Application.Title }));
+                        res.AddMessage(MessageCode.WARNING, string.Format("One or more properties on the UI object: {0} of type {1} in application {2} is not valid and may not be implemented.", new object[] { ui.Title, ui.MetaType, a.Application.Title }));
                     }
 
                 }
@@ -1298,52 +1238,52 @@ namespace Intwenty
                 {
                     if (string.IsNullOrEmpty(db.MetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The data object with Id: {0} in application: {1} has no [MetaCode].", db.Id, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data object with Id: {0} in application: {1} has no [MetaCode].", db.Id, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(db.ParentMetaCode))
                     {
-                        res.AddMessage("ERROR", string.Format("The data object: {0} in application: {1} has no [ParentMetaCode]. (ROOT ?)", db.MetaCode, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data object: {0} in application: {1} has no [ParentMetaCode]. (ROOT ?)", db.MetaCode, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(db.MetaType))
                     {
-                        res.AddMessage("ERROR", string.Format("The data object: {0} in application: {1} has no [MetaType].", db.MetaCode, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data object: {0} in application: {1} has no [MetaType].", db.MetaCode, a.Application.Title));
                         return res;
                     }
 
                     if (string.IsNullOrEmpty(db.DbName))
                     {
-                        res.AddMessage("ERROR", string.Format("The data object: {0} in application {1} has no [DbName].", db.MetaCode, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data object: {0} in application {1} has no [DbName].", db.MetaCode, a.Application.Title));
                     }
 
                     if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataColumn)
                     {
-                        res.AddMessage("WARNING", string.Format("The data column: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
+                        res.AddMessage(MessageCode.WARNING, string.Format("The data column: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
                     }
 
                     if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataTable)
                     {
-                        res.AddMessage("WARNING", string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
+                        res.AddMessage(MessageCode.WARNING, string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
                     }
 
                     if (db.IsMetaTypeDataColumn && GetDefaultMainTableColumns().Exists(p => p.Name == db.DbName))
                     {
-                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
                     }
 
                     if (db.IsMetaTypeDataColumn && GetDefaultSubTableColumns().Exists(p => p.Name == db.DbName))
                     {
-                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
                     }
 
                     if (db.IsMetaTypeDataColumn && GetDefaultVersioningTableColumns().Exists(p => p.Name == db.DbName))
                     {
-                        res.AddMessage("ERROR", string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data column: {0} in application {1} has an invalid name. {0} can't be used since it conflicts with an intwenty default columnname.", db.DbName, a.Application.Title));
                         return res;
                     }
 
@@ -1356,31 +1296,31 @@ namespace Intwenty
             {
                 if (string.IsNullOrEmpty(v.Title))
                 {
-                    res.AddMessage("ERROR", string.Format("The view with Id: {0} has no [Title].", v.Id));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view with Id: {0} has no [Title].", v.Id));
                     return res;
                 }
 
                 if (!v.HasValidMetaType)
                 {
-                    res.AddMessage("ERROR", string.Format("The view object: {0} has no [MetaType].", v.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object: {0} has no [MetaType].", v.Title));
                     return res;
                 }
 
                 if (!string.IsNullOrEmpty(v.SQLQueryFieldName) && v.IsMetaTypeDataView)
                 {
-                    res.AddMessage("WARNING", string.Format("The view object: {0} has a SqlQueryFieldName. It makes no sense on a DATAVIEW model item", v.Title));
+                    res.AddMessage(MessageCode.WARNING, string.Format("The view object: {0} has a SqlQueryFieldName. It makes no sense on a DATAVIEW model item", v.Title));
                 }
 
                 if (!string.IsNullOrEmpty(v.SQLQuery) && (v.IsMetaTypeDataViewColumn || v.IsMetaTypeDataViewKeyColumn))
                 {
-                    res.AddMessage("WARNING", string.Format("The view object: {0} has a SqlQuery. It makes no sense on a DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN model item)", v.Title));
+                    res.AddMessage(MessageCode.WARNING, string.Format("The view object: {0} has a SqlQuery. It makes no sense on a DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN model item)", v.Title));
                 }
 
                 if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewColumn))
-                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWCOLUMN.", v.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWCOLUMN.", v.Title));
 
                 if (v.IsMetaTypeDataView && !viewinfo.Exists(p => p.ParentMetaCode == v.MetaCode && p.IsMetaTypeDataViewKeyColumn))
-                    res.AddMessage("ERROR", string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWKEYCOLUMN.", v.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object: {0} has no children with [MetaType]=DATAVIEWKEYCOLUMN.", v.Title));
 
                 if (v.IsMetaTypeDataViewColumn || v.IsMetaTypeDataViewKeyColumn)
                 {
@@ -1388,17 +1328,17 @@ namespace Intwenty
                     if (view != null)
                     {
                         if (!view.SQLQuery.Contains(v.SQLQueryFieldName))
-                            res.AddMessage("ERROR", string.Format("The  DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN {0} has no SQLQueryFieldName that is included in the SQL Query of the parent view.", v.Title));
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The  DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN {0} has no SQLQueryFieldName that is included in the SQL Query of the parent view.", v.Title));
                     }
                     else
                     {
-                        res.AddMessage("ERROR", string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN  {0} has no parent with [MetaType]=DATAVIEW.", v.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN  {0} has no parent with [MetaType]=DATAVIEW.", v.Title));
                     }
 
                     if (string.IsNullOrEmpty(v.SQLQueryFieldDataType))
                     {
 
-                        res.AddMessage("WARNING", string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN : {0} has no SQLQueryFieldDataType. STRING will be used as default.)", v.Title));
+                        res.AddMessage(MessageCode.WARNING, string.Format("The DATAVIEWCOLUMN or DATAVIEWKEYCOLUMN : {0} has no SQLQueryFieldDataType. STRING will be used as default.)", v.Title));
 
                     }
                 }
@@ -1407,7 +1347,7 @@ namespace Intwenty
                 {
                     if (v.HasNonSelectSql)
                     {
-                        res.AddMessage("ERROR", string.Format("The sql query defined for dataview {0} contains invalid commands.", v.Title));
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The sql query defined for dataview {0} contains invalid commands.", v.Title));
                     }
                     else
                     {
@@ -1422,7 +1362,7 @@ namespace Intwenty
                         catch
                         {
                             client.Close();
-                            res.AddMessage("WARNING", string.Format("The sql query defined for dataview {0} returned an error.", v.Title));
+                            res.AddMessage(MessageCode.WARNING, string.Format("The sql query defined for dataview {0} returned an error.", v.Title));
                         }
                     }
                 }
@@ -1431,14 +1371,14 @@ namespace Intwenty
             }
 
 
-            if (res.Messages.Exists(p => p.Code == "ERROR"))
+            if (res.Messages.Exists(p => p.Code == MessageCode.SYSTEMERROR))
             {
                 res.IsSuccess = false;
             }
             else
             {
                 res.IsSuccess = true;
-                res.AddMessage("SUCCESS", "Model validated successfully");
+                res.AddMessage(MessageCode.RESULT, "Model validated successfully");
             }
 
             return res;
@@ -1523,6 +1463,185 @@ namespace Intwenty
 
 
         #endregion
+
+        #region ConfigureDB
+
+        private void CreateMainTable(ApplicationModel model, OperationResult o)
+        {
+
+            var table_exist = false;
+            table_exist = Client.TableExists(model.Application.DbName);
+            if (table_exist)
+            {
+                o.AddMessage(MessageCode.INFO , "Main table " + model.Application.DbName + " for application: " + model.Application.Title + " is already present");
+            }
+            else
+            {
+
+                string create_sql = GetCreateTableStmt(GetDefaultMainTableColumns(), model.Application.DbName);
+                Client.RunCommand(create_sql);
+                o.AddMessage(MessageCode.INFO, "Main table: " + model.Application.DbName + " for application: " + model.Application.Title + "  was created successfully");
+
+            }
+        }
+
+        private void CreateApplicationVersioningTable(ApplicationModel model, OperationResult o)
+        {
+            var table_exist = false;
+            table_exist = Client.TableExists(model.Application.VersioningTableName);
+            if (table_exist)
+            {
+                //o.AddMessage("DBCONFIG", "Found versioning table (" + model.Application.VersioningTableName + ") for application:" + model.Application.Title);
+            }
+            else
+            {
+
+                string create_sql = GetCreateTableStmt(GetDefaultVersioningTableColumns(), model.Application.VersioningTableName);
+                Client.RunCommand(create_sql);
+
+                //o.AddMessage("DBCONFIG", "Versioning table: " + model.Application.VersioningTableName + " was created successfully");
+
+            }
+        }
+
+        private void CreateDBColumn(OperationResult o, DatabaseModelItem column, string tablename)
+        {
+            if (!column.IsMetaTypeDataColumn)
+            {
+                o.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring column");
+                return;
+            }
+
+
+            var colexist = false;
+            colexist = Client.ColumnExists(tablename, column.DbName);
+
+            if (colexist)
+            {
+                o.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " in table: " + tablename + " is already present.");
+            }
+            else
+            {
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DbEngine == Client.Database);
+                string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
+                Client.RunCommand(create_sql);
+                o.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " (" + coldt.DBMSDataType + ") was created successfully in table: " + tablename);
+
+            }
+
+        }
+
+        private void CreateDBTable(ApplicationModel model, OperationResult o, DatabaseModelItem table)
+        {
+
+            if (!table.IsMetaTypeDataTable)
+            {
+                o.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring table");
+                return;
+            }
+
+
+            var table_exist = false;
+            table_exist = Client.TableExists(table.DbName);
+            if (table_exist)
+            {
+                o.AddMessage(MessageCode.INFO, "Table: " + table.DbName + " in application: " + model.Application.Title + " is already present.");
+            }
+            else
+            {
+
+                string create_sql = GetCreateTableStmt(GetDefaultSubTableColumns(), table.DbName);
+                Client.RunCommand(create_sql);
+                o.AddMessage(MessageCode.INFO, "Subtable: " + table.DbName + " in application: " + model.Application.Title + "  was created successfully");
+
+            }
+
+            foreach (var t in model.DataStructure)
+            {
+                if (t.IsMetaTypeDataColumn && t.ParentMetaCode == table.MetaCode)
+                    CreateDBColumn(o, t, table.DbName);
+            }
+
+        }
+
+        private void CreateIndexes(ApplicationModel model, OperationResult o)
+        {
+            string sql = string.Empty;
+
+
+            try
+            {
+                //Ctreate index on main application table
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.Application.DbName);
+                Client.RunCommand(sql);
+            }
+            catch { }
+
+            try
+            {
+                //Create index on versioning table
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.Application.VersioningTableName);
+                Client.RunCommand(sql);
+            }
+            catch { }
+
+            //Create index on subtables
+            foreach (var t in model.DataStructure)
+            {
+                if (t.IsMetaTypeDataTable)
+                {
+                    try
+                    {
+                        sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", t.DbName);
+                        Client.RunCommand(sql);
+                    }
+                    catch { }
+
+                    try
+                    {
+                        sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
+                        Client.RunCommand(sql);
+                    }
+                    catch { }
+
+                }
+            }
+
+            o.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for application " + model.Application.Title);
+
+
+
+        }
+
+        private string GetCreateTableStmt(List<IntwentyDataColumn> columns, string tablename)
+        {
+            var res = string.Format("CREATE TABLE {0}", tablename) + " (";
+            var sep = "";
+            foreach (var c in columns)
+            {
+                TypeMapItem dt;
+                if (c.DataType == DatabaseModelItem.DataTypeString)
+                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == Client.Database && p.Length == StringLength.Short);
+                else if (c.DataType == DatabaseModelItem.DataTypeText)
+                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == Client.Database && p.Length == StringLength.Long);
+                else
+                    dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == Client.Database);
+
+                res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                sep = ", ";
+            }
+
+            res += ")";
+
+            return res;
+
+        }
+
+
+
+
+        #endregion
+
 
 
 

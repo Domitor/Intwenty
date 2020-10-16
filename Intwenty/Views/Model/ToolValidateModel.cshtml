@@ -30,11 +30,11 @@
                 {
 
                     <tr>
-                        @if (x.Code == "ERROR")
+                        @if (x.Code == Intwenty.Data.Dto.MessageCode.SYSTEMERROR)
                         {
                             <td style="color:red">@x.Code</td>
                         }
-                        else if (x.Code == "WARNING")
+                        else if (x.Code ==  Intwenty.Data.Dto.MessageCode.WARNING)
                         {
                             <td style="color:orange">@x.Code</td>
                         }

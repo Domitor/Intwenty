@@ -64,6 +64,12 @@
 
                             }
 
+                            if (t.IsMetaTypeEmailBox && t.IsDataColumnConnected)
+                            {
+                                @await Html.PartialAsync("UIControls/_EmailBox", t)
+
+                            }
+
                             //LOOKUP bound to DATAVIEW
                             if (t.IsMetaTypeLookUp && t.IsDataViewConnected && t.IsDataColumnConnected && t.IsDataViewColumnConnected)
                             {

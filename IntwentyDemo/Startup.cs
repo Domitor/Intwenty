@@ -20,6 +20,9 @@ using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Intwenty.Services;
+using Intwenty.Interface;
+using Intwenty.Data;
+using IntwentyDemo.Data;
 
 namespace IntwentyDemo
 {
@@ -50,6 +53,7 @@ namespace IntwentyDemo
             services.Configure<IntwentySettings>(Configuration.GetSection("IntwentySettings"));
 
             //Required for Intwenty: Services
+            services.AddTransient<IDataManager, IntwentyDemoDataManager>();
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
             services.AddTransient<IIntwentyDataService, IntwentyDataService>();
             services.AddTransient<IIntwentySystemEventService, IntwentySystemEventService>();
@@ -184,8 +188,15 @@ namespace IntwentyDemo
 
             app.UseEndpoints(endpoints =>
             {
-              
-                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapDefaultControllerRoute();
+
+                //INTWENTY ROUTING
+                endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
+                endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
+                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller= "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
+
                 endpoints.MapRazorPages();
 
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");

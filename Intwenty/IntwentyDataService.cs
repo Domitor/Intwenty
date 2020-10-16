@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
 using Intwenty.Data;
-using Intwenty.Engine;
 using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,143 +12,11 @@ using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;
 using System.Runtime.InteropServices;
 using Intwenty.DataClient.Model;
+using Intwenty.Interface;
 
 namespace Intwenty
 {
-    public interface IIntwentyDataService
-    {
-        /// <summary>
-        /// Creates a new application JSON Document including defaultvalues.
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult CreateNew(ClientStateInfo state);
-
-        /// <summary>
-        /// Saves application data
-        /// </summary>
-        /// <returns>An OperationResult including Id and Version for the saved application</returns>
-        OperationResult Save(ClientStateInfo state);
-
-        /// <summary>
-        /// Deletes all application data (maintable and subtables) by id.
-        /// If the application uses versioning, all versions are deleted.
-        /// </summary>
-        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult DeleteById(ClientStateInfo state);
-
-        /// <summary>
-        /// Deletes data by Id
-        /// Parameter Id can be an Id of an application subtable row, or an application maintable Id
-        /// Parameter dbname can be an application  subtable name or main tablename
-        /// If the dbname represents a main application table, all application data (maintable and subtables) is deleted.
-        /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
-        /// If the application uses versioning, all versions are deleted.
-        /// </summary>
-        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult DeleteById(int applicationid, int id, string dbname);
-
-
-        /// <summary>
-        /// Get the latest version data for and application based on Id
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetLatestVersionById(ClientStateInfo state);
-
-        /// <summary>
-        /// Get the latest version data for and application based on OwnerUserId
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data that matches the filter specified in args. 
-        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
-        /// This function supports paging. It returns the number of records specified in args.BatchSize
-        /// </summary>
-        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetList(ListRetrivalArgs args);
-
-        /// <summary>
-        /// Get a list of (latest version) application data, based on OwnedBy and that matches the filter specified in args. 
-        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
-        /// This function supports paging. It returns the number of records specified in BatchSize
-        /// </summary>
-        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetListByOwnerUser(ListRetrivalArgs args);
-
-        /// <summary>
-        /// Get a list of (latest version) application data. 
-        /// All columns from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetList(int applicationid);
-
-        /// <summary>
-        /// Get a list of (latest version) application data based on OwnedBy. 
-        /// All columns from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetListByOwnerUser(int applicationid, string owneruserid);
-
-        /// <summary>
-        /// Get a list of all versions for an application based on Id
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetVersionListById(ClientStateInfo state);
-
-        /// <summary>
-        /// Get the data for an application based on Id and Version
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetVersion(ClientStateInfo state);
-
-        /// <summary>
-        /// Get value domains used by UI in the application specified by application id
-        /// </summary>
-        OperationResult GetValueDomains(int ApplicationId);
-
-        /// <summary>
-        /// Get all value domains.
-        /// </summary>
-        OperationResult GetValueDomains();
-
-        /// <summary>
-        /// Get all value domain items.
-        /// </summary>
-        /// <returns>A list of ValueDomainModelItem</returns>
-        List<ValueDomainModelItem> GetValueDomainItems();
-
-        /// <summary>
-        /// Get all value domain items for one domain.
-        /// </summary>
-        /// <returns>A list of ValueDomainModelItem</returns>
-        List<ValueDomainModelItem> GetValueDomainItems(string domainname);
-
-        /// <summary>
-        /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetDataView(ListRetrivalArgs args);
-
-        /// <summary>
-        /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetDataViewRecord(ListRetrivalArgs args);
-
-        OperationResult Validate(ApplicationModel model, ClientStateInfo state);
-
-      
-        void LogError(string message, int applicationid=0, string appmetacode="NONE", string username="");
-
-        void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
-
-        void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
-
-        IDataClient GetDataClient();
-
-    }
+   
 
     public class IntwentyDataService : IIntwentyDataService
     {
@@ -162,12 +29,15 @@ namespace Intwenty
 
         private IMemoryCache ApplicationCache { get; }
 
-        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache)
+        private IDataManager DataManager { get; }
+
+        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache, IDataManager datamanager)
         {
             Settings = settings.Value;
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
             ApplicationCache = cache;
+            DataManager = datamanager;
         }
 
         public IDataClient GetDataClient()
@@ -185,7 +55,7 @@ namespace Intwenty
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
                 if (model == null)
                 {
-                    result = new OperationResult(false, string.Format("Could not find application model for applicationid {0} when creating a new empty app", state.ApplicationId));
+                    result = new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Could not find application model for applicationid {0} when creating a new empty app", state.ApplicationId));
                     result.Data = "{}";
                     return result;
                 }
@@ -293,13 +163,12 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-                var validation = Validate(model, state);
+                var validation = DataManager.Validate(model, state);
                 if (validation.IsSuccess)
                 {
                     RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                    var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                    var result = t.Save(state);
+                    var result = DataManager.Save(model,state);
                     return result;
 
                 }
@@ -313,8 +182,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Save Intwenty application failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -333,9 +202,7 @@ namespace Intwenty
 
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-             
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                return t.DeleteById(state);
+                return DataManager.DeleteById(model, state);
                 
 
             }
@@ -344,8 +211,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("Delete Intwenty application by Id failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("Delete Intwenty application by Id failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -386,8 +253,7 @@ namespace Intwenty
                     RemoveFromApplicationCache(applicationid, id);
                 }
               
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                return t.DeleteById(id, dbname);
+                return DataManager.DeleteById(model, id, dbname);
                 
             }
             catch (Exception ex)
@@ -395,8 +261,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("DeleteById(applicationid,id,dbname) failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -416,10 +282,7 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
-
-               
-                 var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                 return t.GetList(args);
+                 return DataManager.GetList(model, args);
                 
             }
             catch (Exception ex)
@@ -427,8 +290,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetList(args) of Intwenty applications failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
                 return result;
             }
@@ -447,9 +310,8 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
-               
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                return t.GetListByOwnerUser(args);
+              
+                return DataManager.GetListByOwnerUser(model, args);
                 
 
             }
@@ -458,8 +320,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetListByOwnerUser(args) of Intwenty applications failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(args) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
                 return result;
             }
@@ -486,8 +348,7 @@ namespace Intwenty
                 }
 
             
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                result = t.GetList();
+                result = DataManager.GetList(model);
 
                 if (result.IsSuccess)
                     ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
@@ -500,8 +361,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetList(applicationid) of Intwenty applications failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
                 return result;
             }
@@ -530,8 +391,7 @@ namespace Intwenty
                 }
 
                
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                result = t.GetListByOwnerUser(owneruserid);
+                result = DataManager.GetListByOwnerUser(model, owneruserid);
 
                 if (result.IsSuccess)
                 {
@@ -547,8 +407,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
                 return result;
             }
@@ -575,9 +435,7 @@ namespace Intwenty
                     return result;
                 }
 
-              
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                result = t.GetLatestVersionById(state);
+                result = DataManager.GetLatestVersionById(model, state);
                 if (result.IsSuccess)
                 {
                     ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
@@ -591,8 +449,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetLatestVersionById(state) of Intwenty application failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById(state) of Intwenty application failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -603,15 +461,14 @@ namespace Intwenty
             try
             {
                 if (state.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter state must be a valid ApplicationId");
+                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
                
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                return t.GetLatestVersionByOwnerUser(state);
+                return DataManager.GetLatestVersionByOwnerUser(model,state);
                 
             }
             catch (Exception ex)
@@ -619,8 +476,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -652,9 +509,7 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
-               
-                var t = DbDataManager.GetDataManager(model, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-                return t.GetApplicationValueDomains();
+                return DataManager.GetApplicationValueDomains(model);
                 
 
             }
@@ -663,8 +518,8 @@ namespace Intwenty
                 var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage("USERERROR", string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
-                result.AddMessage("SYSTEMERROR", ex.Message);
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
@@ -673,10 +528,7 @@ namespace Intwenty
 
         public OperationResult GetValueDomains()
         {
-   
-            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-            return t.GetValueDomains();
-
+            return DataManager.GetValueDomains();
         }
 
         public List<ValueDomainModelItem> GetValueDomainItems()
@@ -689,54 +541,30 @@ namespace Intwenty
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
 
-        public OperationResult Validate(ApplicationModel app, ClientStateInfo state)
+        public OperationResult Validate(ClientStateInfo state)
         {
+            if (state==null)
+                throw new InvalidOperationException("Parameter state cannot be null");
+            if (state.ApplicationId < 1)
+                throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
 
-            foreach (var t in app.UIStructure)
-            {
-                if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
-                {
-                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
-                    if (dv != null && !dv.HasValue)
-                    {
-                        return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title),state.Id, state.Version);
-                    }
-                    foreach (var table in state.Data.SubTables)
-                    {
-                        foreach (var row in table.Rows)
-                        {
-                            dv = row.Values.Find(p => p.DbName == t.DataColumnInfo.DbName);
-                            if (dv != null && !dv.HasValue)
-                            {
-                                return new OperationResult(false, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
-                            }
-                        }
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
-                    }
-                   
-                }
-            }
-
-            return new OperationResult(true, "Successfully validated", state.Id, state.Version);
+            return DataManager.Validate(model, state);
         }
 
        
 
         public OperationResult GetDataView(ListRetrivalArgs args)
         {
-           
-            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-            return t.GetDataView(args);
-            
+            return DataManager.GetDataView(args); 
         }
 
         public OperationResult GetDataViewRecord(ListRetrivalArgs args)
         {
           
-            var t = DbDataManager.GetDataManager(null, ModelRepository, Settings, new Connection(DBMSType, Settings.DefaultConnection));
-            return t.GetDataViewRecord(args);
+            return DataManager.GetDataViewRecord(args);
             
-
         }
 
         public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")

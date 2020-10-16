@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
-
+using Intwenty.Interface;
 
 namespace Intwenty.Controllers
 {

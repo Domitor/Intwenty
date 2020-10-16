@@ -291,6 +291,9 @@ namespace Intwenty.Data.Dto
                 if (Value == DBNull.Value)
                     return false;
 
+                if (string.IsNullOrEmpty(Convert.ToString(Value)))
+                    return false;
+
                 return true;
 
             }

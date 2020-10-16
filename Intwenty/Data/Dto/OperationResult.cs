@@ -15,16 +15,25 @@ namespace Intwenty.Data.Dto
       , DELETED_SAVED = 6
     }
 
+    public enum MessageCode
+    {
+       RESULT = 0
+      ,USERERROR = 1
+      ,SYSTEMERROR = 2
+      ,WARNING = 3
+      ,INFO = 4
+    }
+
     public class OperationMessage
     {
 
         public DateTime Date { get; set; }
 
-        public string Code { get; set; }
+        public MessageCode Code { get; set; }
 
         public string Message { get; set; }
 
-        public OperationMessage(string code, string message)
+        public OperationMessage(MessageCode code, string message)
         {
             Date = DateTime.Now;
             Code = code;
@@ -87,7 +96,7 @@ namespace Intwenty.Data.Dto
             Data = "{}";
         }
 
-        public OperationResult(bool success, string resultmessage="", int id=0, int version=0)
+        public OperationResult(bool success, MessageCode messagecode=MessageCode.RESULT, string message ="", int id=0, int version=0)
         {
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
@@ -95,7 +104,7 @@ namespace Intwenty.Data.Dto
             Id = id;
             Version = version;
             Data = "{}";
-            AddMessage("RESULT", resultmessage);
+            AddMessage(messagecode, message);
         }
 
        
@@ -114,13 +123,13 @@ namespace Intwenty.Data.Dto
             EndTime = DateTime.Now;
         }
 
-        public void Finish(string code, string message)
+        public void Finish(MessageCode code, string message)
         {
             EndTime = DateTime.Now;
             Messages.Add(new OperationMessage(code, message));
         }
 
-        public void AddMessage(string code, string message)
+        public void AddMessage(MessageCode code, string message)
         {
             Messages.Add(new OperationMessage(code, message));
         }
@@ -128,20 +137,20 @@ namespace Intwenty.Data.Dto
         public void SetError(string systemmsg, string usermsg)
         {
             IsSuccess = false;
-            Messages.Add(new OperationMessage("SYSTEMERROR", systemmsg));
-            Messages.Add(new OperationMessage("USERERROR", usermsg));
+            Messages.Add(new OperationMessage(MessageCode.SYSTEMERROR, systemmsg));
+            Messages.Add(new OperationMessage(MessageCode.USERERROR, usermsg));
         }
 
         public void SetSuccess(string msg)
         {
             IsSuccess = true;
-            Messages.Add(new OperationMessage("RESULT", msg));
+            Messages.Add(new OperationMessage(MessageCode.USERERROR, msg));
         }
 
         public string UserError
         {
             get {
-                var msg = Messages.Find(p => p.Code == "USERERROR");
+                var msg = Messages.Find(p => p.Code == MessageCode.USERERROR);
                 if (msg != null)
                     return msg.Message;
 
@@ -153,7 +162,7 @@ namespace Intwenty.Data.Dto
         {
             get
             {
-                var msg = Messages.Find(p => p.Code == "SYSTEMERROR");
+                var msg = Messages.Find(p => p.Code == MessageCode.SYSTEMERROR);
                 if (msg != null)
                     return msg.Message;
 
@@ -165,7 +174,7 @@ namespace Intwenty.Data.Dto
         {
             get
             {
-                var msg = Messages.Find(p => p.Code == "RESULT");
+                var msg = Messages.Find(p => p.Code ==  MessageCode.RESULT);
                 if (msg != null)
                     return msg.Message;
 

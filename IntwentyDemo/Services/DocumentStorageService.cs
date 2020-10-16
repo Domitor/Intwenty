@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Specialized;
 using Intwenty;
+using Intwenty.Interface;
 
 namespace IntwentyDemo.Services
 {

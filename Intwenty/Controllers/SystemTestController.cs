@@ -6,7 +6,7 @@ using Intwenty.Data.Dto;
 using System;
 using System.Text.Json;
 using System.Collections.Generic;
-using Intwenty.Engine;
+using Intwenty.Data;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +17,7 @@ using Intwenty.PushData;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Intwenty.DataClient.Reflection;
+using Intwenty.Interface;
 
 namespace Intwenty.Controllers
 {
@@ -211,7 +212,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test1ORMCreateTable()
         {
-            OperationResult result = new OperationResult(true, "DataClient.CreateTable<T>");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.CreateTable<T>");
             try
             {
 
@@ -234,7 +235,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test2ORMInsert()
         {
-            OperationResult result = new OperationResult(true, "DataClient.InsertEntity(T) - 100 Records using auto increment");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.InsertEntity(T) - 100 Records using auto increment");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -270,7 +271,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test3ORMUpdate()
         {
-            OperationResult result = new OperationResult(true, "DataClient.Update(T) - Retrieve last record and update");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Update(T) - Retrieve last record and update");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -327,7 +328,7 @@ namespace Intwenty.Controllers
         private OperationResult Test4ORMDelete()
         {
 
-            OperationResult result = new OperationResult(true, "DataClient.Delete(T) - Retrieve a list of inserted records and delete them one by one");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Delete(T) - Retrieve a list of inserted records and delete them one by one");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -363,7 +364,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test5CreateIntwentyDb()
         {
-            OperationResult result = new OperationResult(true, "IIntwentyModelService.CreateIntwentyDatabase()");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "IIntwentyModelService.CreateIntwentyDatabase()");
             try
             {
 
@@ -383,7 +384,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test6CreateIntwentyExampleModel()
         {
-            OperationResult result = new OperationResult(true, "Create an intwenty application (My test application)");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Create an intwenty application (My test application)");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -415,8 +416,7 @@ namespace Intwenty.Controllers
 
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
 
-                var t = DbDataManager.GetDataManager(model, _modelservice, _settings, dbstore);
-                OperationResult configres = t.ConfigureDatabase();
+                OperationResult configres = _modelservice.ConfigureDatabase(model);
                 
                 if (!configres.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
@@ -436,7 +436,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test7CreateIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, "Create 100 intwenty application based on the created test model");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Create 100 intwenty application based on the created test model");
             try
             {
                 for (int i = 0; i < 100; i++)
@@ -493,7 +493,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test8GetListOfIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, "Get a list just of created intwenty applications");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get a list just of created intwenty applications");
             try
             {
                 var getlistresult = _dataservice.GetList(10000);
@@ -522,7 +522,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test9GetListOfIntwentyApplicationByOwnerUser()
         {
-            OperationResult result = new OperationResult(true, "Get a list of created intwenty applications by owner user");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get a list of created intwenty applications by owner user");
 
             try
             {
@@ -551,7 +551,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test10GetLatestVersionByOwnerUser()
         {
-            OperationResult result = new OperationResult(true, "Get the latest version of an intwenty application by owner user");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get the latest version of an intwenty application by owner user");
             try
             {
                 var state = new ClientStateInfo();
@@ -581,7 +581,7 @@ namespace Intwenty.Controllers
         private OperationResult Test11UpdateIntwentyApplication()
         {
 
-            OperationResult result = new OperationResult(true, "Update intwenty application");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Update intwenty application");
             try
             {
                 var state = new ClientStateInfo();
@@ -656,7 +656,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test12DeleteIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, "Delete an intwenty application");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Delete an intwenty application");
 
             try
             {
@@ -714,7 +714,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test13GetAllValueDomains()
         {
-            OperationResult result = new OperationResult(true, "Get all value domain items");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get all value domain items");
             try
             {
 
@@ -743,7 +743,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test14GetDataSet()
         {
-            OperationResult result = new OperationResult(true, "Get eventlog dataset <EventLog>");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get eventlog dataset <EventLog>");
 
             try
             {
@@ -775,7 +775,7 @@ namespace Intwenty.Controllers
         private OperationResult Test15Transactions()
         {
 
-            OperationResult result = new OperationResult(true, "DataClient.Transactions");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Transactions");
             try
             {
 
@@ -830,7 +830,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test16CachePerformance()
         {
-            OperationResult result = new OperationResult(true, "Test logging and Intwenty application cache.");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test logging and Intwenty application cache.");
 
             try
             {
@@ -869,7 +869,7 @@ namespace Intwenty.Controllers
         private OperationResult Test17GetLists()
         {
 
-            OperationResult result = new OperationResult(true, "Test GetList(args) and paging");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test GetList(args) and paging");
             try
             {
 
@@ -932,7 +932,7 @@ namespace Intwenty.Controllers
         private OperationResult Test18TestIdentity()
         {
 
-            OperationResult result = new OperationResult(true, "Test Asp.Net.Core.Identity.");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test Asp.Net.Core.Identity.");
 
             try
             {
@@ -1013,7 +1013,7 @@ namespace Intwenty.Controllers
         //SQLite performance
         private OperationResult Test100SqliteInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLite performance - Insert 5000 - Autoincrementation");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1049,7 +1049,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test101SqliteGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLite performance - GetJSONArray 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1079,7 +1079,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test102SqliteGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLite performance - GetEntities 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1109,7 +1109,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test103SqliteGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLite performance - GetResultSet 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1139,7 +1139,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test104SqliteGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLite performance - GetDataTable 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1170,7 +1170,7 @@ namespace Intwenty.Controllers
         //SQL Server performance
         private OperationResult Test200SqlServerInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLServer performance - Insert 5000 - Autoincrementation");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1206,7 +1206,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test201SqlServerGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLServer performance - GetJSONArray 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1236,7 +1236,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test202SqlServerGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLServer performance - GetEntities 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1266,7 +1266,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test203SqlServerGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLServer performance - GetResultSet 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1296,7 +1296,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test204SqlServerGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, "SQLServer performance - GetDataTable 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1328,7 +1328,7 @@ namespace Intwenty.Controllers
         //MariaDB performance
         private OperationResult Test300MariaDbInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, "MariaDb performance - Insert 5000 - Autoincrementation");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1364,7 +1364,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test301MariaDbGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, "MariaDb performance - GetJSONArray 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1394,7 +1394,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test302MariaDbGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, "MariaDb performance - GetEntities 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1424,7 +1424,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test303MariaDbGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, "MariaDb performance - GetResultSet 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1454,7 +1454,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test304MariaDbGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, "MariaDb performance - GetDataTable 5000");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1485,7 +1485,7 @@ namespace Intwenty.Controllers
         //Postgres performance
         private OperationResult Test400PostgresInsertPerformance(bool deleteprev)
         {
-            OperationResult result = new OperationResult(true, string.Format("Postgres performance - Insert {0} - Autoincrementation", 5000));
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - Insert {0} - Autoincrementation", 5000));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1524,7 +1524,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test401PostgresGetJSONArrayPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetJSONArray {0}", expectedtotal));
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetJSONArray {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1554,7 +1554,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test402PostgresGetEntitiesPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetEntities {0}", expectedtotal));
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetEntities {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1584,7 +1584,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test403PostgresGetResultSetPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetResultSet {0}", expectedtotal));
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetResultSet {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1614,7 +1614,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test404PostgresGetDataTablePerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, string.Format("Postgres performance - GetDataTable {0}", expectedtotal));
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetDataTable {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1644,7 +1644,7 @@ namespace Intwenty.Controllers
 
         private OperationResult Test500GetDataView()
         {
-            OperationResult result = new OperationResult(true, "Get an intwenty DataView");
+            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get an intwenty DataView");
 
             try
             {

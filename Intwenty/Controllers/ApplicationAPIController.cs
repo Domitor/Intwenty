@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Data.Dto;
 using Microsoft.AspNetCore.Http;
-
+using Intwenty.Interface;
 
 namespace Intwenty.Controllers
 {
@@ -15,10 +15,10 @@ namespace Intwenty.Controllers
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
 
-        public ApplicationAPIController(IIntwentyDataService ms, IIntwentyModelService sr)
+        public ApplicationAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice)
         {
-            DataRepository = ms;
-            ModelRepository = sr;
+            DataRepository = dataservice;
+            ModelRepository = modelservice;
         }
 
 
@@ -27,8 +27,8 @@ namespace Intwenty.Controllers
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
         /// <param name="id">The data id</param>
-        [HttpGet("/Application/API/GetLatestVersion/{applicationid}/{id}")]
-        public JsonResult GetLatestVersion(int applicationid, int id)
+        [HttpGet]
+        public virtual JsonResult GetLatestVersion(int applicationid, int id)
         {
             var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
             var data = DataRepository.GetLatestVersionById(state);
@@ -40,8 +40,8 @@ namespace Intwenty.Controllers
         /// Get the latest version data for the owning user and with applicationid 
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
-        [HttpGet("/Application/API/GetLatestByLoggedInUser/{applicationid}")]
-        public JsonResult GetLatestByLoggedInUser(int applicationid)
+        [HttpGet]
+        public virtual JsonResult GetLatestByLoggedInUser(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -61,8 +61,8 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
-        [HttpPost("/Application/API/GetListView")]
-        public JsonResult GetListView([FromBody] ListRetrivalArgs model)
+        [HttpPost]
+        public virtual JsonResult GetListView([FromBody] ListRetrivalArgs model)
         {
             var listdata = DataRepository.GetList(model);
             return new JsonResult(listdata);
@@ -71,8 +71,8 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get Domain data based on the meta model for application with Id.
         /// </summary>
-        [HttpGet("/Application/API/GetValueDomains/{id}")]
-        public JsonResult GetValueDomains(int id)
+        [HttpGet]
+        public virtual JsonResult GetValueDomains(int id)
         {
             var data = DataRepository.GetValueDomains(id);
             var res = new JsonResult(data);
@@ -84,8 +84,8 @@ namespace Intwenty.Controllers
         /// Get a dataview record by a search value and a view name.
         /// Used from the LOOKUP Control
         /// </summary>
-        [HttpPost("/Application/API/GetDataViewValue")]
-        public JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
+        [HttpPost]
+        public virtual JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
         {
             var viewitem = DataRepository.GetDataViewRecord(model);
             return new JsonResult(viewitem);
@@ -95,18 +95,18 @@ namespace Intwenty.Controllers
         /// Get a dataview record by a search value and a view name.
         /// Used from the LOOKUP Control
         /// </summary>
-        [HttpPost("/Application/API/GetDataView")]
-        public JsonResult GetDataView([FromBody] ListRetrivalArgs model)
+        [HttpPost]
+        public virtual JsonResult GetDataView([FromBody] ListRetrivalArgs model)
         {
             var dv = DataRepository.GetDataView(model);
             return new JsonResult(dv);
         }
 
         /// <summary>
-        /// Get new NoSeries for fields in the application with Id.
+        /// Get a json structure for a new application, including defaultvalues
         /// </summary>
-        [HttpGet("/Application/API/CreateNew/{id}")]
-        public JsonResult GetDefaultValues(int id)
+        [HttpGet]
+        public virtual JsonResult CreateNew(int id)
         {
             var state = new ClientStateInfo() { ApplicationId = id };
             var t = DataRepository.CreateNew(state);
@@ -115,9 +115,8 @@ namespace Intwenty.Controllers
         }
 
 
-        
-        [HttpPost("/Application/API/Save")]
-        public JsonResult Save([FromBody] System.Text.Json.JsonElement model)
+        [HttpPost]
+        public virtual JsonResult Save([FromBody] System.Text.Json.JsonElement model)
         {
       
             var state = ClientStateInfo.CreateFromJSON(model);
@@ -126,8 +125,8 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost("/Application/API/Delete")]
-        public JsonResult Delete([FromBody] System.Text.Json.JsonElement model)
+        [HttpPost]
+        public virtual JsonResult Delete([FromBody] System.Text.Json.JsonElement model)
         {
 
             var state = ClientStateInfo.CreateFromJSON(model);
@@ -136,8 +135,8 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost("/Application/API/UploadImage")]
-        public async Task<JsonResult> UploadImage(IFormFile file)
+        [HttpPost]
+        public virtual async Task<JsonResult> UploadImage(IFormFile file)
         {
             var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
 
