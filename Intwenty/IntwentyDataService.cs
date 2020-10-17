@@ -20,16 +20,17 @@ namespace Intwenty
 
     public class IntwentyDataService : IIntwentyDataService
     {
-        
-        private IntwentySettings Settings { get; }
 
-        private DBMS DBMSType { get; }
+        protected IntwentySettings Settings { get; }
 
-        private IIntwentyModelService ModelRepository { get; }
+        protected DBMS DBMSType { get; }
 
-        private IMemoryCache ApplicationCache { get; }
+        protected IIntwentyModelService ModelRepository { get; }
 
-        private IDataManager DataManager { get; }
+        protected IMemoryCache ApplicationCache { get; }
+
+        protected DateTime ApplicationSaveTimeStamp { get; }
+
 
         public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache, IDataManager datamanager)
         {
@@ -37,7 +38,7 @@ namespace Intwenty
             ModelRepository = modelservice;
             DBMSType = Settings.DefaultConnectionDBMS;
             ApplicationCache = cache;
-            DataManager = datamanager;
+            ApplicationSaveTimeStamp = DateTime.Now;
         }
 
         public IDataClient GetDataClient()
@@ -45,7 +46,7 @@ namespace Intwenty
            return new Connection(DBMSType, Settings.DefaultConnection);
         }
 
-        public OperationResult CreateNew(ClientStateInfo state)
+        public virtual OperationResult CreateNew(ClientStateInfo state)
         {
             var result = new OperationResult();
 
@@ -98,7 +99,7 @@ namespace Intwenty
             return result;
         }
 
-        private List<DefaultValue> GetDefaultValues(ClientStateInfo state)
+        protected virtual List<DefaultValue> GetDefaultValues(ClientStateInfo state)
         {
             var res = new List<DefaultValue>();
             var model = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == state.ApplicationId);
@@ -150,27 +151,75 @@ namespace Intwenty
 
         }
 
-       
+        #region Save
 
         public OperationResult Save(ClientStateInfo state)
         {
+            if (state == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save application.");
+
+            if (state.ApplicationId < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            OperationResult result = null;
+
             try
             {
-                if (state.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
                 if (model == null)
-                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-                var validation = DataManager.Validate(model, state);
+                result = new OperationResult(true, MessageCode.RESULT, string.Format("Saved application {0}", model.Application.Title), state.Id, state.Version);
+
+                var validation = Validate(model, state);
                 if (validation.IsSuccess)
                 {
                     RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                    var result = DataManager.Save(model,state);
-                    return result;
+                    state.Data.InferModel(model);
 
+                    client.Open();
+
+                    BeforeSave(model, state, client);
+
+                    if (state.Id < 1)
+                    {
+                        state.Id = GetNewSystemID(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
+                        result.Status = LifecycleStatus.NEW_NOT_SAVED;
+                        state.Version = CreateVersionRecord(model, state, client);
+                        BeforeSaveNew(model, state, client);
+                        InsertMainTable(model, state, client);
+                        InsertInformationStatus(model, state, client);
+                        HandleSubTables(model, state, client);
+                        result.Status = LifecycleStatus.NEW_SAVED;
+                    }
+                    else if (state.Id > 0 && model.Application.UseVersioning)
+                    {
+                        result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
+                        state.Version = CreateVersionRecord(model, state, client);
+                        BeforeSaveUpdate(model, state, client);
+                        InsertMainTable(model, state, client);
+                        UpdateInformationStatus(state, client);
+                        HandleSubTables(model, state, client);
+                        result.Status = LifecycleStatus.EXISTING_SAVED;
+                    }
+                    else if (state.Id > 0 && !model.Application.UseVersioning)
+                    {
+                        result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
+                        BeforeSaveUpdate(model, state, client);
+                        UpdateMainTable(model, state, client);
+                        UpdateInformationStatus(state, client);
+                        HandleSubTables(model, state, client);
+                        result.Status = LifecycleStatus.EXISTING_SAVED;
+                    }
+
+                    result.Id = state.Id;
+                    result.Version = state.Version;
+                    AfterSave(model, state, client);
+ 
                 }
                 else
                 {
@@ -179,68 +228,521 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                return result;
             }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
+
+
         }
 
+        protected virtual void BeforeSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+
+        }
+
+        protected virtual void BeforeSaveNew(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+
+        }
+
+        protected virtual void BeforeSaveUpdate(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+
+        }
+
+        protected virtual void AfterSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+
+        }
+
+        protected virtual int GetNewSystemID(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
+        {
+            var m = new SystemID() { ApplicationId = applicationid, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId = 0 };
+            if (metatype == DatabaseModelItem.MetaTypeDataTable)
+            {
+                m.ParentId = state.Id;
+            }
+
+            client.InsertEntity(m);
+
+            return m.Id;
+        }
+
+        private DateTime GetApplicationTimeStamp()
+        {
+            return this.ApplicationSaveTimeStamp;
+
+            /*
+            if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                return this.ApplicationSaveTimeStamp.ToString("yyyy-MM-dd HH:mm:ss");
+            else
+                return this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+                */
+
+        }
+
+        private void InsertMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            var paramlist = new List<ApplicationValue>();
+
+            if (state.Id < 1)
+                throw new InvalidOperationException("Invalid systemid");
+
+            var sql_insert = new StringBuilder();
+            var sql_insert_value = new StringBuilder();
+            sql_insert.Append("INSERT INTO " + model.Application.DbName + " ");
+            sql_insert.Append(" (ID, Version, ApplicationId,  CreatedBy, ChangedBy, OwnedBy, ChangedDate");
+
+            sql_insert_value.Append(" VALUES (");
+            sql_insert_value.Append(" @Id");
+            sql_insert_value.Append(",@Version");
+            sql_insert_value.Append(",@ApplicationId");
+            sql_insert_value.Append(",@CreatedBy");
+            sql_insert_value.Append(",@ChangedBy");
+            sql_insert_value.Append(",@OwnedBy");
+            sql_insert_value.Append(",@ChangedDate");
+
+
+            foreach (var t in state.Data.Values)
+            {
+                if (!t.HasModel)
+                    continue;
+
+                sql_insert.Append("," + t.DbName);
+
+                if (!t.HasValue)
+                {
+                    sql_insert_value.Append(",null");
+                }
+                else
+                {
+                    sql_insert_value.Append(",@" + t.DbName);
+                    paramlist.Add(t);
+                }
+
+            }
+
+            sql_insert.Append(")");
+            sql_insert_value.Append(")");
+            sql_insert.Append(sql_insert_value);
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter("@Id", state.Id));
+            parameters.Add(new IntwentySqlParameter("@Version", state.Version));
+            parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.OwnerUserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
+            SetParameters(paramlist, parameters);
+
+            client.RunCommand(sql_insert.ToString(), parameters: parameters.ToArray());
+
+
+        }
+
+        private void HandleSubTables(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            foreach (var table in state.Data.SubTables)
+            {
+                if (!table.HasModel)
+                    continue;
+
+                foreach (var row in table.Rows)
+                {
+                    if (row.Id < 1 || model.Application.UseVersioning)
+                    {
+                        InsertTableRow(model, row, state, client);
+
+                    }
+                    else
+                    {
+                        UpdateTableRow(row, state, client);
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+
+        private void UpdateMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            var paramlist = new List<ApplicationValue>();
+
+            StringBuilder sql_update = new StringBuilder();
+            sql_update.Append("UPDATE " + model.Application.DbName);
+            sql_update.Append(" set ChangedDate=@ChangedDate");
+            sql_update.Append(",ChangedBy=@ChangedBy");
+
+
+            foreach (var t in state.Data.Values)
+            {
+                if (!t.HasModel)
+                    continue;
+
+                if (!t.HasValue)
+                {
+                    sql_update.Append("," + t.DbName + "=null");
+                }
+                else
+                {
+                    sql_update.Append("," + t.DbName + "=@" + t.DbName);
+                    paramlist.Add(t);
+                }
+
+            }
+
+            sql_update.Append(" WHERE ID=@ID and Version = @Version");
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter("@ID", state.Id));
+            parameters.Add(new IntwentySqlParameter("@Version", state.Version));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
+            SetParameters(paramlist, parameters);
+
+            client.RunCommand(sql_update.ToString(), parameters: parameters.ToArray());
+
+        }
+
+
+
+        private void InsertTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        {
+            var paramlist = new List<ApplicationValue>();
+
+            var rowid = GetNewSystemID(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
+            if (rowid < 1)
+                throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
+
+            var sql_insert = new StringBuilder();
+            var sql_insert_value = new StringBuilder();
+            sql_insert.Append("INSERT INTO " + data.Table.DbName + " ");
+            sql_insert.Append(" (Id, Version, ApplicationId, CreatedBy,  ChangedBy, OwnedBy, ChangedDate, ParentId");
+
+            sql_insert_value.Append(" VALUES (");
+            sql_insert_value.Append(" @Id");
+            sql_insert_value.Append(",@Version");
+            sql_insert_value.Append(",@ApplicationId");
+            sql_insert_value.Append(",@CreatedBy");
+            sql_insert_value.Append(",@ChangedBy");
+            sql_insert_value.Append(",@OwnedBy");
+            sql_insert_value.Append(",@ChangedDate");
+            sql_insert_value.Append(",@ParentId");
+
+
+            foreach (var t in data.Values)
+            {
+                if (!t.HasModel)
+                    continue;
+
+                sql_insert.Append("," + t.DbName);
+
+                if (!t.HasValue)
+                {
+                    sql_insert_value.Append(",null");
+                }
+                else
+                {
+                    sql_insert_value.Append(",@" + t.DbName);
+                    paramlist.Add(t);
+                }
+
+            }
+
+            sql_insert.Append(")");
+            sql_insert_value.Append(")");
+            sql_insert.Append(sql_insert_value.ToString());
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter("@Id", rowid));
+            parameters.Add(new IntwentySqlParameter("@Version", state.Version));
+            parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.OwnerUserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
+            parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
+            SetParameters(paramlist, parameters);
+
+            client.RunCommand(sql_insert.ToString(), parameters: parameters.ToArray());
+
+
+        }
+
+        private void UpdateTableRow(ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        {
+            var paramlist = new List<ApplicationValue>();
+
+            int rowid = 0;
+            StringBuilder sql_update = new StringBuilder();
+            sql_update.Append("UPDATE " + data.Table.DbName);
+            sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
+            sql_update.Append(",ChangedBy=@ChangedBy");
+
+
+            foreach (var t in data.Values)
+            {
+                if (t.DbName.ToLower() == "id")
+                    rowid = t.GetAsInt().Value;
+
+                if (!t.HasModel)
+                    continue;
+
+                if (!t.HasValue)
+                {
+                    sql_update.Append("," + t.DbName + "=null");
+                }
+                else
+                {
+                    sql_update.Append("," + t.DbName + "=@" + t.DbName);
+                    paramlist.Add(t);
+                }
+
+            }
+
+            sql_update.Append(" WHERE ID=@ID and Version = @Version");
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter("@ID", rowid));
+            parameters.Add(new IntwentySqlParameter("@Version", state.Version));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            SetParameters(paramlist, parameters);
+
+            client.RunCommand(sql_update.ToString(), parameters: parameters.ToArray());
+
+        }
+
+        private int CreateVersionRecord(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            int newversion = 0;
+            string sql = String.Empty;
+            sql = "select max(version) from " + model.Application.VersioningTableName;
+            sql += " where ID=" + Convert.ToString(state.Id);
+            sql += " and MetaCode='" + model.Application.MetaCode + "' and MetaType='APPLICATION'";
+
+            object obj = client.GetScalarValue(sql);
+            if (obj != null && obj != DBNull.Value)
+            {
+                newversion = Convert.ToInt32(obj);
+                newversion += 1;
+            }
+            else
+            {
+                newversion = 1;
+            }
+
+            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == DBMSType);
+
+            //DefaultVersioningTableColumns
+            sql = "insert into " + model.Application.VersioningTableName;
+            sql += " (ID, Version, ApplicationId, MetaCode, MetaType, ChangedDate, ParentId)";
+            sql += " VALUES (@P1, @P2, @P3, @P4, @P5, {0}, @P6)";
+            sql = string.Format(sql, getdatecmd.Command);
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter("@P1", state.Id));
+            parameters.Add(new IntwentySqlParameter("@P2", newversion));
+            parameters.Add(new IntwentySqlParameter("@P3", model.Application.Id));
+            parameters.Add(new IntwentySqlParameter("@P4", model.Application.MetaCode));
+            parameters.Add(new IntwentySqlParameter("@P5", "APPLICATION"));
+            parameters.Add(new IntwentySqlParameter("@P6", 0));
+
+            client.RunCommand(sql, parameters: parameters.ToArray());
+
+
+            return newversion;
+        }
+
+        private void InsertInformationStatus(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            var m = new InformationStatus()
+            {
+                Id = state.Id,
+                ApplicationId = model.Application.Id,
+                ChangedBy = state.UserId,
+                ChangedDate = DateTime.Now,
+                CreatedBy = state.UserId,
+                MetaCode = model.Application.MetaCode,
+                OwnedBy = state.OwnerUserId,
+                PerformDate = DateTime.Now,
+                Version = state.Version,
+                EndDate = DateTime.Now,
+                StartDate = DateTime.Now
+            };
+
+            client.InsertEntity(m);
+
+        }
+
+        private void UpdateInformationStatus(ClientStateInfo state, IDataClient client)
+        {
+
+            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == DBMSType);
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { Name = "@ChangedBy", Value = state.UserId });
+            parameters.Add(new IntwentySqlParameter() { Name = "@Version", Value = state.Version });
+            parameters.Add(new IntwentySqlParameter() { Name = "@ID", Value = state.Id });
+
+            client.RunCommand("Update sysdata_InformationStatus set ChangedDate=" + getdatecmd.Command + ", ChangedBy = @ChangedBy, Version = @Version WHERE ID=@ID", parameters: parameters.ToArray());
+
+        }
+
+        private void SetParameters(List<ApplicationValue> paramlist, List<IIntwentySqlParameter> parameters)
+        {
+            foreach (var p in paramlist)
+            {
+                if (p.Model.IsDataTypeText || p.Model.IsDataTypeString)
+                {
+                    var val = p.GetAsString();
+                    if (!string.IsNullOrEmpty(val))
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val));
+                    else
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
+                }
+                else if (p.Model.IsDataTypeInt)
+                {
+                    var val = p.GetAsInt();
+                    if (val.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    else
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
+                }
+                else if (p.Model.IsDataTypeBool)
+                {
+                    var val = p.GetAsBool();
+                    if (val.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    else
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
+                }
+                else if (p.Model.IsDataTypeDateTime)
+                {
+                    var val = p.GetAsDateTime();
+                    if (val.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    else
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
+                }
+                else if (p.Model.IsDataType1Decimal || p.Model.IsDataType2Decimal || p.Model.IsDataType3Decimal)
+                {
+                    var val = p.GetAsDecimal();
+                    if (val.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    else
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
+                }
+            }
+
+        }
+
+        #endregion
+
+        #region Delete
         public OperationResult DeleteById(ClientStateInfo state)
         {
+
+            if (state == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing DeleteById(state).");
+
+            if (state.ApplicationId < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId.");
+
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            OperationResult result=null;
+
             try
             {
-                if (state.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
 
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
-
+               
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                return DataManager.DeleteById(model, state);
-                
+                if (state.Id < 1)
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, "No state.Id found when performing DeleteById(state).", 0, 0);
+
+                result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, 0);
+
+                client.Open();
+                client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+
+                foreach (var table in model.DataStructure)
+                {
+                    if (table.IsMetaTypeDataTable)
+                    {
+                        client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                        client.RunCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                    }
+                }
+
+                client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("Delete Intwenty application by Id failed"));
+                result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
-                return result;
             }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
+
         }
 
         public OperationResult DeleteById(int applicationid, int id, string dbname)
         {
+            
+            if (applicationid < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must contain a valid ApplicationId.");
+
+            if (id < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter id can not be zero.");
+
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
+
+            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (modelitem == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            OperationResult result = null;
+
             try
             {
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must contain a valid ApplicationId");
 
-                if (id < 1)
-                    throw new InvalidOperationException("Parameter id can not be zero");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
-
-                var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == dbname.ToLower());
-                if (modelitem == null)
-                    throw new InvalidOperationException("The dbname did not match the application {0} dbname or any of it's subtables");
+                client.Open();
                 if (modelitem.IsMetaTypeDataTable)
                 {
-                    var client = GetDataClient();
-                    client.Open();
+                    
                     var sysid = client.GetEntity<SystemID>(id);
-                    client.Close();
                     if (sysid == null)
                         throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
                     if (sysid.ParentId < 1)
@@ -252,26 +754,67 @@ namespace Intwenty
                 {
                     RemoveFromApplicationCache(applicationid, id);
                 }
-              
-                return DataManager.DeleteById(model, id, dbname);
-                
+
+
+                if (dbname.ToLower() == model.Application.DbName.ToLower())
+                {
+                    result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
+                    client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                    client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+
+                    foreach (var table in model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable)
+                        {
+                            client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                            client.RunCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                        }
+                    }
+
+                    client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                    client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+
+
+                }
+                else
+                {
+                    foreach (var table in model.DataStructure)
+                    {
+                        if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname.ToLower())
+                        {
+                            result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
+
+                            client.RunCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                            client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+
+                        }
+                    }
+                }
+
+
+                if (result == null)
+                    throw new InvalidOperationException("Found nothing to delete");
+               
+
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
                 result.Messages.Clear();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                return result;
             }
+
+            return result;
         }
+        #endregion
 
-
+        #region Lists
         public OperationResult GetList(ListRetrivalArgs args)
         {
-  
+            OperationResult result = null;
+
             try
             {
 
@@ -282,24 +825,26 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
-                 return DataManager.GetList(model, args);
-                
+                result = GetListInternal(model, args, false, true, true);
+
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
-                return result;
             }
+
+            return result;
         }
 
         public OperationResult GetListByOwnerUser(ListRetrivalArgs args)
         {
 
+            OperationResult result = null;
+
 
             try
             {
@@ -310,29 +855,29 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
 
-              
-                return DataManager.GetListByOwnerUser(model, args);
-                
+                result = GetListInternal(model, args, true, true, true);
 
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
-                return result;
             }
+   
 
-}
+            return result;
+
+        }
 
         public OperationResult GetList(int applicationid)
         {
+            OperationResult result = null;
+
             try
             {
-                OperationResult result = null;
 
                 if (applicationid < 1)
                     throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
@@ -347,19 +892,20 @@ namespace Intwenty
                     return result;
                 }
 
-            
-                result = DataManager.GetList(model);
+                //Postgresql must always use columns in order to set correct case in jsonnames
+                if (DBMSType == DBMS.PostgreSQL)
+                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id }, false, true, false);
+                else
+                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id }, false, false, false);
 
                 if (result.IsSuccess)
                     ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
 
-                return result;
-                
+
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -367,13 +913,17 @@ namespace Intwenty
                 return result;
             }
 
+            return result;
+
         }
 
         public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
         {
+
+            OperationResult result = null;
+
             try
             {
-                OperationResult result = null;
 
                 if (applicationid < 1)
                     throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
@@ -390,8 +940,12 @@ namespace Intwenty
                     return result;
                 }
 
-               
-                result = DataManager.GetListByOwnerUser(model, owneruserid);
+
+                //Postgresql must alwaus use columns in order to set correct case in jsonnames
+                if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id, OwnerUserId = owneruserid }, true, true, false);
+                else
+                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id, OwnerUserId = owneruserid }, true, false, false);
 
                 if (result.IsSuccess)
                 {
@@ -404,18 +958,140 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
-                return result;
             }
+
+            return result;
 
         }
 
+        protected virtual OperationResult GetListInternal(ApplicationModel model, ListRetrivalArgs args, bool getbyowneruser, bool selectcolumns, bool usepaging)
+        {
+            if (args == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Can't get list without ListRetrivalArgs", 0, 0);
 
+            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
+            if (args.MaxCount == 0 && usepaging)
+            {
+
+                var max = client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + model.Application.Id);
+                if (max == DBNull.Value)
+                    args.MaxCount = 0;
+                else
+                    args.MaxCount = Convert.ToInt32(max);
+
+            }
+
+            result.RetriveListArgs = new ListRetrivalArgs();
+            result.RetriveListArgs = args;
+
+
+            try
+            {
+                var columns = new List<IIntwentyResultColumn>();
+                if (selectcolumns)
+                {
+                    columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                    columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                    columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                    columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                    columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+                }
+
+                var sql_list_stmt = new StringBuilder();
+                sql_list_stmt.Append("SELECT t1.* ");
+
+                if (model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) && selectcolumns)
+                {
+
+                    foreach (var t in model.UIStructure)
+                    {
+                        if (t.IsMetaTypeListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
+                        {
+                            sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
+                            columns.Add(t.DataColumnInfo);
+                        }
+                    }
+
+                }
+                else
+                {
+                    foreach (var t in model.DataStructure)
+                    {
+                        if (t.IsMetaTypeDataColumn && t.IsRoot)
+                        {
+                            sql_list_stmt.Append(", t2." + t.DbName + " ");
+                            if (selectcolumns)
+                                columns.Add(t);
+                        }
+                    }
+
+
+                }
+
+                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                if (getbyowneruser)
+                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+
+                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                    sql_list_stmt.Append("AND t2." + args.FilterField + " LIKE '%" + args.FilterValue + "%'  ");
+
+                sql_list_stmt.Append("ORDER BY t1.Id");
+
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                string json = "[]";
+
+                if (getbyowneruser)
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+
+
+
+                if (selectcolumns && usepaging)
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
+                if (!selectcolumns && usepaging)
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray()).ToString();
+                if (!selectcolumns && !usepaging)
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray()).ToString();
+                if (selectcolumns && !usepaging)
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).ToString();
+
+
+                result.Data = json;
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("Fetch list for application {0} failed", model.Application.Title));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "[]";
+
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
+
+
+        }
+
+        #endregion
 
         public OperationResult GetLatestVersionById(ClientStateInfo state)
         {
@@ -550,10 +1226,41 @@ namespace Intwenty
 
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
 
-            return DataManager.Validate(model, state);
+            return Validate(model, state);
         }
 
-       
+        protected virtual OperationResult Validate(ApplicationModel model, ClientStateInfo state)
+        {
+
+            foreach (var t in model.UIStructure)
+            {
+                if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
+                {
+                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
+                    if (dv != null && !dv.HasValue)
+                    {
+                        return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                    }
+                    foreach (var table in state.Data.SubTables)
+                    {
+                        foreach (var row in table.Rows)
+                        {
+                            dv = row.Values.Find(p => p.DbName == t.DataColumnInfo.DbName);
+                            if (dv != null && !dv.HasValue)
+                            {
+                                return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                            }
+                        }
+
+                    }
+
+                }
+            }
+
+            return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
+        }
+
+
 
         public OperationResult GetDataView(ListRetrivalArgs args)
         {
