@@ -53,9 +53,10 @@ namespace IntwentyDemo
             services.Configure<IntwentySettings>(Configuration.GetSection("IntwentySettings"));
 
             //Required for Intwenty: Services
-            services.AddTransient<IDataManager, IntwentyDemoDataManager>();
+            //Override default intwenty dataservice
+            services.AddTransient<IIntwentyDataService, CustomDataService>();
+            //services.AddTransient<IIntwentyDataService, IntwentyDataService>();
             services.AddTransient<IIntwentyModelService, IntwentyModelService>();
-            services.AddTransient<IIntwentyDataService, IntwentyDataService>();
             services.AddTransient<IIntwentySystemEventService, IntwentySystemEventService>();
             services.AddTransient<IEmailSender, EmailService>();
 

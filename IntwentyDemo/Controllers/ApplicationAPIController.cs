@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,8 @@ namespace IntwentyDemo.Controllers
        1.   Name the controller ApplicationAPIController and put in the Controllers folder. 
        2.   Attribute routing must be used otherwise it will be conflicts with routes in the base controller.
     */
+
+    
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationAPIController : Intwenty.Controllers.ApplicationAPIController
     {
@@ -119,4 +122,6 @@ namespace IntwentyDemo.Controllers
 
 
     }
+
+    
 }

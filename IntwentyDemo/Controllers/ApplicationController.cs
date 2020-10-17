@@ -10,6 +10,7 @@ using Intwenty.Interface;
 
 namespace IntwentyDemo.Controllers
 {
+
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationController : Intwenty.Controllers.ApplicationController
     {

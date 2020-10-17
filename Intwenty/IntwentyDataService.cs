@@ -32,7 +32,7 @@ namespace Intwenty
         protected DateTime ApplicationSaveTimeStamp { get; }
 
 
-        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache, IDataManager datamanager)
+        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache)
         {
             Settings = settings.Value;
             ModelRepository = modelservice;
@@ -45,6 +45,8 @@ namespace Intwenty
         {
            return new Connection(DBMSType, Settings.DefaultConnection);
         }
+
+        #region Create
 
         public virtual OperationResult CreateNew(ClientStateInfo state)
         {
@@ -151,10 +153,13 @@ namespace Intwenty
 
         }
 
+        #endregion
+
         #region Save
 
         public OperationResult Save(ClientStateInfo state)
         {
+
             if (state == null)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save application.");
 
@@ -170,7 +175,7 @@ namespace Intwenty
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
                 if (model == null)
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+                   throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
                 result = new OperationResult(true, MessageCode.RESULT, string.Format("Saved application {0}", model.Application.Title), state.Id, state.Version);
 
@@ -228,7 +233,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -264,7 +269,7 @@ namespace Intwenty
 
         }
 
-        protected virtual int GetNewSystemID(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
+        private int GetNewSystemID(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
         {
             var m = new SystemID() { ApplicationId = applicationid, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId = 0 };
             if (metatype == DatabaseModelItem.MetaTypeDataTable)
@@ -655,6 +660,7 @@ namespace Intwenty
         #region Delete
         public OperationResult DeleteById(ClientStateInfo state)
         {
+            OperationResult result = null;
 
             if (state == null)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing DeleteById(state).");
@@ -667,8 +673,6 @@ namespace Intwenty
                 return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
-
-            OperationResult result=null;
 
             try
             {
@@ -700,7 +704,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -716,7 +720,8 @@ namespace Intwenty
 
         public OperationResult DeleteById(int applicationid, int id, string dbname)
         {
-            
+            OperationResult result = null;
+
             if (applicationid < 1)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must contain a valid ApplicationId.");
 
@@ -733,12 +738,11 @@ namespace Intwenty
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
-            OperationResult result = null;
-
             try
             {
 
                 client.Open();
+
                 if (modelitem.IsMetaTypeDataTable)
                 {
                     
@@ -758,7 +762,7 @@ namespace Intwenty
 
                 if (dbname.ToLower() == model.Application.DbName.ToLower())
                 {
-                    result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
+                   
                     client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
 
@@ -773,7 +777,7 @@ namespace Intwenty
 
                     client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-
+                    result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
 
                 }
                 else
@@ -782,11 +786,9 @@ namespace Intwenty
                     {
                         if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname.ToLower())
                         {
-                            result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
-
                             client.RunCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                             client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-
+                            result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
                         }
                     }
                 }
@@ -794,12 +796,11 @@ namespace Intwenty
 
                 if (result == null)
                     throw new InvalidOperationException("Found nothing to delete");
-               
 
             }
             catch (Exception ex)
             {
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -1104,7 +1105,6 @@ namespace Intwenty
             if (state.ApplicationId < 0)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
            
-           
             OperationResult result = null;
 
             if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
@@ -1171,12 +1171,30 @@ namespace Intwenty
 
                 client.Open();
 
-                var t = FetchLatestIdByOwnerUser(model, state, client);
-                if (t.Id < 1)
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = state.ApplicationId });
+                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.OwnerUserId });
 
-                state.Id = t.Id;
-                state.Version = t.Version;
+                var maxid = client.GetScalarValue("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy", parameters: parameters.ToArray());
+                if (maxid != null && maxid != DBNull.Value)
+                {
+
+                    var resultset = client.GetResultSet("SELECT Id,Version from sysdata_InformationStatus where Id = @Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = maxid } });
+                    if (resultset.Rows.Count == 0)
+                    {
+                        client.Close();
+                        return new OperationResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.OwnerUserId));
+                    }
+
+                    state.Id = resultset.FirstRowGetAsInt("Id").Value;
+                    state.Version = resultset.FirstRowGetAsInt("Version").Value;
+                }
+
+                if (state.Id < 1)
+                {
+                    client.Close();
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
+                }
 
                 result = GetLatestVersion(model, state, client);
 
@@ -1331,38 +1349,185 @@ namespace Intwenty
 
         #endregion
 
-
+        #region ValueDomain
         public OperationResult GetValueDomains(int applicationid)
         {
+            OperationResult result = null;
+
+            if (applicationid < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must be a valid ApplicationId.");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
             try
             {
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
-                return DataManager.GetApplicationValueDomains(model);
-                
+
+                var domainindex = 0;
+                var rowindex = 0;
+                var valuedomains = new List<string>();
+                var domains = new List<IResultSet>();
+
+                //COLLECT DOMAINS AND VIEWS USED BY UI
+                foreach (var t in model.UIStructure)
+                {
+                    if (t.HasValueDomain)
+                    {
+                        var domainparts = t.Domain.Split(".".ToCharArray()).ToList();
+                        if (domainparts.Count >= 2)
+                        {
+                            if (!valuedomains.Exists(p => p == domainparts[1]))
+                                valuedomains.Add(domainparts[1]);
+                        }
+                    }
+                }
+
+                client.Open();
+
+                foreach (var d in valuedomains)
+                {
+                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = d } };
+                    var domainset = client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
+                    domainset.Name = d;
+                    domains.Add(domainset);
+                }
+
+                var sb = new StringBuilder();
+                sb.Append("{");
+
+                foreach (IResultSet set in domains)
+                {
+
+                    if (domainindex == 0)
+                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
+                    else
+                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
+
+                    domainindex += 1;
+                    rowindex = 0;
+
+
+                    foreach (var row in set.Rows)
+                    {
+                        if (rowindex == 0)
+                            sb.Append("{");
+                        else
+                            sb.Append(",{");
+
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
+
+                        sb.Append("}");
+                        rowindex += 1;
+                    }
+                    sb.Append("]");
+                }
+                sb.Append("}");
+
+                result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched domains used in ui for application {0}", model.Application.Title), 0, 0);
+                result.Data = sb.ToString();
+
 
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                return result;
+               
             }
+            finally
+            {
+                client.Close();
+            }
+            return result;
 
         }
 
         public OperationResult GetValueDomains()
         {
-            return DataManager.GetValueDomains();
+            OperationResult result = null;
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+               
+                var domainindex = 0;
+                var rowindex = 0;
+                var domains = new List<IResultSet>();
+
+                client.Open();
+
+                var names = client.GetResultSet("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
+                foreach (var d in names.Rows)
+                {
+                    var domainname = d.GetAsString("DomainName");
+                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = domainname } };
+                    var domainset = client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
+                    domainset.Name = domainname;
+                    domains.Add(domainset);
+                }
+
+                var sb = new StringBuilder();
+                sb.Append("{");
+
+                foreach (IResultSet set in domains)
+                {
+
+                    if (domainindex == 0)
+                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
+                    else
+                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
+
+                    domainindex += 1;
+                    rowindex = 0;
+
+
+                    foreach (var row in set.Rows)
+                    {
+                        if (rowindex == 0)
+                            sb.Append("{");
+                        else
+                            sb.Append(",{");
+
+                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
+                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
+                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
+
+                        sb.Append("}");
+                        rowindex += 1;
+                    }
+                    sb.Append("]");
+                }
+                sb.Append("}");
+
+                result = new OperationResult(true, MessageCode.RESULT, "Fetched all value domins", 0, 0);
+                result.Data = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                result = new OperationResult();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, "Fetch all valuedomains failed");
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "[]";
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
         }
 
         public List<ValueDomainModelItem> GetValueDomainItems()
@@ -1374,6 +1539,8 @@ namespace Intwenty
         {
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
+
+        #endregion
 
         #region Validation
 
@@ -1422,18 +1589,154 @@ namespace Intwenty
 
         #endregion
 
+        #region Dataview
 
         public OperationResult GetDataView(ListRetrivalArgs args)
         {
-            return DataManager.GetDataView(args); 
+            OperationResult result = new OperationResult();
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+                var viewinfo = ModelRepository.GetDataViewModels();
+
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
+
+                result.IsSuccess = true;
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv == null)
+                    throw new InvalidOperationException("Could not find dataview to fetch");
+                if (dv.HasNonSelectSql)
+                    throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " (" + dv.MetaCode + ")"));
+
+
+                var columns = new List<IIntwentyResultColumn>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
+                    {
+                        columns.Add(new IntwentyDataColumn() { Name = viewcol.SQLQueryFieldName, DataType = viewcol.DataType });
+                    }
+                }
+
+
+                var sql = string.Format(dv.SQLQuery, " ");
+                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                {
+                    //Infer where formatter
+                    if (!dv.SQLQuery.Contains("{0}"))
+                    {
+                        var tmp = dv.SQLQuery.ToUpper();
+                        var frmind = tmp.IndexOf("FROM");
+                        if (frmind > 5)
+                        {
+                            frmind += 7;
+                            var blankind = tmp.IndexOf(" ", frmind);
+                            sql = tmp.Insert(blankind, "{0}");
+                        }
+                    }
+
+                    sql = string.Format(dv.SQLQuery, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
+                }
+
+                client.Open();
+
+                result.Data = client.GetJSONArray(sql, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), resultcolumns: columns.ToArray());
+
+                result.AddMessage(MessageCode.RESULT, string.Format("Fetched dataview {0}", dv.Title));
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, "Fetch dataview failed");
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "{}";
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
         }
 
         public OperationResult GetDataViewRecord(ListRetrivalArgs args)
         {
-          
-            return DataManager.GetDataViewRecord(args);
-            
+
+            var result = new OperationResult(true, MessageCode.RESULT, "Fetched dataview record");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+
+                var viewinfo = ModelRepository.GetDataViewModels();
+
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
+
+
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
+
+                var sql = "";
+                foreach (var v in viewinfo)
+                {
+                    if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
+                    {
+                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == v.MetaCode);
+                        if (keyfield == null)
+                            continue;
+
+                        sql = string.Format(v.SQLQuery, " WHERE " + keyfield.SQLQueryFieldName + " = @P1 ");
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(sql))
+                    throw new InvalidOperationException("Could not find view and key value in GetDataViewValue(viewinfo, args).");
+
+                var columns = new List<IIntwentyResultColumn>();
+                foreach (var viewcol in viewinfo)
+                {
+                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
+                    {
+                        columns.Add(new IntwentyDataColumn() { Name = viewcol.SQLQueryFieldName, DataType = viewcol.DataType });
+                    }
+                }
+
+                client.Open();
+
+                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValue) }, resultcolumns: columns.ToArray());
+
+
+            }
+            catch (Exception ex)
+            {
+                result.Messages.Clear();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, "Fetch dataview failed");
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "{}";
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
+
         }
+
+        #endregion
 
         public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {

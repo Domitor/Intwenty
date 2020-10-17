@@ -1,4 +1,5 @@
 ﻿using Intwenty.Data.Dto;
+using Intwenty.Data.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using System;
@@ -14,6 +15,7 @@ namespace Intwenty.Interface
         /// </summary>
         /// <returns>An OperationResult including a json object</returns>
         OperationResult CreateNew(ClientStateInfo state);
+
 
         /// <summary>
         /// Saves application data
