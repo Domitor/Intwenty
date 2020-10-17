@@ -1093,47 +1093,73 @@ namespace Intwenty
 
         #endregion
 
+        #region GetApplication
+
         public OperationResult GetLatestVersionById(ClientStateInfo state)
         {
+            if (state == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
+            if (state.Id < 0)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Id is required when executing DefaultDbManager.GetLatestVersionById.");
+            if (state.ApplicationId < 0)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
+           
+           
+            OperationResult result = null;
+
+            if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
+            {
+                return result;
+            }
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
             try
             {
-                OperationResult result = null;
-
-                if (state.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter state must be a valid ApplicationId");
 
                 var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
                 if (model == null)
-                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-                if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
-                {
-                    return result;
-                }
+                client.Open();
 
-                result = DataManager.GetLatestVersionById(model, state);
+                result = GetLatestVersion(model, state, client);
+
                 if (result.IsSuccess)
                 {
                     ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
                 }
-                return result;
-                
 
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                return result;
             }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
         }
 
         public OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
         {
+            OperationResult result = null;
+
+            if (state == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
+            if (string.IsNullOrEmpty(state.OwnerUserId))
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "OwnerUserId is required when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
+            if (state.ApplicationId < 0)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
             try
             {
                 if (state.ApplicationId < 1)
@@ -1143,20 +1169,33 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-               
-                return DataManager.GetLatestVersionByOwnerUser(model,state);
-                
+                client.Open();
+
+                var t = FetchLatestIdByOwnerUser(model, state, client);
+                if (t.Id < 1)
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
+
+                state.Id = t.Id;
+                state.Version = t.Version;
+
+                result = GetLatestVersion(model, state, client);
+
             }
             catch (Exception ex)
             {
-                var result = new OperationResult();
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
                 return result;
             }
+            finally
+            {
+                client.Close();
+            }
+
+            return result;
 
         }
 
@@ -1172,6 +1211,125 @@ namespace Intwenty
             throw new NotImplementedException();
         }
 
+        private OperationResult GetLatestVersion(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            var jsonresult = new StringBuilder();
+
+            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
+
+            try
+            {
+                var columns = new List<IIntwentyResultColumn>();
+                columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+
+
+                var sql_stmt = new StringBuilder();
+                sql_stmt.Append("SELECT t1.* ");
+                foreach (var col in model.DataStructure)
+                {
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                    {
+                        sql_stmt.Append(", t2." + col.DbName + " ");
+                        columns.Add(col);
+
+                    }
+                }
+                sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+                sql_stmt.Append("WHERE t1.ApplicationId = " + model.Application.Id + " ");
+                sql_stmt.Append("AND t1.Id = " + state.Id);
+
+
+                jsonresult.Append("{");
+
+                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray());
+
+                if (appjson.Length < 5)
+                {
+                    jsonresult.Append("}");
+                    result.Messages.Clear();
+                    result.Data = jsonresult.ToString();
+                    result.IsSuccess = false;
+                    result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} returned no data", model.Application.Title));
+                    result.AddMessage(MessageCode.SYSTEMERROR, string.Format("Get latest version for application {0} returned no data", model.Application.Title));
+                    return result;
+                }
+
+                jsonresult.Append("\"" + model.Application.DbName + "\":" + appjson.ToString());
+
+                //SUBTABLES
+                foreach (var t in model.DataStructure)
+                {
+                    if (t.IsMetaTypeDataTable && t.IsRoot)
+                    {
+                        columns = new List<IIntwentyResultColumn>();
+                        columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
+                        columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                        columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+                        columns.Add(new IntwentyDataColumn() { Name = "ParentId", DataType = DatabaseModelItem.DataTypeInt });
+
+                        sql_stmt = new StringBuilder();
+                        sql_stmt.Append("SELECT t1.ApplicationId ");
+                        sql_stmt.Append(", t2.Id ");
+                        sql_stmt.Append(", t2.Version ");
+                        sql_stmt.Append(", t2.ChangedDate ");
+                        sql_stmt.Append(", t2.CreatedBy ");
+                        sql_stmt.Append(", t2.ChangedBy ");
+                        sql_stmt.Append(", t2.OwnedBy ");
+                        sql_stmt.Append(", t2.ParentId ");
+
+                        foreach (var col in model.DataStructure)
+                        {
+                            if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
+                            {
+                                sql_stmt.Append(", t2." + col.DbName + " ");
+                                columns.Add(col);
+                            }
+                        }
+                        sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                        sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
+                        sql_stmt.Append("WHERE t1.ApplicationId = " + model.Application.Id + " ");
+                        sql_stmt.Append("AND t1.Id = " + state.Id);
+
+                        var tablearray = client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray());
+
+
+                        jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
+
+                    }
+                }
+
+                jsonresult.Append("}");
+
+                result.Data = jsonresult.ToString();
+            }
+            catch (Exception ex)
+            {
+
+                result = new OperationResult();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} failed", model.Application.Title));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "{}";
+
+            }
+
+            return result;
+
+        }
+
+
+        #endregion
 
 
         public OperationResult GetValueDomains(int applicationid)
@@ -1217,6 +1375,8 @@ namespace Intwenty
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
 
+        #region Validation
+
         public OperationResult Validate(ClientStateInfo state)
         {
             if (state==null)
@@ -1260,6 +1420,7 @@ namespace Intwenty
             return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
         }
 
+        #endregion
 
 
         public OperationResult GetDataView(ListRetrivalArgs args)
