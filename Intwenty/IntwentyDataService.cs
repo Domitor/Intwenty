@@ -166,6 +166,9 @@ namespace Intwenty
             if (state.ApplicationId < 1)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
+            if (!state.HasData)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
+
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
             OperationResult result = null;
@@ -189,13 +192,19 @@ namespace Intwenty
                     client.Open();
 
                     BeforeSave(model, state, client);
+                    if (!state.Data.HasModel)
+                        state.Data.InferModel(model);
 
                     if (state.Id < 1)
                     {
                         state.Id = GetNewSystemID(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
                         result.Status = LifecycleStatus.NEW_NOT_SAVED;
                         state.Version = CreateVersionRecord(model, state, client);
+
                         BeforeSaveNew(model, state, client);
+                        if (!state.Data.HasModel)
+                            state.Data.InferModel(model);
+
                         InsertMainTable(model, state, client);
                         InsertInformationStatus(model, state, client);
                         HandleSubTables(model, state, client);
@@ -205,7 +214,11 @@ namespace Intwenty
                     {
                         result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                         state.Version = CreateVersionRecord(model, state, client);
+
                         BeforeSaveUpdate(model, state, client);
+                        if (!state.Data.HasModel)
+                            state.Data.InferModel(model);
+
                         InsertMainTable(model, state, client);
                         UpdateInformationStatus(state, client);
                         HandleSubTables(model, state, client);
@@ -215,6 +228,9 @@ namespace Intwenty
                     {
                         result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                         BeforeSaveUpdate(model, state, client);
+                        if (!state.Data.HasModel)
+                            state.Data.InferModel(model);
+
                         UpdateMainTable(model, state, client);
                         UpdateInformationStatus(state, client);
                         HandleSubTables(model, state, client);
@@ -265,6 +281,21 @@ namespace Intwenty
         }
 
         protected virtual void AfterSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+
+        }
+
+        protected virtual void BeforeSaveSubTableRow(ApplicationModel model, ApplicationTableRow row, IDataClient client)
+        {
+
+        }
+
+        protected virtual void BeforeInsertSubTableRow(ApplicationModel model, ApplicationTableRow row, IDataClient client) 
+        {
+
+        }
+
+        protected virtual void BeforeUpdateSubTableRow(ApplicationModel model, ApplicationTableRow row, IDataClient client)
         {
 
         }
@@ -364,13 +395,25 @@ namespace Intwenty
 
                 foreach (var row in table.Rows)
                 {
+                    BeforeSaveSubTableRow(model, row, client);
+                    if (!state.Data.HasModel)
+                        state.Data.InferModel(model);
+
                     if (row.Id < 1 || model.Application.UseVersioning)
                     {
+                        BeforeInsertSubTableRow(model, row, client);
+                        if (!state.Data.HasModel)
+                            state.Data.InferModel(model);
+
                         InsertTableRow(model, row, state, client);
 
                     }
                     else
                     {
+                        BeforeUpdateSubTableRow(model, row, client);
+                        if (!state.Data.HasModel)
+                            state.Data.InferModel(model);
+
                         UpdateTableRow(row, state, client);
 
                     }
@@ -380,6 +423,7 @@ namespace Intwenty
             }
 
         }
+
 
 
 

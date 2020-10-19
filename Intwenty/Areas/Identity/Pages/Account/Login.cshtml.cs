@@ -79,6 +79,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+
             ReturnUrl = returnUrl;
         }
 
@@ -122,6 +123,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                    ReturnUrl = returnUrl;
                     return Page();
                 }
             }

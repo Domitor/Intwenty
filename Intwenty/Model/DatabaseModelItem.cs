@@ -45,10 +45,9 @@ namespace Intwenty.Model
             DbName = entity.DbName;
             Title = entity.DbName;
             DataType = entity.DataType;
-            Domain = entity.Domain;
-            Mandatory = entity.Mandatory;
-            IsUnique = entity.IsUnique;
             Properties = entity.Properties;
+
+
             SetEmptyStrings();
         }
 
@@ -60,7 +59,6 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DbName)) DbName = string.Empty;
             if (string.IsNullOrEmpty(DataType)) DataType = string.Empty;
-            if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(TableName)) TableName = string.Empty;
             if (string.IsNullOrEmpty(ColumnName)) ColumnName = string.Empty;
@@ -79,11 +77,21 @@ namespace Intwenty.Model
 
         public string DataType { get; set; }
 
-        public string Domain { get; set; }
+        public string Domain
+        {
+            get { return GetPropertyValue("DOMAIN"); }
+        }
 
-        public bool Mandatory { get; set; }
+        public bool Mandatory
+        {
+            get { return HasPropertyWithValue("MANDATORY", "TRUE"); }
+        }
 
-        public bool IsUnique { get; set; }
+        public bool Unique
+        {
+            get { return HasPropertyWithValue("UNIQUE", "TRUE"); }
+        }
+
 
         public string Name
         {

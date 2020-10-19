@@ -144,7 +144,7 @@ namespace Intwenty.Data.Dto
         public void SetSuccess(string msg)
         {
             IsSuccess = true;
-            Messages.Add(new OperationMessage(MessageCode.USERERROR, msg));
+            Messages.Add(new OperationMessage(MessageCode.RESULT, msg));
         }
 
         public string UserError

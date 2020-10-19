@@ -469,12 +469,12 @@ namespace Intwenty.Controllers
                             if (s.Contains(":"))
                             {
                                 var subsplit = s.Split(":".ToCharArray());
-                                current.ValidValues.Add(new PropertyPresentation() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.Name });
+                                current.ValidValues.Add(new PropertyItem() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.Name });
 
                             }
                             else
                             {
-                                current.ValidValues.Add(new PropertyPresentation() { PropertyValue = s, Title = s, PropertyCode = current.Name });
+                                current.ValidValues.Add(new PropertyItem() { PropertyValue = s, Title = s, PropertyCode = current.Name });
 
                             }
                         }
@@ -617,6 +617,9 @@ namespace Intwenty.Controllers
                                     state.Id = 0;
                                     state.Version = 0;
                                     state.ApplicationId = app.Application.Id;
+                                    state.AddUpdateProperty("ISIMPORT", "TRUE");
+                                    if (state.HasData)
+                                        state.Data.RemoveKeyValues();
                                     var saveresult = DataRepository.Save(state);
                                     if (saveresult.IsSuccess)
                                         savesuccess += 1;

@@ -52,7 +52,7 @@ namespace Intwenty.Model.DesignerVM
                             if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType) || (input.Id == 0 && input.IsRemoved))
                                 continue;
 
-                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode, Properties = input.GetPropertyStringFromPresentations() };
+                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode, Properties = input.CompilePropertyString() };
                             res.Add(dto);
 
                             if (dto.Id == 0)
@@ -61,7 +61,7 @@ namespace Intwenty.Model.DesignerVM
                             if (input.IsRemoved)
                                 dto.AddUpdateProperty("REMOVED", "TRUE");
 
-                            if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox)
+                            if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox || dto.IsMetaTypeEmailBox)
                             {
                                 if (!string.IsNullOrEmpty(input.ColumnName))
                                 {
@@ -130,7 +130,7 @@ namespace Intwenty.Model.DesignerVM
                                     if (tcol.Id == 0 && tcol.IsRemoved)
                                         continue;
 
-                                    var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode, Properties = tcol.GetPropertyStringFromPresentations() };
+                                    var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode, Properties = tcol.CompilePropertyString() };
                                     res.Add(column);
 
                                     if (column.Id == 0)
@@ -222,7 +222,7 @@ namespace Intwenty.Model.DesignerVM
                         if (uicomp.IsMetaTypePanel)
                         {
                             var pnl = new UserInput() { Id = uicomp.Id, ApplicationId = app.Application.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, MetaType = uicomp.MetaType, Title = uicomp.Title, ParentMetaCode = "ROOT", Properties = uicomp.Properties };
-                            pnl.SetPresentationsFromPropertyString();
+                            pnl.BuildPropertyList();
                             section.LayoutPanels.Add(pnl);
                             foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                             {
@@ -240,10 +240,10 @@ namespace Intwenty.Model.DesignerVM
 
 
                                 //SIMPLE INPUTS
-                                if (uic.IsMetaTypeCheckBox || uic.IsMetaTypeComboBox || uic.IsMetaTypeDatePicker || uic.IsMetaTypeNumBox || uic.IsMetaTypeTextArea || uic.IsMetaTypeTextBox)
+                                if (uic.IsMetaTypeCheckBox || uic.IsMetaTypeComboBox || uic.IsMetaTypeDatePicker || uic.IsMetaTypeNumBox || uic.IsMetaTypeTextArea || uic.IsMetaTypeTextBox || uic.IsMetaTypeEmailBox)
                                 {
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName, Properties = uic.Properties };
-                                    input.SetPresentationsFromPropertyString();
+                                    input.BuildPropertyList();
                                     if (uic.IsDataColumnConnected)
                                     {
                                         input.ColumnName = uic.DataColumnInfo.ColumnName;
@@ -257,7 +257,7 @@ namespace Intwenty.Model.DesignerVM
                                 {
                                 
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName, Properties = uic.Properties };
-                                    input.SetPresentationsFromPropertyString();
+                                    input.BuildPropertyList();
 
                                     //TABLE ND COLUMN(S)
                                     if (uic.IsDataColumnConnected)
@@ -280,7 +280,7 @@ namespace Intwenty.Model.DesignerVM
                                 if (uic.IsMetaTypeEditGrid)
                                 {
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName, Properties = uic.Properties };
-                                    input.SetPresentationsFromPropertyString();
+                                    input.BuildPropertyList();
                                     if (uic.IsDataTableConnected)
                                         input.TableName = uic.DataTableInfo.TableName;
 
@@ -291,7 +291,7 @@ namespace Intwenty.Model.DesignerVM
                                             continue;
 
                                         var child = new UserInput() { Id = gridcol.Id, ApplicationId = app.Application.Id, ColumnOrder = gridcol.ColumnOrder, RowOrder = gridcol.RowOrder, MetaCode = gridcol.MetaCode, MetaType = gridcol.MetaType, Title = gridcol.Title, ParentMetaCode = gridcol.ParentMetaCode, Domain = gridcol.DomainName, Properties = gridcol.Properties };
-                                        child.SetPresentationsFromPropertyString();
+                                        child.BuildPropertyList();
                                         input.Children.Add(child);
 
                                         if (gridcol.IsDataColumnConnected)

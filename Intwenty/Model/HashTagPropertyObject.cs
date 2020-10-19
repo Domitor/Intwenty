@@ -8,19 +8,19 @@ namespace Intwenty.Model
     public class HashTagPropertyObject
     {
 
-        public HashTagPropertyObject()
-        {
-            PropertyPresentations = new List<PropertyPresentation>();
-        }
-
         public string Properties { get; set; }
 
-        public List<PropertyPresentation> PropertyPresentations { get; set; }
+        public List<PropertyItem> PropertyList { get; set; }
 
-
-        public void SetPresentationsFromPropertyString()
+        public HashTagPropertyObject()
         {
-            PropertyPresentations = new List<PropertyPresentation>();
+            PropertyList = new List<PropertyItem>();
+        }
+
+       
+        public void BuildPropertyList()
+        {
+            PropertyList = new List<PropertyItem>();
 
             if (string.IsNullOrEmpty(Properties))
                 return;
@@ -32,26 +32,26 @@ namespace Intwenty.Model
                 var keyval = v.Split("=".ToCharArray());
                 if (keyval.Length == 2)
                 {
-                    var t = new PropertyPresentation() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = keyval[0].ToUpper(), PresentationValue = keyval[1].ToUpper() };
+                    var t = new PropertyItem() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = keyval[0].ToUpper(), PresentationValue = keyval[1].ToUpper() };
                     if (string.IsNullOrEmpty(t.PresentationValue))
                         t.PresentationValue = t.PropertyValue;
 
-                    PropertyPresentations.Add(t);
+                    PropertyList.Add(t);
                 }
             }
         }
 
-        public string GetPropertyStringFromPresentations()
+        public string CompilePropertyString()
         {
-            if (PropertyPresentations == null)
+            if (PropertyList == null)
                 return string.Empty;
 
-            if (PropertyPresentations.Count == 0)
+            if (PropertyList.Count == 0)
                 return string.Empty;
 
             var res = string.Empty;
 
-            foreach (var t in PropertyPresentations)
+            foreach (var t in PropertyList)
             {
 
                 var exists = false;
@@ -215,7 +215,7 @@ namespace Intwenty.Model
 
     }
 
-    public class PropertyPresentation
+    public class PropertyItem
     {
 
         public string Title { get; set; }

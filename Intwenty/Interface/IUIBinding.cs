@@ -16,6 +16,8 @@ namespace Intwenty.Interface
 
         string DataColumnDbName { get; }
 
+        bool ReadOnly { get; }
+
     }
 
     public interface IUIComplexBinding : IUIBinding

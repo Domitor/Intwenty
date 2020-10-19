@@ -13,23 +13,10 @@ namespace Intwenty.Model.DesignerVM
         public static List<DatabaseModelItem> GetDatabaseModel(DBVm model)
         {
             var res = new List<DatabaseModelItem>();
-            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.GetPropertyStringFromPresentations(), DataType = "", MetaCode = p.MetaCode,ParentMetaCode = "ROOT" }));
-            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, DataType = p.DataType, Mandatory = p.Mandatory, Properties = p.GetPropertyStringFromPresentations(), TableName = p.TableName, MetaCode=p.MetaCode }));
+            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.CompilePropertyString(), DataType = "", MetaCode = p.MetaCode,ParentMetaCode = "ROOT" }));
+            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, DataType = p.DataType, Properties = p.CompilePropertyString(), TableName = p.TableName, MetaCode=p.MetaCode }));
 
-            foreach (var t in res)
-            {
-                if (t.IsMetaTypeDataColumn)
-                {
-                    if (t.HasProperty("UNIQUE"))
-                        t.IsUnique = true;
 
-                    t.Domain = t.GetPropertyValue("DOMAIN");
-
-                }
-
-            }
-
-            
             return res;
         }
 
@@ -62,37 +49,28 @@ namespace Intwenty.Model.DesignerVM
         {
             var res = new List<DatabaseTableVm>();
             var table = new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true };
-            table.SetPresentationsFromPropertyString();
+            table.BuildPropertyList();
             res.Add(table);
 
             foreach (var t in app.DataStructure)
             {
                 if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id };
-                    if (t.IsUnique)
-                        col.AddUpdateProperty("UNIQUE", "TRUE");
-                    if (!string.IsNullOrEmpty(t.Domain))
-                        col.AddUpdateProperty("DOMAIN", t.Domain);
-
-                    col.SetPresentationsFromPropertyString();
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
+                    col.BuildPropertyList();
                     res[0].Columns.Add(col);
                 }
 
                 if (t.IsMetaTypeDataTable)
                 {
                     var subtable = new DatabaseTableVm() { Id = t.Id, DbName = t.DbName, MetaCode = t.MetaCode, ParentMetaCode = "ROOT", MetaType = t.MetaType, Properties = t.Properties, Description = t.Description, ApplicationId = app.Application.Id };
-                    subtable.SetPresentationsFromPropertyString();
+                    subtable.BuildPropertyList();
                     foreach (var col in app.DataStructure)
                     {
                         if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                         {
-                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Mandatory = col.Mandatory, Properties = col.Properties, DataType = col.DataType, Description = col.Description, TableName = t.DbName, ApplicationId = app.Application.Id };
-                            if (t.IsUnique)
-                                subtablecolumn.AddUpdateProperty("UNIQUE", "TRUE");
-                            if (!string.IsNullOrEmpty(t.Domain))
-                                subtablecolumn.AddUpdateProperty("DOMAIN", t.Domain);
-                            subtablecolumn.SetPresentationsFromPropertyString();
+                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Properties = col.Properties, DataType = col.DataType, Description = col.Description, TableName = t.DbName, ApplicationId = app.Application.Id };
+                            subtablecolumn.BuildPropertyList();
                             subtable.Columns.Add(subtablecolumn);
                         }
                     }
@@ -106,11 +84,11 @@ namespace Intwenty.Model.DesignerVM
         public static DatabaseTableVm GetListViewTableVm(ApplicationModel app, List<IntwentyDataColumn> intwenty_main_table_columns)
         {
             var table = new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true };
-            table.SetPresentationsFromPropertyString();
+            table.BuildPropertyList();
 
             foreach (var t in intwenty_main_table_columns)
             {
-                 var col = new DatabaseTableColumnVm() { DbName = t.Name, Id = 0, MetaCode = t.Name.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, Mandatory = true, ApplicationId = app.Application.Id };
+                 var col = new DatabaseTableColumnVm() { DbName = t.Name, Id = 0, MetaCode = t.Name.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
                  table.Columns.Add(col);
             }
 
@@ -118,13 +96,8 @@ namespace Intwenty.Model.DesignerVM
             {
                 if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, Mandatory = t.Mandatory, ApplicationId = app.Application.Id };
-                    if (t.IsUnique)
-                        col.AddUpdateProperty("UNIQUE", "TRUE");
-                    if (!string.IsNullOrEmpty(t.Domain))
-                        col.AddUpdateProperty("DOMAIN", t.Domain);
-
-                    col.SetPresentationsFromPropertyString();
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
+                    col.BuildPropertyList();
                     table.Columns.Add(col);
                 }
 
@@ -190,7 +163,6 @@ namespace Intwenty.Model.DesignerVM
         public string DbName { get; set; }
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
-        public bool Mandatory { get; set; }
         public string MetaType { get; set; }
         public string DataType { get; set; }
         public string Description { get; set; }

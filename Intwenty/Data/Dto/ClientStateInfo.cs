@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace Intwenty.Data.Dto
 {
 
-    public class ClientStateInfo
+    public class ClientStateInfo : HashTagPropertyObject
     {
         public static readonly string DEFAULT_USERID = "SYSTEM";
 
@@ -18,8 +18,6 @@ namespace Intwenty.Data.Dto
         public string UserId { get; set; }
 
         public int ApplicationId { get; set; }
-
-        public string Properties { get; set; }
 
         public ApplicationData Data { get; set; }
 
@@ -55,13 +53,7 @@ namespace Intwenty.Data.Dto
             }
         }
 
-        public bool HasDataAndModel
-        {
-            get
-            {
-                return   Data != null && Data.HasDataAndModel;
-            }
-        }
+      
 
        
 

@@ -14,7 +14,7 @@ namespace Intwenty.Model
 
         public List<string> ValidFor { get; set; }
 
-        public List<PropertyPresentation> ValidValues { get; set; }
+        public List<PropertyItem> ValidValues { get; set; }
 
 
         public IntwentyPropertyVm()
@@ -23,7 +23,7 @@ namespace Intwenty.Model
             ValueType = string.Empty;
             Name = string.Empty;
             ValidFor = new List<string>();
-            ValidValues = new List<PropertyPresentation>();
+            ValidValues = new List<PropertyItem>();
         }
 
         public bool IsListType

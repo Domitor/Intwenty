@@ -29,11 +29,28 @@ namespace Intwenty.Data.Dto
             }
         }
 
-        public bool HasDataAndModel
+        public bool HasModel
         {
             get
             {
-                return Values.Count > 0 && Values.Exists(p => p.Model != null);
+
+                if (Values.Exists(p => !p.HasModel))
+                    return false;
+
+                foreach (var tbl in SubTables)
+                {
+                    if (!tbl.HasModel)
+                        return false;
+
+                    foreach (var row in tbl.Rows)
+                    {
+
+                        if (row.Values.Exists(p => !p.HasModel))
+                            return false;
+                    }
+                }
+
+                return true;
             }
         }
 
@@ -208,6 +225,20 @@ namespace Intwenty.Data.Dto
                 }
             }
 
+        }
+
+        public void RemoveKeyValues()
+        {
+            Id = 0;
+            Version = 0;
+            foreach (var t in SubTables)
+            {
+                foreach (var row in t.Rows)
+                {
+                    row.Id = 0;
+                    row.Version = 0;
+                }
+            }
 
         }
 
@@ -234,6 +265,25 @@ namespace Intwenty.Data.Dto
             {
                 return Model != null;
             }
+        }
+
+        public bool HasValue
+        {
+            get
+            {
+                if (Value == null)
+                    return false;
+
+                if (Value == DBNull.Value)
+                    return false;
+
+                if (string.IsNullOrEmpty(Convert.ToString(Value)))
+                    return false;
+
+                return true;
+
+            }
+
         }
 
         public void SetValue(object value)
@@ -281,24 +331,7 @@ namespace Intwenty.Data.Dto
             return null;
         }
 
-        public bool HasValue
-        {
-            get
-            {
-                if (Value == null)
-                    return false;
-
-                if (Value == DBNull.Value)
-                    return false;
-
-                if (string.IsNullOrEmpty(Convert.ToString(Value)))
-                    return false;
-
-                return true;
-
-            }
-
-        }
+       
     }
 
     public class ApplicationTable

@@ -394,6 +394,14 @@ namespace Intwenty.Model
             }
         }
 
+        public bool ReadOnly
+        {
+            get
+            {
+                return HasPropertyWithValue("READONLY", "TRUE"); 
+            }
+        }
+
         public string DataTableDbName
         {
             get 

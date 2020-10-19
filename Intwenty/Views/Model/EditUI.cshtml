@@ -114,6 +114,7 @@
                                                         <div class="dropdown-menu dropdown-menu-lg-right">
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'TEXTBOX')">Textbox</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'NUMBOX')">Numeric</a>
+                                                            <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'EMAILBOX')">Email</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'TEXTAREA')">Textarea</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'CHECKBOX')">Checkbox</a>
                                                             <a class="dropdown-item" href="#" v-on:click="setUserInput(input,'COMBOBOX')">Combobox</a>
@@ -141,6 +142,12 @@
                                                         <div v-if="input.metaType==='NUMBOX'">
                                                             <div class="form-group">
                                                                 <input type="number" class="form-control form-control-sm" disabled />
+                                                            </div>
+                                                        </div>
+
+                                                        <div v-if="input.metaType==='EMAILBOX'">
+                                                            <div class="form-group">
+                                                                <input type="email" class="form-control form-control-sm" disabled />
                                                             </div>
                                                         </div>
 

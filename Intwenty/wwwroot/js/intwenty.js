@@ -65,20 +65,20 @@ Vue.prototype.currentProperties = function (item) {
     if (!item)
         return [];
 
-    if (!item.propertyPresentations)
+    if (!item.propertyList)
         return [];
 
     if (!context.metaproperties)
-        return item.propertyPresentations;
+        return item.propertyList;
 
-    for (var i = 0; i < item.propertyPresentations.length; i++) {
-        var t = context.metaproperties.firstOrDefault({ name: item.propertyPresentations[i].propertyCode });
+    for (var i = 0; i < item.propertyList.length; i++) {
+        var t = context.metaproperties.firstOrDefault({ name: item.propertyList[i].propertyCode });
         if (t != null) {
-            item.propertyPresentations[i].title = t.title;
+            item.propertyList[i].title = t.title;
         }
     }
 
-    return item.propertyPresentations;
+    return item.propertyList;
 };
 
 Vue.prototype.addProperty = function (modelitem) {
@@ -89,13 +89,13 @@ Vue.prototype.addProperty = function (modelitem) {
     if (!modelitem.currentProperty)
         return;
 
-    if (!modelitem.propertyPresentations)
+    if (!modelitem.propertyList)
         return;
 
     if (modelitem.currentProperty.isBoolType)
         modelitem.currentProperty.currentValue = "TRUE";
 
-    var t = modelitem.propertyPresentations.firstOrDefault({ propertyCode: modelitem.currentProperty.name });
+    var t = modelitem.propertyList.firstOrDefault({ propertyCode: modelitem.currentProperty.name });
     if (t != null)
         return;
 
@@ -103,7 +103,7 @@ Vue.prototype.addProperty = function (modelitem) {
         return;
 
 
-    modelitem.propertyPresentations.push({ propertyCode: modelitem.currentProperty.name, title: modelitem.currentProperty.title, propertyValue: modelitem.currentProperty.currentValue, presentationValue: modelitem.currentProperty.currentValue });
+    modelitem.propertyList.push({ propertyCode: modelitem.currentProperty.name, title: modelitem.currentProperty.title, propertyValue: modelitem.currentProperty.currentValue, presentationValue: modelitem.currentProperty.currentValue });
 
     modelitem.currentProperty.currentValue = "";
 };
@@ -116,12 +116,12 @@ Vue.prototype.deleteProperty = function (property, modelitem) {
     if (!modelitem)
         return;
 
-    if (!modelitem.propertyPresentations)
+    if (!modelitem.propertyList)
         return;
 
-    for (var i = 0; i < modelitem.propertyPresentations.length; i++) {
-        if (modelitem.propertyPresentations[i].propertyCode === property.propertyCode) {
-            modelitem.propertyPresentations.splice(i, 1);
+    for (var i = 0; i < modelitem.propertyList.length; i++) {
+        if (modelitem.propertyList[i].propertyCode === property.propertyCode) {
+            modelitem.propertyList.splice(i, 1);
             break;
         }
     }

@@ -441,7 +441,7 @@ namespace Intwenty
                 if (entity == null)
                     return model;
 
-                entity.MetaCode = model.MetaCode;
+                //entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
                 //entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
@@ -454,7 +454,7 @@ namespace Intwenty
                     menuitem.Controller = model.MainMenuItem.Controller;
                     menuitem.Title = model.MainMenuItem.Title;
                     //menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
-          
+
                     Client.UpdateEntity(menuitem);
                     Client.Close();
 
@@ -463,6 +463,9 @@ namespace Intwenty
                 {
                     CreateApplicationMenuItem(model);
                 }
+
+                Client.UpdateEntity(entity);
+                Client.Close();
 
                 return new ApplicationModelItem(entity);
 
@@ -691,13 +694,10 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.DataType = dbi.DataType;
-                        existing.Domain = dbi.Domain;
-                        existing.IsUnique = dbi.IsUnique;
                         existing.MetaType = dbi.MetaType;
                         existing.Description = dbi.Description;
                         existing.ParentMetaCode = dbi.ParentMetaCode;
                         existing.DbName = dbi.DbName;
-                        existing.Mandatory = dbi.Mandatory;
                         existing.Properties = dbi.Properties;
                         Client.UpdateEntity(existing);
                     }
@@ -750,13 +750,11 @@ namespace Intwenty
             {
                 AppMetaCode = dto.AppMetaCode,
                 Description = dto.Description,
-                Domain = dto.Domain,
                 MetaCode = dto.MetaCode,
                 MetaType = dto.MetaType,
                 ParentMetaCode = dto.ParentMetaCode,
                 DbName = dto.DbName,
                 DataType = dto.DataType,
-                Mandatory = dto.Mandatory,
                 Properties = dto.Properties
             };
 
@@ -1072,7 +1070,7 @@ namespace Intwenty
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "MANDATORY", Value = "Is Mandatory", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "UNIQUE", Value = "Unique Value", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DOMAIN", Value = "Validation Domain", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX" });
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX,EMAILBOX" });
 
 
             return res;

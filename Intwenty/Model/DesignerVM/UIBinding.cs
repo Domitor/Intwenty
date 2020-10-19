@@ -13,6 +13,8 @@ namespace Intwenty.Model.DesignerVM
 
         public bool Mandatory { get; set; }
 
+        public bool ReadOnly { get; set; }
+
         public string DataTableDbName { get; set; }
 
         public string DataColumnDbName{ get; set; }

@@ -31,13 +31,9 @@ namespace Intwenty.Data.Entity
 
         public string DataType { get; set; }
 
-        public string Domain { get; set; }
-
         public string Properties { get; set; }
 
-        public bool Mandatory { get; set; }
 
-        public bool IsUnique { get; set; }
     }
 
    

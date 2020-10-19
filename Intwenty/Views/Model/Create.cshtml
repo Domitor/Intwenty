@@ -53,8 +53,7 @@
                         contentType: "application/json",
                         data: JSON.stringify(context.model),
                         success: function (response) {
-                            endpointurl = baseurl + "Edit/" + response.id;
-                            window.location.href = endpointurl;
+                            window.location.href = '@Url.Content("~/Model/")' + "Edit/" + response.id;
                         }
                     });
                 },
