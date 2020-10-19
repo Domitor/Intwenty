@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IntwentyDemo.Data
 {
@@ -56,7 +57,13 @@ namespace IntwentyDemo.Data
                     var customerid = state.Data.GetAsString("CustomerId");
                     if (string.IsNullOrEmpty(customerid))
                         return;
+
                     client.RunCommand(string.Format("update customer set customerstatus='ACTIVE' where customerid='{0}'", customerid));
+
+                    var customer = client.GetResultSet(string.Format("select * from customer where customerid='{0}'", customerid));
+
+                    RemoveFromApplicationCache(10, customer.FirstRowGetAsInt("Id").Value);
+
                 }
                 else
                     base.BeforeSave(model, state, client);

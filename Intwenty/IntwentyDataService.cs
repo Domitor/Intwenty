@@ -1847,7 +1847,7 @@ namespace Intwenty
             ApplicationCache.Set("CACHEDUSERS", users);
         }
 
-        private void RemoveFromApplicationCache(int applicationid, int id)
+        protected void RemoveFromApplicationCache(int applicationid, int id)
         {
             ApplicationCache.Remove(string.Format("APP_APPID_{0}_ID_{1}", applicationid, id));
             ApplicationCache.Remove(string.Format("APPLIST_APPID_{0}", applicationid));
