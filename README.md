@@ -2,7 +2,7 @@
 
 
 # Intwenty
-Create metadata driven applications with java script and ASP.NET Core. 
+Create metadata driven applications with Vue.js and ASP.NET Core. 
 - Define metadata for your datamodel and let Intwenty generate your database structure along with your needs for storing and retriving information.
 - Define your UI model and let intwenty generate your UI.
 - UI Model and data model can be defined either programaticly or with included visual management UI:s
