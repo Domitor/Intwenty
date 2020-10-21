@@ -5,8 +5,10 @@
 Create metadata driven applications with java script and ASP.NET Core. 
 - Define metadata for your datamodel and let Intwenty generate your database structure along with your needs for storing and retriving information.
 - Define your UI model and let intwenty generate your UI.
+- UI Model and data model can be defined either programaticly or with included visual management UI:s
 - Implements Asp.Net Core Identity, without any need of entity framework.
 - Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
+- The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
 
 
 # How to ?
