@@ -24,6 +24,7 @@ using Intwenty.Interface;
 using Intwenty.Data;
 using IntwentyDemo.Data;
 
+
 namespace IntwentyDemo
 {
     public class Startup
@@ -154,6 +155,8 @@ namespace IntwentyDemo
   
             services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
 
+            services.AddSwaggerGen();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -180,7 +183,17 @@ namespace IntwentyDemo
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseRequestLocalization();
-           
+
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             if (Settings.ForceTwoFactorAuthentication)
             {
@@ -198,12 +211,22 @@ namespace IntwentyDemo
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller= "ApplicationAPI" });
                 endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 
+                //Register dynamic API:s
+                var modelservice = app.ApplicationServices.GetRequiredService<IIntwentyModelService>();
+                var apps = modelservice.GetApplicationModels();
+                foreach (var a in apps)
+                {
+                    endpoints.MapControllerRoute(a.Application.MetaCode + "_route_1", "/" + a.Application.DbName + "/API/{action=All}/{id?}", defaults: new { controller = "DynamicApplication" });
+                }
+
                 endpoints.MapRazorPages();
 
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
             });
 
-       
+
+
+
 
         }
     }

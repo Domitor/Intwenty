@@ -17,6 +17,7 @@ using Intwenty.Interface;
 namespace Intwenty.Controllers
 {
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class ModelAPIController : Controller
     {

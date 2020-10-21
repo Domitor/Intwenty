@@ -9,6 +9,7 @@ using Intwenty.Interface;
 
 namespace Intwenty.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationController : Controller
     {
