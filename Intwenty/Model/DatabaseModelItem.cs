@@ -46,9 +46,31 @@ namespace Intwenty.Model
             Title = entity.DbName;
             DataType = entity.DataType;
             Properties = entity.Properties;
+            if (IsMetaTypeDataTable)
+                TableName = DbName;
+            if (IsMetaTypeDataColumn)
+                ColumnName = DbName;
 
 
             SetEmptyStrings();
+        }
+
+        public static DatabaseModelItem CreateFrameworkColumn(int id, string appmetacode, string tablename, string dbname, string datatype, string parentmetacode="ROOT")
+        {
+            var res = new DatabaseModelItem();
+            res.Id = id;
+            res.MetaType = MetaTypeDataColumn;
+            res.AppMetaCode = appmetacode;
+            res.ColumnName = dbname;
+            res.TableName = tablename;
+            res.DataType = datatype;
+            res.Title = dbname;
+            res.MetaCode = appmetacode.ToUpper() + "_SYS_" + dbname.ToUpper();
+            res.ParentMetaCode = parentmetacode;
+            res.Properties = string.Empty;
+            res.IsFrameworkItem = true;
+
+            return res;
         }
 
         private void SetEmptyStrings()
@@ -76,6 +98,8 @@ namespace Intwenty.Model
         public string ColumnName { get; set; }
 
         public string DataType { get; set; }
+
+        public bool IsFrameworkItem { get; set; }
 
         public string Domain
         {

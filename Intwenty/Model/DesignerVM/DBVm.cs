@@ -81,22 +81,16 @@ namespace Intwenty.Model.DesignerVM
             return res;
         }
 
-        public static DatabaseTableVm GetListViewTableVm(ApplicationModel app, List<IntwentyDataColumn> intwenty_main_table_columns)
+        public static DatabaseTableVm GetListViewTableVm(ApplicationModel app)
         {
             var table = new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true };
             table.BuildPropertyList();
-
-            foreach (var t in intwenty_main_table_columns)
-            {
-                 var col = new DatabaseTableColumnVm() { DbName = t.Name, Id = 0, MetaCode = t.Name.ToUpper(), ParentMetaCode = "ROOT", MetaType = DatabaseModelItem.MetaTypeDataColumn , Properties = string.Empty, DataType = t.DataType, Description = string.Empty, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
-                 table.Columns.Add(col);
-            }
 
             foreach (var t in app.DataStructure)
             {
                 if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id, IsFrameworkItem = t.IsFrameworkItem };
                     col.BuildPropertyList();
                     table.Columns.Add(col);
                 }
@@ -167,6 +161,8 @@ namespace Intwenty.Model.DesignerVM
         public string DataType { get; set; }
         public string Description { get; set; }
         public string TableName { get; set; }
+        public bool IsFrameworkItem { get; set; }
+
 
 
         public DatabaseTableColumnVm()

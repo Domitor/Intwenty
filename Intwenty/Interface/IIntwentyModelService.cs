@@ -94,10 +94,10 @@ namespace Intwenty.Interface
 
         public OperationResult ValidateModel();
 
-        public List<IntwentyDataColumn> GetDefaultMainTableColumns();
+        //public List<IntwentyDataColumn> GetDefaultMainTableColumns();
 
 
-        public List<IntwentyDataColumn> GetDefaultSubTableColumns();
+        //public List<IntwentyDataColumn> GetDefaultSubTableColumns();
 
 
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();

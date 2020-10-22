@@ -104,43 +104,7 @@ namespace Intwenty.Controllers
         {
             var res = new List<ApplicationModel>();
             var appmodels = ModelRepository.GetApplicationModels();
-            var main = ModelRepository.GetDefaultMainTableColumns();
-            var subs = ModelRepository.GetDefaultSubTableColumns();
-
-            //NEW LIST
-            foreach (var m in appmodels)
-                res.Add(new ApplicationModel() { Application = m.Application, DataStructure = new List<DatabaseModelItem>(), UIStructure = m.UIStructure });
-
-            //ADD DEFAULT COLUMNS
-            foreach (var m in res)
-            {
-                var app = appmodels.Find(p => p.Application.Id == m.Application.Id);
-                if (app == null)
-                    continue;
-
-                foreach (var defcol in main)
-                {
-                    m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode=app.Application.MetaCode, DbName = defcol.Name, DataType = defcol.DataType, MetaCode = defcol.Name.ToUpper(), ParentMetaCode = DatabaseModelItem.MetaTypeRoot, Title = defcol.Name, TableName = app.Application.DbName, Properties= "INTWENTYDEFAULTCOLUMN=TRUE" });
-                }
-                foreach (var ds in app.DataStructure.Where(p=> p.IsMetaTypeDataColumn && p.IsRoot))
-                {
-                    m.DataStructure.Add(ds);
-                }
-                foreach (var ds in app.DataStructure.Where(p => p.IsMetaTypeDataTable && p.IsRoot))
-                {
-                    m.DataStructure.Add(ds);
-                    foreach (var defcol in subs)
-                    {
-                        m.DataStructure.Add(new DatabaseModelItem(DatabaseModelItem.MetaTypeDataColumn) { AppMetaCode = app.Application.MetaCode, DbName = defcol.Name, DataType = defcol.DataType, MetaCode = defcol.Name.ToUpper(), ParentMetaCode = ds.MetaCode, Title = defcol.Name, TableName = app.Application.DbName, Properties = "INTWENTYDEFAULTCOLUMN=TRUE" });
-                    }
-                    foreach (var subtblcol in app.DataStructure.Where(p => p.IsMetaTypeDataColumn && p.ParentMetaCode == ds.MetaCode))
-                    {
-                        m.DataStructure.Add(subtblcol);
-                    }
-                }
-            }
-
-            return View(res);
+            return View(appmodels);
         }
 
         public IActionResult ToolGenerateTestData()

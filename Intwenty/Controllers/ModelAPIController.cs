@@ -201,8 +201,7 @@ namespace Intwenty.Controllers
         public JsonResult GetListviewTable(int applicationid)
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            var defcols = ModelRepository.GetDefaultMainTableColumns();
-            return new JsonResult(DatabaseModelCreator.GetListViewTableVm(t, defcols));
+            return new JsonResult(DatabaseModelCreator.GetListViewTableVm(t));
 
         }
 

@@ -333,43 +333,44 @@ namespace Intwenty
 
         private void InsertMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
-            var paramlist = new List<ApplicationValue>();
+            var valuelist = new List<ApplicationValue>();
 
             if (state.Id < 1)
                 throw new InvalidOperationException("Invalid systemid");
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + model.Application.DbName + " ");
-            sql_insert.Append(" (ID, Version, ApplicationId,  CreatedBy, ChangedBy, OwnedBy, ChangedDate");
-
+            sql_insert.Append("INSERT INTO " + model.Application.DbName + " (");
             sql_insert_value.Append(" VALUES (");
-            sql_insert_value.Append(" @Id");
-            sql_insert_value.Append(",@Version");
-            sql_insert_value.Append(",@ApplicationId");
-            sql_insert_value.Append(",@CreatedBy");
-            sql_insert_value.Append(",@ChangedBy");
-            sql_insert_value.Append(",@OwnedBy");
-            sql_insert_value.Append(",@ChangedDate");
+            char sep = ' ';
+          
 
+            foreach (var t in model.DataStructure.Where(p=> p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem))
+            {
+                sql_insert.Append(sep + t.DbName);
+                sql_insert_value.Append(sep + "@" + t.DbName);
+                sep = ',';
+            }
 
             foreach (var t in state.Data.Values)
             {
                 if (!t.HasModel)
                     continue;
 
-                sql_insert.Append("," + t.DbName);
+                if (t.Model.IsFrameworkItem)
+                    continue;
+
+                sql_insert.Append(sep + t.DbName);
 
                 if (!t.HasValue)
                 {
-                    sql_insert_value.Append(",null");
+                    sql_insert_value.Append(sep + "null");
                 }
                 else
                 {
-                    sql_insert_value.Append(",@" + t.DbName);
-                    paramlist.Add(t);
+                    sql_insert_value.Append(sep + "@" + t.DbName);
+                    valuelist.Add(t);
                 }
-
             }
 
             sql_insert.Append(")");
@@ -384,7 +385,7 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@OwnedBy", state.OwnerUserId));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
-            SetParameters(paramlist, parameters);
+            SetParameters(valuelist, parameters);
 
             client.RunCommand(sql_insert.ToString(), parameters: parameters.ToArray());
 
@@ -484,23 +485,25 @@ namespace Intwenty
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + data.Table.DbName + " ");
-            sql_insert.Append(" (Id, Version, ApplicationId, CreatedBy,  ChangedBy, OwnedBy, ChangedDate, ParentId");
-
+            sql_insert.Append("INSERT INTO " + data.Table.DbName + " (");
             sql_insert_value.Append(" VALUES (");
-            sql_insert_value.Append(" @Id");
-            sql_insert_value.Append(",@Version");
-            sql_insert_value.Append(",@ApplicationId");
-            sql_insert_value.Append(",@CreatedBy");
-            sql_insert_value.Append(",@ChangedBy");
-            sql_insert_value.Append(",@OwnedBy");
-            sql_insert_value.Append(",@ChangedDate");
-            sql_insert_value.Append(",@ParentId");
+            char sep = ' ';
+
+
+            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == data.Table.Model.MetaCode))
+            {
+                sql_insert.Append(sep + t.DbName);
+                sql_insert_value.Append(sep + "@" + t.DbName);
+                sep = ',';
+            }
 
 
             foreach (var t in data.Values)
             {
                 if (!t.HasModel)
+                    continue;
+
+                if (t.Model.IsFrameworkItem)
                     continue;
 
                 sql_insert.Append("," + t.DbName);
@@ -656,9 +659,9 @@ namespace Intwenty
 
         }
 
-        private void SetParameters(List<ApplicationValue> paramlist, List<IIntwentySqlParameter> parameters)
+        private void SetParameters(List<ApplicationValue> values, List<IIntwentySqlParameter> parameters)
         {
-            foreach (var p in paramlist)
+            foreach (var p in values)
             {
                 if (p.Model.IsDataTypeText || p.Model.IsDataTypeString)
                 {
