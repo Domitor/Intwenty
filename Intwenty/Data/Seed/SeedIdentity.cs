@@ -37,6 +37,7 @@ namespace Intwenty.Data.Seed
             var u = userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
             if (u.Result != null)
             {
+                return;
                 userManager.RemoveFromRoleAsync(u.Result, "ADMINISTRATOR");
                 userManager.DeleteAsync(u.Result);
             }

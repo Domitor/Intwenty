@@ -23,7 +23,8 @@ using Intwenty.Services;
 using Intwenty.Interface;
 using Intwenty.Data;
 using IntwentyDemo.Data;
-
+using Intwenty.Data.Routing;
+using Intwenty.Data.API;
 
 namespace IntwentyDemo
 {
@@ -155,7 +156,8 @@ namespace IntwentyDemo
   
             services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
 
-            services.AddSwaggerGen();
+
+            services.AddIntwentyAPI();
 
         }
 
@@ -185,47 +187,16 @@ namespace IntwentyDemo
             app.UseRequestLocalization();
 
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
+            app.UseIntwentyAPI();
 
             if (Settings.ForceTwoFactorAuthentication)
             {
-                app.UseForceMFAMiddleware();
+                app.UseIntwentyForceMFA();
             }
 
-            app.UseEndpoints(endpoints =>
-            {
+            app.UseIntwentyRouting();
 
-                endpoints.MapDefaultControllerRoute();
-
-                //INTWENTY ROUTING
-                endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
-                endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
-                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller= "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
-
-                //Register dynamic API:s
-                var modelservice = app.ApplicationServices.GetRequiredService<IIntwentyModelService>();
-                var apps = modelservice.GetApplicationModels();
-                foreach (var a in apps)
-                {
-                    endpoints.MapControllerRoute(a.Application.MetaCode + "_route_1", "/" + a.Application.DbName + "/API/{action=All}/{id?}", defaults: new { controller = "DynamicApplication" });
-                }
-
-                endpoints.MapRazorPages();
-
-                endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
-            });
-
-
-
+          
 
 
         }

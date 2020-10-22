@@ -83,10 +83,10 @@ namespace Intwenty
                 {
                     if (dbtbl.IsMetaTypeDataTable && dbtbl.IsRoot)
                     {
-                        sb.Append(",\""+ dbtbl .DbName+ "\":[]");
+                        sb.Append(",\"" + dbtbl.DbName + "\":[]");
                     }
                 }
-               
+
                 sb.Append("}");
 
                 result.Data = sb.ToString();
@@ -96,6 +96,10 @@ namespace Intwenty
             catch (Exception ex)
             {
                 result.SetError(ex.Message, "Error when creating a new application");
+            }
+            finally
+            {
+                result.Finish();
             }
 
             return result;
@@ -258,6 +262,7 @@ namespace Intwenty
             finally
             {
                 client.Close();
+                result.Finish();
             }
 
             return result;
@@ -1168,6 +1173,7 @@ namespace Intwenty
                 client.Open();
 
                 result = GetLatestVersion(model, state, client);
+             
 
                 if (result.IsSuccess)
                 {
@@ -1186,6 +1192,7 @@ namespace Intwenty
             finally
             {
                 client.Close();
+                result.Finish();
             }
 
             return result;
@@ -1384,6 +1391,10 @@ namespace Intwenty
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
 
+            }
+            finally
+            {
+                result.Finish();
             }
 
             return result;
@@ -1628,7 +1639,7 @@ namespace Intwenty
                 }
             }
 
-            return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
+            return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
         }
 
         #endregion
@@ -1707,6 +1718,7 @@ namespace Intwenty
             finally
             {
                 client.Close();
+                result.Finish();
             }
 
             return result;
@@ -1774,6 +1786,7 @@ namespace Intwenty
             finally
             {
                 client.Close();
+                result.Finish();
             }
 
             return result;

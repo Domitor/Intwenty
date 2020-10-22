@@ -49,7 +49,7 @@ namespace Intwenty.Areas.Identity.Data
 
     public static class ForceMFAMiddlewareBuilder
     {
-        public static IApplicationBuilder UseForceMFAMiddleware(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseIntwentyForceMFA(this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<ForceMFAMiddleware>();
         }
