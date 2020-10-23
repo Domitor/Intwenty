@@ -106,6 +106,8 @@ Vue.prototype.addProperty = function (modelitem) {
     modelitem.propertyList.push({ propertyCode: modelitem.currentProperty.name, title: modelitem.currentProperty.title, propertyValue: modelitem.currentProperty.currentValue, presentationValue: modelitem.currentProperty.currentValue });
 
     modelitem.currentProperty.currentValue = "";
+
+    this.$forceUpdate();
 };
 
 Vue.prototype.deleteProperty = function (property, modelitem) {
@@ -132,6 +134,8 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
         return;
 
     modelitem.currentProperty = {};
+    if (!modelitem.propertyList)
+        modelitem.propertyList = []; 
 
     if (!modelitem.hasOwnProperty("showSettings"))
         modelitem.showSettings = false;

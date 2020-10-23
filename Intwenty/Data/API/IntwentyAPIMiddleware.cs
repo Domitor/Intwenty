@@ -62,7 +62,7 @@ namespace Intwenty.Data.API
             // specifying the Swagger JSON endpoint.
             builder.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Intwenty API V1");
                 
                
             });

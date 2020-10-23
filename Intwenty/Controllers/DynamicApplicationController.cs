@@ -67,10 +67,14 @@ namespace Intwenty.Controllers
                 if (model == null)
                     return new BadRequestResult();
 
+                /*
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var res = client.GetJSONArray(string.Format("select * from {0} order by id", dbname.ToLower()));
                 client.Close();
+                */
+
+                var res = DataRepository.GetList(model.Application.Id);
 
                 return new JsonResult(res);
             }
@@ -79,6 +83,28 @@ namespace Intwenty.Controllers
                 return Unauthorized();
             }
           
+
+        }
+
+        [HttpPost]
+        public IActionResult Save([FromBody] System.Text.Json.JsonElement data)
+        {
+            if (IsAuthenticated())
+            {
+                var dbname = GetApplicationFromPath();
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == dbname);
+                if (model == null)
+                    return new BadRequestResult();
+
+                var state = ClientStateInfo.CreateFromJSON(data);
+                var res = DataRepository.Save(state);
+                return new JsonResult(res);
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
 
         }
 
@@ -121,9 +147,7 @@ namespace Intwenty.Controllers
             
         }
 
-
-
-
+       
 
 
     }
