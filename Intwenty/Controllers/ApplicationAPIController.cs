@@ -64,7 +64,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public virtual JsonResult GetListView([FromBody] ListRetrivalArgs model)
         {
-            var listdata = DataRepository.GetList(model);
+            var listdata = DataRepository.GetListViewData(model);
             return new JsonResult(listdata);
         }
 

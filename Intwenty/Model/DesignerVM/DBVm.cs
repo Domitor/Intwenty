@@ -56,7 +56,7 @@ namespace Intwenty.Model.DesignerVM
             {
                 if (t.IsMetaTypeDataColumn && t.IsRoot)
                 {
-                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id };
+                    var col = new DatabaseTableColumnVm() { DbName = t.DbName, Id = t.Id, MetaCode = t.MetaCode, ParentMetaCode = t.ParentMetaCode, MetaType = t.MetaType, Properties = t.Properties, DataType = t.DataType, Description = t.Description, TableName = app.Application.DbName, ApplicationId = app.Application.Id, IsFrameworkItem = t.IsFrameworkItem };
                     col.BuildPropertyList();
                     res[0].Columns.Add(col);
                 }
@@ -69,7 +69,7 @@ namespace Intwenty.Model.DesignerVM
                     {
                         if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                         {
-                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Properties = col.Properties, DataType = col.DataType, Description = col.Description, TableName = t.DbName, ApplicationId = app.Application.Id };
+                            var subtablecolumn = new DatabaseTableColumnVm() { DbName = col.DbName, Id = col.Id, MetaCode = col.MetaCode, ParentMetaCode = col.ParentMetaCode, MetaType = col.MetaType, Properties = col.Properties, DataType = col.DataType, Description = col.Description, TableName = t.DbName, ApplicationId = app.Application.Id, IsFrameworkItem = col.IsFrameworkItem };
                             subtablecolumn.BuildPropertyList();
                             subtable.Columns.Add(subtablecolumn);
                         }

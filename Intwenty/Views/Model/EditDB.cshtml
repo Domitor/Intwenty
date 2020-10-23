@@ -74,23 +74,23 @@
         </thead>
         <tbody v-for="modelitem in model.columns">
             <tr>
-                <td><span class="fa fa-cog" v-on:click="initializePropertyUI(modelitem)" style="cursor:pointer"></span></td>
+                <td><span class="fa fa-cog" v-on:click="initializePropertyUI(modelitem)" style="cursor:pointer" :disabled="modelitem.isFrameworkItem"></span></td>
                 <td>
-                    <select v-model="modelitem.tableName" class="form-control form-control-sm">
+                    <select v-model="modelitem.tableName" class="form-control form-control-sm" :disabled="modelitem.isFrameworkItem">
                         <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm" v-model="modelitem.dbName" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="modelitem.dbName" :disabled="modelitem.isFrameworkItem"  /></td>
                 <td>
-                    <select v-model="modelitem.dataType" class="form-control form-control-sm">
+                    <select v-model="modelitem.dataType" class="form-control form-control-sm" :disabled="modelitem.isFrameworkItem">
                         <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control form-control-sm" v-model="modelitem.description" />
+                    <input type="text" class="form-control form-control-sm" v-model="modelitem.description" :disabled="modelitem.isFrameworkItem" />
                 </td>
                 <td class="mx-auto">
-                    <button class="btn btn-sm btn-danger float-sm-right" v-on:click="deleteDbColumn(modelitem)"><i class="fa fa-trash"></i></button>
+                    <button class="btn btn-sm btn-danger float-sm-right" v-on:click="deleteDbColumn(modelitem)" :disabled="modelitem.isFrameworkItem"><i class="fa fa-trash"></i></button>
                 </td>
             </tr>
             <tr>

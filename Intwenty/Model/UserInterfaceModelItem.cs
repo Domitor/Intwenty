@@ -125,6 +125,8 @@ namespace Intwenty.Model
                     t.Add("COLLAPSIBLE");
                 if (this.IsMetaTypeSection)
                     t.Add("STARTEXPANDED");
+                if (!this.IsMetaTypeEditGrid && !this.IsMetaTypeListView && !this.IsMetaTypeLookUp && !this.IsMetaTypePanel && !this.IsMetaTypeSection)
+                    t.Add("READONLY");
 
                 return t;
             }

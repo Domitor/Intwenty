@@ -864,207 +864,47 @@ namespace Intwenty
         #endregion
 
         #region Lists
-        public OperationResult GetList(ListRetrivalArgs args)
+        public OperationResult GetListViewData(ListRetrivalArgs args)
         {
             OperationResult result = null;
-
-            try
-            {
-
-                if (args.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
-
-                result = GetListInternal(model, args, false, true, true);
-
-            }
-            catch (Exception ex)
-            {
-                result = new OperationResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
-            }
-
-            return result;
-        }
-
-        public OperationResult GetListByOwnerUser(ListRetrivalArgs args)
-        {
-
-            OperationResult result = null;
-
-
-            try
-            {
-                if (args.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
-
-                result = GetListInternal(model, args, true, true, true);
-
-            }
-            catch (Exception ex)
-            {
-                result = new OperationResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(args) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
-            }
-   
-
-            return result;
-
-        }
-
-        public OperationResult GetList(int applicationid)
-        {
-            OperationResult result = null;
-
-            try
-            {
-
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-               
-                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}", applicationid), out result))
-                {
-                    return result;
-                }
-
-                //Postgresql must always use columns in order to set correct case in jsonnames
-                if (DBMSType == DBMS.PostgreSQL)
-                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id }, false, true, false);
-                else
-                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id }, false, false, false);
-
-                if (result.IsSuccess)
-                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
-
-
-            }
-            catch (Exception ex)
-            {
-                result = new OperationResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
-                return result;
-            }
-
-            return result;
-
-        }
-
-        public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
-        {
-
-            OperationResult result = null;
-
-            try
-            {
-
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
-
-                if (string.IsNullOrEmpty(owneruserid))
-                    throw new InvalidOperationException("Parameter owneruserid must not be empty");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), out result))
-                {
-                    return result;
-                }
-
-
-                //Postgresql must alwaus use columns in order to set correct case in jsonnames
-                if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
-                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id, OwnerUserId = owneruserid }, true, true, false);
-                else
-                    result = GetListInternal(model, new ListRetrivalArgs() { ApplicationId = model.Application.Id, OwnerUserId = owneruserid }, true, false, false);
-
-                if (result.IsSuccess)
-                {
-                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
-                    AddCachedUser(owneruserid);
-                }
-
-                return result;
-                
-            }
-            catch (Exception ex)
-            {
-                result = new OperationResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
-            }
-
-            return result;
-
-        }
-
-        protected virtual OperationResult GetListInternal(ApplicationModel model, ListRetrivalArgs args, bool getbyowneruser, bool selectcolumns, bool usepaging)
-        {
-            if (args == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Can't get list without ListRetrivalArgs", 0, 0);
-
-            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
-
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
 
-            if (args.MaxCount == 0 && usepaging)
-            {
-
-                var max = client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + model.Application.Id);
-                if (max == DBNull.Value)
-                    args.MaxCount = 0;
-                else
-                    args.MaxCount = Convert.ToInt32(max);
-
-            }
-
-            result.RetriveListArgs = new ListRetrivalArgs();
-            result.RetriveListArgs = args;
-
-
             try
             {
-                var columns = new List<IIntwentyResultColumn>();
-                if (selectcolumns)
+
+                if (args.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
+
+
+                result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
+
+
+                if (args.MaxCount == 0)
                 {
-                    columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
-                    columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
-                    columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
-                    columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                    columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
-                    columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
-                    columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
+
+                    var max = client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + model.Application.Id);
+                    if (max == DBNull.Value)
+                        args.MaxCount = 0;
+                    else
+                        args.MaxCount = Convert.ToInt32(max);
+
                 }
 
-                var sql_list_stmt = new StringBuilder();
-                sql_list_stmt.Append("SELECT t1.* ");
+                result.RetriveListArgs = new ListRetrivalArgs();
+                result.RetriveListArgs = args;
 
-                if (model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) && selectcolumns)
+
+
+                var columns = new List<IIntwentyResultColumn>();
+                var sql_list_stmt = new StringBuilder();
+                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+
+                if (model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) || DBMSType == DBMS.PostgreSQL)
                 {
 
                     foreach (var t in model.UIStructure)
@@ -1084,8 +924,6 @@ namespace Intwenty
                         if (t.IsMetaTypeDataColumn && t.IsRoot)
                         {
                             sql_list_stmt.Append(", t2." + t.DbName + " ");
-                            if (selectcolumns)
-                                columns.Add(t);
                         }
                     }
 
@@ -1095,7 +933,7 @@ namespace Intwenty
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
                 sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
-                if (getbyowneruser)
+                if (args.HasOwnerUserId)
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
 
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
@@ -1107,40 +945,191 @@ namespace Intwenty
                 parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 string json = "[]";
 
-                if (getbyowneruser)
+                if (args.HasOwnerUserId)
                     parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
 
 
 
-                if (selectcolumns && usepaging)
+                if (columns.Count > 0)
                     json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
-                if (!selectcolumns && usepaging)
+                else
                     json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray()).ToString();
-                if (!selectcolumns && !usepaging)
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray()).ToString();
-                if (selectcolumns && !usepaging)
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).ToString();
-
-
+                
+   
                 result.Data = json;
+
 
             }
             catch (Exception ex)
             {
-                result.Messages.Clear();
+                result = new OperationResult();
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("Fetch list for application {0} failed", model.Application.Title));
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
+            }
+            finally
+            {
+                result.Finish();
+                client.Close();
 
+            }
+
+            return result;
+        }
+
+
+        public OperationResult GetList(int applicationid)
+        {
+            OperationResult result = null;
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
+            try
+            {
+
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+
+                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}", applicationid), out result))
+                {
+                    return result;
+                }
+
+               
+                result = GetListInternal(model, string.Empty, client);
+                
+
+                if (result.IsSuccess)
+                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
+
+
+            }
+            catch (Exception ex)
+            {
+                result = new OperationResult();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "[]";
+                return result;
             }
             finally
             {
                 client.Close();
+                result.Finish();
             }
 
             return result;
 
+        }
+
+        public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
+        {
+
+            OperationResult result = null;
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
+            try
+            {
+
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
+
+                if (string.IsNullOrEmpty(owneruserid))
+                    throw new InvalidOperationException("Parameter owneruserid must not be empty");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), out result))
+                {
+                    return result;
+                }
+
+                result = GetListInternal(model, owneruserid, client);
+
+                if (result.IsSuccess)
+                {
+                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
+                    AddCachedUser(owneruserid);
+                }
+
+                return result;
+                
+            }
+            catch (Exception ex)
+            {
+                result = new OperationResult();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                result.Data = "[]";
+            }
+            finally
+            {
+                client.Close();
+                result.Finish();
+            }
+
+            return result;
+
+        }
+
+        protected virtual OperationResult GetListInternal(ApplicationModel model, string owneruserid, IDataClient client)
+        {
+           
+            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
+
+            var columns = new List<IIntwentyResultColumn>();
+            columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
+            columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
+            columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
+            columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
+
+            var sql_list_stmt = new StringBuilder();
+            sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+
+               
+            foreach (var col in model.DataStructure)
+            {
+                if (col.IsMetaTypeDataColumn && col.IsRoot)
+                {
+                    sql_list_stmt.Append(", t2." + col.DbName + " ");
+                    columns.Add(col);
+                }
+            }
+
+            sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+            sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+            sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+            if (!string.IsNullOrEmpty(owneruserid))
+                sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+
+            sql_list_stmt.Append("ORDER BY t1.Id");
+
+            var parameters = new List<IIntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+
+            if (!string.IsNullOrEmpty(owneruserid))
+                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = owneruserid });
+
+            if (DBMSType == DBMS.PostgreSQL)
+                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray());
+            else
+                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray());
+
+            result.Finish();
+           
+
+            return result;
 
         }
 
@@ -1289,33 +1278,30 @@ namespace Intwenty
 
             var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
 
+
             try
             {
+                //MAINTABLE
                 var columns = new List<IIntwentyResultColumn>();
-                columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
-                columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
-                columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
-                columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
-                columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
-                columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
-
+                columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
 
                 var sql_stmt = new StringBuilder();
-                sql_stmt.Append("SELECT t1.* ");
+                sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
                 foreach (var col in model.DataStructure)
                 {
                     if (col.IsMetaTypeDataColumn && col.IsRoot)
                     {
                         sql_stmt.Append(", t2." + col.DbName + " ");
                         columns.Add(col);
-
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_stmt.Append("WHERE t1.ApplicationId = " + model.Application.Id + " ");
-                sql_stmt.Append("AND t1.Id = " + state.Id);
+                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
+                sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
 
                 jsonresult.Append("{");
@@ -1340,38 +1326,22 @@ namespace Intwenty
                 {
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
+                        char sep = ' ';
                         columns = new List<IIntwentyResultColumn>();
-                        columns.Add(new IntwentyDataColumn() { Name = "Id", DataType = DatabaseModelItem.DataTypeInt });
-                        columns.Add(new IntwentyDataColumn() { Name = "Version", DataType = DatabaseModelItem.DataTypeInt });
-                        columns.Add(new IntwentyDataColumn() { Name = "ApplicationId", DataType = DatabaseModelItem.DataTypeInt });
-                        columns.Add(new IntwentyDataColumn() { Name = "ChangedDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                        columns.Add(new IntwentyDataColumn() { Name = "CreatedBy", DataType = DatabaseModelItem.DataTypeString });
-                        columns.Add(new IntwentyDataColumn() { Name = "ChangedBy", DataType = DatabaseModelItem.DataTypeString });
-                        columns.Add(new IntwentyDataColumn() { Name = "OwnedBy", DataType = DatabaseModelItem.DataTypeString });
-                        columns.Add(new IntwentyDataColumn() { Name = "ParentId", DataType = DatabaseModelItem.DataTypeInt });
-
-                        sql_stmt = new StringBuilder();
-                        sql_stmt.Append("SELECT t1.ApplicationId ");
-                        sql_stmt.Append(", t2.Id ");
-                        sql_stmt.Append(", t2.Version ");
-                        sql_stmt.Append(", t2.ChangedDate ");
-                        sql_stmt.Append(", t2.CreatedBy ");
-                        sql_stmt.Append(", t2.ChangedBy ");
-                        sql_stmt.Append(", t2.OwnedBy ");
-                        sql_stmt.Append(", t2.ParentId ");
-
+                        sql_stmt = new StringBuilder("SELECT ");
                         foreach (var col in model.DataStructure)
                         {
                             if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                             {
-                                sql_stmt.Append(", t2." + col.DbName + " ");
+                                sql_stmt.Append(sep + " t2." + col.DbName + " ");
                                 columns.Add(col);
+                                sep = ',';
                             }
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                        sql_stmt.Append("JOIN " + t.DbName + " t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ");
-                        sql_stmt.Append("WHERE t1.ApplicationId = " + model.Application.Id + " ");
-                        sql_stmt.Append("AND t1.Id = " + state.Id);
+                        sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ", t.DbName));
+                        sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
+                        sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
                         var tablearray = client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray());
 

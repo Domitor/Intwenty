@@ -44,6 +44,8 @@ namespace Intwenty.Data.Dto
 
     public class ListRetrivalArgs
     {
+        public static readonly string DEFAULT_OWNERUSERID = "SYSTEM";
+
         public int ApplicationId { get; set; }
 
         public string OwnerUserId { get; set; }
@@ -60,11 +62,15 @@ namespace Intwenty.Data.Dto
 
         public string FilterValue { get; set; }
 
-
+        public bool HasOwnerUserId
+        {
+            get { return !string.IsNullOrEmpty(OwnerUserId) && OwnerUserId != DEFAULT_OWNERUSERID; }
+        }
 
         public ListRetrivalArgs()
         {
             BatchSize = 50;
+            OwnerUserId = DEFAULT_OWNERUSERID;
         }
 
     }

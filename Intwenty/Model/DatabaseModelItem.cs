@@ -62,13 +62,15 @@ namespace Intwenty.Model
             res.MetaType = MetaTypeDataColumn;
             res.AppMetaCode = appmetacode;
             res.ColumnName = dbname;
+            res.DbName = dbname;
             res.TableName = tablename;
             res.DataType = datatype;
             res.Title = dbname;
-            res.MetaCode = appmetacode.ToUpper() + "_SYS_" + dbname.ToUpper();
+            res.MetaCode = dbname.ToUpper();
             res.ParentMetaCode = parentmetacode;
             res.Properties = string.Empty;
             res.IsFrameworkItem = true;
+            res.Description = "Required by Intwenty";
 
             return res;
         }
@@ -139,11 +141,21 @@ namespace Intwenty.Model
             }
         }
 
-        public static List<string> ValidProperties
+        public List<string> ValidProperties
         {
             get
             {
                 var t = new List<string>();
+                if (this.IsMetaTypeDataColumn)
+                {
+                    t.Add("DEFVALUE");
+                    t.Add("DEFVALUE_START");
+                    t.Add("DEFVALUE_PREFIX");
+                    t.Add("DEFVALUE_SEED");
+                    t.Add("MANDATORY");
+                    t.Add("UNIQUE");
+                    t.Add("DOMAIN");
+                }
                 return t;
             }
         }

@@ -49,7 +49,7 @@ namespace Intwenty.Interface
         OperationResult GetLatestVersionById(ClientStateInfo state);
 
         /// <summary>
-        /// Get the latest version data for and application based on OwnerUserId
+        /// Gets the latest version of an application based on OwnerUserId and ApplicationId
         /// </summary>
         /// <returns>An OperationResult including a json object</returns>
         OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
@@ -59,17 +59,12 @@ namespace Intwenty.Interface
         /// Get a list of (latest version) application data that matches the filter specified in args. 
         /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
         /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUSerId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetList(ListRetrivalArgs args);
+        OperationResult GetListViewData(ListRetrivalArgs args);
 
-        /// <summary>
-        /// Get a list of (latest version) application data, based on OwnedBy and that matches the filter specified in args. 
-        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
-        /// This function supports paging. It returns the number of records specified in BatchSize
-        /// </summary>
-        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetListByOwnerUser(ListRetrivalArgs args);
 
         /// <summary>
         /// Get a list of (latest version) application data. 
