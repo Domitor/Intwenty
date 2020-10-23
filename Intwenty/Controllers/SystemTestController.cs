@@ -73,7 +73,7 @@ namespace Intwenty.Controllers
                 _modelservice.DeleteAppModel(model);
 
             var dvmodel = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG");
-            if (model != null)
+            if (dvmodel != null)
             {
                 foreach (var dv in dvmodel)
                     _modelservice.DeleteDataViewModel(dv.Id);

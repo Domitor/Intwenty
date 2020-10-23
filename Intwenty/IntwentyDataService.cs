@@ -194,6 +194,7 @@ namespace Intwenty
                     state.Data.InferModel(model);
 
                     client.Open();
+                    //client.BeginTransaction();
 
                     BeforeSave(model, state, client);
                     if (!state.Data.HasModel)
@@ -244,6 +245,8 @@ namespace Intwenty
                     result.Id = state.Id;
                     result.Version = state.Version;
                     AfterSave(model, state, client);
+
+                    //client.CommitTransaction();
  
                 }
                 else
@@ -253,6 +256,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
+                //client.RollbackTransaction();
                 result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
@@ -738,6 +742,8 @@ namespace Intwenty
                 result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, 0);
 
                 client.Open();
+                //client.BeginTransaction();
+
                 client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
@@ -753,9 +759,11 @@ namespace Intwenty
                 client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
+                //client.CommitTransaction();
             }
             catch (Exception ex)
             {
+                //client.RollbackTransaction();
                 result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
@@ -906,13 +914,23 @@ namespace Intwenty
 
                 if (model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) || DBMSType == DBMS.PostgreSQL)
                 {
-
+                    //Add columns connected to the listview
                     foreach (var t in model.UIStructure)
                     {
                         if (t.IsMetaTypeListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
                         {
                             sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
                             columns.Add(t.DataColumnInfo);
+                        }
+                    }
+
+                    //Add default columns (IsFrameworkItem) that is not connected to the listview
+                    foreach (var t in model.DataStructure)
+                    {
+                        if (t.IsMetaTypeDataColumn && t.IsRoot && t.IsFrameworkItem && !columns.Exists(p=> p.Name.ToUpper() == t.DbName.ToUpper()))
+                        {
+                            sql_list_stmt.Append(", t2." + t.DbName + " ");
+                            columns.Add(t);
                         }
                     }
 
