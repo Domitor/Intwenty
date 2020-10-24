@@ -40,6 +40,8 @@ namespace Intwenty
 
         private static readonly string TranslationsCacheKey = "TRANSLATIONS";
 
+        private static readonly string EndpointsCacheKey = "ENDPOINTS";
+
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
@@ -463,6 +465,107 @@ namespace Intwenty
         }
         #endregion
 
+        #region Endpoints
+        public List<EndpointModelItem> GetEndpointModels()
+        {
+
+            List<EndpointModelItem> res;
+            if (ModelCache.TryGetValue(EndpointsCacheKey, out res))
+            {
+                return res;
+            }
+
+            Client.Open();
+            var list = Client.GetEntities<EndpointItem>().Select(p => new EndpointModelItem(p)).ToList();
+            Client.Close();
+
+            ModelCache.Set(AppModelCacheKey, res);
+
+            return list;
+        }
+
+        public void SaveEndpointModels(List<EndpointModelItem> model)
+        {
+            ModelCache.Remove(EndpointsCacheKey);
+
+            foreach (var ep in model)
+            {
+
+                if (ep.IsMetaTypeApi)
+                    ep.ParentMetaCode = "ROOT";
+
+                if (string.IsNullOrEmpty(ep.MetaCode))
+                    ep.MetaCode = BaseModelItem.GenerateNewMetaCode(ep);
+
+            }
+
+            Client.Open();
+            foreach (var ep in model)
+            {
+                if (ep.Id < 1)
+                {
+                    var t = new EndpointItem()
+                    {
+
+                        MetaCode = ep.MetaCode,
+                        MetaType = ep.MetaType,
+                        ParentMetaCode = ep.ParentMetaCode,
+                        Title = ep.Title,
+                        Action = ep.Action,
+                        AppMetaCode = ep.AppMetaCode,
+                        DataMetaCode = ep.DataMetaCode,
+                        Description = ep.Description,
+                        OrderNo = ep.OrderNo,
+                        Path = ep.Path,
+                        Properties = ep.Properties
+
+                    };
+                    Client.InsertEntity(t);
+                }
+                else
+                {
+                    var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == ep.Id);
+                    if (existing != null)
+                    {
+                        existing.OrderNo = ep.OrderNo;
+                        existing.Path = ep.Path;
+                        existing.Properties = ep.Properties;
+                        existing.Title = ep.Title;
+                        existing.Action = ep.Action;
+                        existing.DataMetaCode = ep.DataMetaCode;
+                        existing.Description = ep.Description;
+                        
+                        Client.UpdateEntity(existing);
+                    }
+
+                }
+
+            }
+            Client.Close();
+        }
+
+        public void DeleteEndpointModel(int id)
+        {
+            Client.Open();
+            var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                var dto = new EndpointModelItem(existing);
+                if (dto.IsMetaTypeApi)
+                {
+                    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == EndpointModelItem.MetaTypeTableOperation || p.MetaType == EndpointModelItem.MetaTypeDataViewOperation) && p.ParentMetaCode == existing.MetaCode).ToList();
+                    Client.DeleteEntity(existing);
+                    Client.DeleteEntities(childlist);
+                }
+                else
+                {
+                    Client.DeleteEntity(existing);
+                }
+            }
+            Client.Close();
+        }
+        #endregion
+
         #region UI
         public List<UserInterfaceModelItem> GetUserInterfaceModels()
         {
@@ -818,7 +921,19 @@ namespace Intwenty
             {
                 if (dv.Id < 1)
                 {
-                    var t = CreateMetaDataView(dv);
+                    var t = new DataViewItem()
+                    {
+
+                        MetaCode = dv.MetaCode,
+                        MetaType = dv.MetaType,
+                        ParentMetaCode = dv.ParentMetaCode,
+                        Title = dv.Title,
+                        //TitleLocalizationKey = dto.TitleLocalizationKey,
+                        SQLQuery = dv.SQLQuery,
+                        SQLQueryFieldName = dv.SQLQueryFieldName
+
+
+                    };
                     Client.InsertEntity(t);
                 }
                 else
@@ -841,27 +956,6 @@ namespace Intwenty
         }
 
 
-        private DataViewItem CreateMetaDataView(DataViewModelItem dto)
-        {
-            var res = new DataViewItem()
-            {
-
-                MetaCode = dto.MetaCode,
-                MetaType = dto.MetaType,
-                ParentMetaCode = dto.ParentMetaCode,
-                Title = dto.Title,
-                //TitleLocalizationKey = dto.TitleLocalizationKey,
-                SQLQuery = dto.SQLQuery,
-                SQLQueryFieldName = dto.SQLQueryFieldName
-                
-
-            };
-
-            return res;
-
-        }
-
-      
 
       
 
@@ -1041,43 +1135,48 @@ namespace Intwenty
             if (!Settings.ReCreateDatabaseOnStartup)
                 return;
 
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
-           
-                var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            client.CreateTable<ApplicationItem>();
+            client.CreateTable<DatabaseItem>();
+            client.CreateTable<DataViewItem>();
+            client.CreateTable<EventLog>();
+            client.CreateTable<InformationStatus>();
+            client.CreateTable<MenuItem>();
+            client.CreateTable<SystemID>();
+            client.CreateTable<UserInterfaceItem>();
+            client.CreateTable<ValueDomainItem>();
+            client.CreateTable<DefaultValue>();
+            client.CreateTable<TranslationItem>();
+            client.CreateTable<EndpointItem>();
 
-                client.Open();
-                client.CreateTable<ApplicationItem>();
-                client.CreateTable<DatabaseItem>();
-                client.CreateTable<DataViewItem>();
-                client.CreateTable<EventLog>();
-                client.CreateTable<InformationStatus>();
-                client.CreateTable<MenuItem>();
-                client.CreateTable<SystemID>();
-                client.CreateTable<UserInterfaceItem>();
-                client.CreateTable<ValueDomainItem>();
-                client.CreateTable<DefaultValue>();
-                client.CreateTable<TranslationItem>();
+            client.CreateTable<IntwentyUser>(); //security_User
+            client.CreateTable<IntwentyRole>(); //security_Role
+            client.CreateTable<IntwentyUserRole>(); //security_UserRoles
+            client.CreateTable<IntwentyGroup>(); //security_Group
+            client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
 
-                client.CreateTable<IntwentyUser>(); //security_User
-                client.CreateTable<IntwentyRole>(); //security_Role
-                client.CreateTable<IntwentyUserRole>(); //security_UserRoles
-                client.CreateTable<IntwentyGroup>(); //security_Group
-                client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
+            client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
+            client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
+            //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
+            //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 
-                client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
-                client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
-                //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
-                //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
+            var currentdomains = client.GetEntities<ValueDomainItem>();
+            var defaultprops = GetIntentyProperties();
+            foreach (var p in defaultprops)
+            {
+                if (!currentdomains.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
+                    client.InsertEntity(p);
+            }
+            var endpointactions = GetIntentyEndpointActions();
+            foreach (var p in endpointactions)
+            {
+                if (!currentdomains.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
+                    client.InsertEntity(p);
+            }
 
-                var currentprops = client.GetEntities<ValueDomainItem>();
-                var defaultprops = GetIntentyProperties();
-                foreach (var p in defaultprops)
-                {
-                    if (!currentprops.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
-                        client.InsertEntity(p);
-                }
-
-                client.Close();
+            client.Close();
             
         }
 
@@ -1099,6 +1198,18 @@ namespace Intwenty
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX,EMAILBOX" });
 
 
+            return res;
+        }
+
+        private List<ValueDomainItem> GetIntentyEndpointActions()
+        {
+            var res = new List<ValueDomainItem>();
+
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETLATEST", Value = "GetLatestVersion", Properties = "" });
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETALL", Value = "GetAll", Properties = "" });
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "SAVE", Value = "Save", Properties = "" });
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_DATAVIEW_ACTION", Code = "GET", Value = "Get", Properties = "" });
+          
             return res;
         }
 
@@ -1626,6 +1737,8 @@ namespace Intwenty
             return res;
 
         }
+
+      
 
 
 

@@ -136,6 +136,8 @@ namespace Intwenty.Model
                 return "TB";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUp)
                 return "TBL_LOOKUP";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEmailBox)
+                return "EB";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)
                 return "DCOL";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataTable)
@@ -152,6 +154,13 @@ namespace Intwenty.Model
                 return "MAINMENU";
             if (item.MetaType == MenuModelItem.MetaTypeMenuItem)
                 return "MENITM";
+          
+            if (item.MetaType == EndpointModelItem.MetaTypeAPI)
+                return "API";
+            if (item.MetaType == EndpointModelItem.MetaTypeDataViewOperation)
+                return "EP_DV";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableOperation)
+                return "EP_TB";
 
             return item.MetaType;
         }

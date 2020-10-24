@@ -87,6 +87,13 @@ namespace Intwenty.Interface
         public void DeleteTranslation(int id);
 
 
+        public List<EndpointModelItem> GetEndpointModels();
+
+        public void SaveEndpointModels(List<EndpointModelItem> model);
+
+        public void DeleteEndpointModel(int id);
+
+
 
 
         public List<MenuModelItem> GetMenuModels();
