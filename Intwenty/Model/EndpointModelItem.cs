@@ -10,7 +10,7 @@ namespace Intwenty.Model
     public class EndpointModelItem : BaseModelItem
     {
         //META TYPES
-        public static readonly string MetaTypeAPI = "API";
+        //public static readonly string MetaTypeAPI = "API";
         public static readonly string MetaTypeTableOperation = "TABLEOPERATION";
         public static readonly string MetaTypeDataViewOperation = "DATAVIEWOPERATION";
         
@@ -93,7 +93,6 @@ namespace Intwenty.Model
             get
             {
                 var t = new List<string>();
-                t.Add(MetaTypeAPI);
                 t.Add(MetaTypeDataViewOperation);
                 t.Add(MetaTypeTableOperation);
               
@@ -112,12 +111,6 @@ namespace Intwenty.Model
         public bool IsDataViewConnected
         {
             get { return IsMetaTypeDataViewOperation && (DataViewInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataViewInfo.IsMetaTypeDataView); }
-        }
-
-
-        public bool IsMetaTypeApi
-        {
-            get { return MetaType == MetaTypeAPI; }
         }
 
 

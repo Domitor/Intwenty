@@ -40,7 +40,9 @@ namespace Intwenty
 
         private static readonly string TranslationsCacheKey = "TRANSLATIONS";
 
-        private static readonly string EndpointsCacheKey = "ENDPOINTS";
+        private static readonly string EndpointsCacheKey = "INTWENTYENDPOINTS";
+
+        private static readonly string DataViewCacheKey = "INTWENTYDATAVIEWS";
 
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
@@ -470,18 +472,58 @@ namespace Intwenty
         {
 
             List<EndpointModelItem> res;
+            var appmodels = GetApplicationModels();
+            var dataviews = GetDataViewModels();
+
             if (ModelCache.TryGetValue(EndpointsCacheKey, out res))
             {
                 return res;
             }
 
             Client.Open();
-            var list = Client.GetEntities<EndpointItem>().Select(p => new EndpointModelItem(p)).ToList();
+            res = Client.GetEntities<EndpointItem>().Select(p => new EndpointModelItem(p)).ToList();
             Client.Close();
 
-            ModelCache.Set(AppModelCacheKey, res);
+            foreach (var ep in res)
+            {
+                if ((ep.IsMetaTypeTableOperation || ep.IsMetaTypeDataViewOperation) && ep.Path.Length > 0)
+                {
+                    ep.Path.Trim();
+                    if (ep.Path[0] != '/')
+                        ep.Path = "/" + ep.Path;
+                    if (ep.Path[ep.Path.Length - 1] != '/')
+                        ep.Path = ep.Path + "/";
 
-            return list;
+                }
+
+                if (ep.IsMetaTypeTableOperation && !string.IsNullOrEmpty(ep.AppMetaCode) && !string.IsNullOrEmpty(ep.DataMetaCode))
+                {
+                   
+                    var appmodel = appmodels.Find(p => p.Application.MetaCode == ep.AppMetaCode);
+                    if (appmodel != null && ep.DataMetaCode == appmodel.Application.MetaCode)
+                        ep.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = appmodel.Application.MetaCode, Id = 0, DbName = appmodel.Application.DbName, TableName = appmodel.Application.DbName, MetaCode = appmodel.Application.MetaCode, ParentMetaCode = "ROOT", Title = appmodel.Application.DbName, IsFrameworkItem = true }; ;
+
+                    if (ep.DataTableInfo == null && appmodel != null) 
+                    {
+                        var table = appmodel.DataStructure.Find(p => p.IsMetaTypeDataTable && p.MetaCode == ep.DataMetaCode);
+                        if (table != null)
+                            ep.DataTableInfo = table;
+                    }
+                }
+
+                if (ep.IsMetaTypeDataViewOperation && !string.IsNullOrEmpty(ep.DataMetaCode))
+                {
+                    var dv = dataviews.Find(p => p.IsMetaTypeDataView && p.MetaCode == ep.DataMetaCode);
+                    if (dv != null)
+                        ep.DataViewInfo = dv;
+                   
+                }
+
+            }
+
+            ModelCache.Set(EndpointsCacheKey, res);
+
+            return res;
         }
 
         public void SaveEndpointModels(List<EndpointModelItem> model)
@@ -490,13 +532,10 @@ namespace Intwenty
 
             foreach (var ep in model)
             {
-
-                if (ep.IsMetaTypeApi)
-                    ep.ParentMetaCode = "ROOT";
+                 ep.ParentMetaCode = "ROOT";
 
                 if (string.IsNullOrEmpty(ep.MetaCode))
                     ep.MetaCode = BaseModelItem.GenerateNewMetaCode(ep);
-
             }
 
             Client.Open();
@@ -546,21 +585,23 @@ namespace Intwenty
 
         public void DeleteEndpointModel(int id)
         {
+            ModelCache.Remove(EndpointsCacheKey);
+
             Client.Open();
             var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
                 var dto = new EndpointModelItem(existing);
-                if (dto.IsMetaTypeApi)
-                {
-                    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == EndpointModelItem.MetaTypeTableOperation || p.MetaType == EndpointModelItem.MetaTypeDataViewOperation) && p.ParentMetaCode == existing.MetaCode).ToList();
+                //if (dto.IsMetaTypeApi)
+                //{
+                //    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == EndpointModelItem.MetaTypeTableOperation || p.MetaType == EndpointModelItem.MetaTypeDataViewOperation) && p.ParentMetaCode == existing.MetaCode).ToList();
+                //    Client.DeleteEntity(existing);
+                //    Client.DeleteEntities(childlist);
+                //}
+                //else
+                //{
                     Client.DeleteEntity(existing);
-                    Client.DeleteEntities(childlist);
-                }
-                else
-                {
-                    Client.DeleteEntity(existing);
-                }
+                //}
             }
             Client.Close();
         }
@@ -896,15 +937,26 @@ namespace Intwenty
         #region Data Views
         public List<DataViewModelItem> GetDataViewModels()
         {
+            List<DataViewModelItem> res;
+            if (ModelCache.TryGetValue(DataViewCacheKey, out res))
+            {
+                return res;
+            }
+
             Client.Open();
-            var list = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
+            res = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
             Client.Close();
-            LocalizeTitles(list.ToList<ILocalizableTitle>());
-            return list;
+            LocalizeTitles(res.ToList<ILocalizableTitle>());
+
+            ModelCache.Set(EndpointsCacheKey, res);
+
+            return res;
         }
 
         public void SaveDataViewModels(List<DataViewModelItem> model)
         {
+            ModelCache.Remove(DataViewCacheKey);
+
             foreach (var dv in model)
             {
 
@@ -961,6 +1013,9 @@ namespace Intwenty
 
         public void DeleteDataViewModel(int id)
         {
+
+            ModelCache.Remove(DataViewCacheKey);
+
             Client.Open();
             var existing = Client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
@@ -1205,10 +1260,10 @@ namespace Intwenty
         {
             var res = new List<ValueDomainItem>();
 
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETLATEST", Value = "GetLatestVersion", Properties = "" });
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETBYID", Value = "GetById", Properties = "" });
             res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETALL", Value = "GetAll", Properties = "" });
             res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "SAVE", Value = "Save", Properties = "" });
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_DATAVIEW_ACTION", Code = "GET", Value = "Get", Properties = "" });
+            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_DATAVIEW_ACTION", Code = "GETDATA", Value = "GetData", Properties = "" });
           
             return res;
         }

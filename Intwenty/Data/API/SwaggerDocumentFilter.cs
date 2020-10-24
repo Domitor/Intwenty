@@ -23,10 +23,6 @@ namespace Intwenty.Data.API
             _modelservice = ms;
         }
 
-       
-        
-
-      
 
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
@@ -37,71 +33,117 @@ namespace Intwenty.Data.API
             swaggerDoc.Info.Title = "Intwenty";
             swaggerDoc.Info.License = new OpenApiLicense() { Name = "MIT" };
 
-            var apps = _modelservice.GetApplicationModels();
-            foreach (var a in apps)
+            var epmodels = _modelservice.GetEndpointModels();
+            var domains = _modelservice.GetValueDomains();
+
+            //swaggerDoc.Tags.Add(new OpenApiTag() { Name = api.Title, Description = api.Description });
+
+            foreach (var ep in epmodels.Where(p => p.IsMetaTypeTableOperation))
             {
-                swaggerDoc.Tags.Add(new OpenApiTag() { Name = a.Application.DbName, Description = string.Format("The {0} endpoint", a.Application.DbName) } );
+                var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_TABLE_ACTION" && p.Value == ep.Action);
+                if (domainoperation == null)
+                    throw new InvalidOperationException("No enpoint action exists as a domainvalue in intwenty");
 
+                if (domainoperation.Code == "GETBYID")
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description };
+                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    op.Parameters.Add(new OpenApiParameter() { Name = "id", In = ParameterLocation.Path, Required = true, Schema = new OpenApiSchema() { Type = "integer", Format = "int32" } });
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Get, op);
+                    swaggerDoc.Paths.Add(ep.Path + ep.Action + "/{id}", path);
+                }
 
-                var path = new OpenApiPathItem();
-                var op = new OpenApiOperation() { Description = "GetLatestVersion" }; //Parameters = new List<OpenApiParameter>()
-                op.Tags.Add(new OpenApiTag() { Name=a.Application.DbName, Description="Gets the latest version by id" });
-                op.Parameters.Add(new OpenApiParameter() { Name = "id", In = ParameterLocation.Path , Required = true, Schema = new OpenApiSchema() { Type = "integer", Format="int32" }});
-                var resp = new OpenApiResponse() { Description = "SUCCESS" };
-                resp.Content.Add("application/json", new OpenApiMediaType());
-                op.Responses.Add("200", resp);
-                resp = new OpenApiResponse() { Description = "ERROR" };
-                op.Responses.Add("400", resp);
-                resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
-                op.Responses.Add("401", resp);
-                path.AddOperation(OperationType.Get, op);
-                swaggerDoc.Paths.Add("/"+ a.Application.DbName + "/API/GetLatestVersion/{id}", path);
+                if (domainoperation.Code == "GETALL")
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description };
+                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Get, op);
+                    swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
+                }
 
-                path = new OpenApiPathItem();
-                op = new OpenApiOperation() { Description = "GetAll" }; 
-                op.Tags.Add(new OpenApiTag() { Name = a.Application.DbName, Description = string.Format("Get all {0} applications", a.Application.DbName) });
-                resp = new OpenApiResponse() { Description = "SUCCESS" };
-                resp.Content.Add("application/json", new OpenApiMediaType());
-                op.Responses.Add("200", resp);
-                resp = new OpenApiResponse() { Description = "ERROR" };
-                op.Responses.Add("400", resp);
-                resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
-                op.Responses.Add("401", resp);
-                path.AddOperation(OperationType.Get, op);
-                swaggerDoc.Paths.Add("/" + a.Application.DbName + "/API/GetAll", path);
+                if (domainoperation.Code == "SAVE")
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description };
+                    op.RequestBody = new OpenApiRequestBody();
+                    var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
+                    content.Value.Schema = new OpenApiSchema();
+                    content.Value.Schema.Example = GetSaveUpdateSchema(ep);
+                    op.RequestBody.Content.Add(content);
+                    op.RequestBody.Required = true;
 
-                path = new OpenApiPathItem();
-                op = new OpenApiOperation() { Description = "Save" };
-                op.RequestBody = new OpenApiRequestBody();
-                var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
-                content.Value.Schema = new OpenApiSchema();
-                content.Value.Schema.Example = GetSaveUpdateSchema(a);
-                op.RequestBody.Content.Add(content);
-                op.RequestBody.Required = true;
-               
-                op.Tags.Add(new OpenApiTag() { Name = a.Application.DbName, Description = string.Format("Create or update {0}", a.Application.DbName) });
-                resp = new OpenApiResponse() { Description = "SUCCESS" };
-                resp.Content.Add("application/json", new OpenApiMediaType());
-                op.Responses.Add("200", resp);
-                resp = new OpenApiResponse() { Description = "ERROR" };
-                op.Responses.Add("400", resp);
-                resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
-                op.Responses.Add("401", resp);
-                path.AddOperation(OperationType.Post, op);
-                swaggerDoc.Paths.Add("/" + a.Application.DbName + "/API/Save", path);
+                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Post, op);
+                    swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
 
+                }
             }
 
-          
-           
+            foreach (var ep in epmodels.Where(p => p.IsMetaTypeDataViewOperation))
+            {
+                var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_DATAVIEW_ACTION" && p.Value == ep.Action);
+                if (domainoperation == null)
+                    throw new InvalidOperationException("No enpoint action exists as a domainvalue in intwenty");
+
+                if (domainoperation.Code == "GETDATA")
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description };
+                    op.Tags.Add(new OpenApiTag() { Name = ep.Title, Description = ep.Description });
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Get, op);
+                    swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
+                }
+            }
+
+
+            
+
         }
 
-        private OpenApiString GetSaveUpdateSchema(ApplicationModel model)
+        private OpenApiString GetSaveUpdateSchema(EndpointModelItem epitem)
         {
           
 
             try
             {
+
+                if (!epitem.IsMetaTypeTableOperation || string.IsNullOrEmpty(epitem.AppMetaCode))
+                    return new OpenApiString("");
+
+                var models = _modelservice.GetApplicationModels();
+                var model = models.Find(p => p.Application.MetaCode == epitem.AppMetaCode);
+                if (model==null)
+                    return new OpenApiString("");
 
                 var sep = "";
                 var sb = new StringBuilder();

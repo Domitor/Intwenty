@@ -155,8 +155,7 @@ namespace Intwenty.Model
             if (item.MetaType == MenuModelItem.MetaTypeMenuItem)
                 return "MENITM";
           
-            if (item.MetaType == EndpointModelItem.MetaTypeAPI)
-                return "API";
+        
             if (item.MetaType == EndpointModelItem.MetaTypeDataViewOperation)
                 return "EP_DV";
             if (item.MetaType == EndpointModelItem.MetaTypeTableOperation)

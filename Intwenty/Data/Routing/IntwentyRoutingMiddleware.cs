@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,12 +28,12 @@ namespace Intwenty.Data.Routing
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
                 endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 
-                //Register dynamic API:s
+                //Register endpoints
                 var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
-                var apps = modelservice.GetApplicationModels();
-                foreach (var a in apps)
+                var epmodels = modelservice.GetEndpointModels();
+                foreach (var ep in epmodels.Where(p=> p.IsMetaTypeDataViewOperation || p.IsMetaTypeTableOperation))
                 {
-                    endpoints.MapControllerRoute(a.Application.MetaCode + "_route_1", "/" + a.Application.DbName + "/API/{action=All}/{id?}", defaults: new { controller = "DynamicApplication" });
+                    endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action="+ep.Action+"}/{id?}", defaults: new { controller = "DynamicApplication" });
                 }
 
                 endpoints.MapRazorPages();
