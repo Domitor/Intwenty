@@ -1,0 +1,182 @@
+﻿
+
+@{
+    ViewData["Title"] = "Add / Edit Integrations";
+}
+
+@await Html.PartialAsync("_Modals")
+
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>Integrations</h2></div>
+        <div class="card-body">Create endpoints to make your data avaialable for other parties.</div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+    <div>
+        <div class="btn btn-sm btn-primary" v-on:click="saveChanges">
+            <span class="glyphicon glyphicon-save"></span> Save changes
+        </div>
+
+        <div class="btn btn-sm btn-secondary" v-on:click="addEndpoint" style="float:right">
+            <span class="fa fa-plus"></span> Add Endpoint
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:30%">Based On <span style="color: red"> *</span></th>
+                <th style="width:30%">Path <span style="color: red"> *</span></th>
+                <th style="width:30%">Action <span style="color: red"> *</span></th>
+                <th style="width:10%"></th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in endpoints">
+            <tr>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.metaType" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteEndpoint(entry)"><i class="fa fa-trash"></i></div></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {  },
+                endpoints: [],
+                idgen: -1
+            },
+            methods: {
+
+
+                addEndpoint: function ()
+                {
+
+                    this.idgen -= 1;
+                    this.endpoints.unshift({ id: this.idgen, metaType: "", action: "", path: "" });
+                },
+                deleteEndpoint: function (entry)
+                {
+                    var context = this;
+
+                    if (entry.id < 1)
+                    {
+                        for (var i = 0; i < context.endpoints.length; i++)
+                        {
+                            if (context.endpoints[i].id === entry.id)
+                            {
+                                context.endpoints.splice(i, 1);
+                                break;
+                            }
+                        }
+                        return;
+                    }
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteEndpoint";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            success: function (response) {
+                                context.endpoints = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete endpoint ?", "The endpoint will be deleted, continue ?", yesfunc);
+
+                },
+                markChanged: function (entry)
+                {
+                    entry.properties = "CHANGED=TRUE";
+
+                },
+                saveChanges: function ()
+                {
+
+                        var list = [];
+                        var context = this;
+
+                    for (var i = 0; i < context.endpoints.length; i++)
+                        {
+                        if (context.endpoints[i].id < 1 || context.endpoints[i].properties.indexOf("CHANGED=TRUE") > -1)
+                            list.push(context.endpoints[i]);
+                        }
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "SaveEndpoints";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(list),
+                            success: function (response)
+                            {
+                                context.endpoints = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+
+                }
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                //endpoints
+                var context = this;
+                var baseurl = '@Url.Content("~/Model/API/")';
+                var endpointurl = baseurl + "GetEndpoints";
+                $.get(endpointurl, function (response) {
+                    context.endpoints = response;
+                });
+
+            }
+        });
+    </script>
+
+}
+

@@ -658,7 +658,7 @@ namespace Intwenty.Controllers
       
 
         /// <summary>
-        /// Get meta data for data views
+        /// Get translations
         /// </summary>
         [HttpGet("/Model/API/GetTranslations")]
         public JsonResult GetTranslations()
@@ -712,8 +712,67 @@ namespace Intwenty.Controllers
 
         #endregion
 
+        #region Endpoints
+
+
+
         /// <summary>
-        /// Get meta data for number series
+        /// Get endpoints
+        /// </summary>
+        [HttpGet("/Model/API/GetEndpoints")]
+        public JsonResult GetEndpoints()
+        {
+            var t = ModelRepository.GetEndpointModels();
+            var res = new JsonResult(t);
+            return res;
+
+        }
+
+
+        [HttpPost("/Model/API/SaveTranslations")]
+        public JsonResult SaveEndpoints([FromBody] List<EndpointModelItem> model)
+        {
+            try
+            {
+                ModelRepository.SaveEndpointModels(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving endpoints.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetTranslations();
+        }
+
+
+        [HttpPost("/Model/API/DeleteEndpoints")]
+        public JsonResult DeleteEndpoint([FromBody] EndpointModelItem model)
+        {
+            try
+            {
+                ModelRepository.DeleteEndpointModel(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting an endpoint.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetTranslations();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Get menu items
         /// </summary>
         [HttpGet("/Model/API/GetMenuModelItems")]
         public JsonResult GetMenuModelItems()
