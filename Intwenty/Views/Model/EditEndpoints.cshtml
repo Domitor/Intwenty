@@ -144,8 +144,7 @@
                             data: JSON.stringify(entry),
                             success: function (response) {
                                 context.model = response;
-                                for (var i = 0; i < context.model.endpoints.length; i++)
-                                    context.model.endpoints[i].expanded = false;
+                                
                             },
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
@@ -193,6 +192,7 @@
                         if (!entry.path)
                         {
                             $("#tbPath_" + entry.id).addClass('requiredNotValid');
+                            invalid = true;
                         }
                         if (!entry.action)
                         {
@@ -219,8 +219,7 @@
                         success: function (response)
                         {
                             context.model = response;
-                            for (var i = 0; i < context.model.endpoints.length; i++)
-                                context.model.endpoints[i].expanded = false;
+                           
                         },
                         error: function (response)
                         {
@@ -259,9 +258,7 @@
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;
-                    for (var i = 0; i < context.model.endpoints.length; i++)
-                        context.model.endpoints[i].expanded = false;
-
+                   
                    
                 });
 

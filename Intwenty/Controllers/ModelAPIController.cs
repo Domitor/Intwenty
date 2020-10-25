@@ -722,7 +722,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/GetEndpoints")]
         public JsonResult GetEndpoints()
         {
-            var res = new EndpointCollectionVm();
+            var res = new EndpointManagementVm();
 
             res.Endpoints = new List<EndpointVm>();
             var endpoints = ModelRepository.GetEndpointModels();

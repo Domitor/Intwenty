@@ -187,6 +187,44 @@ namespace Intwenty.Model
             return false;
         }
 
+        public bool RemoveProperty(string propertyname)
+        {
+            var temp = "";
+            var res = false;
+            try
+            {
+                if (string.IsNullOrEmpty(propertyname))
+                    return false;
+
+                if (!string.IsNullOrEmpty(Properties))
+                {
+                    temp = this.Properties;
+                    var arr = Properties.Split("#".ToCharArray());
+                    this.Properties = "";
+                    var sep = "";
+                    foreach (var v in arr)
+                    {
+                        var keyval = v.Split("=".ToCharArray());
+                        if (keyval[0].ToUpper() != propertyname.ToUpper())
+                        {
+                            this.Properties += sep + v;
+                            sep = "#";
+                        }
+                        else
+                        {
+                            res = true;
+                        }
+                       
+                    }
+                }
+            }
+            catch {
+                this.Properties = temp;
+            }
+
+            return res;
+        }
+
         public List<string> GetProperties()
         {
             var res = new List<string>();

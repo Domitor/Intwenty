@@ -534,8 +534,7 @@ namespace Intwenty
             {
                  ep.ParentMetaCode = "ROOT";
 
-                if (string.IsNullOrEmpty(ep.MetaCode))
-                    ep.MetaCode = BaseModelItem.GenerateNewMetaCode(ep);
+               
             }
 
             Client.Open();
@@ -545,8 +544,6 @@ namespace Intwenty
                 {
                     var t = new EndpointItem()
                     {
-
-                        MetaCode = ep.MetaCode,
                         MetaType = ep.MetaType,
                         ParentMetaCode = ep.ParentMetaCode,
                         Title = ep.Title,
@@ -559,6 +556,10 @@ namespace Intwenty
                         Properties = ep.Properties
 
                     };
+
+                    if (string.IsNullOrEmpty(t.MetaCode))
+                        t.MetaCode = BaseModelItem.GenerateNewMetaCode(ep);
+
                     Client.InsertEntity(t);
                 }
                 else
@@ -566,6 +567,7 @@ namespace Intwenty
                     var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == ep.Id);
                     if (existing != null)
                     {
+                        existing.AppMetaCode = ep.AppMetaCode;
                         existing.OrderNo = ep.OrderNo;
                         existing.Path = ep.Path;
                         existing.Properties = ep.Properties;

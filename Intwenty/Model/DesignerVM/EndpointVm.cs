@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.Model.DesignerVM
 {
-    public class EndpointCollectionVm
+    public class EndpointManagementVm
     {
 
         public List<EndpointVm> Endpoints { get; set; }
@@ -30,12 +30,19 @@ namespace Intwenty.Model.DesignerVM
 
         public string Description { get; set; }
 
+        public bool Expanded { get; set; }
+
         public static EndpointVm CreateEndpointVm(EndpointModelItem model)
         {
             var t = new EndpointVm();
             t.Action = model.Action;
             t.Path = model.Path;
-            t.DataSource = model.AppMetaCode + "|" + model.DataMetaCode;
+
+            if (model.IsMetaTypeTableOperation)
+                t.DataSource = model.AppMetaCode + "|" + model.DataMetaCode;
+            else
+                t.DataSource = model.DataMetaCode;
+
             t.EndpointType = model.MetaType;
             t.Id = model.Id;
             t.Properties = model.Properties;
@@ -49,18 +56,19 @@ namespace Intwenty.Model.DesignerVM
             t.Action = model.Action;
             t.Path = model.Path;
             var check = model.DataSource.Split('|');
-            if (check.Length > 1)
+            if (t.IsMetaTypeTableOperation)
             {
                 t.AppMetaCode = check[0];
                 t.DataMetaCode = check[1];
             }
-            else if(check.Length == 1)
+            else
             {
-                t.DataMetaCode = check[0];
+                t.DataMetaCode = model.DataSource;
             }
             t.Id = model.Id;
 
             t.Properties = model.Properties;
+            t.RemoveProperty("CHANGED");
 
 
             return t;
