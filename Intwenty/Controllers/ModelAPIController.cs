@@ -722,11 +722,46 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/GetEndpoints")]
         public JsonResult GetEndpoints()
         {
-            var t = ModelRepository.GetEndpointModels();
-            var res = new JsonResult(t);
-            return res;
+            var res = new EndpointVm();
+            res.Endpoints = ModelRepository.GetEndpointModels();
+            res.EndpointDataSourceTypes = new List<EndpointDataSourceType>();
+            res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "TABLEOPERATION", title = "Database table" });
+            res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "DATAVIEWOPERATION", title = "Intwenty Data View" });
+            res.EndpointActions = ModelRepository.GetValueDomains().Where(p => p.DomainName == "ENDPOINT_TABLE_ACTION" || 
+                                                                               p.DomainName == "ENDPOINT_DATAVIEW_ACTION").ToList();
+
+            res.EndpointDataSources = new List<EndpointDataSource>();
+            var apps = ModelRepository.GetApplicationModels();
+            foreach (var a in apps)
+            {
+                res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode, title = a.Application.DbName, type = "TABLEOPERATION" });
+                foreach (var subtable in a.DataStructure.Where(p=> p.IsMetaTypeDataTable))
+                {
+                    res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.MetaCode, title = subtable.DbName, type = "TABLEOPERATION" });
+
+                }
+            }
+            var dataviews = ModelRepository.GetDataViewModels();
+            foreach (var dv in dataviews.Where(p=> p.IsMetaTypeDataView))
+            {
+                res.EndpointDataSources.Add(new EndpointDataSource() { id = dv.MetaCode, title = dv.Title, type = "DATAVIEWOPERATION" });
+            }
+
+            return new JsonResult(res);
 
         }
+
+        /// <summary>
+        /// Get endpoint operations
+        /// </summary>
+        [HttpGet("/Model/API/GetEndpointOperations")]
+        public JsonResult GetEndpointOperations()
+        {
+            var endpointoperations = ModelRepository.GetValueDomains().Where(p=> p.DomainName== "ENDPOINT_TABLE_ACTION" || p.DomainName == "ENDPOINT_DATAVIEW_ACTION");
+            return new JsonResult(endpointoperations);
+
+        }
+
 
 
         [HttpPost("/Model/API/SaveTranslations")]

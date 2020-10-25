@@ -60,6 +60,11 @@ namespace Intwenty.Controllers
             return View();
         }
 
+        public IActionResult EditEndpoints()
+        {
+            return View();
+        }
+
         public IActionResult EditDataviews()
         {
             return View();

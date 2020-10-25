@@ -36,17 +36,35 @@
         <thead>
             <tr>
 
-                <th style="width:30%">Based On <span style="color: red"> *</span></th>
-                <th style="width:30%">Path <span style="color: red"> *</span></th>
-                <th style="width:30%">Action <span style="color: red"> *</span></th>
+                <th style="width:20%">Path <span style="color: red"> *</span></th>
+                <th style="width:20%">Data Source Type <span style="color: red"> *</span></th>
+                <th style="width:20%">Data Source <span style="color: red"> *</span></th>
+                <th style="width:20%">Action <span style="color: red"> *</span></th>
                 <th style="width:10%"></th>
             </tr>
         </thead>
-        <tbody v-for="entry in endpoints">
+        <tbody v-for="entry in model.endpoints">
             <tr>
-                <td><input type="text" class="form-control form-control-sm" v-model="entry.metaType" v-on:input="markChanged(entry)" /></td>
-                <td><input type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" /></td>
-                <td><input type="text" class="form-control form-control-sm" v-model="entry.action" v-on:input="markChanged(entry)" /></td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" placeholder="Example: /API/Customer/" />
+                </td>
+                <td>
+                    <select v-model="entry.metaType" class="form-control form-control-sm" id="cbEndpointType" v-on:input="markChanged(entry)">
+                        <option v-for="eptype in model.endpointDataSourceTypes" v-bind:value="eptype.id">{{eptype.title}}</option>
+                    </select>
+                </td>
+                <td>
+                    <select v-model="entry.dataMetaCode" class="form-control form-control-sm" id="cbEndpointSource" v-on:input="markChanged(entry)" :disabled="entry.metaType==''">
+                        <option v-for="source in dataSource(entry)" v-bind:value="source.id">{{source.title}}</option>
+                    </select>
+                </td>
+
+                <td>
+                    <select v-model="entry.action" class="form-control form-control-sm" id="cbActions" v-on:input="markChanged(entry)" :disabled="entry.metaType==''">
+                        <option v-for="action in actions(entry)" v-bind:value="action.value">{{action.title}}</option>
+                    </select>
+                </td>
+
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteEndpoint(entry)"><i class="fa fa-trash"></i></div></td>
             </tr>
         </tbody>
@@ -63,9 +81,8 @@
             el: '#app',
             data:
             {
-                model: {  },
-                endpoints: [],
-                idgen: -1
+                model: {}
+                
             },
             methods: {
 
@@ -74,7 +91,7 @@
                 {
 
                     this.idgen -= 1;
-                    this.endpoints.unshift({ id: this.idgen, metaType: "", action: "", path: "" });
+                    this.model.endpoints.unshift({ id: this.idgen, metaType: "", action: "", path: "" });
                 },
                 deleteEndpoint: function (entry)
                 {
@@ -82,11 +99,11 @@
 
                     if (entry.id < 1)
                     {
-                        for (var i = 0; i < context.endpoints.length; i++)
+                        for (var i = 0; i < context.model.endpoints.length; i++)
                         {
-                            if (context.endpoints[i].id === entry.id)
+                            if (context.model.endpoints[i].id === entry.id)
                             {
-                                context.endpoints.splice(i, 1);
+                                context.model.endpoints.splice(i, 1);
                                 break;
                             }
                         }
@@ -106,7 +123,7 @@
                             contentType: "application/json",
                             data: JSON.stringify(entry),
                             success: function (response) {
-                                context.endpoints = response;
+                                context.model = response;
                             },
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
@@ -128,9 +145,9 @@
                         var list = [];
                         var context = this;
 
-                    for (var i = 0; i < context.endpoints.length; i++)
+                    for (var i = 0; i < context.model.endpoints.length; i++)
                         {
-                        if (context.endpoints[i].id < 1 || context.endpoints[i].properties.indexOf("CHANGED=TRUE") > -1)
+                        if (context.model.endpoints[i].id < 1 || context.model.endpoints[i].properties.indexOf("CHANGED=TRUE") > -1)
                             list.push(context.endpoints[i]);
                         }
 
@@ -145,7 +162,7 @@
                             data: JSON.stringify(list),
                             success: function (response)
                             {
-                                context.endpoints = response;
+                                context.model = response;
                             },
                             error: function (response)
                             {
@@ -153,7 +170,18 @@
                             }
                         });
 
+                },
+                dataSource(endpoint) {
+                    return this.model.endpointDataSources.filter(event => event.type === endpoint.metaType);
+                },
+                actions(endpoint)
+                {
+                    return this.model.endpointActions.filter(event =>
+                        (event.domainName === "ENDPOINT_TABLE_ACTION" && endpoint.metaType === "TABLEOPERATION") ||
+                        (event.domainName === "ENDPOINT_DATAVIEW_ACTION" && endpoint.metaType === "DATAVIEWOPERATION")
+                    );
                 }
+               
             },
             computed:
             {
@@ -170,8 +198,10 @@
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
                 var endpointurl = baseurl + "GetEndpoints";
-                $.get(endpointurl, function (response) {
-                    context.endpoints = response;
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
+                   
                 });
 
             }
