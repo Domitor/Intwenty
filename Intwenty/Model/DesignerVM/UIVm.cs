@@ -414,7 +414,6 @@ namespace Intwenty.Model.DesignerVM
 
     public class UserInput : BaseModelVm
     {
-        public int Id { get; set; }
         public int ApplicationId { get; set; }
         public string Title { get; set; }
         public int RowOrder { get; set; }

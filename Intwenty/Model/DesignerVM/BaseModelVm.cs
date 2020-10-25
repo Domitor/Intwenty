@@ -6,6 +6,7 @@ namespace Intwenty.Model.DesignerVM
 {
     public class BaseModelVm : HashTagPropertyObject
     {
+        public int Id { get; set; }
 
         public IntwentyPropertyVm CurrentProperty { get; set; }
 

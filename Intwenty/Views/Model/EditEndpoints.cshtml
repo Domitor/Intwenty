@@ -35,37 +35,56 @@
     <table class="table table">
         <thead>
             <tr>
-
+                <th style="width:5%"></th>
                 <th style="width:20%">Path <span style="color: red"> *</span></th>
-                <th style="width:20%">Data Source Type <span style="color: red"> *</span></th>
-                <th style="width:20%">Data Source <span style="color: red"> *</span></th>
-                <th style="width:20%">Action <span style="color: red"> *</span></th>
+                <th style="width:15%">Data Source Type <span style="color: red"> *</span></th>
+                <th style="width:25%">Data Source <span style="color: red"> *</span></th>
+                <th style="width:13%">Action <span style="color: red"> *</span></th>
                 <th style="width:10%"></th>
             </tr>
         </thead>
         <tbody v-for="entry in model.endpoints">
+
             <tr>
+                <td><span class="fa fa-cog" v-on:click="entry.expanded = !entry.expanded" style="cursor:pointer"></span></td>
+
                 <td>
-                    <input type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" placeholder="Example: /API/Customer/" />
+                    <input v-bind:id="'tbPath_' + entry.id" type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" placeholder="Example: /API/Customer/" />
                 </td>
                 <td>
-                    <select v-model="entry.metaType" class="form-control form-control-sm" id="cbEndpointType" v-on:input="markChanged(entry)">
+                    <select v-bind:id="'cbendpointType_' + entry.id"  v-model="entry.endpointType" class="form-control form-control-sm"  v-on:input="markChanged(entry)">
                         <option v-for="eptype in model.endpointDataSourceTypes" v-bind:value="eptype.id">{{eptype.title}}</option>
                     </select>
                 </td>
                 <td>
-                    <select v-model="entry.dataMetaCode" class="form-control form-control-sm" id="cbEndpointSource" v-on:input="markChanged(entry)" :disabled="entry.metaType==''">
-                        <option v-for="source in dataSource(entry)" v-bind:value="source.id">{{source.title}}</option>
+                    <select v-bind:id="'cbdataSource_' + entry.id"  v-model="entry.dataSource" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="entry.endpointType==''">
+                        <option v-for="source in dataSourceSelection(entry)" v-bind:value="source.id">{{source.title}}</option>
                     </select>
                 </td>
 
                 <td>
-                    <select v-model="entry.action" class="form-control form-control-sm" id="cbActions" v-on:input="markChanged(entry)" :disabled="entry.metaType==''">
+                    <select v-bind:id="'cbAction_' + entry.id" v-model="entry.action" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="entry.endpointType==''">
                         <option v-for="action in actions(entry)" v-bind:value="action.value">{{action.title}}</option>
                     </select>
                 </td>
 
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteEndpoint(entry)"><i class="fa fa-trash"></i></div></td>
+            </tr>
+
+            <tr v-if="entry.expanded">
+
+                <td colspan="5">
+                    <div class="form-group">
+                        <label class="control-label">Description</label>
+                        <textarea v-bind:id="'taDescription_' + entry.id"
+                                  v-model="entry.description"
+                                  rows="5"
+                                  cols="50"
+                                  class="form-control form-control-sm"></textarea>
+                    </div>
+                </td>
+
+              
             </tr>
         </tbody>
     </table>
@@ -81,7 +100,8 @@
             el: '#app',
             data:
             {
-                model: {}
+                model: {},
+                idgen: 0
                 
             },
             methods: {
@@ -91,7 +111,7 @@
                 {
 
                     this.idgen -= 1;
-                    this.model.endpoints.unshift({ id: this.idgen, metaType: "", action: "", path: "" });
+                    this.model.endpoints.unshift({ id: this.idgen, endpointType: "", action: "", path: "", dataSource:"", expanded:false });
                 },
                 deleteEndpoint: function (entry)
                 {
@@ -124,6 +144,8 @@
                             data: JSON.stringify(entry),
                             success: function (response) {
                                 context.model = response;
+                                for (var i = 0; i < context.model.endpoints.length; i++)
+                                    context.model.endpoints[i].expanded = false;
                             },
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
@@ -137,48 +159,84 @@
                 markChanged: function (entry)
                 {
                     entry.properties = "CHANGED=TRUE";
+                    if (entry.endpointType)
+                        $("#cbendpointType_" + entry.id).removeClass('requiredNotValid');
+                    if (entry.dataSource)
+                        $("#cbdataSource_" + entry.id).removeClass('requiredNotValid');
+                    if (entry.path)
+                        $("#tbPath_" + entry.id).removeClass('requiredNotValid');
+                    if (entry.action)
+                        $("#cbAction_" + entry.id).removeClass('requiredNotValid');
 
                 },
                 saveChanges: function ()
                 {
 
-                        var list = [];
-                        var context = this;
+                    var list = [];
+                    var context = this;
+                    var invalid = false;
 
                     for (var i = 0; i < context.model.endpoints.length; i++)
+                    {
+
+                        var entry = context.model.endpoints[i];
+
+                        if (!entry.endpointType)
                         {
-                        if (context.model.endpoints[i].id < 1 || context.model.endpoints[i].properties.indexOf("CHANGED=TRUE") > -1)
-                            list.push(context.endpoints[i]);
+                            $("#cbendpointType_" + entry.id).addClass('requiredNotValid');
+                            invalid=true;
+                        }
+                        if (!entry.dataSource) {
+                            $("#cbdataSource_" + entry.id).addClass('requiredNotValid');
+                            invalid = true;
+                        }
+                        if (!entry.path)
+                        {
+                            $("#tbPath_" + entry.id).addClass('requiredNotValid');
+                        }
+                        if (!entry.action)
+                        {
+                            $("#cbAction_" + entry.id).addClass('requiredNotValid');
+                            invalid = true;
                         }
 
-                        var baseurl = '@Url.Content("~/Model/API/")';
-                        var endpointurl = baseurl + "SaveEndpoints";
+                        if (invalid)
+                            return;
+
+                        if (entry.id < 1 || entry.properties.indexOf("CHANGED=TRUE") > -1)
+                            list.push(entry);
+                    }
+
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "SaveEndpoints";
 
 
-                        $.ajax({
-                            url: endpointurl,
-                            type: "POST",
-                            contentType: "application/json",
-                            data: JSON.stringify(list),
-                            success: function (response)
-                            {
-                                context.model = response;
-                            },
-                            error: function (response)
-                            {
-                                raiseErrorModal(response.responseJSON);
-                            }
-                        });
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(list),
+                        success: function (response)
+                        {
+                            context.model = response;
+                            for (var i = 0; i < context.model.endpoints.length; i++)
+                                context.model.endpoints[i].expanded = false;
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
+                        }
+                    });
 
                 },
-                dataSource(endpoint) {
-                    return this.model.endpointDataSources.filter(event => event.type === endpoint.metaType);
+                dataSourceSelection(endpoint) {
+                    return this.model.endpointDataSources.filter(event => event.type === endpoint.endpointType);
                 },
                 actions(endpoint)
                 {
                     return this.model.endpointActions.filter(event =>
-                        (event.domainName === "ENDPOINT_TABLE_ACTION" && endpoint.metaType === "TABLEOPERATION") ||
-                        (event.domainName === "ENDPOINT_DATAVIEW_ACTION" && endpoint.metaType === "DATAVIEWOPERATION")
+                        (event.domainName === "ENDPOINT_TABLE_ACTION" && endpoint.endpointType === "TABLEOPERATION") ||
+                        (event.domainName === "ENDPOINT_DATAVIEW_ACTION" && endpoint.endpointType === "DATAVIEWOPERATION")
                     );
                 }
                
@@ -201,6 +259,9 @@
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;
+                    for (var i = 0; i < context.model.endpoints.length; i++)
+                        context.model.endpoints[i].expanded = false;
+
                    
                 });
 

@@ -722,8 +722,15 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/GetEndpoints")]
         public JsonResult GetEndpoints()
         {
-            var res = new EndpointVm();
-            res.Endpoints = ModelRepository.GetEndpointModels();
+            var res = new EndpointCollectionVm();
+
+            res.Endpoints = new List<EndpointVm>();
+            var endpoints = ModelRepository.GetEndpointModels();
+            foreach (var ep in endpoints)
+            {
+                res.Endpoints.Add(EndpointVm.CreateEndpointVm(ep));
+            }
+
             res.EndpointDataSourceTypes = new List<EndpointDataSourceType>();
             res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "TABLEOPERATION", title = "Database table" });
             res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "DATAVIEWOPERATION", title = "Intwenty Data View" });
@@ -734,10 +741,10 @@ namespace Intwenty.Controllers
             var apps = ModelRepository.GetApplicationModels();
             foreach (var a in apps)
             {
-                res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode, title = a.Application.DbName, type = "TABLEOPERATION" });
+                res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode + "|" + a.Application.MetaCode, title = a.Application.DbName, type = "TABLEOPERATION" });
                 foreach (var subtable in a.DataStructure.Where(p=> p.IsMetaTypeDataTable))
                 {
-                    res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.MetaCode, title = subtable.DbName, type = "TABLEOPERATION" });
+                    res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.AppMetaCode + "|" + subtable.MetaCode, title = subtable.DbName, type = "TABLEOPERATION" });
 
                 }
             }
@@ -751,25 +758,19 @@ namespace Intwenty.Controllers
 
         }
 
-        /// <summary>
-        /// Get endpoint operations
-        /// </summary>
-        [HttpGet("/Model/API/GetEndpointOperations")]
-        public JsonResult GetEndpointOperations()
-        {
-            var endpointoperations = ModelRepository.GetValueDomains().Where(p=> p.DomainName== "ENDPOINT_TABLE_ACTION" || p.DomainName == "ENDPOINT_DATAVIEW_ACTION");
-            return new JsonResult(endpointoperations);
-
-        }
+      
 
 
-
-        [HttpPost("/Model/API/SaveTranslations")]
-        public JsonResult SaveEndpoints([FromBody] List<EndpointModelItem> model)
+        [HttpPost("/Model/API/SaveEndpoints")]
+        public JsonResult SaveEndpoints([FromBody] List<EndpointVm> model)
         {
             try
             {
-                ModelRepository.SaveEndpointModels(model);
+                var list = new List<EndpointModelItem>();
+                foreach (var m in model)
+                    list.Add(EndpointVm.CreateEndpointModelItem(m));
+
+                ModelRepository.SaveEndpointModels(list);
             }
             catch (Exception ex)
             {
@@ -780,11 +781,11 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetTranslations();
+            return GetEndpoints();
         }
 
 
-        [HttpPost("/Model/API/DeleteEndpoints")]
+        [HttpPost("/Model/API/DeleteEndpoint")]
         public JsonResult DeleteEndpoint([FromBody] EndpointModelItem model)
         {
             try
@@ -801,7 +802,7 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetTranslations();
+            return GetEndpoints();
         }
 
         #endregion

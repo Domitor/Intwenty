@@ -126,7 +126,6 @@ namespace Intwenty.Model.DesignerVM
 
     public class DatabaseTableVm : BaseModelVm
     {
-        public int Id { get; set; }
         public int ApplicationId { get; set; }
         public string DbName { get; set; }
         public string MetaCode { get; set; }
