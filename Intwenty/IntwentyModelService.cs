@@ -1253,7 +1253,7 @@ namespace Intwenty
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "UNIQUE", Value = "Unique Value", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DOMAIN", Value = "Validation Domain", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
             res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX,EMAILBOX" });
-
+            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "GRIDLAYOUT", Value = "Layout", Properties = "PROPERTYTYPE=LIST#VALIDFOR=EDITGRID#VALUES=CELL:Cell,MODAL:Modal,EXPANDER:expander" });
 
             return res;
         }

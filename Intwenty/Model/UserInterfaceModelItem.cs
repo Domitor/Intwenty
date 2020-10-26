@@ -10,6 +10,13 @@ namespace Intwenty.Model
     public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle
     {
         //META TYPES
+        public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
+        public static readonly string MetaTypeLabel = "LABEL";
+        public static readonly string MetaTypeImage = "IMAGE";
+        public static readonly string MetaTypeStaticHTML = "STATICHTML";
+        public static readonly string MetaTypeCreateView = "CREATEVIEW";
+        public static readonly string MetaTypeUpdateView = "UPDATEVIEW";
+        public static readonly string MetaTypePresentationView = "PRESENTATIONVIEW";
         public static readonly string MetaTypeEmailBox = "EMAILBOX";
         public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
@@ -31,6 +38,8 @@ namespace Intwenty.Model
         public static readonly string MetaTypeEditGridCheckBox = "EDITGRID_CHECKBOX";
         public static readonly string MetaTypeEditGridComboBox = "EDITGRID_COMBOBOX";
         public static readonly string MetaTypeEditGridLookUp = "EDITGRID_LOOKUP";
+        public static readonly string MetaTypeEditGridEmailBox = "EDITGRID_EMAILBOX";
+        public static readonly string MetaTypeEditGridStaticHTML = "EDITGRID_STATICHTML";
 
 
         public UserInterfaceModelItem()
@@ -127,6 +136,8 @@ namespace Intwenty.Model
                     t.Add("STARTEXPANDED");
                 if (!this.IsMetaTypeEditGrid && !this.IsMetaTypeListView && !this.IsMetaTypeLookUp && !this.IsMetaTypePanel && !this.IsMetaTypeSection)
                     t.Add("READONLY");
+                if (!this.IsMetaTypeEditGrid)
+                    t.Add("GRIDLAYOUT");
 
                 return t;
             }
@@ -137,6 +148,13 @@ namespace Intwenty.Model
             get
             {
                 var t = new List<string>();
+                t.Add(MetaTypeCreateView);
+                t.Add(MetaTypeUpdateView);
+                t.Add(MetaTypePresentationView);
+                t.Add(MetaTypeStaticHTML);
+                t.Add(MetaTypeLabel);
+                t.Add(MetaTypeImage);
+                t.Add(MetaTypeTextBlock);
                 t.Add(MetaTypeTextBox);
                 t.Add(MetaTypeEmailBox);
                 t.Add(MetaTypePasswordBox);
@@ -158,6 +176,8 @@ namespace Intwenty.Model
                 t.Add(MetaTypeEditGridNumBox);
                 t.Add(MetaTypeEditGridDatePicker);
                 t.Add(MetaTypeEditGridLookUp);
+                t.Add(MetaTypeEditGridStaticHTML);
+                t.Add(MetaTypeEditGridEmailBox);
 
                 return t;
             }
@@ -234,6 +254,42 @@ namespace Intwenty.Model
 
             }
         }
+
+        public bool IsMetaTypeCreateView
+        {
+            get { return MetaType == MetaTypeCreateView; }
+        }
+
+        public bool IsMMetaTypeUpdateView
+        {
+            get { return MetaType == MetaTypeUpdateView; }
+        }
+
+        public bool IsMetaTypePresentationView
+        {
+            get { return MetaType == MetaTypePresentationView; }
+        }
+
+        public bool IsMetaTypeStaticHTML
+        {
+            get { return MetaType == MetaTypeStaticHTML; }
+        }
+
+        public bool IsMetaTypeImage
+        {
+            get { return MetaType == MetaTypeImage; }
+        }
+
+        public bool IsMetaTypeTextBlock
+        {
+            get { return MetaType == MetaTypeTextBlock; }
+        }
+
+        public bool IsMetaTypeLabel
+        {
+            get { return MetaType == MetaTypeLabel; }
+        }
+
 
         public bool IsMetaTypeEmailBox
         {
@@ -349,6 +405,16 @@ namespace Intwenty.Model
         public bool IsMetaTypeEditGridLookUp
         {
             get { return MetaType == MetaTypeEditGridLookUp; }
+        }
+
+        public bool IsMetaTypeEditGridStaticHTML
+        {
+            get { return MetaType == MetaTypeEditGridStaticHTML; }
+        }
+
+        public bool IsMetaTypeEditGridEmailBox
+        {
+            get { return MetaType == MetaTypeEditGridEmailBox; }
         }
 
         public override bool HasValidMetaType
