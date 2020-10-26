@@ -9,6 +9,8 @@ using Intwenty.Interface;
 using Microsoft.Extensions.Primitives;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
+using Intwenty.DataClient.Model;
+using Intwenty.DataClient;
 
 namespace Intwenty.Controllers
 {
@@ -31,15 +33,22 @@ namespace Intwenty.Controllers
             if (!IsAuthenticated())
                 return Unauthorized();
             
-                var ep = GetEndpointModelFromPath();
-                return new JsonResult("");
+            var ep = GetEndpointModelFromPath();
+            if (ep == null)
+                return new BadRequestResult();
 
-                /*
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == GetApplicationFromPath());
+            if (!ep.IsDataTableConnected)
+                return new BadRequestResult();
+
+            if (!id.HasValue)
+                 return new BadRequestResult();
+
+
+            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                   p.Application.MetaCode == ep.AppMetaCode))
+            {
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
                 if (model == null)
-                    return new BadRequestResult();
-
-                if (!id.HasValue)
                     return new BadRequestResult();
 
                 var state = new ClientStateInfo() { Id = id.Value, ApplicationId = model.Application.Id };
@@ -50,14 +59,114 @@ namespace Intwenty.Controllers
                     res.StatusCode = 400;
                     return res;
                 }
-                 
+
 
                 return new JsonResult(data);
 
-                */
+            }
+            else
+            {
+                var prms = new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", id.Value) };
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                var res = client.GetJSONObject(string.Format("select * from {0} where id = @P1", ep.DataTableInfo.DbName), parameters: prms);
+                client.Close();
+                return new JsonResult(res);
+
+            }
+
+
+
+        }
+
+       
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            if (!IsAuthenticated())
+                return Unauthorized();
+
+             var ep = GetEndpointModelFromPath();
+             if (ep == null)
+                return new BadRequestResult();
+
+            if (!ep.IsDataTableConnected)
+                return new BadRequestResult();
+
+          
+            //Is application basequery
+            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                    p.Application.MetaCode == ep.AppMetaCode))
+            {
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
+                if (model == null)
+                    return new BadRequestResult();
+
+                var res = DataRepository.GetList(model.Application.Id);
+                return new JsonResult(res);
+
+            }
+            else
+            {
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName));
+                client.Close();
+                return new JsonResult(res);
+
+            }
+
+                
+
+        }
+
+        [HttpPost]
+        public IActionResult Save([FromBody] System.Text.Json.JsonElement data)
+        {
+            if (!IsAuthenticated())
+                return Unauthorized();
+
+
+            var ep = GetEndpointModelFromPath();
+            if (ep == null)
+                return new BadRequestResult();
+
+            if (!ep.IsDataTableConnected)
+                return new BadRequestResult();
+
+            //Is application basequery
+            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                    p.Application.MetaCode == ep.AppMetaCode))
+            {
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
+                if (model == null)
+                    return new BadRequestResult();
+
+                var state = ClientStateInfo.CreateFromJSON(data);
+                state.ApplicationId = model.Application.Id;
+                state.Data.ApplicationId = model.Application.Id;
+                var res = DataRepository.Save(state);
+                if (!res.IsSuccess)
+                {
+                    var error = new JsonResult(res.SystemError);
+                    error.StatusCode = 400;
+                    return error;
+                }
+                else
+                {
+                    return new JsonResult(res);
+                }
+
+
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
+
+
            
-
-
         }
 
         [HttpGet]
@@ -81,71 +190,6 @@ namespace Intwenty.Controllers
 
 
             return new BadRequestResult();
-
-        }
-
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            if (!IsAuthenticated())
-                return Unauthorized();
-
-                var ep = GetEndpointModelFromPath();
-                if (ep == null)
-                  return new BadRequestResult();
-
-            if (ep.IsDataTableConnected)
-            {
-                //Is application basequery
-                if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
-                                                                  p.Application.MetaCode == ep.AppMetaCode))
-                {
-                    var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
-                    if (model == null)
-                        return new BadRequestResult();
-
-                    var res = DataRepository.GetList(model.Application.Id);
-                    return new JsonResult(res);
-
-                }
-                else
-                {
-                    var client = DataRepository.GetDataClient();
-                    client.Open();
-                    var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName));
-                    client.Close();
-                    return new JsonResult(res);
-
-                }
-
-                
-            }
-
-            return new JsonResult("");
-
-        }
-
-        [HttpPost]
-        public IActionResult Save([FromBody] System.Text.Json.JsonElement data)
-        {
-            if (!IsAuthenticated())
-                return Unauthorized();
-
-            var ep = GetEndpointModelFromPath();
-            return new JsonResult("");
-
-           
-                //var dbname = GetApplicationFromPath();
-                //var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == dbname);
-                //if (model == null)
-                //    return new BadRequestResult();
-
-                //var state = ClientStateInfo.CreateFromJSON(data);
-                //var res = DataRepository.Save(state);
-                //return new JsonResult(res);
-
-              
-
 
         }
 

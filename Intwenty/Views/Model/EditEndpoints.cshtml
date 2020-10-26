@@ -75,10 +75,14 @@
 
                 <td colspan="5">
                     <div class="form-group">
+                        <label class="control-label">Title</label>
+                        <input v-bind:id="'tbTitle_' + entry.id" type="text" class="form-control form-control-sm" v-model="entry.title"  />
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">Description</label>
                         <textarea v-bind:id="'taDescription_' + entry.id"
                                   v-model="entry.description"
-                                  rows="5"
+                                  rows="3"
                                   cols="50"
                                   class="form-control form-control-sm"></textarea>
                     </div>
@@ -111,7 +115,7 @@
                 {
 
                     this.idgen -= 1;
-                    this.model.endpoints.unshift({ id: this.idgen, endpointType: "", action: "", path: "", dataSource:"", expanded:false });
+                    this.model.endpoints.unshift({ id: this.idgen, endpointType: "", action: "", path: "", dataSource:"", expanded:false, description:"",title:"" });
                 },
                 deleteEndpoint: function (entry)
                 {

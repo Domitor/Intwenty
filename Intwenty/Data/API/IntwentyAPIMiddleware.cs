@@ -1,4 +1,5 @@
-﻿using Intwenty.Interface;
+﻿using Intwenty.Data.Routing;
+using Intwenty.Interface;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,8 @@ namespace Intwenty.Data.API
 
         public static void AddIntwentyAPI(this IServiceCollection services)
         {
+
+            //services.AddTransient<IntwentyEndpointTransformer>();
 
             services.AddSwaggerGen(options => 
             {

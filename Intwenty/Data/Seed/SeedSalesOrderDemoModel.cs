@@ -201,6 +201,8 @@ namespace Intwenty.Data.Seed
 
              temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
              temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
+             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
+             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERS", Text = "Kunder" });
              temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERLIST", Text = "Customer list" });
              temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERLIST", Text = "Kunder" });
              temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERID", Text = "Customer ID" });
@@ -242,12 +244,12 @@ namespace Intwenty.Data.Seed
             #region endpoints
 
             //Define som endpoints for the customer application (Actions must be in the ENDPOINT_TABLE_ACTION domain)
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_GETLATEST", DataMetaCode = "CUSTOMER", Path = "DYNAPI/Customer", Action="GetById", Title = "Get customer", Description = "Get latest version of a customer by id", ParentMetaCode = "ROOT" });
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_GETALL", DataMetaCode = "CUSTOMER", Path = "DYNAPI/Customer", Action = "GetAll", Title = "Get all customers", Description = "Get all customers in the database", ParentMetaCode = "ROOT" });
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_SAVE", DataMetaCode = "CUSTOMER", Path = "DYNAPI/Customer", Action = "Save", Title = "Save customer", Description = "Create or update customer", ParentMetaCode = "EP_CUSTOMER" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_GETLATEST", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Action="GetById", Title = "Get customer", Description = "Get latest version of a customer by id", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_GETALL", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Action = "GetAll", Title = "Get all customers", Description = "Get all customers in the database", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEOPERATION", MetaCode = "EP_CUSTOMER_SAVE", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Action = "Save", Title = "Save customer", Description = "Create or update customer", ParentMetaCode = "EP_CUSTOMER" });
 
             //Define som endpoints for dataviews (Actions must be in the ENDPOINT_DATAVIEW_ACTION domain)
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "", MetaType = "DATAVIEWOPERATION", MetaCode = "EP_DV_OP_1", DataMetaCode = "VENDORVIEW", Path = "DYNAPI/DV", Action = "GetData", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "", MetaType = "DATAVIEWOPERATION", MetaCode = "EP_DV_OP_1", DataMetaCode = "VENDORVIEW", Path = "MyAPI/Vendor", Action = "GetData", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
 
             #endregion
 

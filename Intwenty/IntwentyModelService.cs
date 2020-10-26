@@ -1330,6 +1330,7 @@ namespace Intwenty
 
             var apps = GetApplicationModels();
             var viewinfo = GetDataViewModels();
+            var endpointinfo = GetEndpointModels();
             var res = new OperationResult();
 
             if (apps.Count == 0)
@@ -1483,7 +1484,7 @@ namespace Intwenty
 
                 if (!v.HasValidMetaType)
                 {
-                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object: {0} has no [MetaType].", v.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object: {0} has no [MetaType] or the MetaType is invalid.", v.Title));
                     return res;
                 }
 
@@ -1548,6 +1549,48 @@ namespace Intwenty
                     }
                 }
 
+
+            }
+
+            foreach (var ep in endpointinfo)
+            {
+                if (string.IsNullOrEmpty(ep.MetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("There is an endpoint object without [MetaCode]"));
+                    return res;
+                }
+
+                if (string.IsNullOrEmpty(ep.ParentMetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("There is an endpoint object without [ParentMetaCode]"));
+                    return res;
+                }
+
+                if (!ep.HasValidMetaType)
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object with MetaCode: {0}  has no [MetaType] or the MetaType is invalid.", ep.MetaCode));
+                    return res;
+                }
+
+                if (string.IsNullOrEmpty(ep.Path))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object with MetaCode: {0} has no [Path]", ep.MetaCode));
+                }
+
+                if (string.IsNullOrEmpty(ep.Action))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object with MetaCode: {0} has no [Action]", ep.MetaCode));
+                }
+
+                if (!ep.IsDataTableConnected && !ep.IsDataViewConnected)
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object {0} has no connection to database table or an intwenty data view", (ep.Path+ep.Action)));
+                }
+
+                if (ep.IsDataTableConnected && string.IsNullOrEmpty(ep.AppMetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object {0} is connected to a table but has no [AppMetaCode]", (ep.Path + ep.Action)));
+                }
 
             }
 

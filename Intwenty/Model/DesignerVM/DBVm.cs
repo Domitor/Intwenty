@@ -143,7 +143,7 @@ namespace Intwenty.Model.DesignerVM
             ParentMetaCode = "";
             MetaType = "";
             Description = "";
-            Columns= new List<DatabaseTableColumnVm>();
+            Columns = new List<DatabaseTableColumnVm>();
         }
 
        
@@ -151,7 +151,6 @@ namespace Intwenty.Model.DesignerVM
 
     public class DatabaseTableColumnVm : BaseModelVm
     {
-        public int Id { get; set; }
         public int ApplicationId { get; set; }
         public string DbName { get; set; }
         public string MetaCode { get; set; }

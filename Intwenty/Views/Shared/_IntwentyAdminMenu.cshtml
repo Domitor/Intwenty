@@ -3,7 +3,6 @@
     <div class="dropdown-menu">
         <a class="dropdown-item" asp-area="Identity" asp-page="/Admin/UserAdministration"><span class="fa fa-cogs"></span> Manage Users</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="GetList"><span class="fa fa-cogs"></span> Manage applications</a>
-        <a class="dropdown-item" asp-controller="Model" asp-action="EditEndpoints"><span class="fas fa-globe-europe"></span> Manage Endpoints</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="EditTranslations"><span class="fas fa-globe-europe"></span> Manage Translations</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
@@ -16,6 +15,7 @@
         <a class="dropdown-item" asp-controller="Model" asp-action="ImportModel"><span class="fa fa-cogs"></span> Import Model</a>
         <a class="dropdown-item" asp-controller="ModelAPI" asp-action="ExportData"><span class="fa fa-cogs"></span> Export Data</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="ImportData"><span class="fa fa-cogs"></span> Import Data</a>
-        <a class="dropdown-item" href="~/swagger/index.html" target="_blank"><span class="fa fa-cogs"></span> API Documentation</a>
+        <a class="dropdown-item" asp-controller="Model" asp-action="EditEndpoints"><span class="fas fa-handshake"></span> API Management</a>
+        <a class="dropdown-item" href="~/swagger/index.html" target="_blank"><span class="fas fa-handshake"></span> API Docs and Testing</a>
     </div>
 </li>

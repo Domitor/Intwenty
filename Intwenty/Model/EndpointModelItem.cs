@@ -29,7 +29,6 @@ namespace Intwenty.Model
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
-            Title = entity.Title;
             Description = entity.Description;
             AppMetaCode = entity.AppMetaCode;
             MetaCode = entity.MetaCode;

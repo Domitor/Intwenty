@@ -28,6 +28,7 @@ namespace Intwenty.Model.DesignerVM
 
         public string Action { get; set; }
 
+        public string Title { get; set; }
         public string Description { get; set; }
 
         public bool Expanded { get; set; }
@@ -46,6 +47,8 @@ namespace Intwenty.Model.DesignerVM
             t.EndpointType = model.MetaType;
             t.Id = model.Id;
             t.Properties = model.Properties;
+            t.Description = model.Description;
+            t.Title = model.Title;
 
             return t;
         }
@@ -68,6 +71,9 @@ namespace Intwenty.Model.DesignerVM
             t.Id = model.Id;
 
             t.Properties = model.Properties;
+            t.Description = model.Description;
+            t.Title = model.Title;
+            
             t.RemoveProperty("CHANGED");
 
 

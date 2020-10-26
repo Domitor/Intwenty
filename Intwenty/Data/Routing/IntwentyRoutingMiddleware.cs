@@ -1,6 +1,9 @@
 ﻿using Intwenty.Interface;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -31,10 +34,14 @@ namespace Intwenty.Data.Routing
                 //Register endpoints
                 var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
                 var epmodels = modelservice.GetEndpointModels();
+
                 foreach (var ep in epmodels.Where(p=> p.IsMetaTypeDataViewOperation || p.IsMetaTypeTableOperation))
                 {
                     endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action="+ep.Action+"}/{id?}", defaults: new { controller = "DynamicApplication" });
                 }
+
+                //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
+
 
                 endpoints.MapRazorPages();
 
@@ -44,4 +51,36 @@ namespace Intwenty.Data.Routing
 
         }
     }
+
+    /*
+    class IntwentyEndpointTransformer : DynamicRouteValueTransformer
+    {
+        private readonly IIntwentyModelService _modelservice;
+
+        public IntwentyEndpointTransformer(IIntwentyModelService ms)
+        {
+            this._modelservice = ms;
+        }
+
+        public override async ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, RouteValueDictionary values)
+        {
+            var path = httpContext.Request.Path.ToString();
+            var ep = _modelservice.GetEndpointModels().Find(p => (p.Path + p.Action).ToUpper() == path.ToUpper());
+            if (ep != null)
+            {
+                
+
+            }
+
+            //var productString = values[“product”] as string;
+            //var id = await this._productLocator.FindProduct(“product”, out var controller);
+
+            //values[“controller”] = controller;
+            //values[“action”] = "Get";
+            //values[“id”] = id;
+
+            return values;
+        }
+    }
+    */
 }

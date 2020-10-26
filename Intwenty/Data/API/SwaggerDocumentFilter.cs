@@ -36,9 +36,9 @@ namespace Intwenty.Data.API
             var epmodels = _modelservice.GetEndpointModels();
             var domains = _modelservice.GetValueDomains();
 
-            //swaggerDoc.Tags.Add(new OpenApiTag() { Name = api.Title, Description = api.Description });
+            var endpoinggroup = new OpenApiTag() { Name = "Endpoints"};
 
-            foreach (var ep in epmodels.Where(p => p.IsMetaTypeTableOperation))
+            foreach (var ep in epmodels.Where(p => p.IsMetaTypeTableOperation && p.IsDataTableConnected))
             {
                 var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_TABLE_ACTION" && p.Value == ep.Action);
                 if (domainoperation == null)
@@ -48,7 +48,11 @@ namespace Intwenty.Data.API
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
-                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    if (string.IsNullOrEmpty(ep.Title))
+                        op.Summary = string.Format("Retrieve data from the {0} table", ep.DataTableInfo.DbName);
+                    else
+                        op.Summary = ep.Title;
+                    op.Tags.Add(endpoinggroup);
                     op.Parameters.Add(new OpenApiParameter() { Name = "id", In = ParameterLocation.Path, Required = true, Schema = new OpenApiSchema() { Type = "integer", Format = "int32" } });
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
@@ -65,7 +69,11 @@ namespace Intwenty.Data.API
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
-                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    if (string.IsNullOrEmpty(ep.Title))
+                        op.Summary = string.Format("Retrieve data from the {0} table", ep.DataTableInfo.DbName);
+                    else
+                        op.Summary = ep.Title;
+                    op.Tags.Add(endpoinggroup);
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
                     op.Responses.Add("200", resp);
@@ -77,18 +85,17 @@ namespace Intwenty.Data.API
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
                 }
 
-                if (domainoperation.Code == "SAVE")
+                if (domainoperation.Code == "SAVE" && ep.DataTableInfo.MetaCode == ep.AppMetaCode)
                 {
                     var path = new OpenApiPathItem();
-                    var op = new OpenApiOperation() { Description = ep.Description };
+                    var op = new OpenApiOperation() { Description = ep.Description, Summary = ep.Title };
                     op.RequestBody = new OpenApiRequestBody();
                     var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
                     content.Value.Schema = new OpenApiSchema();
                     content.Value.Schema.Example = GetSaveUpdateSchema(ep);
                     op.RequestBody.Content.Add(content);
                     op.RequestBody.Required = true;
-
-                    op.Tags.Add(new OpenApiTag() { Name = ep.Action, Description = ep.Description });
+                    op.Tags.Add(endpoinggroup);
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
                     op.Responses.Add("200", resp);
@@ -102,7 +109,7 @@ namespace Intwenty.Data.API
                 }
             }
 
-            foreach (var ep in epmodels.Where(p => p.IsMetaTypeDataViewOperation))
+            foreach (var ep in epmodels.Where(p => p.IsMetaTypeDataViewOperation && p.IsDataViewConnected))
             {
                 var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_DATAVIEW_ACTION" && p.Value == ep.Action);
                 if (domainoperation == null)
@@ -112,7 +119,11 @@ namespace Intwenty.Data.API
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
-                    op.Tags.Add(new OpenApiTag() { Name = ep.Title, Description = ep.Description });
+                    if (string.IsNullOrEmpty(ep.Title))
+                        op.Summary = string.Format("Retrieve data from the '{0}' data view", ep.DataViewInfo.Title);
+                    else
+                        op.Summary = ep.Title;
+                    op.Tags.Add(endpoinggroup);
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
                     op.Responses.Add("200", resp);
@@ -153,7 +164,8 @@ namespace Intwenty.Data.API
                 foreach (var col in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && p.IsRoot))
                 {
                     if (col.DbName.ToUpper() == "APPLICATIONID")
-                        sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
+                        continue;
+                        //sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
                     else if (col.IsNumeric)
                         sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, 0));
                     else if (col.IsDateTime)
@@ -175,11 +187,12 @@ namespace Intwenty.Data.API
                         foreach (var col in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.ParentMetaCode == dbtbl.MetaCode))
                         {
                             if (col.DbName.ToUpper() == "APPLICATIONID")
-                                sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
+                                continue;
+                            //sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
                             else if (col.IsNumeric)
                                 sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, 0));
                             else if (col.IsDateTime)
-                                sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, DateTime.Now.AddYears((DateTime.Now.Year-1973)*-1).ToString("yyyy-MM-dd HH:mm:ss")));
+                                sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, DateTime.Now.AddYears((DateTime.Now.Year - 1973) * -1).ToString("yyyy-MM-dd HH:mm:ss")));
                             else
                                 sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, "string"));
 
