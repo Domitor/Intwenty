@@ -486,7 +486,7 @@ namespace Intwenty
 
             foreach (var ep in res)
             {
-                if ((ep.IsMetaTypeTableOperation || ep.IsMetaTypeDataViewOperation) && ep.Path.Length > 0)
+                if (ep.Path.Length > 0)
                 {
                     ep.Path.Trim();
                     if (ep.Path[0] != '/')
@@ -496,7 +496,8 @@ namespace Intwenty
 
                 }
 
-                if (ep.IsMetaTypeTableOperation && !string.IsNullOrEmpty(ep.AppMetaCode) && !string.IsNullOrEmpty(ep.DataMetaCode))
+                if ((ep.IsMetaTypeTableGetById || ep.IsMetaTypeTableGetAll || ep.IsMetaTypeTableSave)
+                    && !string.IsNullOrEmpty(ep.AppMetaCode) && !string.IsNullOrEmpty(ep.DataMetaCode))
                 {
                    
                     var appmodel = appmodels.Find(p => p.Application.MetaCode == ep.AppMetaCode);
@@ -511,7 +512,7 @@ namespace Intwenty
                     }
                 }
 
-                if (ep.IsMetaTypeDataViewOperation && !string.IsNullOrEmpty(ep.DataMetaCode))
+                if (ep.IsMetaTypeDataViewGetData && !string.IsNullOrEmpty(ep.DataMetaCode))
                 {
                     var dv = dataviews.Find(p => p.IsMetaTypeDataView && p.MetaCode == ep.DataMetaCode);
                     if (dv != null)
@@ -547,7 +548,6 @@ namespace Intwenty
                         MetaType = ep.MetaType,
                         ParentMetaCode = ep.ParentMetaCode,
                         Title = ep.Title,
-                        Action = ep.Action,
                         AppMetaCode = ep.AppMetaCode,
                         DataMetaCode = ep.DataMetaCode,
                         Description = ep.Description,
@@ -572,7 +572,6 @@ namespace Intwenty
                         existing.Path = ep.Path;
                         existing.Properties = ep.Properties;
                         existing.Title = ep.Title;
-                        existing.Action = ep.Action;
                         existing.DataMetaCode = ep.DataMetaCode;
                         existing.Description = ep.Description;
                         
@@ -1219,56 +1218,12 @@ namespace Intwenty
             //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
             //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 
-            var currentdomains = client.GetEntities<ValueDomainItem>();
-            var defaultprops = GetIntentyProperties();
-            foreach (var p in defaultprops)
-            {
-                if (!currentdomains.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
-                    client.InsertEntity(p);
-            }
-            var endpointactions = GetIntentyEndpointActions();
-            foreach (var p in endpointactions)
-            {
-                if (!currentdomains.Exists(x => x.DomainName == p.DomainName && x.Code == p.Code))
-                    client.InsertEntity(p);
-            }
-
             client.Close();
             
         }
 
-        private List<ValueDomainItem> GetIntentyProperties()
-        {
-            var res = new List<ValueDomainItem>();
-
-
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "HIDEFILTER", Value = "Hide filter", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=LISTVIEW,DATAVIEW" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "COLLAPSIBLE", Value = "Collapsible", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "STARTEXPANDED", Value = "Start expanded", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=SECTION" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE", Value = "Default value", Properties = "PROPERTYTYPE=LIST#VALIDFOR=DATACOLUMN#VALUES=NONE:None,AUTO:Automatic" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_START", Value = "Default value start", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUM" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_PREFIX", Value = "Default value prefix", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DEFVALUE_SEED", Value = "Default value seed", Properties = "PROPERTYTYPE=NUMERIC#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "MANDATORY", Value = "Is Mandatory", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "UNIQUE", Value = "Unique Value", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "DOMAIN", Value = "Validation Domain", Properties = "PROPERTYTYPE=STRING#VALIDFOR=DATACOLUMN" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "READONLY", Value = "Is Readonly", Properties = "PROPERTYTYPE=BOOLEAN#VALIDFOR=TEXTBOX,COMBOBOX,NUMBOX,TEXTAREA,CHECKBOX,EMAILBOX" });
-            res.Add(new ValueDomainItem() { DomainName = "INTWENTYPROPERTY", Code = "GRIDLAYOUT", Value = "Layout", Properties = "PROPERTYTYPE=LIST#VALIDFOR=EDITGRID#VALUES=CELL:Cell,MODAL:Modal,EXPANDER:expander" });
-
-            return res;
-        }
-
-        private List<ValueDomainItem> GetIntentyEndpointActions()
-        {
-            var res = new List<ValueDomainItem>();
-
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETBYID", Value = "GetById", Properties = "" });
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "GETALL", Value = "GetAll", Properties = "" });
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_TABLE_ACTION", Code = "SAVE", Value = "Save", Properties = "" });
-            res.Add(new ValueDomainItem() { DomainName = "ENDPOINT_DATAVIEW_ACTION", Code = "GETDATA", Value = "GetData", Properties = "" });
-          
-            return res;
-        }
+       
+      
 
         public List<OperationResult> ConfigureDatabase()
         {

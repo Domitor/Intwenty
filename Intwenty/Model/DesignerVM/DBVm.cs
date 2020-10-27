@@ -146,7 +146,15 @@ namespace Intwenty.Model.DesignerVM
             Columns = new List<DatabaseTableColumnVm>();
         }
 
-       
+        public override List<IntwentyProperty> SelectableProperties
+        {
+            get
+            {
+                return DatabaseModelItem.GetAvailableProperties().Where(p => p.ValidFor.Contains(DatabaseModelItem.MetaTypeDataTable)).ToList();
+            }
+        }
+
+
     }
 
     public class DatabaseTableColumnVm : BaseModelVm
@@ -176,8 +184,15 @@ namespace Intwenty.Model.DesignerVM
 
         }
 
+        public override List<IntwentyProperty> SelectableProperties 
+        {
+            get {
+                return DatabaseModelItem.GetAvailableProperties().Where(p => p.ValidFor.Contains(DatabaseModelItem.MetaTypeDataColumn)).ToList();
+            }
+        }
 
-      
+
+
     }
 
 }

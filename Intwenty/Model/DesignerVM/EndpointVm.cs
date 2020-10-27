@@ -39,7 +39,7 @@ namespace Intwenty.Model.DesignerVM
             t.Action = model.Action;
             t.Path = model.Path;
 
-            if (model.IsMetaTypeTableOperation)
+            if (model.IsDataTableConnected)
                 t.DataSource = model.AppMetaCode + "|" + model.DataMetaCode;
             else
                 t.DataSource = model.DataMetaCode;
@@ -56,10 +56,9 @@ namespace Intwenty.Model.DesignerVM
         public static EndpointModelItem CreateEndpointModelItem(EndpointVm model)
         {
             var t = new EndpointModelItem(model.EndpointType);
-            t.Action = model.Action;
             t.Path = model.Path;
             var check = model.DataSource.Split('|');
-            if (t.IsMetaTypeTableOperation)
+            if (check.Length > 1)
             {
                 t.AppMetaCode = check[0];
                 t.DataMetaCode = check[1];

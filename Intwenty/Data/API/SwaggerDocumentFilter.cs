@@ -38,13 +38,11 @@ namespace Intwenty.Data.API
 
             var endpoinggroup = new OpenApiTag() { Name = "Endpoints"};
 
-            foreach (var ep in epmodels.Where(p => p.IsMetaTypeTableOperation && p.IsDataTableConnected))
+            foreach (var ep in epmodels)
             {
-                var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_TABLE_ACTION" && p.Value == ep.Action);
-                if (domainoperation == null)
-                    throw new InvalidOperationException("No enpoint action exists as a domainvalue in intwenty");
 
-                if (domainoperation.Code == "GETBYID")
+
+                if (ep.IsMetaTypeTableGetById && ep.IsDataTableConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -65,7 +63,7 @@ namespace Intwenty.Data.API
                     swaggerDoc.Paths.Add(ep.Path + ep.Action + "/{id}", path);
                 }
 
-                if (domainoperation.Code == "GETALL")
+                if (ep.IsMetaTypeTableGetAll && ep.IsDataTableConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -85,7 +83,7 @@ namespace Intwenty.Data.API
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
                 }
 
-                if (domainoperation.Code == "SAVE" && ep.DataTableInfo.MetaCode == ep.AppMetaCode)
+                if (ep.IsMetaTypeTableSave && ep.DataTableInfo.MetaCode == ep.AppMetaCode)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description, Summary = ep.Title };
@@ -107,15 +105,9 @@ namespace Intwenty.Data.API
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
 
                 }
-            }
 
-            foreach (var ep in epmodels.Where(p => p.IsMetaTypeDataViewOperation && p.IsDataViewConnected))
-            {
-                var domainoperation = domains.Find(p => p.DomainName == "ENDPOINT_DATAVIEW_ACTION" && p.Value == ep.Action);
-                if (domainoperation == null)
-                    throw new InvalidOperationException("No enpoint action exists as a domainvalue in intwenty");
 
-                if (domainoperation.Code == "GETDATA")
+                if (ep.IsMetaTypeDataViewGetData && ep.IsDataViewConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -134,9 +126,9 @@ namespace Intwenty.Data.API
                     path.AddOperation(OperationType.Get, op);
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
                 }
+
+
             }
-
-
             
 
         }
@@ -148,7 +140,7 @@ namespace Intwenty.Data.API
             try
             {
 
-                if (!epitem.IsMetaTypeTableOperation || string.IsNullOrEmpty(epitem.AppMetaCode))
+                if (!epitem.IsDataViewConnected || string.IsNullOrEmpty(epitem.AppMetaCode))
                     return new OpenApiString("");
 
                 var models = _modelservice.GetApplicationModels();

@@ -63,29 +63,39 @@ namespace Intwenty.Model
             get { return this.DbName + "_Versioning"; }
         }
 
-
         public override bool HasValidMetaType
         {
-            get { return true; }
-        }
-
-        public static List<string> ValidProperties
-        {
-            get
+            get 
             {
-                var t = new List<string>();
-                return t;
+                return this.MetaType == MetaTypeApplication; 
             }
         }
 
-        public static List<string> ValidMetaTypes
+        public override bool HasValidProperties
         {
             get
             {
-                var t = new List<string>();
-                t.Add(MetaTypeApplication);
-                return t;
+                foreach (var prop in GetProperties())
+                {
+                    if (!GetAvaliableProperties().Exists(p => p.CodeName == prop))
+                        return false;
+                }
+                return true;
             }
+        }
+
+        public static List<IntwentyProperty> GetAvaliableProperties()
+        {
+            return new List<IntwentyProperty>();
+        }
+
+        public static List<IntwentyMetaType> GetAvailableMetaTypes()
+        {
+            return new List<IntwentyMetaType>()
+            {
+                new IntwentyMetaType(){ Code=MetaTypeApplication, Title="Application" }
+
+            };
         }
 
 

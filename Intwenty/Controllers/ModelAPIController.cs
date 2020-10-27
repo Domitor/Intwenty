@@ -179,7 +179,7 @@ namespace Intwenty.Controllers
         public JsonResult GetIntwentyDataTypes()
         {
             var t = new DatabaseModelItem();
-            return new JsonResult(DatabaseModelItem.DataTypes);
+            return new JsonResult(DatabaseModelItem.GetAvailableDataTypes());
 
         }
 
@@ -428,69 +428,6 @@ namespace Intwenty.Controllers
         }
 
 
-        /// <summary>
-        /// Get intwenty properties used to configure metadata
-        /// </summary>
-        [HttpGet("/Model/API/GetIntwentyProperties")]
-        public JsonResult GetIntwentyProperties()
-        {
-            var result = new List<IntwentyPropertyVm>();
-            var t = ModelRepository.GetValueDomains().Where(p=> p.DomainName=="INTWENTYPROPERTY");
-            foreach (var prop in t)
-            {
-                var current = result.Find(p => p.Name == prop.Code);
-                if (current == null)
-                {
-                    current = new IntwentyPropertyVm();
-                    result.Add(current);
-                }
-                current.Name = prop.Code;
-                current.Title = prop.Value;
-                current.ValueType = prop.GetPropertyValue("PROPERTYTYPE");
-                var vfor = prop.GetPropertyValue("VALIDFOR");
-                if (!string.IsNullOrEmpty(vfor) && vfor.Contains(","))
-                {
-                    current.ValidFor = vfor.Split(",".ToCharArray()).ToList();
-                }
-                else if(!string.IsNullOrEmpty(vfor) && !vfor.Contains(","))
-                {
-                    current.ValidFor.Add(vfor);
-                }
-
-
-                if (current.IsListType)
-                {
-                    var values = prop.GetPropertyValue("VALUES");
-                    if (!string.IsNullOrEmpty(values))
-                    {
-                        var split = values.Split(",".ToCharArray());
-                        foreach (var s in split)
-                        {
-                            if (s.Contains(":"))
-                            {
-                                var subsplit = s.Split(":".ToCharArray());
-                                current.ValidValues.Add(new PropertyItem() {  PropertyValue  = subsplit[0], Title = subsplit[1], PropertyCode = current.Name });
-
-                            }
-                            else
-                            {
-                                current.ValidValues.Add(new PropertyItem() { PropertyValue = s, Title = s, PropertyCode = current.Name });
-
-                            }
-                        }
-                        
-                    }
-                   
-                }
-
-            }
-            
-
-
-
-            return new JsonResult(result);
-
-        }
 
         #endregion
 

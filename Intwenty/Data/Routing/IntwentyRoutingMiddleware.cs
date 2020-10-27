@@ -35,7 +35,7 @@ namespace Intwenty.Data.Routing
                 var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
                 var epmodels = modelservice.GetEndpointModels();
 
-                foreach (var ep in epmodels.Where(p=> p.IsMetaTypeDataViewOperation || p.IsMetaTypeTableOperation))
+                foreach (var ep in epmodels)
                 {
                     endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action="+ep.Action+"}/{id?}", defaults: new { controller = "DynamicApplication" });
                 }

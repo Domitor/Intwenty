@@ -5,13 +5,11 @@ using System.Collections.Generic;
 
 namespace Intwenty.Model
 {
-    public class ValueDomainModelItem : BaseModelItem, ILocalizableTitle
+    public class ValueDomainModelItem : HashTagPropertyObject, ILocalizableTitle
     {
 
         public ValueDomainModelItem()
         {
-            MetaType = MetaTypeValueDomain;
-            ParentMetaCode = MetaTypeRoot;
             SetEmptyStrings();
         }
 
@@ -24,9 +22,6 @@ namespace Intwenty.Model
             Title = entity.Value;
             TitleLocalizationKey = entity.ValueLocalizationKey;
             Properties = entity.Properties;
-            MetaType = MetaTypeValueDomain;
-            MetaCode = DomainName;
-            ParentMetaCode = MetaTypeRoot;
             SetEmptyStrings();
         }
 
@@ -40,26 +35,8 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
-        public static readonly string MetaTypeValueDomain = "VALUEDOMAIN";
-
-        public static List<string> ValidProperties
-        {
-            get
-            {
-                var t = new List<string>();
-                return t;
-            }
-        }
-
-        public static List<string> ValidMetaTypes
-        {
-            get
-            {
-                var t = new List<string>();
-                t.Add(MetaTypeValueDomain);
-                return t;
-            }
-        }
+      
+        public int Id { get; set; }
 
         public string TitleLocalizationKey { get; set; }
 
@@ -69,13 +46,9 @@ namespace Intwenty.Model
 
         public string Value { get; set; }
 
-        public override bool HasValidMetaType
-        {
-            get { return true;  }
-        }
+        public string Title { get; set; }
 
-
-        public override bool IsValid
+        public bool IsValid
         {
             get
             {

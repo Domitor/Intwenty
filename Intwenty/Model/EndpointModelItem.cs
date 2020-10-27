@@ -10,9 +10,10 @@ namespace Intwenty.Model
     public class EndpointModelItem : BaseModelItem
     {
         //META TYPES
-        //public static readonly string MetaTypeAPI = "API";
-        public static readonly string MetaTypeTableOperation = "TABLEOPERATION";
-        public static readonly string MetaTypeDataViewOperation = "DATAVIEWOPERATION";
+        public static readonly string MetaTypeTableGetById = "TABLEGETBYID";
+        public static readonly string MetaTypeTableGetAll = "TABLEGETALL";
+        public static readonly string MetaTypeTableSave = "TABLESAVE";
+        public static readonly string MetaTypeDataViewGetData = "DATAVIEWGETDATA";
         
         public EndpointModelItem()
         {
@@ -25,7 +26,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public EndpointModelItem(Data.Entity.EndpointItem entity)
+        public EndpointModelItem(EndpointItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
@@ -35,7 +36,6 @@ namespace Intwenty.Model
             ParentMetaCode = entity.ParentMetaCode;
             Properties = entity.Properties;
             Path = entity.Path;
-            Action = entity.Action;
             DataMetaCode = entity.DataMetaCode;
             OrderNo = entity.OrderNo;
             Title = entity.Title;
@@ -51,7 +51,6 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
             if (string.IsNullOrEmpty(Path)) Path = string.Empty;
-            if (string.IsNullOrEmpty(Action)) Action = string.Empty;
             if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
@@ -60,8 +59,6 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
 
         public string Path { get; set; }
-
-        public string Action { get; set; }
 
         public string Description { get; set; }
 
@@ -73,66 +70,54 @@ namespace Intwenty.Model
 
         public DataViewModelItem DataViewInfo { get; set; }
 
-     
-
-        public List<string> ValidProperties
+        public string Action 
         {
-            get
-            {
-                var t = new List<string>();
+            get {
 
-              
+                if (IsMetaTypeDataViewGetData)
+                    return "GetData";
+                if (IsMetaTypeTableGetAll)
+                    return "GetAll";
+                if (IsMetaTypeTableGetById)
+                    return "GetById";
+                if (IsMetaTypeTableSave)
+                    return "Save";
 
-                return t;
+                return string.Empty;
+
             }
         }
 
-        public static List<string> ValidMetaTypes
+       
+
+
+
+        public static List<IntwentyProperty> GetAvailableProperties()
         {
-            get
+            return new List<IntwentyProperty>();
+        }
+
+        public static List<IntwentyMetaType> GetAvailableMetaTypes()
+        {
+            return new List<IntwentyMetaType>()
             {
-                var t = new List<string>();
-                t.Add(MetaTypeDataViewOperation);
-                t.Add(MetaTypeTableOperation);
-              
+                new IntwentyMetaType(){ Code=MetaTypeTableGetById, Title="Table - GetById" },
+                new IntwentyMetaType(){ Code=MetaTypeTableGetAll,  Title="Table - GetAll" },
+                new IntwentyMetaType(){ Code=MetaTypeTableSave,    Title="Table - Save" },
+                new IntwentyMetaType(){ Code=MetaTypeDataViewGetData, Title="Intwenty Data View - GetData" },
 
-                return t;
-            }
+            };
         }
-
-        public bool IsDataTableConnected
-        {
-            get { return IsMetaTypeTableOperation && (DataTableInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
-        }
-
-     
-
-        public bool IsDataViewConnected
-        {
-            get { return IsMetaTypeDataViewOperation && (DataViewInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataViewInfo.IsMetaTypeDataView); }
-        }
-
-
-        public bool IsMetaTypeTableOperation
-        {
-            get { return MetaType == MetaTypeTableOperation; }
-        }
-
-        public bool IsMetaTypeDataViewOperation
-        {
-            get { return MetaType == MetaTypeDataViewOperation; }
-        }
-
 
         public override bool HasValidMetaType
         {
             get
             {
-               if (string.IsNullOrEmpty(MetaType))
-                   return false;
+                if (string.IsNullOrEmpty(MetaType))
+                    return false;
 
-               if (ValidMetaTypes.Contains(MetaType))
-                   return true;
+                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
+                    return true;
 
                 return false;
 
@@ -143,19 +128,46 @@ namespace Intwenty.Model
         {
             get
             {
-                foreach (var s in GetProperties())
+                foreach (var prop in GetProperties())
                 {
-                    if (!ValidProperties.Exists(p => p == s))
+                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
                         return false;
                 }
-
                 return true;
             }
         }
 
-        public string UIId
+        public bool IsDataTableConnected
         {
-            get { return MetaCode; }
+            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
+        }
+
+     
+
+        public bool IsDataViewConnected
+        {
+            get { return (DataViewInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataViewInfo.IsMetaTypeDataView); }
+        }
+
+
+        public bool IsMetaTypeTableGetById
+        {
+            get { return MetaType == MetaTypeTableGetById; }
+        }
+
+        public bool IsMetaTypeTableGetAll
+        {
+            get { return MetaType == MetaTypeTableGetAll; }
+        }
+
+        public bool IsMetaTypeTableSave
+        {
+            get { return MetaType == MetaTypeTableSave; }
+        }
+
+        public bool IsMetaTypeDataViewGetData
+        {
+            get { return MetaType == MetaTypeDataViewGetData; }
         }
 
 

@@ -8,11 +8,11 @@ namespace Intwenty.Model.DesignerVM
     {
         public int Id { get; set; }
 
-        public IntwentyPropertyVm CurrentProperty { get; set; }
+        public IntwentyProperty CurrentProperty { get; set; }
 
         public BaseModelVm()
         {
-            CurrentProperty = new IntwentyPropertyVm();
+            CurrentProperty = new IntwentyProperty();
         }
 
 

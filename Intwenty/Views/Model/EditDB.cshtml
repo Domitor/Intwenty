@@ -122,7 +122,6 @@
             data: {
                 model: { tables: [], columns: [] },
                 datatypes: [],
-                metaproperties: [],
                 idgen:-1
             },
             methods:
@@ -225,14 +224,6 @@
                     endpointurl = baseurl + "GetIntwentyDataTypes";
                     $.get(endpointurl, function (response) {
                         context.datatypes = response;
-
-                        //Properties
-                        endpointurl = baseurl + "GetIntwentyProperties";
-                        $.get(endpointurl, function (response) {
-                            context.metaproperties = response;
-                        }).fail(function (response) {
-                            raiseErrorModal(response.responseJSON);
-                        });
                     }).fail(function (response) {
                         raiseErrorModal(response.responseJSON);
                     });

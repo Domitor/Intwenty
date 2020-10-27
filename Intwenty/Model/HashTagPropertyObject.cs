@@ -10,17 +10,20 @@ namespace Intwenty.Model
 
         public string Properties { get; set; }
 
-        public List<PropertyItem> PropertyList { get; set; }
+        public List<IntwentyProperty> PropertyList { get; set; }
+
+        public virtual List<IntwentyProperty> SelectableProperties { get; private set; }
 
         public HashTagPropertyObject()
         {
-            PropertyList = new List<PropertyItem>();
+            PropertyList = new List<IntwentyProperty>();
+            SelectableProperties = new List<IntwentyProperty>();
         }
 
        
         public void BuildPropertyList()
         {
-            PropertyList = new List<PropertyItem>();
+            PropertyList = new List<IntwentyProperty>();
 
             if (string.IsNullOrEmpty(Properties))
                 return;
@@ -32,11 +35,16 @@ namespace Intwenty.Model
                 var keyval = v.Split("=".ToCharArray());
                 if (keyval.Length == 2)
                 {
-                    var t = new PropertyItem() { PropertyCode = keyval[0].ToUpper(), PropertyValue = keyval[1].ToUpper(), Title = keyval[0].ToUpper(), PresentationValue = keyval[1].ToUpper() };
-                    if (string.IsNullOrEmpty(t.PresentationValue))
-                        t.PresentationValue = t.PropertyValue;
-
-                    PropertyList.Add(t);
+                    var definition = SelectableProperties.Find(p => p.CodeName == keyval[0].ToUpper());
+                    if (definition == null)
+                    {
+                        PropertyList.Add(new IntwentyProperty() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1].ToUpper() });
+                    }
+                    else
+                    {
+                        PropertyList.Add(IntwentyProperty.CreateNew(keyval[0].ToUpper(), keyval[1].ToUpper(), definition));
+                    }
+                   
                 }
             }
         }
@@ -61,17 +69,17 @@ namespace Intwenty.Model
                     foreach (string v in arr)
                     {
                         string[] keyval = v.Split("=".ToCharArray());
-                        if (keyval[0].ToUpper() == t.PropertyCode.ToUpper())
+                        if (keyval[0].ToUpper() == t.CodeName.ToUpper())
                             exists = true;
                     }
                 }
 
                 if (string.IsNullOrEmpty(res))
-                    res = t.PropertyCode + "=" + t.PropertyValue;
+                    res = t.CodeName + "=" + t.CodeValue;
                 else
                 {
                     if (!exists)
-                         res += "#" + t.PropertyCode + "=" + t.PropertyValue;
+                         res += "#" + t.CodeName + "=" + t.CodeValue;
                 }
             }
 
@@ -248,21 +256,22 @@ namespace Intwenty.Model
             return res;
         }
 
-      
+        public bool HasProperties
+        {
+            get { return !string.IsNullOrEmpty(Properties); }
+        }
+
+
 
 
     }
 
-    public class PropertyItem
+    public class PropertyListValue
     {
+        public string CodeValue { get; set; }
 
-        public string Title { get; set; }
+        public string DisplayValue { get; set; }
 
-        public string PropertyCode { get; set; }
-
-        public string PropertyValue { get; set; }
-
-        public string PresentationValue { get; set; }
 
     }
 }

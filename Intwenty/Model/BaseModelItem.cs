@@ -14,11 +14,6 @@ namespace Intwenty.Model
 
         private static int MetaCodeCounter = 1;
 
-        public virtual bool IsValid
-        {
-            get { return false; }
-        }
-
         public string Title { get; set; }
 
         public string MetaCode { get; set; }
@@ -29,10 +24,8 @@ namespace Intwenty.Model
 
         public abstract bool HasValidMetaType { get; }
 
-        public virtual bool HasValidProperties
-        {
-            get { return false; }
-        }
+        public abstract bool HasValidProperties { get; }
+
 
         public bool IsRoot
         {
@@ -42,10 +35,7 @@ namespace Intwenty.Model
             }
         }
 
-        public bool HasProperties
-        {
-            get { return !string.IsNullOrEmpty(Properties); }
-        }
+       
 
         public static string GenerateNewMetaCode(BaseModelItem item)
         {
@@ -142,8 +132,6 @@ namespace Intwenty.Model
                 return "DCOL";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataTable)
                 return "DTBL";
-            if (item.MetaType == ValueDomainModelItem.MetaTypeValueDomain)
-                return "VDOM";
             if (item.MetaType == DataViewModelItem.MetaTypeDataView)
                 return "DV";
             if (item.MetaType == DataViewModelItem.MetaTypeDataViewColumn)
@@ -156,10 +144,14 @@ namespace Intwenty.Model
                 return "MENITM";
           
         
-            if (item.MetaType == EndpointModelItem.MetaTypeDataViewOperation)
-                return "EP_DV";
-            if (item.MetaType == EndpointModelItem.MetaTypeTableOperation)
-                return "EP_TB";
+            if (item.MetaType == EndpointModelItem.MetaTypeDataViewGetData)
+                return "EP_DV_GD";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableGetAll)
+                return "EP_TB_GA";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableGetById)
+                return "EP_TB_GB";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableSave)
+                return "EP_TB_S";
 
             return item.MetaType;
         }

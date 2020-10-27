@@ -24,8 +24,6 @@ namespace Intwenty.Data.Entity
 
         public string Path { get; set; }
 
-        public string Action { get; set; }
-
         public string Description { get; set; }
 
         public string DataMetaCode { get; set; }

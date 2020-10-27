@@ -18,7 +18,7 @@ Requires an item with properties, which name is passed as the model
                     name="propcbox"
                     v-model="@(Model).currentProperty"
                     class="form-control form-control-sm">
-                <option v-for="item in validProperties(@(Model))" v-bind:value="item">{{item.title}}</option>
+                <option v-for="item in @(Model).selectableProperties" v-bind:value="item">{{item.displayName}}</option>
             </select>
         </div>
 
@@ -27,20 +27,20 @@ Requires an item with properties, which name is passed as the model
         </div>
 
         <div class="mr-2" v-if="@(Model).currentProperty.isStringType">
-            <input class="form-control-sm" v-model="@(Model).currentProperty.currentValue" type="text" />
+            <input class="form-control-sm" v-model="@(Model).currentProperty.codeValue" type="text" />
         </div>
 
         <div class="mr-2" v-if="@(Model).currentProperty.isNumericType">
-            <input class="form-control-sm" v-model="@(Model).currentProperty.currentValue" type="number" />
+            <input class="form-control-sm" v-model="@(Model).currentProperty.codeValue" type="number" />
         </div>
 
         <div class="mr-2" v-if="@(Model).currentProperty.isListType">
             <div class="form-group">
                 <select id="cboxpropvalues"
                         name="cboxpropvalues"
-                        v-model="@(Model).currentProperty.currentValue"
+                        v-model="@(Model).currentProperty.codeValue"
                         class="form-control form-control-sm">
-                    <option v-for="item in @(Model).currentProperty.validValues" v-bind:value="item.propertyValue">{{item.title}}</option>
+                    <option v-for="item in @(Model).currentProperty.validValues" v-bind:value="item.codeValue">{{item.displayValue}}</option>
                 </select>
             </div>
         </div>
@@ -62,9 +62,9 @@ Requires an item with properties, which name is passed as the model
             </tr>
         </thead>
         <tbody>
-            <tr v-for="property in currentProperties(@(Model))">
-                <td>{{property.title}}</td>
-                <td>{{property.presentationValue}}</td>
+            <tr v-for="property in @(Model).propertyList">
+                <td>{{property.displayName}}</td>
+                <td>{{property.displayValue}}</td>
                 <td><span v-on:click="deleteProperty(property,@(Model))" class="fa fa-trash" style="cursor:pointer"></span></td>
             </tr>
         </tbody>

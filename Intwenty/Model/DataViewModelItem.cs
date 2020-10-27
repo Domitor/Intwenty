@@ -57,24 +57,55 @@ namespace Intwenty.Model
         public int OrderNo { get; set; }
 
 
-        public static List<string> ValidProperties
+        public static List<IntwentyProperty> GetAvailableProperties()
+        {
+
+            var res = new List<IntwentyProperty>();
+
+            var prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
+            prop.ValidFor.Add("DATAVIEW");
+            res.Add(prop);
+
+
+            return res;
+
+        }
+
+
+        public static List<IntwentyMetaType> GetAvailableMetaTypes()
+        {
+            var t = new List<IntwentyMetaType>();
+            t.Add(new IntwentyMetaType() { Code = MetaTypeDataView, Title = "Data View" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeDataViewColumn, Title = "Data View Column" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeDataViewKeyColumn, Title = "Data View Key Column" });
+            return t;
+        }
+
+        public override bool HasValidMetaType
         {
             get
             {
-                var t = new List<string>();
-                return t;
+                if (string.IsNullOrEmpty(MetaType))
+                    return false;
+
+                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
+                    return true;
+
+                return false;
+
             }
         }
 
-        public static List<string> ValidMetaTypes
+        public override bool HasValidProperties
         {
             get
             {
-                var t = new List<string>();
-                t.Add(MetaTypeDataView);
-                t.Add(MetaTypeDataViewColumn);
-                t.Add(MetaTypeDataViewKeyColumn);
-                return t;
+                foreach (var prop in GetProperties())
+                {
+                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                        return false;
+                }
+                return true;
             }
         }
 
@@ -94,20 +125,7 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeDataViewKeyColumn; }
         }
 
-        public override bool HasValidMetaType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(MetaType))
-                    return false;
-
-                if (ValidMetaTypes.Contains(MetaType))
-                    return true;
-
-                return false;
-
-            }
-        }
+       
 
         public bool HasNonSelectSql
         {

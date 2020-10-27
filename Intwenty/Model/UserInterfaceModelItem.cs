@@ -1,7 +1,7 @@
 ﻿using Intwenty.Data.Entity;
 using Intwenty.Interface;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Intwenty.Model
 {
@@ -122,66 +122,124 @@ namespace Intwenty.Model
 
         public DataViewModelItem DataViewColumnInfo2 { get; set; }
 
-        public List<string> ValidProperties
+        public static List<IntwentyProperty> GetAvailableProperties()
+        {
+
+            var res = new List<IntwentyProperty>();
+
+            var prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
+            prop.ValidFor.Add(MetaTypeListView);
+            res.Add(prop);
+
+            prop = new IntwentyProperty("COLLAPSIBLE", "Collapsible", "BOOLEAN");
+            prop.ValidFor.Add(MetaTypeSection);
+            res.Add(prop);
+
+            prop = new IntwentyProperty("STARTEXPANDED", "Start expanded", "BOOLEAN");
+            prop.ValidFor.Add(MetaTypeSection);
+            res.Add(prop);
+
+            prop = new IntwentyProperty("READONLY", "Read Only", "BOOLEAN");
+            prop.ValidFor.Add(MetaTypeCheckBox);
+            prop.ValidFor.Add(MetaTypeComboBox);
+            prop.ValidFor.Add(MetaTypeDatePicker);
+            prop.ValidFor.Add(MetaTypeEditGridCheckBox);
+            prop.ValidFor.Add(MetaTypeEditGridComboBox);
+            prop.ValidFor.Add(MetaTypeEditGridDatePicker);
+            prop.ValidFor.Add(MetaTypeEditGridEmailBox);
+            prop.ValidFor.Add(MetaTypeEditGridLookUp);
+            prop.ValidFor.Add(MetaTypeEditGridTextBox);
+            prop.ValidFor.Add(MetaTypeEmailBox);
+            prop.ValidFor.Add(MetaTypeLookUp);
+            prop.ValidFor.Add(MetaTypeNumBox);
+            prop.ValidFor.Add(MetaTypePasswordBox);
+            prop.ValidFor.Add(MetaTypeTextArea);
+            prop.ValidFor.Add(MetaTypeTextBox);
+            res.Add(prop);
+
+
+            prop = new IntwentyProperty("EDITMODE", "Edit Mode", "LIST");
+            prop.ValidFor.Add(MetaTypeEditGrid);
+            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "CELL", DisplayValue = "Line" });
+            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
+            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
+            res.Add(prop);
+
+            prop = new IntwentyProperty("GRIDLAYOUT", "Layout", "LIST");
+            prop.ValidFor.Add(MetaTypeEditGrid);
+            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "GRID", DisplayValue = "Grid" });
+            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "CARD", DisplayValue = "Card" });
+            res.Add(prop);
+
+            return res;
+
+        }
+
+        public static List<IntwentyMetaType> GetAvailableMetaTypes()
+        {
+            var t = new List<IntwentyMetaType>();
+            t.Add(new IntwentyMetaType() { Code = MetaTypeCheckBox, Title = "Checkbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeComboBox, Title = "Combobox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeCreateView, Title = "Create View" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeDatePicker, Title = "Datepicker" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGrid, Title = "Grid" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridCheckBox, Title = "Grid Checkbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridComboBox, Title = "Grid Combobox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridDatePicker, Title = "Grid Datepicker" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridEmailBox, Title = "Grid Emailbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridLookUp, Title = "Grid Look Up" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridNumBox, Title = "Grid Numbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridStaticHTML, Title = "Grid HTML" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridTextBox, Title = "Grid Textbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeEmailBox, Title = "Emailbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeImage, Title = "Image" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeImageBox, Title = "Image Upload" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeLabel, Title = "Label" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeListView, Title = "List View" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeListViewColumn, Title = "List View Column" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeLookUp, Title = "Look Up" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeNumBox, Title = "Numbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypePanel, Title = "Panel" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypePasswordBox, Title = "Password Box" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypePresentationView, Title = "Presentation View" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeSection, Title = "Section" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeStaticHTML, Title = "HTML" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeTextArea, Title = "Text Area" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeTextBlock, Title = "Text Block" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeTextBox, Title = "Textbox" });
+            t.Add(new IntwentyMetaType() { Code = MetaTypeUpdateView, Title = "Update View" });
+            return t;
+        }
+
+
+        public override bool HasValidMetaType
         {
             get
             {
-                var t = new List<string>();
+                if (string.IsNullOrEmpty(MetaType))
+                    return false;
 
-                if (this.IsMetaTypeListView)
-                    t.Add("HIDEFILTER");
-                if (this.IsMetaTypeSection)
-                    t.Add("COLLAPSIBLE");
-                if (this.IsMetaTypeSection)
-                    t.Add("STARTEXPANDED");
-                if (!this.IsMetaTypeEditGrid && !this.IsMetaTypeListView && !this.IsMetaTypeLookUp && !this.IsMetaTypePanel && !this.IsMetaTypeSection)
-                    t.Add("READONLY");
-                if (!this.IsMetaTypeEditGrid)
-                    t.Add("GRIDLAYOUT");
+                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
+                    return true;
 
-                return t;
+                return false;
+
             }
         }
 
-        public static List<string> ValidMetaTypes
+        public override bool HasValidProperties
         {
             get
             {
-                var t = new List<string>();
-                t.Add(MetaTypeCreateView);
-                t.Add(MetaTypeUpdateView);
-                t.Add(MetaTypePresentationView);
-                t.Add(MetaTypeStaticHTML);
-                t.Add(MetaTypeLabel);
-                t.Add(MetaTypeImage);
-                t.Add(MetaTypeTextBlock);
-                t.Add(MetaTypeTextBox);
-                t.Add(MetaTypeEmailBox);
-                t.Add(MetaTypePasswordBox);
-                t.Add(MetaTypeTextArea);
-                t.Add(MetaTypeLookUp);
-                t.Add(MetaTypeNumBox);
-                t.Add(MetaTypeCheckBox);
-                t.Add(MetaTypeComboBox);
-                t.Add(MetaTypeImageBox);
-                t.Add(MetaTypeListView);
-                t.Add(MetaTypeListViewColumn);
-                t.Add(MetaTypePanel);
-                t.Add(MetaTypeDatePicker);
-                t.Add(MetaTypeEditGrid);
-                t.Add(MetaTypeSection);
-                t.Add(MetaTypeEditGridCheckBox);
-                t.Add(MetaTypeEditGridComboBox);
-                t.Add(MetaTypeEditGridTextBox);
-                t.Add(MetaTypeEditGridNumBox);
-                t.Add(MetaTypeEditGridDatePicker);
-                t.Add(MetaTypeEditGridLookUp);
-                t.Add(MetaTypeEditGridStaticHTML);
-                t.Add(MetaTypeEditGridEmailBox);
-
-                return t;
+                foreach (var prop in GetProperties())
+                {
+                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                        return false;
+                }
+                return true;
             }
         }
+
 
         public bool IsDataTableConnected
         {
@@ -215,7 +273,7 @@ namespace Intwenty.Model
 
         public bool HasValueDomain
         {
-            get { return Domain.Contains(ValueDomainModelItem.MetaTypeValueDomain + "."); }
+            get { return Domain.Contains("VALUEDOMAIN."); }
         }
 
         public bool HasDataViewDomain
@@ -417,34 +475,7 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeEditGridEmailBox; }
         }
 
-        public override bool HasValidMetaType
-        {
-            get
-            {
-               if (string.IsNullOrEmpty(MetaType))
-                   return false;
-
-               if (ValidMetaTypes.Contains(MetaType))
-                   return true;
-
-                return false;
-
-            }
-        }
-
-        public override bool HasValidProperties
-        {
-            get
-            {
-                foreach (var s in GetProperties())
-                {
-                    if (!ValidProperties.Exists(p => p == s))
-                        return false;
-                }
-
-                return true;
-            }
-        }
+     
 
         public string UIId
         {
