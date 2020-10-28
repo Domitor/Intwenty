@@ -40,6 +40,10 @@ namespace Intwenty.Interface
         /// </summary>
         public List<ApplicationModel> GetApplicationModels();
 
+        /// <summary>
+        /// Get all application models
+        /// </summary>
+        public List<ApplicationModel> GetLocalizedApplicationModels();
 
 
         public List<ApplicationModelItem> GetAppModels();
@@ -65,7 +69,7 @@ namespace Intwenty.Interface
 
 
 
-
+        public List<DataViewModelItem> GetLocalizedDataViewModels();
         public List<DataViewModelItem> GetDataViewModels();
 
         public void SaveDataViewModels(List<DataViewModelItem> model);
@@ -95,17 +99,12 @@ namespace Intwenty.Interface
 
 
 
-
+        public List<MenuModelItem> GetLocalizedMenuModels();
         public List<MenuModelItem> GetMenuModels();
 
 
+
         public OperationResult ValidateModel();
-
-        //public List<IntwentyDataColumn> GetDefaultMainTableColumns();
-
-
-        //public List<IntwentyDataColumn> GetDefaultSubTableColumns();
-
 
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
 

@@ -28,7 +28,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Create(int id)
         {
-            var t = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == id);
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p=> p.Application.Id == id);
             return View(t);
         }
 
@@ -37,7 +37,7 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult GetList(int id)
         {
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == id);
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
             return View(t);
         }
 
@@ -47,7 +47,7 @@ namespace Intwenty.Controllers
         public virtual IActionResult Edit(int applicationid, int id)
         {
             ViewBag.SystemId = Convert.ToString(id);
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
             return View(t);
 
         }

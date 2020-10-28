@@ -53,8 +53,8 @@ namespace Intwenty
             DataTypes = Client.GetDbTypeMap();
             CurrentCulture = Settings.DefaultCulture;
             if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
-           {
-
+            {
+                
                 if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
                     CurrentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
                 else
@@ -184,6 +184,19 @@ namespace Intwenty
 
         }
 
+        public List<ApplicationModel> GetLocalizedApplicationModels()
+        {
+            var res = GetApplicationModels();
+            foreach (var a in res) 
+            {
+                LocalizeTitle(a.Application);
+                LocalizeTitle(a.Application.MainMenuItem);
+                LocalizeTitles(a.UIStructure.ToList<ILocalizableTitle>());
+            }
+            return res;
+
+        }
+            
         public List<ApplicationModel> GetApplicationModels()
         {
             List<ApplicationModel> res = null;
@@ -194,93 +207,19 @@ namespace Intwenty
             }
 
             res = new List<ApplicationModel>();
-            List<UserInterfaceModelItem> uitems;
-            List<DataViewModelItem> views;
-            var apps =  GetAppModels();
-            Client.Open();
-            uitems = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
-            views = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
-            Client.Close();
-
-            //Localization
-            LocalizeTitles(uitems.ToList<ILocalizableTitle>());
-            LocalizeTitles(views.ToList<ILocalizableTitle>());
-
-            var dbmodelitems = GetDatabaseModels();
+            var appitems =  GetAppModels();
+            var dbitems = GetDatabaseModels();
+            var uiitems = GetUserInterfaceModels();
 
 
-            foreach (var app in apps)
+            foreach (var app in appitems)
             {
                 var t = new ApplicationModel();
                 t.Application = app;
                 t.DataStructure = new List<DatabaseModelItem>();
                 t.UIStructure = new List<UserInterfaceModelItem>();
-
-                t.DataStructure.AddRange(dbmodelitems.Where(p=> p.AppMetaCode== app.MetaCode));
-
-                foreach (var item in uitems.OrderBy(p=> p.RowOrder).ThenBy(p=> p.ColumnOrder))
-                {
-                    if (item.AppMetaCode == app.MetaCode)
-                    {
-                        t.UIStructure.Add(item);
-
-                        if (!string.IsNullOrEmpty(item.DataMetaCode))
-                        {
-                            var dinf = t.DataStructure.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
-                            if (dinf != null && dinf.IsMetaTypeDataColumn)
-                                item.DataColumnInfo = dinf;
-                            else if (dinf != null && dinf.IsMetaTypeDataTable)
-                                item.DataTableInfo = dinf;
-
-
-                            if (item.DataColumnInfo != null && item.DataTableInfo == null)
-                            {
-                                if (!item.DataColumnInfo.IsRoot)
-                                {
-                                    dinf = t.DataStructure.Find(p => p.MetaCode == item.DataColumnInfo.ParentMetaCode && p.AppMetaCode == app.MetaCode);
-                                    if (dinf != null && dinf.IsMetaTypeDataTable)
-                                        item.DataTableInfo = dinf;
-                                }
-                                else
-                                {
-                                    item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id=0, DbName = app.DbName, TableName = app.DbName, MetaCode= app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem=true   };
-
-                                }
-                            }
-
-                        }
-
-                        if (!string.IsNullOrEmpty(item.DataMetaCode2))
-                        {
-                            var dinf = t.DataStructure.Find(p => p.MetaCode == item.DataMetaCode2 && p.AppMetaCode == app.MetaCode);
-                            if (dinf != null && dinf.IsMetaTypeDataColumn)
-                                item.DataColumnInfo2 = dinf;
-                        }
-
-                        if (item.HasDataViewDomain)
-                        {
-                            var vinf = views.Find(p => p.MetaCode == item.ViewName && p.IsRoot);
-                            if (vinf != null)
-                                item.DataViewInfo = vinf;
-
-                            if (!string.IsNullOrEmpty(item.ViewMetaCode))
-                            {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && !p.IsRoot);
-                                if (vinf != null)
-                                    item.DataViewColumnInfo = vinf;
-                            }
-                            if (!string.IsNullOrEmpty(item.ViewMetaCode2))
-                            {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && !p.IsRoot);
-                                if (vinf != null)
-                                    item.DataViewColumnInfo2 = vinf;
-                            }
-                        }
-
-                       
-                    }
-                }
-
+                t.DataStructure.AddRange(dbitems.Where(p=> p.AppMetaCode== app.MetaCode));
+                t.UIStructure.AddRange(uiitems.Where(p => p.AppMetaCode == app.MetaCode));
                 res.Add(t);
             }
 
@@ -290,9 +229,7 @@ namespace Intwenty
 
         }
 
-       
-
-        public List<MenuModelItem> GetMenuModels()
+        public List<MenuModelItem> GetLocalizedMenuModels()
         {
             Client.Open();
             var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
@@ -302,7 +239,39 @@ namespace Intwenty
             //Localization
             LocalizeTitles(apps.ToList<ILocalizableTitle>());
             LocalizeTitles(menu.ToList<ILocalizableTitle>());
-           
+
+
+            var res = new List<MenuModelItem>();
+            foreach (var m in menu)
+            {
+
+                //DEFAULTS
+                if (!string.IsNullOrEmpty(m.AppMetaCode) && m.IsMetaTypeMenuItem)
+                {
+                    if (string.IsNullOrEmpty(m.Controller))
+                        m.Controller = "Application";
+
+                    if (string.IsNullOrEmpty(m.Action))
+                        m.Action = "GetList";
+
+                    if (!string.IsNullOrEmpty(m.AppMetaCode))
+                    {
+                        var app = apps.Find(p => p.MetaCode == m.AppMetaCode);
+                        if (app != null)
+                            m.Application = app;
+                    }
+                }
+
+            }
+
+            return menu.OrderBy(p => p.OrderNo).ToList();
+        }
+        public List<MenuModelItem> GetMenuModels()
+        {
+            Client.Open();
+            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
+            Client.Close();
 
             var res = new List<MenuModelItem>();
             foreach (var m in menu)
@@ -333,25 +302,24 @@ namespace Intwenty
 
 
         #region Application
+      
+
         public List<ApplicationModelItem> GetAppModels()
         {
 
             Client.Open();
-            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            var res = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
             Client.Close();
 
-            //Localization
-            LocalizeTitles(apps.ToList<ILocalizableTitle>());
-
             var menu = GetMenuModels();
-            foreach (var app in apps)
+            foreach (var app in res)
             {
                 var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
                 if (mi != null)
                     app.MainMenuItem = mi;
             }
 
-            return apps;
+            return res;
         }
 
         public void DeleteAppModel(ApplicationModelItem model)
@@ -619,17 +587,7 @@ namespace Intwenty
             var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
-                var dto = new EndpointModelItem(existing);
-                //if (dto.IsMetaTypeApi)
-                //{
-                //    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == EndpointModelItem.MetaTypeTableOperation || p.MetaType == EndpointModelItem.MetaTypeDataViewOperation) && p.ParentMetaCode == existing.MetaCode).ToList();
-                //    Client.DeleteEntity(existing);
-                //    Client.DeleteEntities(childlist);
-                //}
-                //else
-                //{
-                    Client.DeleteEntity(existing);
-                //}
+               Client.DeleteEntity(existing);
             }
             Client.Close();
         }
@@ -638,14 +596,77 @@ namespace Intwenty
         #region UI
         public List<UserInterfaceModelItem> GetUserInterfaceModels()
         {
-            var res = new List<UserInterfaceModelItem>();
 
-            var models = GetApplicationModels();
+            Client.Open();
+            var res = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
+            Client.Close();
 
-            foreach (var m in models)
+            var dbmodelitems = GetDatabaseModels();
+            var apps = GetAppModels();
+            var views = GetDataViewModels();
+
+            foreach (var app in apps)
             {
-                res.AddRange(m.UIStructure);
+                foreach (var item in res.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                {
+                    if (item.AppMetaCode == app.MetaCode)
+                    {
+                        if (!string.IsNullOrEmpty(item.DataMetaCode))
+                        {
+                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
+                            if (dinf != null && dinf.IsMetaTypeDataColumn)
+                                item.DataColumnInfo = dinf;
+                            else if (dinf != null && dinf.IsMetaTypeDataTable)
+                                item.DataTableInfo = dinf;
+
+
+                            if (item.DataColumnInfo != null && item.DataTableInfo == null)
+                            {
+                                if (!item.DataColumnInfo.IsRoot)
+                                {
+                                    dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumnInfo.ParentMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                                    if (dinf != null)
+                                        item.DataTableInfo = dinf;
+                                }
+                                else
+                                {
+                                    item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id = 0, DbName = app.DbName, TableName = app.DbName, MetaCode = app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem = true };
+                                }
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(item.DataMetaCode2))
+                        {
+                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataMetaCode2 && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
+                            if (dinf != null)
+                                item.DataColumnInfo2 = dinf;
+                        }
+
+                        if (item.HasDataViewDomain)
+                        {
+                            var vinf = views.Find(p => p.MetaCode == item.ViewName && p.IsRoot);
+                            if (vinf != null)
+                                item.DataViewInfo = vinf;
+
+                            if (!string.IsNullOrEmpty(item.ViewMetaCode))
+                            {
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && !p.IsRoot);
+                                if (vinf != null)
+                                    item.DataViewColumnInfo = vinf;
+                            }
+                            if (!string.IsNullOrEmpty(item.ViewMetaCode2))
+                            {
+                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && !p.IsRoot);
+                                if (vinf != null)
+                                    item.DataViewColumnInfo2 = vinf;
+                            }
+                        }
+
+
+                    }
+                }
             }
+
 
             return res;
         }
@@ -963,6 +984,14 @@ namespace Intwenty
         #endregion
 
         #region Data Views
+
+        public List<DataViewModelItem> GetLocalizedDataViewModels()
+        {
+            var res = GetDataViewModels();
+            LocalizeTitles(res.ToList<ILocalizableTitle>());
+            return res;
+        }
+
         public List<DataViewModelItem> GetDataViewModels()
         {
             List<DataViewModelItem> res;
@@ -974,7 +1003,6 @@ namespace Intwenty
             Client.Open();
             res = Client.GetEntities<DataViewItem>().Select(p => new DataViewModelItem(p)).ToList();
             Client.Close();
-            LocalizeTitles(res.ToList<ILocalizableTitle>());
 
             ModelCache.Set(DataViewCacheKey, res);
 
@@ -1212,6 +1240,26 @@ namespace Intwenty
                     }
                 }
             }
+        }
+
+        private void LocalizeTitle(ILocalizableTitle item)
+        {
+            if (item == null)
+                return;
+
+            //Localization
+            var translations = Client.GetEntities<TranslationItem>();
+
+
+            if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+            {
+                var trans = translations.Find(p => p.Culture == CurrentCulture && p.TransKey == item.TitleLocalizationKey);
+                if (trans != null)
+                    item.Title = trans.Text;
+                else
+                    item.Title = item.TitleLocalizationKey;
+            }
+            
         }
 
         #region misc
