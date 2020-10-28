@@ -88,14 +88,11 @@ namespace Intwenty.Model
             }
         }
 
-       
-
-
-
-        public static List<IntwentyProperty> GetAvailableProperties()
+        public override string ModelCode
         {
-            return new List<IntwentyProperty>();
+            get { return "ENDPOINTMODEL"; }
         }
+
 
         public static List<IntwentyMetaType> GetAvailableMetaTypes()
         {
@@ -116,10 +113,11 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
-                    return true;
 
-                return false;
+                if (!IntwentyRegistry.IntwentyMetaTypes.Exists(p => p.Code == MetaType && p.ModelCode == ModelCode))
+                    return false;
+
+                return true;
 
             }
         }
@@ -130,7 +128,7 @@ namespace Intwenty.Model
             {
                 foreach (var prop in GetProperties())
                 {
-                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                    if (!IntwentyRegistry.IntwentyProperties.Exists(p => p.CodeName == prop && p.ValidFor.Contains(MetaType)))
                         return false;
                 }
                 return true;

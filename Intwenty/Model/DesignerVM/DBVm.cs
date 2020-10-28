@@ -112,7 +112,7 @@ namespace Intwenty.Model.DesignerVM
 
         public List<DatabaseTableVm> Tables { get; set; }
         public List<DatabaseTableColumnVm> Columns { get; set; }
-      
+        public List<IntwentyProperty> PropertyCollection { get; set; }
 
         public DBVm()
         {
@@ -146,13 +146,7 @@ namespace Intwenty.Model.DesignerVM
             Columns = new List<DatabaseTableColumnVm>();
         }
 
-        public override List<IntwentyProperty> SelectableProperties
-        {
-            get
-            {
-                return DatabaseModelItem.GetAvailableProperties().Where(p => p.ValidFor.Contains(DatabaseModelItem.MetaTypeDataTable)).ToList();
-            }
-        }
+      
 
 
     }
@@ -182,13 +176,6 @@ namespace Intwenty.Model.DesignerVM
             Description = "";
             TableName = "";
 
-        }
-
-        public override List<IntwentyProperty> SelectableProperties 
-        {
-            get {
-                return DatabaseModelItem.GetAvailableProperties().Where(p => p.ValidFor.Contains(DatabaseModelItem.MetaTypeDataColumn)).ToList();
-            }
         }
 
 

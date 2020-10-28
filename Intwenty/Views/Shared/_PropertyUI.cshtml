@@ -18,7 +18,7 @@ Requires an item with properties, which name is passed as the model
                     name="propcbox"
                     v-model="@(Model).currentProperty"
                     class="form-control form-control-sm">
-                <option v-for="item in @(Model).selectableProperties" v-bind:value="item">{{item.displayName}}</option>
+                <option v-for="item in selectableProperties(@(Model))" v-bind:value="item">{{item.displayName}}</option>
             </select>
         </div>
 

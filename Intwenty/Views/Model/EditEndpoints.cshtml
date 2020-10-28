@@ -15,12 +15,17 @@
         <div class="card-header"><h2>Integrations</h2></div>
         <div class="card-body">Create endpoints to make your data avaialable for other parties.</div>
     </div>
+
     <br />
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
+        <strong>Changes have been saved !</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <br />
 
 
-    <br />
-    <br />
     <div>
         <div class="btn btn-sm btn-primary" v-on:click="saveChanges">
             <span class="glyphicon glyphicon-save"></span> Save changes
@@ -36,11 +41,10 @@
         <thead>
             <tr>
                 <th style="width:5%"></th>
-                <th style="width:20%">Path <span style="color: red"> *</span></th>
-                <th style="width:15%">Data Source Type <span style="color: red"> *</span></th>
+                <th style="width:25%">Path <span style="color: red"> *</span></th>
+                <th style="width:25%">Data Source Type <span style="color: red"> *</span></th>
                 <th style="width:25%">Data Source <span style="color: red"> *</span></th>
-                <th style="width:13%">Action <span style="color: red"> *</span></th>
-                <th style="width:10%"></th>
+                <th style="width:20%"></th>
             </tr>
         </thead>
         <tbody v-for="entry in model.endpoints">
@@ -52,19 +56,13 @@
                     <input v-bind:id="'tbPath_' + entry.id" type="text" class="form-control form-control-sm" v-model="entry.path" v-on:input="markChanged(entry)" placeholder="Example: /API/Customer/" />
                 </td>
                 <td>
-                    <select v-bind:id="'cbendpointType_' + entry.id"  v-model="entry.endpointType" class="form-control form-control-sm"  v-on:input="markChanged(entry)">
-                        <option v-for="eptype in model.endpointDataSourceTypes" v-bind:value="eptype.id">{{eptype.title}}</option>
+                    <select v-bind:id="'cbendpointType_' + entry.id" v-model="entry.endpointType" class="form-control form-control-sm" v-on:input="markChanged(entry)">
+                        <option v-for="eptype in model.endpointTypes" v-bind:value="eptype">{{eptype.title}}</option>
                     </select>
                 </td>
                 <td>
-                    <select v-bind:id="'cbdataSource_' + entry.id"  v-model="entry.dataSource" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="entry.endpointType==''">
+                    <select v-bind:id="'cbdataSource_' + entry.id" v-model="entry.dataSource" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="!entry.endpointType">
                         <option v-for="source in dataSourceSelection(entry)" v-bind:value="source.id">{{source.title}}</option>
-                    </select>
-                </td>
-
-                <td>
-                    <select v-bind:id="'cbAction_' + entry.id" v-model="entry.action" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="entry.endpointType==''">
-                        <option v-for="action in actions(entry)" v-bind:value="action.value">{{action.title}}</option>
                     </select>
                 </td>
 
@@ -73,10 +71,10 @@
 
             <tr v-if="entry.expanded">
 
-                <td colspan="5">
+                <td colspan="4">
                     <div class="form-group">
                         <label class="control-label">Title</label>
-                        <input v-bind:id="'tbTitle_' + entry.id" type="text" class="form-control form-control-sm" v-model="entry.title"  />
+                        <input v-bind:id="'tbTitle_' + entry.id" type="text" class="form-control form-control-sm" v-model="entry.title" />
                     </div>
                     <div class="form-group">
                         <label class="control-label">Description</label>
@@ -88,7 +86,7 @@
                     </div>
                 </td>
 
-              
+
             </tr>
         </tbody>
     </table>
@@ -168,8 +166,7 @@
                         $("#cbdataSource_" + entry.id).removeClass('requiredNotValid');
                     if (entry.path)
                         $("#tbPath_" + entry.id).removeClass('requiredNotValid');
-                    if (entry.action)
-                        $("#cbAction_" + entry.id).removeClass('requiredNotValid');
+                  
 
                 },
                 saveChanges: function ()
@@ -198,11 +195,7 @@
                             $("#tbPath_" + entry.id).addClass('requiredNotValid');
                             invalid = true;
                         }
-                        if (!entry.action)
-                        {
-                            $("#cbAction_" + entry.id).addClass('requiredNotValid');
-                            invalid = true;
-                        }
+                      
 
                         if (invalid)
                             return;
@@ -223,6 +216,8 @@
                         success: function (response)
                         {
                             context.model = response;
+                            context.model.modelSaved = true;
+                            setTimeout(function () { context.model.modelSaved = false; }, 3000);
                            
                         },
                         error: function (response)
@@ -232,17 +227,12 @@
                     });
 
                 },
-                dataSourceSelection(endpoint) {
-                    return this.model.endpointDataSources.filter(event => event.type === endpoint.endpointType);
-                },
-                actions(endpoint)
+                dataSourceSelection(endpoint)
                 {
-                    return this.model.endpointActions.filter(event =>
-                        (event.domainName === "ENDPOINT_TABLE_ACTION" && endpoint.endpointType === "TABLEOPERATION") ||
-                        (event.domainName === "ENDPOINT_DATAVIEW_ACTION" && endpoint.endpointType === "DATAVIEWOPERATION")
-                    );
+                    return this.model.endpointDataSources.filter(p => p.type === endpoint.endpointType.datasourcetype);
                 }
-               
+                
+
             },
             computed:
             {

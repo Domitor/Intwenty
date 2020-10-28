@@ -64,6 +64,33 @@ namespace Intwenty
             AppModelCacheKey += "-" + CurrentCulture.Replace("-", "").ToUpper();
         }
 
+        public void ClearCache(string key = "ALL")
+        {
+            var clearall = false;
+
+            if (string.IsNullOrEmpty(key))
+                clearall = true;
+            if (key.ToUpper()=="ALL")
+                clearall = true;
+
+            if (clearall)
+            {
+                ModelCache.Remove(AppModelCacheKey);
+                ModelCache.Remove(DefaultVersioningTableColumnsCacheKey);
+                ModelCache.Remove(ValueDomainsCacheKey);
+                ModelCache.Remove(TranslationsCacheKey);
+                ModelCache.Remove(EndpointsCacheKey);
+                ModelCache.Remove(DataViewCacheKey);
+            }
+            else
+            {
+                ModelCache.Remove(key);
+            }
+          
+
+        }
+
+
         public SystemModel GetSystemModel()
         {
             Client.Open();
@@ -949,7 +976,7 @@ namespace Intwenty
             Client.Close();
             LocalizeTitles(res.ToList<ILocalizableTitle>());
 
-            ModelCache.Set(EndpointsCacheKey, res);
+            ModelCache.Set(DataViewCacheKey, res);
 
             return res;
         }

@@ -122,57 +122,9 @@ namespace Intwenty.Model
 
         public DataViewModelItem DataViewColumnInfo2 { get; set; }
 
-        public static List<IntwentyProperty> GetAvailableProperties()
+        public override string ModelCode
         {
-
-            var res = new List<IntwentyProperty>();
-
-            var prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeListView);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("COLLAPSIBLE", "Collapsible", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeSection);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("STARTEXPANDED", "Start expanded", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeSection);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("READONLY", "Read Only", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeCheckBox);
-            prop.ValidFor.Add(MetaTypeComboBox);
-            prop.ValidFor.Add(MetaTypeDatePicker);
-            prop.ValidFor.Add(MetaTypeEditGridCheckBox);
-            prop.ValidFor.Add(MetaTypeEditGridComboBox);
-            prop.ValidFor.Add(MetaTypeEditGridDatePicker);
-            prop.ValidFor.Add(MetaTypeEditGridEmailBox);
-            prop.ValidFor.Add(MetaTypeEditGridLookUp);
-            prop.ValidFor.Add(MetaTypeEditGridTextBox);
-            prop.ValidFor.Add(MetaTypeEmailBox);
-            prop.ValidFor.Add(MetaTypeLookUp);
-            prop.ValidFor.Add(MetaTypeNumBox);
-            prop.ValidFor.Add(MetaTypePasswordBox);
-            prop.ValidFor.Add(MetaTypeTextArea);
-            prop.ValidFor.Add(MetaTypeTextBox);
-            res.Add(prop);
-
-
-            prop = new IntwentyProperty("EDITMODE", "Edit Mode", "LIST");
-            prop.ValidFor.Add(MetaTypeEditGrid);
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "CELL", DisplayValue = "Line" });
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
-            res.Add(prop);
-
-            prop = new IntwentyProperty("GRIDLAYOUT", "Layout", "LIST");
-            prop.ValidFor.Add(MetaTypeEditGrid);
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "GRID", DisplayValue = "Grid" });
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "CARD", DisplayValue = "Card" });
-            res.Add(prop);
-
-            return res;
-
+            get { return "UIMODEL"; }
         }
 
         public static List<IntwentyMetaType> GetAvailableMetaTypes()
@@ -219,10 +171,11 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
-                    return true;
 
-                return false;
+                if (!IntwentyRegistry.IntwentyMetaTypes.Exists(p => p.Code == MetaType && p.ModelCode == ModelCode))
+                    return false;
+
+                return true;
 
             }
         }
@@ -233,7 +186,7 @@ namespace Intwenty.Model
             {
                 foreach (var prop in GetProperties())
                 {
-                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                    if (!IntwentyRegistry.IntwentyProperties.Exists(p => p.CodeName == prop && p.ValidFor.Contains(MetaType)))
                         return false;
                 }
                 return true;

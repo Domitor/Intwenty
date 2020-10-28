@@ -41,9 +41,9 @@ namespace Intwenty.Model.DesignerVM
             return res;
         }
 
-        public static List<DataViewVm> GetDataViewVm(List<DataViewModelItem> viewmeta)
+        public static DataViewModelVm GetDataViewModelVm(List<DataViewModelItem> viewmeta)
         {
-            var res = new List<DataViewVm>();
+            var res = new DataViewModelVm();
 
             foreach (var t in viewmeta)
             {
@@ -59,13 +59,29 @@ namespace Intwenty.Model.DesignerVM
                         }
                     }
 
-                    res.Add(dv);
+                    res.Views.Add(dv);
                 }
             }
 
             return res;
         }
     }
+
+    public class DataViewModelVm
+    {
+        public bool ModelSaved { get; set; }
+
+        public List<DataViewVm> Views { get; set; }
+        public List<IntwentyProperty> PropertyCollection { get; set; }
+
+        public DataViewModelVm()
+        {
+            Views = new List<DataViewVm>();
+        }
+
+
+    }
+
 
     public class DataViewVm
     {

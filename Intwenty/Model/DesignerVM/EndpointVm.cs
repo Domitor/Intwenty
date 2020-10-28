@@ -1,26 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Intwenty.Model.DesignerVM
 {
     public class EndpointManagementVm
     {
+        public bool modelSaved { get; set; }
 
         public List<EndpointVm> Endpoints { get; set; }
 
-        public List<ValueDomainModelItem> EndpointActions { get; set; }
-
-        public List<EndpointDataSourceType> EndpointDataSourceTypes { get; set; }
+        public List<EndpointType> EndpointTypes
+        {
+            get
+            {
+                var res = new List<EndpointType>();
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGetById, title = "Application - GetById", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Application - Save", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGetAll, title = "Table - GetAll", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewGetData, title = "Intwenty Data View - GetData", datasourcetype = "DATAVIEW" });
+                return res;
+            }
+        }
 
         public List<EndpointDataSource> EndpointDataSources { get; set; }
-
 
     }
 
     public class EndpointVm : BaseModelVm
     {
-        public string EndpointType { get; set; }
+        public EndpointType EndpointType { get; set; }
 
         public string DataSource { get; set; }
 
@@ -33,6 +43,8 @@ namespace Intwenty.Model.DesignerVM
 
         public bool Expanded { get; set; }
 
+        public List<IntwentyProperty> PropertyCollection { get; set; }
+
         public static EndpointVm CreateEndpointVm(EndpointModelItem model)
         {
             var t = new EndpointVm();
@@ -44,7 +56,17 @@ namespace Intwenty.Model.DesignerVM
             else
                 t.DataSource = model.DataMetaCode;
 
-            t.EndpointType = model.MetaType;
+            if (model.IsMetaTypeTableGetById)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGetById, title = "Application - GetById", datasourcetype = "TABLE" };
+            else if (model.IsMetaTypeTableSave)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Application - Save", datasourcetype = "TABLE" };
+            else if (model.IsMetaTypeTableGetAll)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGetAll, title = "Table - GetAll", datasourcetype = "TABLE" };
+            else if (model.IsMetaTypeDataViewGetData)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewGetData, title = "Intwenty Data View - GetData", datasourcetype = "DATAVIEW" };
+            else
+                throw new InvalidOperationException("Invalid endpoint metatype");
+
             t.Id = model.Id;
             t.Properties = model.Properties;
             t.Description = model.Description;
@@ -55,7 +77,7 @@ namespace Intwenty.Model.DesignerVM
 
         public static EndpointModelItem CreateEndpointModelItem(EndpointVm model)
         {
-            var t = new EndpointModelItem(model.EndpointType);
+            var t = new EndpointModelItem(model.EndpointType.id);
             t.Path = model.Path;
             var check = model.DataSource.Split('|');
             if (check.Length > 1)
@@ -68,7 +90,6 @@ namespace Intwenty.Model.DesignerVM
                 t.DataMetaCode = model.DataSource;
             }
             t.Id = model.Id;
-
             t.Properties = model.Properties;
             t.Description = model.Description;
             t.Title = model.Title;
@@ -81,11 +102,13 @@ namespace Intwenty.Model.DesignerVM
 
     }
 
-    public class EndpointDataSourceType 
+    public class EndpointType 
     {
         public string id { get; set; }
 
         public string title { get; set; }
+
+        public string datasourcetype { get; set; }
 
     }
 

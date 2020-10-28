@@ -335,9 +335,8 @@ namespace Intwenty.Model.DesignerVM
     {
         public int Id { get; set; }
         public string Title { get; set; }
-       
         public List<Section> Sections { get; set; }
-  
+        public List<IntwentyProperty> PropertyCollection { get; set; }
 
         public UIVm()
         {

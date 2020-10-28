@@ -26,6 +26,7 @@ namespace Intwenty.Model
 
         public abstract bool HasValidProperties { get; }
 
+        public abstract string ModelCode { get; }
 
         public bool IsRoot
         {

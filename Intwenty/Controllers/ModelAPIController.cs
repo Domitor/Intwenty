@@ -159,6 +159,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
                 var dbvm = DatabaseModelCreator.GetDatabaseVm(t);
+                dbvm.PropertyCollection = IntwentyRegistry.IntwentyProperties;
                 return new JsonResult(dbvm);
             }
             catch (Exception ex)
@@ -217,8 +218,9 @@ namespace Intwenty.Controllers
         public JsonResult GetDataViewModels()
         {
             var t = ModelRepository.GetDataViewModels();
-            var views = DataViewModelCreator.GetDataViewVm(t);
-            var res = new JsonResult(views);
+            var model = DataViewModelCreator.GetDataViewModelVm(t);
+            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
+            var res = new JsonResult(model);
             return res;
 
         }
@@ -279,7 +281,9 @@ namespace Intwenty.Controllers
         public JsonResult GetApplicationUI(int applicationid)
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(UIModelCreator.GetUIVm(t));
+            var model = UIModelCreator.GetUIVm(t);
+            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
+            return new JsonResult(model);
 
         }
 
@@ -325,7 +329,9 @@ namespace Intwenty.Controllers
         public JsonResult GetListViewModel(int applicationid)
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            return new JsonResult(ListViewVm.GetListView(t));
+            var model = ListViewVm.GetListView(t);
+            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
+            return new JsonResult(model);
 
         }
 
@@ -668,28 +674,26 @@ namespace Intwenty.Controllers
                 res.Endpoints.Add(EndpointVm.CreateEndpointVm(ep));
             }
 
-            res.EndpointDataSourceTypes = new List<EndpointDataSourceType>();
-            res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "TABLEOPERATION", title = "Database table" });
-            res.EndpointDataSourceTypes.Add(new EndpointDataSourceType() { id = "DATAVIEWOPERATION", title = "Intwenty Data View" });
-            res.EndpointActions = ModelRepository.GetValueDomains().Where(p => p.DomainName == "ENDPOINT_TABLE_ACTION" || 
-                                                                               p.DomainName == "ENDPOINT_DATAVIEW_ACTION").ToList();
+           
 
             res.EndpointDataSources = new List<EndpointDataSource>();
             var apps = ModelRepository.GetApplicationModels();
             foreach (var a in apps)
             {
-                res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode + "|" + a.Application.MetaCode, title = a.Application.DbName, type = "TABLEOPERATION" });
+                res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode + "|" + a.Application.MetaCode, title = a.Application.DbName, type = "TABLE" });
                 foreach (var subtable in a.DataStructure.Where(p=> p.IsMetaTypeDataTable))
                 {
-                    res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.AppMetaCode + "|" + subtable.MetaCode, title = subtable.DbName, type = "TABLEOPERATION" });
+                    res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.AppMetaCode + "|" + subtable.MetaCode, title = subtable.DbName, type = "TABLE" });
 
                 }
             }
             var dataviews = ModelRepository.GetDataViewModels();
             foreach (var dv in dataviews.Where(p=> p.IsMetaTypeDataView))
             {
-                res.EndpointDataSources.Add(new EndpointDataSource() { id = dv.MetaCode, title = dv.Title, type = "DATAVIEWOPERATION" });
+                res.EndpointDataSources.Add(new EndpointDataSource() { id = dv.MetaCode, title = dv.Title, type = "DATAVIEW" });
             }
+
+            
 
             return new JsonResult(res);
 

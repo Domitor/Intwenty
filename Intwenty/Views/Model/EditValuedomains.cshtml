@@ -15,7 +15,15 @@
         <div class="card-header"><h2>Value domains</h2></div>
         <div class="card-body">Value domains is simple lists of value pairs. Value domains are used in UI controls such as Comboboxes where the user selects one or more values.</div>
     </div>
+
+
     <br />
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
+        <strong>Changes have been saved !</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <br />
 
     <div class="row">
@@ -100,7 +108,7 @@
             el: '#app',
             data:
             {
-                model: { showNew:false, newDomainName: "" },
+                model: { showNew:false, newDomainName: "", modelSaved:false },
                 valuedomains: [],
                 idgen: -1
             },
@@ -206,6 +214,8 @@
                             success: function (response)
                             {
                                 context.valuedomains = response;
+                                context.model.modelSaved = true;
+                                setTimeout(function () { context.model.modelSaved = false; }, 3000);
                             },
                             error: function (response)
                             {

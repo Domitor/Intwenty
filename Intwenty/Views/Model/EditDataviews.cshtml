@@ -17,6 +17,14 @@
     </div>
 
     <br />
+
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
+        <strong>Changes have been saved !</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <br />
 
     <div>
@@ -27,12 +35,13 @@
 
     <br />
 
-    <div v-for="item in dataviews" class="row">
-       
+    <div v-for="item in model.views" class="row">
+
         <div class="col-sm-8">
             <div style="padding: 5px; border:dotted 1px gray">
                 <div class="row">
                     <div class="col-sm-6">
+
                         <label class="control-label">Title <span style="color: red"> *</span></label>
                         <div class="form-inline">
                             <input type="text" class="form-control form-control-sm" v-model="item.title" />
@@ -50,7 +59,7 @@
                     </div>
                     <div class="col-sm-6">
 
-                       
+
 
 
                     </div>
@@ -109,7 +118,7 @@
         var app = new Vue({
             el: '#app',
             data: {
-                dataviews: []
+                model: {}
             },
             methods:
             {
@@ -133,9 +142,13 @@
                         data: JSON.stringify(item),
                         success: function (response)
                         {
-                            context.dataviews = response;
-                            for (var i = 0; i < context.dataviews.length; i++)
-                                context.dataviews[i].showSettings = false;
+                            context.model = response;
+                            for (var i = 0; i < context.model.views.length; i++)
+                                context.model.views[i].showSettings = false;
+
+                            context.model.modelSaved = true;
+                            setTimeout(function () { context.model.modelSaved = false; }, 3000);
+
                         },
                         error: function (response)
                         {
@@ -158,9 +171,9 @@
                             contentType: "application/json",
                             data: JSON.stringify(item),
                             success: function (response) {
-                                context.dataviews = response;
-                                for (var i = 0; i < context.dataviews.length; i++)
-                                    context.dataviews[i].showSettings = false;
+                                context.model = response;
+                                for (var i = 0; i < context.model.views.length; i++)
+                                    context.model.views[i].showSettings = false;
                             },
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
@@ -173,7 +186,7 @@
                 },
                 addDataView: function () {
                     var context = this;
-                    context.dataviews.unshift({ properties: "", fields: [], id: -1, showSettings: false });
+                    context.model.views.unshift({ properties: "", fields: [], id: -1, showSettings: false });
                 },
                 addDataViewField: function (item) {
                     item.fields.unshift({ properties: "", id: -1 });
@@ -201,9 +214,9 @@
                 var endpointurl = baseurl + "GetDataViewModels";
                 $.get(endpointurl, function (response)
                 {
-                    context.dataviews = response;
-                    for (var i = 0; i < context.dataviews.length; i++)
-                        context.dataviews[i].showSettings = false;
+                    context.model = response;
+                    for (var i = 0; i < context.model.views.length; i++)
+                        context.model.views[i].showSettings = false;
                 }).fail(function (response) {
                     raiseErrorModal(response.responseJSON);
                 });

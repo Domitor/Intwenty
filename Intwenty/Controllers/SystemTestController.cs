@@ -29,7 +29,6 @@ namespace Intwenty.Controllers
         private readonly IIntwentyModelService _modelservice;
         private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
-        private readonly IMemoryCache _cache;
         private readonly UserManager<IntwentyUser> _usermanager;
         private readonly SignInManager<IntwentyUser> _signinmanager;
         private readonly RoleManager<IntwentyRole> _rolemanager;
@@ -38,7 +37,6 @@ namespace Intwenty.Controllers
         public SystemTestController(IIntwentyModelService modelservice,
                                     IIntwentyDataService dataservice,
                                     IOptions<IntwentySettings> settings,
-                                    IMemoryCache cache,
                                     UserManager<IntwentyUser> usermgr,
                                     SignInManager<IntwentyUser> signinmgr,
                                     RoleManager<IntwentyRole> rolemgr,
@@ -47,7 +45,6 @@ namespace Intwenty.Controllers
             _modelservice = modelservice;
             _dataservice = dataservice;
             _settings = settings.Value;
-            _cache = cache;
             _usermanager = usermgr;
             _signinmanager = signinmgr;
             _rolemanager = rolemgr;
@@ -72,10 +69,10 @@ namespace Intwenty.Controllers
             if (model != null)
                 _modelservice.DeleteAppModel(model);
 
-            var dvmodel = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG");
-            if (dvmodel != null)
+            var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
+            if (dvmodels != null && dvmodels.Count > 0)
             {
-                foreach (var dv in dvmodel)
+                foreach (var dv in dvmodels)
                     _modelservice.DeleteDataViewModel(dv.Id);
             }
 
@@ -181,29 +178,6 @@ namespace Intwenty.Controllers
                 }
             }
 
-
-
-
-            /*
-            res.Add(Test1ORMCreateTable());
-            res.Add(Test2ORMInsert());
-            res.Add(Test3ORMUpdate());
-            res.Add(Test4ORMDelete());
-            res.Add(Test5CreateIntwentyDb());
-            res.Add(Test6CreateIntwentyExampleModel());
-            res.Add(Test7CreateIntwentyApplication());
-            res.Add(Test8GetListOfIntwentyApplication());
-            res.Add(Test9GetListOfIntwentyApplicationByOwnerUser());
-            res.Add(Test10GetLatestVersionByOwnerUser());
-            res.Add(Test11UpdateIntwentyApplication());
-            res.Add(Test12DeleteIntwentyApplication());
-            res.Add(Test13GetAllValueDomains());
-            res.Add(Test14GetDataSet());
-            res.Add(Test15ORMGetByExpression());
-            res.Add(Test16CachePerformance());
-            res.Add(Test17GetLists());
-            res.Add(Test18TestIdentity());
-            */
 
             return new JsonResult(res);
 
@@ -389,9 +363,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                _cache.Remove("APPMODELS");
-
-               
+              
                 dbstore.Open();
                 dbstore.InsertEntity(new ApplicationItem() { Id = 10000, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
                 dbstore.InsertEntity(new DatabaseItem() { AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
@@ -413,8 +385,13 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
                 dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
                 dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
+                dbstore.Close();
+
+                _modelservice.ClearCache();
 
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
+                if (model==null)
+                    throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
                 OperationResult configres = _modelservice.ConfigureDatabase(model);
                 
@@ -423,7 +400,7 @@ namespace Intwenty.Controllers
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
-                dbstore.Close();
+              
             }
             catch (Exception ex)
             {

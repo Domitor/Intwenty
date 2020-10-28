@@ -18,6 +18,12 @@
     </div>
 
     <br />
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
+        <strong>Changes have been saved !</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <br />
 
     <div class="row">
@@ -77,6 +83,7 @@
             el: '#app',
             data:
             {
+                model: { modelSaved:false },
                 menuitems: [],
                 applications: []
             },
@@ -98,7 +105,10 @@
                 },
                 saveChanges: function ()
                 {
-
+                    var context = this;
+                    raiseInformationModal("Info", "This is not yet implemented !");
+                    context.model.modelSaved = true;
+                    setTimeout(function () { context.model.modelSaved = false; }, 3000);  
                 }
             },
             computed:

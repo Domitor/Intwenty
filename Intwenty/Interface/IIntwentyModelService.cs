@@ -109,6 +109,8 @@ namespace Intwenty.Interface
 
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
 
+        public void ClearCache(string key="ALL");
+
 
     }
 }

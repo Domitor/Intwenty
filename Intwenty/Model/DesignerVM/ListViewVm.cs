@@ -50,7 +50,7 @@ namespace Intwenty.Model.DesignerVM
         public string Title { get; set; }
         public string MetaCode { get; set; }
         public string Properties { get; set; }
-
+        public List<IntwentyProperty> PropertyCollection { get; set; }
         public List<ListViewFieldVm> Fields { get; set; }
 
         public ListViewVm()

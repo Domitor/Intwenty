@@ -60,20 +60,12 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeMenuItem; }
         }
 
-        public static List<IntwentyProperty> GetAvailableProperties()
+        public override string ModelCode
         {
-            var res = new List<IntwentyProperty>();
-            return res;
+            get { return "MENUMODEL"; }
         }
 
-
-        public static List<IntwentyMetaType> GetAvailableMetaTypes()
-        {
-            var t = new List<IntwentyMetaType>();
-            t.Add(new IntwentyMetaType() { Code = MetaTypeMainMenu, Title = "Main Menu" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeMenuItem, Title = "Menu Item" });
-            return t;
-        }
+     
 
         public override bool HasValidMetaType
         {
@@ -82,10 +74,11 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
-                    return true;
 
-                return false;
+                if (!IntwentyRegistry.IntwentyMetaTypes.Exists(p => p.Code == MetaType && p.ModelCode == ModelCode))
+                    return false;
+
+                return true;
 
             }
         }
@@ -96,7 +89,7 @@ namespace Intwenty.Model
             {
                 foreach (var prop in GetProperties())
                 {
-                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                    if (!IntwentyRegistry.IntwentyProperties.Exists(p => p.CodeName == prop && p.ValidFor.Contains(MetaType)))
                         return false;
                 }
                 return true;

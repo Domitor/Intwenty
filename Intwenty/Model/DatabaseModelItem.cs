@@ -125,6 +125,11 @@ namespace Intwenty.Model
             get { return DbName;  }
         }
 
+        public override string ModelCode
+        {
+            get { return "DATAMODEL"; }
+        }
+
         public static List<string> GetAvailableDataTypes()
         {
          
@@ -141,54 +146,6 @@ namespace Intwenty.Model
             
         }
 
-        public static List<IntwentyProperty> GetAvailableProperties()
-        {
-     
-            var res = new List<IntwentyProperty>();
-
-            var prop = new IntwentyProperty("DEFVALUE", "Default Value", "LIST");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            prop.ValidValues.Add(new PropertyListValue() {  CodeValue = "NONE", DisplayValue = "None" });
-            prop.ValidValues.Add(new PropertyListValue() { CodeValue = "AUTO", DisplayValue = "Automatic" });
-            res.Add(prop);
-
-            prop = new IntwentyProperty("DEFVALUE_START", "Default Value Start", "NUMERIC");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("DEFVALUE_PREFIX", "Default Value Prefix", "STRING");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("DEFVALUE_SEED", "Default Value Seed", "NUMERIC");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("MANDATORY", "Required", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("UNIQUE", "Unique", "BOOLEAN");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            prop = new IntwentyProperty("DOMAIN", "Domain", "STRING");
-            prop.ValidFor.Add(MetaTypeDataColumn);
-            res.Add(prop);
-
-            return res;
-            
-        }
-
-        public static List<IntwentyMetaType> GetAvailableMetaTypes()
-        {
-            
-            var t = new List<IntwentyMetaType>();
-            t.Add(new IntwentyMetaType() { Code = MetaTypeDataColumn, Title = "Column" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeDataTable, Title = "Table" });
-            return t;
-            
-        }
 
         public override bool HasValidMetaType
         {
@@ -197,10 +154,11 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(MetaType))
                     return false;
 
-                if (GetAvailableMetaTypes().Exists(p => p.Code == MetaType))
-                    return true;
+              
+                if (!IntwentyRegistry.IntwentyMetaTypes.Exists(p => p.Code == MetaType && p.ModelCode == ModelCode))
+                     return false;
 
-                return false;
+                return true;
 
             }
         }
@@ -211,22 +169,10 @@ namespace Intwenty.Model
             {
                 foreach (var prop in GetProperties())
                 {
-                    if (!GetAvailableProperties().Exists(p => p.CodeName == prop))
+                    if (!IntwentyRegistry.IntwentyProperties.Exists(p => p.CodeName == prop && p.ValidFor.Contains(MetaType)))
                         return false;
                 }
                 return true;
-            }
-        }
-
-        public override List<IntwentyProperty> SelectableProperties
-        {
-            get 
-            { 
-                var t = GetAvailableProperties().Where(p => p.ValidFor.Contains(MetaType));
-                if (t != null)
-                    return t.ToList();
-                else
-                    return new List<IntwentyProperty>();
             }
         }
 

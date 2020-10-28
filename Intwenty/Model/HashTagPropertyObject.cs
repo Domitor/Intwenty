@@ -10,20 +10,18 @@ namespace Intwenty.Model
 
         public string Properties { get; set; }
 
-        public List<IntwentyProperty> PropertyList { get; set; }
-
-        public virtual List<IntwentyProperty> SelectableProperties { get; private set; }
+        public List<PropertyValue> PropertyList { get; set; }
 
         public HashTagPropertyObject()
         {
-            PropertyList = new List<IntwentyProperty>();
-            SelectableProperties = new List<IntwentyProperty>();
+            PropertyList = new List<PropertyValue>();
         }
+
 
        
         public void BuildPropertyList()
         {
-            PropertyList = new List<IntwentyProperty>();
+            PropertyList = new List<PropertyValue>();
 
             if (string.IsNullOrEmpty(Properties))
                 return;
@@ -35,14 +33,14 @@ namespace Intwenty.Model
                 var keyval = v.Split("=".ToCharArray());
                 if (keyval.Length == 2)
                 {
-                    var definition = SelectableProperties.Find(p => p.CodeName == keyval[0].ToUpper());
+                    var definition = IntwentyRegistry.IntwentyProperties.Find(p => p.CodeName == keyval[0].ToUpper());
                     if (definition == null)
                     {
-                        PropertyList.Add(new IntwentyProperty() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1].ToUpper() });
+                        PropertyList.Add(new PropertyValue() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1].ToUpper() });
                     }
                     else
                     {
-                        PropertyList.Add(IntwentyProperty.CreateNew(keyval[0].ToUpper(), keyval[1].ToUpper(), definition));
+                        PropertyList.Add(PropertyValue.CreateNew(keyval[0].ToUpper(), keyval[1].ToUpper(), definition));
                     }
                    
                 }
@@ -266,12 +264,5 @@ namespace Intwenty.Model
 
     }
 
-    public class PropertyListValue
-    {
-        public string CodeValue { get; set; }
-
-        public string DisplayValue { get; set; }
-
-
-    }
+   
 }

@@ -34,6 +34,32 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
+Vue.prototype.selectableProperties = function (item)
+{
+    var context = this;
+
+    if (!item.metaType)
+        return [];
+
+    if (!context.model.propertyCollection)
+        return [];
+
+    var result = [];
+    for (var i = 0; i < context.model.propertyCollection.length; i++) {
+        var isincluded = false;
+        if (context.model.propertyCollection[i].validFor) {
+            for (var z = 0; z < context.model.propertyCollection[i].validFor.length; z++) {
+
+                if (item.metaType === context.model.propertyCollection[i].validFor[z])
+                    isincluded = true;
+            }
+        }
+        if (isincluded)
+            result.push(context.model.propertyCollection[i]);
+    }
+
+    return result;
+};
 
 
 Vue.prototype.addProperty = function (modelitem) {
@@ -60,7 +86,7 @@ Vue.prototype.addProperty = function (modelitem) {
         return;
 
 
-    modelitem.propertyList.push({ codeName: modelitem.currentProperty.codeName, displayName: modelitem.currentProperty.displayName, codeValue: modelitem.currentProperty.codeValue, displayValue: modelitem.currentProperty.displayValue });
+    modelitem.propertyList.push({ codeName: modelitem.currentProperty.codeName, codeValue: modelitem.currentProperty.codeValue, displayValue: modelitem.currentProperty.displayValue });
 
     modelitem.currentProperty.codeValue = "";
 

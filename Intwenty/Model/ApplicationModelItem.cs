@@ -9,7 +9,7 @@ namespace Intwenty.Model
 {
 
    public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
-    {
+   {
         public static readonly string MetaTypeApplication = "APPLICATION";
 
         public ApplicationModelItem()
@@ -63,6 +63,11 @@ namespace Intwenty.Model
             get { return this.DbName + "_Versioning"; }
         }
 
+        public override string ModelCode
+        {
+            get { return "APPMODEL"; }
+        }
+
         public override bool HasValidMetaType
         {
             get 
@@ -77,26 +82,15 @@ namespace Intwenty.Model
             {
                 foreach (var prop in GetProperties())
                 {
-                    if (!GetAvaliableProperties().Exists(p => p.CodeName == prop))
+                    if (!IntwentyRegistry.IntwentyProperties.Exists(p => p.CodeName == prop && p.ValidFor.Contains(MetaType)))
                         return false;
                 }
                 return true;
             }
         }
 
-        public static List<IntwentyProperty> GetAvaliableProperties()
-        {
-            return new List<IntwentyProperty>();
-        }
 
-        public static List<IntwentyMetaType> GetAvailableMetaTypes()
-        {
-            return new List<IntwentyMetaType>()
-            {
-                new IntwentyMetaType(){ Code=MetaTypeApplication, Title="Application" }
 
-            };
-        }
 
 
 

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Intwenty.Model
 {
+
+   
+
     public class IntwentyProperty
     {
         public string CodeName { get; set; }
@@ -18,7 +21,7 @@ namespace Intwenty.Model
 
         public List<string> ValidFor { get; set; }
 
-        public List<PropertyListValue> ValidValues { get; set; }
+        public List<SelectablePropertyValue> ValidValues { get; set; }
 
       
 
@@ -28,7 +31,7 @@ namespace Intwenty.Model
             ValueType = string.Empty;
             CodeName = string.Empty;
             ValidFor = new List<string>();
-            ValidValues = new List<PropertyListValue>();
+            ValidValues = new List<SelectablePropertyValue>();
             CodeValue = string.Empty;
             DisplayValue = string.Empty;
         }
@@ -39,43 +42,9 @@ namespace Intwenty.Model
             ValueType = valuetype;
             CodeName = name;
             ValidFor = new List<string>();
-            ValidValues = new List<PropertyListValue>();
+            ValidValues = new List<SelectablePropertyValue>();
             CodeValue = string.Empty;
             DisplayValue = string.Empty;
-        }
-
-        public static IntwentyProperty CreateNew(string name, string value, IntwentyProperty instance=null)
-        {
-            if (instance == null)
-                return new IntwentyProperty() { CodeName = name, CodeValue = value };
-            else
-            {
-                var t = new IntwentyProperty();
-                t.CodeName = instance.CodeName;
-                t.DisplayName = instance.DisplayName;
-                t.DisplayValue = value;
-               
-                if (instance.IsListType)
-                {
-                    var v = instance.ValidValues.Find(p => p.CodeValue == value);
-                    if (v != null)
-                        t.DisplayValue = v.DisplayValue;
-
-                }
-
-                t.ValueType = instance.ValueType;
-
-                foreach (var m in instance.ValidFor)
-                    t.ValidFor.Add(m);
-                foreach (var m in instance.ValidValues)
-                    t.ValidValues.Add(new PropertyListValue() { CodeValue = m.CodeValue, DisplayValue = m.DisplayValue });
-
-                return t;
-
-            }
-
-
-
         }
 
 
@@ -107,6 +76,45 @@ namespace Intwenty.Model
                 return ValueType == "BOOLEAN";
             }
         }
+
+    }
+
+    public class SelectablePropertyValue
+    {
+        public string CodeValue { get; set; }
+
+        public string DisplayValue { get; set; }
+
+
+    }
+
+    public class PropertyValue
+    {
+        public string CodeName { get; set; }
+
+        public string CodeValue { get; set; }
+
+        public string DisplayValue { get; set; }
+
+
+        public static PropertyValue CreateNew(string name, string value, IntwentyProperty instance = null)
+        {
+            if (instance == null)
+                return new PropertyValue() { CodeName = name, CodeValue = value };
+            else
+            {
+                var t = new PropertyValue();
+                t.CodeName = instance.CodeName;
+                t.CodeValue = value;
+                t.DisplayValue = value;
+                return t;
+
+            }
+
+
+
+        }
+
 
     }
 
