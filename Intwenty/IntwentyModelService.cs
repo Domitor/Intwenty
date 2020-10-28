@@ -1192,7 +1192,7 @@ namespace Intwenty
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
         {
-
+            
             //Localization
             var translations = Client.GetEntities<TranslationItem>();
 
@@ -1205,6 +1205,11 @@ namespace Intwenty
                         item.Title = trans.Text;
                     else
                         item.Title = item.TitleLocalizationKey;
+
+                    if (CurrentCulture == "sv-SE" && item.Title == "Kunder")
+                    {
+                        var x = "";
+                    }
                 }
             }
         }
@@ -1254,47 +1259,79 @@ namespace Intwenty
 
         public List<OperationResult> ConfigureDatabase()
         {
-            ModelCache.Remove(AppModelCacheKey);
-
+            var databasemodel = GetDatabaseModels();
             var res = new List<OperationResult>();
-            var l = GetApplicationModels();
+            var l = GetAppModels();
             foreach (var model in l)
             {
-                res.Add(ConfigureDatabase(model));
+                res.Add(ConfigureDatabase(model, databasemodel));
             }
 
             return res;
         }
 
-        public OperationResult ConfigureDatabase(ApplicationModel model)
+        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null)
         {
-            var res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0}", model.Application.Title));
+            var res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0}", model.Title));
 
             try
             {
+              
+                if (databasemodel == null) 
+                {
+                    databasemodel = GetDatabaseModels();
+                }
+
                 Client.Open();
-                CreateMainTable(model, res);
+                var maintable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem && p.AppMetaCode == model.MetaCode).ToList();
+                if (maintable_default_cols == null)
+                    throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
+                if (maintable_default_cols.Count == 0)
+                    throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
+
+
+                CreateMainTable(model, maintable_default_cols, res);
                 CreateApplicationVersioningTable(model, res);
 
-                foreach (var t in model.DataStructure)
+                foreach (var t in databasemodel)
                 {
+                    if (t.AppMetaCode != model.MetaCode)
+                        continue;
+
                     if (t.IsMetaTypeDataColumn && t.IsRoot && !t.IsFrameworkItem)
                     {
-                        CreateDBColumn(res, t, model.Application.DbName);
+                        CreateDBColumn(t, model.DbName, res);
                     }
 
                     if (t.IsMetaTypeDataTable)
                     {
-                        CreateDBTable(model, res, t);
+                        var subtable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && t.AppMetaCode == model.MetaCode && p.ParentMetaCode == t.MetaCode).ToList();
+                        if (subtable_default_cols == null)
+                            throw new InvalidOperationException("Found application subtable without default columns");
+                        if (subtable_default_cols.Count == 0)
+                            throw new InvalidOperationException("Found application subtable without default columns");
+
+                        CreateDBTable(model, t, subtable_default_cols, res);
+                        foreach (var col in databasemodel)
+                        {
+                            if (col.IsFrameworkItem || col.AppMetaCode != model.MetaCode || col.IsRoot || col.ParentMetaCode != t.MetaCode)
+                                continue;
+
+                            CreateDBColumn(col, t.DbName, res);
+                        }
+
+                        CreateSubtableIndexes(t, res);
+
+
                     }
                 }
 
-                CreateIndexes(model, res);
+                CreateMainTableIndexes(model, res);
 
             }
             catch (Exception ex)
             {
-                res.SetError(ex.Message, "");
+                res = new OperationResult(false, MessageCode.SYSTEMERROR, ex.Message);
             }
             finally
             {
@@ -1623,50 +1660,70 @@ namespace Intwenty
 
         #region ConfigureDB
 
-        private void CreateMainTable(ApplicationModel model, OperationResult o)
+        private void CreateMainTable(ApplicationModelItem model, List<DatabaseModelItem> columns, OperationResult result)
         {
 
             var table_exist = false;
-            table_exist = Client.TableExists(model.Application.DbName);
+            table_exist = Client.TableExists(model.DbName);
             if (table_exist)
             {
-                o.AddMessage(MessageCode.INFO , "Main table " + model.Application.DbName + " for application: " + model.Application.Title + " is already present");
+                result.AddMessage(MessageCode.INFO , "Main table " + model.DbName + " for application: " + model.Title + " is already present");
             }
             else
             {
 
-                string create_sql = GetCreateTableStmt(model.DataStructure.Where(p=> p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem).ToList(), model.Application.DbName);
+                string create_sql = GetCreateTableStmt(columns, model.DbName);
                 Client.RunCommand(create_sql);
-                o.AddMessage(MessageCode.INFO, "Main table: " + model.Application.DbName + " for application: " + model.Application.Title + "  was created successfully");
+                result.AddMessage(MessageCode.INFO, "Main table: " + model.DbName + " for application: " + model.Title + "  was created successfully");
 
             }
         }
 
-        private void CreateApplicationVersioningTable(ApplicationModel model, OperationResult o)
+        private void CreateDBTable(ApplicationModelItem model, DatabaseModelItem table, List<DatabaseModelItem> columns, OperationResult result)
         {
+
+            if (!table.IsMetaTypeDataTable)
+            {
+                result.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring table");
+                return;
+            }
+
+
             var table_exist = false;
-            table_exist = Client.TableExists(model.Application.VersioningTableName);
+            table_exist = Client.TableExists(table.DbName);
             if (table_exist)
             {
-                //o.AddMessage("DBCONFIG", "Found versioning table (" + model.Application.VersioningTableName + ") for application:" + model.Application.Title);
+                result.AddMessage(MessageCode.INFO, "Table: " + table.DbName + " in application: " + model.Title + " is already present.");
             }
             else
             {
 
-                string create_sql = GetCreateVersioningTableStmt(GetDefaultVersioningTableColumns(), model.Application.VersioningTableName);
+                string create_sql = GetCreateTableStmt(columns, table.DbName);
                 Client.RunCommand(create_sql);
+                result.AddMessage(MessageCode.INFO, "Subtable: " + table.DbName + " in application: " + model.Title + "  was created successfully");
 
-                //o.AddMessage("DBCONFIG", "Versioning table: " + model.Application.VersioningTableName + " was created successfully");
+            }
 
+        }
+
+        private void CreateApplicationVersioningTable(ApplicationModelItem model, OperationResult result)
+        {
+            var table_exist = false;
+            table_exist = Client.TableExists(model.VersioningTableName);
+            if (!table_exist)
+            {
+
+                string create_sql = GetCreateVersioningTableStmt(GetDefaultVersioningTableColumns(), model.VersioningTableName);
+                Client.RunCommand(create_sql);
             }
         }
 
-        private void CreateDBColumn(OperationResult o, DatabaseModelItem column, string tablename)
+        private void CreateDBColumn(DatabaseModelItem column, string tablename, OperationResult result)
         {
             
             if (!column.IsMetaTypeDataColumn)
             {
-                o.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring column");
+                result.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring column");
                 return;
             }
 
@@ -1676,53 +1733,22 @@ namespace Intwenty
 
             if (colexist)
             {
-                o.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " in table: " + tablename + " is already present.");
+                result.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " in table: " + tablename + " is already present.");
             }
             else
             {
                 var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DbEngine == Client.Database);
                 string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
                 Client.RunCommand(create_sql);
-                o.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " (" + coldt.DBMSDataType + ") was created successfully in table: " + tablename);
+                result.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " (" + coldt.DBMSDataType + ") was created successfully in table: " + tablename);
 
             }
 
         }
 
-        private void CreateDBTable(ApplicationModel model, OperationResult o, DatabaseModelItem table)
-        {
+      
 
-            if (!table.IsMetaTypeDataTable)
-            {
-                o.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring table");
-                return;
-            }
-
-
-            var table_exist = false;
-            table_exist = Client.TableExists(table.DbName);
-            if (table_exist)
-            {
-                o.AddMessage(MessageCode.INFO, "Table: " + table.DbName + " in application: " + model.Application.Title + " is already present.");
-            }
-            else
-            {
-
-                string create_sql = GetCreateTableStmt(model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == table.MetaCode).ToList(), table.DbName);
-                Client.RunCommand(create_sql);
-                o.AddMessage(MessageCode.INFO, "Subtable: " + table.DbName + " in application: " + model.Application.Title + "  was created successfully");
-
-            }
-
-            foreach (var t in model.DataStructure)
-            {
-                if (t.IsMetaTypeDataColumn && t.ParentMetaCode == table.MetaCode && !t.IsFrameworkItem)
-                    CreateDBColumn(o, t, table.DbName);
-            }
-
-        }
-
-        private void CreateIndexes(ApplicationModel model, OperationResult o)
+        private void CreateMainTableIndexes(ApplicationModelItem model, OperationResult result)
         {
             string sql = string.Empty;
 
@@ -1730,7 +1756,7 @@ namespace Intwenty
             try
             {
                 //Ctreate index on main application table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.Application.DbName);
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.DbName);
                 Client.RunCommand(sql);
             }
             catch { }
@@ -1738,34 +1764,43 @@ namespace Intwenty
             try
             {
                 //Create index on versioning table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.Application.VersioningTableName);
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.VersioningTableName);
                 Client.RunCommand(sql);
             }
             catch { }
 
-            //Create index on subtables
-            foreach (var t in model.DataStructure)
+            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
+
+
+
+        }
+
+        private void CreateSubtableIndexes(DatabaseModelItem model, OperationResult result)
+        {
+            string sql = string.Empty;
+
+
+            if (!model.IsMetaTypeDataTable)
+                return;
+         
+             
+            try
             {
-                if (t.IsMetaTypeDataTable)
-                {
-                    try
-                    {
-                        sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", t.DbName);
-                        Client.RunCommand(sql);
-                    }
-                    catch { }
-
-                    try
-                    {
-                        sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", t.DbName);
-                        Client.RunCommand(sql);
-                    }
-                    catch { }
-
-                }
+                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.DbName);
+                Client.RunCommand(sql);
             }
+            catch { }
 
-            o.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for application " + model.Application.Title);
+            try
+            {
+                sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", model.DbName);
+                Client.RunCommand(sql);
+            }
+            catch { }
+
+
+
+            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
 
 
 

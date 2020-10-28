@@ -32,7 +32,7 @@ namespace Intwenty.Interface
 
         public List<OperationResult> ConfigureDatabase();
 
-        public OperationResult ConfigureDatabase(ApplicationModel model);
+        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null);
 
 
         /// <summary>

@@ -389,7 +389,7 @@ namespace Intwenty.Controllers
 
                 _modelservice.ClearCache();
 
-                var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
+                var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
                 if (model==null)
                     throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
