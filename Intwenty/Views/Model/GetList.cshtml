@@ -25,17 +25,23 @@
                     <th style="width:10%"></th>
                     <th style="width:20%">Title</th>
                     <th style="width:25%">Description</th>
-                    <th style="width:20%"></th>
-                    <th style="width:15%"></th>
-                    <th style="width:10%"></th>
+                    <th style="width:20%">DB</th>
+                    <th style="width:20%">UI Design</th>
+                    <th style="width:5%"></th>
                 </tr>
             </thead>
             <tr v-for="item in datalist">
                 <td><a v-bind:href="'/Model/Edit/' + item.id" role="button" class="btn btn-sm btn-secondary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
-                <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary">Manage database</a></td>
-                <td><a v-bind:href="'/Model/EditUI/' + item.id" role="button" class="btn btn-sm btn-secondary">Manage UI</a></td>
+                <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-database"></i> Manage DB</a></td>
+                <td>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">C</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/UPVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Update View">U</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the List View">L</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/PRVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">P</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/PRLIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">PL</a>
+                </td>
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
             </tr>
         </table>

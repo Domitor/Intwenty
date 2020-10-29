@@ -271,7 +271,7 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeCreateView; }
         }
 
-        public bool IsMMetaTypeUpdateView
+        public bool IsMetaTypeUpdateView
         {
             get { return MetaType == MetaTypeUpdateView; }
         }

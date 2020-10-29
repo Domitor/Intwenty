@@ -48,10 +48,11 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/EditUI/{applicationid}")]
-        public IActionResult EditUI(int applicationid)
+        [HttpGet("/Model/EditUI/{applicationid}/{viewtype}")]
+        public IActionResult EditUI(int applicationid, string viewtype)
         {
             ViewBag.SystemId = Convert.ToString(applicationid);
+            ViewBag.ViewType = viewtype;
             return View();
         }
 

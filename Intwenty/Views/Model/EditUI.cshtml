@@ -35,8 +35,8 @@
     <br />
 
     <div class="card">
-        <div class="card-header"> <h2>UI model designer </h2></div>
-        <div class="card-body">Design the {{model.title}} UI model and connect it to the database model.</div>
+        <div class="card-header"><h2>UI model designer </h2></div>
+        <div class="card-body">Design the '{{model.designerTitle}}' for application {{model.applicationTitle}} and connect it to the database model.</div>
     </div>
 
     <br />
@@ -44,16 +44,10 @@
     <br />
     <br />
 
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item"><a class="nav-link active" href="#userinput" id="userinput-tab" data-toggle="tab" aria-selected="true"><b>User Inputs</b></a></li>
-        <li class="nav-item"><a class="nav-link" href="#listview" id="listview-tab" data-toggle="tab" aria-selected="false"><b>Listview</b></a></li>
-    </ul>
+   
 
-    <div class="tab-content">
+        <div id="uidesigner" v-if="model.viewType!='LIVIEW'">
 
-        <div id="userinput" class="tab-pane fade show active">
-            <br />
-            <br />
             <div class="btn btn-sm btn-secondary" v-on:click="addSection">
                 <span class="fa fa-plus"></span> Add section
             </div>
@@ -259,9 +253,9 @@
         </div>
 
 
-        <div id="listview" class="tab-pane fade">
-            <br />
-            <br />
+        <div id="listview" v-if="model.viewType=='LIVIEW'">
+
+
             <div class="btn btn-sm btn-primary" v-on:click="saveListView" style="float:right">
                 <span class="fa fa-save"></span> Save changes
             </div>
@@ -274,7 +268,7 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label class="control-label">Title <span style="color: red"> *</span></label>
-                                <input type="text" class="form-control form-control-sm" v-model="listview.title" />
+                                <input type="text" class="form-control form-control-sm" v-model="model.title" />
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -301,7 +295,7 @@
                                             <th style="width:65%">Column name <span style="color: red"> *</span></th>
                                         </tr>
                                     </thead>
-                                    <tbody v-for="field in listview.fields">
+                                    <tbody v-for="field in model.fields">
                                         <tr>
 
                                             <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
@@ -323,7 +317,7 @@
         </div>
 
 
-    </div>
+
 
 
 
@@ -484,7 +478,6 @@
                 dbtables: [],
                 valuedomains: [],
                 dataviews: [],
-                listview: {},
                 listviewtable: {},
                 active_setting_input: {},
                 metaproperties: [],
@@ -725,10 +718,10 @@
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(context.listview),
+                        data: JSON.stringify(context.model),
                         success: function (response)
                         {
-                            context.listview = response;
+                            context.model = response;
                             raiseInformationModal("Success", "The Listview UI model was successfully saved.");
                         },
                         error: function (response) {
@@ -796,7 +789,7 @@
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
-                var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId";
+                var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId/@ViewBag.ViewType";
 
                 //Application
                 $.get(endpointurl, function (response) {
@@ -822,24 +815,12 @@
                                 context.valuedomains = response;
                             }).done(function () {
 
-                                //ListView
-                                endpointurl = baseurl + "GetListViewModel/@ViewBag.SystemId";
-                                $.get(endpointurl, function (response) {
-                                    context.listview = response;
-                                }).done(function () {
-
                                     //Selectable listview columns
                                     endpointurl = baseurl + "GetListviewTable/@ViewBag.SystemId";
                                     $.get(endpointurl, function (response) {
                                         context.listviewtable = response;
-                                    }).done(function () {
-                                        //Properties
-                                        endpointurl = baseurl + "GetIntwentyProperties";
-                                        $.get(endpointurl, function (response) {
-                                            context.metaproperties = response;
-                                        });
                                     });
-                                });
+
                             });
                         });
 

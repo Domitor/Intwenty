@@ -275,29 +275,29 @@ namespace Intwenty.Controllers
 
 
         /// <summary>
-        /// Get UI model for application with id
+        /// Get UI view model for application with id and the viewtype
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationUI/{applicationid}")]
-        public JsonResult GetApplicationUI(int applicationid)
+        [HttpGet("/Model/API/GetApplicationUI/{applicationid}/{viewtype}")]
+        public JsonResult GetApplicationUI(int applicationid, string viewtype)
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            var model = UIModelCreator.GetUIVm(t);
+            var model = UIModelCreator.GetUIVm(t, viewtype);
             model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
             return new JsonResult(model);
 
         }
 
         [HttpPost("/Model/API/SaveUserInterfaceModel")]
-        public JsonResult SaveUserInterfaceModel([FromBody] UIVm model)
+        public JsonResult SaveUserInterfaceModel([FromBody] ViewVm model)
         {
             try
             {
-                if (model.Id < 1)
+                if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId missing in model");
 
 
                 var views = ModelRepository.GetDataViewModels();
-                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.Id);
+                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
                 if (app == null)
                     throw new InvalidOperationException("Could not find application");
 
@@ -306,7 +306,7 @@ namespace Intwenty.Controllers
                 ModelRepository.SaveUserInterfaceModels(dtolist);
 
                 var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-                var vm = UIModelCreator.GetUIVm(t);
+                var vm = UIModelCreator.GetUIVm(t, model.ViewType);
                 return new JsonResult(vm);
 
             }
@@ -321,22 +321,8 @@ namespace Intwenty.Controllers
 
         }
 
-
-        /// <summary>
-        /// Get meta data for application with id
-        /// </summary>
-        [HttpGet("/Model/API/GetListViewModel/{applicationid}")]
-        public JsonResult GetListViewModel(int applicationid)
-        {
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            var model = ListViewVm.GetListView(t);
-            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
-            return new JsonResult(model);
-
-        }
-
         [HttpPost("/Model/API/SaveListViewModel")]
-        public JsonResult SaveListViewModel([FromBody] ListViewVm model)
+        public JsonResult SaveListViewModel([FromBody] ViewVm model)
         {
             try
             {
@@ -348,8 +334,12 @@ namespace Intwenty.Controllers
                 if (app == null)
                     throw new InvalidOperationException("Could not find application");
 
-                var dtolist = MetaDataListViewCreator.GetMetaUIListView(model, app);
+                var dtolist = UIModelCreator.GetListViewUIModel(model, app);
                 ModelRepository.SaveUserInterfaceModels(dtolist);
+
+                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+                var vm = UIModelCreator.GetUIVm(t, model.ViewType);
+                return new JsonResult(vm);
 
             }
             catch (Exception ex)
@@ -361,7 +351,7 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetListViewModel(model.ApplicationId);
+            
         }
 
         #endregion
@@ -656,8 +646,6 @@ namespace Intwenty.Controllers
         #endregion
 
         #region Endpoints
-
-
 
         /// <summary>
         /// Get endpoints

@@ -9,9 +9,22 @@ namespace Intwenty.Model.DesignerVM
     public static class UIModelCreator
     {
 
-        public static List<UserInterfaceModelItem> GetUIModel(UIVm model, ApplicationModel app, List<DataViewModelItem> views)
+        public static List<UserInterfaceModelItem> GetUIModel(ViewVm model, ApplicationModel app, List<DataViewModelItem> views)
         {
             var res = new List<UserInterfaceModelItem>();
+
+
+            var viewitem = app.UIStructure.Find(p => p.MetaType == model.MetaType);
+            if (viewitem == null)
+            {
+                viewitem = new UserInterfaceModelItem(model.MetaType) { Id = -1, AppMetaCode = app.Application.MetaCode, MetaCode = "", ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = BaseModelItem.MetaTypeRoot };
+                viewitem.MetaCode = BaseModelItem.GenerateNewMetaCode(viewitem);
+            }
+
+            if (viewitem == null)
+                return res;
+
+            res.Add(viewitem);
 
             foreach (var section in model.Sections)
             {
@@ -19,7 +32,7 @@ namespace Intwenty.Model.DesignerVM
                 if (section.Id == 0 && section.IsRemoved)
                     continue;
 
-                var sect = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = BaseModelItem.MetaTypeRoot };
+                var sect = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = viewitem.MetaCode };
                 res.Add(sect);
                 if (sect.Id == 0)
                     sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
@@ -190,26 +203,111 @@ namespace Intwenty.Model.DesignerVM
 
         }
 
-        public static UIVm GetUIVm(ApplicationModel app)
+        public static List<UserInterfaceModelItem> GetListViewUIModel(ViewVm model, ApplicationModel app)
         {
-            var res = new UIVm();
-            res.Id = app.Application.Id;
-            res.Title = app.Application.Title;
+            var res = new List<UserInterfaceModelItem>();
+            var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode };
+            if (string.IsNullOrEmpty(model.MetaCode))
+                t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
 
-         
+            res.Add(t);
 
-       
+
+            foreach (var f in model.Fields)
+            {
+                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewColumn) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
+                if (string.IsNullOrEmpty(lf.MetaCode))
+                    lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
+
+                if (!string.IsNullOrEmpty(f.DbName))
+                {
+                    var dmc = app.DataStructure.Find(p => p.DbName == f.DbName && p.IsRoot);
+                    if (dmc != null)
+                    {
+                        lf.DataMetaCode = dmc.MetaCode;
+                    }
+                    else
+                    {
+                        //DEFAULT FIELD METACODE
+                        lf.DataMetaCode = f.DbName.ToUpper();
+                    }
+                }
+
+                res.Add(lf);
+            }
+
+            return res;
+        }
+
+        public static ViewVm GetUIVm(ApplicationModel app, string viewtype)
+        {
+            var res = new ViewVm();
+            res.ApplicationId = app.Application.Id;
+            res.ApplicationTitle = app.Application.Title;
+
+            res.ViewType = viewtype;
+            if (viewtype.ToUpper() == "CRVIEW")
+            {
+                res.DesignerTitle = "Create View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeCreateView;
+            }
+            if (viewtype.ToUpper() == "UPVIEW")
+            {
+                res.DesignerTitle = "Update View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeUpdateView;
+            }
+            if (viewtype.ToUpper() == "LIVIEW")
+            {
+                res.DesignerTitle = "List View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeListView;
+            }
+            if (viewtype.ToUpper() == "PRVIEW")
+            {
+                res.DesignerTitle = "Presentation View";
+                res.MetaType = UserInterfaceModelItem.MetaTypePresentationView;
+            }
+            if (viewtype.ToUpper() == "PRLIVIEW")
+            {
+                res.DesignerTitle = "Presentation List View";
+                res.MetaType = UserInterfaceModelItem.MetaTypePresentationView;
+            }
+
+            var viewitem = app.UIStructure.Find(p => p.MetaType == res.MetaType);
+            if (viewitem == null && res.MetaType == UserInterfaceModelItem.MetaTypeUpdateView)
+                viewitem = app.UIStructure.Find(p => p.IsMetaTypeCreateView);
+
+            if (viewitem == null)
+                return res;
+
+            res.MetaCode = viewitem.MetaCode;
+            res.Properties = viewitem.Properties;
+            res.Id = viewitem.Id;
+            res.Title = viewitem.Title;
+
+            if (!viewitem.IsMetaTypeListView)
+                BuildVm(res, viewitem, app);
+            else
+                BuildListViewVm(res, viewitem, app);
+
+            return res;
+        }
+
+        public static void BuildVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
+        {
+
             foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
             {
+                if (uic.ParentMetaCode != viewitem.MetaCode)
+                    continue;
+
                 if (uic.IsMetaTypeSection)
                 {
                     var sect = new Section() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
-                    sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE","TRUE");
+                    sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE", "TRUE");
                     sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
                     res.Sections.Add(sect);
                 }
             }
-            
 
             foreach (var section in res.Sections)
             {
@@ -218,7 +316,7 @@ namespace Intwenty.Model.DesignerVM
                 {
                     if (uicomp.ParentMetaCode == section.MetaCode || section.Id == 0)
                     {
-                       
+
                         if (uicomp.IsMetaTypePanel)
                         {
                             var pnl = new UserInput() { Id = uicomp.Id, ApplicationId = app.Application.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, MetaType = uicomp.MetaType, Title = uicomp.Title, ParentMetaCode = "ROOT", Properties = uicomp.Properties };
@@ -255,7 +353,7 @@ namespace Intwenty.Model.DesignerVM
                                 //LOOK UP
                                 if (uic.IsMetaTypeLookUp)
                                 {
-                                
+
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName, Properties = uic.Properties };
                                     input.BuildPropertyList();
 
@@ -267,7 +365,7 @@ namespace Intwenty.Model.DesignerVM
                                         if (uic.IsDataColumn2Connected)
                                             input.ColumnName2 = uic.DataColumnInfo2.ColumnName;
                                     }
-                                   
+
                                     //VIEW CONNECTION
                                     if (uic.IsDataViewColumnConnected)
                                         input.ViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
@@ -303,11 +401,11 @@ namespace Intwenty.Model.DesignerVM
                                         if (gridcol.IsMetaTypeEditGridLookUp)
                                         {
                                             child.Domain = gridcol.ViewName;
-                                          
+
                                             //VIEW CONNECTION
                                             if (gridcol.IsDataViewColumnConnected)
                                                 child.ViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
-                                            
+
                                         }
                                     }
 
@@ -321,28 +419,62 @@ namespace Intwenty.Model.DesignerVM
                 section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
             }
 
-           
-
-
-            return res;
         }
 
-      
+        public static void BuildListViewVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
+        {
+
+            foreach (var f in app.UIStructure)
+            {
+                if (f.IsMetaTypeListViewColumn && f.ParentMetaCode == viewitem.MetaCode)
+                {
+                    if (f.IsDataColumnConnected)
+                        res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumnInfo.DbName });
+                    else
+                        res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title });
+                }
+            }
+
+
+        }
+
+
     }
 
 
-    public class UIVm
+    public class ViewVm : BaseModelVm
     {
-        public int Id { get; set; }
+
+        public int ApplicationId { get; set; }
+
+        public string ApplicationTitle { get; set; }
+
+        public string ViewType { get; set;  }
+
+        public string DesignerTitle{ get; set; }
+
         public string Title { get; set; }
+
+        public string MetaType { get; set; }
+
+        public string MetaCode { get; set; }
+
         public List<Section> Sections { get; set; }
         public List<IntwentyProperty> PropertyCollection { get; set; }
 
-        public UIVm()
+        public List<ListViewFieldVm> Fields { get; set; }
+
+        public ViewVm()
         {
-            Title = "";
+            ApplicationTitle = "";
             Sections = new List<Section>();
-         
+            ViewType = "";
+            DesignerTitle = "";
+            Title = "";
+            MetaType = "";
+            MetaCode = "";
+            Properties = "";
+            Fields = new List<ListViewFieldVm>();
         }
 
     }
@@ -454,8 +586,21 @@ namespace Intwenty.Model.DesignerVM
 
     }
 
-   
-  
+    public class ListViewFieldVm
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string DbName { get; set; }
+        public string Properties { get; set; }
+
+        public ListViewFieldVm()
+        {
+            Title = "";
+            DbName = "";
+            Properties = "";
+        }
+    }
+
 
 
 
