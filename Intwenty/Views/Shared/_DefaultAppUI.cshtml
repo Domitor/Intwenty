@@ -1,7 +1,7 @@
 ﻿@model Intwenty.Model.ApplicationModel
 
 @{
-      var dataviewmodels = ModelRepository.GetDataViewModels();
+      var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
 }
 
 @foreach (var sect in Model.UIStructure.Where(p=> p.IsMetaTypeSection).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))

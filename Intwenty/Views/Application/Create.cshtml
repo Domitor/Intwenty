@@ -3,9 +3,9 @@
 @{
     ViewData["Title"] = "Create New " + Model.Application.Title;
 
-    if (!Model.UIStructure.Exists(p => p.IsRoot && p.IsMetaTypeSection))
+    if (!Model.UIStructure.Exists(p => p.IsMetaTypeSection))
     {
-        <h1><span class="label label-warning btn-lg">There's no UI model defined for this application yet.</span></h1>
+        <h1>There's no UI model defined for this application yet.</h1>
         return;
     }
 

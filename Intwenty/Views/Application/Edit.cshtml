@@ -2,7 +2,15 @@
 
 @{
     ViewData["Title"] = "Edit " + Model.Application.Title + " (" + ViewBag.SystemId + ")";
+
+    if (!Model.UIStructure.Exists(p => p.IsMetaTypeSection))
+    {
+        <h1>There's no UI model defined for this application yet.</h1>
+        return;
+    }
 }
+
+
 
 @await Html.PartialAsync("_Modals")
 
@@ -35,7 +43,7 @@
 @section Scripts
 {
 
- 
+
     <script>
         Vue.prototype.runMounted = function () {
 

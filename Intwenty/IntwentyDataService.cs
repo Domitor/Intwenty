@@ -452,6 +452,9 @@ namespace Intwenty
                 if (!t.HasModel)
                     continue;
 
+                if (t.Model.IsFrameworkItem)
+                    continue;
+
                 if (!t.HasValue)
                 {
                     sql_update.Append("," + t.DbName + "=null");
