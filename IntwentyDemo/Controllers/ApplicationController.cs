@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Intwenty.Data.Dto;
+using Intwenty.Model.Dto;
 using Microsoft.AspNetCore.Http;
 using Intwenty;
 using Intwenty.Interface;

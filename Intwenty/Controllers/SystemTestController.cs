@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Intwenty.Model;
-using Intwenty.Data.Entity;
+using Intwenty.Model.Dto;
+using Intwenty.Entity;
 using Microsoft.Extensions.Options;
-using Intwenty.Data.Dto;
 using System;
 using System.Text.Json;
 using System.Collections.Generic;
-using Intwenty.Data;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;

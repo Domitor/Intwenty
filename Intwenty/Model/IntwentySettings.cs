@@ -112,6 +112,10 @@ namespace Intwenty.Model
         public string GoogleClientSecret { get; set; }
 
 
+        //API
+        public bool UseIntwentyAPI { get; set; }
+
+
 
         /// <summary>
         /// TEST DB CONNECTIONS

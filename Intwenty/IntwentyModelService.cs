@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Intwenty.Data.Entity;
+using Intwenty.Entity;
 using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
-using Intwenty.Data;
 using Microsoft.Extensions.Options;
-using Intwenty.Data.Dto;
+using Intwenty.Model.Dto;
 using Intwenty.Areas.Identity.Models;
 using Microsoft.Extensions.Localization;
-using Intwenty.Data.Localization;
+using Intwenty.Localization;
 using Intwenty.Interface;
 using Microsoft.AspNetCore.Identity;
 using Intwenty.DataClient;
@@ -467,13 +466,16 @@ namespace Intwenty
         {
 
             List<EndpointModelItem> res;
-            var appmodels = GetApplicationModels();
-            var dataviews = GetDataViewModels();
+           
 
             if (ModelCache.TryGetValue(EndpointsCacheKey, out res))
             {
                 return res;
             }
+
+            var appmodels = GetAppModels();
+            var dbmodels = GetDatabaseModels();
+            var dataviews = GetDataViewModels();
 
             Client.Open();
             res = Client.GetEntities<EndpointItem>().Select(p => new EndpointModelItem(p)).ToList();
@@ -495,13 +497,13 @@ namespace Intwenty
                     && !string.IsNullOrEmpty(ep.AppMetaCode) && !string.IsNullOrEmpty(ep.DataMetaCode))
                 {
                    
-                    var appmodel = appmodels.Find(p => p.Application.MetaCode == ep.AppMetaCode);
-                    if (appmodel != null && ep.DataMetaCode == appmodel.Application.MetaCode)
-                        ep.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = appmodel.Application.MetaCode, Id = 0, DbName = appmodel.Application.DbName, TableName = appmodel.Application.DbName, MetaCode = appmodel.Application.MetaCode, ParentMetaCode = "ROOT", Title = appmodel.Application.DbName, IsFrameworkItem = true }; ;
+                    var appmodel = appmodels.Find(p => p.MetaCode == ep.AppMetaCode);
+                    if (appmodel != null && ep.DataMetaCode == appmodel.MetaCode)
+                        ep.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = appmodel.MetaCode, Id = 0, DbName = appmodel.DbName, TableName = appmodel.DbName, MetaCode = appmodel.MetaCode, ParentMetaCode = "ROOT", Title = appmodel.DbName, IsFrameworkItem = true }; ;
 
                     if (ep.DataTableInfo == null && appmodel != null) 
                     {
-                        var table = appmodel.DataStructure.Find(p => p.IsMetaTypeDataTable && p.MetaCode == ep.DataMetaCode);
+                        var table = dbmodels.Find(p => p.IsMetaTypeDataTable && p.MetaCode == ep.DataMetaCode);
                         if (table != null)
                             ep.DataTableInfo = table;
                     }

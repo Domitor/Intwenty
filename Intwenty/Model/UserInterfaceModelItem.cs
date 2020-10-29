@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.Entity;
+﻿using Intwenty.Entity;
 using Intwenty.Interface;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +53,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public UserInterfaceModelItem(Data.Entity.UserInterfaceItem entity)
+        public UserInterfaceModelItem(UserInterfaceItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;

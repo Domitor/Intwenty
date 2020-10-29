@@ -1,4 +1,4 @@
-﻿@model Intwenty.Data.Dto.OperationResult
+﻿@model Intwenty.Model.Dto.OperationResult
 
 @{
     ViewData["Title"] = "Validate meta model";
@@ -30,11 +30,11 @@
                 {
 
                     <tr>
-                        @if (x.Code == Intwenty.Data.Dto.MessageCode.SYSTEMERROR)
+                        @if (x.Code == Intwenty.Model.Dto.MessageCode.SYSTEMERROR)
                         {
                             <td style="color:red">@x.Code</td>
                         }
-                        else if (x.Code ==  Intwenty.Data.Dto.MessageCode.WARNING)
+                        else if (x.Code ==  Intwenty.Model.Dto.MessageCode.WARNING)
                         {
                             <td style="color:orange">@x.Code</td>
                         }

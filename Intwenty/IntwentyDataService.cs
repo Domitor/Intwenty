@@ -1,12 +1,11 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
-using Intwenty.Data;
 using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
-using Intwenty.Data.Dto;
-using Intwenty.Data.Entity;
-using Intwenty.Data.Helpers;
+using Intwenty.Model.Dto;
+using Intwenty.Entity;
+using Intwenty.Helpers;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;

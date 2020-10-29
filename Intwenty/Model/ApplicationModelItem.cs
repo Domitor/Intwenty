@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.Entity;
+﻿using Intwenty.Entity;
 using Intwenty.Interface;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public ApplicationModelItem(Data.Entity.ApplicationItem entity)
+        public ApplicationModelItem(ApplicationItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;

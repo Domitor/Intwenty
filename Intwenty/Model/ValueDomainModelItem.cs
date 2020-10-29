@@ -1,4 +1,4 @@
-﻿using Intwenty.Data.Entity;
+﻿using Intwenty.Entity;
 using Intwenty.Interface;
 using System.Collections.Generic;
 

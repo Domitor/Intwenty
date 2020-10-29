@@ -3,7 +3,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Intwenty.Data.Seed;
+using Intwenty.Seed;
 using Microsoft.Extensions.Hosting;
 using Intwenty;
 using Microsoft.Extensions.Configuration;

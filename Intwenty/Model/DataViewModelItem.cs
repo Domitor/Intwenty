@@ -1,5 +1,5 @@
 ﻿
-using Intwenty.Data.Entity;
+using Intwenty.Entity;
 using Intwenty.DataClient;
 using Intwenty.Interface;
 using System.Collections.Generic;

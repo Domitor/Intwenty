@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Intwenty.Model.DesignerVM;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
-using Intwenty.Data.Dto;
-using Intwenty.Data.Entity;
+using Intwenty.Model.Dto;
+using Intwenty.Entity;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
-using Intwenty.Data.Helpers;
+using Intwenty.Helpers;
 using Intwenty.Interface;
 
 namespace Intwenty.Controllers

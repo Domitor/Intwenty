@@ -1,5 +1,5 @@
-﻿using Intwenty.Data.Dto;
-using Intwenty.Data.Entity;
+﻿using Intwenty.Model.Dto;
+using Intwenty.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using System;

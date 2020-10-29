@@ -1,6 +1,6 @@
 ﻿
 using Intwenty;
-using Intwenty.Data.Entity;
+using Intwenty.Entity;
 using Microsoft.AspNetCore.Mvc;
 
 

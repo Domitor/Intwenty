@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs.Models;
 using Intwenty;
-using Intwenty.Data.Dto;
-using Intwenty.Data;
+using Intwenty.Model.Dto;
 using Intwenty.Interface;
 using Intwenty.Model;
 using System;
@@ -13,6 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 
 namespace IntwentyDemo.Data
 {

@@ -14,7 +14,7 @@ using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Data;
-using Intwenty.Data.Dto;
+using Intwenty.Model.Dto;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
