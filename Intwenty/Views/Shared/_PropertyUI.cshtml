@@ -63,7 +63,7 @@ Requires an item with properties, which name is passed as the model
         </thead>
         <tbody>
             <tr v-for="property in @(Model).propertyList">
-                <td>{{property.displayName}}</td>
+                <td>{{property.codeName}}</td>
                 <td>{{property.displayValue}}</td>
                 <td><span v-on:click="deleteProperty(property,@(Model))" class="fa fa-trash" style="cursor:pointer"></span></td>
             </tr>

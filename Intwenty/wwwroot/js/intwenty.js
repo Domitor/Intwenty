@@ -77,6 +77,10 @@ Vue.prototype.addProperty = function (modelitem) {
         modelitem.currentProperty.displayValue = "True";
     }
 
+    if (modelitem.currentProperty.isStringType || modelitem.currentProperty.isNumericType)
+        modelitem.currentProperty.displayValue = modelitem.currentProperty.codeValue;
+
+
     var t = modelitem.propertyList.firstOrDefault({ codeName: modelitem.currentProperty.codeName });
     if (t != null)
         return;
