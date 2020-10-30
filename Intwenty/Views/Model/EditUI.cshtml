@@ -145,19 +145,19 @@
 
                                                             <div v-if="input.metaType==='TEXTBOX'">
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control form-control-sm" disabled />
+                                                                    <input type="text" class="form-control form-control-sm" placeholder="Input control for text..." disabled />
                                                                 </div>
                                                             </div>
 
                                                             <div v-if="input.metaType==='NUMBOX'">
                                                                 <div class="form-group">
-                                                                    <input type="number" class="form-control form-control-sm" disabled />
+                                                                    <input type="number" class="form-control form-control-sm" placeholder="Input control for numbers..." disabled />
                                                                 </div>
                                                             </div>
 
                                                             <div v-if="input.metaType==='EMAILBOX'">
                                                                 <div class="form-group">
-                                                                    <input type="email" class="form-control form-control-sm" disabled />
+                                                                    <input type="email" class="form-control form-control-sm" placeholder="Input control for emails.." disabled />
                                                                 </div>
                                                             </div>
 
@@ -172,6 +172,18 @@
                                                                 <div class="form-group">
                                                                     <textarea class="form-control form-control-sm" rows="5" cols="50" disabled></textarea>
                                                                 </div>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='LABEL'">
+                                                                <h3>A label</h3>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='TEXTBLOCK'">
+                                                                <p>A block of text...bla bla bla bla bla some more blaha bla bla etc very important text.</p>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='STATICHTML'">
+                                                                {{input.rawHTML}}
                                                             </div>
 
                                                             <div v-if="input.metaType==='DATEPICKER'">
@@ -243,6 +255,9 @@
                                                                                         <input type="text" class="form-control form-control-sm" disabled />
                                                                                     </div>
 
+                                                                                </div>
+                                                                                <div v-if="tcol.metaType==='EDITGRID_STATICHTML'">
+                                                                                    {{tcol.rawHTML}}
                                                                                 </div>
                                                                             </td>
                                                                         </tr>
@@ -360,9 +375,15 @@
                         </nav>
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="nav-bindings" role="tabpanel" aria-labelledby="nav-bindings-tab">
-                                <div class="form-group">
+
+                                <div class="form-group" v-if="showSettingTitle">
                                     <label class="control-label">Title</label>
                                     <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
+                                </div>
+
+                                <div class="form-group" v-if="showSettingRawHTML">
+                                    <label class="control-label">HTML</label>
+                                    <textarea type="text" class="form-control form-control-sm" rows="10" cols="200" v-model="active_setting_input.rawHTML"></textarea>
                                 </div>
 
                                 <div class="form-group" v-if="showSettingDbTable">
@@ -420,12 +441,9 @@
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
                                         <div class="dropdown-menu dropdown-menu-lg-right">
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_TEXTBOX')">Textbox</a>
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_NUMBOX')">Numeric</a>
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_DATEPICKER')">Datepicker</a>
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_CHECKBOX')">Checkbox</a>
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_COMBOBOX')">Combobox</a>
-                                            <a class="dropdown-item" href="#" v-on:click="addEditGridColumn('EDITGRID_LOOKUP')">Lookup</a>
+                                            <span v-for="gridcoltype in model.uiGridControls">
+                                                <a class="dropdown-item" href="#" v-on:click="addEditGridColumn(gridcoltype.code)">{{gridcoltype.title}}</a>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -773,9 +791,29 @@
             },
             computed:
             {
+                showSettingTitle: function ()
+                {
+                    if (this.active_setting_input.metaType == "EDITGRID_STATICHTML" ||
+                        this.active_setting_input.metaType == "STATICHTML" ||
+                        this.active_setting_input.metaType == "IMAGE" ||
+                        this.active_setting_input.metaType == "TEXTBLOCK" ||
+                        this.active_setting_input.metaType == "LABEL")
+                        return false;
+
+                    return true;
+                },
+                showSettingRawHTML: function () {
+                    if (this.active_setting_input.metaType == "EDITGRID_STATICHTML" ||
+                        this.active_setting_input.metaType == "STATICHTML")
+                        return true;
+
+                    return false;
+                },
                 showSettingDbColumn: function ()
                 {
-                     if (this.active_setting_input.metaType == "EDITGRID")
+                    if (this.active_setting_input.metaType == "EDITGRID" || 
+                        this.active_setting_input.metaType == "STATICHTML" ||
+                        this.active_setting_input.metaType == "EDITGRID_STATICHTML")
                         return false;
 
                     return true;
