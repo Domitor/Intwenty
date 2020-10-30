@@ -15,7 +15,10 @@
         <a class="dropdown-item" asp-controller="Model" asp-action="ImportModel"><span class="fa fa-cogs"></span> Import Model</a>
         <a class="dropdown-item" asp-controller="ModelAPI" asp-action="ExportData"><span class="fa fa-cogs"></span> Export Data</a>
         <a class="dropdown-item" asp-controller="Model" asp-action="ImportData"><span class="fa fa-cogs"></span> Import Data</a>
-        <a class="dropdown-item" asp-controller="Model" asp-action="EditEndpoints"><span class="fas fa-handshake"></span> API Management</a>
-        <a class="dropdown-item" href="~/swagger/index.html" target="_blank"><span class="fas fa-handshake"></span> API Docs and Testing</a>
+        @if (Settings.Value.UseIntwentyAPI)
+        {
+            <a class="dropdown-item" asp-controller="Model" asp-action="EditEndpoints"><span class="fas fa-handshake"></span> API Management</a>
+            <a class="dropdown-item" href="~/swagger/index.html" target="_blank"><span class="fas fa-handshake"></span> API Docs and Testing</a>
+        }
     </div>
 </li>

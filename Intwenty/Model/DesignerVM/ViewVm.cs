@@ -74,7 +74,7 @@ namespace Intwenty.Model.DesignerVM
                             if (input.IsRemoved)
                                 dto.AddUpdateProperty("REMOVED", "TRUE");
 
-                            if (dto.IsMetaTypeCheckBox || dto.IsMetaTypeComboBox || dto.IsMetaTypeDatePicker || dto.IsMetaTypeNumBox || dto.IsMetaTypeTextArea || dto.IsMetaTypeTextBox || dto.IsMetaTypeEmailBox)
+                            if (dto.IsUIBindingType)
                             {
                                 if (!string.IsNullOrEmpty(input.ColumnName))
                                 {
@@ -91,7 +91,7 @@ namespace Intwenty.Model.DesignerVM
                                 }
                             }
 
-                            if (dto.IsMetaTypeLookUp)
+                            if (dto.IsUIComplexBindingType)
                             {
                                 if (!string.IsNullOrEmpty(input.Domain))
                                 {
@@ -126,6 +126,12 @@ namespace Intwenty.Model.DesignerVM
                                 }
                             }
 
+                            if (dto.IsMetaTypeStaticHTML)
+                            {
+                                dto.RawHTML = input.RawHTML;
+
+                            }
+
                             if (dto.IsMetaTypeEditGrid)
                             {
                                 DatabaseModelItem dt = null;
@@ -152,7 +158,7 @@ namespace Intwenty.Model.DesignerVM
                                     if (tcol.IsRemoved || input.IsRemoved)
                                         column.AddUpdateProperty("REMOVED", "TRUE");
 
-                                    if (column.IsMetaTypeEditGridCheckBox || column.IsMetaTypeEditGridComboBox || column.IsMetaTypeEditGridDatePicker || column.IsMetaTypeEditGridNumBox || column.IsMetaTypeEditGridTextBox || column.IsMetaTypeEditGridLookUp)
+                                    if (column.IsEditGridUIBindingType || column.IsEditGridUIComplexBindingType)
                                     {
                                         if (dt != null)
                                         {
@@ -187,6 +193,10 @@ namespace Intwenty.Model.DesignerVM
                                                     column.ViewMetaCode = dmc.MetaCode;
                                             }
                                         }
+                                    }
+                                    else if (column.IsMetaTypeEditGridStaticHTML)
+                                    {
+                                        column.RawHTML = tcol.RawHTML;
                                     }
                                 }
 
@@ -284,12 +294,50 @@ namespace Intwenty.Model.DesignerVM
             res.Id = viewitem.Id;
             res.Title = viewitem.Title;
 
+            SetCollections(res);
+
             if (!viewitem.IsMetaTypeListView)
                 BuildVm(res, viewitem, app);
             else
                 BuildListViewVm(res, viewitem, app);
 
             return res;
+        }
+
+        private static void SetCollections(ViewVm res)
+        {
+            res.PropertyCollection = IntwentyRegistry.IntwentyProperties;
+            res.UIControls = new List<IntwentyMetaType>();
+            res.GridUIControls = new List<IntwentyMetaType>();
+
+            var temp = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.ModelCode == "UIMODEL").ToList();
+
+            res.UIControls.Add(temp.Find(p=> p.Code == UserInterfaceModelItem.MetaTypeCheckBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeComboBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeDatePicker));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEmailBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeImage));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeImageBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeLabel));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeLookUp));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeNumBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypePasswordBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeStaticHTML));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextArea));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextBlock));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGrid));
+
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridCheckBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridComboBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridDatePicker));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridEmailBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridLookUp));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridNumBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridStaticHTML));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridTextBox));
+
+
         }
 
         public static void BuildVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
@@ -338,7 +386,7 @@ namespace Intwenty.Model.DesignerVM
 
 
                                 //SIMPLE INPUTS
-                                if (uic.IsMetaTypeCheckBox || uic.IsMetaTypeComboBox || uic.IsMetaTypeDatePicker || uic.IsMetaTypeNumBox || uic.IsMetaTypeTextArea || uic.IsMetaTypeTextBox || uic.IsMetaTypeEmailBox)
+                                if (uic.IsUIBindingType)
                                 {
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName, Properties = uic.Properties };
                                     input.BuildPropertyList();
@@ -350,8 +398,17 @@ namespace Intwenty.Model.DesignerVM
                                     lr.UserInputs.Add(input);
                                 }
 
+                                //Static
+                                if (uic.IsMetaTypeStaticHTML)
+                                {
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName, Properties = uic.Properties };
+                                    input.BuildPropertyList();
+                                    input.RawHTML = uic.RawHTML;
+                                    lr.UserInputs.Add(input);
+                                }
+
                                 //LOOK UP
-                                if (uic.IsMetaTypeLookUp)
+                                if (uic.IsUIComplexBindingType)
                                 {
 
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName, Properties = uic.Properties };
@@ -407,6 +464,11 @@ namespace Intwenty.Model.DesignerVM
                                                 child.ViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
 
                                         }
+
+                                        if (gridcol.IsMetaTypeEditGridStaticHTML)
+                                        {
+                                            child.RawHTML = gridcol.RawHTML;
+                                        }
                                     }
 
                                     lr.UserInputs.Add(input);
@@ -446,23 +508,18 @@ namespace Intwenty.Model.DesignerVM
     {
 
         public int ApplicationId { get; set; }
-
         public string ApplicationTitle { get; set; }
-
         public string ViewType { get; set;  }
-
         public string DesignerTitle{ get; set; }
-
         public string Title { get; set; }
-
         public string MetaType { get; set; }
-
         public string MetaCode { get; set; }
-
+        public bool ShowComponents { get; set; }
         public List<Section> Sections { get; set; }
         public List<IntwentyProperty> PropertyCollection { get; set; }
-
         public List<ListViewFieldVm> Fields { get; set; }
+        public List<IntwentyMetaType> UIControls { get; set; }
+        public List<IntwentyMetaType> GridUIControls { get; set; }
 
         public ViewVm()
         {
@@ -559,7 +616,7 @@ namespace Intwenty.Model.DesignerVM
         public string MetaType { get; set; }
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
-      
+        public string RawHTML { get; set; }
         public string Domain { get; set; }
         public bool IsRemoved { get; set; }
 
@@ -580,6 +637,7 @@ namespace Intwenty.Model.DesignerVM
             ViewColumnName = "";
             ViewColumnName2 = "";
             Domain = "";
+            RawHTML = "";
             Children = new List<UserInput>();
 
         }

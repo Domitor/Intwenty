@@ -6,6 +6,8 @@
 @using Intwenty.Localization
 @using Microsoft.Extensions.Localization
 @using Intwenty.Interface
+@using Microsoft.Extensions.Options;
 @inject IViewLocalizer Localizer
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @inject Intwenty.Interface.IIntwentyModelService ModelRepository
+@inject IOptions<IntwentySettings> Settings

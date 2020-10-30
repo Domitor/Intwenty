@@ -52,6 +52,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePanel, Title = "Panel" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePasswordBox, Title = "Password Box" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePresentationView, Title = "Presentation View" , ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePresentationListView, Title = "Presentation List View", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeSection, Title = "Section" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeStaticHTML, Title = "HTML" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextArea, Title = "Text Area" , ModelCode = "UIMODEL" });

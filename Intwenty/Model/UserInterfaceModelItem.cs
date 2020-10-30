@@ -17,6 +17,7 @@ namespace Intwenty.Model
         public static readonly string MetaTypeCreateView = "CREATEVIEW";
         public static readonly string MetaTypeUpdateView = "UPDATEVIEW";
         public static readonly string MetaTypePresentationView = "PRESENTATIONVIEW";
+        public static readonly string MetaTypePresentationListView = "PRESENTATIONLISTVIEW";
         public static readonly string MetaTypeEmailBox = "EMAILBOX";
         public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
@@ -71,6 +72,7 @@ namespace Intwenty.Model
             ViewMetaCode2 = entity.ViewMetaCode2;
             Domain = entity.Domain;
             Properties = entity.Properties;
+            RawHTML = entity.RawHTML;
             SetEmptyStrings();
         }
 
@@ -87,6 +89,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
@@ -110,6 +113,8 @@ namespace Intwenty.Model
 
         public string Domain { get; set; }
 
+        public string RawHTML { get; set; }
+
         public DatabaseModelItem DataTableInfo { get; set; }
 
         public DatabaseModelItem DataColumnInfo { get; set; }
@@ -125,42 +130,6 @@ namespace Intwenty.Model
         public override string ModelCode
         {
             get { return "UIMODEL"; }
-        }
-
-        public static List<IntwentyMetaType> GetAvailableMetaTypes()
-        {
-            var t = new List<IntwentyMetaType>();
-            t.Add(new IntwentyMetaType() { Code = MetaTypeCheckBox, Title = "Checkbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeComboBox, Title = "Combobox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeCreateView, Title = "Create View" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeDatePicker, Title = "Datepicker" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGrid, Title = "Grid" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridCheckBox, Title = "Grid Checkbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridComboBox, Title = "Grid Combobox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridDatePicker, Title = "Grid Datepicker" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridEmailBox, Title = "Grid Emailbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridLookUp, Title = "Grid Look Up" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridNumBox, Title = "Grid Numbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridStaticHTML, Title = "Grid HTML" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEditGridTextBox, Title = "Grid Textbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeEmailBox, Title = "Emailbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeImage, Title = "Image" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeImageBox, Title = "Image Upload" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeLabel, Title = "Label" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeListView, Title = "List View" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeListViewColumn, Title = "List View Column" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeLookUp, Title = "Look Up" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeNumBox, Title = "Numbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypePanel, Title = "Panel" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypePasswordBox, Title = "Password Box" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypePresentationView, Title = "Presentation View" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeSection, Title = "Section" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeStaticHTML, Title = "HTML" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeTextArea, Title = "Text Area" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeTextBlock, Title = "Text Block" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeTextBox, Title = "Textbox" });
-            t.Add(new IntwentyMetaType() { Code = MetaTypeUpdateView, Title = "Update View" });
-            return t;
         }
 
 
@@ -192,6 +161,63 @@ namespace Intwenty.Model
                 return true;
             }
         }
+
+        public bool IsUIBindingType
+        {
+            get
+            {
+                return IsMetaTypeCheckBox || IsMetaTypeComboBox || IsMetaTypeDatePicker ||
+                       IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
+                       IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
+                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox;
+
+            }
+
+        }
+
+        public bool IsUIComplexBindingType
+        {
+            get
+            {
+                return IsMetaTypeLookUp;
+
+            }
+
+        }
+
+        public bool IsEditGridUIBindingType
+        {
+            get
+            {
+                return IsMetaTypeEditGridCheckBox || IsMetaTypeEditGridComboBox || IsMetaTypeEditGridDatePicker ||
+                       IsMetaTypeEditGridEmailBox || IsMetaTypeEditGridNumBox || IsMetaTypeEditGridTextBox;
+
+            }
+
+        }
+
+        public bool IsEditGridUIComplexBindingType
+        {
+            get
+            {
+                return IsMetaTypeEditGridLookUp;
+
+            }
+
+        }
+
+        public bool IsUIViewType
+        {
+            get
+            {
+                return IsMetaTypeCreateView || IsMetaTypeUpdateView || IsMetaTypeListView ||
+                       IsMetaTypePresentationView || IsMetaTypePresentationListView;
+
+            }
+
+        }
+
+      
 
 
         public bool IsDataTableConnected
@@ -279,6 +305,11 @@ namespace Intwenty.Model
         public bool IsMetaTypePresentationView
         {
             get { return MetaType == MetaTypePresentationView; }
+        }
+
+        public bool IsMetaTypePresentationListView
+        {
+            get { return MetaType == MetaTypePresentationListView; }
         }
 
         public bool IsMetaTypeStaticHTML

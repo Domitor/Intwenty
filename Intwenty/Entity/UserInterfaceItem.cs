@@ -47,6 +47,8 @@ namespace Intwenty.Entity
         public string Domain { get; set; }
 
         public string Properties { get; set; }
+
+        public string RawHTML { get; set; }
     }
 
 

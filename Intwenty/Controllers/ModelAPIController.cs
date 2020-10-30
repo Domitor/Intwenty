@@ -282,7 +282,6 @@ namespace Intwenty.Controllers
         {
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             var model = UIModelCreator.GetUIVm(t, viewtype);
-            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
             return new JsonResult(model);
 
         }
