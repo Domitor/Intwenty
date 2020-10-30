@@ -1460,8 +1460,8 @@ namespace Intwenty
                     }
 
 
-                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeEditListViewColumn))
-                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
+                    if (ui.IsMetaTypeEditListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeEditListViewColumn))
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITLISTVIEW in application {1} has no children with [MetaType]=EDITLISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
                     if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumnConnected)
@@ -1496,9 +1496,9 @@ namespace Intwenty
 
                 }
 
-                if (a.UIStructure.Count(p => p.IsMetaTypeListView) > 1)
+                if (a.UIStructure.Count(p => p.IsMetaTypeEditListView) > 1)
                 {
-                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has multiple LISTVIEW ui objects, which is not allowd", a.Application.Title));
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has multiple EDITLISTVIEW ui objects, which is not allowd", a.Application.Title));
                 }
 
                 foreach (var db in a.DataStructure)

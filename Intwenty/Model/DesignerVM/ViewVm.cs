@@ -261,25 +261,29 @@ namespace Intwenty.Model.DesignerVM
                 res.DesignerTitle = "Create View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeCreateView;
             }
-            if (viewtype.ToUpper() == "EDVIEW")
+            else if (viewtype.ToUpper() == "EDVIEW")
             {
                 res.DesignerTitle = "Edit View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeEditView;
             }
-            if (viewtype.ToUpper() == "EDLIVIEW")
+            else if (viewtype.ToUpper() == "EDLIVIEW")
             {
                 res.DesignerTitle = "Edit List View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeEditListView;
             }
-            if (viewtype.ToUpper() == "DEVIEW")
+            else if (viewtype.ToUpper() == "DEVIEW")
             {
                 res.DesignerTitle = "Detail View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeDetailView;
             }
-            if (viewtype.ToUpper() == "PRLIVIEW")
+            else if (viewtype.ToUpper() == "LIVIEW")
             {
                 res.DesignerTitle = "List View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeListView;
+            }
+            else
+            {
+                throw new InvalidOperationException("invalid view type in UIModelCreater.GetUIVm");
             }
 
             SetCollections(res);
@@ -293,10 +297,10 @@ namespace Intwenty.Model.DesignerVM
             res.Id = viewitem.Id;
             res.Title = viewitem.Title;
 
-            if (!viewitem.IsMetaTypeListView)
+            if (!viewitem.IsMetaTypeEditListView)
                 BuildVm(res, viewitem, app);
             else
-                BuildListViewVm(res, viewitem, app);
+                BuildEditListViewVm(res, viewitem, app);
 
             return res;
         }
@@ -480,7 +484,7 @@ namespace Intwenty.Model.DesignerVM
 
         }
 
-        public static void BuildListViewVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
+        public static void BuildEditListViewVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
         {
 
             foreach (var f in app.UIStructure)
