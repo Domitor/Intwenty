@@ -4,18 +4,18 @@
 @{
     var title = "";
     var view = Model.UIStructure.Find(p => p.IsMetaTypeEditView);
-    if (view == null)
+    if (view != null)
+    {
+        title = view.Title;
+    }
+    else
     {
         view = Model.UIStructure.Find(p => p.IsMetaTypeCreateView);
         if (view == null)
         {
-            <h1>There's no 'presentation' view model defined for this application yet.</h1>
+            <h3>There's no 'edit' view model defined for this application yet.</h3>
         }
-
-    }
-    else
-    {
-        title = view.Title;
+       
     }
 
     ViewData["Title"] = title;

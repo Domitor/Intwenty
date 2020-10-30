@@ -3,18 +3,19 @@
 @{
     var title = "";
     var view = Model.UIStructure.Find(p => p.IsMetaTypeCreateView);
-    if (view == null)
+    if (view != null)
     {
-        <h1>There's no 'create' view model defined for this application yet.</h1>
+        title = view.Title;
+
     }
     else
     {
-        title = view.Title;
+        <h3>There's no 'create' view model defined for this application yet.</h3>
     }
-    
+
     ViewData["Title"] = title;
 
-    
+
 
 }
 

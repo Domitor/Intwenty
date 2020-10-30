@@ -4,15 +4,14 @@
 @{
     var title = "";
     var view = Model.UIStructure.Find(p => p.IsMetaTypeDetailView);
-    if (view == null)
+    if (view != null)
     {
-       
-        <h1>There's no 'detail' view model defined for this application yet.</h1>
-
+        title = view.Title;
+        <h3>TODO: DETAIL UI (DETAILVIEW)</h3>
     }
     else
     {
-        title = view.Title;
+        <h3>There's no 'detail' view model defined for this application yet.</h3>
     }
 
     ViewData["Title"] = title;
@@ -25,7 +24,7 @@
 
 <div id="app">
 
-    <h1>TODO: DETAIL UI (DETAILVIEW)</h1>
+
 
 
 </div>
@@ -35,7 +34,7 @@
 
 
     <script>
-      
+
 
     </script>
 

@@ -179,36 +179,35 @@
                                                             </div>
 
                                                             <div v-if="input.metaType==='LABEL'">
-                                                                <h3>{{input.columnName}}</h3>
+                                                                <p>Label for: {{input.columnName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='TEXTBLOCK'">
-                                                                <p>A block of text...bla bla bla bla bla some more blaha bla bla etc very important text.</p>
+                                                                <p>Text block for: {{input.columnName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='STATICHTML'">
-                                                                {{input.rawHTML}}
+                                                                <p>Static HTML</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='DATEPICKER'">
                                                                 <div class="form-group">
-                                                                    <input type="date" class="form-control form-control-sm" />
+                                                                    <input type="text" class="form-control form-control-sm" placeholder="Inpu control for date, example: 1973-04-17" disabled />
                                                                 </div>
                                                             </div>
 
                                                             <div v-if="input.metaType==='IMAGE'">
-                                                                <i class="fas fa-image fa-3x"></i> An image where the url is stored in a database column
+                                                                <i class="fas fa-image"></i> An image where the url is stored in a database column
                                                             </div>
 
                                                             <div v-if="input.metaType==='IMAGEBOX'">
-                                                                <div style="padding:10px; border: thin solid  lightgray">
 
-                                                                    <div class="file btn btn-sm btn-primary">
-                                                                        <span class="fas fa-cloud-upload-alt"></span> Upload
-                                                                        <input type="file" class="uploadInput" />
-                                                                    </div>
-
+                                                                <div class="file btn btn-sm btn-primary">
+                                                                    <span class="fas fa-cloud-upload-alt"></span> Upload
+                                                                    <input type="file" class="uploadInput" />
                                                                 </div>
+                                                                <i class="fas fa-image"></i>
+
                                                             </div>
 
                                                             <div v-if="input.metaType==='COMBOBOX'">
