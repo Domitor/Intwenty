@@ -1,0 +1,43 @@
+﻿@model Intwenty.Model.ApplicationModel
+
+@await Html.PartialAsync("_Modals")
+
+<div id="app">
+    <div>
+
+        <br />
+
+
+        @{
+            var title = "";
+            var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+            if (lv != null)
+            {
+                title = lv.Title;
+            }
+            else
+            {
+                <h1><span class="label label-warning btn-lg">There's no list view model defined for this application yet.</span></h1>
+                return;
+
+            }
+        }
+
+
+
+    </div>
+</div>
+
+@section Scripts
+{
+    
+    <script>
+       
+        <h1>TODO: Index UI (LISTVIEW)</h1>
+
+
+    </script>
+
+
+
+}

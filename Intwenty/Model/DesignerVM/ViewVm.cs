@@ -225,7 +225,7 @@ namespace Intwenty.Model.DesignerVM
 
             foreach (var f in model.Fields)
             {
-                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListViewColumn) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
+                var lf = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeEditListViewColumn) { Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode, Id = f.Id, AppMetaCode = app.Application.MetaCode };
                 if (string.IsNullOrEmpty(lf.MetaCode))
                     lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
 
@@ -261,33 +261,30 @@ namespace Intwenty.Model.DesignerVM
                 res.DesignerTitle = "Create View";
                 res.MetaType = UserInterfaceModelItem.MetaTypeCreateView;
             }
-            if (viewtype.ToUpper() == "UPVIEW")
+            if (viewtype.ToUpper() == "EDVIEW")
             {
-                res.DesignerTitle = "Update View";
-                res.MetaType = UserInterfaceModelItem.MetaTypeUpdateView;
+                res.DesignerTitle = "Edit View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeEditView;
             }
-            if (viewtype.ToUpper() == "LIVIEW")
+            if (viewtype.ToUpper() == "EDLIVIEW")
             {
-                res.DesignerTitle = "List View";
-                res.MetaType = UserInterfaceModelItem.MetaTypeListView;
+                res.DesignerTitle = "Edit List View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeEditListView;
             }
-            if (viewtype.ToUpper() == "PRVIEW")
+            if (viewtype.ToUpper() == "DEVIEW")
             {
-                res.DesignerTitle = "Presentation View";
-                res.MetaType = UserInterfaceModelItem.MetaTypePresentationView;
+                res.DesignerTitle = "Detail View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeDetailView;
             }
             if (viewtype.ToUpper() == "PRLIVIEW")
             {
-                res.DesignerTitle = "Presentation List View";
-                res.MetaType = UserInterfaceModelItem.MetaTypePresentationView;
+                res.DesignerTitle = "List View";
+                res.MetaType = UserInterfaceModelItem.MetaTypeListView;
             }
 
             SetCollections(res);
 
             var viewitem = app.UIStructure.Find(p => p.MetaType == res.MetaType);
-            if (viewitem == null && res.MetaType == UserInterfaceModelItem.MetaTypeUpdateView)
-                viewitem = app.UIStructure.Find(p => p.IsMetaTypeCreateView);
-
             if (viewitem == null)
                 return res;
 
@@ -411,7 +408,7 @@ namespace Intwenty.Model.DesignerVM
                                 if (uic.IsUIComplexBindingType)
                                 {
 
-                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.ViewName, Properties = uic.Properties };
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DataViewName, Properties = uic.Properties };
                                     input.BuildPropertyList();
 
                                     //TABLE ND COLUMN(S)
@@ -457,7 +454,7 @@ namespace Intwenty.Model.DesignerVM
 
                                         if (gridcol.IsMetaTypeEditGridLookUp)
                                         {
-                                            child.Domain = gridcol.ViewName;
+                                            child.Domain = gridcol.DataViewName;
 
                                             //VIEW CONNECTION
                                             if (gridcol.IsDataViewColumnConnected)
@@ -488,7 +485,7 @@ namespace Intwenty.Model.DesignerVM
 
             foreach (var f in app.UIStructure)
             {
-                if (f.IsMetaTypeListViewColumn && f.ParentMetaCode == viewitem.MetaCode)
+                if (f.IsMetaTypeEditListViewColumn && f.ParentMetaCode == viewitem.MetaCode)
                 {
                     if (f.IsDataColumnConnected)
                         res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumnInfo.DbName });

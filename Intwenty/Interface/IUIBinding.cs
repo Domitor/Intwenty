@@ -23,7 +23,7 @@ namespace Intwenty.Interface
     public interface IUIComplexBinding : IUIBinding
     {
 
-        string ViewName { get; }
+        string DataViewName { get; }
 
         string DomainName { get; }
 

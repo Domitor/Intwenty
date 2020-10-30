@@ -1,0 +1,43 @@
+﻿@model Intwenty.Model.ApplicationModel
+
+
+@{
+    var title = "";
+    var view = Model.UIStructure.Find(p => p.IsMetaTypeDetailView);
+    if (view == null)
+    {
+       
+        <h1>There's no 'detail' view model defined for this application yet.</h1>
+
+    }
+    else
+    {
+        title = view.Title;
+    }
+
+    ViewData["Title"] = title;
+
+}
+
+
+
+@await Html.PartialAsync("_Modals")
+
+<div id="app">
+
+    <h1>TODO: DETAIL UI (DETAILVIEW)</h1>
+
+
+</div>
+
+@section Scripts
+{
+
+
+    <script>
+      
+
+    </script>
+
+
+}

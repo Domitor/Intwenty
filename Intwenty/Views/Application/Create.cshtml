@@ -1,13 +1,20 @@
 ﻿@model Intwenty.Model.ApplicationModel
 
 @{
-    ViewData["Title"] = "Create New " + Model.Application.Title;
-
-    if (!Model.UIStructure.Exists(p => p.IsMetaTypeSection))
+    var title = "";
+    var view = Model.UIStructure.Find(p => p.IsMetaTypeCreateView);
+    if (view == null)
     {
-        <h1>There's no UI model defined for this application yet.</h1>
-        return;
+        <h1>There's no 'create' view model defined for this application yet.</h1>
     }
+    else
+    {
+        title = view.Title;
+    }
+    
+    ViewData["Title"] = title;
+
+    
 
 }
 
@@ -18,11 +25,11 @@
     <br />
 
     <div class="card">
-        <div class="card-header"><h2>@Localizer["Create new"] @Model.Application.Title</h2></div>
+        <div class="card-header"><h2>@title</h2></div>
         <div class="card-body">
             <ul class="nav">
                 <li class="nav-item">
-                    <a asp-action="GetList" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                    <a asp-action="EditList" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
                 </li>
                 <li class="nav-item">
                     <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Localizer["Save"]</button>

@@ -46,7 +46,7 @@
     <br />
     <br />
    
-    <div id="uidesigner" v-if="model.viewType!='LIVIEW'">
+    <div id="uidesigner" v-if="model.viewType!='EDLIVIEW'">
 
 
         <div class="row">
@@ -179,7 +179,7 @@
                                                             </div>
 
                                                             <div v-if="input.metaType==='LABEL'">
-                                                                <h3>A label</h3>
+                                                                <h3>{{input.columnName}}</h3>
                                                             </div>
 
                                                             <div v-if="input.metaType==='TEXTBLOCK'">
@@ -196,10 +196,25 @@
                                                                 </div>
                                                             </div>
 
+                                                            <div v-if="input.metaType==='IMAGE'">
+                                                                <i class="fas fa-image fa-3x"></i> An image where the url is stored in a database column
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='IMAGEBOX'">
+                                                                <div style="padding:10px; border: thin solid  lightgray">
+
+                                                                    <div class="file btn btn-sm btn-primary">
+                                                                        <span class="fas fa-cloud-upload-alt"></span> Upload
+                                                                        <input type="file" class="uploadInput" />
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+
                                                             <div v-if="input.metaType==='COMBOBOX'">
                                                                 <div class="form-group">
                                                                     <select class="form-control form-control-sm" disabled>
-                                                                        <option>Example 1</option>
+                                                                        <option>Items from a value domain..</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -213,62 +228,63 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div v-if="input.metaType==='EDITGRID'">
-                                                                <table class="table table-bordered">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
-                                                                                <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px; float:right; cursor:pointer" title="Column settings"></span> {{tcol.title}}
-                                                                            </td>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
-                                                                                <div v-if="tcol.metaType==='EDITGRID_TEXTBOX'">
-                                                                                    <div class="form-group">
-                                                                                        <input type="text" class="form-control form-control-sm" disabled />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_NUMBOX'">
-                                                                                    <div class="form-group">
-                                                                                        <input type="number" class="form-control form-control-sm" disabled />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_COMBOBOX'">
-                                                                                    <div class="form-group">
-                                                                                        <select class="form-control form-control-sm" disabled>
-                                                                                            <option>Example 1</option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_CHECKBOX'">
-                                                                                    <div class="form-group">
-                                                                                        <br />
-                                                                                        <input type="checkbox" disabled />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_DATEPICKER'">
-                                                                                    <div class="form-group">
-                                                                                        <input type="date" class="form-control form-control-sm" />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_LOOKUP'">
-                                                                                    <div class="form form-inline">
-                                                                                        <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
-                                                                                        <input type="text" class="form-control form-control-sm" disabled />
-                                                                                    </div>
 
-                                                                                </div>
-                                                                                <div v-if="tcol.metaType==='EDITGRID_STATICHTML'">
-                                                                                    {{tcol.rawHTML}}
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
+                                                                <div v-if="input.metaType==='EDITGRID'">
+                                                                    <table class="table table-bordered">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
+                                                                                    <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px; float:right; cursor:pointer" title="Column settings"></span> {{tcol.title}}
+                                                                                </td>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_TEXTBOX'">
+                                                                                        <div class="form-group">
+                                                                                            <input type="text" class="form-control form-control-sm" disabled />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_NUMBOX'">
+                                                                                        <div class="form-group">
+                                                                                            <input type="number" class="form-control form-control-sm" disabled />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_COMBOBOX'">
+                                                                                        <div class="form-group">
+                                                                                            <select class="form-control form-control-sm" disabled>
+                                                                                                <option>Example 1</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_CHECKBOX'">
+                                                                                        <div class="form-group">
+                                                                                            <br />
+                                                                                            <input type="checkbox" disabled />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_DATEPICKER'">
+                                                                                        <div class="form-group">
+                                                                                            <input type="date" class="form-control form-control-sm" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_LOOKUP'">
+                                                                                        <div class="form form-inline">
+                                                                                            <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
+                                                                                            <input type="text" class="form-control form-control-sm" disabled />
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                    <div v-if="tcol.metaType==='EDITGRID_STATICHTML'">
+                                                                                        {{tcol.rawHTML}}
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -289,7 +305,7 @@
         </div>
     </div>
 
-    <div id="listview" v-if="model.viewType=='LIVIEW'">
+    <div id="listview" v-if="model.viewType=='EDLIVIEW'">
 
 
         <div class="btn btn-sm btn-primary" v-on:click="saveListView" style="float:right">
@@ -298,8 +314,8 @@
         <br />
         <hr />
 
-        <div style="margin:15px">
-            <div style="padding: 5px; border:dotted 1px gray">
+        <div class="card">
+            <div class="card-header">
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group">
@@ -311,6 +327,8 @@
 
                     </div>
                 </div>
+            </div>
+            <div class="card-body">
                 <div class="row">
                     <div class="col-lg-12" style="margin: 5px">
                         <b>Fields: </b>
@@ -347,9 +365,10 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
+
+
     </div>
 
 
@@ -379,7 +398,7 @@
                         </nav>
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="nav-bindings" role="tabpanel" aria-labelledby="nav-bindings-tab">
-
+                                <br />
                                 <div class="form-group" v-if="showSettingTitle">
                                     <label class="control-label">Title</label>
                                     <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
@@ -588,7 +607,7 @@
                     this.addLayoutRow(sect);
                 },
                 addListViewField: function () {
-                    this.listview.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "LISTVIEWCOLUMN" });
+                    this.model.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "EDITLISTVIEWCOLUMN" });
                 },
                 addEditGridColumn: function (metatype)
                 {

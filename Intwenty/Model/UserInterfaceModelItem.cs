@@ -15,9 +15,9 @@ namespace Intwenty.Model
         public static readonly string MetaTypeImage = "IMAGE";
         public static readonly string MetaTypeStaticHTML = "STATICHTML";
         public static readonly string MetaTypeCreateView = "CREATEVIEW";
-        public static readonly string MetaTypeUpdateView = "UPDATEVIEW";
-        public static readonly string MetaTypePresentationView = "PRESENTATIONVIEW";
-        public static readonly string MetaTypePresentationListView = "PRESENTATIONLISTVIEW";
+        public static readonly string MetaTypeEditView = "EDITVIEW";
+        public static readonly string MetaTypeDetailView = "DETAILVIEW";
+        public static readonly string MetaTypeListView = "LISTVIEW";
         public static readonly string MetaTypeEmailBox = "EMAILBOX";
         public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
@@ -26,8 +26,8 @@ namespace Intwenty.Model
         public static readonly string MetaTypeNumBox = "NUMBOX";
         public static readonly string MetaTypeCheckBox = "CHECKBOX";
         public static readonly string MetaTypeComboBox = "COMBOBOX";
-        public static readonly string MetaTypeListView = "LISTVIEW";
-        public static readonly string MetaTypeListViewColumn = "LISTVIEWCOLUMN";
+        public static readonly string MetaTypeEditListView = "EDITLISTVIEW";
+        public static readonly string MetaTypeEditListViewColumn = "EDITLISTVIEWCOLUMN";
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeEditGrid = "EDITGRID";
@@ -210,8 +210,8 @@ namespace Intwenty.Model
         {
             get
             {
-                return IsMetaTypeCreateView || IsMetaTypeUpdateView || IsMetaTypeListView ||
-                       IsMetaTypePresentationView || IsMetaTypePresentationListView;
+                return IsMetaTypeCreateView || IsMetaTypeEditView || IsMetaTypeListView ||
+                       IsMetaTypeDetailView || IsMetaTypeEditListView;
 
             }
 
@@ -260,7 +260,7 @@ namespace Intwenty.Model
             get { return Domain.Contains(DataViewModelItem.MetaTypeDataView + "."); }
         }
 
-        public string ViewName
+        public string DataViewName
         {
             get
             {
@@ -297,19 +297,19 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeCreateView; }
         }
 
-        public bool IsMetaTypeUpdateView
+        public bool IsMetaTypeEditView
         {
-            get { return MetaType == MetaTypeUpdateView; }
+            get { return MetaType == MetaTypeEditView; }
         }
 
-        public bool IsMetaTypePresentationView
+        public bool IsMetaTypeDetailView
         {
-            get { return MetaType == MetaTypePresentationView; }
+            get { return MetaType == MetaTypeDetailView; }
         }
 
-        public bool IsMetaTypePresentationListView
+        public bool IsMetaTypeListView
         {
-            get { return MetaType == MetaTypePresentationListView; }
+            get { return MetaType == MetaTypeListView; }
         }
 
         public bool IsMetaTypeStaticHTML
@@ -384,15 +384,15 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeImageBox; }
         }
 
-        public bool IsMetaTypeListView
+        public bool IsMetaTypeEditListView
         {
-            get { return MetaType == MetaTypeListView; }
+            get { return MetaType == MetaTypeEditListView; }
         }
 
 
-        public bool IsMetaTypeListViewColumn
+        public bool IsMetaTypeEditListViewColumn
         {
-            get { return MetaType == MetaTypeListViewColumn; }
+            get { return MetaType == MetaTypeEditListViewColumn; }
         }
 
        

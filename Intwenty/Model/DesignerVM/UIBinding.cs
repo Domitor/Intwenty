@@ -32,7 +32,7 @@ namespace Intwenty.Model.DesignerVM
 
     public class UIComplexBinding : UIBinding, IUIComplexBinding
     {
-        public string ViewName { get; set; }
+        public string DataViewName { get; set; }
 
         public string DomainName { get; set; }
 
@@ -49,7 +49,7 @@ namespace Intwenty.Model.DesignerVM
             Title = "";
             DataColumnDbName = "";
             DataColumn2DbName = "";
-            ViewName = "";
+            DataViewName = "";
             DomainName = "";
             DataViewColumnDbName = "";
             DataViewColumn2DbName = "";

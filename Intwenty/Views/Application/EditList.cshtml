@@ -10,14 +10,14 @@
 
         @{
             var title = "";
-            var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+            var lv = Model.UIStructure.Find(p => p.IsMetaTypeEditListView);
             if (lv != null)
             {
                 title = lv.Title;
             }
             else
             {
-                <h1><span class="label label-warning btn-lg">There's no listview model defined for this application yet.</span></h1>
+                <h1><span class="label label-warning btn-lg">There's no edit list view model defined for this application yet.</span></h1>
                 return;
 
             }
@@ -29,7 +29,7 @@
 
                 <ul class="nav">
                     <li class="nav-item">
-                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Localizer["New", new[] { Model.Application.Title }]</a>
+                        <a asp-action="Create" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Localizer["New", new[] { "" }]</a>
                     </li>
                     <li class="nav-item">
                         <a href="#" v-on:click="exportToExcel()" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</a>

@@ -116,8 +116,8 @@
                                             {
                                                 <td>
                                                     <div class="form form-inline">
-                                                        <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.ViewName', item)"><span class="fa fa-plus"></span></button>
-                                                        <input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.ViewName','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
+                                                        <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.DataViewName', item)"><span class="fa fa-plus"></span></button>
+                                                        <input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.DataViewName','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
                                                     </div>
                                                 </td>
                                             }
@@ -172,7 +172,7 @@
         if ((t.IsMetaTypeLookUp || t.IsMetaTypeEditGridLookUp) && t.IsDataViewConnected)
         {
             <!-- Modal -->
-            <div class="modal fade" id="@t.ViewName" role="dialog">
+            <div class="modal fade" id="@t.DataViewName" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">

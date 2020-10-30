@@ -37,10 +37,10 @@ namespace IntwentyDemo.Controllers
         /// <summary>
         /// Renders a list view for application with supplied Id
         /// </summary>
-        [HttpGet("Application/GetList/{id}")]
-        public override IActionResult GetList(int id)
+        [HttpGet("Application/List/{id}")]
+        public override IActionResult List(int id)
         {
-            return base.GetList(id);
+            return base.List(id);
         }
 
         /// <summary>
@@ -50,6 +50,26 @@ namespace IntwentyDemo.Controllers
         public override IActionResult Edit(int applicationid, int id)
         {
             return base.Edit(applicationid,id);
+        }
+
+        /// <summary>
+        /// Generate a detail presentation UI based on UIStructure for the application with the supplied application model id and application data id.
+        /// </summary>
+        [HttpGet("Application/Detail/{applicationid}/{id}")]
+        public override IActionResult Detail(int applicationid, int id)
+        {
+            return base.Detail(applicationid, id);
+
+        }
+
+
+        /// <summary>
+        /// Renders a list view for application with supplied application model id.
+        /// </summary>
+        [HttpGet("Application/EditList/{id}")]
+        public override IActionResult EditList(int id)
+        {
+            return base.EditList(id);
         }
 
 

@@ -26,7 +26,7 @@
             {
                 foreach (var a in ModelRepository.GetAppModels())
                 {
-                    <a class="dropdown-item" asp-controller="Application" asp-action="GetList" asp-route-id="@a.Id">@a.Title</a>
+                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@a.Id">@a.Title</a>
                 }
             }
             else

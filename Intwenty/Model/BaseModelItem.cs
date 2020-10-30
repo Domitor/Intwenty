@@ -111,7 +111,9 @@ namespace Intwenty.Model
                 return "TBL_TB";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeListView)
                 return "LV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeListViewColumn)
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditListView)
+                return "EDLV";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditListViewColumn)
                 return "LV_COL";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
                 return "LOOKUP";

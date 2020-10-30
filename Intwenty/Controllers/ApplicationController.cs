@@ -24,7 +24,17 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
-        /// Generate UI based on UIStructure for the application with the supplied application model id.
+        /// Generate a presentation UI based on UIStructure for the application with the supplied application model
+        /// </summary>
+        public virtual IActionResult List(int id)
+        {
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
+            return View(t);
+
+        }
+
+        /// <summary>
+        /// Generate create UI based on UIStructure for the application with the supplied application model id.
         /// </summary>
         public virtual IActionResult Create(int id)
         {
@@ -32,17 +42,9 @@ namespace Intwenty.Controllers
             return View(t);
         }
 
-        /// <summary>
-        /// Renders a list view for application with supplied application model id.
-        /// </summary>
-        public virtual IActionResult GetList(int id)
-        {
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
-            return View(t);
-        }
 
         /// <summary>
-        /// Generate UI based on UIStructure for the application with the supplied application model id and application data id.
+        /// Generate edit UI based on UIStructure for the application with the supplied application model id and application data id.
         /// </summary>
         public virtual IActionResult Edit(int applicationid, int id)
         {
@@ -51,6 +53,28 @@ namespace Intwenty.Controllers
             return View(t);
 
         }
+
+        /// <summary>
+        /// Generate a detail presentation UI based on UIStructure for the application with the supplied application model id and application data id.
+        /// </summary>
+        public virtual IActionResult Detail(int applicationid, int id)
+        {
+            ViewBag.SystemId = Convert.ToString(id);
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
+            return View(t);
+
+        }
+
+
+        /// <summary>
+        /// Renders a list view for application with supplied application model id.
+        /// </summary>
+        public virtual IActionResult EditList(int id)
+        {
+            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
+            return View(t);
+        }
+
 
 
     }

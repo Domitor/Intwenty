@@ -154,8 +154,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var ui in app.UIStructure.Where(p => p.IsMetaTypeListView ||
-                                                                   p.IsMetaTypeListViewColumn).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    @foreach (var ui in app.UIStructure.Where(p => p.IsMetaTypeEditListView ||
+                                                                   p.IsMetaTypeEditListViewColumn).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
                     <tr>
                         <td>@ui.MetaCode</td>

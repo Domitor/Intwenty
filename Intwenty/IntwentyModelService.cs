@@ -251,7 +251,7 @@ namespace Intwenty
                         m.Controller = "Application";
 
                     if (string.IsNullOrEmpty(m.Action))
-                        m.Action = "GetList";
+                        m.Action = "EditList";
 
                     if (!string.IsNullOrEmpty(m.AppMetaCode))
                     {
@@ -283,7 +283,7 @@ namespace Intwenty
                         m.Controller = "Application";
 
                     if (string.IsNullOrEmpty(m.Action))
-                        m.Action = "GetList";
+                        m.Action = "EditList";
 
                     if (!string.IsNullOrEmpty(m.AppMetaCode))
                     {
@@ -646,7 +646,7 @@ namespace Intwenty
 
                         if (item.HasDataViewDomain)
                         {
-                            var vinf = views.Find(p => p.MetaCode == item.ViewName && p.IsRoot);
+                            var vinf = views.Find(p => p.MetaCode == item.DataViewName && p.IsRoot);
                             if (vinf != null)
                                 item.DataViewInfo = vinf;
 
@@ -1460,7 +1460,7 @@ namespace Intwenty
                     }
 
 
-                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeListViewColumn))
+                    if (ui.IsMetaTypeListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeEditListViewColumn))
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LISTVIEW in application {1} has no children with [MetaType]=LISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 

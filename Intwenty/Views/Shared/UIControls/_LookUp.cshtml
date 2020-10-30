@@ -8,7 +8,7 @@
 
 
     <div style="width:10%">
-        <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@Model.ViewName',model.@Model.DataTableDbName)"><span class="fa fa-plus"></span></button>
+        <button style="float:left" class="btn btn-sm btn-secondary" v-on:click="openDataViewLookUp('@Model.DataViewName',model.@Model.DataTableDbName)"><span class="fa fa-plus"></span></button>
     </div>
 
 
@@ -18,7 +18,7 @@
                type="text" 
                class="form-control form-control-sm" 
                v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" 
-               v-on:keydown.tab="getDataViewValue('@Model.ViewName','@Model.DataColumnDbName','@Model.UIId')" 
+               v-on:keydown.tab="getDataViewValue('@Model.DataViewName','@Model.DataColumnDbName','@Model.UIId')" 
                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeLookUp
                data-title="@Model.Title"
                data-dbtable="@Model.DataTableDbName" 

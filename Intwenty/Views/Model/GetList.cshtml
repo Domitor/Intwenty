@@ -36,11 +36,11 @@
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-database"></i> Manage DB</a></td>
                 <td>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">C</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/UPVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Update View">U</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the List View">L</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/PRVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">P</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/PRLIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">PL</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">CR</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit View">U</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDLIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit/Delete List View">D</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/DEVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">P</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">PL</a>
                 </td>
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
             </tr>

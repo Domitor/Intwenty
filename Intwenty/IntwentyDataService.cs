@@ -914,12 +914,12 @@ namespace Intwenty
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
 
-                if (model.UIStructure.Exists(p => p.IsMetaTypeListViewColumn && p.IsDataColumnConnected) || DBMSType == DBMS.PostgreSQL)
+                if (model.UIStructure.Exists(p => p.IsMetaTypeEditListViewColumn && p.IsDataColumnConnected) || DBMSType == DBMS.PostgreSQL)
                 {
                     //Add columns connected to the listview
                     foreach (var t in model.UIStructure)
                     {
-                        if (t.IsMetaTypeListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
+                        if (t.IsMetaTypeEditListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
                         {
                             sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
                             columns.Add(t.DataColumnInfo);

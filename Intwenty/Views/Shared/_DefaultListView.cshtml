@@ -20,7 +20,7 @@
                     foreach (var c in Model.UIStructure)
                     {
 
-                        if (c.IsMetaTypeListViewColumn && c.IsDataColumnConnected)
+                        if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
                         {
                             <option value="@c.DataColumnInfo.DbName">@c.Title</option>
                         }
@@ -44,7 +44,7 @@
                 foreach (var c in Model.UIStructure)
                 {
 
-                    if (c.IsMetaTypeListViewColumn && c.IsDataColumnConnected)
+                    if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
                     {
                         <th v-on:click="sortBycolumn('@c.DataColumnInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
                     }
@@ -60,7 +60,7 @@
             foreach (var c in Model.UIStructure)
             {
 
-                if (c.IsMetaTypeListViewColumn && c.IsDataColumnConnected)
+                if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
                 {
                     if (c.HasProperty("IMAGE"))
                     {
