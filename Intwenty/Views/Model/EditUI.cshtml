@@ -25,11 +25,13 @@
     .uipnl {
         margin-top: 10px;
     }
+
+    
+}
 </style>
 
 
-
-<div id="app">
+<div id="app" class="uidesigner">
 
     <br />
     <br />
@@ -53,7 +55,9 @@
             </div>
             <div v-bind:class="componentDesignerClass()">
                 <div class="btn btn-secondary btn-sm" v-on:click="model.showComponents=!model.showComponents">
-                    <i class="fas fa-align-justify"></i> Show UI Controls
+                    <i class="fas fa-align-justify"></i>
+                    <span v-if="!model.showComponents">Show UI Controls</span>
+                    <span v-if="model.showComponents">Hide UI Controls</span>
                 </div>
                 <div class="btn btn-sm btn-secondary" v-on:click="addSection">
                     <i class="fa fa-plus"></i> Add section
@@ -67,10 +71,10 @@
         <div class="row">
             <div class="col-lg-3" v-if="model.showComponents">
 
-                <nav class="navbar bg-light">
+                <nav class="navbar bg-dark" id="selectcontrolnav">
                     <ul class="navbar-nav">
                         <li class="nav-item" v-for="comp in model.uiControls">
-                            <a class="nav-link" href="#" v-bind:id="comp.code" draggable="true" v-on:dragstart="dragUI(event)">{{comp.title}}</a>
+                            <div class="text-light" v-bind:id="comp.code" draggable="true" v-on:dragstart="dragUI(event)"><i class="fas fa-dragon"></i> {{comp.title}}</div>
                         </li>
                     </ul>
                 </nav>
@@ -504,6 +508,15 @@
 
     <script>
 
+        $(window).scroll(function () {
+            var scrollTop = $(window).scrollTop();
+            //console.log("scrollTop>>>" + scrollTop);
+            if (scrollTop == 0) {
+                $("#selectcontrolnav").css({ "margin-top": "0px" });
+            } else {
+                $("#selectcontrolnav").css({ "margin-top": ($(window).scrollTop()-200) + "px" });
+            }
+        });
 
         var app = new Vue({
             el: '#app',

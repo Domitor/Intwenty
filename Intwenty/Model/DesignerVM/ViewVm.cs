@@ -282,6 +282,8 @@ namespace Intwenty.Model.DesignerVM
                 res.MetaType = UserInterfaceModelItem.MetaTypePresentationView;
             }
 
+            SetCollections(res);
+
             var viewitem = app.UIStructure.Find(p => p.MetaType == res.MetaType);
             if (viewitem == null && res.MetaType == UserInterfaceModelItem.MetaTypeUpdateView)
                 viewitem = app.UIStructure.Find(p => p.IsMetaTypeCreateView);
@@ -293,8 +295,6 @@ namespace Intwenty.Model.DesignerVM
             res.Properties = viewitem.Properties;
             res.Id = viewitem.Id;
             res.Title = viewitem.Title;
-
-            SetCollections(res);
 
             if (!viewitem.IsMetaTypeListView)
                 BuildVm(res, viewitem, app);
