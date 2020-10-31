@@ -1,0 +1,19 @@
+﻿@model IUIBinding
+
+@if (Model.HasPropertyWithValue("SIZE", "H1"))
+{
+    <h3>{{item.@Model.DataColumnDbName}}</h3>
+}
+else if (Model.HasPropertyWithValue("SIZE", "H2"))
+{
+    <h2>{{item.@Model.DataColumnDbName}}</h2>
+}
+else if (Model.HasPropertyWithValue("SIZE", "H3"))
+{
+    <h3>{{item.@Model.DataColumnDbName}}</h3>
+}
+else
+{
+    <h3>{{item.@Model.DataColumnDbName}}</h3>
+}
+

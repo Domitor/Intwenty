@@ -6,25 +6,36 @@
 
 
 
-        @{
-            var title = "";
-            var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
-            if (lv != null)
-            {
-                title = lv.Title;
-                <h3>TODO: List UI (LISTVIEW)</h3>
-            }
-            else
-            {
-                <h3>There's no 'list' view model defined for this application yet.</h3>
+    @{
+        var title = "";
+        var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+        if (lv != null)
+        {
+            title = lv.Title;
 
+        }
+        else
+        {
+            <h3>There's no 'list' view model defined for this application yet.</h3>
+            return;
 
-            }
-
-            ViewData["Title"] = title;
         }
 
+        ViewData["Title"] = title;
+    }
 
+    <article v-for="item in datalist">
+
+        @await Html.PartialAsync("_DefaultAppUI", Model)
+
+    </article>
+
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{listRetrieveInfo.batchSize}}</a></li>
+            <li class="page-item"><a class="page-link" href="#" v-on:click="nextpage()">Next {{listRetrieveInfo.batchSize}}</a></li>
+        </ul>
+    </nav>
 
 </div>
 
@@ -32,8 +43,9 @@
 {
     
     <script>
-       
-       
+
+        var app = getEditListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")');
+
 
     </script>
 

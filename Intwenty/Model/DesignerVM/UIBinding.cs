@@ -5,7 +5,7 @@ using Intwenty.Model;
 namespace Intwenty.Model.DesignerVM
 {
 
-    public class UIBinding : IUIBinding
+    public class UIBinding : HashTagPropertyObject, IUIBinding
     {
         public string UIId { get; set; }
 

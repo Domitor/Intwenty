@@ -874,7 +874,7 @@ namespace Intwenty
         #endregion
 
         #region Lists
-        public OperationResult GetListViewData(ListRetrivalArgs args)
+        public OperationResult GetPagedList(ListRetrivalArgs args)
         {
             OperationResult result = null;
             var client = new Connection(DBMSType, Settings.DefaultConnection);
@@ -914,40 +914,16 @@ namespace Intwenty
                 var sql_list_stmt = new StringBuilder();
                 sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
 
-                if (model.UIStructure.Exists(p => p.IsMetaTypeEditListViewColumn && p.IsDataColumnConnected) || DBMSType == DBMS.PostgreSQL)
+                foreach (var t in model.DataStructure)
                 {
-                    //Add columns connected to the listview
-                    foreach (var t in model.UIStructure)
+                    if (t.IsMetaTypeDataColumn && t.IsRoot)
                     {
-                        if (t.IsMetaTypeEditListViewColumn && t.IsDataColumnConnected && t.DataColumnInfo.IsRoot)
+                        sql_list_stmt.Append(", t2." + t.DbName + " ");
+                        if (DBMSType == DBMS.PostgreSQL)
                         {
-                            sql_list_stmt.Append(", t2." + t.DataColumnInfo.DbName + " ");
-                            columns.Add(t.DataColumnInfo);
-                        }
-                    }
-
-                    //Add default columns (IsFrameworkItem) that is not connected to the listview
-                    foreach (var t in model.DataStructure)
-                    {
-                        if (t.IsMetaTypeDataColumn && t.IsRoot && t.IsFrameworkItem && !columns.Exists(p=> p.Name.ToUpper() == t.DbName.ToUpper()))
-                        {
-                            sql_list_stmt.Append(", t2." + t.DbName + " ");
                             columns.Add(t);
                         }
                     }
-
-                }
-                else
-                {
-                    foreach (var t in model.DataStructure)
-                    {
-                        if (t.IsMetaTypeDataColumn && t.IsRoot)
-                        {
-                            sql_list_stmt.Append(", t2." + t.DbName + " ");
-                        }
-                    }
-
-
                 }
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");

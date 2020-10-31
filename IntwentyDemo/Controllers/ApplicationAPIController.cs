@@ -55,10 +55,10 @@ namespace IntwentyDemo.Controllers
         /// <summary>
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
-        [HttpPost("Application/API/GetListView")]
-        public override JsonResult GetListView([FromBody] ListRetrivalArgs model)
+        [HttpPost("Application/API/GetPagedList")]
+        public override JsonResult GetPagedList([FromBody] ListRetrivalArgs model)
         {
-            return base.GetListView(model);
+            return base.GetPagedList(model);
         }
 
         /// <summary>

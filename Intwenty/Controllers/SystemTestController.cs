@@ -853,7 +853,7 @@ namespace Intwenty.Controllers
                 args.ApplicationId = 10000;
                 args.BatchSize = 20;
 
-                var getlistresult = _dataservice.GetListViewData(args);
+                var getlistresult = _dataservice.GetPagedList(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
@@ -869,7 +869,7 @@ namespace Intwenty.Controllers
                 args.CurrentRowNum = 30;
                 args.BatchSize = 10;
 
-                getlistresult = _dataservice.GetListViewData(args);
+                getlistresult = _dataservice.GetPagedList(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 

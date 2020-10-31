@@ -18,6 +18,10 @@ namespace Intwenty.Interface
 
         bool ReadOnly { get; }
 
+        bool HasProperty(string propertyname);
+
+        bool HasPropertyWithValue(string propertyname, object value);
+
     }
 
     public interface IUIComplexBinding : IUIBinding
@@ -33,5 +37,6 @@ namespace Intwenty.Interface
 
         string DataViewColumn2DbName { get; }
 
+       
     }
 }

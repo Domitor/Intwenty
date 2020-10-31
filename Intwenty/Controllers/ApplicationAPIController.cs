@@ -62,9 +62,9 @@ namespace Intwenty.Controllers
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost]
-        public virtual JsonResult GetListView([FromBody] ListRetrivalArgs model)
+        public virtual JsonResult GetPagedList([FromBody] ListRetrivalArgs model)
         {
-            var listdata = DataRepository.GetListViewData(model);
+            var listdata = DataRepository.GetPagedList(model);
             return new JsonResult(listdata);
         }
 

@@ -28,3 +28,9 @@
   opacity: 0;
   right: 0;
   top: 0; }
+
+/*Used in Intwenty Create / Edit Views */
+fieldset {
+    border: solid 0px #DDD !important;
+    padding: 10px;
+}

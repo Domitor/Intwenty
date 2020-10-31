@@ -57,13 +57,12 @@ namespace Intwenty.Interface
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
-        /// If there's a LISTVIEW defined for the application, the columns in the list view is returned otherwise all columns.
         /// This function supports paging. It returns the number of records specified in args.BatchSize
         /// 
         /// If args.OwnerUSerId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetListViewData(ListRetrivalArgs args);
+        OperationResult GetPagedList(ListRetrivalArgs args);
 
 
         /// <summary>
