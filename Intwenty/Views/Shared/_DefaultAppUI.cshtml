@@ -1,37 +1,26 @@
-﻿@model Intwenty.Model.ApplicationModel
+﻿@model Intwenty.Model.UIRendering.UIView
 
 @{
       var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
 }
 
-@foreach (var sect in Model.UIStructure.Where(p=> p.IsMetaTypeSection).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+@foreach (var sect in Model.Sections)
 {
 
-    var pnlcount = Model.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode);
-    var currentview = Model.UIStructure.Find(p => p.MetaCode == sect.ParentMetaCode && (p.IsMetaTypeCreateView || p.IsMetaTypeDetailView || p.IsMetaTypeEditView || p.IsMetaTypeListView));
-    if (currentview == null)
-    {
-        continue;
-    }
     <div class="row">
 
-        @foreach (var pl in Model.UIStructure.Where(p=> p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+        @foreach (var pl in sect.Panels)
         {
-            var usefieldset = false;
-            @if (!string.IsNullOrEmpty(pl.Title) && (currentview.IsMetaTypeCreateView || currentview.IsMetaTypeEditView))
-            {
-                usefieldset = true;
-            }
 
-            <div class="col-md-@(12/pnlcount)">
+            <div class="col-md-@(12/sect.Panels.Count)">
 
-               @if (usefieldset)
+               @if (pl.UseFieldSet)
                {
                 @:<fieldset>
                     @:<legend>@pl.Title</legend>
                }
 
-                    @foreach (var t in Model.UIStructure.Where(k => k.ParentMetaCode == pl.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    @foreach (var t in pl.Controls)
                     {
                         if (t.IsMetaTypeTextBox && t.IsDataColumnConnected)
                         {
@@ -103,7 +92,7 @@
 
 
 
-                        if (t.IsMetaTypeEditGrid && t.IsDataTableConnected)
+                        if (t.IsMetaTypeEditGrid && t.Children.Count > 0)
                         {
                             <h4>@t.Title</h4>
 
@@ -116,25 +105,22 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        @foreach (var tf in Model.UIStructure.OrderBy(p => p.ColumnOrder))
+                                        @foreach (var tf in t.Children)
                                         {
-                                            if (tf.ParentMetaCode == t.MetaCode)
-                                            {
-                                                <th>@tf.Title</th>
-                                            }
+                                            <th>@tf.Title</th>
                                         }
                                     </tr>
                                 </thead>
                                 <tr v-for="item in model.@t.DataTableDbName">
 
-                                    @foreach (var tf in Model.UIStructure.OrderBy(p => p.ColumnOrder))
+                                    @foreach (var tf in t.Children)
                                     {
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridTextBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridTextBox && tf.IsDataColumnConnected)
                                         {
                                             <td><input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_TEXTBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridLookUp && tf.IsDataColumnConnected && tf.IsDataViewColumnConnected && tf.IsDataViewConnected)
+                                        if (tf.IsMetaTypeEditGridLookUp && tf.IsDataColumnConnected && tf.IsDataViewColumnConnected && tf.IsDataViewConnected)
                                         {
                                             <td>
                                                 <div class="form form-inline">
@@ -144,17 +130,17 @@
                                             </td>
                                         }
 
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridNumBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridNumBox && tf.IsDataColumnConnected)
                                         {
                                             <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_NUMBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridDatePicker && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridDatePicker && tf.IsDataColumnConnected)
                                         {
                                             <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_DATEPICKER" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridComboBox && tf.IsDataColumnConnected && tf.HasValueDomain)
+                                        if (tf.IsMetaTypeEditGridComboBox && tf.IsDataColumnConnected && tf.HasValueDomain)
                                         {
                                             <td>
                                                 <select v-model="item.@tf.DataColumnDbName" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="EDITGRID_COMBOBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory">
@@ -163,9 +149,9 @@
                                             </td>
                                         }
 
-                                        if (tf.ParentMetaCode == t.MetaCode && tf.IsMetaTypeEditGridCheckBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridCheckBox && tf.IsDataColumnConnected)
                                         {
-                                            <td><input type="checkbox" class="form-control form-control-sm" v-model="item.@tf.DataMetaCode" v-on:input="onUserInput(event)" data-metatype="EDITGRID_CHECKBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
+                                            <td><input type="checkbox" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_CHECKBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
                                     }
 
@@ -175,7 +161,7 @@
                         }
 
                     }  <!--FOR-->
-               @if (usefieldset)
+               @if (pl.UseFieldSet)
                {
                 @: </fieldset>
                }
@@ -192,7 +178,7 @@
    
 
 
-    @foreach (var t in Model.UIStructure.OrderBy(p => p.RowOrder))
+    @foreach (var t in Model.Modals)
     {
         if ((t.IsMetaTypeLookUp || t.IsMetaTypeEditGridLookUp) && t.IsDataViewConnected)
         {

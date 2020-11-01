@@ -2,7 +2,7 @@
 using Intwenty.Interface;
 using Intwenty.Model;
 
-namespace Intwenty.Model.DesignerVM
+namespace Intwenty.Model.UIRendering
 {
 
     public class UIBinding : HashTagPropertyObject, IUIBinding
@@ -19,6 +19,7 @@ namespace Intwenty.Model.DesignerVM
 
         public string DataColumnDbName{ get; set; }
 
+        public string RawHTML { get; }
 
         public UIBinding()
         {
@@ -26,6 +27,7 @@ namespace Intwenty.Model.DesignerVM
             UIId = "";
             Title = "";
             DataColumnDbName = "";
+            RawHTML = "";
 
         }
     }

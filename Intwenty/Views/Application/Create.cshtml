@@ -2,16 +2,13 @@
 
 @{
     var title = "";
-    var view = Model.UIStructure.Find(p => p.IsMetaTypeCreateView);
+    var view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
     if (view != null)
     {
         title = view.Title;
 
     }
-    else
-    {
-        <h3>There's no 'create' view model defined for this application yet.</h3>
-    }
+
 
     ViewData["Title"] = title;
 
@@ -41,9 +38,14 @@
 
     <br />
 
-
-    @await Html.PartialAsync("_DefaultAppUI", Model)
-
+    @if (view != null)
+    {
+        await Html.PartialAsync("_DefaultAppUI", view);
+   }
+    else
+    {
+        <h3>There's no 'create' view model defined for this application yet.</h3>
+    }
 
 </div>
 

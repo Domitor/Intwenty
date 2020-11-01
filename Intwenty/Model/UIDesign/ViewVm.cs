@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Intwenty.Model.DesignerVM
+namespace Intwenty.Model.UIDesign
 {
 
     public static class UIModelCreator

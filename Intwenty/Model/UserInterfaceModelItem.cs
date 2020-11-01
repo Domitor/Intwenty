@@ -7,7 +7,7 @@ namespace Intwenty.Model
 {
 
 
-    public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle
+    public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
@@ -46,12 +46,14 @@ namespace Intwenty.Model
         public UserInterfaceModelItem()
         {
             SetEmptyStrings();
+            Children = new List<IUIControl>();
         }
 
         public UserInterfaceModelItem(string metatype)
         {
             MetaType = metatype;
             SetEmptyStrings();
+            Children = new List<IUIControl>();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -74,6 +76,7 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
             SetEmptyStrings();
+            Children = new List<IUIControl>();
         }
 
         private void SetEmptyStrings()
@@ -126,6 +129,8 @@ namespace Intwenty.Model
         public DataViewModelItem DataViewColumnInfo { get; set; }
 
         public DataViewModelItem DataViewColumnInfo2 { get; set; }
+
+        public List<IUIControl> Children { get; set; }
 
         public override string ModelCode
         {
@@ -312,6 +317,11 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeListView; }
         }
 
+        public bool IsMetaTypeEditListView
+        {
+            get { return MetaType == MetaTypeEditListView; }
+        }
+
         public bool IsMetaTypeStaticHTML
         {
             get { return MetaType == MetaTypeStaticHTML; }
@@ -383,12 +393,6 @@ namespace Intwenty.Model
         {
             get { return MetaType == MetaTypeImageBox; }
         }
-
-        public bool IsMetaTypeEditListView
-        {
-            get { return MetaType == MetaTypeEditListView; }
-        }
-
 
         public bool IsMetaTypeEditListViewColumn
         {

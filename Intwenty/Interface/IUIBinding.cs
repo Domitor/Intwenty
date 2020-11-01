@@ -16,6 +16,8 @@ namespace Intwenty.Interface
 
         string DataColumnDbName { get; }
 
+        string RawHTML { get; }
+
         bool ReadOnly { get; }
 
         bool HasProperty(string propertyname);

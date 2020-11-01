@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Intwenty.Interface;
+using Intwenty.Model.UIRendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -24,10 +26,74 @@ namespace Intwenty.Model
         public List<DatabaseModelItem> DataStructure { get; set; }
 
         /// <summary>
-        /// Describes the UI for this application
+        /// All UI model items, describing the UI for this application
         /// </summary>
         public List<UserInterfaceModelItem> UIStructure { get; set; }
 
+        /// <summary>
+        /// UIView models to use when rendering html
+        /// </summary>
+        public List<UIView> UIViews 
+        {
+            get { return GetUIViews(); }
+        }
+
+
+        private List<UIView> GetUIViews()
+        {
+            if (UIStructure == null)
+                return new List<UIView>();
+            if (UIStructure.Count == 0)
+                return new List<UIView>();
+
+            var res = new List<UIView>();
+
+            foreach (var v in UIStructure.Where(p => p.IsUIViewType))
+            {
+                var uiview = new UIView();
+                uiview.Title = v.Title;
+                uiview.MetaType = v.MetaType;
+
+                foreach (var sect in UIStructure.Where(p => p.IsMetaTypeSection && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                {
+                    var section = new UISection() { Properties = sect.Properties, Title = sect.Title };
+                    foreach (var pnl in UIStructure.Where(p => p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    {
+                        var panel = new UIPanel() { Properties = sect.Properties, Title = sect.Title };
+                        if (!string.IsNullOrEmpty(panel.Title) && (uiview.IsMetaTypeCreateView || uiview.IsMetaTypeEditView))
+                            panel.UseFieldSet = true;
+                      
+                        foreach (var ctrl in UIStructure.Where(p => p.ParentMetaCode == pnl.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                        {
+                            //Should not happen, just in case, remove container controls
+                            if (ctrl.IsMetaTypePanel || ctrl.IsMetaTypeSection || ctrl.IsUIViewType)
+                                continue;
+
+                            if (ctrl.IsMetaTypeLookUp || ctrl.IsMetaTypeEditGridLookUp)
+                                uiview.Modals.Add(ctrl);
+
+
+                            if (ctrl.IsMetaTypeEditGrid)
+                            {
+                                ctrl.Children = new List<IUIControl>();
+                                foreach (var col in UIStructure.Where(p => p.ParentMetaCode == ctrl.MetaCode && (p.IsEditGridUIBindingType || 
+                                                                                                                 p.IsEditGridUIComplexBindingType)).OrderBy(p => p.ColumnOrder))
+                                {
+                                    ctrl.Children.Add(col);
+                                }
+
+                            }
+                            panel.Controls.Add(ctrl);
+                        }
+                        section.Panels.Add(panel);
+                    }
+                    uiview.Sections.Add(section);
+                }
+                res.Add(uiview);
+            }
+
+            return res;
+        }
 
 
     }

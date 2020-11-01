@@ -1236,10 +1236,6 @@ namespace Intwenty
                     else
                         item.Title = item.TitleLocalizationKey;
 
-                    if (CurrentCulture == "sv-SE" && item.Title == "Kunder")
-                    {
-                        var x = "";
-                    }
                 }
             }
         }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace Intwenty.Model.DesignerVM
+namespace Intwenty.Model.UIDesign
 {
     public static class DataViewModelCreator
     {
