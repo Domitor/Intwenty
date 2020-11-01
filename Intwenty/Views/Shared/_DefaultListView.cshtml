@@ -51,21 +51,20 @@
             foreach (var c in Model.Columns)
             {
 
-              
-                    if (c.IsMetaTypeImage)
-                    {
-                        <td>
-                            <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80" class="rounded" />
-                        </td>
-                    }
-                    else
-                    {
-                        <td>{{item.@c.DataColumnInfo.DbName}}</td>
-                    }
+                if (c.IsMetaTypeImage)
+                {
+                    <td>
+                        <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80" class="rounded" />
+                    </td>
                 }
+                else
+                {
+                    <td>{{item.@c.DataColumnInfo.DbName}}</td>
+                }
+             }
 
-            }
-        }
+         }
+        
     </tr>
 
 </table>

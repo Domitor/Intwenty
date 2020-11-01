@@ -8,7 +8,7 @@
 
     @{
         var title = "";
-        var view = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+        var view = Model.UIViews.Find(p => p.IsMetaTypeListView);
         if (view != null)
         {
             title = view.Title;
@@ -23,7 +23,7 @@
 
         @if (view != null)
         {
-            await Html.PartialAsync("_DefaultAppUI", view);
+            @await Html.PartialAsync("_DefaultAppUI", view);
         }
         else
         {

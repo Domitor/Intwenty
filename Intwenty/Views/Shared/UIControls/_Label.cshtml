@@ -12,8 +12,20 @@ else if (Model.HasPropertyWithValue("SIZE", "H3"))
 {
     <h3>{{item.@Model.DataColumnDbName}}</h3>
 }
+else if (Model.HasPropertyWithValue("SIZE", "H4"))
+{
+    <h4>{{item.@Model.DataColumnDbName}}</h4>
+}
+else if (Model.HasPropertyWithValue("SIZE", "H5"))
+{
+    <h5>{{item.@Model.DataColumnDbName}}</h5>
+}
+else if (Model.HasPropertyWithValue("SIZE", "H6"))
+{
+    <h6>{{item.@Model.DataColumnDbName}}</h6>
+}
 else
 {
-    <h3>{{item.@Model.DataColumnDbName}}</h3>
+    <b>{{item.@Model.DataColumnDbName}}</b><br />
 }
 

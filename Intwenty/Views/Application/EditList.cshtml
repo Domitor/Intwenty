@@ -10,12 +10,12 @@
 
         @{
             var title = "";
-            var view = Model.UIStructure.Find(p => p.IsMetaTypeEditListView);
+            var view = Model.UIViews.Find(p => p.IsMetaTypeEditListView);
             if (view != null)
             {
                 title = view.Title;
             }
-           
+
         }
 
         <div class="card">
@@ -39,10 +39,10 @@
 
 
         <br />
-
+     
         @if (view != null)
         {
-            await Html.PartialAsync("_DefaultListView", view);
+            @await Html.PartialAsync("_DefaultListView", view);
         }
         else
         {

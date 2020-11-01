@@ -55,6 +55,18 @@ namespace Intwenty.Model
                 uiview.MetaType = v.MetaType;
                 uiview.ApplicationId = Application.Id;
 
+                if (v.IsMetaTypeEditListView)
+                {
+                    foreach (var liedcol in UIStructure.Where(p => p.IsMetaTypeEditListViewColumn && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.ColumnOrder))
+                    {
+                        if (!liedcol.IsDataColumnConnected)
+                            continue;
+                        if (!liedcol.IsDataTableConnected)
+                            continue;
+
+                        uiview.Columns.Add(liedcol);
+                    }
+                }
                 foreach (var sect in UIStructure.Where(p => p.IsMetaTypeSection && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                 {
                     var section = new UISection() { Properties = sect.Properties, Title = sect.Title };

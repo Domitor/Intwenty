@@ -40,7 +40,7 @@
 
     @if (view != null)
     {
-        await Html.PartialAsync("_DefaultAppUI", view);
+        @await Html.PartialAsync("_DefaultAppUI", view);
    }
     else
     {
