@@ -23,18 +23,23 @@ namespace Intwenty.Entity
         public string AppMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a DatabaseItem
+        /// Reference to a DataView
         /// </summary>
-        public string DataMetaCode { get; set; }
+        public string DataViewMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a DataViewItem
+        /// Reference to a DatabaseItems
         /// </summary>
-        public string ViewMetaCode { get; set; }
-
+        public string DataMetaCode { get; set; }
         public string DataMetaCode2 { get; set; }
 
-        public string ViewMetaCode2 { get; set; }
+        /// <summary>
+        /// Reference to a DataView Columns
+        /// </summary>
+        public string DataViewColumnMetaCode { get; set; }
+        public string DataViewColumn2MetaCode { get; set; }
+
+
 
         public string MetaCode { get; set; }
 

@@ -34,15 +34,14 @@ namespace Intwenty.Model.UIRendering
 
     public class UIComplexBinding : UIBinding, IUIComplexBinding
     {
-        public string DataViewName { get; set; }
-
+        public string DataViewMetaCode { get; set; }
+        public string DataViewTitle { get; set; }
         public string DomainName { get; set; }
-
         public string DataColumn2DbName { get; set; }
-
         public string DataViewColumnDbName{ get; set; }
-
+        public string DataViewColumnTitle { get; set; }
         public string DataViewColumn2DbName { get; set; }
+        public string DataViewColumn2Title { get; set; }
 
         public UIComplexBinding()
         {
@@ -51,11 +50,13 @@ namespace Intwenty.Model.UIRendering
             Title = "";
             DataColumnDbName = "";
             DataColumn2DbName = "";
-            DataViewName = "";
+            DataViewMetaCode = "";
             DomainName = "";
             DataViewColumnDbName = "";
             DataViewColumn2DbName = "";
-           
+            DataViewColumnTitle = "";
+            DataViewColumn2Title = "";
+
 
         }
     }

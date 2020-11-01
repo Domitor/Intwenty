@@ -33,18 +33,11 @@ namespace Intwenty.Interface
         bool IsMetaTypeEditGridStaticHTML { get; }
         bool IsMetaTypeEditGridEmailBox { get; }
         bool HasValueDomain { get; }
-        bool HasDataViewDomain { get; }
 
         //Optionals
         bool IsDataColumn2Connected { get; }
         bool IsDataViewColumn2Connected { get; }
 
-        DatabaseModelItem DataTableInfo { get; }
-        DatabaseModelItem DataColumnInfo { get;  }
-        DatabaseModelItem DataColumnInfo2 { get;  }
-        DataViewModelItem DataViewInfo { get;}
-        DataViewModelItem DataViewColumnInfo { get; }
-        DataViewModelItem DataViewColumnInfo2 { get; }
         List<IUIControl> Children { get; set; }
     }
 
@@ -53,8 +46,6 @@ namespace Intwenty.Interface
         int ColumnOrder { get; }
 
         bool IsMetaTypeImage { get; }
-        DatabaseModelItem DataColumnInfo { get; }
-
-
     }
+
 }

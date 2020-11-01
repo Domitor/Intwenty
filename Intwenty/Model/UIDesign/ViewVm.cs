@@ -95,7 +95,7 @@ namespace Intwenty.Model.UIDesign
                             {
                                 if (!string.IsNullOrEmpty(input.Domain))
                                 {
-                                    dto.Domain = "DATAVIEW." + input.Domain;
+                                    dto.DataViewMetaCode = input.Domain;
                                 }
 
                                 if (!string.IsNullOrEmpty(input.ColumnName))
@@ -109,7 +109,7 @@ namespace Intwenty.Model.UIDesign
                                 {
                                     var dmc = views.Find(p => p.SQLQueryFieldName == input.ViewColumnName && p.ParentMetaCode == input.Domain);
                                     if (dmc != null)
-                                        dto.ViewMetaCode = dmc.MetaCode;
+                                        dto.DataViewColumnMetaCode = dmc.MetaCode;
                                 }
 
                                 if (!string.IsNullOrEmpty(input.ColumnName2))
@@ -122,7 +122,7 @@ namespace Intwenty.Model.UIDesign
                                 {
                                     var dmc = views.Find(p => p.SQLQueryFieldName == input.ViewColumnName2 && p.ParentMetaCode == input.Domain);
                                     if (dmc != null)
-                                        dto.ViewMetaCode2 = dmc.MetaCode;
+                                        dto.DataViewColumn2MetaCode = dmc.MetaCode;
                                 }
                             }
 
@@ -190,7 +190,7 @@ namespace Intwenty.Model.UIDesign
                                             {
                                                 var dmc = views.Find(p => p.SQLQueryFieldName == tcol.ViewColumnName && p.ParentMetaCode == tcol.Domain);
                                                 if (dmc != null)
-                                                    column.ViewMetaCode = dmc.MetaCode;
+                                                    column.DataViewColumnMetaCode = dmc.MetaCode;
                                             }
                                         }
                                     }
@@ -412,7 +412,7 @@ namespace Intwenty.Model.UIDesign
                                 if (uic.IsUIComplexBindingType)
                                 {
 
-                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DataViewName, Properties = uic.Properties };
+                                    var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DataViewMetaCode, Properties = uic.Properties };
                                     input.BuildPropertyList();
 
                                     //TABLE ND COLUMN(S)
@@ -458,7 +458,7 @@ namespace Intwenty.Model.UIDesign
 
                                         if (gridcol.IsMetaTypeEditGridLookUp)
                                         {
-                                            child.Domain = gridcol.DataViewName;
+                                            child.Domain = gridcol.DataViewMetaCode;
 
                                             //VIEW CONNECTION
                                             if (gridcol.IsDataViewColumnConnected)

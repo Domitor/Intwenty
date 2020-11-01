@@ -69,9 +69,10 @@ namespace Intwenty.Model
             ColumnOrder = entity.ColumnOrder;
             RowOrder = entity.RowOrder;
             DataMetaCode = entity.DataMetaCode;
-            ViewMetaCode = entity.ViewMetaCode;
             DataMetaCode2 = entity.DataMetaCode2;
-            ViewMetaCode2 = entity.ViewMetaCode2;
+            DataViewMetaCode = entity.DataViewMetaCode;
+            DataViewColumnMetaCode = entity.DataViewColumnMetaCode;
+            DataViewColumn2MetaCode = entity.DataViewColumn2MetaCode;
             Domain = entity.Domain;
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
@@ -85,10 +86,11 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(ViewMetaCode2)) ViewMetaCode2 = string.Empty;
             if (string.IsNullOrEmpty(DataMetaCode2)) DataMetaCode2 = string.Empty;
+            if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumnMetaCode)) DataViewColumnMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn2MetaCode)) DataViewColumn2MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
@@ -101,14 +103,12 @@ namespace Intwenty.Model
         public string Description { get; set; }
 
         public string AppMetaCode { get; set; }
-
+        public string DataViewMetaCode { get; set; }
         public string DataMetaCode { get; set; }
-
-        public string ViewMetaCode { get; set; }
-
         public string DataMetaCode2 { get; set; }
+        public string DataViewColumnMetaCode { get; set; }
+        public string DataViewColumn2MetaCode { get; set; }
 
-        public string ViewMetaCode2 { get; set; }
 
         public int ColumnOrder { get; set; }
 
@@ -247,12 +247,12 @@ namespace Intwenty.Model
 
         public bool IsDataViewColumnConnected
         {
-            get { return (DataViewColumnInfo != null && !string.IsNullOrEmpty(ViewMetaCode)); }
+            get { return (DataViewColumnInfo != null && !string.IsNullOrEmpty(DataViewColumnMetaCode)); }
         }
 
         public bool IsDataViewColumn2Connected
         {
-            get { return (DataViewColumnInfo2 != null && !string.IsNullOrEmpty(ViewMetaCode2)); }
+            get { return (DataViewColumnInfo2 != null && !string.IsNullOrEmpty(DataViewColumn2MetaCode)); }
         }
 
         public bool HasValueDomain
@@ -260,26 +260,6 @@ namespace Intwenty.Model
             get { return Domain.Contains("VALUEDOMAIN."); }
         }
 
-        public bool HasDataViewDomain
-        {
-            get { return Domain.Contains(DataViewModelItem.MetaTypeDataView + "."); }
-        }
-
-        public string DataViewName
-        {
-            get
-            {
-                if (!HasDataViewDomain)
-                    return string.Empty;
-
-                var splits = Domain.Split(".".ToCharArray());
-                if (splits.Length >= 2)
-                    return splits[1];
-                else
-                    return string.Empty;
-                
-            }
-        }
 
         public string DomainName
         {
@@ -522,7 +502,18 @@ namespace Intwenty.Model
             }
         }
 
-      
+        public string DataViewTitle
+        {
+            get
+            {
+                if (IsDataViewConnected)
+                    return DataViewInfo.Title;
+
+                return string.Empty;
+            }
+        }
+
+
         public string DataViewColumnDbName
         {
             get
@@ -545,7 +536,27 @@ namespace Intwenty.Model
             }
         }
 
+        public string DataViewColumnTitle
+        {
+            get
+            {
+                if (IsDataViewColumnConnected)
+                    return DataViewColumnInfo.Title;
 
+                return string.Empty;
+            }
+        }
+
+        public string DataViewColumn2Title
+        {
+            get
+            {
+                if (IsDataViewColumn2Connected)
+                    return DataViewColumnInfo2.Title;
+
+                return string.Empty;
+            }
+        }
 
 
 

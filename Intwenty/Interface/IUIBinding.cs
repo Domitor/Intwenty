@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Intwenty.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,8 +29,11 @@ namespace Intwenty.Interface
 
     public interface IUIComplexBinding : IUIBinding
     {
+       
 
-        string DataViewName { get; }
+        string DataViewMetaCode { get; }
+
+        string DataViewTitle { get; }
 
         string DomainName { get; }
 
@@ -37,8 +41,14 @@ namespace Intwenty.Interface
 
         string DataViewColumnDbName { get; }
 
+        string DataViewColumnTitle{ get; }
+
         string DataViewColumn2DbName { get; }
 
-       
+        string DataViewColumn2Title { get; }
+
+
     }
+
+  
 }

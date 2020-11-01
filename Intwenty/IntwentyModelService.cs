@@ -644,21 +644,21 @@ namespace Intwenty
                                 item.DataColumnInfo2 = dinf;
                         }
 
-                        if (item.HasDataViewDomain)
+                        if (!string.IsNullOrEmpty(item.DataViewMetaCode))
                         {
-                            var vinf = views.Find(p => p.MetaCode == item.DataViewName && p.IsRoot);
+                            var vinf = views.Find(p => p.MetaCode == item.DataViewMetaCode && p.IsRoot);
                             if (vinf != null)
                                 item.DataViewInfo = vinf;
 
-                            if (!string.IsNullOrEmpty(item.ViewMetaCode))
+                            if (!string.IsNullOrEmpty(item.DataViewColumnMetaCode))
                             {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode && !p.IsRoot);
+                                vinf = views.Find(p => p.MetaCode == item.DataViewColumnMetaCode && !p.IsRoot);
                                 if (vinf != null)
                                     item.DataViewColumnInfo = vinf;
                             }
-                            if (!string.IsNullOrEmpty(item.ViewMetaCode2))
+                            if (!string.IsNullOrEmpty(item.DataViewColumn2MetaCode))
                             {
-                                vinf = views.Find(p => p.MetaCode == item.ViewMetaCode2 && !p.IsRoot);
+                                vinf = views.Find(p => p.MetaCode == item.DataViewColumn2MetaCode && !p.IsRoot);
                                 if (vinf != null)
                                     item.DataViewColumnInfo2 = vinf;
                             }
@@ -720,9 +720,10 @@ namespace Intwenty
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataMetaCode = uic.DataMetaCode;
                         existing.DataMetaCode2 = uic.DataMetaCode2;
-                        existing.ViewMetaCode = uic.ViewMetaCode;
-                        existing.ViewMetaCode2 = uic.ViewMetaCode2;
+                        existing.DataViewColumnMetaCode = uic.DataViewColumnMetaCode;
+                        existing.DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode;
                         existing.Domain = uic.Domain;
+                        existing.DataViewMetaCode = uic.DataViewMetaCode;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
                         Client.UpdateEntity(existing);
@@ -750,8 +751,9 @@ namespace Intwenty
                 ColumnOrder = dto.ColumnOrder,
                 DataMetaCode = dto.DataMetaCode,
                 DataMetaCode2 = dto.DataMetaCode2,
-                ViewMetaCode = dto.ViewMetaCode,
-                ViewMetaCode2 = dto.ViewMetaCode2,
+                DataViewMetaCode = dto.DataViewMetaCode,
+                DataViewColumnMetaCode = dto.DataViewColumnMetaCode,
+                DataViewColumn2MetaCode = dto.DataViewColumn2MetaCode,
                 Description = dto.Description,
                 Domain = dto.Domain,
                 MetaCode = dto.MetaCode,

@@ -19,7 +19,7 @@
                 @{
                     foreach (var c in Model.Columns)
                     {
-                        <option value="@c.DataColumnInfo.DbName">@c.Title</option>
+                        <option value="@c.DataColumnDbName">@c.Title</option>
                     }
                 }
             </select>
@@ -38,7 +38,7 @@
             @{
                 foreach (var c in Model.Columns)
                 {
-                    <th v-on:click="sortBycolumn('@c.DataColumnInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
+                    <th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
 
                 }
             }
@@ -54,12 +54,12 @@
                 if (c.IsMetaTypeImage)
                 {
                     <td>
-                        <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80" class="rounded" />
+                        <img v-bind:src="item.@c.DataColumnDbName" width="80" class="rounded" />
                     </td>
                 }
                 else
                 {
-                    <td>{{item.@c.DataColumnInfo.DbName}}</td>
+                    <td>{{item.@c.DataColumnDbName}}</td>
                 }
              }
 

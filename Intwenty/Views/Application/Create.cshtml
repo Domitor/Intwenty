@@ -91,7 +91,7 @@
                     if (response.isSuccess) {
                         context.model['@Model.Application.DbName'].Id = response.id;
                         context.model['@Model.Application.DbName'].Version = response.version;
-                        endpointurl = '@Url.Content("~/Application/GetList")' + "/@Model.Application.Id";
+                        endpointurl = '@Url.Content("~/Application/EditList")' + "/@Model.Application.Id";
                         window.location.href = endpointurl;
                     }
                     else {
