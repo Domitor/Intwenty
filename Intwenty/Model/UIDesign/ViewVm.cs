@@ -105,9 +105,9 @@ namespace Intwenty.Model.UIDesign
                                         dto.DataMetaCode = dmc.MetaCode;
                                 }
 
-                                if (!string.IsNullOrEmpty(input.ViewColumnName))
+                                if (!string.IsNullOrEmpty(input.DataViewColumnName))
                                 {
-                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.ViewColumnName && p.ParentMetaCode == input.Domain);
+                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumnName && p.ParentMetaCode == input.DataViewMetaCode);
                                     if (dmc != null)
                                         dto.DataViewColumnMetaCode = dmc.MetaCode;
                                 }
@@ -118,9 +118,9 @@ namespace Intwenty.Model.UIDesign
                                     if (dmc != null)
                                         dto.DataMetaCode2 = dmc.MetaCode;
                                 }
-                                if (!string.IsNullOrEmpty(input.ViewColumnName2))
+                                if (!string.IsNullOrEmpty(input.DataViewColumnName2))
                                 {
-                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.ViewColumnName2 && p.ParentMetaCode == input.Domain);
+                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumnName2 && p.ParentMetaCode == input.DataViewMetaCode);
                                     if (dmc != null)
                                         dto.DataViewColumn2MetaCode = dmc.MetaCode;
                                 }
@@ -186,9 +186,9 @@ namespace Intwenty.Model.UIDesign
                                                 column.Domain = "DATAVIEW." + tcol.Domain;
                                             }
 
-                                            if (!string.IsNullOrEmpty(tcol.ViewColumnName))
+                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName))
                                             {
-                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.ViewColumnName && p.ParentMetaCode == tcol.Domain);
+                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.DataViewColumnName && p.ParentMetaCode == tcol.DataViewMetaCode);
                                                 if (dmc != null)
                                                     column.DataViewColumnMetaCode = dmc.MetaCode;
                                             }
@@ -425,10 +425,11 @@ namespace Intwenty.Model.UIDesign
                                     }
 
                                     //VIEW CONNECTION
+                                    input.DataViewMetaCode = uic.DataViewMetaCode;
                                     if (uic.IsDataViewColumnConnected)
-                                        input.ViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
+                                        input.DataViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
                                     if (uic.IsDataViewColumn2Connected)
-                                        input.ViewColumnName2 = uic.DataViewColumnInfo2.SQLQueryFieldName;
+                                        input.DataViewColumnName2 = uic.DataViewColumnInfo2.SQLQueryFieldName;
 
                                     lr.UserInputs.Add(input);
                                 }
@@ -441,28 +442,27 @@ namespace Intwenty.Model.UIDesign
                                         input.TableName = uic.DataTableInfo.TableName;
 
                                     //COLUMNS
-                                    foreach (var gridcol in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                                    foreach (var gridcol in app.UIStructure.Where(p=> p.ParentMetaCode == input.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                                     {
-                                        if (gridcol.ParentMetaCode != input.MetaCode)
-                                            continue;
-
                                         var child = new UserInput() { Id = gridcol.Id, ApplicationId = app.Application.Id, ColumnOrder = gridcol.ColumnOrder, RowOrder = gridcol.RowOrder, MetaCode = gridcol.MetaCode, MetaType = gridcol.MetaType, Title = gridcol.Title, ParentMetaCode = gridcol.ParentMetaCode, Domain = gridcol.DomainName, Properties = gridcol.Properties };
                                         child.BuildPropertyList();
                                         input.Children.Add(child);
 
+                                        child.TableName = input.TableName;
+
                                         if (gridcol.IsDataColumnConnected)
-                                        {
                                             child.ColumnName = gridcol.DataColumnInfo.ColumnName;
-                                            child.TableName = gridcol.DataColumnInfo.TableName;
-                                        }
+                                        if (gridcol.IsDataColumn2Connected)
+                                            child.ColumnName2 = gridcol.DataColumnInfo2.ColumnName;
 
                                         if (gridcol.IsMetaTypeEditGridLookUp)
                                         {
-                                            child.Domain = gridcol.DataViewMetaCode;
-
                                             //VIEW CONNECTION
+                                            child.DataViewMetaCode = gridcol.DataViewMetaCode;
                                             if (gridcol.IsDataViewColumnConnected)
-                                                child.ViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
+                                                child.DataViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
+                                            if (gridcol.IsDataViewColumn2Connected)
+                                                child.DataViewColumnName2 = gridcol.DataViewColumnInfo2.SQLQueryFieldName;
 
                                         }
 
@@ -611,14 +611,16 @@ namespace Intwenty.Model.UIDesign
         public string TableName { get; set; }
         public string ColumnName { get; set; }
         public string ColumnName2 { get; set; }
-        public string ViewColumnName { get; set; }
-        public string ViewColumnName2 { get; set; }
+        public string DataViewMetaCode { get; set; }
+        public string DataViewColumnName { get; set; }
+        public string DataViewColumnName2 { get; set; }
 
         public string MetaType { get; set; }
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string RawHTML { get; set; }
         public string Domain { get; set; }
+      
         public bool IsRemoved { get; set; }
 
         public List<UserInput> Children { get; set; }
@@ -635,8 +637,9 @@ namespace Intwenty.Model.UIDesign
             ParentMetaCode = "";
             ColumnName = "";
             ColumnName2 = "";
-            ViewColumnName = "";
-            ViewColumnName2 = "";
+            DataViewColumnName = "";
+            DataViewColumnName2 = "";
+            DataViewMetaCode = "";
             Domain = "";
             RawHTML = "";
             Children = new List<UserInput>();

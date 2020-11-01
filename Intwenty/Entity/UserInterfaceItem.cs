@@ -28,7 +28,7 @@ namespace Intwenty.Entity
         public string DataViewMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a DatabaseItems
+        /// Reference to a DatabaseItems (Table / Columns)
         /// </summary>
         public string DataMetaCode { get; set; }
         public string DataMetaCode2 { get; set; }
