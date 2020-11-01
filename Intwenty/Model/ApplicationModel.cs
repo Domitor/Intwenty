@@ -53,6 +53,7 @@ namespace Intwenty.Model
                 var uiview = new UIView();
                 uiview.Title = v.Title;
                 uiview.MetaType = v.MetaType;
+                uiview.ApplicationId = Application.Id;
 
                 foreach (var sect in UIStructure.Where(p => p.IsMetaTypeSection && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                 {
@@ -69,7 +70,16 @@ namespace Intwenty.Model
                             if (ctrl.IsMetaTypePanel || ctrl.IsMetaTypeSection || ctrl.IsUIViewType)
                                 continue;
 
-                            if (ctrl.IsMetaTypeLookUp || ctrl.IsMetaTypeEditGridLookUp)
+                            if ((ctrl.IsUIBindingType || ctrl.IsUIComplexBindingType) && (!ctrl.IsDataColumnConnected || !ctrl.IsDataTableConnected))
+                                continue;
+
+                            if (ctrl.IsUIComplexBindingType && (!ctrl.IsDataViewColumnConnected || !ctrl.IsDataViewConnected))
+                                continue;
+
+                            if (ctrl.IsMetaTypeEditGrid && !ctrl.IsDataTableConnected)
+                                continue;
+
+                            if (ctrl.IsMetaTypeLookUp)
                                 uiview.Modals.Add(ctrl);
 
 
@@ -79,6 +89,14 @@ namespace Intwenty.Model
                                 foreach (var col in UIStructure.Where(p => p.ParentMetaCode == ctrl.MetaCode && (p.IsEditGridUIBindingType || 
                                                                                                                  p.IsEditGridUIComplexBindingType)).OrderBy(p => p.ColumnOrder))
                                 {
+                                    if (!col.IsDataTableConnected || !col.IsDataColumnConnected)
+                                        continue;
+                                    if (ctrl.IsEditGridUIComplexBindingType && (!col.IsDataViewColumnConnected || !col.IsDataViewConnected))
+                                        continue;
+
+                                    if (ctrl.IsMetaTypeEditGridLookUp)
+                                        uiview.Modals.Add(ctrl);
+
                                     ctrl.Children.Add(col);
                                 }
 

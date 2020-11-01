@@ -22,55 +22,55 @@
 
                     @foreach (var t in pl.Controls)
                     {
-                        if (t.IsMetaTypeTextBox && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeTextBox)
                         {
                             @await Html.PartialAsync("UIControls/_TextBox", t)
                         }
 
-                        if (t.IsMetaTypeNumBox && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeNumBox)
                         {
                             @await Html.PartialAsync("UIControls/_NumBox", t)
 
                         }
 
-                        if (t.IsMetaTypeDatePicker && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeDatePicker)
                         {
                             @await Html.PartialAsync("UIControls/_DatePicker", t)
 
                         }
 
-                        if (t.IsMetaTypeCheckBox && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeCheckBox)
                         {
                             @await Html.PartialAsync("UIControls/_CheckBox", t)
 
                         }
 
-                        if (t.IsMetaTypeTextArea && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeTextArea)
                         {
                             @await Html.PartialAsync("UIControls/_TextArea", t)
 
                         }
 
-                        if (t.IsMetaTypeComboBox && t.IsDataColumnConnected && t.HasValueDomain)
+                        if (t.IsMetaTypeComboBox && t.HasValueDomain)
                         {
                             @await Html.PartialAsync("UIControls/_ComboBox", t)
 
                         }
 
-                        if (t.IsMetaTypeImageBox && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeImageBox)
                         {
                             @await Html.PartialAsync("UIControls/_ImageBox", t)
 
                         }
 
-                        if (t.IsMetaTypeEmailBox && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeEmailBox)
                         {
                             @await Html.PartialAsync("UIControls/_EmailBox", t)
 
                         }
 
                         //LOOKUP bound to DATAVIEW
-                        if (t.IsMetaTypeLookUp && t.IsDataViewConnected && t.IsDataColumnConnected && t.IsDataViewColumnConnected)
+                        if (t.IsMetaTypeLookUp)
                         {
                             @await Html.PartialAsync("UIControls/_LookUp", t)
 
@@ -78,13 +78,13 @@
                             <br />
                         }
 
-                        if (t.IsMetaTypeLabel && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeLabel)
                         {
                             @await Html.PartialAsync("UIControls/_Label", t)
 
                         }
 
-                        if (t.IsMetaTypeTextBlock && t.IsDataColumnConnected)
+                        if (t.IsMetaTypeTextBlock)
                         {
                             @await Html.PartialAsync("UIControls/_TextBlock", t)
 
@@ -115,12 +115,12 @@
 
                                     @foreach (var tf in t.Children)
                                     {
-                                        if (tf.IsMetaTypeEditGridTextBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridTextBox)
                                         {
                                             <td><input type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_TEXTBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.IsMetaTypeEditGridLookUp && tf.IsDataColumnConnected && tf.IsDataViewColumnConnected && tf.IsDataViewConnected)
+                                        if (tf.IsMetaTypeEditGridLookUp)
                                         {
                                             <td>
                                                 <div class="form form-inline">
@@ -130,17 +130,17 @@
                                             </td>
                                         }
 
-                                        if (tf.IsMetaTypeEditGridNumBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridNumBox)
                                         {
                                             <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_NUMBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.IsMetaTypeEditGridDatePicker && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridDatePicker)
                                         {
                                             <td><input type="number" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_DATEPICKER" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
 
-                                        if (tf.IsMetaTypeEditGridComboBox && tf.IsDataColumnConnected && tf.HasValueDomain)
+                                        if (tf.IsMetaTypeEditGridComboBox && tf.HasValueDomain)
                                         {
                                             <td>
                                                 <select v-model="item.@tf.DataColumnDbName" class="form-control form-control-sm" v-on:change="onUserInput(event)" data-metatype="EDITGRID_COMBOBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory">
@@ -149,7 +149,7 @@
                                             </td>
                                         }
 
-                                        if (tf.IsMetaTypeEditGridCheckBox && tf.IsDataColumnConnected)
+                                        if (tf.IsMetaTypeEditGridCheckBox)
                                         {
                                             <td><input type="checkbox" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:input="onUserInput(event)" data-metatype="EDITGRID_CHECKBOX" data-dbfield="@tf.DataColumnDbName" data-required="@tf.Mandatory" /></td>
                                         }
@@ -180,8 +180,7 @@
 
     @foreach (var t in Model.Modals)
     {
-        if ((t.IsMetaTypeLookUp || t.IsMetaTypeEditGridLookUp) && t.IsDataViewConnected)
-        {
+       
             <!-- Modal -->
             <div class="modal fade" id="@t.DataViewName" role="dialog">
                 <div class="modal-dialog">
@@ -203,11 +202,7 @@
                                         <label class="control-label">Filter</label>
                                         <select v-model="viewretrieveinfo.filterField" class="form-control form-control-sm">
                                             @{
-
-                                                if (t.IsDataViewColumnConnected)
-                                                {
-                                                    <option value="@t.DataViewColumnInfo.SQLQueryFieldName">@t.DataViewColumnInfo.Title</option>
-                                                }
+                                               <option value="@t.DataViewColumnInfo.SQLQueryFieldName">@t.DataViewColumnInfo.Title</option>
                                                 if (t.IsDataViewColumn2Connected)
                                                 {
                                                     <option value="@t.DataViewColumnInfo2.SQLQueryFieldName">@t.DataViewColumnInfo2.Title</option>
@@ -237,8 +232,7 @@
                                         <tr v-for="item in dataview">
 
 
-                                            @if (t.IsDataViewColumnConnected)
-                                            {
+                                           
                                                 <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.UIId')" data-dismiss="modal">{{item.@t.DataViewColumnInfo.SQLQueryFieldName}}</a></td>
                                                 @foreach (var viewcol in dataviewmodels)
                                                 {
@@ -248,9 +242,6 @@
                                                     }
 
                                                 }
-                                            }
-
-
 
 
                                         </tr>
@@ -270,7 +261,7 @@
                     </div>
                 </div>
             </div>
-        }
+        
     }
 
 

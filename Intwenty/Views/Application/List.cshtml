@@ -8,25 +8,27 @@
 
     @{
         var title = "";
-        var lv = Model.UIStructure.Find(p => p.IsMetaTypeListView);
-        if (lv != null)
+        var view = Model.UIStructure.Find(p => p.IsMetaTypeListView);
+        if (view != null)
         {
-            title = lv.Title;
+            title = view.Title;
 
         }
-        else
-        {
-            <h3>There's no 'list' view model defined for this application yet.</h3>
-            return;
-
-        }
+       
 
         ViewData["Title"] = title;
     }
 
     <article v-for="item in datalist">
 
-        @await Html.PartialAsync("_DefaultAppUI", Model)
+        @if (view != null)
+        {
+            await Html.PartialAsync("_DefaultAppUI", view);
+        }
+        else
+        {
+            <h3>There's no 'list' view model defined for this application yet.</h3>
+        }
 
     </article>
 

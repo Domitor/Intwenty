@@ -10,16 +10,12 @@
 
         @{
             var title = "";
-            var lv = Model.UIStructure.Find(p => p.IsMetaTypeEditListView);
-            if (lv != null)
+            var view = Model.UIStructure.Find(p => p.IsMetaTypeEditListView);
+            if (view != null)
             {
-                title = lv.Title;
+                title = view.Title;
             }
-            else
-            {
-                <h3>There's no 'edit list' view model defined for this application yet.</h3>
-                return;
-            }
+           
         }
 
         <div class="card">
@@ -44,10 +40,16 @@
 
         <br />
 
+        @if (view != null)
+        {
+            await Html.PartialAsync("_DefaultListView", view);
+        }
+        else
+        {
+            <h3>There's no 'edit list' view model defined for this application yet.</h3>
+        }
 
 
-
-        @await Html.PartialAsync("_DefaultListView", Model)
 
     </div>
 </div>

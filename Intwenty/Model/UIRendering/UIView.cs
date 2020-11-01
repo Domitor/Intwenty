@@ -8,6 +8,7 @@ namespace Intwenty.Model.UIRendering
 
     public class UIView
     {
+        public int ApplicationId { get; set; }
         public string MetaType { get; set; }
         public string Title { get; set; }
         public List<UISection>  Sections { get; set; }

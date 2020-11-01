@@ -11,11 +11,11 @@
     else
     {
         view = Model.UIStructure.Find(p => p.IsMetaTypeCreateView);
-        if (view == null)
+        if (view != null)
         {
-            <h3>There's no 'edit' view model defined for this application yet.</h3>
+            title = view.Title;
         }
-       
+
     }
 
     ViewData["Title"] = title;
@@ -46,7 +46,14 @@
     <br />
 
 
-    @await Html.PartialAsync("_DefaultAppUI", Model)
+    @if (view != null)
+    {
+        await Html.PartialAsync("_DefaultAppUI", view);
+    }
+    else
+    {
+        <h3>There's no 'edit' view model defined for this application yet.</h3>
+    }
 
 
 </div>

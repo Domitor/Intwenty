@@ -7,12 +7,8 @@
     if (view != null)
     {
         title = view.Title;
-        <h3>TODO: DETAIL UI (DETAILVIEW)</h3>
     }
-    else
-    {
-        <h3>There's no 'detail' view model defined for this application yet.</h3>
-    }
+    
 
     ViewData["Title"] = title;
 
@@ -24,9 +20,14 @@
 
 <div id="app">
 
-
-
-
+    @if (view != null)
+    {
+        await Html.PartialAsync("_DefaultAppUI", view);
+    }
+    else
+    {
+        <h3>There's no 'detail' view model defined for this application yet.</h3>
+    }
 </div>
 
 @section Scripts

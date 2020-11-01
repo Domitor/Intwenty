@@ -1,6 +1,6 @@
-﻿@model Intwenty.Model.ApplicationModel
+﻿@model Intwenty.Model.UIRendering.UIView
 
-@if (!Model.UIStructure.Exists(p => p.HasPropertyWithValue("HIDEFILTER", "TRUE")))
+@if (!Model.Columns.Exists(p => p.HasPropertyWithValue("HIDEFILTER", "TRUE")))
 {
 <div class="row">
     <div class="col-lg-3"></div>
@@ -17,14 +17,9 @@
             <label class="control-label">Filter</label>
             <select v-model="model.filterfield" class="form-control form-control-sm">
                 @{
-                    foreach (var c in Model.UIStructure)
+                    foreach (var c in Model.Columns)
                     {
-
-                        if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
-                        {
-                            <option value="@c.DataColumnInfo.DbName">@c.Title</option>
-                        }
-
+                        <option value="@c.DataColumnInfo.DbName">@c.Title</option>
                     }
                 }
             </select>
@@ -41,13 +36,9 @@
             <th style="width:5%"></th>
             <th style="width:5%"></th>
             @{
-                foreach (var c in Model.UIStructure)
+                foreach (var c in Model.Columns)
                 {
-
-                    if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
-                    {
-                        <th v-on:click="sortBycolumn('@c.DataColumnInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
-                    }
+                    <th v-on:click="sortBycolumn('@c.DataColumnInfo.DbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
 
                 }
             }
@@ -55,14 +46,13 @@
     </thead>
     <tr v-for="item in sortedResults">
         <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
-        <td style="vertical-align:middle"><a v-bind:href="'/Application/Edit/@Model.Application.Id/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+        <td style="vertical-align:middle"><a v-bind:href="'/Application/Edit/@Model.ApplicationId/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
         @{
-            foreach (var c in Model.UIStructure)
+            foreach (var c in Model.Columns)
             {
 
-                if (c.IsMetaTypeEditListViewColumn && c.IsDataColumnConnected)
-                {
-                    if (c.HasProperty("IMAGE"))
+              
+                    if (c.IsMetaTypeImage)
                     {
                         <td>
                             <img v-bind:src="item.@c.DataColumnInfo.DbName" width="80" class="rounded" />

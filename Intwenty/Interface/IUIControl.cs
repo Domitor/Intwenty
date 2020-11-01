@@ -32,14 +32,16 @@ namespace Intwenty.Interface
         bool IsMetaTypeEditGridLookUp { get; }
         bool IsMetaTypeEditGridStaticHTML { get; }
         bool IsMetaTypeEditGridEmailBox { get; }
-        bool IsDataTableConnected { get; }
-        bool IsDataColumnConnected { get; }
-        bool IsDataColumn2Connected { get; }
-        bool IsDataViewConnected { get; }
-        bool IsDataViewColumnConnected { get; }
-        bool IsDataViewColumn2Connected { get; }
         bool HasValueDomain { get; }
         bool HasDataViewDomain { get; }
+
+        //Optionals
+        bool IsDataColumn2Connected { get; }
+        bool IsDataViewColumn2Connected { get; }
+
+        DatabaseModelItem DataTableInfo { get; }
+        DatabaseModelItem DataColumnInfo { get;  }
+        DatabaseModelItem DataColumnInfo2 { get;  }
         DataViewModelItem DataViewInfo { get;}
         DataViewModelItem DataViewColumnInfo { get; }
         DataViewModelItem DataViewColumnInfo2 { get; }
@@ -49,7 +51,10 @@ namespace Intwenty.Interface
     public interface IEditListViewColumn : IUIBinding
     {
         int ColumnOrder { get; }
-       
+
+        bool IsMetaTypeImage { get; }
+        DatabaseModelItem DataColumnInfo { get; }
+
 
     }
 }
