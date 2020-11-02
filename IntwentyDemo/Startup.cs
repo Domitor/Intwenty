@@ -31,29 +31,34 @@ namespace IntwentyDemo
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            //Settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
         }
 
         public IConfiguration Configuration { get; }
 
-        //public IntwentySettings Settings { get; }
-
         public void ConfigureServices(IServiceCollection services)
         {
 
+            //Default IntwentyDataService
+            //services.AddIntwenty<IntwentyDataService>(Configuration);
+
+            //Customized IntwentyDataService
             services.AddIntwenty<CustomDataService>(Configuration);
 
+            //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
             services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                 {
                     policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    //policy.RequireRole(new string[] { "USER" });
                 });
 
                 options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
                 {
                     policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    //policy.RequireRole(new string[] { "ADMINISTRATOR" });
+
                 });
             });
 
@@ -77,7 +82,7 @@ namespace IntwentyDemo
                 app.UseHsts();
             }
 
-
+            //Set up everything related to intwenty
             app.UseIntwenty();
 
         }
