@@ -99,6 +99,7 @@ client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType
 - asp.net core 3.1
 - Microsoft.AspNetCore.Mvc 2.2.0
 - Intwenty.DataClient
+- Swashbuckle.AspNetCore 5.6.3
 
 # Frontend Dependencies
 - bootstrap 4.3.7
