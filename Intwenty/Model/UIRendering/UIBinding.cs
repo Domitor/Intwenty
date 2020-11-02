@@ -19,7 +19,9 @@ namespace Intwenty.Model.UIRendering
 
         public string DataColumnDbName{ get; set; }
 
-        public string RawHTML { get; }
+        public string RawHTML { get; set; }
+
+        public string JavaScriptObjectName { get; set; }
 
         public UIBinding()
         {

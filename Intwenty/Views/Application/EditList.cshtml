@@ -9,11 +9,13 @@
 
 
         @{
+            var pagesize = 20;
             var title = "";
             var view = Model.UIViews.Find(p => p.IsMetaTypeEditListView);
             if (view != null)
             {
                 title = view.Title;
+                pagesize = view.PageSize;
             }
 
         }
@@ -29,7 +31,12 @@
                     <li class="nav-item">
                         <a href="#" v-on:click="exportToExcel()" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</a>
                     </li>
-
+                    @if (Model.HasListView)
+                    {
+                        <li class="nav-item">
+                            <a asp-action="List" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px">Presentation</a>
+                        </li>
+                    }
                 </ul>
 
             </div>
@@ -58,8 +65,8 @@
 {
     
     <script>
-       
-        var app = getEditListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")');
+
+        var app = getEditListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")', @pagesize);
 
 
     </script>

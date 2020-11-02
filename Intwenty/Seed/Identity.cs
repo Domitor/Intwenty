@@ -9,7 +9,7 @@ using Intwenty.Model;
 
 namespace Intwenty.Seed
 {
-    public static class SeedIdentity
+    public static class Identity
     {
 
 

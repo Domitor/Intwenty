@@ -62,6 +62,9 @@
                 <div class="btn btn-sm btn-secondary" v-on:click="addSection">
                     <i class="fa fa-plus"></i> Add section
                 </div>
+                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings">
+                    <i class="fa fa-cog"></i> View Settings
+                </div>
                 <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI" style="float:right">
                     <i class="fa fa-save"></i> Save changes
                 </div>
@@ -570,6 +573,12 @@
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
                 },
+                openViewSettings() {
+                    this.active_setting_input = this.model;
+                    this.initializePropertyUI(this.active_setting_input);
+                    this.$forceUpdate();
+                    $("#ui_setting_modal").modal();
+                },
                 addLayoutRow: function (sect)
                 {
                     var new_row_order = 0;
@@ -845,6 +854,11 @@
                 {
                     if (this.active_setting_input.metaType == "EDITGRID" || 
                         this.active_setting_input.metaType == "STATICHTML" ||
+                        this.active_setting_input.metaType == "CREATEVIEW" ||
+                        this.active_setting_input.metaType == "EDITVIEW" ||
+                        this.active_setting_input.metaType == "LISTVIEW" ||
+                        this.active_setting_input.metaType == "EDITLISTVIEW" ||
+                        this.active_setting_input.metaType == "DETAILVIEW" ||
                         this.active_setting_input.metaType == "EDITGRID_STATICHTML")
                         return false;
 

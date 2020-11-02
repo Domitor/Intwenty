@@ -124,6 +124,17 @@ namespace Intwenty.Model
 
         }
 
+        public int GetAsInt(string propertyname)
+        {
+            try
+            {
+                var res = GetPropertyValue(propertyname);
+                return Convert.ToInt32(res);
+            }
+            catch { }
+
+            return 0;
+        }
       
 
         public string GetPropertyValue(string propertyname)

@@ -12,7 +12,7 @@ using Intwenty.Interface;
 
 namespace Intwenty.Seed
 {
-    public static class SeedSalesOrderDemoModel
+    public static class DemoModel
     {
      
 
@@ -20,8 +20,7 @@ namespace Intwenty.Seed
         {
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.SeedDatabaseOnStartUp ||
-                !Settings.Value.ReCreateDatabaseOnStartup)
+            if (!Settings.Value.SeedDatabaseOnStartUp)
                 return;
 
             var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
@@ -189,21 +188,33 @@ namespace Intwenty.Seed
 
 
             //UI
-            /*
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "CREATEVIEW", MetaCode = "ADDEDITVIEW", DataMetaCode = "", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "SECTION", MetaCode = "MAINSECTION", DataMetaCode = "", Title = "Sales Header", ParentMetaCode = "ADDEDITVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "PANEL", MetaCode = "PNL1", DataMetaCode = "", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "TEXTBOX", MetaCode = "TB_VENDID", DataMetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "TEXTBOX", MetaCode = "TB_VENDNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
-            */
+            //CREATE  - UPDATE
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "CREATEVIEW", MetaCode = "ADDEDITVIEW", Title = "Add a new article", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "Article", ParentMetaCode = "ADDEDITVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "PANEL", MetaCode = "PNL1", Title = "", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "TEXTBOX", MetaCode = "TB_HEADER", DataColumn1MetaCode = "POSTHEADER", Title = "Article Header", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "TEXTAREA", MetaCode = "TB_TEXT", DataColumn1MetaCode = "POSTTEXT", Title = "Article Text", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "PANEL", MetaCode = "PNL2", Title = "", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "IMAGEBOX", MetaCode = "IMGBOX_ARTIMAGE", DataColumn1MetaCode = "POSTIMAGE", Title = "Image", ParentMetaCode = "PNL2", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+
+            //LIST (Presentation)
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "LISTVIEW", MetaCode = "ARTLISTVIEW", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "SECTION", MetaCode = "LVSECTION", Title = "", ParentMetaCode = "ARTLISTVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "PANEL", MetaCode = "LVPANEL", Title = "", ParentMetaCode = "LVSECTION", RowOrder = 1, ColumnOrder = 1 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "IMAGE", MetaCode = "LV_POSTIMAGE", DataColumn1MetaCode = "POSTIMAGE", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "LABEL", MetaCode = "LV_POSTLABEL", DataColumn1MetaCode = "POSTHEADER", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 2, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "TEXTBLOCK", MetaCode = "LV_POSTTEXT", DataColumn1MetaCode = "POSTTEXT", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 3, ColumnOrder = 1, Properties = "" });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "PANEL", MetaCode = "LVRIGHTPANEL", Title = "", ParentMetaCode = "LVSECTION", RowOrder = 1, ColumnOrder = 2 });
+
+
+
             //EDITLISTVIEW
-            /*
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "EDITLISTVIEW", MetaCode = "MAIN_EDITLISTVIEW", DataMetaCode = "", Title = "Vendor List", TitleLocalizationKey = "VENDORLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_ID", DataMetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 1 });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_VENDID", DataMetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
-            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "VENDOR", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_VENDNAME", DataMetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 3 });
-            */
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "EDITLISTVIEW", MetaCode = "MAIN_EDITLISTVIEW", Title = "Articles", TitleLocalizationKey = "", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "ELV_ID", DataColumn1MetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "BLOGAPP", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "ELV_POSTHEADER", DataColumn1MetaCode = "POSTHEADER", Title = "Article Header", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+
             #endregion
+
 
             #region dataviews
             //DATAVIEWS

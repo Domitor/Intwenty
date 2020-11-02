@@ -11,7 +11,7 @@ using Intwenty.DataClient;
 
 namespace Intwenty.Seed
 {
-    public static class SeedDefaultLocalization
+    public static class DefaultLocalization
     {
 
 

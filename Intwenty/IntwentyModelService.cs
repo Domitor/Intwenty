@@ -1488,7 +1488,7 @@ namespace Intwenty
 
                     if (!ui.IsMetaTypeEditGrid)
                     {
-                        if (!ui.IsDataColumn1Connected)
+                        if (!ui.IsDataColumn1Connected && !ui.IsUIContainerType)
                             res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataColumn1MetaCode].", new object[] { ui.Title, a.Application.Title }));
                     }
                     else

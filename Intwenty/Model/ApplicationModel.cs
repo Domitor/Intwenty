@@ -38,6 +38,51 @@ namespace Intwenty.Model
             get { return GetUIViews(); }
         }
 
+        public bool HasCreateView
+        {
+            get 
+            { 
+                return GetUIViews().Exists(p=> p.IsMetaTypeCreateView); 
+            }
+
+        }
+
+        public bool HasEditView
+        {
+            get
+            {
+                return GetUIViews().Exists(p => p.IsMetaTypeEditView);
+            }
+
+        }
+
+        public bool HasEditListView
+        {
+            get
+            {
+                return GetUIViews().Exists(p => p.IsMetaTypeEditListView);
+            }
+
+        }
+
+        public bool HasDetailView
+        {
+            get
+            {
+                return GetUIViews().Exists(p => p.IsMetaTypeDetailView);
+            }
+
+        }
+
+        public bool HasListView
+        {
+            get
+            {
+                return GetUIViews().Exists(p => p.IsMetaTypeListView);
+            }
+
+        }
+
 
         private List<UIView> GetUIViews()
         {
@@ -54,6 +99,12 @@ namespace Intwenty.Model
                 uiview.Title = v.Title;
                 uiview.MetaType = v.MetaType;
                 uiview.ApplicationId = Application.Id;
+                uiview.Properties = v.Properties;
+
+                if (uiview.HasProperty("PAGESIZE"))
+                    uiview.PageSize = uiview.GetAsInt("PAGESIZE");
+                if (uiview.PageSize == 0)
+                    uiview.PageSize = 20; //DEFAULT
 
                 if (v.IsMetaTypeEditListView)
                 {
@@ -64,6 +115,7 @@ namespace Intwenty.Model
                         if (!liedcol.IsDataTableConnected)
                             continue;
 
+                        liedcol.JavaScriptObjectName = "item";
                         uiview.Columns.Add(liedcol);
                     }
                 }
@@ -72,7 +124,7 @@ namespace Intwenty.Model
                     var section = new UISection() { Properties = sect.Properties, Title = sect.Title };
                     foreach (var pnl in UIStructure.Where(p => p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
-                        var panel = new UIPanel() { Properties = sect.Properties, Title = sect.Title };
+                        var panel = new UIPanel() { Properties = pnl.Properties, Title = pnl.Title };
                         if (!string.IsNullOrEmpty(panel.Title) && (uiview.IsMetaTypeCreateView || uiview.IsMetaTypeEditView))
                             panel.UseFieldSet = true;
                       
@@ -90,6 +142,11 @@ namespace Intwenty.Model
 
                             if (ctrl.IsMetaTypeEditGrid && !ctrl.IsDataTableConnected)
                                 continue;
+
+                            if (v.IsMetaTypeDetailView || v.IsMetaTypeCreateView || v.IsMetaTypeEditView)
+                                ctrl.JavaScriptObjectName = "model";
+                            if (v.IsMetaTypeEditListView || v.IsMetaTypeListView)
+                                ctrl.JavaScriptObjectName = "item";
 
                             if (ctrl.IsMetaTypeLookUp)
                                 uiview.Modals.Add(ctrl);

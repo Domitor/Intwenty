@@ -463,16 +463,17 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
 
 
 
-function getEditListView(vueelement, applicationid, baseurl)
+function getEditListView(vueelement, applicationid, baseurl, pagesize)
 {
-
+    if (!pagesize)
+        pagesize = 20;
 
     var app = new Vue({
         el: vueelement,
         data: {
             datalist: []
             , model: { "filtervalue": "", "filterfield": "" }
-            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterField": "", "filterValue": "" }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -607,16 +608,17 @@ function getEditListView(vueelement, applicationid, baseurl)
     return app;
 };
 
-function getListView(vueelement, applicationid, baseurl)
+function getListView(vueelement, applicationid, baseurl, pagesize)
 {
-
+    if (!pagesize)
+        pagesize = 20;
 
     var app = new Vue({
         el: vueelement,
         data: {
             datalist: []
             , model: { "filtervalue": "", "filterfield": "" }
-            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": 20, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , listRetrieveInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "listViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterField": "", "filterValue": "" }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl

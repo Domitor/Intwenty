@@ -24,6 +24,9 @@ namespace Intwenty.Model.UIDesign
             if (viewitem == null)
                 return res;
 
+            viewitem.Properties = model.CompilePropertyString();
+            viewitem.Title = model.Title;
+
             res.Add(viewitem);
 
             foreach (var section in model.Sections)
@@ -315,6 +318,7 @@ namespace Intwenty.Model.UIDesign
             res.Properties = viewitem.Properties;
             res.Id = viewitem.Id;
             res.Title = viewitem.Title;
+            res.BuildPropertyList();
 
             if (!viewitem.IsMetaTypeEditListView)
                 BuildVm(res, viewitem, app);

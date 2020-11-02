@@ -7,17 +7,21 @@
 
 
     @{
+        var pagesize = 20;
         var title = "";
         var view = Model.UIViews.Find(p => p.IsMetaTypeListView);
         if (view != null)
         {
             title = view.Title;
-
+            pagesize = view.PageSize;
         }
-       
+
 
         ViewData["Title"] = title;
     }
+
+    <br />
+    <br />
 
     <article v-for="item in datalist">
 
@@ -46,7 +50,7 @@
     
     <script>
 
-        var app = getEditListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")');
+        var app = getListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")', @pagesize);
 
 
     </script>

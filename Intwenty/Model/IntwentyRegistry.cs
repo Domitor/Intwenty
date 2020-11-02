@@ -159,6 +159,29 @@ namespace Intwenty.Model
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
             _properties.Add(prop);
 
+            prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeImage);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("IMGLAYOUT", "Layout", "LIST");
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeImage);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "DEFAULT", DisplayValue = "Default" });
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("LABELSIZE", "Size", "LIST");
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeLabel);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H1", DisplayValue = "h1" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H2", DisplayValue = "h2" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H3", DisplayValue = "h3" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H4", DisplayValue = "h4" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H5", DisplayValue = "h5" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "H6", DisplayValue = "h6" });
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeListView);
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeEditListView);
+            _properties.Add(prop);
 
             return _properties;
 

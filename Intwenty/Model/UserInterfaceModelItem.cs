@@ -97,6 +97,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
+            if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
@@ -120,6 +121,7 @@ namespace Intwenty.Model
         public DataViewModelItem DataViewColumn1Info { get; set; }
         public DataViewModelItem DataViewColumn2Info { get; set; }
         public List<IUIControl> Children { get; set; }
+        public string JavaScriptObjectName { get; set; }
 
         public override string ModelCode
         {
@@ -211,7 +213,14 @@ namespace Intwenty.Model
 
         }
 
-      
+        public bool IsUIContainerType
+        {
+            get
+            {
+                return IsUIViewType || IsMetaTypeSection || IsMetaTypePanel;
+            }
+
+        }
 
 
         public bool IsDataTableConnected

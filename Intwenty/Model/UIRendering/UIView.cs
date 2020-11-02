@@ -6,7 +6,7 @@ using System.Text;
 namespace Intwenty.Model.UIRendering
 {
 
-    public class UIView
+    public class UIView : HashTagPropertyObject
     {
         public int ApplicationId { get; set; }
         public string MetaType { get; set; }
@@ -14,6 +14,7 @@ namespace Intwenty.Model.UIRendering
         public List<UISection>  Sections { get; set; }
         public List<IEditListViewColumn> Columns { get; set; }
         public List<IUIControl> Modals { get; set; }
+        public int PageSize { get; set; }
 
         public bool IsMetaTypeCreateView
         {

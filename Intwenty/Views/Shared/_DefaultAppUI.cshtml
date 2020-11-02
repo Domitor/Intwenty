@@ -63,6 +63,12 @@
 
                         }
 
+                        if (t.IsMetaTypeImage)
+                        {
+                            @await Html.PartialAsync("UIControls/_Image", t)
+
+                        }
+
                         if (t.IsMetaTypeEmailBox)
                         {
                             @await Html.PartialAsync("UIControls/_EmailBox", t)

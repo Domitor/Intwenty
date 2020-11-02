@@ -113,9 +113,17 @@ namespace IntwentyDemo.Controllers
         }
 
         [HttpPost("Application/API/UploadImage")]
-        public override Task<JsonResult> UploadImage(IFormFile file)
+        public override async Task<JsonResult> UploadImage(IFormFile file)
         {
-            return base.UploadImage(file);
+            var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
+
+            var fileandpath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\USERDOC", uniquefilename);
+            using (var fs = new FileStream(fileandpath, FileMode.Create))
+            {
+                await file.CopyToAsync(fs);
+            }
+
+            return new JsonResult(new { fileName = uniquefilename });
         }
 
 

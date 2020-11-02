@@ -25,6 +25,10 @@ namespace Intwenty.Interface
 
         bool HasPropertyWithValue(string propertyname, object value);
 
+        string GetPropertyValue(string propertyname);
+
+        string JavaScriptObjectName { get; set; }
+
     }
 
     public interface IUIComplexBinding : IUIBinding
