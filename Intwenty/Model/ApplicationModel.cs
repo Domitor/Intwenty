@@ -59,7 +59,7 @@ namespace Intwenty.Model
                 {
                     foreach (var liedcol in UIStructure.Where(p => p.IsMetaTypeEditListViewColumn && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.ColumnOrder))
                     {
-                        if (!liedcol.IsDataColumnConnected)
+                        if (!liedcol.IsDataColumn1Connected)
                             continue;
                         if (!liedcol.IsDataTableConnected)
                             continue;
@@ -82,10 +82,10 @@ namespace Intwenty.Model
                             if (ctrl.IsMetaTypePanel || ctrl.IsMetaTypeSection || ctrl.IsUIViewType)
                                 continue;
 
-                            if ((ctrl.IsUIBindingType || ctrl.IsUIComplexBindingType) && (!ctrl.IsDataColumnConnected || !ctrl.IsDataTableConnected))
+                            if ((ctrl.IsUIBindingType || ctrl.IsUIComplexBindingType) && (!ctrl.IsDataColumn1Connected || !ctrl.IsDataTableConnected))
                                 continue;
 
-                            if (ctrl.IsUIComplexBindingType && (!ctrl.IsDataViewColumnConnected || !ctrl.IsDataViewConnected))
+                            if (ctrl.IsUIComplexBindingType && (!ctrl.IsDataViewColumn1Connected || !ctrl.IsDataViewConnected))
                                 continue;
 
                             if (ctrl.IsMetaTypeEditGrid && !ctrl.IsDataTableConnected)
@@ -101,13 +101,13 @@ namespace Intwenty.Model
                                 foreach (var col in UIStructure.Where(p => p.ParentMetaCode == ctrl.MetaCode && (p.IsEditGridUIBindingType || 
                                                                                                                  p.IsEditGridUIComplexBindingType)).OrderBy(p => p.ColumnOrder))
                                 {
-                                    if (!col.IsDataTableConnected || !col.IsDataColumnConnected)
+                                    if (!col.IsDataTableConnected || !col.IsDataColumn1Connected)
                                         continue;
-                                    if (ctrl.IsEditGridUIComplexBindingType && (!col.IsDataViewColumnConnected || !col.IsDataViewConnected))
+                                    if (col.IsEditGridUIComplexBindingType && (!col.IsDataViewColumn1Connected || !col.IsDataViewConnected))
                                         continue;
 
-                                    if (ctrl.IsMetaTypeEditGridLookUp)
-                                        uiview.Modals.Add(ctrl);
+                                    if (col.IsMetaTypeEditGridLookUp)
+                                        uiview.Modals.Add(col);
 
                                     ctrl.Children.Add(col);
                                 }

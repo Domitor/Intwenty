@@ -68,10 +68,11 @@ namespace Intwenty.Model
             ParentMetaCode = entity.ParentMetaCode;
             ColumnOrder = entity.ColumnOrder;
             RowOrder = entity.RowOrder;
-            DataMetaCode = entity.DataMetaCode;
-            DataMetaCode2 = entity.DataMetaCode2;
+            DataTableMetaCode = entity.DataTableMetaCode;
+            DataColumn1MetaCode = entity.DataColumn1MetaCode;
+            DataColumn2MetaCode = entity.DataColumn2MetaCode;
             DataViewMetaCode = entity.DataViewMetaCode;
-            DataViewColumnMetaCode = entity.DataViewColumnMetaCode;
+            DataViewColumn1MetaCode = entity.DataViewColumn1MetaCode;
             DataViewColumn2MetaCode = entity.DataViewColumn2MetaCode;
             Domain = entity.Domain;
             Properties = entity.Properties;
@@ -86,10 +87,11 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataMetaCode2)) DataMetaCode2 = string.Empty;
+            if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataColumn1MetaCode)) DataColumn1MetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataColumn2MetaCode)) DataColumn2MetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumnMetaCode)) DataViewColumnMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn1MetaCode)) DataViewColumn1MetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataViewColumn2MetaCode)) DataViewColumn2MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
@@ -99,37 +101,24 @@ namespace Intwenty.Model
         }
 
         public string TitleLocalizationKey { get; set; }
-
         public string Description { get; set; }
-
         public string AppMetaCode { get; set; }
+        public string DataTableMetaCode { get; set; }
         public string DataViewMetaCode { get; set; }
-        public string DataMetaCode { get; set; }
-        public string DataMetaCode2 { get; set; }
-        public string DataViewColumnMetaCode { get; set; }
+        public string DataColumn1MetaCode { get; set; }
+        public string DataColumn2MetaCode { get; set; }
+        public string DataViewColumn1MetaCode { get; set; }
         public string DataViewColumn2MetaCode { get; set; }
-
-
         public int ColumnOrder { get; set; }
-
         public int RowOrder { get; set; }
-
         public string Domain { get; set; }
-
         public string RawHTML { get; set; }
-
         public DatabaseModelItem DataTableInfo { get; set; }
-
-        public DatabaseModelItem DataColumnInfo { get; set; }
-
-        public DatabaseModelItem DataColumnInfo2 { get; set; }
-
+        public DatabaseModelItem DataColumn1Info { get; set; }
+        public DatabaseModelItem DataColumn2Info { get; set; }
         public DataViewModelItem DataViewInfo { get; set; }
-
-        public DataViewModelItem DataViewColumnInfo { get; set; }
-
-        public DataViewModelItem DataViewColumnInfo2 { get; set; }
-
+        public DataViewModelItem DataViewColumn1Info { get; set; }
+        public DataViewModelItem DataViewColumn2Info { get; set; }
         public List<IUIControl> Children { get; set; }
 
         public override string ModelCode
@@ -227,32 +216,32 @@ namespace Intwenty.Model
 
         public bool IsDataTableConnected
         {
-            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
+            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
         }
 
-        public bool IsDataColumnConnected
+        public bool IsDataColumn1Connected
         {
-            get { return (DataColumnInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataColumnInfo.IsMetaTypeDataColumn); }
+            get { return (DataColumn1Info != null && !string.IsNullOrEmpty(DataColumn1MetaCode) && DataColumn1Info.IsMetaTypeDataColumn); }
         }
 
         public bool IsDataColumn2Connected
         {
-            get { return (DataColumnInfo2 != null && !string.IsNullOrEmpty(DataMetaCode2) && DataColumnInfo2.IsMetaTypeDataColumn); }
+            get { return (DataColumn2Info != null && !string.IsNullOrEmpty(DataColumn2MetaCode) && DataColumn2Info.IsMetaTypeDataColumn); }
         }
 
         public bool IsDataViewConnected
         {
-            get { return (Domain.Contains(DataViewModelItem.MetaTypeDataView) && DataViewInfo != null && DataViewInfo.IsMetaTypeDataView); }
+            get { return (DataViewInfo != null && !string.IsNullOrEmpty(DataViewMetaCode) && DataViewInfo.IsMetaTypeDataView); }
         }
 
-        public bool IsDataViewColumnConnected
+        public bool IsDataViewColumn1Connected
         {
-            get { return (DataViewColumnInfo != null && !string.IsNullOrEmpty(DataViewColumnMetaCode)); }
+            get { return (DataViewColumn1Info != null && !string.IsNullOrEmpty(DataViewColumn1MetaCode)); }
         }
 
         public bool IsDataViewColumn2Connected
         {
-            get { return (DataViewColumnInfo2 != null && !string.IsNullOrEmpty(DataViewColumn2MetaCode)); }
+            get { return (DataViewColumn2Info != null && !string.IsNullOrEmpty(DataViewColumn2MetaCode)); }
         }
 
         public bool HasValueDomain
@@ -454,8 +443,8 @@ namespace Intwenty.Model
         {
             get 
             {
-                if (IsDataColumnConnected)
-                    return DataColumnInfo.Mandatory;
+                if (IsDataColumn1Connected)
+                    return DataColumn1Info.Mandatory;
 
                 return false;
             }
@@ -480,12 +469,13 @@ namespace Intwenty.Model
             }
         }
 
-        public string DataColumnDbName
+        public string DataColumnDbName => DataColumn1DbName;
+        public string DataColumn1DbName
         {
             get
             {
-                if (IsDataColumnConnected)
-                    return DataColumnInfo.DbName;
+                if (IsDataColumn1Connected)
+                    return DataColumn1Info.DbName;
 
                 return string.Empty;
             }
@@ -496,7 +486,7 @@ namespace Intwenty.Model
             get
             {
                 if (IsDataColumn2Connected)
-                    return DataColumnInfo2.DbName;
+                    return DataColumn2Info.DbName;
 
                 return string.Empty;
             }
@@ -513,13 +503,13 @@ namespace Intwenty.Model
             }
         }
 
-
-        public string DataViewColumnDbName
+        public string DataViewColumnDbName => DataViewColumn1DbName;
+        public string DataViewColumn1DbName
         {
             get
             {
-                if (IsDataViewColumnConnected)
-                    return DataViewColumnInfo.SQLQueryFieldName;
+                if (IsDataViewColumn1Connected)
+                    return DataViewColumn1Info.SQLQueryFieldName;
 
                 return string.Empty;
             }
@@ -530,29 +520,34 @@ namespace Intwenty.Model
             get
             {
                 if (IsDataViewColumn2Connected)
-                    return DataViewColumnInfo2.SQLQueryFieldName;
+                    return DataViewColumn2Info.SQLQueryFieldName;
 
                 return string.Empty;
             }
         }
 
-        public string DataViewColumnTitle
+        public string DataViewColumnTitle => DataViewColumn1Title;
+        public string DataViewColumn1Title
         {
             get
             {
-                if (IsDataViewColumnConnected)
-                    return DataViewColumnInfo.Title;
+                if (IsDataViewColumn1Connected)
+                    return DataViewColumn1Info.Title;
 
                 return string.Empty;
             }
         }
+
+       
+
+
 
         public string DataViewColumn2Title
         {
             get
             {
                 if (IsDataViewColumn2Connected)
-                    return DataViewColumnInfo2.Title;
+                    return DataViewColumn2Info.Title;
 
                 return string.Empty;
             }

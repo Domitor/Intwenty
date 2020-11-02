@@ -47,8 +47,8 @@ namespace Intwenty.Model
             var title = "";
             if (item is UserInterfaceModelItem ui)
             {
-                if (ui.IsDataColumnConnected)
-                    title += ui.DataColumnInfo.DbName.ToUpper();
+                if (ui.IsDataColumn1Connected)
+                    title += ui.DataColumn1Info.DbName.ToUpper();
                 else if (ui.IsDataTableConnected)
                     title += ui.DataTableInfo.DbName.ToUpper();
             }
@@ -109,6 +109,12 @@ namespace Intwenty.Model
                 return "TBL_NUMBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox)
                 return "TBL_TB";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeCreateView)
+                return "CRV";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditView)
+                return "EDV";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeDetailView)
+                return "DEV";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeListView)
                 return "LV";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditListView)

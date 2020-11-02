@@ -23,20 +23,26 @@ namespace Intwenty.Entity
         public string AppMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a DataView
+        /// Reference to an Intwenty DataView
         /// </summary>
         public string DataViewMetaCode { get; set; }
 
         /// <summary>
-        /// Reference to a DatabaseItems (Table / Columns)
+        /// Reference to a DataTable
         /// </summary>
-        public string DataMetaCode { get; set; }
-        public string DataMetaCode2 { get; set; }
+        public string DataTableMetaCode { get; set; }
+
 
         /// <summary>
-        /// Reference to a DataView Columns
+        /// Reference to a Database table Columns
         /// </summary>
-        public string DataViewColumnMetaCode { get; set; }
+        public string DataColumn1MetaCode { get; set; }
+        public string DataColumn2MetaCode { get; set; }
+
+        /// <summary>
+        /// Reference to Intwenty DataView Columns
+        /// </summary>
+        public string DataViewColumn1MetaCode { get; set; }
         public string DataViewColumn2MetaCode { get; set; }
 
 
@@ -49,6 +55,9 @@ namespace Intwenty.Entity
 
         public int RowOrder { get; set; }
 
+        /// <summary>
+        /// Reference to a value domain
+        /// </summary>
         public string Domain { get; set; }
 
         public string Properties { get; set; }

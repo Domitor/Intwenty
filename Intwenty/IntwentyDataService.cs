@@ -562,7 +562,13 @@ namespace Intwenty
                 if (t.DbName.ToLower() == "id")
                     rowid = t.GetAsInt().Value;
 
+                if (rowid < 1)
+                    continue;
+
                 if (!t.HasModel)
+                    continue;
+
+                if (t.Model.IsFrameworkItem)
                     continue;
 
                 if (!t.HasValue)
@@ -1585,9 +1591,9 @@ namespace Intwenty
 
             foreach (var t in model.UIStructure)
             {
-                if (t.IsDataColumnConnected && t.DataColumnInfo.Mandatory)
+                if (t.IsDataColumn1Connected && t.DataColumn1Info.Mandatory)
                 {
-                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumnInfo.DbName);
+                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumn1Info.DbName);
                     if (dv != null && !dv.HasValue)
                     {
                         return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
@@ -1596,7 +1602,7 @@ namespace Intwenty
                     {
                         foreach (var row in table.Rows)
                         {
-                            dv = row.Values.Find(p => p.DbName == t.DataColumnInfo.DbName);
+                            dv = row.Values.Find(p => p.DbName == t.DataColumn1Info.DbName);
                             if (dv != null && !dv.HasValue)
                             {
                                 return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);

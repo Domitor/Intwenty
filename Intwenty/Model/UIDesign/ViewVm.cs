@@ -74,13 +74,20 @@ namespace Intwenty.Model.UIDesign
                             if (input.IsRemoved)
                                 dto.AddUpdateProperty("REMOVED", "TRUE");
 
+                            if (!string.IsNullOrEmpty(input.TableName))
+                            {
+                                var dmc = app.DataStructure.Find(p => p.DbName == input.TableName && p.IsMetaTypeDataTable);
+                                if (dmc != null)
+                                    dto.DataTableMetaCode = dmc.MetaCode;
+                            }
+
                             if (dto.IsUIBindingType)
                             {
                                 if (!string.IsNullOrEmpty(input.ColumnName))
                                 {
                                     var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName && p.IsRoot);
                                     if (dmc != null)
-                                        dto.DataMetaCode = dmc.MetaCode;
+                                        dto.DataColumn1MetaCode = dmc.MetaCode;
                                 }
                                 if (dto.IsMetaTypeComboBox)
                                 {
@@ -93,31 +100,33 @@ namespace Intwenty.Model.UIDesign
 
                             if (dto.IsUIComplexBindingType)
                             {
-                                if (!string.IsNullOrEmpty(input.Domain))
+                                if (!string.IsNullOrEmpty(input.DataViewMetaCode))
                                 {
-                                    dto.DataViewMetaCode = input.Domain;
+                                    dto.DataViewMetaCode = input.DataViewMetaCode;
                                 }
 
                                 if (!string.IsNullOrEmpty(input.ColumnName))
                                 {
                                     var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName && p.IsRoot);
                                     if (dmc != null)
-                                        dto.DataMetaCode = dmc.MetaCode;
-                                }
-
-                                if (!string.IsNullOrEmpty(input.DataViewColumnName))
-                                {
-                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumnName && p.ParentMetaCode == input.DataViewMetaCode);
-                                    if (dmc != null)
-                                        dto.DataViewColumnMetaCode = dmc.MetaCode;
+                                        dto.DataColumn1MetaCode = dmc.MetaCode;
                                 }
 
                                 if (!string.IsNullOrEmpty(input.ColumnName2))
                                 {
                                     var dmc = app.DataStructure.Find(p => p.DbName == input.ColumnName2 && p.IsRoot);
                                     if (dmc != null)
-                                        dto.DataMetaCode2 = dmc.MetaCode;
+                                        dto.DataColumn2MetaCode = dmc.MetaCode;
                                 }
+
+                                if (!string.IsNullOrEmpty(input.DataViewColumnName))
+                                {
+                                    var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumnName && p.ParentMetaCode == input.DataViewMetaCode);
+                                    if (dmc != null)
+                                        dto.DataViewColumn1MetaCode = dmc.MetaCode;
+                                }
+
+                               
                                 if (!string.IsNullOrEmpty(input.DataViewColumnName2))
                                 {
                                     var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumnName2 && p.ParentMetaCode == input.DataViewMetaCode);
@@ -140,7 +149,7 @@ namespace Intwenty.Model.UIDesign
                                     dt = app.DataStructure.Find(p => p.DbName == input.TableName && p.IsMetaTypeDataTable);
                                     if (dt != null)
                                     {
-                                        dto.DataMetaCode = dt.MetaCode;
+                                        dto.DataTableMetaCode = dt.MetaCode;
                                     }
                                 }
 
@@ -164,9 +173,9 @@ namespace Intwenty.Model.UIDesign
                                         {
                                             if (!string.IsNullOrEmpty(tcol.ColumnName))
                                             {
-                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName && p.ParentMetaCode == dt.MetaCode);
+                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName && p.ParentMetaCode == dt.MetaCode && p.IsMetaTypeDataColumn);
                                                 if (dmc != null)
-                                                    column.DataMetaCode = dmc.MetaCode;
+                                                    column.DataColumn1MetaCode = dmc.MetaCode;
                                             }
                                         }
 
@@ -181,16 +190,30 @@ namespace Intwenty.Model.UIDesign
 
                                         if (column.IsMetaTypeEditGridLookUp)
                                         {
-                                            if (!string.IsNullOrEmpty(tcol.Domain))
+                                            if (!string.IsNullOrEmpty(tcol.ColumnName2) && dt != null)
                                             {
-                                                column.Domain = "DATAVIEW." + tcol.Domain;
+                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName2 && p.ParentMetaCode == dt.MetaCode);
+                                                if (dmc != null)
+                                                    column.DataColumn2MetaCode = dmc.MetaCode;
                                             }
 
-                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName))
+                                            if (!string.IsNullOrEmpty(tcol.DataViewMetaCode))
+                                            {
+                                                column.DataViewMetaCode = tcol.DataViewMetaCode;
+                                            }
+
+                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName) && !string.IsNullOrEmpty(tcol.DataViewMetaCode))
                                             {
                                                 var dmc = views.Find(p => p.SQLQueryFieldName == tcol.DataViewColumnName && p.ParentMetaCode == tcol.DataViewMetaCode);
                                                 if (dmc != null)
-                                                    column.DataViewColumnMetaCode = dmc.MetaCode;
+                                                    column.DataViewColumn1MetaCode = dmc.MetaCode;
+                                            }
+
+                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName2) && !string.IsNullOrEmpty(tcol.DataViewMetaCode))
+                                            {
+                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.DataViewColumnName2 && p.ParentMetaCode == tcol.DataViewMetaCode);
+                                                if (dmc != null)
+                                                    column.DataViewColumn2MetaCode = dmc.MetaCode;
                                             }
                                         }
                                     }
@@ -231,16 +254,12 @@ namespace Intwenty.Model.UIDesign
 
                 if (!string.IsNullOrEmpty(f.DbName))
                 {
-                    var dmc = app.DataStructure.Find(p => p.DbName == f.DbName && p.IsRoot);
+                    var dmc = app.DataStructure.Find(p => p.DbName == f.DbName && p.IsRoot && p.IsMetaTypeDataColumn);
                     if (dmc != null)
                     {
-                        lf.DataMetaCode = dmc.MetaCode;
+                        lf.DataColumn1MetaCode = dmc.MetaCode;
                     }
-                    else
-                    {
-                        //DEFAULT FIELD METACODE
-                        lf.DataMetaCode = f.DbName.ToUpper();
-                    }
+                   
                 }
 
                 res.Add(lf);
@@ -391,10 +410,13 @@ namespace Intwenty.Model.UIDesign
                                 {
                                     var input = new UserInput() { Id = uic.Id, ApplicationId = app.Application.Id, ColumnOrder = pnl.ColumnOrder, RowOrder = uic.RowOrder, MetaCode = uic.MetaCode, MetaType = uic.MetaType, Title = uic.Title, ParentMetaCode = uic.ParentMetaCode, Domain = uic.DomainName, Properties = uic.Properties };
                                     input.BuildPropertyList();
-                                    if (uic.IsDataColumnConnected)
+                                    if (uic.IsDataColumn1Connected)
                                     {
-                                        input.ColumnName = uic.DataColumnInfo.ColumnName;
-                                        input.TableName = uic.DataColumnInfo.TableName;
+                                        input.ColumnName = uic.DataColumn1Info.ColumnName;
+                                    }
+                                    if (uic.IsDataTableConnected)
+                                    {
+                                        input.TableName = uic.DataTableInfo.TableName;
                                     }
                                     lr.UserInputs.Add(input);
                                 }
@@ -416,20 +438,25 @@ namespace Intwenty.Model.UIDesign
                                     input.BuildPropertyList();
 
                                     //TABLE ND COLUMN(S)
-                                    if (uic.IsDataColumnConnected)
+                                    if (uic.IsDataColumn1Connected)
                                     {
-                                        input.ColumnName = uic.DataColumnInfo.ColumnName;
-                                        input.TableName = uic.DataColumnInfo.TableName;
+                                        input.ColumnName = uic.DataColumn1Info.ColumnName;
                                         if (uic.IsDataColumn2Connected)
-                                            input.ColumnName2 = uic.DataColumnInfo2.ColumnName;
+                                            input.ColumnName2 = uic.DataColumn2Info.ColumnName;
                                     }
+                                    if (uic.IsDataTableConnected)
+                                    {
+                                        input.TableName = uic.DataTableInfo.TableName;
+                                    }
+
 
                                     //VIEW CONNECTION
                                     input.DataViewMetaCode = uic.DataViewMetaCode;
-                                    if (uic.IsDataViewColumnConnected)
-                                        input.DataViewColumnName = uic.DataViewColumnInfo.SQLQueryFieldName;
+
+                                    if (uic.IsDataViewColumn1Connected)
+                                        input.DataViewColumnName = uic.DataViewColumn1Info.SQLQueryFieldName;
                                     if (uic.IsDataViewColumn2Connected)
-                                        input.DataViewColumnName2 = uic.DataViewColumnInfo2.SQLQueryFieldName;
+                                        input.DataViewColumnName2 = uic.DataViewColumn2Info.SQLQueryFieldName;
 
                                     lr.UserInputs.Add(input);
                                 }
@@ -450,19 +477,19 @@ namespace Intwenty.Model.UIDesign
 
                                         child.TableName = input.TableName;
 
-                                        if (gridcol.IsDataColumnConnected)
-                                            child.ColumnName = gridcol.DataColumnInfo.ColumnName;
+                                        if (gridcol.IsDataColumn1Connected)
+                                            child.ColumnName = gridcol.DataColumn1Info.ColumnName;
                                         if (gridcol.IsDataColumn2Connected)
-                                            child.ColumnName2 = gridcol.DataColumnInfo2.ColumnName;
+                                            child.ColumnName2 = gridcol.DataColumn2Info.ColumnName;
 
                                         if (gridcol.IsMetaTypeEditGridLookUp)
                                         {
                                             //VIEW CONNECTION
                                             child.DataViewMetaCode = gridcol.DataViewMetaCode;
-                                            if (gridcol.IsDataViewColumnConnected)
-                                                child.DataViewColumnName = gridcol.DataViewColumnInfo.SQLQueryFieldName;
+                                            if (gridcol.IsDataViewColumn1Connected)
+                                                child.DataViewColumnName = gridcol.DataViewColumn1Info.SQLQueryFieldName;
                                             if (gridcol.IsDataViewColumn2Connected)
-                                                child.DataViewColumnName2 = gridcol.DataViewColumnInfo2.SQLQueryFieldName;
+                                                child.DataViewColumnName2 = gridcol.DataViewColumn2Info.SQLQueryFieldName;
 
                                         }
 
@@ -491,8 +518,8 @@ namespace Intwenty.Model.UIDesign
             {
                 if (f.IsMetaTypeEditListViewColumn && f.ParentMetaCode == viewitem.MetaCode)
                 {
-                    if (f.IsDataColumnConnected)
-                        res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumnInfo.DbName });
+                    if (f.IsDataColumn1Connected)
+                        res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title, DbName = f.DataColumn1Info.DbName });
                     else
                         res.Fields.Add(new ListViewFieldVm() { Id = f.Id, Properties = f.Properties, Title = f.Title });
                 }
@@ -614,15 +641,12 @@ namespace Intwenty.Model.UIDesign
         public string DataViewMetaCode { get; set; }
         public string DataViewColumnName { get; set; }
         public string DataViewColumnName2 { get; set; }
-
         public string MetaType { get; set; }
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string RawHTML { get; set; }
         public string Domain { get; set; }
-      
         public bool IsRemoved { get; set; }
-
         public List<UserInput> Children { get; set; }
 
 

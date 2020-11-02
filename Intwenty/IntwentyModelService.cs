@@ -613,35 +613,46 @@ namespace Intwenty
                 {
                     if (item.AppMetaCode == app.MetaCode)
                     {
-                        if (!string.IsNullOrEmpty(item.DataMetaCode))
+                        if (!string.IsNullOrEmpty(item.DataTableMetaCode))
                         {
-                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataMetaCode && p.AppMetaCode == app.MetaCode);
-                            if (dinf != null && dinf.IsMetaTypeDataColumn)
-                                item.DataColumnInfo = dinf;
-                            else if (dinf != null && dinf.IsMetaTypeDataTable)
-                                item.DataTableInfo = dinf;
-
-
-                            if (item.DataColumnInfo != null && item.DataTableInfo == null)
+                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                            if (dinf != null)
                             {
-                                if (!item.DataColumnInfo.IsRoot)
+                                item.DataTableInfo = dinf;
+                                item.DataTableMetaCode = dinf.MetaCode;
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
+                        {
+                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
+                            if (dinf != null)
+                                item.DataColumn1Info = dinf;
+
+                            if (item.DataColumn1Info != null && item.DataTableInfo == null)
+                            {
+                                if (!item.DataColumn1Info.IsRoot)
                                 {
-                                    dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumnInfo.ParentMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                                    dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1Info.ParentMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
                                     if (dinf != null)
+                                    {
                                         item.DataTableInfo = dinf;
+                                        item.DataTableMetaCode = dinf.MetaCode;
+                                    }
                                 }
                                 else
                                 {
+                                    item.DataTableMetaCode = app.MetaCode;
                                     item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id = 0, DbName = app.DbName, TableName = app.DbName, MetaCode = app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem = true };
                                 }
                             }
                         }
 
-                        if (!string.IsNullOrEmpty(item.DataMetaCode2))
+                        if (!string.IsNullOrEmpty(item.DataColumn2MetaCode))
                         {
-                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataMetaCode2 && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
+                            var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn2MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
                             if (dinf != null)
-                                item.DataColumnInfo2 = dinf;
+                                item.DataColumn2Info = dinf;
                         }
 
                         if (!string.IsNullOrEmpty(item.DataViewMetaCode))
@@ -650,17 +661,17 @@ namespace Intwenty
                             if (vinf != null)
                                 item.DataViewInfo = vinf;
 
-                            if (!string.IsNullOrEmpty(item.DataViewColumnMetaCode))
+                            if (!string.IsNullOrEmpty(item.DataViewColumn1MetaCode))
                             {
-                                vinf = views.Find(p => p.MetaCode == item.DataViewColumnMetaCode && !p.IsRoot);
+                                vinf = views.Find(p => p.MetaCode == item.DataViewColumn1MetaCode && !p.IsRoot);
                                 if (vinf != null)
-                                    item.DataViewColumnInfo = vinf;
+                                    item.DataViewColumn1Info = vinf;
                             }
                             if (!string.IsNullOrEmpty(item.DataViewColumn2MetaCode))
                             {
                                 vinf = views.Find(p => p.MetaCode == item.DataViewColumn2MetaCode && !p.IsRoot);
                                 if (vinf != null)
-                                    item.DataViewColumnInfo2 = vinf;
+                                    item.DataViewColumn2Info = vinf;
                             }
                         }
 
@@ -718,11 +729,12 @@ namespace Intwenty
                         //existing.TitleLocalizationKey = uic.TitleLocalizationKey;
                         existing.RowOrder = uic.RowOrder;
                         existing.ColumnOrder = uic.ColumnOrder;
-                        existing.DataMetaCode = uic.DataMetaCode;
-                        existing.DataMetaCode2 = uic.DataMetaCode2;
-                        existing.DataViewColumnMetaCode = uic.DataViewColumnMetaCode;
+                        existing.DataColumn1MetaCode = uic.DataColumn1MetaCode;
+                        existing.DataColumn2MetaCode = uic.DataColumn2MetaCode;
+                        existing.DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode;
                         existing.DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode;
                         existing.Domain = uic.Domain;
+                        existing.DataTableMetaCode = uic.DataTableMetaCode;
                         existing.DataViewMetaCode = uic.DataViewMetaCode;
                         existing.Description = uic.Description;
                         existing.Properties = uic.Properties;
@@ -749,10 +761,11 @@ namespace Intwenty
             {
                 AppMetaCode = dto.AppMetaCode,
                 ColumnOrder = dto.ColumnOrder,
-                DataMetaCode = dto.DataMetaCode,
-                DataMetaCode2 = dto.DataMetaCode2,
+                DataTableMetaCode = dto.DataTableMetaCode,
+                DataColumn1MetaCode = dto.DataColumn1MetaCode,
+                DataColumn2MetaCode = dto.DataColumn2MetaCode,
                 DataViewMetaCode = dto.DataViewMetaCode,
-                DataViewColumnMetaCode = dto.DataViewColumnMetaCode,
+                DataViewColumn1MetaCode = dto.DataViewColumn1MetaCode,
                 DataViewColumn2MetaCode = dto.DataViewColumn2MetaCode,
                 Description = dto.Description,
                 Domain = dto.Domain,
@@ -1452,7 +1465,7 @@ namespace Intwenty
                         return res;
                     }
 
-                    if (string.IsNullOrEmpty(ui.Title) && !ui.IsMetaTypePanel && !ui.IsMetaTypeSection)
+                    if (string.IsNullOrEmpty(ui.Title) && (ui.IsUIBindingType || ui.IsUIComplexBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIComplexBindingType))
                     {
                         res.AddMessage(MessageCode.WARNING, string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
                     }
@@ -1462,10 +1475,10 @@ namespace Intwenty
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITLISTVIEW in application {1} has no children with [MetaType]=EDITLISTVIEWFIELD.", ui.Title, a.Application.Title));
 
 
-                    if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumnConnected)
+                    if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumn1Connected)
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
 
-                    if (ui.IsMetaTypeLookUp && ui.IsDataViewColumnConnected && ui.DataViewColumnInfo.IsMetaTypeDataViewColumn)
+                    if (ui.IsMetaTypeLookUp && ui.IsDataViewColumn1Connected && ui.DataViewColumn1Info.IsMetaTypeDataViewColumn)
                     {
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has a connection (ViewMetaCode) to a DATAVIEWCOLUMN, it should be a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
                     }
@@ -1475,8 +1488,8 @@ namespace Intwenty
 
                     if (!ui.IsMetaTypeEditGrid)
                     {
-                        if (!ui.IsDataColumnConnected && !string.IsNullOrEmpty(ui.DataMetaCode))
-                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
+                        if (!ui.IsDataColumn1Connected)
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataColumn1MetaCode].", new object[] { ui.Title, a.Application.Title }));
                     }
                     else
                     {
@@ -1484,7 +1497,7 @@ namespace Intwenty
                             res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database table [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
                     }
 
-                    if (ui.IsMetaTypeEditGridLookUp && !ui.IsDataViewColumnConnected)
+                    if (ui.IsMetaTypeEditGridLookUp && !ui.IsDataViewColumn1Connected)
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITGRID_LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
 
                     if (!ui.HasValidProperties)
