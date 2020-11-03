@@ -10,7 +10,9 @@ Create metadata driven applications with Vue.js and ASP.NET Core.
 - Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
 - The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
 
-
+# Tutorial
+ <a href="https://www.youtube.com/watch?v=uZTSxROr5VY" target="_blank">Introduction video</a>
+ 
 # How to ?
 
 | Task |
