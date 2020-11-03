@@ -10,6 +10,11 @@ using Intwenty.Interface;
 
 namespace IntwentyDemo.Controllers
 {
+    /*
+     
+       -- This is an example of how to override the Intwenty ApplicationController --
+       1.   Name the controller ApplicationController and put in the Controllers folder. 
+       2.   Attribute routing must be used otherwise it will be conflicts with routes in the base controller.
 
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationController : Intwenty.Controllers.ApplicationController
@@ -74,4 +79,6 @@ namespace IntwentyDemo.Controllers
 
 
     }
+
+    */
 }
