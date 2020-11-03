@@ -2,29 +2,26 @@
 
 
 # Intwenty
-Create metadata driven applications with Vue.js and ASP.NET Core. 
-- Define metadata for your datamodel and let Intwenty generate your database structure along with your needs for storing and retriving information.
-- Define your UI model and let intwenty generate your UI.
-- UI Model and data model can be defined either programaticly or with included visual management UI:s
+Is a meta data driven CMS / Blog Engine built on Vue.js and ASP.NET Core. 
+- It lets you create models for UI and data.
+- It uses the model to create database objects and render the UI.
+- Models can be defined either programaticly or visually.
 - Implements Asp.Net Core Identity, without any need of entity framework.
 - Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
 - The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
 
-
+# Tutorial
+## <a href="https://www.youtube.com/watch?v=uZTSxROr5VY" target="_blank">Youtube - Introduction video</a>
+ 
 # How to ?
 
 | Task |
 | ------------- |
 |  <a href="https://github.com/Domitor/Intwenty/wiki/How-to-get-started">Quick start</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Intwenty-Settings">Configure intwenty</a> |  
-|  <a href="https://github.com/Domitor/Intwenty/wiki/Application-startup">Configure Asp.Net Core Identity with Intwenty</a> | 
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Intwenty-Settings">Configure intwenty (Settings)</a> |  
+|  <a href="https://github.com/Domitor/Intwenty/wiki/Application-startup">Configure intwenty (Application Startup)</a> | 
 | <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-DataService">The Intwenty DataService</a> |
-| <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-ModelService">The Intwenty ModelService</a> | |
-| Run an Intwenty self test |
-| The Admin UI |
-| Sharing your model |
-| Import a model |
-| Generate model documentation |
+| <a href="https://github.com/Domitor/Intwenty/wiki/The-Intwenty-ModelService">The Intwenty ModelService</a> |
 
 
 # Create a model using the management UI
