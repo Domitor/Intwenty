@@ -1632,10 +1632,9 @@ namespace Intwenty
                 var viewinfo = ModelRepository.GetDataViewModels();
 
                 if (args == null)
-                    throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
+                    throw new InvalidOperationException("Call to GetDataView without ListFilter argument");
 
                 result.IsSuccess = true;
-                result.ListFilter = new ListFilter();
                 result.ListFilter = args;
 
 
@@ -1655,12 +1654,22 @@ namespace Intwenty
                     }
                 }
 
+                if (result.ListFilter.MaxCount == 0)
+                {
+
+                    var max = client.GetScalarValue(dv.SQLQuery);
+                    if (max == DBNull.Value)
+                        result.ListFilter.MaxCount = 0;
+                    else
+                        result.ListFilter.MaxCount = Convert.ToInt32(max);
+
+                }
 
                 var sql = string.Format(dv.SQLQuery, " ");
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                 {
                     //Infer where formatter
-                    if (!dv.SQLQuery.Contains("{0}"))
+                    if (!dv.SQLQuery.Contains("{0}") && !sql.ToUpper().Contains("WHERE"))
                     {
                         var tmp = dv.SQLQuery.ToUpper();
                         var frmind = tmp.IndexOf("FROM");
@@ -1671,8 +1680,28 @@ namespace Intwenty
                             sql = tmp.Insert(blankind, "{0}");
                         }
                     }
+                    else if (!dv.SQLQuery.Contains("{0}") && sql.ToUpper().Contains("WHERE"))
+                    {
+                        var tmp = dv.SQLQuery.ToUpper();
+                        var frmind = tmp.IndexOf("WHERE");
+                        if (frmind > 5)
+                        {
+                            frmind += 1;
+                            var blankind = tmp.IndexOf(" ", frmind);
+                            sql = tmp.Insert(blankind, "{0}");
+                        }
+                    }
 
-                    sql = string.Format(dv.SQLQuery, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
+                    if (!sql.ToUpper().Contains("WHERE"))
+                    {
+                        sql = string.Format(sql, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
+                    }
+                    else
+                    {
+                        sql = string.Format(sql, " ( " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ) AND ");
+                    }
+
+                   
                 }
 
                 client.Open();

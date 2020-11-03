@@ -201,13 +201,13 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="control-label">Value</label>
-                                        <input type="text" class="form-control form-control-sm" v-model="viewretrieveinfo.filterValue" v-on:blur="handleDataViewFilter" />
+                                        <input type="text" class="form-control form-control-sm" v-model="pageInfo.filterValue" v-on:blur="handleDataViewFilter" />
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="control-label">Filter</label>
-                                        <select v-model="viewretrieveinfo.filterField" class="form-control form-control-sm">
+                                        <select v-model="pageInfo.filterField" class="form-control form-control-sm">
                                             @{
                                                <option value="@t.DataViewColumnDbName">@t.DataViewColumnTitle</option>
                                                 if (t.IsDataViewColumn2Connected)
@@ -255,8 +255,8 @@
                                     </table>
                                     <nav>
                                         <ul class="pagination">
-                                            <li class="page-item" v-bind:class="{ disabled: isFirstDataViewPage }"><a class="page-link" href="#" v-on:click="prevDataViewLookUpPage()">Previous {{viewretrieveinfo.batchSize}}</a></li>
-                                            <li class="page-item"><a class="page-link" href="#" v-on:click="nextDataViewLookUpPage()">Next {{viewretrieveinfo.batchSize}}</a></li>
+                                            <li class="page-item" v-bind:class="{ disabled: isFirstDataViewPage }"><a class="page-link" href="#" v-on:click="prevDataViewLookUpPage()">Previous {{pageInfo.batchSize}}</a></li>
+                                            <li class="page-item" v-bind:class="{ disabled: isLastDataViewPage }"><a class="page-link" href="#" v-on:click="nextDataViewLookUpPage()">Next {{pageInfo.batchSize}}</a></li>
                                         </ul>
                                     </nav>
                                 </div>

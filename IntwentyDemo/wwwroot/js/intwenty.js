@@ -197,7 +197,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             valuedomains: {},
             model: { [apptablename]: {} },
             validation: {},
-            viewretrieveinfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" },
+            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" },
             current_edit_line: {}
         },
         methods:
@@ -349,7 +349,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             getDataViewValue: function (viewname, keyfield, lookupid) {
 
                 var context = this;
-                context.viewretrieveinfo.dataViewMetaCode = viewname;
+                context.pageInfo.dataViewMetaCode = viewname;
 
                 $("input[data-lookupid]").each(function () {
                     var id = $(this).data('lookupid');
@@ -357,16 +357,16 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
                         if (dbfield === keyfield) {
-                            context.viewretrieveinfo.filterField = viewfield;
-                            context.viewretrieveinfo.filterValue = context.model[apptablename][dbfield];
+                            context.pageInfo.filterField = viewfield;
+                            context.pageInfo.filterValue = context.model[apptablename][dbfield];
                         }
                     }
                 });
 
-                if (!context.viewretrieveinfo.filterValue)
-                    context.viewretrieveinfo.filterValue = "";
-                if (context.viewretrieveinfo.filterValue.length == 0)
-                    context.viewretrieveinfo.filterValue = "";
+                if (!context.pageInfo.filterValue)
+                    context.pageInfo.filterValue = "";
+                if (context.pageInfo.filterValue.length == 0)
+                    context.pageInfo.filterValue = "";
 
                 var endpointurl = baseurl + "GetDataViewValue";
 
@@ -374,7 +374,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                     url: endpointurl,
                     type: "POST",
                     contentType: "application/json",
-                    data: JSON.stringify(context.viewretrieveinfo),
+                    data: JSON.stringify(context.pageInfo),
                     success: function (response) {
                         var dataviewitem = JSON.parse(response.data);
                         $("input[data-lookupid]").each(function () {
@@ -395,23 +395,23 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 if (!viewname)
                     return;
 
-                this.viewretrieveinfo.maxCount = 0;
-                this.viewretrieveinfo.currentRowNum = 0;
-                this.viewretrieveinfo.filterField = "";
-                this.viewretrieveinfo.filterValue = "";
-                this.viewretrieveinfo.dataViewMetaCode = viewname;
+                this.pageInfo.maxCount = 0;
+                this.pageInfo.currentRowNum = 0;
+                this.pageInfo.filterField = "";
+                this.pageInfo.filterValue = "";
+                this.pageInfo.dataViewMetaCode = viewname;
                 this.getDataViewLookUpPage();
                 this.current_edit_line = line;
                 $("#" + viewname).modal();
             },
             nextDataViewLookUpPage: function () {
                 var context = this;
-                context.viewretrieveinfo.currentRowNum += context.viewretrieveinfo.batchSize;
+                context.pageInfo.currentRowNum += context.pageInfo.batchSize;
                 context.getDataViewLookUpPage();
             },
             prevDataViewLookUpPage: function () {
                 var context = this;
-                context.viewretrieveinfo.currentRowNum -= context.viewretrieveinfo.batchSize;
+                context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
                 context.getDataViewLookUpPage();
             },
             getDataViewLookUpPage: function () {
@@ -423,13 +423,13 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                     url: endpointurl,
                     type: "POST",
                     contentType: "application/json",
-                    data: JSON.stringify(context.viewretrieveinfo),
+                    data: JSON.stringify(context.pageInfo),
                     success: function (response) {
                         //DATA
                         context.dataview = JSON.parse(response.data);
 
                         //UPDATE CURRENT PAGE INFO
-                        context.viewretrieveinfo = response.retriveListArgs;
+                        context.pageInfo = response.listFilter;
                     }
                 });
             },
@@ -438,7 +438,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             },
             handleDataViewFilter: function () {
                 var context = this;
-                context.viewretrieveinfo.currentRowNum = 0;
+                context.pageInfo.currentRowNum = 0;
                 context.getDataViewLookUpPage();
 
             },
@@ -517,10 +517,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize)
                 var context = this;
 
                 if (!context.model.filterfield || context.model.filterfield == "")
-                    return;
-
-                if (context.model.filtervalue == "")
-                    return;
+                    context.model.filterfield="";
 
                 if (context.model.filtervalue != context.pageInfo.filterValue) {
                     context.pageInfo.currentRowNum = 0;
@@ -662,10 +659,7 @@ function getListView(vueelement, applicationid, baseurl, pagesize)
                 var context = this;
 
                 if (!context.model.filterfield || context.model.filterfield == "")
-                    return;
-
-                if (context.model.filtervalue == "")
-                    return;
+                    context.model.filterfield = "";
 
                 if (context.model.filtervalue != context.pageInfo.filterValue) {
                     context.pageInfo.currentRowNum = 0;
