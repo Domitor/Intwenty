@@ -7,13 +7,17 @@
     if (view != null)
     {
         title = view.Title;
+        if (string.IsNullOrEmpty(title))
+        {
+            title = "Edit";
+        }
     }
     else
     {
         view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
         if (view != null)
         {
-            title = view.Title;
+            title = "Edit";
         }
 
     }

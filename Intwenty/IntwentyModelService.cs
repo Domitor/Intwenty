@@ -1465,8 +1465,12 @@ namespace Intwenty
                         return res;
                     }
 
-                    if (string.IsNullOrEmpty(ui.Title) && (ui.IsUIBindingType || ui.IsUIComplexBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIComplexBindingType))
+                    if (string.IsNullOrEmpty(ui.Title) && 
+                            (ui.IsUIBindingType || ui.IsUIComplexBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIComplexBindingType) &&
+                            (!ui.IsMetaTypeLabel & !ui.IsMetaTypeImage & !ui.IsMetaTypeTextBlock)
+                        )
                     {
+                       
                         res.AddMessage(MessageCode.WARNING, string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
                     }
 

@@ -20,7 +20,7 @@ namespace Intwenty.Seed
         {
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.SeedDatabaseOnStartUp)
+            if (!Settings.Value.SeedModelOnStartUp)
                 return;
 
             var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);

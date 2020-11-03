@@ -17,7 +17,7 @@
                name="@Model.UIId"
                type="text" 
                class="form-control form-control-sm" 
-               v-model="model.@Model.DataTableDbName.@Model.DataColumnDbName" 
+               v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName" 
                v-on:keydown.tab="getDataViewValue('@Model.DataViewMetaCode','@Model.DataColumnDbName','@Model.UIId')" 
                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeLookUp
                data-title="@Model.Title"
@@ -36,7 +36,7 @@
         <div style="float:left; margin-left:5px; width:60%">
             <input type="text" 
                    class="form-control form-control-sm" 
-                   v-model="model.@Model.DataTableDbName.@Model.DataColumn2DbName" 
+                   v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumn2DbName" 
                    data-dbtable="@Model.DataTableDbName" 
                    data-dbfield="@Model.DataColumn2DbName" 
                    data-viewfield="@Model.DataViewColumn2DbName" 

@@ -42,44 +42,13 @@ namespace Intwenty.Model.Dto
 
     }
 
-    public class ListRetrivalArgs
-    {
-        public static readonly string DEFAULT_OWNERUSERID = "SYSTEM";
-
-        public int ApplicationId { get; set; }
-
-        public string OwnerUserId { get; set; }
-
-        public string DataViewMetaCode { get; set; }
-
-        public int MaxCount { get; set; }
-
-        public int CurrentRowNum{ get; set; }
-
-        public int BatchSize { get; set; }
-
-        public string FilterField { get; set; }
-
-        public string FilterValue { get; set; }
-
-        public bool HasOwnerUserId
-        {
-            get { return !string.IsNullOrEmpty(OwnerUserId) && OwnerUserId != DEFAULT_OWNERUSERID; }
-        }
-
-        public ListRetrivalArgs()
-        {
-            BatchSize = 50;
-            OwnerUserId = DEFAULT_OWNERUSERID;
-        }
-
-    }
+   
 
     public class OperationResult
     {
         public LifecycleStatus Status { get; set; }
 
-        public ListRetrivalArgs RetriveListArgs { get; set; }
+        public ListFilter ListFilter { get; set; }
 
         public List<OperationMessage> Messages { get; set; }
 

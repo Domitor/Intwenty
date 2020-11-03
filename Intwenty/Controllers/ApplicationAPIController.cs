@@ -62,7 +62,7 @@ namespace Intwenty.Controllers
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost]
-        public virtual JsonResult GetPagedList([FromBody] ListRetrivalArgs model)
+        public virtual JsonResult GetPagedList([FromBody] ListFilter model)
         {
             var listdata = DataRepository.GetPagedList(model);
             return new JsonResult(listdata);
@@ -85,7 +85,7 @@ namespace Intwenty.Controllers
         /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost]
-        public virtual JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
+        public virtual JsonResult GetDataViewValue([FromBody] ListFilter model)
         {
             var viewitem = DataRepository.GetDataViewRecord(model);
             return new JsonResult(viewitem);
@@ -96,7 +96,7 @@ namespace Intwenty.Controllers
         /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost]
-        public virtual JsonResult GetDataView([FromBody] ListRetrivalArgs model)
+        public virtual JsonResult GetDataView([FromBody] ListFilter model)
         {
             var dv = DataRepository.GetDataView(model);
             return new JsonResult(dv);

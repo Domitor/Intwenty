@@ -310,7 +310,9 @@
 
     <div id="listview" v-if="model.viewType=='EDLIVIEW'">
 
-
+        <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings">
+            <i class="fa fa-cog"></i> View Settings
+        </div>
         <div class="btn btn-sm btn-primary" v-on:click="saveListView" style="float:right">
             <span class="fa fa-save"></span> Save changes
         </div>
@@ -340,7 +342,7 @@
                         <div>
                             <div>
                                 <div class="btn btn-sm btn-secondary" v-on:click="addListViewField">
-                                    <span class="fa fa-plus"></span> Add list view field
+                                    <span class="fa fa-plus"></span> Add Column
                                 </div>
                             </div>
                             <br />

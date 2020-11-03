@@ -849,7 +849,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var args = new ListRetrivalArgs();
+                var args = new ListFilter();
                 args.ApplicationId = 10000;
                 args.BatchSize = 20;
 
@@ -1625,7 +1625,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var res = _dataservice.GetDataView(new ListRetrivalArgs() { BatchSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
+                var res = _dataservice.GetDataView(new ListFilter() { BatchSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
                 if (!res.IsSuccess)
                     throw new InvalidOperationException("DataView could not execute");
 

@@ -18,9 +18,8 @@ namespace Intwenty.Seed
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.SeedDatabaseOnStartUp ||
-                !Settings.Value.UseDemoSettings ||
-                !Settings.Value.ReCreateDatabaseOnStartup)
+            if (!Settings.Value.SeedModelOnStartUp ||
+                !Settings.Value.UseDemoSettings)
                 return;
 
             if (string.IsNullOrEmpty(Settings.Value.DemoAdminUser) ||
@@ -29,62 +28,54 @@ namespace Intwenty.Seed
                 string.IsNullOrEmpty(Settings.Value.DemoUserPassword))
                 return;
 
+
             var userManager = services.GetRequiredService<UserManager<IntwentyUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IntwentyRole>>();
 
-        
-
-            var u = userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
-            if (u.Result != null)
+            var admrole = roleManager.FindByNameAsync("ADMINISTRATOR");
+            if (admrole.Result == null)
             {
-                return;
-                userManager.RemoveFromRoleAsync(u.Result, "ADMINISTRATOR");
-                userManager.DeleteAsync(u.Result);
-            }
-            u = userManager.FindByNameAsync(Settings.Value.DemoUser);
-            if (u.Result != null)
-            {
-                userManager.RemoveFromRoleAsync(u.Result, "USER");
-                userManager.DeleteAsync(u.Result);
+                var role = new IntwentyRole();
+                role.Name = "ADMINISTRATOR";
+                roleManager.CreateAsync(role);
             }
 
-            var r = roleManager.FindByNameAsync("ADMINISTRATOR");
-            if (r.Result != null)
-                roleManager.DeleteAsync(r.Result);
+            var userrole = roleManager.FindByNameAsync("USER");
+            if (userrole.Result == null)
+            {
+                var role = new IntwentyRole();
+                role.Name = "USER";
+                roleManager.CreateAsync(role);
+            }
 
-            r = roleManager.FindByNameAsync("USER");
-            if (r.Result != null)
-                roleManager.DeleteAsync(r.Result);
+            var currr_admin = userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
+            if (currr_admin.Result == null)
+            {
+                var user = new IntwentyUser();
+                user.UserName = Settings.Value.DemoAdminUser;
+                user.Email = Settings.Value.DemoAdminUser;
+                user.FirstName = "Admin";
+                user.LastName = "Adminsson";
+                user.EmailConfirmed = true;
+                user.Culture = Settings.Value.DefaultCulture;
+                userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
+                userManager.AddToRoleAsync(user, "ADMINISTRATOR");
+            }
 
+            var curr_user = userManager.FindByNameAsync(Settings.Value.DemoUser);
+            if (curr_user.Result == null)
+            {
+                var user = new IntwentyUser();
+                user.UserName = Settings.Value.DemoUser;
+                user.Email = Settings.Value.DemoUser;
+                user.FirstName = "User";
+                user.LastName = "Usersson";
+                user.EmailConfirmed = true;
+                user.Culture = Settings.Value.DefaultCulture;
+                userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
+                userManager.AddToRoleAsync(user, "USER");
+            }
 
-            var role = new IntwentyRole();
-            role.Name = "ADMINISTRATOR";
-            roleManager.CreateAsync(role);
-
-            role = new IntwentyRole();
-            role.Name = "USER";
-            roleManager.CreateAsync(role);
-
-            var user = new IntwentyUser();
-            user.UserName = Settings.Value.DemoAdminUser;
-            user.Email = Settings.Value.DemoAdminUser;
-            user.FirstName = "Admin";
-            user.LastName = "Adminsson";
-            user.EmailConfirmed = true;
-            user.Culture = Settings.Value.DefaultCulture;
-            userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
-            userManager.AddToRoleAsync(user, "ADMINISTRATOR");
-
-
-            user = new IntwentyUser();
-            user.UserName = Settings.Value.DemoUser;
-            user.Email = Settings.Value.DemoUser;
-            user.FirstName = "User";
-            user.LastName = "Usersson";
-            user.EmailConfirmed = true;
-            user.Culture = Settings.Value.DefaultCulture;
-            userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
-            userManager.AddToRoleAsync(user, "USER");
 
         }
 

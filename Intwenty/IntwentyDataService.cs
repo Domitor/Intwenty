@@ -880,7 +880,7 @@ namespace Intwenty
         #endregion
 
         #region Lists
-        public OperationResult GetPagedList(ListRetrivalArgs args)
+        public OperationResult GetPagedList(ListFilter args)
         {
             OperationResult result = null;
             var client = new Connection(DBMSType, Settings.DefaultConnection);
@@ -911,8 +911,8 @@ namespace Intwenty
 
                 }
 
-                result.RetriveListArgs = new ListRetrivalArgs();
-                result.RetriveListArgs = args;
+                result.ListFilter = new ListFilter();
+                result.ListFilter = args;
 
 
 
@@ -953,9 +953,9 @@ namespace Intwenty
 
 
                 if (columns.Count > 0)
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
                 else
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), false, parameters.ToArray()).ToString();
+                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), false, parameters.ToArray()).ToString();
                 
    
                 result.Data = json;
@@ -1621,7 +1621,7 @@ namespace Intwenty
 
         #region Dataview
 
-        public OperationResult GetDataView(ListRetrivalArgs args)
+        public OperationResult GetDataView(ListFilter args)
         {
             OperationResult result = new OperationResult();
 
@@ -1635,8 +1635,8 @@ namespace Intwenty
                     throw new InvalidOperationException("Call to GetDataView without ListRetrivalArgs");
 
                 result.IsSuccess = true;
-                result.RetriveListArgs = new ListRetrivalArgs();
-                result.RetriveListArgs = args;
+                result.ListFilter = new ListFilter();
+                result.ListFilter = args;
 
 
                 var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
@@ -1677,7 +1677,7 @@ namespace Intwenty
 
                 client.Open();
 
-                result.Data = client.GetJSONArray(sql, result.RetriveListArgs.CurrentRowNum, (result.RetriveListArgs.CurrentRowNum + result.RetriveListArgs.BatchSize), resultcolumns: columns.ToArray());
+                result.Data = client.GetJSONArray(sql, result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), resultcolumns: columns.ToArray());
 
                 result.AddMessage(MessageCode.RESULT, string.Format("Fetched dataview {0}", dv.Title));
 
@@ -1699,7 +1699,7 @@ namespace Intwenty
             return result;
         }
 
-        public OperationResult GetDataViewRecord(ListRetrivalArgs args)
+        public OperationResult GetDataViewRecord(ListFilter args)
         {
 
             var result = new OperationResult(true, MessageCode.RESULT, "Fetched dataview record");
@@ -1715,8 +1715,8 @@ namespace Intwenty
                     throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
 
 
-                result.RetriveListArgs = new ListRetrivalArgs();
-                result.RetriveListArgs = args;
+                result.ListFilter = new ListFilter();
+                result.ListFilter = args;
 
                 var sql = "";
                 foreach (var v in viewinfo)

@@ -62,7 +62,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUSerId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a json array and the current paging rownum</returns>
-        OperationResult GetPagedList(ListRetrivalArgs args);
+        OperationResult GetPagedList(ListFilter args);
 
 
         /// <summary>
@@ -117,13 +117,13 @@ namespace Intwenty.Interface
         /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetDataView(ListRetrivalArgs args);
+        OperationResult GetDataView(ListFilter args);
 
         /// <summary>
         /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
         /// </summary>
         /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetDataViewRecord(ListRetrivalArgs args);
+        OperationResult GetDataViewRecord(ListFilter args);
 
         /// <summary>
         /// Validates an application according to validation rules in the model

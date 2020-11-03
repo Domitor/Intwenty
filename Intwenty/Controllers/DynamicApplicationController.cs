@@ -99,7 +99,7 @@ namespace Intwenty.Controllers
             if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
                                                                     p.Application.MetaCode == ep.AppMetaCode))
             {
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower());
                 if (model == null)
                     return new BadRequestResult();
 
@@ -111,7 +111,7 @@ namespace Intwenty.Controllers
             {
                 var client = DataRepository.GetDataClient();
                 client.Open();
-                var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName));
+                var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower()));
                 client.Close();
                 return new JsonResult(res);
 
@@ -181,7 +181,7 @@ namespace Intwenty.Controllers
 
             if (ep.IsDataViewConnected)
             {
-                var args = new ListRetrivalArgs();
+                var args = new ListFilter();
                 args.BatchSize = 10000;
                 args.DataViewMetaCode = ep.DataViewInfo.MetaCode;
                 var res = DataRepository.GetDataView(args);

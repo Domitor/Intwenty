@@ -6,6 +6,10 @@
     if (view != null)
     {
         title = view.Title;
+        if (string.IsNullOrEmpty(title))
+        {
+            title = "Create";
+        }
 
     }
 

@@ -25,7 +25,7 @@ namespace Intwenty.Model
 
         //FOR DEBUG AND DEMO MODE
         public bool ReCreateDatabaseOnStartup { get; set; }
-        public bool SeedDatabaseOnStartUp { get; set; }
+        public bool SeedModelOnStartUp { get; set; }
         public bool UseDemoSettings { get; set; }
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }

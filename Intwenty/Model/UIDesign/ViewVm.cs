@@ -242,7 +242,7 @@ namespace Intwenty.Model.UIDesign
         public static List<UserInterfaceModelItem> GetListViewUIModel(ViewVm model, ApplicationModel app)
         {
             var res = new List<UserInterfaceModelItem>();
-            var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode };
+            var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeEditListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode, Properties = model.CompilePropertyString() };
             if (string.IsNullOrEmpty(model.MetaCode))
                 t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
 

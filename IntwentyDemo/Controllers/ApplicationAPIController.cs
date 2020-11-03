@@ -56,7 +56,7 @@ namespace IntwentyDemo.Controllers
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost("Application/API/GetPagedList")]
-        public override JsonResult GetPagedList([FromBody] ListRetrivalArgs model)
+        public override JsonResult GetPagedList([FromBody] ListFilter model)
         {
             return base.GetPagedList(model);
         }
@@ -75,7 +75,7 @@ namespace IntwentyDemo.Controllers
         /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost("Application/API/GetDataViewValue")]
-        public override JsonResult GetDataViewValue([FromBody] ListRetrivalArgs model)
+        public override JsonResult GetDataViewValue([FromBody] ListFilter model)
         {
             return base.GetDataViewValue(model);
         }
@@ -85,7 +85,7 @@ namespace IntwentyDemo.Controllers
         /// Used from the LOOKUP Control
         /// </summary>
         [HttpPost("Application/API/GetDataView")]
-        public override JsonResult GetDataView([FromBody] ListRetrivalArgs model)
+        public override JsonResult GetDataView([FromBody] ListFilter model)
         {
             return base.GetDataView(model);
         }
