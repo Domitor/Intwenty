@@ -1,7 +1,7 @@
 ﻿@model List<Intwenty.Model.ApplicationModel>
 
 @{
-    ViewData["Title"] = "Meta model documentation";
+    ViewData["Title"] = "Model documentation";
 }
 
 <style>
@@ -16,7 +16,7 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>@Localizer["METAMODELDOC"]</h2></div>
+        <div class="card-header"><h2>Model documentation</h2></div>
         <div class="card-body"></div>
     </div>
     <br />
@@ -52,7 +52,7 @@
                                     <tr>
                                         <th style="width:30%">Column name</th>
                                         <th style="width:10%">Intwenty data type</th>
-                                        <th style="width:10%">Sql data type</th>
+                                        <th style="width:10%">Db data type</th>
                                         <th style="width:10%">Mandatory</th>
                                         <th style="width:40%">Remarks</th>
                                     </tr>
@@ -63,7 +63,16 @@
                                     <tr>
                                         <td>@data.DbName</td>
                                         <td>@data.DataType</td>
-                                        <td>-</td>
+                                        <td>
+                                            @if (data.HasProperty("DBDATATYPE"))
+                                            {
+                                                <span>@data.GetPropertyValue("DBDATATYPE")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </td>
                                         <td>@data.Mandatory</td>
 
                                         @if (data.HasProperty("INTWENTYDEFAULTCOLUMN"))

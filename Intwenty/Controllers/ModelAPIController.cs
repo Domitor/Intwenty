@@ -474,38 +474,56 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/ExportData")]
         public IActionResult ExportData()
         {
+            var client = DataRepository.GetDataClient();
             var data = new StringBuilder("{\"IntwentyData\":[");
-            var apps = ModelRepository.GetApplicationModels();
-            var sep = "";
-            foreach (var app in apps)
+
+            try
             {
-                var client = DataRepository.GetDataClient();
-                var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
-
-                foreach (var istat in infostatuslist)
+                var apps = ModelRepository.GetApplicationModels();
+                var sep = "";
+                foreach (var app in apps)
                 {
-                    data.Append(sep + "{");
-                    data.Append(DBHelpers.GetJSONValue("ApplicationId", app.Application.Id));
-                    data.Append("," + DBHelpers.GetJSONValue("AppMetaCode", app.Application.MetaCode));
-                    data.Append("," + DBHelpers.GetJSONValue("DbName", app.Application.DbName));
-                    data.Append("," + DBHelpers.GetJSONValue("Id", istat.Id));
-                    data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
-                    data.Append(",\"ApplicationData\":");
+                    client.Open();
+                    var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
+                    client.Close();
 
-                    var state = new ClientStateInfo() { ApplicationId = app.Application.Id, Id = istat.Id, Version = istat.Version };
-                    var appversiondata = DataRepository.GetLatestVersionById(state);
-                    data.Append(appversiondata.Data);
-                    data.Append("}");
-                    sep = ",";
+                    foreach (var istat in infostatuslist)
+                    {
+                        data.Append(sep + "{");
+                        data.Append(DBHelpers.GetJSONValue("ApplicationId", app.Application.Id));
+                        data.Append("," + DBHelpers.GetJSONValue("AppMetaCode", app.Application.MetaCode));
+                        data.Append("," + DBHelpers.GetJSONValue("DbName", app.Application.DbName));
+                        data.Append("," + DBHelpers.GetJSONValue("Id", istat.Id));
+                        data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
+                        data.Append(",\"ApplicationData\":");
 
+                        var state = new ClientStateInfo() { ApplicationId = app.Application.Id, Id = istat.Id, Version = istat.Version };
+                        var appversiondata = DataRepository.GetLatestVersionById(state);
+                        data.Append(appversiondata.Data);
+                        data.Append("}");
+                        sep = ",";
+
+                    }
                 }
+                data.Append("]");
+                data.Append("}");
+
+
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data.ToString());
+                return File(bytes, "application/json", "intwentydata.json");
+
             }
-            data.Append("]");
-            data.Append("}");
+            catch 
+            { 
+            
+            }
+            finally 
+            {
+                client.Close();
+            }
 
-
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data.ToString());
-            return File(bytes, "application/json", "intwentydata.json");
+            return new JsonResult("");
+            
         }
 
 

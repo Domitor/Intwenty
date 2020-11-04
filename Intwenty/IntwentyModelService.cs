@@ -112,6 +112,9 @@ namespace Intwenty
             var valuedomainitems = Client.GetEntities<ValueDomainItem>();
             foreach (var a in valuedomainitems)
                 t.ValueDomains.Add(a);
+            var endpints = Client.GetEntities<EndpointItem>();
+            foreach (var a in endpints)
+                t.Endpoints.Add(a);
 
             Client.Close();
 
@@ -144,6 +147,7 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<MenuItem>());
                     Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
+                    Client.DeleteEntities(Client.GetEntities<EndpointItem>());
                 }
 
                 foreach (var a in model.Applications)
@@ -164,6 +168,9 @@ namespace Intwenty
                 foreach (var a in model.ValueDomains)
                     Client.InsertEntity(a);
 
+                foreach (var a in model.Endpoints)
+                    Client.InsertEntity(a);
+
                 result.IsSuccess = true;
                 result.AddMessage(MessageCode.RESULT, "The model was imported successfully");
 
@@ -171,12 +178,15 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                Client.Close();
                 result.IsSuccess = false;
                 if (!model.DeleteCurrentModel)
                     result.SetError(ex.Message, "Error importing model, this is probably due to conflict with the current model. Try to upload with the delete option.");
                 else
                     result.SetError(ex.Message, "Error importing model");
+            }
+            finally
+            {
+                Client.Close();
             }
 
             return result;

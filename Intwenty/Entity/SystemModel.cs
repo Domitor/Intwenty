@@ -9,6 +9,7 @@ namespace Intwenty.Entity
         public bool DeleteCurrentModel { get; set; }
 
         public DateTime ModelDate { get; set; }
+
         public List<ApplicationItem> Applications { get; set; }
 
         public List<DatabaseItem> DatabaseItems { get; set; }
@@ -21,6 +22,8 @@ namespace Intwenty.Entity
 
         public List<ValueDomainItem> ValueDomains { get; set; }
 
+        public List<EndpointItem> Endpoints { get; set; }
+
 
         public SystemModel()
         {
@@ -31,6 +34,7 @@ namespace Intwenty.Entity
             DataViewItems = new List<DataViewItem>();
             MenuItems = new List<MenuItem>();
             ValueDomains = new List<ValueDomainItem>();
+            Endpoints = new List<EndpointItem>();
         }
 
 

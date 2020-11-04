@@ -133,7 +133,10 @@
                                                 <div class="form form-inline">
                                                     <button style="margin:5px" class="btn btn-sm btn-primary" v-on:click="openDataViewLookUp('@tf.DataViewMetaCode', item)"><span class="fa fa-plus"></span></button>
                                                     <input size="10" type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumnDbName" v-on:keydown.tab="getDataViewValue('@tf.DataViewMetaCode','@tf.DataColumnDbName','@tf.UIId')" data-dbfield="@tf.DataColumnDbName" data-viewfield="@tf.DataViewColumnDbName" data-lookupid="@tf.UIId" />
-                                                    <input readonly size="50" style="margin-left: 5px" type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumn2DbName" data-dbfield="@tf.DataColumn2DbName" data-viewfield="@tf.DataViewColumn2DbName" data-lookupid="@tf.UIId" />
+                                                    @if (tf.IsDataColumn2Connected && tf.IsDataViewColumn2Connected)
+                                                    {
+                                                        <input readonly size="50" style="margin-left: 5px" type="text" class="form-control form-control-sm" v-model="item.@tf.DataColumn2DbName" data-dbfield="@tf.DataColumn2DbName" data-viewfield="@tf.DataViewColumn2DbName" data-lookupid="@tf.UIId" />
+                                                    }
                                                 </div>
                                             </td>
                                         }

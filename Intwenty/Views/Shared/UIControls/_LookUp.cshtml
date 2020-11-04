@@ -30,7 +30,8 @@
     </div>
 
 
-    @if (!string.IsNullOrEmpty(Model.DataViewColumn2DbName))
+    @if (!string.IsNullOrEmpty(Model.DataViewColumn2DbName) &&
+         !string.IsNullOrEmpty(Model.DataColumn2DbName))
     {
 
         <div style="float:left; margin-left:5px; width:60%">

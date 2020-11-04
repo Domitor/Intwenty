@@ -108,8 +108,19 @@ namespace Intwenty.Controllers
 
         public IActionResult ToolModelDocumentation()
         {
+            var client = DataRepository.GetDataClient();
+            var dbtypemap = client.GetDbTypeMap();
             var res = new List<ApplicationModel>();
             var appmodels = ModelRepository.GetApplicationModels();
+            foreach (var app in appmodels)
+            {
+                foreach (var col in app.DataStructure.Where(p => p.IsMetaTypeDataColumn))
+                {
+                    var dbtype = dbtypemap.Find(p => p.IntwentyType == col.DataType && p.DbEngine == client.Database);
+                    if (dbtype!=null)
+                        col.AddUpdateProperty("DBDATATYPE", dbtype.DBMSDataType);
+                }
+            }
             return View(appmodels);
         }
 
