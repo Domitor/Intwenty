@@ -15,13 +15,13 @@ namespace Intwenty.Localization
     {
         private readonly ConcurrentDictionary<string, IntwentyStringLocalizer> Cache = new ConcurrentDictionary<string, IntwentyStringLocalizer>();
 
-        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyModelService ModelService { get; }
         private IntwentySettings Settings { get; }
 
-        public IntwentyStringLocalizerFactory(IIntwentyDataService ds, IOptions<IntwentySettings> settings)
+        public IntwentyStringLocalizerFactory(IIntwentyModelService ms, IOptions<IntwentySettings> settings)
         {
-            DataRepository = ds;
-            Settings = settings.Value; ;
+            ModelService = ms;
+            Settings = settings.Value;
         }
 
         public IStringLocalizer Create(string basename, string location)
@@ -37,7 +37,7 @@ namespace Intwenty.Localization
                 return value;
             }
 
-            value = new IntwentyStringLocalizer(DataRepository, Settings);
+            value = new IntwentyStringLocalizer(ModelService, Settings);
 
             Cache.TryAdd(basename, value);
 
@@ -55,7 +55,7 @@ namespace Intwenty.Localization
                 return value;
             }
 
-            value = new IntwentyStringLocalizer(DataRepository, Settings);
+            value = new IntwentyStringLocalizer(ModelService, Settings);
 
             Cache.TryAdd(basename, value);
 

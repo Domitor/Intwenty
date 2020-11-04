@@ -15,12 +15,12 @@ namespace Intwenty.Localization
     public class IntwentyStringLocalizer : IStringLocalizer
     {
 
-        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyModelService ModelService { get; }
         private IntwentySettings Settings { get; }
 
-        public IntwentyStringLocalizer(IIntwentyDataService ds, IntwentySettings settings)
+        public IntwentyStringLocalizer(IIntwentyModelService ms, IntwentySettings settings)
         {
-            DataRepository = ds;
+            ModelService = ms;
             Settings = settings;
         }
 
@@ -49,8 +49,8 @@ namespace Intwenty.Localization
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Can't get current culture");
 
-                var list = DataRepository.GetDataClient().GetEntities<TranslationItem>();
-                var trans = list.Find(p => p.TransKey == name && p.Culture == culture);
+                var list = ModelService.GetTranslations();
+                var trans = list.Find(p => p.Key == name && p.Culture == culture);
                 if (trans == null)
                     return new LocalizedString(name, name);
 
@@ -77,8 +77,8 @@ namespace Intwenty.Localization
                 if (string.IsNullOrEmpty(culture))
                     throw new InvalidOperationException("Can't get current culture");
 
-                var list = DataRepository.GetDataClient().GetEntities<TranslationItem>();
-                var trans = list.Find(p => p.TransKey == name && p.Culture == culture);
+                var list = ModelService.GetTranslations();
+                var trans = list.Find(p => p.Key == name && p.Culture == culture);
                 if (trans == null)
                     return new LocalizedString(name, name);
 
@@ -99,7 +99,8 @@ namespace Intwenty.Localization
             if (string.IsNullOrEmpty(culture))
                 throw new InvalidOperationException("Missing culture in settingfile");
 
-            return DataRepository.GetDataClient().GetEntities<TranslationItem>().Where(z=> z.Culture==culture).Select(p => new LocalizedString(p.TransKey, p.Text)).ToList();
+            var list = ModelService.GetTranslations();
+            return list.Where(z=> z.Culture==culture).Select(p => new LocalizedString(p.Key, p.Text)).ToList();
         }
 
         public IStringLocalizer WithCulture(CultureInfo culture)

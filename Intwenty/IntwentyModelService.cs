@@ -793,6 +793,7 @@ namespace Intwenty
             Client.Open();
             var dbitems = Client.GetEntities<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
             Client.Close();
+
             var res = new List<DatabaseModelItem>();
 
             foreach (var app in apps)
@@ -1189,6 +1190,9 @@ namespace Intwenty
             Client.Open();
             var t = Client.GetEntities<TranslationItem>().Select(p => new TranslationModelItem(p)).ToList();
             Client.Close();
+
+            ModelCache.Set(TranslationsCacheKey, t);
+
             return t;
         }
 
@@ -1224,6 +1228,7 @@ namespace Intwenty
         public void DeleteTranslation(int id)
         {
             ModelCache.Remove(TranslationsCacheKey);
+
             var existing = Client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
             {
@@ -1237,15 +1242,15 @@ namespace Intwenty
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
         {
-            
+
             //Localization
-            var translations = Client.GetEntities<TranslationItem>();
+            var translations = GetTranslations();
 
             foreach (var item in list)
             {
                 if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
                 {
-                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.TransKey == item.TitleLocalizationKey);
+                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
                         item.Title = trans.Text;
                     else
@@ -1261,12 +1266,12 @@ namespace Intwenty
                 return;
 
             //Localization
-            var translations = Client.GetEntities<TranslationItem>();
+            var translations = GetTranslations();
 
 
             if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
             {
-                var trans = translations.Find(p => p.Culture == CurrentCulture && p.TransKey == item.TitleLocalizationKey);
+                var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
                 if (trans != null)
                     item.Title = trans.Text;
                 else
@@ -1286,32 +1291,45 @@ namespace Intwenty
 
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
-            client.Open();
-            client.CreateTable<ApplicationItem>();
-            client.CreateTable<DatabaseItem>();
-            client.CreateTable<DataViewItem>();
-            client.CreateTable<EventLog>();
-            client.CreateTable<InformationStatus>();
-            client.CreateTable<MenuItem>();
-            client.CreateTable<SystemID>();
-            client.CreateTable<UserInterfaceItem>();
-            client.CreateTable<ValueDomainItem>();
-            client.CreateTable<DefaultValue>();
-            client.CreateTable<TranslationItem>();
-            client.CreateTable<EndpointItem>();
+            try
+            {
+               
 
-            client.CreateTable<IntwentyUser>(); //security_User
-            client.CreateTable<IntwentyRole>(); //security_Role
-            client.CreateTable<IntwentyUserRole>(); //security_UserRoles
-            client.CreateTable<IntwentyGroup>(); //security_Group
-            client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
+                client.Open();
+                client.CreateTable<ApplicationItem>();
+                client.CreateTable<DatabaseItem>();
+                client.CreateTable<DataViewItem>();
+                client.CreateTable<EventLog>();
+                client.CreateTable<InformationStatus>();
+                client.CreateTable<MenuItem>();
+                client.CreateTable<SystemID>();
+                client.CreateTable<UserInterfaceItem>();
+                client.CreateTable<ValueDomainItem>();
+                client.CreateTable<DefaultValue>();
+                client.CreateTable<TranslationItem>();
+                client.CreateTable<EndpointItem>();
 
-            client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
-            client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
-            //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
-            //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
+                client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyRole>(); //security_Role
+                client.CreateTable<IntwentyUserRole>(); //security_UserRoles
+                client.CreateTable<IntwentyGroup>(); //security_Group
+                client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
 
-            client.Close();
+                client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
+                client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
+                                                         //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
+                                                         //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
+
+                client.Close();
+
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+            finally
+            {
+                client.Close();
+            }
             
         }
 
@@ -1339,11 +1357,9 @@ namespace Intwenty
             {
               
                 if (databasemodel == null) 
-                {
                     databasemodel = GetDatabaseModels();
-                }
+                
 
-                Client.Open();
                 var maintable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem && p.AppMetaCode == model.MetaCode).ToList();
                 if (maintable_default_cols == null)
                     throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
@@ -1394,10 +1410,7 @@ namespace Intwenty
             {
                 res = new OperationResult(false, MessageCode.SYSTEMERROR, ex.Message);
             }
-            finally
-            {
-                Client.Close();
-            }
+           
 
             return res;
         }
@@ -1742,6 +1755,8 @@ namespace Intwenty
                 result.AddMessage(MessageCode.INFO, "Main table: " + model.DbName + " for application: " + model.Title + "  was created successfully");
 
             }
+
+            Client.Close();
         }
 
         private void CreateDBTable(ApplicationModelItem model, DatabaseModelItem table, List<DatabaseModelItem> columns, OperationResult result)
@@ -1769,6 +1784,8 @@ namespace Intwenty
 
             }
 
+            Client.Close();
+
         }
 
         private void CreateApplicationVersioningTable(ApplicationModelItem model, OperationResult result)
@@ -1781,6 +1798,8 @@ namespace Intwenty
                 string create_sql = GetCreateVersioningTableStmt(GetDefaultVersioningTableColumns(), model.VersioningTableName);
                 Client.RunCommand(create_sql);
             }
+
+            Client.Close();
         }
 
         private void CreateDBColumn(DatabaseModelItem column, string tablename, OperationResult result)
@@ -1809,6 +1828,8 @@ namespace Intwenty
 
             }
 
+            Client.Close();
+
         }
 
       
@@ -1825,6 +1846,7 @@ namespace Intwenty
                 Client.RunCommand(sql);
             }
             catch { }
+            finally { Client.Close(); }
 
             try
             {
@@ -1833,10 +1855,9 @@ namespace Intwenty
                 Client.RunCommand(sql);
             }
             catch { }
+            finally { Client.Close(); }
 
             result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
-
-
 
         }
 
@@ -1855,6 +1876,7 @@ namespace Intwenty
                 Client.RunCommand(sql);
             }
             catch { }
+            finally { Client.Close(); }
 
             try
             {
@@ -1862,7 +1884,7 @@ namespace Intwenty
                 Client.RunCommand(sql);
             }
             catch { }
-
+            finally { Client.Close(); }
 
 
             result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
