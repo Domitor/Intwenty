@@ -89,31 +89,35 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                
+                var client = _dataService.GetDataClient();
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     _dataService.LogInfo(String.Format("User {0} logged in with password",Input.Email), username: Input.Email);
-                    var signedinuser = _dataService.GetDataClient().GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    client.Open();
+                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
                     {
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        _dataService.GetDataClient().UpdateEntity(signedinuser);
+                        client.UpdateEntity(signedinuser);
                     }
+                    client.Close();
 
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
-                    var signedinuser = _dataService.GetDataClient().GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    client.Open();
+                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
                     {
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        _dataService.GetDataClient().UpdateEntity(signedinuser);
+                        client.UpdateEntity(signedinuser);
                     }
-
+                    client.Close();
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)

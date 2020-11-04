@@ -199,14 +199,18 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
+            client.Close();
             if (existingrole == null)
                 return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is nor role named {0}", roleName) } }));
 
+            client.Open();
             var existing_userrole = client.GetEntities<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
+            client.Close();
             if (existing_userrole != null)
                 return Task.FromResult(IdentityResult.Success);
 
             var urole = new IntwentyUserRole() { RoleId = existingrole.Id, UserId = user.Id };
+            client.Open();
             client.InsertEntity(urole);
             client.Close();
             return Task.CompletedTask;
@@ -297,15 +301,20 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
+            client.Close();
             if (existingrole == null)
                 return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is nor role named {0}", roleName) } }));
 
+            client.Open();
             var existing_userrole = client.GetEntities<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
+            client.Close();
             if (existing_userrole == null)
                 return Task.FromResult(IdentityResult.Success);
 
+            client.Open();
             client.DeleteEntity(existing_userrole);
             client.Close();
+
             return Task.CompletedTask;
         }
 
@@ -408,6 +417,7 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var user = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == normalizedEmail);
+            client.Close();
 
             return Task.FromResult(user);
         }
@@ -595,9 +605,13 @@ namespace Intwenty.Areas.Identity.Data
             client.Open();
             var model = client.GetEntities<IntwentyUserLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey);
             client.Close();
-            if (model != null)
-                client.DeleteEntity<IntwentyUserLogin>(model);
 
+            if (model != null)
+            {
+                client.Open();
+                client.DeleteEntity<IntwentyUserLogin>(model);
+                client.Close();
+            }
             return Task.CompletedTask;
         }
 
@@ -613,6 +627,7 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             result = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
+            client.Close();
 
             return Task.FromResult(result);
         }
@@ -698,6 +713,7 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var mclaims = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type).ToList();
+            client.Close();
             foreach (var matchedClaim in mclaims)
             {
                 matchedClaim.ClaimValue = newClaim.Value;
@@ -721,9 +737,11 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             foreach (var claim in claims)
             {
+                
                 var mclaims = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type).ToList();
                 foreach (var c in mclaims)
                 {

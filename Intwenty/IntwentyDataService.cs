@@ -95,6 +95,7 @@ namespace Intwenty
             catch (Exception ex)
             {
                 result.SetError(ex.Message, "Error when creating a new application");
+                LogError("IntwentyDataService.CreateNew: " + ex.Message);
             }
             finally
             {
@@ -261,12 +262,12 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                //client.RollbackTransaction();
                 result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.Save: " + ex.Message);
             }
             finally
             {
@@ -797,6 +798,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                LogError("IntwentyDataService.DeleteById: " + ex.Message);
             }
             finally
             {
@@ -894,6 +896,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.DeleteById: " + ex.Message);
             }
 
             return result;
@@ -990,6 +993,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
+                LogError("IntwentyDataService.GetPagedList: " + ex.Message);
             }
             finally
             {
@@ -1040,7 +1044,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
-                return result;
+                LogError("IntwentyDataService.GetList: " + ex.Message);
             }
             finally
             {
@@ -1095,6 +1099,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
+                LogError("IntwentyDataService.GetListbyOwnerUser: " + ex.Message);
             }
             finally
             {
@@ -1203,6 +1208,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
             }
             finally
             {
@@ -1272,7 +1278,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                return result;
+                LogError("IntwentyDataService.GetLatestVersionByOwnerUser: " + ex.Message);
             }
             finally
             {
@@ -1386,6 +1392,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.GetLatestVersion: " + ex.Message);
 
             }
             finally
@@ -1493,7 +1500,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-               
+                LogError("IntwentyDataService.GetValueDomains: " + ex.Message);
             }
             finally
             {
@@ -1572,6 +1579,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, "Fetch all valuedomains failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "[]";
+                LogError("IntwentyDataService.GetValueDomains: " + ex.Message);
             }
             finally
             {
@@ -1746,6 +1754,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, "Fetch dataview failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.GetDataView: " + ex.Message);
             }
             finally
             {
@@ -1814,6 +1823,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, "Fetch dataview failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
+                LogError("IntwentyDataService.GetDataViewRecord: " + ex.Message);
             }
             finally
             {
@@ -1858,19 +1868,17 @@ namespace Intwenty
                 parameters.Add(new IntwentySqlParameter("@ApplicationId", applicationid));
                 parameters.Add(new IntwentySqlParameter("@UserName", username));
 
-               
+
 
                 var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
-               
-                client.RunCommand("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES ("+getdatecmd.Command+", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)", parameters:parameters.ToArray());
 
-                client.Close();
-                
+                client.RunCommand("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (" + getdatecmd.Command + ", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)", parameters: parameters.ToArray());
+
             }
-            catch (Exception ex)
+            catch {}
+            finally
             {
                 client.Close();
-                throw ex;
             }
         }
 

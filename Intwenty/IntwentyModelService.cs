@@ -1323,7 +1323,8 @@ namespace Intwenty
                 client.Close();
 
             }
-            catch (Exception ex) {
+            catch (Exception ex) 
+            {
                 throw ex;
             }
             finally
