@@ -1854,6 +1854,10 @@ namespace Intwenty
 
         private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
+            if (Settings.LogVerbosity == LogVerbosityTypes.Error && (verbosity == "WARNING" || verbosity == "INFO"))
+                return;
+            if (Settings.LogVerbosity == LogVerbosityTypes.Warning && verbosity == "INFO")
+                return;
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();

@@ -36,13 +36,11 @@ namespace Intwenty.Middleware
             swaggerDoc.Info.Description = "Info.....";
 
             var epmodels = _modelservice.GetEndpointModels();
-            var domains = _modelservice.GetValueDomains();
 
             var endpoinggroup = new OpenApiTag() { Name = "Endpoints"};
 
             foreach (var ep in epmodels)
             {
-
 
                 if (ep.IsMetaTypeTableGet && ep.IsDataTableConnected)
                 {

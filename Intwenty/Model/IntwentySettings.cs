@@ -11,9 +11,17 @@ namespace Intwenty.Model
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
+    public enum LogVerbosityTypes { Information, Warning, Error };
+
 
     public class IntwentySettings
     {
+        public IntwentySettings()
+        {
+            LogVerbosity = LogVerbosityTypes.Error;
+        }
+
+        public LogVerbosityTypes LogVerbosity { get; set; }
 
         /// <summary>
         /// Database connection
