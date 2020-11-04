@@ -436,6 +436,9 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             isFirstDataViewPage: function () {
                 return this.pageInfo.currentRowNum <= 0;
             },
+            isLastDataViewPage: function () {
+                return this.pageInfo.currentRowNum >= this.pageInfo.maxCount;
+            },
             handleDataViewFilter: function () {
                 var context = this;
                 context.pageInfo.currentRowNum = 0;
