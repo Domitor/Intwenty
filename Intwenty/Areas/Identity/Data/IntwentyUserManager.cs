@@ -40,21 +40,27 @@ namespace Intwenty.Areas.Identity.Data
             var t = new IntwentyGroup();
             t.Id = Guid.NewGuid().ToString();
             t.Name = groupname;
+            client.Open();
             var user = client.InsertEntity(t);
+            client.Close();
             return Task.FromResult(t);
         }
 
         public Task<IntwentyGroup> GetGroupByNameAsync(string groupname)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
             var t = client.GetEntities<IntwentyGroup>().Find(p => p.Name.ToUpper() == groupname.ToUpper());
+            client.Close();
             return Task.FromResult(t);
         }
 
         public Task<IntwentyGroup> GetGroupByIdAsync(string groupid)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
             var t = client.GetEntities<IntwentyGroup>().Find(p => p.Id== groupid);
+            client.Close();
             return Task.FromResult(t);
         }
 
@@ -89,8 +95,9 @@ namespace Intwenty.Areas.Identity.Data
         public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, string groupname, string membershipstatus)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
             var result = IdentityResult.Success;
+            
+            client.Open();
             var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.GroupName.ToUpper() == groupname.ToUpper() && p.UserId == user.Id);
             if (t != null)
             {
@@ -102,14 +109,16 @@ namespace Intwenty.Areas.Identity.Data
                 result = IdentityResult.Failed();
             }
             client.Close();
+
             return Task.FromResult(result);
         }
 
         public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyGroup group, string membershipstatus)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
             var result = IdentityResult.Success;
+
+            client.Open();
             var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.GroupId == group.Id && p.UserId == user.Id);
             if (t != null)
             {
@@ -121,14 +130,16 @@ namespace Intwenty.Areas.Identity.Data
                 result = IdentityResult.Failed();
             }
             client.Close();
+
             return Task.FromResult(result);
         }
 
         public Task<IdentityResult> ChangeGroupNameAsync(string groupid, string newgroupname)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
             var result = IdentityResult.Success;
+
+            client.Open();
             var t = client.GetEntity<IntwentyGroup>(groupid);
             if (t != null)
             {
@@ -150,24 +161,29 @@ namespace Intwenty.Areas.Identity.Data
                 result = IdentityResult.Failed();
             }
             client.Close();
+
             return Task.FromResult(result);
         }
 
         public Task<bool> GroupExists(string groupname)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             var t = client.GetEntities<IntwentyGroup>().Exists(p => p.Name.ToUpper() == groupname.ToUpper());
             client.Close();
+
             return Task.FromResult(t);
         }
 
         public Task<List<IntwentyUserGroup>> GetUserGroups(IntwentyUser user)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             var t = client.GetEntities<IntwentyUserGroup>().Where(p => p.UserId == user.Id).ToList();
             client.Close();
+
             return Task.FromResult(t);
 
         }
@@ -176,9 +192,11 @@ namespace Intwenty.Areas.Identity.Data
         public Task<List<IntwentyUserGroup>> GetGroupMembers(IntwentyGroup group)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             var t = client.GetEntities<IntwentyUserGroup>().Where(p => p.GroupId == group.Id);
             client.Close();
+
             return Task.FromResult(t.ToList());
 
         }
@@ -186,6 +204,7 @@ namespace Intwenty.Areas.Identity.Data
         public Task<bool> IsWaitingToJoinGroup(string username)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             var list = client.GetEntities<IntwentyUserGroup>();
             client.Close();
@@ -202,10 +221,14 @@ namespace Intwenty.Areas.Identity.Data
         public Task<IdentityResult> RemoveFromGroupAsync(string userid, string groupid)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+
             client.Open();
             var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.UserId == userid && p.GroupId == groupid);
-            client.DeleteEntity(t);
+            if (t!=null)
+                client.DeleteEntity(t);
+
             client.Close();
+
             return Task.FromResult(IdentityResult.Success);
 
         }
