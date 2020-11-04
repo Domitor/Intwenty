@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -32,6 +33,7 @@ namespace Intwenty.Middleware
             swaggerDoc.Tags = new List<OpenApiTag>();
             swaggerDoc.Info.Title = "Intwenty";
             swaggerDoc.Info.License = new OpenApiLicense() { Name = "MIT" };
+            swaggerDoc.Info.Description = "Info.....";
 
             var epmodels = _modelservice.GetEndpointModels();
             var domains = _modelservice.GetValueDomains();
@@ -42,7 +44,7 @@ namespace Intwenty.Middleware
             {
 
 
-                if (ep.IsMetaTypeTableGetById && ep.IsDataTableConnected)
+                if (ep.IsMetaTypeTableGet && ep.IsDataTableConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -63,7 +65,7 @@ namespace Intwenty.Middleware
                     swaggerDoc.Paths.Add(ep.Path + ep.Action + "/{id}", path);
                 }
 
-                if (ep.IsMetaTypeTableGetAll && ep.IsDataTableConnected)
+                if (ep.IsMetaTypeTableList && ep.IsDataTableConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -71,6 +73,14 @@ namespace Intwenty.Middleware
                         op.Summary = string.Format("Retrieve data from the {0} table", ep.DataTableInfo.DbName);
                     else
                         op.Summary = ep.Title;
+                    
+                    op.RequestBody = new OpenApiRequestBody();
+                    var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
+                    content.Value.Schema = new OpenApiSchema();
+                    content.Value.Schema.Example = GetListSchema(ep);
+                    op.RequestBody.Content.Add(content);
+                    op.RequestBody.Required = true;
+
                     op.Tags.Add(endpoinggroup);
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
@@ -79,7 +89,7 @@ namespace Intwenty.Middleware
                     op.Responses.Add("400", resp);
                     resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
                     op.Responses.Add("401", resp);
-                    path.AddOperation(OperationType.Get, op);
+                    path.AddOperation(OperationType.Post, op);
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
                 }
 
@@ -107,7 +117,7 @@ namespace Intwenty.Middleware
                 }
 
 
-                if (ep.IsMetaTypeDataViewGetData && ep.IsDataViewConnected)
+                if (ep.IsMetaTypeDataViewList && ep.IsDataViewConnected)
                 {
                     var path = new OpenApiPathItem();
                     var op = new OpenApiOperation() { Description = ep.Description };
@@ -115,6 +125,14 @@ namespace Intwenty.Middleware
                         op.Summary = string.Format("Retrieve data from the '{0}' data view", ep.DataViewInfo.Title);
                     else
                         op.Summary = ep.Title;
+
+                    op.RequestBody = new OpenApiRequestBody();
+                    var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
+                    content.Value.Schema = new OpenApiSchema();
+                    content.Value.Schema.Example = GetListSchema(ep);
+                    op.RequestBody.Content.Add(content);
+                    op.RequestBody.Required = true;
+
                     op.Tags.Add(endpoinggroup);
                     var resp = new OpenApiResponse() { Description = "SUCCESS" };
                     resp.Content.Add("application/json", new OpenApiMediaType());
@@ -123,7 +141,7 @@ namespace Intwenty.Middleware
                     op.Responses.Add("400", resp);
                     resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
                     op.Responses.Add("401", resp);
-                    path.AddOperation(OperationType.Get, op);
+                    path.AddOperation(OperationType.Post, op);
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
                 }
 
@@ -133,19 +151,34 @@ namespace Intwenty.Middleware
 
         }
 
+        private OpenApiString GetListSchema(EndpointModelItem epitem)
+        {
+
+            var sb = new StringBuilder();
+
+            sb.Append("{");
+            sb.Append(DBHelpers.GetJSONValue("currentRowNum", 0));
+            sb.Append("," + DBHelpers.GetJSONValue("batchSize", 100));
+            sb.Append("," +DBHelpers.GetJSONValue("ownerUserId", ""));
+            sb.Append("}");
+
+            return new OpenApiString(sb.ToString());
+
+        }
+
         private OpenApiString GetSaveUpdateSchema(EndpointModelItem epitem)
         {
-          
+
 
             try
             {
 
-                if (!epitem.IsDataViewConnected || string.IsNullOrEmpty(epitem.AppMetaCode))
+                if (epitem.IsDataViewConnected || string.IsNullOrEmpty(epitem.AppMetaCode))
                     return new OpenApiString("");
 
                 var models = _modelservice.GetApplicationModels();
                 var model = models.Find(p => p.Application.MetaCode == epitem.AppMetaCode);
-                if (model==null)
+                if (model == null)
                     return new OpenApiString("");
 
                 var sep = "";
@@ -157,7 +190,7 @@ namespace Intwenty.Middleware
                 {
                     if (col.DbName.ToUpper() == "APPLICATIONID")
                         continue;
-                        //sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
+                    //sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, model.Application.Id));
                     else if (col.IsNumeric)
                         sb.Append(sep + DBHelpers.GetJSONValue(col.DbName, 0));
                     else if (col.IsDateTime)
@@ -167,7 +200,7 @@ namespace Intwenty.Middleware
 
                     sep = ",";
                 }
-               
+
                 sb.Append("}");
 
                 foreach (var dbtbl in model.DataStructure)
@@ -206,9 +239,9 @@ namespace Intwenty.Middleware
             }
             catch
             {
-                
+
             }
-           
+
 
             return null;
         }

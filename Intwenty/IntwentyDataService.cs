@@ -216,6 +216,9 @@ namespace Intwenty
                     }
                     else if (state.Id > 0 && model.Application.UseVersioning)
                     {
+                        if (!IdExists(model, state, client))
+                            throw new InvalidOperationException(String.Format("Update failed, the ID {0} dows not exist for application {1}", state.Id, model.Application.Title));
+
                         result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                         state.Version = CreateVersionRecord(model, state, client);
 
@@ -230,6 +233,9 @@ namespace Intwenty
                     }
                     else if (state.Id > 0 && !model.Application.UseVersioning)
                     {
+                        if (!IdExists(model, state, client))
+                            throw new InvalidOperationException(String.Format("Update failed, the ID {0} dows not exist for application {1}", state.Id, model.Application.Title));
+
                         result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                         BeforeSaveUpdate(model, state, client);
                         if (!state.Data.HasModel)
@@ -636,6 +642,21 @@ namespace Intwenty
             return newversion;
         }
 
+        private bool IdExists(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        {
+            string sql = String.Empty;
+            sql = "select 1 from sysdata_InformationStatus where id={0} and ApplicationId={1}";
+            sql = String.Format(sql, state.Id, state.ApplicationId);
+
+            object obj = client.GetScalarValue(sql);
+            if (obj != null && obj != DBNull.Value)
+                return true;
+
+            return false;
+
+          
+        }
+
         private void InsertInformationStatus(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
             var m = new InformationStatus()
@@ -888,6 +909,8 @@ namespace Intwenty
 
             try
             {
+                if (args == null)
+                    throw new InvalidOperationException("Parameter args was null");
 
                 if (args.ApplicationId < 1)
                     throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
@@ -911,9 +934,7 @@ namespace Intwenty
 
                 }
 
-                result.ListFilter = new ListFilter();
                 result.ListFilter = args;
-
 
 
                 var columns = new List<IIntwentyResultColumn>();
@@ -1654,10 +1675,10 @@ namespace Intwenty
                     }
                 }
 
-                if (result.ListFilter.MaxCount == 0)
+                if (result.ListFilter.MaxCount == 0 && !string.IsNullOrEmpty(dv.QueryTableDbName))
                 {
 
-                    var max = client.GetScalarValue(dv.SQLQuery);
+                    var max = client.GetScalarValue("select count(*) from " + dv.QueryTableDbName);
                     if (max == DBNull.Value)
                         result.ListFilter.MaxCount = 0;
                     else
@@ -1666,10 +1687,17 @@ namespace Intwenty
                 }
 
                 var sql = string.Format(dv.SQLQuery, " ");
+               
+
                 if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
                 {
+                    var create_where_placeholder = !dv.SQLQuery.Contains("{0}") && !dv.SQLQuery.Contains("WHERE");
+                    var create_where = dv.SQLQuery.Contains("{0}") && !dv.SQLQuery.Contains("WHERE");
+                    var create_and_placeholder = !dv.SQLQuery.Contains("{0}") && dv.SQLQuery.Contains("WHERE");
+                    var create_and = dv.SQLQuery.Contains("{0}") && dv.SQLQuery.Contains("WHERE");
+
                     //Infer where formatter
-                    if (!dv.SQLQuery.Contains("{0}") && !sql.ToUpper().Contains("WHERE"))
+                    if (create_where_placeholder)
                     {
                         var tmp = dv.SQLQuery.ToUpper();
                         var frmind = tmp.IndexOf("FROM");
@@ -1680,7 +1708,7 @@ namespace Intwenty
                             sql = tmp.Insert(blankind, "{0}");
                         }
                     }
-                    else if (!dv.SQLQuery.Contains("{0}") && sql.ToUpper().Contains("WHERE"))
+                    else if (create_and_placeholder)
                     {
                         var tmp = dv.SQLQuery.ToUpper();
                         var frmind = tmp.IndexOf("WHERE");
@@ -1692,11 +1720,11 @@ namespace Intwenty
                         }
                     }
 
-                    if (!sql.ToUpper().Contains("WHERE"))
+                    if (create_where)
                     {
                         sql = string.Format(sql, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
                     }
-                    else
+                    else if (create_and)
                     {
                         sql = string.Format(sql, " ( " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ) AND ");
                     }

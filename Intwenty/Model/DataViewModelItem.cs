@@ -171,7 +171,7 @@ namespace Intwenty.Model
                         count += 1;
                     }
 
-                    return searchstring.Substring(namestart, (nameend - namestart));
+                    return searchstring.Substring(namestart, (nameend - namestart)).ToLower();
                 }
                 catch { }
 

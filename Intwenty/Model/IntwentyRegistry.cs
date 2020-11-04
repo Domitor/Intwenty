@@ -65,10 +65,10 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataView, Title = "Data View", ModelCode = "DATAVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewColumn, Title = "Data View Column", ModelCode = "DATAVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewKeyColumn, Title = "Data View Key Column", ModelCode = "DATAVIEWMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGetById, Title = "Table - GetById", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGetAll, Title = "Table - GetAll", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableSave, Title = "Table - Save", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewGetData, Title = "Intwenty Data View - GetData", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableList, Title = "List", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableSave, Title = "Save", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMainMenu, Title = "Main Menu", ModelCode = "MENUMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMenuItem, Title = "Menu Item", ModelCode = "MENUMODEL" });
 

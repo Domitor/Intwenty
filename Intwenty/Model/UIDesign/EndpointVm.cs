@@ -16,10 +16,10 @@ namespace Intwenty.Model.UIDesign
             get
             {
                 var res = new List<EndpointType>();
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGetById, title = "Application - GetById", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Application - Save", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGetAll, title = "Table - GetAll", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewGetData, title = "Intwenty Data View - GetData", datasourcetype = "DATAVIEW" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" });
                 return res;
             }
         }
@@ -56,14 +56,14 @@ namespace Intwenty.Model.UIDesign
             else
                 t.DataSource = model.DataMetaCode;
 
-            if (model.IsMetaTypeTableGetById)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGetById, title = "Application - GetById", datasourcetype = "TABLE" };
+            if (model.IsMetaTypeTableGet)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeTableSave)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Application - Save", datasourcetype = "TABLE" };
-            else if (model.IsMetaTypeTableGetAll)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGetAll, title = "Table - GetAll", datasourcetype = "TABLE" };
-            else if (model.IsMetaTypeDataViewGetData)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewGetData, title = "Intwenty Data View - GetData", datasourcetype = "DATAVIEW" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save", datasourcetype = "TABLE" };
+            else if (model.IsMetaTypeTableList)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" };
+            else if (model.IsMetaTypeDataViewList)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" };
             else
                 throw new InvalidOperationException("Invalid endpoint metatype");
 

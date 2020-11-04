@@ -10,10 +10,10 @@ namespace Intwenty.Model
     public class EndpointModelItem : BaseModelItem
     {
         //META TYPES
-        public static readonly string MetaTypeTableGetById = "TABLEGETBYID";
-        public static readonly string MetaTypeTableGetAll = "TABLEGETALL";
+        public static readonly string MetaTypeTableGet = "TABLEGET";
+        public static readonly string MetaTypeTableList = "TABLELIST";
         public static readonly string MetaTypeTableSave = "TABLESAVE";
-        public static readonly string MetaTypeDataViewGetData = "DATAVIEWGETDATA";
+        public static readonly string MetaTypeDataViewList = "DATAVIEWLIST";
         
         public EndpointModelItem()
         {
@@ -74,12 +74,12 @@ namespace Intwenty.Model
         {
             get {
 
-                if (IsMetaTypeDataViewGetData)
-                    return "GetData";
-                if (IsMetaTypeTableGetAll)
-                    return "GetAll";
-                if (IsMetaTypeTableGetById)
-                    return "GetById";
+                if (IsMetaTypeDataViewList)
+                    return "View";
+                if (IsMetaTypeTableList)
+                    return "List";
+                if (IsMetaTypeTableGet)
+                    return "Get";
                 if (IsMetaTypeTableSave)
                     return "Save";
 
@@ -93,18 +93,6 @@ namespace Intwenty.Model
             get { return "ENDPOINTMODEL"; }
         }
 
-
-        public static List<IntwentyMetaType> GetAvailableMetaTypes()
-        {
-            return new List<IntwentyMetaType>()
-            {
-                new IntwentyMetaType(){ Code=MetaTypeTableGetById, Title="Table - GetById" },
-                new IntwentyMetaType(){ Code=MetaTypeTableGetAll,  Title="Table - GetAll" },
-                new IntwentyMetaType(){ Code=MetaTypeTableSave,    Title="Table - Save" },
-                new IntwentyMetaType(){ Code=MetaTypeDataViewGetData, Title="Intwenty Data View - GetData" },
-
-            };
-        }
 
         public override bool HasValidMetaType
         {
@@ -148,14 +136,14 @@ namespace Intwenty.Model
         }
 
 
-        public bool IsMetaTypeTableGetById
+        public bool IsMetaTypeTableGet
         {
-            get { return MetaType == MetaTypeTableGetById; }
+            get { return MetaType == MetaTypeTableGet; }
         }
 
-        public bool IsMetaTypeTableGetAll
+        public bool IsMetaTypeTableList
         {
-            get { return MetaType == MetaTypeTableGetAll; }
+            get { return MetaType == MetaTypeTableList; }
         }
 
         public bool IsMetaTypeTableSave
@@ -163,9 +151,9 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeTableSave; }
         }
 
-        public bool IsMetaTypeDataViewGetData
+        public bool IsMetaTypeDataViewList
         {
-            get { return MetaType == MetaTypeDataViewGetData; }
+            get { return MetaType == MetaTypeDataViewList; }
         }
 
 

@@ -493,7 +493,7 @@ namespace Intwenty
 
                 }
 
-                if ((ep.IsMetaTypeTableGetById || ep.IsMetaTypeTableGetAll || ep.IsMetaTypeTableSave)
+                if ((ep.IsMetaTypeTableGet || ep.IsMetaTypeTableList || ep.IsMetaTypeTableSave)
                     && !string.IsNullOrEmpty(ep.AppMetaCode) && !string.IsNullOrEmpty(ep.DataMetaCode))
                 {
                    
@@ -509,7 +509,7 @@ namespace Intwenty
                     }
                 }
 
-                if (ep.IsMetaTypeDataViewGetData && !string.IsNullOrEmpty(ep.DataMetaCode))
+                if (ep.IsMetaTypeDataViewList && !string.IsNullOrEmpty(ep.DataMetaCode))
                 {
                     var dv = dataviews.Find(p => p.IsMetaTypeDataView && p.MetaCode == ep.DataMetaCode);
                     if (dv != null)

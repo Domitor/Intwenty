@@ -153,12 +153,12 @@ namespace Intwenty.Model
                 return "MENITM";
           
         
-            if (item.MetaType == EndpointModelItem.MetaTypeDataViewGetData)
-                return "EP_DV_GD";
-            if (item.MetaType == EndpointModelItem.MetaTypeTableGetAll)
-                return "EP_TB_GA";
-            if (item.MetaType == EndpointModelItem.MetaTypeTableGetById)
-                return "EP_TB_GB";
+            if (item.MetaType == EndpointModelItem.MetaTypeDataViewList)
+                return "EP_DV";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableList)
+                return "EP_TB_L";
+            if (item.MetaType == EndpointModelItem.MetaTypeTableGet)
+                return "EP_TB_G";
             if (item.MetaType == EndpointModelItem.MetaTypeTableSave)
                 return "EP_TB_S";
 

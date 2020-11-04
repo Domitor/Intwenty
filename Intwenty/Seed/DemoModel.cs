@@ -286,12 +286,12 @@ namespace Intwenty.Seed
             #region endpoints
 
             //Define som endpoints for the customer application (Actions must be in the ENDPOINT_TABLE_ACTION domain)
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEGETBYID", MetaCode = "EP_CUSTOMER_GETLATEST", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Get customer", Description = "Get latest version of a customer by id", ParentMetaCode = "ROOT" });
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEGETALL", MetaCode = "EP_CUSTOMER_GETALL", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Get all customers", Description = "Get all customers in the database", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLEGET", MetaCode = "EP_CUSTOMER_GETLATEST", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Get customer", Description = "Get latest version of a customer by id", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLELIST", MetaCode = "EP_CUSTOMER_GETALL", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Get all customers", Description = "Get all customers in the database", ParentMetaCode = "ROOT" });
             client.InsertEntity(new EndpointItem() { AppMetaCode = "CUSTOMER", MetaType = "TABLESAVE", MetaCode = "EP_CUSTOMER_SAVE", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Save customer", Description = "Create or update customer", ParentMetaCode = "EP_CUSTOMER" });
 
             //Define som endpoints for dataviews (Actions must be in the ENDPOINT_DATAVIEW_ACTION domain)
-            client.InsertEntity(new EndpointItem() { AppMetaCode = "", MetaType = "DATAVIEWGETDATA", MetaCode = "EP_DV_OP_1", DataMetaCode = "VENDORVIEW", Path = "MyAPI/Vendor", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
+            client.InsertEntity(new EndpointItem() { AppMetaCode = "", MetaType = "DATAVIEWLIST", MetaCode = "EP_DV_OP_1", DataMetaCode = "VENDORVIEW", Path = "MyAPI/Vendor", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
 
             #endregion
 

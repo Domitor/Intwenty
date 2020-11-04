@@ -28,7 +28,7 @@ namespace Intwenty.Controllers
 
 
         [HttpGet]
-        public IActionResult GetById(int? id)
+        public IActionResult Get(int? id)
         {
             if (!IsAuthenticated())
                 return Unauthorized();
@@ -38,29 +38,22 @@ namespace Intwenty.Controllers
                 return new BadRequestResult();
 
             if (!ep.IsDataTableConnected)
-                return new BadRequestResult();
+                return new JsonResult("Failure due to endpoint model configuration") { StatusCode = 400 };
 
             if (!id.HasValue)
-                 return new BadRequestResult();
+                 return new JsonResult("Parameter Id must be an integer value") { StatusCode = 400 };
 
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                   p.Application.MetaCode == ep.AppMetaCode);
 
-            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
-                                                                   p.Application.MetaCode == ep.AppMetaCode))
+            if (model!= null)
             {
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
-                if (model == null)
-                    return new BadRequestResult();
-
+              
                 var state = new ClientStateInfo() { Id = id.Value, ApplicationId = model.Application.Id };
                 var data = DataRepository.GetLatestVersionById(state);
                 if (!data.IsSuccess)
-                {
-                    var res = new JsonResult(data.SystemError);
-                    res.StatusCode = 400;
-                    return res;
-                }
-
-
+                    return new JsonResult(data.UserError) { StatusCode = 400 };
+                
                 return new JsonResult(data);
 
             }
@@ -81,8 +74,8 @@ namespace Intwenty.Controllers
 
        
 
-        [HttpGet]
-        public IActionResult GetAll()
+        [HttpPost]
+        public IActionResult List([FromBody] ListFilter model)
         {
             if (!IsAuthenticated())
                 return Unauthorized();
@@ -92,18 +85,22 @@ namespace Intwenty.Controllers
                 return new BadRequestResult();
 
             if (!ep.IsDataTableConnected)
-                return new BadRequestResult();
+                return new JsonResult("Failure due to endpoint model configuration") { StatusCode = 400 };
 
-          
+            if (model == null)
+                return new JsonResult("Invalid request body") { StatusCode = 400 };
+
+
+            var m = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                     p.Application.MetaCode == ep.AppMetaCode);
             //Is application basequery
-            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
-                                                                    p.Application.MetaCode == ep.AppMetaCode))
+            if (m != null)
             {
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower());
-                if (model == null)
-                    return new BadRequestResult();
-
-                var res = DataRepository.GetList(model.Application.Id);
+                model.ApplicationId = m.Application.Id;
+                var res = DataRepository.GetPagedList(model);
+                if (!res.IsSuccess)
+                    return new JsonResult(res.UserError) { StatusCode = 400 };
+                
                 return new JsonResult(res);
 
             }
@@ -111,14 +108,11 @@ namespace Intwenty.Controllers
             {
                 var client = DataRepository.GetDataClient();
                 client.Open();
-                var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower()));
+                var res = client.GetJSONArray(string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower()), model.CurrentRowNum, (model.CurrentRowNum + model.BatchSize));
                 client.Close();
                 return new JsonResult(res);
 
-            }
-
-                
-
+            }   
         }
 
         [HttpPost]
@@ -133,44 +127,38 @@ namespace Intwenty.Controllers
                 return new BadRequestResult();
 
             if (!ep.IsDataTableConnected)
-                return new BadRequestResult();
+                return new JsonResult("Failure due to endpoint model configuration") { StatusCode = 400 };
 
-            //Is application basequery
-            if (ModelRepository.GetApplicationModels().Exists(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
-                                                                    p.Application.MetaCode == ep.AppMetaCode))
+         
+
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToLower() == ep.DataTableInfo.DbName.ToLower() &&
+                                                                 p.Application.MetaCode == ep.AppMetaCode);
+
+            if (model == null)
+                return new JsonResult("Invalid request body") { StatusCode = 400 };
+
+           
+            var state = ClientStateInfo.CreateFromJSON(data);
+            state.ApplicationId = model.Application.Id;
+            state.Data.ApplicationId = model.Application.Id;
+            var res = DataRepository.Save(state);
+            if (!res.IsSuccess)
             {
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.DbName.ToUpper() == ep.DataTableInfo.DbName);
-                if (model == null)
-                    return new BadRequestResult();
-
-                var state = ClientStateInfo.CreateFromJSON(data);
-                state.ApplicationId = model.Application.Id;
-                state.Data.ApplicationId = model.Application.Id;
-                var res = DataRepository.Save(state);
-                if (!res.IsSuccess)
-                {
-                    var error = new JsonResult(res.SystemError);
-                    error.StatusCode = 400;
-                    return error;
-                }
-                else
-                {
-                    return new JsonResult(res);
-                }
-
-
+                return new JsonResult(res.SystemError) { StatusCode = 400 };
             }
             else
             {
-                return new BadRequestResult();
+                return new JsonResult(res);
             }
 
 
            
+
+           
         }
 
-        [HttpGet]
-        public IActionResult GetData()
+        [HttpPost]
+        public IActionResult View([FromBody] ListFilter model)
         {
             if (!IsAuthenticated())
                 return Unauthorized();
@@ -179,17 +167,18 @@ namespace Intwenty.Controllers
             if (ep == null)
                 return new BadRequestResult();
 
-            if (ep.IsDataViewConnected)
-            {
-                var args = new ListFilter();
-                args.BatchSize = 10000;
-                args.DataViewMetaCode = ep.DataViewInfo.MetaCode;
-                var res = DataRepository.GetDataView(args);
-                return new JsonResult(res);
-            }
+            if (!ep.IsDataViewConnected)
+                return new JsonResult("Failure due to endpoint model configuration") { StatusCode = 400 };
 
+            if (model == null)
+                return new JsonResult("Invalid request body") { StatusCode = 400 };
 
-            return new BadRequestResult();
+            model.DataViewMetaCode = ep.DataViewInfo.MetaCode;
+            var res = DataRepository.GetDataView(model);
+            if (!res.IsSuccess)
+                return new JsonResult(res.UserError) { StatusCode = 400 };
+
+            return new JsonResult(res);
 
         }
 
@@ -219,7 +208,10 @@ namespace Intwenty.Controllers
         private EndpointModelItem GetEndpointModelFromPath() 
         {
             var path = this.Request.Path.Value;
-            var ep = ModelRepository.GetEndpointModels().Find(p => (p.Path + p.Action).ToUpper() == path.ToUpper());
+
+            //var epmodels = ModelRepository.GetEndpointModels();
+
+            var ep = ModelRepository.GetEndpointModels().Find(p => path.ToUpper().Contains((p.Path + p.Action).ToUpper()));
             return ep;
 
         }
