@@ -197,8 +197,11 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             valuedomains: {},
             model: { [apptablename]: {} },
             validation: {},
-            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterField": "", "filterValue": "" },
-            current_edit_line: {}
+            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterValues":[] },
+            current_edit_line: {},
+            showFilter: false,
+            dlgFilterColumnName: "",
+            dlgFilterValue: ""
         },
         methods:
         {
@@ -335,7 +338,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             setSelectedDataViewValue: function (item, lookupid) {
                 var context = this;
 
-                $("input[data-lookupid]").each(function () {
+                $("input[data-lookupid]").each(function ()
+                {
                     var id = $(this).data('lookupid');
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
@@ -349,6 +353,9 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             getDataViewValue: function (viewname, keyfield, lookupid) {
 
                 var context = this;
+
+                context.pageInfo.filterValues = [];
+
                 context.pageInfo.dataViewMetaCode = viewname;
 
                 $("input[data-lookupid]").each(function () {
@@ -356,17 +363,16 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                     if (id === lookupid) {
                         var dbfield = $(this).data('dbfield');
                         var viewfield = $(this).data('viewfield');
-                        if (dbfield === keyfield) {
-                            context.pageInfo.filterField = viewfield;
-                            context.pageInfo.filterValue = context.model[apptablename][dbfield];
+                        if (dbfield === keyfield)
+                        {
+                            if (viewfield != '' && context.model[apptablename][dbfield])
+                            {
+                                context.pageInfo.filterValues.push({ "columnName": viewfield, "value": context.model[apptablename][dbfield] });
+                            }
                         }
                     }
                 });
 
-                if (!context.pageInfo.filterValue)
-                    context.pageInfo.filterValue = "";
-                if (context.pageInfo.filterValue.length == 0)
-                    context.pageInfo.filterValue = "";
 
                 var endpointurl = baseurl + "GetDataViewValue";
 
@@ -375,15 +381,20 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify(context.pageInfo),
-                    success: function (response) {
+                    success: function (response)
+                    {
                         var dataviewitem = JSON.parse(response.data);
                         $("input[data-lookupid]").each(function () {
                             var id = $(this).data('lookupid');
                             if (id === lookupid) {
                                 var dbfield = $(this).data('dbfield');
                                 var viewfield = $(this).data('viewfield');
-                                context.model[apptablename][dbfield] = dataviewitem[viewfield];
-                                context.$forceUpdate();
+                                if (dbfield != keyfield)
+                                {
+                                    context.model[apptablename][dbfield] = dataviewitem[viewfield];
+                                    context.$forceUpdate();
+                                }
+
                             }
                         });
 
@@ -395,10 +406,11 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 if (!viewname)
                     return;
 
+                this.showFilter = false;
+                this.dlgFilterColumnName = "";
+                this.dlgFilterValue = "";
                 this.pageInfo.maxCount = 0;
                 this.pageInfo.currentRowNum = 0;
-                this.pageInfo.filterField = "";
-                this.pageInfo.filterValue = "";
                 this.pageInfo.dataViewMetaCode = viewname;
                 this.getDataViewLookUpPage();
                 this.current_edit_line = line;
@@ -417,6 +429,12 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             getDataViewLookUpPage: function () {
                 var context = this;
 
+                context.pageInfo.filterValues = [];
+                if (context.dlgFilterColumnName != '' && context.dlgFilterValue != '')
+                {
+                    context.pageInfo.filterValues.push({ "columnName": context.dlgFilterColumnName, "value": context.dlgFilterValue });
+                }
+              
                 var endpointurl = baseurl + "GetDataView";
 
                 $.ajax({
@@ -439,7 +457,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             isLastDataViewPage: function () {
                 return this.pageInfo.currentRowNum >= this.pageInfo.maxCount;
             },
-            handleDataViewFilter: function () {
+            runFilter: function ()
+            {
                 var context = this;
                 context.pageInfo.currentRowNum = 0;
                 context.getDataViewLookUpPage();
@@ -475,8 +494,8 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize)
         el: vueelement,
         data: {
             datalist: []
-            , model: { "filtervalue": "", "filterfield": "" }
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , model: { "showFilter": false }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "batchSize": pagesize, "currentRowNum": 0, "filterValues":[] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -513,23 +532,32 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize)
 
                         //UPDATE CURRENT PAGE INFO
                         context.pageInfo = response.listFilter;
+                        if (context.pageInfo.filterValues.length === 0)
+                            context.addFilterValue();
                     }
                 });
             },
-            handleFilterValue: function () {
+            runFilter: function () {
+                var context = this;
+                if (context.pageInfo.filterValues.length > 0)
+                    context.getPage();
+            },
+            addFilterValue: function ()
+            {
+                var context = this;
+                context.pageInfo.filterValues.push({ "columnName": "", "value": ""});
+            },
+            deleteFilterValue: function (item) {
                 var context = this;
 
-                if (!context.model.filterfield || context.model.filterfield == "")
-                    context.model.filterfield="";
-
-                if (context.model.filtervalue != context.pageInfo.filterValue) {
-                    context.pageInfo.currentRowNum = 0;
-                    context.pageInfo.filterField = context.model.filterfield;
-                    context.pageInfo.filterValue = context.model.filtervalue;
-                    context.getPage();
+                for (var i = 0; i < context.pageInfo.filterValues.length; i++)
+                {
+                    if (context.pageInfo.filterValues[i].columnName === item.columnName)
+                    {
+                        context.pageInfo.filterValues.splice(i, 1);
+                        break;
+                    }
                 }
-
-
             },
             sortBycolumn: function (s) {
                 //if s == current sort, reverse
@@ -539,7 +567,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize)
                 this.currentSort = s;
             },
             exportToExcel: function () {
-                var args = { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": 2000, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+                var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "currentRowNum": 0, "filterValues": [] }
                 var context = this;
                 var endpointurl = context.baseUrl + "GetPagedList";
 
@@ -620,8 +648,8 @@ function getListView(vueelement, applicationid, baseurl, pagesize)
         el: vueelement,
         data: {
             datalist: []
-            , model: { "filtervalue": "", "filterfield": "" }
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterField": "", "filterValue": "" }
+            , model: { }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterValues": [] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -658,20 +686,9 @@ function getListView(vueelement, applicationid, baseurl, pagesize)
                     }
                 });
             },
-            handleFilterValue: function () {
-                var context = this;
-
-                if (!context.model.filterfield || context.model.filterfield == "")
-                    context.model.filterfield = "";
-
-                if (context.model.filtervalue != context.pageInfo.filterValue) {
-                    context.pageInfo.currentRowNum = 0;
-                    context.pageInfo.filterField = context.model.filterfield;
-                    context.pageInfo.filterValue = context.model.filtervalue;
-                    context.getPage();
-                }
-
-
+            handleFilterValue: function ()
+            {
+                
             },
             sortBycolumn: function (s) {
                 //if s == current sort, reverse

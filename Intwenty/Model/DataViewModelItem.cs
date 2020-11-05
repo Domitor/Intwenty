@@ -128,6 +128,7 @@ namespace Intwenty.Model
                     if (SQLQuery.ToUpper().Contains("ALTER ") ||
                         SQLQuery.ToUpper().Contains("DROP ") ||
                         SQLQuery.ToUpper().Contains("TRUNCATE ") ||
+                        SQLQuery.ToUpper().Contains("INSERT ") ||
                         SQLQuery.ToUpper().Contains("UPDATE ") ||
                         SQLQuery.ToUpper().Contains("DELETE "))
                     {
@@ -171,7 +172,7 @@ namespace Intwenty.Model
                         count += 1;
                     }
 
-                    return searchstring.Substring(namestart, (nameend - namestart)).ToLower();
+                    return searchstring.Substring(namestart, (nameend - namestart));
                 }
                 catch { }
 
@@ -204,6 +205,11 @@ namespace Intwenty.Model
         }
 
         public string DataType => this.SQLQueryFieldDataType;
+
+
+      
+
+
     }
 
   

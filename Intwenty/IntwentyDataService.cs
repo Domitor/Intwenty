@@ -962,8 +962,15 @@ namespace Intwenty
                 if (args.HasOwnerUserId)
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
 
-                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
-                    sql_list_stmt.Append("AND t2." + args.FilterField + " LIKE '%" + args.FilterValue + "%'  ");
+                if (args.FilterValues != null && args.FilterValues.Count > 0)
+                {
+                    foreach (var v in args.FilterValues)
+                    {
+                        if (!string.IsNullOrEmpty(v.ColumnName) && !string.IsNullOrEmpty(v.Value))
+                            sql_list_stmt.Append("AND t2." + v.ColumnName + " LIKE '%" + v.Value + "%'  ");
+                    }
+                }
+              
 
                 sql_list_stmt.Append("ORDER BY t1.Id");
 
@@ -1694,51 +1701,19 @@ namespace Intwenty
 
                 }
 
-                var sql = string.Format(dv.SQLQuery, " ");
-               
-
-                if (!string.IsNullOrEmpty(args.FilterField) && !string.IsNullOrEmpty(args.FilterValue))
+                var sql = dv.SQLQuery;
+                if (args.FilterValues != null && args.FilterValues.Count > 0)
                 {
-                    var create_where_placeholder = !dv.SQLQuery.Contains("{0}") && !dv.SQLQuery.Contains("WHERE");
-                    var create_where = dv.SQLQuery.Contains("{0}") && !dv.SQLQuery.Contains("WHERE");
-                    var create_and_placeholder = !dv.SQLQuery.Contains("{0}") && dv.SQLQuery.Contains("WHERE");
-                    var create_and = dv.SQLQuery.Contains("{0}") && dv.SQLQuery.Contains("WHERE");
-
-                    //Infer where formatter
-                    if (create_where_placeholder)
+                    foreach (var v in args.FilterValues)
                     {
-                        var tmp = dv.SQLQuery.ToUpper();
-                        var frmind = tmp.IndexOf("FROM");
-                        if (frmind > 5)
+                        if (!string.IsNullOrEmpty(v.ColumnName) && !string.IsNullOrEmpty(v.Value))
                         {
-                            frmind += 7;
-                            var blankind = tmp.IndexOf(" ", frmind);
-                            sql = tmp.Insert(blankind, "{0}");
+                            sql = DBHelpers.AddSelectSqlAndCondition(sql, v.ColumnName, v.Value);
                         }
                     }
-                    else if (create_and_placeholder)
-                    {
-                        var tmp = dv.SQLQuery.ToUpper();
-                        var frmind = tmp.IndexOf("WHERE");
-                        if (frmind > 5)
-                        {
-                            frmind += 1;
-                            var blankind = tmp.IndexOf(" ", frmind);
-                            sql = tmp.Insert(blankind, "{0}");
-                        }
-                    }
-
-                    if (create_where)
-                    {
-                        sql = string.Format(sql, " WHERE " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ");
-                    }
-                    else if (create_and)
-                    {
-                        sql = string.Format(sql, " ( " + args.FilterField + " LIKE '%" + args.FilterValue + "%' ) AND ");
-                    }
-
-                   
                 }
+
+               
 
                 client.Open();
 
@@ -1778,28 +1753,27 @@ namespace Intwenty
                 var viewinfo = ModelRepository.GetDataViewModels();
 
                 if (args == null)
-                    throw new InvalidOperationException("Call to GetDataViewValue without ListRetrivalArgs");
+                    throw new InvalidOperationException("Call to GetDataViewRecord without ListFilter argument");
+                if (!args.HasFilter)
+                    throw new InvalidOperationException("Call to GetDataViewRecord without a filter to find one record");
+                if (string.IsNullOrEmpty(args.DataViewMetaCode))
+                    throw new InvalidOperationException("Call to GetDataViewRecord without a DataViewMetaCode");
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv == null)
+                    throw new InvalidOperationException("Could not find dataview");
+
+                var dvcol = viewinfo.Find(p => p.ParentMetaCode == dv.MetaCode && p.SQLQueryFieldName == args.FilterValues[0].ColumnName);
+                if (dvcol == null)
+                    throw new InvalidOperationException("Could not find the dataview column specified in the filterValues");
 
 
                 result.ListFilter = new ListFilter();
                 result.ListFilter = args;
 
-                var sql = "";
-                foreach (var v in viewinfo)
-                {
-                    if (v.IsMetaTypeDataView && v.MetaCode == args.DataViewMetaCode)
-                    {
-                        var keyfield = viewinfo.Find(p => p.IsMetaTypeDataViewKeyColumn && p.ParentMetaCode == v.MetaCode);
-                        if (keyfield == null)
-                            continue;
-
-                        sql = string.Format(v.SQLQuery, " WHERE " + keyfield.SQLQueryFieldName + " = @P1 ");
-                        break;
-                    }
-                }
-
+                var sql = DBHelpers.AddSelectSqlAndCondition(dv.SQLQuery, dvcol.SQLQueryFieldName, "@P1", false); 
                 if (string.IsNullOrEmpty(sql))
-                    throw new InvalidOperationException("Could not find view and key value in GetDataViewValue(viewinfo, args).");
+                    throw new InvalidOperationException("GetDataViewRecord - Could not build sql statement.");
 
                 var columns = new List<IIntwentyResultColumn>();
                 foreach (var viewcol in viewinfo)
@@ -1812,8 +1786,9 @@ namespace Intwenty
 
                 client.Open();
 
-                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValue) }, resultcolumns: columns.ToArray());
-
+                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray());
+                if (string.IsNullOrEmpty(result.Data))
+                    result.Data = "{}";
 
             }
             catch (Exception ex)

@@ -16,7 +16,7 @@
 
                @if (pl.UseFieldSet)
                {
-                @:<fieldset>
+                @:<fieldset class="intwentypanel">
                     @:<legend>@pl.Title</legend>
                }
 
@@ -201,19 +201,24 @@
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
+
                             <div class="row">
-                                <div class="col-lg-6">
+
+                                <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label class="control-label">Value</label>
-                                        <input type="text" class="form-control form-control-sm" v-model="pageInfo.filterValue" v-on:blur="handleDataViewFilter" />
+                                        <button v-on:click="showFilter=!showFilter">
+                                            <i class="fas fa-search"></i>
+                                            <span v-if="showFilter">Hide</span>
+                                            <span v-if="!showFilter">Show</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="control-label">Filter</label>
-                                        <select v-model="pageInfo.filterField" class="form-control form-control-sm">
+
+                                <div class="col-lg-4">
+                                    <div class="form-group" v-if="showFilter">
+                                        <select v-model="dlgFilterColumnName" class="form-control form-control-sm">
                                             @{
-                                               <option value="@t.DataViewColumnDbName">@t.DataViewColumnTitle</option>
+                                                <option value="@t.DataViewColumnDbName">@t.DataViewColumnTitle</option>
                                                 if (t.IsDataViewColumn2Connected)
                                                 {
                                                     <option value="@t.DataViewColumn2DbName">@t.DataViewColumn2Title</option>
@@ -223,7 +228,18 @@
                                         </select>
                                     </div>
                                 </div>
+
+
+                                <div class="col-lg-4" v-if="showFilter">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control form-control-sm" v-model="dlgFilterValue" v-on:blur="runFilter" />
+                                    </div>
+                                </div>
+
                             </div>
+
+    
+
                             <div class="row">
                                 <div class="col-lg-12">
                                     <table class="table table-bordered">
@@ -240,19 +256,18 @@
                                                 }
                                             </tr>
                                         </thead>
+
                                         <tr v-for="item in dataview">
 
-
-                                           
-                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.UIId')" data-dismiss="modal">{{item.@t.DataViewColumnDbName}}</a></td>
-                                                @foreach (var viewcol in dataviewmodels)
+                                            <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@t.UIId')" data-dismiss="modal">{{item.@t.DataViewColumnDbName}}</a></td>
+                                            @foreach (var viewcol in dataviewmodels)
+                                            {
+                                                if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == t.DataViewMetaCode && viewcol.SQLQueryFieldName.ToUpper() != t.DataViewColumnDbName.ToUpper())
                                                 {
-                                                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == t.DataViewMetaCode && viewcol.SQLQueryFieldName.ToUpper() != t.DataViewColumnDbName.ToUpper())
-                                                    {
-                                                        <td>{{item.@viewcol.SQLQueryFieldName}}</td>
-                                                    }
-
+                                                    <td>{{item.@viewcol.SQLQueryFieldName}}</td>
                                                 }
+
+                                            }
 
 
                                         </tr>

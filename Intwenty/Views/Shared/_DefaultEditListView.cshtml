@@ -1,31 +1,69 @@
 ﻿@model Intwenty.Model.UIRendering.UIView
 
-@if (!Model.Columns.Exists(p => p.HasPropertyWithValue("HIDEFILTER", "TRUE")))
+@if (!Model.HasPropertyWithValue("HIDEFILTER", "TRUE"))
 {
-<div class="row">
-    <div class="col-lg-3"></div>
-    <div class="col-lg-3"></div>
-    <div class="col-lg-2"></div>
-    <div class="col-lg-2">
-        <div class="form-group">
-            <label class="control-label">Value</label>
-            <input type="text" class="form-control form-control-sm" v-model="model.filtervalue" v-on:blur="handleFilterValue" />
+
+    <div class="row">
+        <div class="col-lg-6"></div>
+        <div class="col-lg-6">
+
+            <button v-on:click="model.showFilter=!model.showFilter" style="float:right">
+                <i class="fas fa-search"></i>
+                <span v-if="model.showFilter">Hide</span>
+                <span v-if="!model.showFilter">Show</span>
+            </button>
+
+            <br />
+            <br />
+
+            <fieldset style="padding:5px; border:1px solid black; border-radius:4px; float:right" v-if="model.showFilter">
+
+                <div class="row">
+                    <div class="col-lg-5">Filter</div>
+                    <div class="col-lg-5">Value</div>
+                    <div class="col-lg-2"></div>
+                </div>
+
+                <div class="mt-2"></div>
+
+                <div class="row" v-for="filteritem in pageInfo.filterValues">
+
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <select v-model="filteritem.columnName" class="form-control form-control-sm">
+                                @{
+                                    foreach (var c in Model.Columns)
+                                    {
+                                        <option value="@c.DataColumnDbName">@c.Title</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" v-model="filteritem.value" v-on:blur="runFilter" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-danger" v-on:click="deleteFilterValue(filteritem)"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button type="button" v-on:click="addFilterValue"><span class="fa fa-plus"></span></button>
+
+            </fieldset>
+
         </div>
     </div>
-    <div class="col-lg-2">
-        <div class="form-group">
-            <label class="control-label">Filter</label>
-            <select v-model="model.filterfield" class="form-control form-control-sm">
-                @{
-                    foreach (var c in Model.Columns)
-                    {
-                        <option value="@c.DataColumnDbName">@c.Title</option>
-                    }
-                }
-            </select>
-        </div>
-    </div>
-</div>
+
+    <br />
+
 }
 
 
@@ -61,10 +99,10 @@
                 {
                     <td>{{item.@c.DataColumnDbName}}</td>
                 }
-             }
+            }
 
-         }
-        
+        }
+
     </tr>
 
 </table>

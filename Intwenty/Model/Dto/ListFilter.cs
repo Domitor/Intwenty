@@ -20,9 +20,16 @@ namespace Intwenty.Model.Dto
 
         public int BatchSize { get; set; }
 
-        public string FilterField { get; set; }
+        public List<FilterValue> FilterValues { get; set; }
 
-        public string FilterValue { get; set; }
+        public bool HasFilter
+        {
+            get
+            {
+                return FilterValues != null && FilterValues.Count > 0;
+
+            }
+        }
 
         public bool HasOwnerUserId
         {
@@ -33,7 +40,16 @@ namespace Intwenty.Model.Dto
         {
             BatchSize = 50;
             OwnerUserId = DEFAULT_OWNERUSERID;
+            FilterValues = new List<FilterValue>();
         }
+
+    }
+
+    public class FilterValue
+    {
+        public string ColumnName { get; set; }
+
+        public string Value { get; set; }
 
     }
 }

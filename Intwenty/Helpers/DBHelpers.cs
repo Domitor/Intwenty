@@ -399,6 +399,72 @@ namespace Intwenty.Helpers
             return dateTimeTypes.Contains(col.DataType);
         }
 
+        public static string AddSelectSqlAndCondition(string sqlquery, string columnname, string value, bool is_like_condition = true)
+        {
+
+            var sql = string.Format(sqlquery, " ");
+            var uppersql = sql.ToUpper();
+
+            var infer_where_stmt = !sql.Contains("WHERE");
+            var valueisparameter = value.StartsWith("@");
+
+
+            //Infer where formatter
+            if (infer_where_stmt)
+            {
+                var frmind = uppersql.IndexOf("FROM");
+                if (frmind > 5)
+                {
+                    frmind += 7;
+                    var blankind = uppersql.IndexOf(" ", frmind);
+                    sql = sql.Insert(blankind, "{0}");
+                }
+            }
+            else
+            {
+                var frmind = uppersql.IndexOf("WHERE");
+                if (frmind > 5)
+                {
+                    frmind += 1;
+                    var blankind = uppersql.IndexOf(" ", frmind);
+                    sql = sql.Insert(blankind, "{0}");
+                }
+            }
+
+            if (is_like_condition)
+            {
+                if (infer_where_stmt)
+                    sql = string.Format(sql, " WHERE " + columnname + " LIKE '%" + value + "%' ");
+                else
+                    sql = string.Format(sql, " ( " + columnname + " LIKE '%" + value + "%' ) AND ");
+
+            }
+            else
+            {
+                if (!valueisparameter)
+                {
+                    if (infer_where_stmt)
+                        sql = string.Format(sql, " WHERE " + columnname + " = '" + value + "' ");
+                    else
+                        sql = string.Format(sql, " ( " + columnname + " = '" + value + "' ) AND ");
+
+                }
+                else
+                {
+                    if (infer_where_stmt)
+                        sql = string.Format(sql, " WHERE " + columnname + " = " + value + " ");
+                    else
+                        sql = string.Format(sql, " ( " + columnname + " = " + value + " ) AND ");
+                }
+
+            }
+
+
+
+            return sql;
+
+        }
+
 
     }
 
