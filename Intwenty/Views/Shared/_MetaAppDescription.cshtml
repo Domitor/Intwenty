@@ -2,6 +2,13 @@
     <div class="col-lg-6">
 
         <div class="form-group">
+            <label class="control-label">System<span style="color: red"> *</span></label>
+            <select v-model="model.systemMetaCode" class="form-control form-control-sm" :disabled="model.id > 0">
+                <option v-for="sys in systems" v-bind:value="sys.metaCode">{{sys.title}}</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label class="control-label">Title<span style="color: red"> *</span></label>
             <input id="apptitle" type="text" class="form-control form-control-sm" v-model="model.title" v-on:input="setCodes" />
         </div>
@@ -21,20 +28,7 @@
             <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
-        <div class="form-group">
-            <label class="control-label">Menu Title (The text to use in the main menu for this application)</label>
-            <input id="menutitle" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.title" />
-        </div>
 
-        <div class="form-group">
-            <label class="control-label">Action name (Leave blank to use standard logic)</label>
-            <input id="actionname" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.action" />
-        </div>
-
-        <div class="form-group">
-            <label class="control-label">Controller name (Leave blank to use standard logic)</label>
-            <input id="controllername" type="text" class="form-control form-control-sm" v-model="model.mainMenuItem.controller" />
-        </div>
     </div>
 
 

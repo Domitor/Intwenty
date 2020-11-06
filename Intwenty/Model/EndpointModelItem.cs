@@ -39,7 +39,7 @@ namespace Intwenty.Model
             DataMetaCode = entity.DataMetaCode;
             OrderNo = entity.OrderNo;
             Title = entity.Title;
-            
+            SystemMetaCode = entity.SystemMetaCode;
 
             SetEmptyStrings();
         }
@@ -54,6 +54,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataMetaCode)) DataMetaCode = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
         }
 
         public string AppMetaCode { get; set; }

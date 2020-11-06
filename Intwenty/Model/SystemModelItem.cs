@@ -2,34 +2,31 @@
 using Intwenty.Interface;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
+using System.Text;
 
 namespace Intwenty.Model
 {
+    public class SystemModelItem : BaseModelItem, ILocalizableTitle
+    {
+        public static readonly string MetaTypeSystem = "SYSTEM";
 
-   public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
-   {
-        public static readonly string MetaTypeApplication = "APPLICATION";
-
-        public ApplicationModelItem()
+        public SystemModelItem()
         {
+            MetaType = MetaTypeSystem;
+            ParentMetaCode = BaseModelItem.MetaTypeRoot;
             SetEmptyStrings();
         }
 
-        public ApplicationModelItem(ApplicationItem entity)
+        public SystemModelItem(SystemItem entity)
         {
             Id = entity.Id;
             Title = entity.Title;
             TitleLocalizationKey = entity.TitleLocalizationKey;
             Description = entity.Description;
             MetaCode = entity.MetaCode;
-            DbName = entity.DbName;
-            UseVersioning = entity.UseVersioning;
-            IsHierarchicalApplication = entity.IsHierarchicalApplication;
+            DbPrefix = entity.DbPrefix;
             RequiresAuthorization = entity.RequiresAuthorization;
-            SystemMetaCode = entity.SystemMetaCode;
-            MetaType = MetaTypeApplication;
+            MetaType = MetaTypeSystem;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
             SetEmptyStrings();
         }
@@ -42,38 +39,27 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
-            if (string.IsNullOrEmpty(SystemMetaCode)) TitleLocalizationKey = string.Empty;
+            if (string.IsNullOrEmpty(DbPrefix)) Title = string.Empty;
         }
-
-      
 
         public string TitleLocalizationKey { get; set; }
 
         public string Description { get; set; }
 
-        public string DbName { get; set; }
-
-        public bool IsHierarchicalApplication { get; set; }
+        public string DbPrefix { get; set; }
 
         public bool RequiresAuthorization { get; set; }
 
-        public bool UseVersioning { get; set; }
-
-        public string VersioningTableName
-        {
-            get { return this.DbName + "_Versioning"; }
-        }
-
         public override string ModelCode
         {
-            get { return "APPMODEL"; }
+            get { return "SYSMODEL"; }
         }
 
         public override bool HasValidMetaType
         {
-            get 
+            get
             {
-                return this.MetaType == MetaTypeApplication; 
+                return this.MetaType == MetaTypeSystem;
             }
         }
 
@@ -88,17 +74,9 @@ namespace Intwenty.Model
                 }
                 return true;
             }
+
+
         }
 
-       
-
-        
-
-
-
-
-
-
     }
-    
 }

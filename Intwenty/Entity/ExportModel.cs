@@ -4,11 +4,14 @@ using System.Linq;
 
 namespace Intwenty.Entity
 {
-    public class SystemModel
+    public class ExportModel
     {
+
         public bool DeleteCurrentModel { get; set; }
 
         public DateTime ModelDate { get; set; }
+
+        public List<SystemItem> Systems { get; set; }
 
         public List<ApplicationItem> Applications { get; set; }
 
@@ -25,7 +28,7 @@ namespace Intwenty.Entity
         public List<EndpointItem> Endpoints { get; set; }
 
 
-        public SystemModel()
+        public ExportModel()
         {
             ModelDate = DateTime.Now;
             Applications = new List<ApplicationItem>();
@@ -35,6 +38,7 @@ namespace Intwenty.Entity
             MenuItems = new List<MenuItem>();
             ValueDomains = new List<ValueDomainItem>();
             Endpoints = new List<EndpointItem>();
+            Systems = new List<SystemItem>();
         }
 
 

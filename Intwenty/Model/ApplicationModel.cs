@@ -15,6 +15,8 @@ namespace Intwenty.Model
 
         }
 
+        public SystemModelItem System { get; set; }
+
         /// <summary>
         /// Describes an application
         /// </summary>
@@ -100,6 +102,7 @@ namespace Intwenty.Model
                 uiview.MetaType = v.MetaType;
                 uiview.ApplicationId = Application.Id;
                 uiview.Properties = v.Properties;
+                
 
                 if (uiview.HasProperty("PAGESIZE"))
                     uiview.PageSize = uiview.GetAsInt("PAGESIZE");

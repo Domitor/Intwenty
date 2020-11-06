@@ -16,12 +16,19 @@ namespace Intwenty.Interface
         /// Get a complete system model, used for export model
         /// </summary>
         /// <returns></returns>
-        public SystemModel GetSystemModel();
+        public ExportModel GetExportModel();
 
         /// <summary>
         /// Insert a complete system model, used for import model
         /// </summary>
-        public OperationResult InsertSystemModel(SystemModel model);
+        public OperationResult ImportModel(ExportModel model);
+
+
+        public List<SystemModelItem> GetSystemModels();
+
+        public void SaveSystemModel(SystemModelItem model);
+
+        public void DeleteSystemModel(SystemModelItem model);
 
 
         /// <summary>
@@ -48,7 +55,7 @@ namespace Intwenty.Interface
 
         public List<ApplicationModelItem> GetAppModels();
 
-        public ApplicationModelItem SaveAppModel(ApplicationModelItem model);
+        public OperationResult SaveAppModel(ApplicationModelItem model);
 
         public void DeleteAppModel(ApplicationModelItem model);
 

@@ -77,6 +77,7 @@ namespace Intwenty.Model
             Domain = entity.Domain;
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
+            SystemMetaCode = entity.SystemMetaCode;
             SetEmptyStrings();
             Children = new List<IUIControl>();
         }
@@ -99,6 +100,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
             if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
+            if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
         }
 
         public string TitleLocalizationKey { get; set; }

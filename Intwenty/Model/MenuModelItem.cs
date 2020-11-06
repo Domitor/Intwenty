@@ -34,7 +34,8 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             OrderNo = entity.OrderNo;
             AppMetaCode = entity.AppMetaCode;
-            
+            SystemMetaCode = entity.SystemMetaCode;
+
         }
 
 

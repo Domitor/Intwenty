@@ -13,6 +13,7 @@ using Intwenty.Interface;
 using Microsoft.AspNetCore.Identity;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
+using System.Media;
 
 namespace Intwenty
 {
@@ -33,6 +34,8 @@ namespace Intwenty
 
         private string AppModelCacheKey = "APPMODELS";
 
+        private string AppModelItemsCacheKey = "APPMODELITEMS";
+
         private static readonly string DefaultVersioningTableColumnsCacheKey = "DEFVERTBLCOLS";
 
         private static readonly string ValueDomainsCacheKey = "VALUEDOMAINS";
@@ -42,6 +45,8 @@ namespace Intwenty
         private static readonly string EndpointsCacheKey = "INTWENTYENDPOINTS";
 
         private static readonly string DataViewCacheKey = "INTWENTYDATAVIEWS";
+
+        private static readonly string SystemModelItemCacheKey = "INTWENTYSYSTEMS";
 
 
         public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
@@ -90,10 +95,14 @@ namespace Intwenty
         }
 
 
-        public SystemModel GetSystemModel()
+        public ExportModel GetExportModel()
         {
+
             Client.Open();
-            var t = new SystemModel();
+            var t = new ExportModel();
+            var systems = Client.GetEntities<SystemItem>();
+            foreach (var a in systems)
+                t.Systems.Add(a);
             var apps = Client.GetEntities<ApplicationItem>();
             foreach (var a in apps)
                 t.Applications.Add(a);
@@ -122,7 +131,7 @@ namespace Intwenty
 
         }
 
-        public OperationResult InsertSystemModel(SystemModel model)
+        public OperationResult ImportModel(ExportModel model)
         {
             if (model == null)
             {
@@ -136,6 +145,7 @@ namespace Intwenty
             try
             {
                 ModelCache.Remove(AppModelCacheKey);
+                ModelCache.Remove(AppModelItemsCacheKey);
 
                 Client.Open();
 
@@ -148,7 +158,11 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
+                    Client.DeleteEntities(Client.GetEntities<SystemItem>());
                 }
+
+                foreach (var a in model.Systems)
+                    Client.InsertEntity(a);
 
                 foreach (var a in model.Applications)
                     Client.InsertEntity(a);
@@ -193,13 +207,117 @@ namespace Intwenty
 
         }
 
+        public List<SystemModelItem> GetSystemModels()
+        {
+            List<SystemModelItem> res = null;
+
+            if (ModelCache.TryGetValue(SystemModelItemCacheKey, out res))
+            {
+                return res;
+            }
+
+            res = new List<SystemModelItem>();
+
+            Client.Open();
+            var systems = Client.GetEntities<SystemItem>();
+            Client.Close();
+
+            if (systems.Count == 0)
+                systems.Add(new SystemItem() { Id = 9999, DbPrefix = "def", Title = "Default", MetaCode = "INTWENTYDEFAULTSYS" });
+            
+            foreach (var s in systems)
+            {
+                res.Add(new SystemModelItem(s));
+            }
+
+            ModelCache.Set(SystemModelItemCacheKey, res);
+
+            return res;
+        }
+
+        public void SaveSystemModel(SystemModelItem model)
+        {
+            if (model == null)
+                return;
+
+            ModelCache.Remove(SystemModelItemCacheKey);
+
+            model.ParentMetaCode = BaseModelItem.MetaTypeRoot;
+
+            if (!string.IsNullOrEmpty(model.DbPrefix))
+                throw new InvalidOperationException("Cant save a system withot a dbprefix");
+
+            if (!string.IsNullOrEmpty(model.Title))
+                throw new InvalidOperationException("Cant save a system withot a title");
+
+            Client.Open();
+            var current_systems = GetSystemModels();
+            Client.Close();
+
+            if (model.Id < 1)
+            {
+
+                if (current_systems.Exists(p => p.DbPrefix == model.DbPrefix))
+                    throw new InvalidOperationException(string.Format("There is already a system with DbPrefix {0}", model.DbPrefix));
+
+                if (current_systems.Exists(p => p.Title == model.Title))
+                    throw new InvalidOperationException(string.Format("There is already a system with the title {0}", model.Title));
+
+                var entity = new SystemItem();
+                if (string.IsNullOrEmpty(model.MetaCode))
+                    entity.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+
+                entity.Title = model.Title;
+                entity.Description = model.Description;
+                entity.DbPrefix = model.DbPrefix;
+                entity.RequiresAuthorization = model.RequiresAuthorization;
+
+                Client.Open();
+                Client.InsertEntity(entity);
+                Client.Close();
+            }
+            else
+            {
+                Client.Open();
+                var existing = Client.GetEntity<SystemItem>(model.Id);
+                if (existing != null)
+                {
+
+                    existing.Title = model.Title;
+                    existing.Description = model.Description;
+                    existing.RequiresAuthorization = model.RequiresAuthorization;
+                    Client.UpdateEntity(existing);
+
+                }
+                Client.Close();
+            }
+
+
+        }
+
+        public void DeleteSystemModel(SystemModelItem model)
+        {
+            if (model == null)
+                return;
+
+            ModelCache.Remove(SystemModelItemCacheKey);
+
+            Client.Open();
+            var existing = Client.GetEntity<SystemItem>(model.Id);
+            if (existing != null)
+            {
+                Client.DeleteEntity(existing);
+            }
+            Client.Close();
+        }
+
+
         public List<ApplicationModel> GetLocalizedApplicationModels()
         {
             var res = GetApplicationModels();
             foreach (var a in res) 
             {
                 LocalizeTitle(a.Application);
-                LocalizeTitle(a.Application.MainMenuItem);
                 LocalizeTitles(a.UIStructure.ToList<ILocalizableTitle>());
             }
             return res;
@@ -219,11 +337,17 @@ namespace Intwenty
             var appitems =  GetAppModels();
             var dbitems = GetDatabaseModels();
             var uiitems = GetUserInterfaceModels();
+            var systems = GetSystemModels();
 
 
             foreach (var app in appitems)
             {
                 var t = new ApplicationModel();
+
+                var system = systems.Find(p => p.MetaCode == app.SystemMetaCode);
+                if (system != null)
+                    t.System = system;
+
                 t.Application = app;
                 t.DataStructure = new List<DatabaseModelItem>();
                 t.UIStructure = new List<UserInterfaceModelItem>();
@@ -240,8 +364,8 @@ namespace Intwenty
 
         public List<MenuModelItem> GetLocalizedMenuModels()
         {
+            var apps = GetAppModels();
             Client.Open();
-            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
             var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
             Client.Close();
 
@@ -277,8 +401,9 @@ namespace Intwenty
         }
         public List<MenuModelItem> GetMenuModels()
         {
+            var apps = GetAppModels();
+
             Client.Open();
-            var apps = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
             var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
             Client.Close();
 
@@ -315,18 +440,33 @@ namespace Intwenty
 
         public List<ApplicationModelItem> GetAppModels()
         {
+          
+            List<ApplicationModelItem> res = null;
 
+            if (ModelCache.TryGetValue(AppModelItemsCacheKey, out res))
+            {
+                return res;
+            }
+
+            res = new List<ApplicationModelItem>();
+            var systems = GetSystemModels();
             Client.Open();
-            var res = Client.GetEntities<ApplicationItem>().Select(p => new ApplicationModelItem(p)).ToList();
+            var apps = Client.GetEntities<ApplicationItem>();
             Client.Close();
 
-            var menu = GetMenuModels();
-            foreach (var app in res)
+
+
+            foreach (var a in apps)
             {
-                var mi = menu.Find(p => p.IsMetaTypeMenuItem && p.Application.Id == app.Id);
-                if (mi != null)
-                    app.MainMenuItem = mi;
+                var am = new ApplicationModelItem(a);
+                var sys = systems.Find(p => p.SystemMetaCode == a.SystemMetaCode);
+                if (sys != null)
+                    am.SystemInfo = sys;
+
+               res.Add(am);
             }
+
+            ModelCache.Set(AppModelItemsCacheKey, res);
 
             return res;
         }
@@ -337,15 +477,13 @@ namespace Intwenty
             if (model==null)
                 throw new InvalidOperationException("Missing required information when deleting application model.");
 
-            if (model.Id < 1 || string.IsNullOrEmpty(model.MetaCode))
+            if (model.Id < 1)
                 throw new InvalidOperationException("Missing required information when deleting application model.");
 
             var existing = Client.GetEntities<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
             if (existing == null)
-                return; //throw new InvalidOperationException("Could not find application model when deleting application model.");
+                return; 
 
-
-         
             var dbitems = Client.GetEntities<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (dbitems != null && dbitems.Count() > 0)
                 Client.DeleteEntities(dbitems);
@@ -363,17 +501,31 @@ namespace Intwenty
             Client.Close();
 
             ModelCache.Remove(AppModelCacheKey);
+            ModelCache.Remove(AppModelItemsCacheKey);
 
         }
 
-        public ApplicationModelItem SaveAppModel(ApplicationModelItem model)
+        public OperationResult SaveAppModel(ApplicationModelItem model)
         {
-            ModelCache.Remove(AppModelCacheKey);
-
-            var apps = Client.GetEntities<ApplicationItem>();
 
             if (model == null)
-                return null;
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Model cannot be null");
+
+            if (string.IsNullOrEmpty(model.SystemMetaCode))
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a SystemMetaCode");
+            if (string.IsNullOrEmpty(model.DbName))
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a DbName");
+
+            ModelCache.Remove(AppModelCacheKey);
+            ModelCache.Remove(AppModelItemsCacheKey);
+
+            Client.Open();
+            var apps = Client.GetEntities<ApplicationItem>();
+            Client.Close();
+            var system = GetSystemModels();
+            var currentsystem = system.Find(p => p.MetaCode == model.SystemMetaCode);
+            if (currentsystem==null)
+                return new OperationResult(false, MessageCode.USERERROR, "Please select a system");
 
             if (model.Id < 1)
             {
@@ -384,20 +536,50 @@ namespace Intwenty
                     max += 10;
                 }
 
+                if (string.IsNullOrEmpty(model.MetaCode)) 
+                {
+                    model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                } 
+                else
+                {
+                    if (apps.Exists(p => p.MetaCode == model.MetaCode))
+                        model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                }
+
+
+                if (!model.DbName.ToUpper().StartsWith(currentsystem.DbPrefix.ToUpper() + "_"))
+                {
+                    var dbname = currentsystem.DbPrefix + "_" + model.DbName;
+                    if (apps.Exists(p => p.DbName.ToUpper() == dbname.ToUpper()))
+                    {
+                        return new OperationResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
+                    }
+                    model.DbName = dbname;
+                }
+                else
+                {
+                    if (apps.Exists(p => p.DbName.ToUpper() == model.DbName.ToUpper()))
+                    {
+                        return new OperationResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
+                    }
+
+                }
+
                 var entity = new ApplicationItem();
                 entity.Id = max;
                 entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
-                //entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
+                entity.SystemMetaCode = model.MetaCode;
+                entity.RequiresAuthorization = model.RequiresAuthorization;
 
+                Client.Open();
                 Client.InsertEntity(entity);
                 Client.Close();
 
-                CreateApplicationMenuItem(model);
-
-                return new ApplicationModelItem(entity);
+              
+                return new OperationResult(true, MessageCode.RESULT, "A new application model was inserted.");
 
             }
             else
@@ -405,70 +587,23 @@ namespace Intwenty
 
                 var entity = apps.FirstOrDefault(p => p.Id == model.Id);
                 if (entity == null)
-                    return model;
+                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Failure updating application model, no such id {0}", model.Id));
 
-                //entity.MetaCode = model.MetaCode;
                 entity.Title = model.Title;
-                //entity.TitleLocalizationKey = model.TitleLocalizationKey;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
-
-                var menuitem = Client.GetEntities<MenuItem>().FirstOrDefault(p => p.AppMetaCode == entity.MetaCode && p.MetaType == MenuModelItem.MetaTypeMenuItem);
-                if (menuitem != null)
-                {
-                    menuitem.Action = model.MainMenuItem.Action;
-                    menuitem.Controller = model.MainMenuItem.Controller;
-                    menuitem.Title = model.MainMenuItem.Title;
-                    //menuitem.TitleLocalizationKey = model.MainMenuItem.TitleLocalizationKey;
-
-                    Client.UpdateEntity(menuitem);
-                    Client.Close();
-
-                }
-                else
-                {
-                    CreateApplicationMenuItem(model);
-                }
+                entity.RequiresAuthorization = model.RequiresAuthorization;
 
                 Client.UpdateEntity(entity);
                 Client.Close();
 
-                return new ApplicationModelItem(entity);
+                return new OperationResult(true, MessageCode.RESULT, "Application model updated.");
 
             }
 
         }
 
-        private void CreateApplicationMenuItem(ApplicationModelItem model)
-        {
 
-            if (!string.IsNullOrEmpty(model.MainMenuItem.Title))
-            {
-                var max = 0;
-                var menu = GetMenuModels();
-                var root = menu.Find(p => p.IsMetaTypeMainMenu);
-                if (root == null)
-                {
-                    var main = new MenuItem() { AppMetaCode = "", MetaType = "MAINMENU", OrderNo = 1, ParentMetaCode = "ROOT", Properties = "", Title = "Applications" };
-                    Client.InsertEntity(main);
-                    Client.Close();
-                    max = 1;
-                }
-                else
-                {
-                    max = menu.Max(p => p.OrderNo);
-                }
-
-                var appmi = new MenuItem() { AppMetaCode = model.MetaCode, MetaType = MenuModelItem.MetaTypeMenuItem, OrderNo = max + 10, ParentMetaCode = root.MetaCode, Properties = "", Title = model.MainMenuItem.Title };
-                appmi.Action = model.MainMenuItem.Action;
-                appmi.Controller = model.MainMenuItem.Controller;
-                appmi.MetaCode = BaseModelItem.GenerateNewMetaCode(model.MainMenuItem);
-                Client.InsertEntity(appmi);
-                Client.Close();
-
-            }
-
-        }
         #endregion
 
         #region Endpoints
@@ -556,6 +691,7 @@ namespace Intwenty
                         ParentMetaCode = ep.ParentMetaCode,
                         Title = ep.Title,
                         AppMetaCode = ep.AppMetaCode,
+                        SystemMetaCode = ep.SystemMetaCode,
                         DataMetaCode = ep.DataMetaCode,
                         Description = ep.Description,
                         OrderNo = ep.OrderNo,
@@ -575,6 +711,7 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.AppMetaCode = ep.AppMetaCode;
+                        existing.SystemMetaCode = ep.SystemMetaCode;
                         existing.OrderNo = ep.OrderNo;
                         existing.Path = ep.Path;
                         existing.Properties = ep.Properties;
@@ -623,6 +760,7 @@ namespace Intwenty
                 {
                     if (item.AppMetaCode == app.MetaCode)
                     {
+                        item.SystemInfo = app.SystemInfo;
                         if (!string.IsNullOrEmpty(item.DataTableMetaCode))
                         {
                             var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
@@ -696,6 +834,8 @@ namespace Intwenty
 
         public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model)
         {
+            var apps = GetAppModels();
+
             ModelCache.Remove(AppModelCacheKey);
 
             foreach (var t in model)
@@ -727,7 +867,33 @@ namespace Intwenty
                     if (string.IsNullOrEmpty(uic.MetaCode))
                         throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
 
-                    Client.InsertEntity(CreateMetaUIItem(uic));
+                    var app = apps.Find(p => p.MetaCode == uic.AppMetaCode);
+                    if (app==null)
+                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a valid AppMetaCode");
+
+                    var entity = new UserInterfaceItem()
+                    {
+                        AppMetaCode = uic.AppMetaCode,
+                        ColumnOrder = uic.ColumnOrder,
+                        DataTableMetaCode = uic.DataTableMetaCode,
+                        DataColumn1MetaCode = uic.DataColumn1MetaCode,
+                        DataColumn2MetaCode = uic.DataColumn2MetaCode,
+                        DataViewMetaCode = uic.DataViewMetaCode,
+                        DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode,
+                        DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode,
+                        Description = uic.Description,
+                        Domain = uic.Domain,
+                        MetaCode = uic.MetaCode,
+                        MetaType = uic.MetaType,
+                        ParentMetaCode = uic.ParentMetaCode,
+                        RowOrder = uic.RowOrder,
+                        Title = uic.Title,
+                        Properties = uic.Properties,
+                        SystemMetaCode = app.SystemMetaCode
+
+                    };
+
+                    Client.InsertEntity(entity);
 
                 }
                 else
@@ -736,7 +902,6 @@ namespace Intwenty
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
-                        //existing.TitleLocalizationKey = uic.TitleLocalizationKey;
                         existing.RowOrder = uic.RowOrder;
                         existing.ColumnOrder = uic.ColumnOrder;
                         existing.DataColumn1MetaCode = uic.DataColumn1MetaCode;
@@ -765,33 +930,7 @@ namespace Intwenty
        
 
 
-        private UserInterfaceItem CreateMetaUIItem(UserInterfaceModelItem dto)
-        {
-            var res = new UserInterfaceItem()
-            {
-                AppMetaCode = dto.AppMetaCode,
-                ColumnOrder = dto.ColumnOrder,
-                DataTableMetaCode = dto.DataTableMetaCode,
-                DataColumn1MetaCode = dto.DataColumn1MetaCode,
-                DataColumn2MetaCode = dto.DataColumn2MetaCode,
-                DataViewMetaCode = dto.DataViewMetaCode,
-                DataViewColumn1MetaCode = dto.DataViewColumn1MetaCode,
-                DataViewColumn2MetaCode = dto.DataViewColumn2MetaCode,
-                Description = dto.Description,
-                Domain = dto.Domain,
-                MetaCode = dto.MetaCode,
-                MetaType = dto.MetaType,
-                ParentMetaCode = dto.ParentMetaCode,
-                RowOrder = dto.RowOrder,
-                Title = dto.Title,
-                //TitleLocalizationKey = dto.TitleLocalizationKey,
-                Properties = dto.Properties
-                
-            };
-
-            return res;
-
-        }
+      
         #endregion
 
         #region Database
@@ -808,13 +947,13 @@ namespace Intwenty
 
             foreach (var app in apps)
             {
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "Id", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "Version", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "CreatedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "ChangedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "OwnedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "Id", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "Version", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "CreatedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime));
 
                 foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.IsRoot))
                 {
@@ -824,21 +963,24 @@ namespace Intwenty
                                         p.IsMetaTypeDataColumn))
                         continue;
 
+                    column.SystemInfo = app.SystemInfo;
                     column.TableName = app.DbName;
                     res.Add(column);
                 }
 
                 foreach (var table in dbitems.Where(p => p.IsMetaTypeDataTable && p.AppMetaCode == app.MetaCode))
                 {
+                    table.SystemInfo = app.SystemInfo;
+
                     res.Add(table);
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "Id", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "Version", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "CreatedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "ChangedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "OwnedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, table.DbName, "ParentId", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "Id", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "Version", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "CreatedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ParentId", DatabaseModelItem.DataTypeInt, table.MetaCode));
 
                     foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.ParentMetaCode == table.MetaCode && !p.IsRoot))
                     {
@@ -849,9 +991,8 @@ namespace Intwenty
                             continue;
 
                         column.TableName = table.DbName;
-
-
-                       res.Add(column);
+                        column.SystemInfo = app.SystemInfo;
+                        res.Add(column);
                         
                     }
                 }
@@ -899,6 +1040,8 @@ namespace Intwenty
                 if (dbi.IsMetaTypeDataColumn && !dbi.HasValidDataType)
                     throw new InvalidOperationException("Invalid datatype type when saving application database model.");
 
+                dbi.SystemMetaCode = app.Application.SystemMetaCode;
+
 
             }
 
@@ -915,7 +1058,18 @@ namespace Intwenty
                     if (string.IsNullOrEmpty(dbi.MetaCode))
                         dbi.MetaCode = BaseModelItem.GenerateNewMetaCode(dbi);
 
-                    var t = CreateMetaDataItem(dbi);
+                    var t = new DatabaseItem()
+                    {
+                        AppMetaCode = dbi.AppMetaCode,
+                        Description = dbi.Description,
+                        MetaCode = dbi.MetaCode,
+                        MetaType = dbi.MetaType,
+                        ParentMetaCode = dbi.ParentMetaCode,
+                        DbName = dbi.DbName,
+                        DataType = dbi.DataType,
+                        Properties = dbi.Properties,
+                        SystemMetaCode = dbi.SystemMetaCode
+                    };
 
 
                     //SET PARENT META CODE
@@ -991,24 +1145,7 @@ namespace Intwenty
             }
         }
 
-        private DatabaseItem CreateMetaDataItem(DatabaseModelItem dto)
-        {
-            var res = new DatabaseItem()
-            {
-                AppMetaCode = dto.AppMetaCode,
-                Description = dto.Description,
-                MetaCode = dto.MetaCode,
-                MetaType = dto.MetaType,
-                ParentMetaCode = dto.ParentMetaCode,
-                DbName = dto.DbName,
-                DataType = dto.DataType,
-                Properties = dto.Properties
-            };
-
-
-            return res;
-
-        }
+     
         #endregion
 
         #region Data Views
@@ -1064,11 +1201,9 @@ namespace Intwenty
                         MetaType = dv.MetaType,
                         ParentMetaCode = dv.ParentMetaCode,
                         Title = dv.Title,
-                        //TitleLocalizationKey = dto.TitleLocalizationKey,
                         SQLQuery = dv.SQLQuery,
-                        SQLQueryFieldName = dv.SQLQueryFieldName
-
-
+                        SQLQueryFieldName = dv.SQLQueryFieldName,
+                        SystemMetaCode = dv.SystemMetaCode
                     };
                     Client.InsertEntity(t);
                 }
@@ -1080,7 +1215,6 @@ namespace Intwenty
                         existing.SQLQuery = dv.SQLQuery;
                         existing.SQLQueryFieldName = dv.SQLQueryFieldName;
                         existing.Title = dv.Title;
-                        //existing.TitleLocalizationKey = dv.TitleLocalizationKey;
                         Client.UpdateEntity(existing);
                     }
 
@@ -1306,6 +1440,7 @@ namespace Intwenty
                
 
                 client.Open();
+                client.CreateTable<SystemItem>();
                 client.CreateTable<ApplicationItem>();
                 client.CreateTable<DatabaseItem>();
                 client.CreateTable<DataViewItem>();
@@ -1432,6 +1567,7 @@ namespace Intwenty
 
             ModelCache.Remove(AppModelCacheKey);
 
+            var systems = GetSystemModels();
             var apps = GetApplicationModels();
             var viewinfo = GetDataViewModels();
             var endpointinfo = GetEndpointModels();
@@ -1441,6 +1577,34 @@ namespace Intwenty
             {
                 res.IsSuccess = false;
                 res.AddMessage(MessageCode.SYSTEMERROR, "The model doesn't seem to exist");
+            }
+
+            if (systems.Count == 0)
+            {
+                res.AddMessage(MessageCode.SYSTEMERROR, "There's no systems in the model, thre shoult be atleast one default system");
+                return res;
+            }
+
+            foreach (var a in systems)
+            {
+                if (string.IsNullOrEmpty(a.Title))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The system with Id: {0} has no [Title].", a.Id));
+                    return res;
+                }
+
+                if (string.IsNullOrEmpty(a.MetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The system {0} has no [MetaCode].", a.Title));
+                    return res;
+                }
+
+                if (string.IsNullOrEmpty(a.DbPrefix))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The system {0} has no [DbPrefix].", a.Title));
+                    return res;
+                }
+
             }
 
             foreach (var a in apps)
@@ -1454,6 +1618,18 @@ namespace Intwenty
 
                 if (string.IsNullOrEmpty(a.Application.MetaCode))
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [MetaCode].", a.Application.Title));
+
+                if (string.IsNullOrEmpty(a.Application.SystemMetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [SystemMetaCode].", a.Application.Title));
+                    return res;
+                }
+
+                if (!systems.Exists(p=> p.MetaCode == a.Application.SystemMetaCode))
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has an invalid [SystemMetaCode].", a.Application.Title));
+                    return res;
+                }
 
                 if (string.IsNullOrEmpty(a.Application.DbName))
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [DbName].", a.Application.Title));
@@ -1852,7 +2028,7 @@ namespace Intwenty
 
             try
             {
-                //Ctreate index on main application table
+                //Create index on main application table
                 sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.DbName);
                 Client.RunCommand(sql);
             }
@@ -1953,7 +2129,9 @@ namespace Intwenty
 
         }
 
-      
+       
+
+
 
 
 

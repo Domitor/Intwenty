@@ -10,7 +10,7 @@ namespace Intwenty.Entity
     {
         [AutoIncrement]
         public int Id { get; set; }
-
+        public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
 
         public string Title { get; set; }

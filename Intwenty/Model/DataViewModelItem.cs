@@ -37,6 +37,7 @@ namespace Intwenty.Model
             OrderNo = entity.OrderNo;
             Properties = "";
             SQLQueryFieldDataType = entity.SQLQueryFieldDataType;
+            SystemMetaCode = entity.SystemMetaCode;
             if (string.IsNullOrEmpty(SQLQueryFieldDataType))
                 SQLQueryFieldDataType = DatabaseModelItem.DataTypeString;
         }

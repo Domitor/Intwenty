@@ -19,9 +19,10 @@ namespace Intwenty.Entity
         public string TitleLocalizationKey { get; set; }
 
         public string Description { get; set; }
-
+        public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
-
+        public string ParentMetaCode { get; set; }
+        public string MetaCode { get; set; }
         /// <summary>
         /// Reference to an Intwenty DataView
         /// </summary>
@@ -47,9 +48,7 @@ namespace Intwenty.Entity
 
 
 
-        public string MetaCode { get; set; }
-
-        public string ParentMetaCode { get; set; }
+       
 
         public int ColumnOrder { get; set; }
 

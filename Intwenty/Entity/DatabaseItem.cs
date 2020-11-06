@@ -20,7 +20,7 @@ namespace Intwenty.Entity
         public string MetaType { get; set; }
 
         public string Description { get; set; }
-
+        public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
 
         public string MetaCode { get; set; }

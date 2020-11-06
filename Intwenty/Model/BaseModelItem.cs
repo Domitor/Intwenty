@@ -14,6 +14,8 @@ namespace Intwenty.Model
 
         private static int MetaCodeCounter = 1;
 
+        public string SystemMetaCode { get; set; }
+
         public string Title { get; set; }
 
         public string MetaCode { get; set; }
@@ -28,6 +30,8 @@ namespace Intwenty.Model
 
         public abstract string ModelCode { get; }
 
+        public SystemModelItem SystemInfo { get; set; }
+
         public bool IsRoot
         {
             get
@@ -36,7 +40,14 @@ namespace Intwenty.Model
             }
         }
 
-       
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
+        }
 
         public static string GenerateNewMetaCode(BaseModelItem item)
         {

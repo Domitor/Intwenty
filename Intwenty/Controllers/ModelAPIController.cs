@@ -30,6 +30,65 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
+        #region Systems
+
+        /// <summary>
+        /// Get endpoints
+        /// </summary>
+        [HttpGet("/Model/API/GetSystems")]
+        public JsonResult GetSystems()
+        {
+
+            var res = ModelRepository.GetSystemModels();
+            return new JsonResult(res);
+
+        }
+
+
+
+
+        [HttpPost("/Model/API/SaveSystem")]
+        public JsonResult SaveEndpoints([FromBody] SystemModelItem model)
+        {
+            try
+            {
+                ModelRepository.SaveSystemModel(model);
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving a system.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetSystems();
+        }
+
+
+        [HttpPost("/Model/API/DeleteSystem")]
+        public JsonResult DeleteSystem([FromBody] SystemModelItem model)
+        {
+            try
+            {
+               
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting an endpoint.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetSystems();
+        }
+
+        #endregion
+
         #region Applicaion models
 
         /// <summary>
@@ -434,7 +493,7 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/ExportModel")]
         public IActionResult ExportModel()
         {
-            var t = ModelRepository.GetSystemModel();
+            var t = ModelRepository.GetExportModel();
             var json = System.Text.Json.JsonSerializer.Serialize(t);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "intwentymodel.json");
@@ -453,9 +512,9 @@ namespace Intwenty.Controllers
                 {
                     fileContents = await reader.ReadToEndAsync();
                 }
-                var model = System.Text.Json.JsonSerializer.Deserialize<SystemModel>(fileContents);
+                var model = System.Text.Json.JsonSerializer.Deserialize<ExportModel>(fileContents);
                 model.DeleteCurrentModel = delete;
-                result = ModelRepository.InsertSystemModel(model);
+                result = ModelRepository.ImportModel(model);
             }
             catch(Exception ex) 
             {

@@ -11,7 +11,7 @@ namespace Intwenty.Entity
     {
         [AutoIncrement]
         public int Id { get; set; }
-
+        public string SystemMetaCode { get; set; }
         public string MetaType { get; set; }
 
         public string MetaCode { get; set; }
