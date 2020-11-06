@@ -12,7 +12,7 @@
     <br />
 
     <div class="card">
-        <div class="card-header"><h2>Edit <i>{{model.title}}</i></h2></div>
+        <div class="card-header"><h2>Edit {{model.title}}</h2></div>
         <div class="card-body">
             Edit basic model data for application {{model.title}}
         </div>
@@ -20,7 +20,7 @@
 
     <br />
 
-    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-default"><span class="fa fa-backward"></span> Back to list</a>
+    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
 
 
     <br />
@@ -43,9 +43,8 @@
         var app = new Vue({
             el: '#app',
             data: {
-                model: {
-                    mainMenuItem: {}
-                    }
+                model: {}
+               ,systems:[]
             },
             methods:
             {
@@ -80,6 +79,10 @@
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;
+                    var endpointurl = baseurl + "GetSystems";
+                    $.get(endpointurl, function (response) {
+                        context.systems = response;
+                    });
                 });
 
             }

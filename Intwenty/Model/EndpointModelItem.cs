@@ -57,6 +57,10 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
         }
 
+        public SystemModelItem SystemInfo { get; set; }
+
+        public string SystemMetaCode { get; set; }
+
         public string AppMetaCode { get; set; }
 
         public string Path { get; set; }
@@ -167,6 +171,15 @@ namespace Intwenty.Model
 
                 return string.Empty;
             }
+        }
+
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
         }
 
     }

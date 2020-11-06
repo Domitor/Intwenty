@@ -222,12 +222,14 @@ namespace Intwenty
             var systems = Client.GetEntities<SystemItem>();
             Client.Close();
 
-            if (systems.Count == 0)
-                systems.Add(new SystemItem() { Id = 9999, DbPrefix = "def", Title = "Default", MetaCode = "INTWENTYDEFAULTSYS" });
-            
             foreach (var s in systems)
             {
                 res.Add(new SystemModelItem(s));
+            }
+
+            if (res.Count == 0)
+            {
+                res.Add(new SystemModelItem() { Id = 9999, DbPrefix = "def", Title = "Default", MetaCode = "INTWENTYDEFAULTSYS" });
             }
 
             ModelCache.Set(SystemModelItemCacheKey, res);
@@ -459,7 +461,7 @@ namespace Intwenty
             foreach (var a in apps)
             {
                 var am = new ApplicationModelItem(a);
-                var sys = systems.Find(p => p.SystemMetaCode == a.SystemMetaCode);
+                var sys = systems.Find(p => p.MetaCode == a.SystemMetaCode);
                 if (sys != null)
                     am.SystemInfo = sys;
 
@@ -516,6 +518,7 @@ namespace Intwenty
             if (string.IsNullOrEmpty(model.DbName))
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a DbName");
 
+           
             ModelCache.Remove(AppModelCacheKey);
             ModelCache.Remove(AppModelItemsCacheKey);
 
@@ -571,7 +574,7 @@ namespace Intwenty
                 entity.Title = model.Title;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
-                entity.SystemMetaCode = model.MetaCode;
+                entity.SystemMetaCode = model.SystemMetaCode;
                 entity.RequiresAuthorization = model.RequiresAuthorization;
 
                 Client.Open();

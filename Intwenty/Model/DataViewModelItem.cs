@@ -42,6 +42,10 @@ namespace Intwenty.Model
                 SQLQueryFieldDataType = DatabaseModelItem.DataTypeString;
         }
 
+        public SystemModelItem SystemInfo { get; set; }
+
+        public string SystemMetaCode { get; set; }
+
         public string TitleLocalizationKey { get; set; }
 
         public string SQLQuery { get; set; }
@@ -208,7 +212,14 @@ namespace Intwenty.Model
         public string DataType => this.SQLQueryFieldDataType;
 
 
-      
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
+        }
 
 
     }

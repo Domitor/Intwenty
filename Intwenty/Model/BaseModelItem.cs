@@ -14,8 +14,6 @@ namespace Intwenty.Model
 
         private static int MetaCodeCounter = 1;
 
-        public string SystemMetaCode { get; set; }
-
         public string Title { get; set; }
 
         public string MetaCode { get; set; }
@@ -30,7 +28,7 @@ namespace Intwenty.Model
 
         public abstract string ModelCode { get; }
 
-        public SystemModelItem SystemInfo { get; set; }
+      
 
         public bool IsRoot
         {
@@ -40,14 +38,7 @@ namespace Intwenty.Model
             }
         }
 
-        public bool HasSystemInfo
-        {
-            get
-            {
-                return this.SystemInfo != null;
-            }
-
-        }
+       
 
         public static string GenerateNewMetaCode(BaseModelItem item)
         {
@@ -55,6 +46,7 @@ namespace Intwenty.Model
                 return GetQuiteUniqueString();
 
             var res = GetMetaTypeAbbreviation(item);
+           
             var title = "";
             if (item is UserInterfaceModelItem ui)
             {
@@ -102,6 +94,12 @@ namespace Intwenty.Model
 
         private static string GetMetaTypeAbbreviation(BaseModelItem item)
         {
+            if (item.MetaType == ApplicationModelItem.MetaTypeApplication || item is ApplicationModelItem)
+                return "APP";
+            if (item.MetaType == SystemModelItem.MetaTypeSystem || item is SystemModelItem)
+                return "SYS";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeCheckBox)
+                return "CBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeCheckBox)
                 return "CBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeComboBox)

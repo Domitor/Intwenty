@@ -38,6 +38,9 @@ namespace Intwenty.Model
 
         }
 
+        public SystemModelItem SystemInfo { get; set; }
+
+        public string SystemMetaCode { get; set; }
 
         public ApplicationModelItem Application { get; set; }
 
@@ -95,6 +98,15 @@ namespace Intwenty.Model
                 }
                 return true;
             }
+        }
+
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
         }
 
     }

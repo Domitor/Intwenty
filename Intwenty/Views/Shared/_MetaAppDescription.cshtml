@@ -3,7 +3,7 @@
 
         <div class="form-group">
             <label class="control-label">System<span style="color: red"> *</span></label>
-            <select v-model="model.systemMetaCode" class="form-control form-control-sm" :disabled="model.id > 0">
+            <select id="cbSystem" v-model="model.systemMetaCode" class="form-control form-control-sm" :disabled="model.id > 0" v-on:input="setCodes">
                 <option v-for="sys in systems" v-bind:value="sys.metaCode">{{sys.title}}</option>
             </select>
         </div>

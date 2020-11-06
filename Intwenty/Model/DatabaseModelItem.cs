@@ -72,7 +72,8 @@ namespace Intwenty.Model
             res.ParentMetaCode = parentmetacode;
             res.Properties = string.Empty;
             res.IsFrameworkItem = true;
-            res.SystemMetaCode = system.MetaCode;
+            if (system!=null)
+                res.SystemMetaCode = system.MetaCode;
             res.SystemInfo = system;
             res.Description = "Required by Intwenty";
 
@@ -93,6 +94,10 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
         }
+
+        public SystemModelItem SystemInfo { get; set; }
+
+        public string SystemMetaCode { get; set; }
 
         public string Description { get; set; }
 
@@ -281,7 +286,16 @@ namespace Intwenty.Model
             }
         }
 
-     
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
+        }
+
+
     }
 
 }

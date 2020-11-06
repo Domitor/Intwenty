@@ -45,7 +45,9 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(SystemMetaCode)) TitleLocalizationKey = string.Empty;
         }
 
-      
+        public SystemModelItem SystemInfo { get; set; }
+
+        public string SystemMetaCode { get; set; }
 
         public string TitleLocalizationKey { get; set; }
 
@@ -90,9 +92,19 @@ namespace Intwenty.Model
             }
         }
 
-       
 
-        
+        public bool HasSystemInfo
+        {
+            get
+            {
+                return this.SystemInfo != null;
+            }
+
+        }
+
+
+
+
 
 
 
