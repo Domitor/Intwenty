@@ -32,7 +32,14 @@ namespace Intwenty.Controllers
         public virtual IActionResult List(int id)
         {
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
-            return View(t);
+            if (t == null)
+                return NotFound();
+            if (!t.UseAuthorization)
+                return View(t);
+            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(t);
+            else
+                return Forbid();
 
         }
 
@@ -41,11 +48,13 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Create(int id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-
+           
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p=> p.Application.Id == id);
-            if (UserManager.HasPermission(UserManager.GetUserAsync(User).Result, t, Areas.Identity.Models.IntwentyPermission.Read))
+            if (t == null)
+                return NotFound();
+            if (!t.UseAuthorization)
+                return View(t);
+            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
             else
                 return Forbid();
@@ -57,12 +66,14 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Edit(int applicationid, int id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-
+            
             ViewBag.SystemId = Convert.ToString(id);
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
-            if (UserManager.HasPermission(UserManager.GetUserAsync(User).Result, t, Areas.Identity.Models.IntwentyPermission.Read))
+            if (t == null)
+                return NotFound();
+            if (!t.UseAuthorization)
+                return View(t);
+            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
             else
                 return Forbid();
@@ -76,7 +87,14 @@ namespace Intwenty.Controllers
         {
             ViewBag.SystemId = Convert.ToString(id);
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
-            return View(t);
+            if (t == null)
+                return NotFound();
+            if (!t.UseAuthorization)
+                return View(t);
+            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(t);
+            else
+                return Forbid();
 
         }
 
@@ -86,11 +104,13 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult EditList(int id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
 
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
-            if (UserManager.HasPermission(UserManager.GetUserAsync(User).Result, t, Areas.Identity.Models.IntwentyPermission.Read))
+            if (t == null)
+                return NotFound();
+            if (!t.UseAuthorization)
+                return View(t);
+            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
             else
                 return Forbid();

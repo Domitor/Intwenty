@@ -85,6 +85,21 @@ namespace Intwenty.Model
 
         }
 
+        public bool UseAuthorization
+        {
+            get
+            {
+                if (Application.RequiresAuthorization)
+                    return true;
+                if (System.RequiresAuthorization)
+                    return true;
+
+                return false;
+
+            }
+
+        }
+
 
         private List<UIView> GetUIViews()
         {

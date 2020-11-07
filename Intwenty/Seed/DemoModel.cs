@@ -35,7 +35,7 @@ namespace Intwenty.Seed
             //SYSTEMS
             systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title="Default", RequiresAuthorization = false, DbPrefix = "def" });
             systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", RequiresAuthorization = true, DbPrefix ="wms" });
-            systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", RequiresAuthorization = false, DbPrefix = "blog" });
+            systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", RequiresAuthorization = true, DbPrefix = "blog" });
 
             //APPLICATIONS
             applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", IsHierarchicalApplication = false, UseVersioning = false });

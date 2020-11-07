@@ -50,8 +50,8 @@ namespace IntwentyDemo
             {
                 options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                 {
-                    //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                    policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN", "USER" });
+                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    //policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN", "USER" });
                 });
 
                 options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>

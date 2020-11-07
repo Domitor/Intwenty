@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -124,8 +125,12 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(list);
         }
 
-        public bool HasPermission(IntwentyUser user, ApplicationModel requested_app, IntwentyPermission requested_action)
+        public bool HasPermission(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return false;
+
+            var user = GetUserAsync(claimprincipal).Result;
             if (user == null || requested_app == null)
                 throw new InvalidOperationException("Error when checking for a permission.");
 
