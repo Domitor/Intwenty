@@ -124,7 +124,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(list);
         }
 
-        public Task<bool> HasPermission(IntwentyUser user, ApplicationModel requested_app, IntwentyPermission requested_action)
+        public bool HasPermission(IntwentyUser user, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
             if (user == null || requested_app == null)
                 throw new InvalidOperationException("Error when checking for a permission.");
@@ -135,10 +135,10 @@ namespace Intwenty.Areas.Identity.Data
             client.Close();
 
             if (this.IsInRoleAsync(user, "SUPERADMIN").Result)
-                return Task.FromResult(true);
+                return true;
 
             if (list.Exists(p => p.PermissionType == ApplicationModelItem.MetaTypeApplication &&
-                                p.MetaCode == requested_app.System.MetaCode &&
+                                p.MetaCode == requested_app.Application.MetaCode &&
                                 (
                                 (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
@@ -146,7 +146,7 @@ namespace Intwenty.Areas.Identity.Data
                                 )))
             {
 
-                return Task.FromResult(true);
+                return true;
             }
 
             if (list.Exists(p => p.PermissionType == SystemModelItem.MetaTypeSystem &&
@@ -158,10 +158,10 @@ namespace Intwenty.Areas.Identity.Data
                                  )))
             {
 
-                return Task.FromResult(true);
+                return true;
             }
 
-            return Task.FromResult(true);
+            return false;
         }
 
         #endregion
