@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using Intwenty.PushData;

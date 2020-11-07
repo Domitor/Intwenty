@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage

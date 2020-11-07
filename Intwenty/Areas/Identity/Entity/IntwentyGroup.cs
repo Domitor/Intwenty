@@ -1,15 +1,18 @@
 ﻿using Intwenty.DataClient.Reflection;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Areas.Identity.Models
+namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_UserLogin")]
+    [DbTableName("security_Group")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyUserLogin : IdentityUserLogin<string>
+    public class IntwentyGroup
     {
         public string Id { get; set; }
+
+        public string Name { get; set; }
+
+
     }
 }

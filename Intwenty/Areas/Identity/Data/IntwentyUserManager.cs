@@ -1,4 +1,4 @@
-﻿using Intwenty.Areas.Identity.Models;
+﻿using Intwenty.Areas.Identity.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +32,71 @@ namespace Intwenty.Areas.Identity.Data
         {
             Settings = settings.Value;
         }
-      
+
+        #region Intwenty Permissions
+
+        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, bool read, bool modify, bool delete)
+        {
+            if (user == null)
+                throw new InvalidOperationException("Error when adding permission to user.");
+
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
+            client.Close();
+            if (existing != null)
+            {
+                existing.Read = read;
+                existing.Modify = modify;
+                existing.Delete = delete;
+
+                client.Open();
+                client.UpdateEntity(existing);
+                client.Close();
+
+                return Task.FromResult(IdentityResult.Success);
+
+            }
+
+            var t = new IntwentyUserPermission();
+            t.Id = Guid.NewGuid().ToString();
+            t.UserId = user.Id;
+            t.UserName = user.UserName;
+            t.MetaCode = metacode;
+            t.PermissionType = permissiontype;
+            t.Read = read;
+            t.Modify = modify;
+            t.Delete = delete;
+            client.Open();
+            client.InsertEntity(t);
+            client.Close();
+
+
+            return Task.FromResult(IdentityResult.Success);
+        }
+
+        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode)
+        {
+            if (user == null)
+                throw new InvalidOperationException("Error when removing permission from user.");
+
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
+            client.Close();
+            if (existing != null)
+            {
+                client.Open();
+                client.DeleteEntity(existing);
+                client.Close();
+            }
+
+            return Task.FromResult(IdentityResult.Success);
+        }
+
+        #endregion
+
+        #region Intwenty Groups
 
         public Task<IntwentyGroup> AddGroupAsync(string groupname)
         {
@@ -233,6 +297,7 @@ namespace Intwenty.Areas.Identity.Data
 
         }
 
+        #endregion
 
         public override Task<IdentityResult> DeleteAsync(IntwentyUser user)
         {

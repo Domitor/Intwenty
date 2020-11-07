@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;

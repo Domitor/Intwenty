@@ -6,7 +6,7 @@ using Intwenty.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Dto;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using Microsoft.Extensions.Localization;
 using Intwenty.Localization;
 using Intwenty.Interface;

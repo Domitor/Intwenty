@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Intwenty.Areas.Identity.Models
+namespace Intwenty.Areas.Identity.Entity
 {
     [DbTableName("security_User")]
     [DbTablePrimaryKey("Id")]

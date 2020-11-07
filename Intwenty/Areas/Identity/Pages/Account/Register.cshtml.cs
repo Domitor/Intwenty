@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;

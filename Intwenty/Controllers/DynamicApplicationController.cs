@@ -7,7 +7,7 @@ using Intwenty.Model.Dto;
 using Microsoft.AspNetCore.Http;
 using Intwenty.Interface;
 using Microsoft.Extensions.Primitives;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.Model;
 using Intwenty.DataClient.Model;
 using Intwenty.DataClient;

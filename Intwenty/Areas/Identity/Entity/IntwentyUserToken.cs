@@ -4,12 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Areas.Identity.Models
+namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_RoleClaim")]
+    [DbTableName("security_UserToken")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyRoleClaim : IdentityRoleClaim<string>
+    public class IntwentyUserToken : IdentityUserToken<string>
     {
-       
+       public string Id { get; set; }
+
     }
 }

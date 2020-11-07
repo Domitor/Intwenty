@@ -1,5 +1,5 @@
 ﻿using Intwenty.Areas.Identity.Data;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.Localization;
 using Intwenty.Interface;
 using Intwenty.Model;

@@ -1,9 +1,9 @@
-﻿using Intwenty.Areas.Identity.Models;
+﻿using Intwenty.Areas.Identity.Entity;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Model
+namespace Intwenty.Areas.Identity.Models
 {
     public class IntwentyUserVm
     {

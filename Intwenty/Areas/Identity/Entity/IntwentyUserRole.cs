@@ -3,7 +3,7 @@ using Intwenty.DataClient.Reflection;
 using Microsoft.AspNetCore.Identity;
 
 
-namespace Intwenty.Areas.Identity.Models
+namespace Intwenty.Areas.Identity.Entity
 {
     [DbTableName("security_UserRoles")]
     [DbTablePrimaryKey("UserId,RoleId")]

@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {

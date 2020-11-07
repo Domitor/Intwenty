@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 
 
 namespace Intwenty.Areas.Identity.Pages.Account

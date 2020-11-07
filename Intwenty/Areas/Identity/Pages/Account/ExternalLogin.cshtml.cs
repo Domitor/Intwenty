@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Data;
-using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.Model;
 using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
