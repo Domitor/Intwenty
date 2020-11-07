@@ -1,4 +1,5 @@
 ﻿using Intwenty.Areas.Identity.Entity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
@@ -35,6 +36,13 @@ namespace Intwenty.Areas.Identity.Data
 
         #region Intwenty Permissions
 
+        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionVm permission)
+        {
+            if (user == null || permission == null)
+                throw new InvalidOperationException("Error when adding permission to user.");
+
+            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Read, permission.Modify, permission.Delete);
+        }
         public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, bool read, bool modify, bool delete)
         {
             if (user == null)
@@ -75,6 +83,14 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(IdentityResult.Success);
         }
 
+        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionVm permission)
+        {
+            if (user == null || permission == null)
+                throw new InvalidOperationException("Error when removing permission from user.");
+
+            return RemoveUserPermissionAsync(user, permission.PermissionType, permission.MetaCode);
+        }
+
         public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode)
         {
             if (user == null)
@@ -92,6 +108,59 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             return Task.FromResult(IdentityResult.Success);
+        }
+
+        public Task<List<IntwentyUserPermissionVm>> GetUserPermissions(IntwentyUser user)
+        {
+            if (user == null)
+                throw new InvalidOperationException("Error when fetching user permissions.");
+
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).Select(p=> new IntwentyUserPermissionVm(p)).ToList();
+            client.Close();
+
+            return Task.FromResult(list);
+        }
+
+        public Task<bool> HasPermission(IntwentyUser user, ApplicationModel requested_app, IntwentyPermission requested_action)
+        {
+            if (user == null || requested_app == null)
+                throw new InvalidOperationException("Error when checking for a permission.");
+
+            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).ToList();
+            client.Close();
+
+            if (this.IsInRoleAsync(user, "SUPERADMIN").Result)
+                return Task.FromResult(true);
+
+            if (list.Exists(p => p.PermissionType == ApplicationModelItem.MetaTypeApplication &&
+                                p.MetaCode == requested_app.System.MetaCode &&
+                                (
+                                (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
+                                (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
+                                (requested_action == IntwentyPermission.Delete && (p.Delete))
+                                )))
+            {
+
+                return Task.FromResult(true);
+            }
+
+            if (list.Exists(p => p.PermissionType == SystemModelItem.MetaTypeSystem &&
+                                 p.MetaCode == requested_app.System.MetaCode &&
+                                 (
+                                 (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
+                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
+                                 (requested_action == IntwentyPermission.Delete && (p.Delete))
+                                 )))
+            {
+
+                return Task.FromResult(true);
+            }
+
+            return Task.FromResult(true);
         }
 
         #endregion

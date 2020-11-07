@@ -38,11 +38,13 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         @await Html.PartialAsync("_IntwentyAppMenu")
+
+                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("USERADMIN") || User.IsInRole("SYSTEMADMIN"))
+                        {
+                            @await Html.PartialAsync("_IntwentyAdminMenu")
+                        }
                     }
-                    @if (User.IsInRole("ADMINISTRATOR"))
-                    {
-                        @await Html.PartialAsync("_IntwentyAdminMenu")
-                    }
+
 
 
                 </ul>

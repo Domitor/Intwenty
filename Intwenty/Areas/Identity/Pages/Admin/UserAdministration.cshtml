@@ -37,7 +37,7 @@
                 <th style="width:15%">IsBlocked</th>
                 <th style="width:15%">MFA Active</th>
                 <th style="width:25%">Last login</th>
-                <th style="width:5%">Edit</th>
+                <th style="width:5%">Permissions</th>
                 <th style="width:5%">Block</th>
                 <th style="width:5%">Reset MFA</th>
                 <th style="width:5%">Delete</th>
@@ -49,7 +49,7 @@
                 <td>{{entry.isBlocked}}</td>
                 <td>{{entry.mfaActive}}</td>
                 <td>{{entry.lastLogin}}</td>
-                <td><div class="btn btn-sm btn-secondary" v-on:click="editUser(entry)" title="Edit"><i class="fas fa-edit"></i></div></td>
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'/UserPermission/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
                 <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
                 <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
                 <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>

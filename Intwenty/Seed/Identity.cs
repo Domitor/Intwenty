@@ -32,11 +32,27 @@ namespace Intwenty.Seed
             var userManager = services.GetRequiredService<UserManager<IntwentyUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IntwentyRole>>();
 
-            var admrole = roleManager.FindByNameAsync("ADMINISTRATOR");
+            var admrole = roleManager.FindByNameAsync("SUPERADMIN");
             if (admrole.Result == null)
             {
                 var role = new IntwentyRole();
-                role.Name = "ADMINISTRATOR";
+                role.Name = "SUPERADMIN";
+                roleManager.CreateAsync(role);
+            }
+
+            admrole = roleManager.FindByNameAsync("USERADMIN");
+            if (admrole.Result == null)
+            {
+                var role = new IntwentyRole();
+                role.Name = "USERADMIN";
+                roleManager.CreateAsync(role);
+            }
+
+            admrole = roleManager.FindByNameAsync("SYSTEMADMIN");
+            if (admrole.Result == null)
+            {
+                var role = new IntwentyRole();
+                role.Name = "USERADMIN";
                 roleManager.CreateAsync(role);
             }
 
@@ -45,6 +61,14 @@ namespace Intwenty.Seed
             {
                 var role = new IntwentyRole();
                 role.Name = "USER";
+                roleManager.CreateAsync(role);
+            }
+
+            userrole = roleManager.FindByNameAsync("APIUSER");
+            if (userrole.Result == null)
+            {
+                var role = new IntwentyRole();
+                role.Name = "APIUSER";
                 roleManager.CreateAsync(role);
             }
 
@@ -59,7 +83,7 @@ namespace Intwenty.Seed
                 user.EmailConfirmed = true;
                 user.Culture = Settings.Value.DefaultCulture;
                 userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
-                userManager.AddToRoleAsync(user, "ADMINISTRATOR");
+                userManager.AddToRoleAsync(user, "SUPERADMIN");
             }
 
             var curr_user = userManager.FindByNameAsync(Settings.Value.DemoUser);
@@ -75,6 +99,8 @@ namespace Intwenty.Seed
                 userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
                 userManager.AddToRoleAsync(user, "USER");
             }
+
+           
 
 
         }

@@ -21,6 +21,12 @@ namespace IntwentyDemo.Controllers
             return View();
         }
 
-      
+        [HttpGet("UserPermission/{id}")]
+        public IActionResult UserPermission(string id)
+        {
+            return View();
+        }
+
+
     }
 }

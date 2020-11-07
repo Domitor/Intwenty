@@ -45,24 +45,24 @@ namespace IntwentyDemo
             services.AddIntwenty<CustomDataService>(Configuration);
 
             //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
-            services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
+            //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                 {
-                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                    //policy.RequireRole(new string[] { "USER" });
+                    //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN", "USER" });
                 });
 
                 options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
                 {
-                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                    //policy.RequireRole(new string[] { "ADMINISTRATOR" });
+                    //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" });
 
                 });
             });
 
-            //services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+            services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
 
         }
 
