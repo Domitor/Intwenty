@@ -17,6 +17,8 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string UserName { get; set; }
 
+        public string Title { get; set; }
+
         public string PermissionType { get; set; }
 
         /// <summary>

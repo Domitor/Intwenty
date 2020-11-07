@@ -49,7 +49,7 @@
                 <td>{{entry.isBlocked}}</td>
                 <td>{{entry.mfaActive}}</td>
                 <td>{{entry.lastLogin}}</td>
-                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'/UserPermission/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'../../Model/UserPermission/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
                 <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
                 <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
                 <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>

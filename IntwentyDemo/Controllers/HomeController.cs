@@ -1,19 +1,30 @@
 ﻿
 using Intwenty;
+using Intwenty.Areas.Identity.Data;
+using Intwenty.Areas.Identity.Entity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Entity;
+using Intwenty.Interface;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Linq;
 
 namespace IntwentyDemo.Controllers
 {
     public class HomeController : Controller
     {
-    
 
-        public HomeController()
+        private IIntwentyDataService DataService { get; }
+        private IIntwentyModelService ModelService { get; }
+        private IntwentyUserManager UserManager { get; }
+
+        public HomeController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager)
         {
-            
+            DataService = dataservice;
+            ModelService = modelservice;
+            UserManager = usermanager;
         }
+
+       
 
         public IActionResult Index()
         {
@@ -21,12 +32,14 @@ namespace IntwentyDemo.Controllers
             return View();
         }
 
-        [HttpGet("UserPermission/{id}")]
-        public IActionResult UserPermission(string id)
-        {
-            return View();
-        }
 
 
     }
+
 }
+
+  
+
+
+
+

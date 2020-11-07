@@ -13,6 +13,9 @@ using System.IO;
 using System.Text;
 using Intwenty.Helpers;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Entity;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Controllers
 {
@@ -24,10 +27,13 @@ namespace Intwenty.Controllers
         public IIntwentyDataService DataRepository { get; }
         public IIntwentyModelService ModelRepository { get; }
 
-        public ModelAPIController(IIntwentyDataService ms, IIntwentyModelService sr)
+        private IntwentyUserManager UserManager { get; }
+
+        public ModelAPIController(IIntwentyDataService ms, IIntwentyModelService sr, IntwentyUserManager usermanager)
         {
             DataRepository = ms;
             ModelRepository = sr;
+            UserManager = usermanager;
         }
 
         #region Systems
@@ -812,10 +818,171 @@ namespace Intwenty.Controllers
 
         #endregion
 
-        /// <summary>
-        /// Get menu items
-        /// </summary>
-        [HttpGet("/Model/API/GetMenuModelItems")]
+        #region User Permission
+
+        [HttpGet("Model/API/GetUserPermissions/{id}")]
+        public IActionResult GetUserPermissions(string id)
+        {
+            if (!User.Identity.IsAuthenticated)
+                new JsonResult(new IntwentyUserPermissionVm());
+
+            var adminuser = UserManager.GetUserAsync(User).Result;
+            if (adminuser == null)
+                new JsonResult(new IntwentyUserPermissionVm());
+
+            if (!User.IsInRole("SUPERADMIN") && !User.IsInRole("USERADMIN"))
+            {
+                new JsonResult(new IntwentyUserPermissionVm());
+            }
+
+            var admin_permissions = UserManager.GetUserPermissions(adminuser).Result;
+
+            var client = DataRepository.GetDataClient();
+            client.Open();
+            var user = client.GetEntity<IntwentyUser>(id);
+            client.Close();
+
+            if (user == null)
+                new JsonResult(new IntwentyUserPermissionVm());
+
+            var user_permissions = UserManager.GetUserPermissions(user).Result;
+            var user_roles = UserManager.GetRolesAsync(user).Result;
+
+            var res = new IntwentyUserPermissionVm();
+            res.Id = user.Id;
+            res.UserName = user.UserName;
+
+            res.UserSystemPermissions.AddRange(user_permissions.Where(p => p.IsSystemPermission));
+            res.UserApplicationPermissions.AddRange(user_permissions.Where(p => p.IsApplicationPermission));
+
+            foreach (var role in user_roles)
+            {
+                res.UserRoles.Add(new IntwentyUserRoleItem() { RoleName = role });
+            }
+
+            res.Roles.AddRange(new IntwentyUserRoleItem[]
+            {
+                new IntwentyUserRoleItem() { RoleName="APIUSER" }
+               ,new IntwentyUserRoleItem() { RoleName="USER" }
+            });
+
+
+            var apps = ModelRepository.GetApplicationModels();
+            if (!User.IsInRole("SUPERADMIN"))
+            {
+
+                foreach (var a in apps)
+                {
+                    if (admin_permissions.Exists(p => p.IsSystemPermission && a.System.MetaCode == p.MetaCode))
+                    {
+                        res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.Application.MetaCode, a.Application.Title));
+                        if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.System.MetaCode))
+                            res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.System.MetaCode, a.System.Title));
+
+                    }
+                }
+            }
+            else
+            {
+                res.Roles.Add(new IntwentyUserRoleItem() { RoleName = "USERADMIN" });
+                res.Roles.Add(new IntwentyUserRoleItem() { RoleName = "SYSTEMADMIN" });
+                res.Roles.Add(new IntwentyUserRoleItem() { RoleName = "SUPERADMIN" });
+
+                foreach (var a in apps)
+                {
+                    res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.Application.MetaCode, a.Application.Title));
+                    if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.System.MetaCode))
+                        res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.System.MetaCode, a.System.Title));
+                }
+
+            }
+
+            return new JsonResult(res);
+        }
+
+        [HttpPost("Model/API/SaveUserPermissions")]
+        public IActionResult SaveUserPermissions([FromBody] IntwentyUserPermissionVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                new JsonResult(new IntwentyUserPermissionVm());
+
+            if (!User.IsInRole("SUPERADMIN") && !User.IsInRole("USERADMIN"))
+            {
+                new JsonResult(new IntwentyUserPermissionVm());
+            }
+
+            var client = DataRepository.GetDataClient();
+            client.Open();
+            var user = client.GetEntity<IntwentyUser>(model.Id);
+            client.Close();
+
+            if (user == null)
+                return BadRequest();
+
+            var permissions = UserManager.GetUserPermissions(user).Result;
+            var roles = UserManager.GetRolesAsync(user).Result.ToList();
+
+            foreach (var r in model.UserRoles)
+            {
+                UserManager.AddToRoleAsync(user, r.RoleName);
+            }
+
+
+
+            foreach (var r in model.UserSystemPermissions)
+            {
+                UserManager.AddUpdateUserPermissionAsync(user, r);
+            }
+
+
+            foreach (var r in model.UserApplicationPermissions)
+            {
+                UserManager.AddUpdateUserPermissionAsync(user, r);
+            }
+
+
+            return GetUserPermissions(model.Id);
+        }
+
+        [HttpPost("Model/API/DeleteUserPermission")]
+        public IActionResult DeleteUserPermission([FromBody] IntwentyUserPermissionItem model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                new JsonResult(new IntwentyUserPermissionVm());
+
+            if (!User.IsInRole("SUPERADMIN") && !User.IsInRole("USERADMIN"))
+            {
+                new JsonResult(new IntwentyUserPermissionVm());
+            }
+
+            var client = DataRepository.GetDataClient();
+            client.Open();
+            var user = client.GetEntity<IntwentyUser>(model.UserId);
+            client.Close();
+
+            if (user == null)
+                return BadRequest();
+
+            if (model.PermissionType == "ROLE")
+            {
+                UserManager.RemoveFromRoleAsync(user, model.MetaCode);
+            }
+            else
+            {
+                UserManager.RemoveUserPermissionAsync(user, model);
+
+            }
+
+            return GetUserPermissions(user.Id);
+        }
+
+
+    #endregion
+
+    /// <summary>
+    /// Get menu items
+    /// </summary>
+    [HttpGet("/Model/API/GetMenuModelItems")]
         public JsonResult GetMenuModelItems()
         {
             var t = ModelRepository.GetMenuModels();

@@ -1465,6 +1465,8 @@ namespace Intwenty
 
                 client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
                 client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
+                client.CreateTable<IntwentyUserPermission>(); //security_UserPermission
+
                                                          //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
                                                          //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 

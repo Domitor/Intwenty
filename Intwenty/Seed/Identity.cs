@@ -52,7 +52,7 @@ namespace Intwenty.Seed
             if (admrole.Result == null)
             {
                 var role = new IntwentyRole();
-                role.Name = "USERADMIN";
+                role.Name = "SYSTEMADMIN";
                 roleManager.CreateAsync(role);
             }
 

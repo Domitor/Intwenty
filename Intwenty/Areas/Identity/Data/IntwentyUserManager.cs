@@ -36,14 +36,14 @@ namespace Intwenty.Areas.Identity.Data
 
         #region Intwenty Permissions
 
-        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionVm permission)
+        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionItem permission)
         {
             if (user == null || permission == null)
                 throw new InvalidOperationException("Error when adding permission to user.");
 
-            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Read, permission.Modify, permission.Delete);
+            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Title, permission.Read, permission.Modify, permission.Delete);
         }
-        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, bool read, bool modify, bool delete)
+        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, string title, bool read, bool modify, bool delete)
         {
             if (user == null)
                 throw new InvalidOperationException("Error when adding permission to user.");
@@ -69,6 +69,7 @@ namespace Intwenty.Areas.Identity.Data
             var t = new IntwentyUserPermission();
             t.Id = Guid.NewGuid().ToString();
             t.UserId = user.Id;
+            t.Title = title;
             t.UserName = user.UserName;
             t.MetaCode = metacode;
             t.PermissionType = permissiontype;
@@ -83,7 +84,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionVm permission)
+        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionItem permission)
         {
             if (user == null || permission == null)
                 throw new InvalidOperationException("Error when removing permission from user.");
@@ -110,14 +111,14 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public Task<List<IntwentyUserPermissionVm>> GetUserPermissions(IntwentyUser user)
+        public Task<List<IntwentyUserPermissionItem>> GetUserPermissions(IntwentyUser user)
         {
             if (user == null)
                 throw new InvalidOperationException("Error when fetching user permissions.");
 
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
-            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).Select(p=> new IntwentyUserPermissionVm(p)).ToList();
+            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).Select(p=> new IntwentyUserPermissionItem(p)).ToList();
             client.Close();
 
             return Task.FromResult(list);
