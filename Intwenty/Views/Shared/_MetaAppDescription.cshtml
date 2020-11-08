@@ -38,67 +38,128 @@
     </div>
 </div>
 
-<h4>Access to views and functions</h4>
+<h4>Intwenty Default Views access requirements</h4>
 <hr />
 <div class="row">
-    <div class="col-lg-6">
-        <strong>View</strong><br />
-        <label class="radio-inline">
-            <input type="radio" name="viewaccess" value="PUB" v-model="model.viewAccess">Public
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.viewAccess">Authorized
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="viewaccess" value="OWNER" v-model="model.viewAccess">Data Owner
-        </label>
+    <div class="col-lg-5">
+
+        <strong>The Create View</strong><br />
+        <div class="form-check">
+            <label class="radio">
+                <input type="radio" name="createaccess" value="PUB" v-model="model.createAccess">None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio">
+                <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createAccess">Authorized (Create Permission)
+            </label>
+        </div>
+
+
 
         <br />
 
-        <strong>Create</strong><br />
-        <label class="radio-inline">
-            <input type="radio" name="createaccess" value="PUB" v-model="model.createAccess">Public
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createAccess">Authorized
-        </label>
+        <strong>The Edit View</strong><br />
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="modifyaccess" value="PUB" v-model="model.modifyAccess">None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="modifyaccess" checked value="AUTH" v-model="model.modifyAccess">Authorized (Modify Permission)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="modifyaccess" value="OWNER" v-model="model.modifyAccess">Authorized (Modify Permission) and Data Owner
+            </label>
+        </div>
+
+
+
+
+        <br />
+        <div class="form-check">
+
+        </div>
+
+        <strong>The Editlist View</strong><br />
+        <div class="form-check">
+             <label class="radio-inline">
+                <input type="radio" name="deleteaccess" value="PUB" v-model="model.deleteAccess">None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="deleteaccess" checked value="AUTH" v-model="model.deleteAccess">Authorized (Modify Permission)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="deleteaccess" value="OWNER" v-model="model.deleteAccess">Authorized (Modify Permission) and Data Owner
+            </label>
+        </div>
 
         <br />
 
-        <strong>Modify</strong><br />
-        <label class="radio-inline">
-            <input type="radio" name="modifyaccess" value="PUB" v-model="model.modifyAccess">Public
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="modifyaccess" checked value="AUTH" v-model="model.modifyAccess">Authorized
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="modifyaccess" value="OWNER" v-model="model.modifyAccess">Data Owner
-        </label>
+        <strong>The Detail View (Presentation)</strong><br />
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="viewaccess" value="PUB" v-model="model.viewAccess">None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.viewAccess">Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="viewaccess" value="OWNER" v-model="model.viewAccess">Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
 
         <br />
 
 
-        <strong>Delete</strong><br />
+        <strong>The List View (Presentation)</strong><br />
+        <div class="form-check">
         <label class="radio-inline">
-            <input type="radio" name="deleteaccess"  value="PUB" v-model="model.deleteAccess">Public
+            <input type="radio" name="viewaccess" value="PUB" v-model="model.viewAccess">None (Public)
         </label>
-        <label class="radio-inline">
-            <input type="radio" name="deleteaccess" checked value="AUTH" v-model="model.deleteAccess">Authorized
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="deleteaccess" value="OWNER" v-model="model.deleteAccess">Data Owner
-        </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.viewAccess">Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="viewaccess" value="OWNER" v-model="model.viewAccess">Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
+       
 
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-7">
         <div class="alert alert-primary" role="alert">
-            <i class="far fa-question-circle"></i> This controls how users is allowed to access and use the views and functions in this application.
+            <i class="far fa-question-circle"></i> Specify what permission that is required to access a certain view in this application.
             <br />
             <br />
+            <strong>Intwenty Default Views</strong><br />
+            <hr />
+            <strong>The Create View</strong><br />The view where you create new application records <br /><br />
+            <strong>The Edit View</strong><br />The view where you edit application records <br /><br />
+            <strong>The Edit List View</strong><br />The view where you list application records, this view also allows for deleting records. <br /><br />
+            <strong>The Detail View</strong><br />A readonly presentation view, to present an application record <br /><br />
+            <strong>The List View</strong><br />A readonly presentation view, to present multiple aplication records <br /><br />
+            <br />
+            <strong>View access Modes</strong><br />
+            <hr />
             <strong style="width:100px">Public: </strong> Anyone <br />
-            <strong style="width:100px">Authorized: </strong> Only authorized users <br />
-            <strong style="width:100px">Data Owner: </strong> Only the authorized user who created the data
+            <strong style="width:100px">Authorized (Permission): </strong> Authorized user <br />
+            <strong style="width:100px">Authorized (Permission) and Data Owner: </strong> Authorized user who created the data
         </div>
     </div>
 </div>
