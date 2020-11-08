@@ -6,8 +6,8 @@ namespace Intwenty.Entity
 {
     [DbTableIndex("sysid_idx_pid", false, "ParentId")]
     [DbTablePrimaryKey("Id")]
-    [DbTableName("sysdata_SystemId")]
-    public class SystemID
+    [DbTableName("sysdata_InstanceId")]
+    public class InstanceId
     {
         [AutoIncrement]
         public int Id { get; set; }

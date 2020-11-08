@@ -272,7 +272,6 @@ namespace Intwenty
                 entity.Title = model.Title;
                 entity.Description = model.Description;
                 entity.DbPrefix = model.DbPrefix;
-                entity.RequiresAuthorization = model.RequiresAuthorization;
 
                 Client.Open();
                 Client.InsertEntity(entity);
@@ -287,7 +286,6 @@ namespace Intwenty
 
                     existing.Title = model.Title;
                     existing.Description = model.Description;
-                    existing.RequiresAuthorization = model.RequiresAuthorization;
                     Client.UpdateEntity(existing);
 
                 }
@@ -575,7 +573,12 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
                 entity.SystemMetaCode = model.SystemMetaCode;
-                entity.RequiresAuthorization = model.RequiresAuthorization;
+                entity.CreateAccess = model.CreateAccess;
+                entity.ModifyAccess = model.ModifyAccess;
+                entity.DeleteAccess = model.DeleteAccess;
+                entity.ViewAccess = model.ViewAccess;
+                entity.ApplicationPath = model.ApplicationPath;
+                entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
 
                 Client.Open();
                 Client.InsertEntity(entity);
@@ -595,7 +598,12 @@ namespace Intwenty
                 entity.Title = model.Title;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
-                entity.RequiresAuthorization = model.RequiresAuthorization;
+                entity.CreateAccess = model.CreateAccess;
+                entity.ModifyAccess = model.ModifyAccess;
+                entity.DeleteAccess = model.DeleteAccess;
+                entity.ViewAccess = model.ViewAccess;
+                entity.ApplicationPath = model.ApplicationPath;
+                entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
 
                 Client.UpdateEntity(entity);
                 Client.Close();
@@ -1450,7 +1458,7 @@ namespace Intwenty
                 client.CreateTable<EventLog>();
                 client.CreateTable<InformationStatus>();
                 client.CreateTable<MenuItem>();
-                client.CreateTable<SystemID>();
+                client.CreateTable<InstanceId>();
                 client.CreateTable<UserInterfaceItem>();
                 client.CreateTable<ValueDomainItem>();
                 client.CreateTable<DefaultValue>();

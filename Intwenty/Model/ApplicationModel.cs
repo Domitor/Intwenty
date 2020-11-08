@@ -85,19 +85,48 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseAuthorization
+        public bool UseCreateAuthorization
         {
             get
             {
-                if (Application.RequiresAuthorization)
-                    return true;
-                if (System.RequiresAuthorization)
+                if (Application.CreateAccess != "PUB")
                     return true;
 
                 return false;
-
             }
+        }
 
+        public bool UseModifyAuthorization
+        {
+            get
+            {
+                if (Application.ModifyAccess != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool UseDeleteAuthorization
+        {
+            get
+            {
+                if (Application.DeleteAccess != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool UseViewAuthorization
+        {
+            get
+            {
+                if (Application.ViewAccess != "PUB")
+                    return true;
+
+                return false;
+            }
         }
 
 

@@ -28,6 +28,5 @@ namespace Intwenty.Entity
 
         public string DbPrefix { get; set; }
 
-        public bool RequiresAuthorization { get; set; }
     }
 }

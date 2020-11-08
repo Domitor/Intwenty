@@ -202,7 +202,7 @@ namespace Intwenty
 
                     if (state.Id < 1)
                     {
-                        state.Id = GetNewSystemID(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
+                        state.Id = GetNewInstanceId(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
                         result.Status = LifecycleStatus.NEW_NOT_SAVED;
                         state.Version = CreateVersionRecord(model, state, client);
 
@@ -315,9 +315,9 @@ namespace Intwenty
 
         }
 
-        private int GetNewSystemID(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
+        private int GetNewInstanceId(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
         {
-            var m = new SystemID() { ApplicationId = applicationid, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId = 0 };
+            var m = new InstanceId() { ApplicationId = applicationid, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId = 0 };
             if (metatype == DatabaseModelItem.MetaTypeDataTable)
             {
                 m.ParentId = state.Id;
@@ -346,7 +346,7 @@ namespace Intwenty
             var valuelist = new List<ApplicationValue>();
 
             if (state.Id < 1)
-                throw new InvalidOperationException("Invalid systemid");
+                throw new InvalidOperationException("Invalid id (instance id)");
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
@@ -492,7 +492,7 @@ namespace Intwenty
         {
             var paramlist = new List<ApplicationValue>();
 
-            var rowid = GetNewSystemID(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
+            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
             if (rowid < 1)
                 throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
 
@@ -782,11 +782,11 @@ namespace Intwenty
                     if (table.IsMetaTypeDataTable)
                     {
                         client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
-                        client.RunCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                        client.RunCommand("DELETE FROM sysdata_InstanceId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                     }
                 }
 
-                client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
                 //client.CommitTransaction();
@@ -837,7 +837,7 @@ namespace Intwenty
                 if (modelitem.IsMetaTypeDataTable)
                 {
                     
-                    var sysid = client.GetEntity<SystemID>(id);
+                    var sysid = client.GetEntity<InstanceId>(id);
                     if (sysid == null)
                         throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
                     if (sysid.ParentId < 1)
@@ -862,11 +862,11 @@ namespace Intwenty
                         if (table.IsMetaTypeDataTable)
                         {
                             client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                            client.RunCommand("DELETE FROM sysdata_SystemId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                            client.RunCommand("DELETE FROM sysdata_InstanceId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                         }
                     }
 
-                    client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                    client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
 
@@ -878,7 +878,7 @@ namespace Intwenty
                         if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname.ToLower())
                         {
                             client.RunCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                            client.RunCommand("DELETE FROM sysdata_SystemId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                            client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                             result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
                         }
                     }

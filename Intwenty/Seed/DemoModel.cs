@@ -33,16 +33,16 @@ namespace Intwenty.Seed
             var endpoints = new List<EndpointItem>();
 
             //SYSTEMS
-            systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title="Default", RequiresAuthorization = false, DbPrefix = "def" });
-            systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", RequiresAuthorization = true, DbPrefix ="wms" });
-            systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", RequiresAuthorization = true, DbPrefix = "blog" });
+            systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title="Default", DbPrefix = "def" });
+            systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", DbPrefix ="wms" });
+            systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", DbPrefix = "blog" });
 
             //APPLICATIONS
-            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", IsHierarchicalApplication = false, UseVersioning = false });
-            applications.Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", SystemMetaCode = "WAREHOUSE", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "wms_Item", IsHierarchicalApplication = false, UseVersioning = false });
-            applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", IsHierarchicalApplication = false, UseVersioning = false });
-            applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", IsHierarchicalApplication = false, UseVersioning = false });
-            applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false });
+            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath="Customers", CreateAccess="AUTH", DeleteAccess="AUTH", ModifyAccess="AUTH", ViewAccess="AUTH" });
+            applications.Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", SystemMetaCode = "WAREHOUSE", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "wms_Item", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Items", CreateAccess = "AUTH", DeleteAccess = "AUTH", ModifyAccess = "AUTH", ViewAccess = "AUTH" });
+            applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "SalesOrder", CreateAccess = "AUTH", DeleteAccess = "AUTH", ModifyAccess = "AUTH", ViewAccess = "AUTH" });
+            applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Vendor", CreateAccess = "AUTH", DeleteAccess = "AUTH", ModifyAccess = "AUTH", ViewAccess = "AUTH" });
+            applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "", CreateAccess = "AUTH", DeleteAccess = "OWNER", ModifyAccess = "AUTH", ViewAccess = "PUB" });
 
             //MENU
             menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", TitleLocalizationKey = "MENU", OrderNo = 1, Action = "", Controller = "" });

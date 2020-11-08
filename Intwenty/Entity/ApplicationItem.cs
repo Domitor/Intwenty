@@ -13,6 +13,8 @@ namespace Intwenty.Entity
 
         }
 
+       
+
         public string SystemMetaCode { get; set; }
 
         public int Id { get; set; }
@@ -32,14 +34,22 @@ namespace Intwenty.Entity
 
         public bool IsHierarchicalApplication { get; set; }
 
-        public bool RequiresAuthorization { get; set; }
-
         /// <summary>
         /// Don't update data, instead create and keep track of new versions.
         /// </summary>
         public bool UseVersioning { get; set; }
 
-       
+        public string CreateAccess { get; set; }
+
+        public string ModifyAccess { get; set; }
+
+        public string DeleteAccess { get; set; }
+
+        public string ViewAccess { get; set; }
+
+        public string ApplicationPath { get; set; }
+
+
 
     }
 

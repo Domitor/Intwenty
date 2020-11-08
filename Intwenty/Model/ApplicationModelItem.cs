@@ -27,10 +27,14 @@ namespace Intwenty.Model
             DbName = entity.DbName;
             UseVersioning = entity.UseVersioning;
             IsHierarchicalApplication = entity.IsHierarchicalApplication;
-            RequiresAuthorization = entity.RequiresAuthorization;
             SystemMetaCode = entity.SystemMetaCode;
             MetaType = MetaTypeApplication;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
+            CreateAccess = entity.CreateAccess;
+            ModifyAccess = entity.ModifyAccess;
+            DeleteAccess = entity.DeleteAccess;
+            ViewAccess = entity.ViewAccess;
+            ApplicationPath = entity.ApplicationPath;
             SetEmptyStrings();
         }
 
@@ -43,11 +47,26 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) TitleLocalizationKey = string.Empty;
+            if (string.IsNullOrEmpty(CreateAccess)) CreateAccess = string.Empty;
+            if (string.IsNullOrEmpty(ModifyAccess)) ModifyAccess = string.Empty;
+            if (string.IsNullOrEmpty(DeleteAccess)) DeleteAccess = string.Empty;
+            if (string.IsNullOrEmpty(ViewAccess)) ViewAccess = string.Empty;
+            if (string.IsNullOrEmpty(ApplicationPath)) ApplicationPath = string.Empty;
         }
 
         public SystemModelItem SystemInfo { get; set; }
 
         public string SystemMetaCode { get; set; }
+
+        public string CreateAccess { get; set; }
+
+        public string ModifyAccess { get; set; }
+
+        public string DeleteAccess { get; set; }
+
+        public string ViewAccess { get; set; }
+
+        public string ApplicationPath { get; set; }
 
         public string TitleLocalizationKey { get; set; }
 

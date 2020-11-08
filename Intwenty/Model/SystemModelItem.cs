@@ -25,7 +25,6 @@ namespace Intwenty.Model
             Description = entity.Description;
             MetaCode = entity.MetaCode;
             DbPrefix = entity.DbPrefix;
-            RequiresAuthorization = entity.RequiresAuthorization;
             MetaType = MetaTypeSystem;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
             SetEmptyStrings();
@@ -47,8 +46,6 @@ namespace Intwenty.Model
         public string Description { get; set; }
 
         public string DbPrefix { get; set; }
-
-        public bool RequiresAuthorization { get; set; }
 
         public override string ModelCode
         {
