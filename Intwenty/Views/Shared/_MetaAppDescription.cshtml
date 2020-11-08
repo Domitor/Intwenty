@@ -1,6 +1,8 @@
 ﻿<div class="row">
     <div class="col-lg-6">
 
+        <h4>Basics</h4>
+
         <div class="form-group">
             <label class="control-label">System<span style="color: red"> *</span></label>
             <select id="cbSystem" v-model="model.systemMetaCode" class="form-control form-control-sm" :disabled="model.id > 0" v-on:input="setCodes">
@@ -28,9 +30,74 @@
             <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
+        <div class="form-group">
+            <label class="control-label">URL Path<span style="color: red"> *</span></label>
+            <input id="apppath" type="text" class="form-control form-control-sm" v-model="model.applicationPath" placeholder="Example: /MyApp/" />
+        </div>
 
     </div>
+</div>
+
+<h4>Access to views and functions</h4>
+<div class="row">
+    <div class="col-lg-6">
+        <strong>View</strong><br />
+        <label class="radio-inline">
+            <input type="radio" name="viewaccess" value="PUB" v-model="model.viewAccess">Public
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.viewAccess">Authorized
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="viewaccess" value="OWNER" v-model="model.viewAccess">Data Owner
+        </label>
+
+        <br />
+
+        <strong>Create</strong><br />
+        <label class="radio-inline">
+            <input type="radio" name="createaccess" value="PUB" v-model="model.createAccess">Public
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createAccess">Authorized
+        </label>
+
+        <br />
+
+        <strong>Modify</strong><br />
+        <label class="radio-inline">
+            <input type="radio" name="modifyaccess" value="PUB" v-model="model.modifyAccess">Public
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="modifyaccess" checked value="AUTH" v-model="model.modifyAccess">Authorized
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="modifyaccess" value="OWNER" v-model="model.modifyAccess">Data Owner
+        </label>
+
+        <br />
 
 
+        <strong>Delete</strong><br />
+        <label class="radio-inline">
+            <input type="radio" name="deleteaccess"  value="PUB" v-model="model.deleteAccess">Public
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="deleteaccess" checked value="AUTH" v-model="model.deleteAccess">Authorized
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="deleteaccess" value="OWNER" v-model="model.deleteAccess">Data Owner
+        </label>
 
+    </div>
+    <div class="col-lg-6">
+        <div class="alert alert-primary" role="alert">
+            <i class="far fa-question-circle"></i> This controls how users is allowed to access and use the views and functions in this application.
+            <br />
+            <br />
+            <strong style="width:100px">Public: </strong> Anyone <br />
+            <strong style="width:100px">Authorized: </strong> Only authorized users <br />
+            <strong style="width:100px">Data Owner: </strong> Only the authorized user who created the data
+        </div>
+    </div>
 </div>

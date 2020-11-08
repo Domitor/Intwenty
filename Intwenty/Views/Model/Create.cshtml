@@ -19,12 +19,14 @@
         </div>
     </div>
 
+    <button class="btn btn-sm btn-primary" type="button" v-on:click="createApplication()"><span class="fa fa-save"></span> Save</button>
+
     <br />
     <br />
 
     @await Html.PartialAsync("_MetaAppDescription")
 
-    <button class="btn btn-sm btn-primary" type="button" v-on:click="createApplication()"><span class="fa fa-save"></span> Save</button>
+
 
 </div>
 
