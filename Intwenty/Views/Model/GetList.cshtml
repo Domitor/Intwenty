@@ -36,11 +36,18 @@
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-database"></i> Manage DB</a></td>
                 <td>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">Create</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit View">Update</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDLIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit/Delete List View">Editlist</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/DEVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">Detail</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">List</a>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><i class="fas fa-align-justify"></i> Open the view designer</button>
+                        <div class="dropdown-menu dropdown-menu-lg-right" style="z-index:20000">
+                            <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" class="dropdown-item" title="Design the Create View">Design the Create View</a>
+                            <a v-bind:href="'/Model/EditUI/' + item.id + '/EDVIEW'" class="dropdown-item" title="Design the Edit View">Design the Update View</a>
+                            <a v-bind:href="'/Model/EditUI/' + item.id + '/EDLIVIEW'" class="dropdown-item" title="Design the Edit List View">Design the Editlist View</a>
+                            <a v-bind:href="'/Model/EditUI/' + item.id + '/DEVIEW'" class="dropdown-item" title="Design the Presentation View">Design the Detail View</a>
+                            <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" class="dropdown-item" title="Design the Presentation List View">Design the List View</a>
+                        </div>
+                    </div>
+
+                   
                 </td>
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
             </tr>

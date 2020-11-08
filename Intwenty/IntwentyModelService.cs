@@ -573,10 +573,11 @@ namespace Intwenty
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
                 entity.SystemMetaCode = model.SystemMetaCode;
-                entity.CreateAccess = model.CreateAccess;
-                entity.ModifyAccess = model.ModifyAccess;
-                entity.DeleteAccess = model.DeleteAccess;
-                entity.ViewAccess = model.ViewAccess;
+                entity.CreateViewRequirement = model.CreateViewRequirement;
+                entity.EditListViewRequirement = model.EditListViewRequirement;
+                entity.EditViewRequirement = model.EditViewRequirement;
+                entity.DetailViewRequirement = model.DetailViewRequirement;
+                entity.ListViewRequirement = model.ListViewRequirement;
                 entity.ApplicationPath = model.ApplicationPath;
                 entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
 
@@ -598,10 +599,11 @@ namespace Intwenty
                 entity.Title = model.Title;
                 entity.DbName = model.DbName;
                 entity.Description = model.Description;
-                entity.CreateAccess = model.CreateAccess;
-                entity.ModifyAccess = model.ModifyAccess;
-                entity.DeleteAccess = model.DeleteAccess;
-                entity.ViewAccess = model.ViewAccess;
+                entity.CreateViewRequirement = model.CreateViewRequirement;
+                entity.EditListViewRequirement = model.EditListViewRequirement;
+                entity.EditViewRequirement = model.EditViewRequirement;
+                entity.DetailViewRequirement = model.DetailViewRequirement;
+                entity.ListViewRequirement = model.ListViewRequirement;
                 entity.ApplicationPath = model.ApplicationPath;
                 entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
 

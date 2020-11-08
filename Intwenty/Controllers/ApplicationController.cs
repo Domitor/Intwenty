@@ -34,7 +34,7 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
             if (t == null)
                 return NotFound();
-            if (!t.UseViewAuthorization)
+            if (!t.UseListViewAuthorization)
                 return View(t);
             if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
@@ -52,7 +52,7 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p=> p.Application.Id == id);
             if (t == null)
                 return NotFound();
-            if (!t.UseCreateAuthorization)
+            if (!t.UseCreateViewAuthorization)
                 return View(t);
             if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
@@ -71,7 +71,7 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
             if (t == null)
                 return NotFound();
-            if (!t.UseModifyAuthorization)
+            if (!t.UseEditViewAuthorization)
                 return View(t);
             if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
@@ -89,7 +89,7 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
             if (t == null)
                 return NotFound();
-            if (!t.UseViewAuthorization)
+            if (!t.UseDetailViewAuthorization)
                 return View(t);
             if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);
@@ -108,7 +108,7 @@ namespace Intwenty.Controllers
             var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
             if (t == null)
                 return NotFound();
-            if (!t.UseModifyAuthorization)
+            if (!t.UseEditViewAuthorization)
                 return View(t);
             if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(t);

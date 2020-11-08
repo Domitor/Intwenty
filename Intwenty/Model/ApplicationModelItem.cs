@@ -30,10 +30,11 @@ namespace Intwenty.Model
             SystemMetaCode = entity.SystemMetaCode;
             MetaType = MetaTypeApplication;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
-            CreateAccess = entity.CreateAccess;
-            ModifyAccess = entity.ModifyAccess;
-            DeleteAccess = entity.DeleteAccess;
-            ViewAccess = entity.ViewAccess;
+            CreateViewRequirement = entity.CreateViewRequirement;
+            EditViewRequirement = entity.EditViewRequirement;
+            EditListViewRequirement = entity.EditListViewRequirement;
+            DetailViewRequirement = entity.DetailViewRequirement;
+            ListViewRequirement = entity.ListViewRequirement;
             ApplicationPath = entity.ApplicationPath;
             SetEmptyStrings();
         }
@@ -47,10 +48,11 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) TitleLocalizationKey = string.Empty;
-            if (string.IsNullOrEmpty(CreateAccess)) CreateAccess = string.Empty;
-            if (string.IsNullOrEmpty(ModifyAccess)) ModifyAccess = string.Empty;
-            if (string.IsNullOrEmpty(DeleteAccess)) DeleteAccess = string.Empty;
-            if (string.IsNullOrEmpty(ViewAccess)) ViewAccess = string.Empty;
+            if (string.IsNullOrEmpty(CreateViewRequirement)) CreateViewRequirement = string.Empty;
+            if (string.IsNullOrEmpty(EditViewRequirement)) EditViewRequirement = string.Empty;
+            if (string.IsNullOrEmpty(EditListViewRequirement)) EditListViewRequirement = string.Empty;
+            if (string.IsNullOrEmpty(DetailViewRequirement)) DetailViewRequirement = string.Empty;
+            if (string.IsNullOrEmpty(ListViewRequirement)) ListViewRequirement = string.Empty;
             if (string.IsNullOrEmpty(ApplicationPath)) ApplicationPath = string.Empty;
         }
 
@@ -58,13 +60,15 @@ namespace Intwenty.Model
 
         public string SystemMetaCode { get; set; }
 
-        public string CreateAccess { get; set; }
+        public string CreateViewRequirement { get; set; }
 
-        public string ModifyAccess { get; set; }
+        public string EditViewRequirement { get; set; }
 
-        public string DeleteAccess { get; set; }
+        public string EditListViewRequirement { get; set; }
 
-        public string ViewAccess { get; set; }
+        public string DetailViewRequirement { get; set; }
+
+        public string ListViewRequirement { get; set; }
 
         public string ApplicationPath { get; set; }
 

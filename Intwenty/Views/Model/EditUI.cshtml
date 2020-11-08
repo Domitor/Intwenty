@@ -37,14 +37,30 @@
     <br />
 
     <div class="card">
-        <div class="card-header"><h2>UI model designer </h2></div>
-        <div class="card-body">Design the '{{model.designerTitle}}' for application {{model.applicationTitle}} and connect it to the database model.</div>
+        <div class="card-header"><h2>View designer </h2></div>
+        <div class="card-body">
+            Design the <b>'{{model.designerTitle}}'</b> for application <b>{{model.applicationTitle}}</b> and connect it to the database model.
+            
+            <br />
+
+            <ul class="nav">
+                <li class="nav-item">
+                    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                </li>
+                <li class="nav-item">
+                  
+                </li>
+                <li class="nav-item">
+                    <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI" style="margin:10px">
+                        <i class="fa fa-save"></i> Save changes
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <br />
-    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-default"><span class="fa fa-backward"></span> Back to list</a>
-    <br />
-    <br />
+    
    
     <div id="uidesigner" v-if="model.viewType!='EDLIVIEW'">
 
@@ -62,12 +78,10 @@
                 <div class="btn btn-sm btn-secondary" v-on:click="addSection">
                     <i class="fa fa-plus"></i> Add section
                 </div>
-                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings">
-                    <i class="fa fa-cog"></i> View Settings
+                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings" style="float:right">
+                    <i class="fa fa-cog"></i> Settings
                 </div>
-                <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI" style="float:right">
-                    <i class="fa fa-save"></i> Save changes
-                </div>
+
                 <hr />
             </div>
         </div>

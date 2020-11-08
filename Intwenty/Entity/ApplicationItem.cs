@@ -39,13 +39,15 @@ namespace Intwenty.Entity
         /// </summary>
         public bool UseVersioning { get; set; }
 
-        public string CreateAccess { get; set; }
+        public string CreateViewRequirement { get; set; }
 
-        public string ModifyAccess { get; set; }
+        public string EditViewRequirement { get; set; }
 
-        public string DeleteAccess { get; set; }
+        public string EditListViewRequirement { get; set; }
 
-        public string ViewAccess { get; set; }
+        public string DetailViewRequirement { get; set; }
+
+        public string ListViewRequirement { get; set; }
 
         public string ApplicationPath { get; set; }
 
