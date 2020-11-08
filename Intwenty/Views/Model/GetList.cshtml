@@ -24,9 +24,9 @@
                 <tr>
                     <th style="width:10%"></th>
                     <th style="width:20%">Title</th>
-                    <th style="width:25%">Description</th>
-                    <th style="width:20%">DB</th>
-                    <th style="width:20%">UI Design</th>
+                    <th style="width:20%">Description</th>
+                    <th style="width:12%">DB</th>
+                    <th style="width:33%">UI View Design</th>
                     <th style="width:5%"></th>
                 </tr>
             </thead>
@@ -36,11 +36,11 @@
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/Model/EditDB/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-database"></i> Manage DB</a></td>
                 <td>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">CR</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit View">U</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDLIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit/Delete List View">D</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/DEVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">P</a>
-                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">PL</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/CRVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Create View">Create</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit View">Update</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/EDLIVIEW'" role="button" class="btn btn-sm btn-success" title="Design the Edit/Delete List View">Editlist</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/DEVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation View">Detail</a>
+                    <a v-bind:href="'/Model/EditUI/' + item.id + '/LIVIEW'" role="button" class="btn btn-sm btn-primary" title="Design the Presentation List View">List</a>
                 </td>
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
             </tr>

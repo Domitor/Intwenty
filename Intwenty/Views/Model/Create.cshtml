@@ -10,19 +10,23 @@
 <div id="app">
 
     <br />
-    <br />
+
 
     <div class="card">
         <div class="card-header"><h2>Create new application</h2></div>
         <div class="card-body">
             Create basic meta data for a new application.
+            <br />
+            <ul class="nav">
+                <li class="nav-item">
+                    <button class="btn btn-sm btn-primary" type="button" v-on:click="createApplication()" style="margin:10px"><span class="fa fa-save"></span> Save</button>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <button class="btn btn-sm btn-primary" type="button" v-on:click="createApplication()"><span class="fa fa-save"></span> Save</button>
+    <br />
 
-    <br />
-    <br />
 
     @await Html.PartialAsync("_MetaAppDescription")
 
