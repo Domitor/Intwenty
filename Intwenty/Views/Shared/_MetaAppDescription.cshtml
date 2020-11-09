@@ -1,7 +1,7 @@
-﻿<div class="row">
-    <div class="col-lg-6">
+﻿<h4>Basics</h4>
 
-        <h4>Basics</h4>
+<div class="row">
+    <div class="col-lg-6">
 
         <div class="form-group">
             <label class="control-label">System<span style="color: red"> *</span></label>
@@ -30,10 +30,28 @@
             <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
+      
+
+    </div>
+    <div class="col-lg-6">
+
         <div class="form-group">
-            <label class="control-label">URL Path<span style="color: red"> *</span></label>
-            <input id="apppath" type="text" class="form-control form-control-sm" v-model="model.applicationPath" placeholder="Example: /MyApp/" />
+            <label class="control-label">Application Path<span style="color: red"> *</span></label>
+            <input id="apppath" type="text" class="form-control form-control-sm" v-model="model.applicationPath" placeholder="Example: MyApp" />
         </div>
+
+        <strong>Valid application paths</strong>
+        <p><i>Intwenty must be restarted for your new or changed URL (Application Path) to take effect</i></p>
+        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Create</p>
+        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Edit/{id}</p>
+        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Detail/{id}</p>
+        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/EditList</p>
+        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/List</p>
+        <p>/APPLICATION/Create/{applicationid}</p>
+        <p>/APPLICATION/Edit/{applicationid}/{id}</p>
+        <p>/APPLICATION/Detail/{applicationid}/{id}</p>
+        <p>/APPLICATION/EditList/{applicationid}</p>
+        <p>/APPLICATION/List/{applicationid}</p>
 
     </div>
 </div>
@@ -62,17 +80,17 @@
         <strong>The Edit View</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="modifyaccess" value="PUB" v-model="model.editViewRequirement">None (Public)
+                <input type="radio" name="editaccess" value="PUB" v-model="model.editViewRequirement">None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="modifyaccess" checked value="AUTH" v-model="model.editViewRequirement">Authorized (Modify Permission)
+                <input type="radio" name="editaccess" checked value="AUTH" v-model="model.editViewRequirement">Authorized (Modify Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="modifyaccess" value="OWNER" v-model="model.editViewRequirement">Authorized (Modify Permission) and Data Owner
+                <input type="radio" name="editaccess" value="OWNER" v-model="model.editViewRequirement">Authorized (Modify Permission) and Data Owner
             </label>
         </div>
 
@@ -86,18 +104,18 @@
 
         <strong>The Editlist View</strong><br />
         <div class="form-check">
-             <label class="radio-inline">
-                <input type="radio" name="deleteaccess" value="PUB" v-model="model.editListViewRequirement">None (Public)
+            <label class="radio-inline">
+                <input type="radio" name="editlistviewaccess" value="PUB" v-model="model.editListViewRequirement">None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="deleteaccess" checked value="AUTH" v-model="model.editListViewRequirement">Authorized (Modify Permission)
+                <input type="radio" name="editlistviewaccess" checked value="AUTH" v-model="model.editListViewRequirement">Authorized (Modify Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="deleteaccess" value="OWNER" v-model="model.editListViewRequirement">Authorized (Modify Permission) and Data Owner
+                <input type="radio" name="editlistviewaccess" value="OWNER" v-model="model.editListViewRequirement">Authorized (Modify Permission) and Data Owner
             </label>
         </div>
 
@@ -106,17 +124,17 @@
         <strong>The Detail View (Presentation)</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="viewaccess" value="PUB" v-model="model.detailViewRequirement">None (Public)
+                <input type="radio" name="detailaccess" value="PUB" v-model="model.detailViewRequirement">None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.detailViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="detailaccess" value="AUTH" checked v-model="model.detailViewRequirement">Authorized (Read Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="viewaccess" value="OWNER" v-model="model.detailViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="detailaccess" value="OWNER" v-model="model.detailViewRequirement">Authorized (Read Permission) and Data Owner
             </label>
         </div>
 
@@ -125,21 +143,21 @@
 
         <strong>The List View (Presentation)</strong><br />
         <div class="form-check">
-        <label class="radio-inline">
-            <input type="radio" name="viewaccess" value="PUB" v-model="model.listViewRequirement">None (Public)
-        </label>
-        </div>
-        <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="viewaccess" value="AUTH" checked v-model="model.listViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="listviewaccess" value="PUB" v-model="model.listViewRequirement">None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="viewaccess" value="OWNER" v-model="model.listViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="listviewaccess" value="AUTH" checked v-model="model.listViewRequirement">Authorized (Read Permission)
             </label>
         </div>
-       
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="listviewaccess" value="OWNER" v-model="model.listViewRequirement">Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
+
 
     </div>
     <div class="col-lg-7">
@@ -149,11 +167,11 @@
             <br />
             <strong>Intwenty Default Views</strong><br />
             <hr />
-            <strong>The Create View</strong><br />The view where you create new application records <br /><br />
-            <strong>The Edit View</strong><br />The view where you edit application records <br /><br />
-            <strong>The Edit List View</strong><br />The view where you list application records, this view also allows for deleting records. <br /><br />
+            <strong>The Create View</strong><br />Used to create new application records <br /><br />
+            <strong>The Edit View</strong><br />Used to edit or export an application record <br /><br />
+            <strong>The Edit List View</strong><br />Used to list application records, this view also allows for deleting records. <br /><br />
             <strong>The Detail View</strong><br />A readonly presentation view, to present an application record <br /><br />
-            <strong>The List View</strong><br />A readonly presentation view, to present multiple aplication records <br /><br />
+            <strong>The List View</strong><br />A readonly presentation view, to present multiple application records <br /><br />
             <br />
             <strong>View access Modes</strong><br />
             <hr />

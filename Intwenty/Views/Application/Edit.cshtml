@@ -71,7 +71,7 @@
 
             var context = this;
             var baseurl = '@Url.Content("~/Application/API/")';
-            var endpointurl = baseurl + "GetLatestVersion/@Model.Application.Id/@ViewBag.SystemId";
+            var endpointurl = baseurl + "GetEditData/@Model.Application.Id/@ViewBag.SystemId";
 
             $.get(endpointurl, function (response) {
                 context.model = JSON.parse(response.data);

@@ -494,8 +494,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
         },
         methods: {
             downloadExcel: function () {
-                var context = this;
-                alert('test');
+
             },
             nextpage: function () {
                 var context = this;
@@ -509,7 +508,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
             },
             getPage: function () {
                 var context = this;
-                var endpointurl = context.baseUrl + "GetPagedList";
+                var endpointurl = context.baseUrl + "GetEditListData";
 
 
                 $.ajax({
@@ -557,7 +556,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
             exportToExcel: function () {
                 var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "currentRowNum": 0, "filterValues": [] }
                 var context = this;
-                var endpointurl = context.baseUrl + "GetPagedList";
+                var endpointurl = context.baseUrl + "GetEditListData";
 
                 $.ajax({
                     url: endpointurl,
@@ -656,7 +655,7 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
             },
             getPage: function () {
                 var context = this;
-                var endpointurl = context.baseUrl + "GetPagedList";
+                var endpointurl = context.baseUrl + "GetListData";
 
 
                 $.ajax({

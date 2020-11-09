@@ -23,12 +23,28 @@ namespace Intwenty.Controllers
 
 
         /// <summary>
-        /// Get the latest version data by id for an application with applicationid 
+        /// Get the latest version data by id for an application with applicationid
+        /// Used by the EditView
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
         /// <param name="id">The data id</param>
         [HttpGet]
-        public virtual JsonResult GetLatestVersion(int applicationid, int id)
+        public virtual JsonResult GetEditData(int applicationid, int id)
+        {
+            var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
+            var data = DataRepository.GetLatestVersionById(state);
+            return new JsonResult(data);
+
+        }
+
+        /// <summary>
+        /// Get the latest version data by id for an application with applicationid
+        /// Used by the DetailView
+        /// </summary>
+        /// <param name="applicationid">The ID of the application in the meta model</param>
+        /// <param name="id">The data id</param>
+        [HttpGet]
+        public virtual JsonResult GetDetailData(int applicationid, int id)
         {
             var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
             var data = DataRepository.GetLatestVersionById(state);
@@ -62,7 +78,17 @@ namespace Intwenty.Controllers
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost]
-        public virtual JsonResult GetPagedList([FromBody] ListFilter model)
+        public virtual JsonResult GetEditListData([FromBody] ListFilter model)
+        {
+            var listdata = DataRepository.GetPagedList(model);
+            return new JsonResult(listdata);
+        }
+
+        /// <summary>
+        /// Loads data for a listview for the application with supplied Id
+        /// </summary>
+        [HttpPost]
+        public virtual JsonResult GetListData([FromBody] ListFilter model)
         {
             var listdata = DataRepository.GetPagedList(model);
             return new JsonResult(listdata);

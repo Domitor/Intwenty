@@ -80,8 +80,6 @@ namespace Intwenty.Model
 
         public bool IsHierarchicalApplication { get; set; }
 
-        public bool RequiresAuthorization { get; set; }
-
         public bool UseVersioning { get; set; }
 
         public string VersioningTableName

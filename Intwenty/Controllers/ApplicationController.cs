@@ -7,6 +7,7 @@ using Intwenty.Model.Dto;
 using Microsoft.AspNetCore.Http;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
+using Intwenty.Model;
 
 namespace Intwenty.Controllers
 {
@@ -31,7 +32,14 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult List(int id)
         {
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
+            var path = this.Request.Path.Value;
+            var apps = ModelRepository.GetLocalizedApplicationModels();
+            ApplicationModel t = null;
+            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
+                t = apps.Find(p => p.Application.Id == id);
+            else
+                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+
             if (t == null)
                 return NotFound();
             if (!t.UseListViewAuthorization)
@@ -48,14 +56,21 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Create(int id)
         {
-           
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p=> p.Application.Id == id);
-            if (t == null)
+
+            var path = this.Request.Path.Value;
+            var apps = ModelRepository.GetLocalizedApplicationModels();
+            ApplicationModel current_model = null;
+            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
+                current_model = apps.Find(p => p.Application.Id == id);
+            else
+                current_model = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+
+            if (current_model == null)
                 return NotFound();
-            if (!t.UseCreateViewAuthorization)
-                return View(t);
-            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(t);
+            if (!current_model.UseCreateViewAuthorization)
+                return View(current_model);
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(current_model);
             else
                 return Forbid();
         }
@@ -66,9 +81,19 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Edit(int applicationid, int id)
         {
-            
+            if (id < 0)
+                return NotFound();
+
             ViewBag.SystemId = Convert.ToString(id);
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
+
+            var path = this.Request.Path.Value;
+            var apps = ModelRepository.GetLocalizedApplicationModels();
+            ApplicationModel t = null;
+            if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
+                t = apps.Find(p => p.Application.Id == applicationid);
+            else
+                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+
             if (t == null)
                 return NotFound();
             if (!t.UseEditViewAuthorization)
@@ -85,8 +110,19 @@ namespace Intwenty.Controllers
         /// </summary>
         public virtual IActionResult Detail(int applicationid, int id)
         {
+            if (id < 0)
+                return NotFound();
+
             ViewBag.SystemId = Convert.ToString(id);
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == applicationid);
+
+            var path = this.Request.Path.Value;
+            var apps = ModelRepository.GetLocalizedApplicationModels();
+            ApplicationModel t = null;
+            if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
+                t = apps.Find(p => p.Application.Id == applicationid);
+            else
+                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+
             if (t == null)
                 return NotFound();
             if (!t.UseDetailViewAuthorization)
@@ -105,7 +141,14 @@ namespace Intwenty.Controllers
         public virtual IActionResult EditList(int id)
         {
 
-            var t = ModelRepository.GetLocalizedApplicationModels().Find(p => p.Application.Id == id);
+            var path = this.Request.Path.Value;
+            var apps = ModelRepository.GetLocalizedApplicationModels();
+            ApplicationModel t = null;
+            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
+                t = apps.Find(p => p.Application.Id == id);
+            else
+                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+
             if (t == null)
                 return NotFound();
             if (!t.UseEditViewAuthorization)

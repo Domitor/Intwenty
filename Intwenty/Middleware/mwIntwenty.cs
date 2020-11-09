@@ -198,10 +198,11 @@ namespace Intwenty.Middleware
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
                 endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 
+                var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
+
                 //REGISTER ENDPOINTS
                 if (settings.UseIntwentyAPI)
                 {
-                    var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
                     var epmodels = modelservice.GetEndpointModels();
 
                     foreach (var ep in epmodels)
@@ -210,6 +211,32 @@ namespace Intwenty.Middleware
                     }
                 }
                 //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
+
+                var appmodels = modelservice.GetApplicationModels();
+                foreach (var a in appmodels)
+                {
+                    if (a.Application == null)
+                        continue;
+
+                    if (string.IsNullOrEmpty(a.Application.ApplicationPath))
+                        continue;
+
+                    if (a.Application.ApplicationPath.Length < 2)
+                        continue;
+
+                    var path = a.Application.ApplicationPath;
+                    path.Trim();
+                    if (path[0] != '/')
+                        path = "/" + path;
+                    if (path[path.Length - 1] != '/')
+                        path = path + "/";
+
+                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_create", path + "{action=Create}", defaults: new { controller = "Application" });
+                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_edit", path + "{action=Edit}/{id}", defaults: new { controller = "Application" });
+                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_editlist", path + "{action=EditList}", defaults: new { controller = "Application" });
+                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_detail", path + "{action=Detail}/{id}", defaults: new { controller = "Application" });
+                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_create", path + "{action=List}", defaults: new { controller = "Application" });
+                }
 
 
                 endpoints.MapRazorPages();
