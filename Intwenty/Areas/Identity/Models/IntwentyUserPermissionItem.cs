@@ -22,9 +22,9 @@ namespace Intwenty.Areas.Identity.Models
             Title = p.Title;
             PermissionType = p.PermissionType;
             MetaCode = p.MetaCode;
-            Read = p.Read;
-            Modify = p.Modify;
-            Delete = p.Delete;
+            Read = p.ReadPermission;
+            Modify = p.ModifyPermission;
+            Delete = p.DeletePermission;
         }
 
         public IntwentyUserPermissionItem()

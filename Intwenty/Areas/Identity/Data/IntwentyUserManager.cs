@@ -55,9 +55,9 @@ namespace Intwenty.Areas.Identity.Data
             client.Close();
             if (existing != null)
             {
-                existing.Read = read;
-                existing.Modify = modify;
-                existing.Delete = delete;
+                existing.ReadPermission = read;
+                existing.ModifyPermission = modify;
+                existing.DeletePermission = delete;
 
                 client.Open();
                 client.UpdateEntity(existing);
@@ -74,9 +74,9 @@ namespace Intwenty.Areas.Identity.Data
             t.UserName = user.UserName;
             t.MetaCode = metacode;
             t.PermissionType = permissiontype;
-            t.Read = read;
-            t.Modify = modify;
-            t.Delete = delete;
+            t.ReadPermission = read;
+            t.ModifyPermission = modify;
+            t.DeletePermission = delete;
             client.Open();
             client.InsertEntity(t);
             client.Close();
@@ -145,9 +145,9 @@ namespace Intwenty.Areas.Identity.Data
             if (list.Exists(p => p.PermissionType == ApplicationModelItem.MetaTypeApplication &&
                                 p.MetaCode == requested_app.Application.MetaCode &&
                                 (
-                                (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
-                                (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
-                                (requested_action == IntwentyPermission.Delete && (p.Delete))
+                                (requested_action == IntwentyPermission.Read && (p.ReadPermission || p.DeletePermission || p.ModifyPermission)) ||
+                                (requested_action == IntwentyPermission.Modify && (p.ModifyPermission)) ||
+                                (requested_action == IntwentyPermission.Delete && (p.DeletePermission))
                                 )))
             {
 
@@ -157,9 +157,9 @@ namespace Intwenty.Areas.Identity.Data
             if (list.Exists(p => p.PermissionType == SystemModelItem.MetaTypeSystem &&
                                  p.MetaCode == requested_app.System.MetaCode &&
                                  (
-                                 (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
-                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
-                                 (requested_action == IntwentyPermission.Delete && (p.Delete))
+                                 (requested_action == IntwentyPermission.Read && (p.ReadPermission || p.DeletePermission || p.ModifyPermission)) ||
+                                 (requested_action == IntwentyPermission.Modify && (p.ModifyPermission)) ||
+                                 (requested_action == IntwentyPermission.Delete && (p.DeletePermission))
                                  )))
             {
 

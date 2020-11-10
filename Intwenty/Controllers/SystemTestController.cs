@@ -420,14 +420,13 @@ namespace Intwenty.Controllers
                     var state = new ClientStateInfo();
                     state.ApplicationId = 10000;
                     state.UserId = "TESTUSER";
-                    state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "TESTUSER" });
 
                     if (i > 25)
-                        state.FilterValues[0].Value = "OTHERUSER";
+                        state.UserId = "OTHERUSER";
                     if (i > 50)
-                        state.FilterValues[0].Value = "OTHERUSER1";
+                        state.UserId = "OTHERUSER1";
                     if (i > 75)
-                        state.FilterValues[0].Value = "OTHERUSER2";
+                        state.UserId = "OTHERUSER2";
 
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });

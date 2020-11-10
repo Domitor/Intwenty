@@ -26,11 +26,11 @@ namespace Intwenty.Areas.Identity.Entity
         /// </summary>
         public string MetaCode { get; set; }
 
-        public bool Read { get; set; }
+        public bool ReadPermission { get; set; }
 
-        public bool Modify { get; set; }
+        public bool ModifyPermission { get; set; }
 
-        public bool Delete { get; set; }
+        public bool DeletePermission { get; set; }
 
        
     }

@@ -47,16 +47,16 @@
         <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Detail/{id}</p>
         <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/EditList</p>
         <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/List</p>
-        <p>/APPLICATION/Create/{applicationid}</p>
-        <p>/APPLICATION/Edit/{applicationid}/{id}</p>
-        <p>/APPLICATION/Detail/{applicationid}/{id}</p>
-        <p>/APPLICATION/EditList/{applicationid}</p>
-        <p>/APPLICATION/List/{applicationid}</p>
+        <p>/Application/Create/{applicationid}</p>
+        <p>/Application/Edit/{applicationid}/{id}</p>
+        <p>/Application/Detail/{applicationid}/{id}</p>
+        <p>/Application/EditList/{applicationid}</p>
+        <p>/Application/List/{applicationid}</p>
 
     </div>
 </div>
 
-<h4>Intwenty Default Views access requirements</h4>
+<h4>Default View Access Requirements</h4>
 <hr />
 <div class="row">
     <div class="col-lg-5">
@@ -158,45 +158,31 @@
             </label>
         </div>
 
-        <strong>Save Information</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="savefunction" value="PUB" disabled />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="savefunction" value="AUTH" checked />Authorized (Modify Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="savefunction" value="OWNER" disabled />Authorized (Modify Permission) and Data Owner
-            </label>
-        </div>
+        <br />
+        <h4>Function Requirements</h4>
+        <hr />
+
+        <strong>Save New Information (Inherits the 'Create View')</strong><br />
+        <p v-if="model.createViewRequirement=='PUB'">None (Public)</p>
+        <p v-if="model.createViewRequirement=='AUTH'">Authorized (Modify Permission)</p>
+
+        <br />
+
+        <strong>Update Information (Inherits the 'Edit View')</strong><br />
+        <p v-if="model.editViewRequirement=='PUB'">None (Public)</p>
+        <p v-if="model.editViewRequirement=='AUTH'">Authorized (Modify Permission)</p>
+        <p v-if="model.editViewRequirement=='OWNER'">Authorized (Modify Permission) and Data Owner</p>
+
 
         <strong>Delete Information</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="deletefunction" value="PUB" disabled />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="deletefunction" value="AUTH" checked />Authorized (Delete Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="deletefunction" value="OWNER" disabled />Authorized (Delete Permission) and Data Owner
-            </label>
-        </div>
+        <p>Authorized (Delete Permission) and Data Owner</p>
+       
 
 
     </div>
     <div class="col-lg-7">
         <div class="alert alert-primary" role="alert">
-            <i class="far fa-question-circle"></i> Specify what permission that is required to access a certain view in this application.
+            <i class="far fa-question-circle"></i> Specify what permission that is required to access the standard views in this application.
             <br />
             <br />
             <strong>Intwenty Default Views</strong><br />

@@ -80,11 +80,13 @@ namespace Intwenty
             if (clearall)
             {
                 ModelCache.Remove(AppModelCacheKey);
+                ModelCache.Remove(AppModelItemsCacheKey);
                 ModelCache.Remove(DefaultVersioningTableColumnsCacheKey);
                 ModelCache.Remove(ValueDomainsCacheKey);
                 ModelCache.Remove(TranslationsCacheKey);
                 ModelCache.Remove(EndpointsCacheKey);
                 ModelCache.Remove(DataViewCacheKey);
+               
             }
             else
             {
