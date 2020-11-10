@@ -3,11 +3,12 @@
 
 # Intwenty
 Is a meta data driven CMS / Blog Engine built on Vue.js and ASP.NET Core. 
-- It lets you create meta models for UI and data.
+- It lets you create meta models that describes UI and data.
 - Models are stored as data instead of strongly typed objects.
-- It uses the meta model to create database objects and render the UI.
+- It uses the model to build the database, SQL statements, UI and integration endpoints.
 - Models can be defined either programaticly or visually.
-- Implements Asp.Net Core Identity, without any need of entity framework.
+- Implements and extends Asp.Net Core Identity.
+- Does not use entity framework.
 - Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
 - The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
 
