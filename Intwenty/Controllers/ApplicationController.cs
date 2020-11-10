@@ -69,7 +69,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseCreateViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
                 return View(current_model);
             else
                 return Forbid();

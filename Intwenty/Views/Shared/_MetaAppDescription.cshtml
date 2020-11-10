@@ -64,12 +64,12 @@
         <strong>The Create View</strong><br />
         <div class="form-check">
             <label class="radio">
-                <input type="radio" name="createaccess" value="PUB" v-model="model.createViewRequirement">None (Public)
+                <input type="radio" name="createaccess" value="PUB" v-model="model.createViewRequirement" />None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio">
-                <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createViewRequirement">Authorized (Create Permission)
+                <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createViewRequirement" />Authorized (Modify Permission)
             </label>
         </div>
 
@@ -80,17 +80,17 @@
         <strong>The Edit View</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editaccess" value="PUB" v-model="model.editViewRequirement">None (Public)
+                <input type="radio" name="editaccess" value="PUB" v-model="model.editViewRequirement" />None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editaccess" checked value="AUTH" v-model="model.editViewRequirement">Authorized (Modify Permission)
+                <input type="radio" name="editaccess" checked value="AUTH" v-model="model.editViewRequirement" />Authorized (Read Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editaccess" value="OWNER" v-model="model.editViewRequirement">Authorized (Modify Permission) and Data Owner
+                <input type="radio" name="editaccess" value="OWNER" v-model="model.editViewRequirement" />Authorized (Read Permission) and Data Owner
             </label>
         </div>
 
@@ -105,17 +105,17 @@
         <strong>The Editlist View</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" value="PUB" v-model="model.editListViewRequirement">None (Public)
+                <input type="radio" name="editlistviewaccess" value="PUB" v-model="model.editListViewRequirement" />None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" checked value="AUTH" v-model="model.editListViewRequirement">Authorized (Modify Permission)
+                <input type="radio" name="editlistviewaccess" checked value="AUTH" v-model="model.editListViewRequirement" />Authorized (Read Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" value="OWNER" v-model="model.editListViewRequirement">Authorized (Modify Permission) and Data Owner
+                <input type="radio" name="editlistviewaccess" value="OWNER" v-model="model.editListViewRequirement" />Authorized (Read Permission) and Data Owner
             </label>
         </div>
 
@@ -124,17 +124,17 @@
         <strong>The Detail View (Presentation)</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="PUB" v-model="model.detailViewRequirement">None (Public)
+                <input type="radio" name="detailaccess" value="PUB" v-model="model.detailViewRequirement" />None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="AUTH" checked v-model="model.detailViewRequirement">Authorized (Read Permission)
+                <input type="radio" name="detailaccess" value="AUTH" checked v-model="model.detailViewRequirement" />Authorized (Read Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="OWNER" v-model="model.detailViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="detailaccess" value="OWNER" v-model="model.detailViewRequirement" />Authorized (Read Permission) and Data Owner
             </label>
         </div>
 
@@ -144,17 +144,51 @@
         <strong>The List View (Presentation)</strong><br />
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="PUB" v-model="model.listViewRequirement">None (Public)
+                <input type="radio" name="listviewaccess" value="PUB" v-model="model.listViewRequirement" />None (Public)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="AUTH" checked v-model="model.listViewRequirement">Authorized (Read Permission)
+                <input type="radio" name="listviewaccess" value="AUTH" checked v-model="model.listViewRequirement" />Authorized (Read Permission)
             </label>
         </div>
         <div class="form-check">
             <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="OWNER" v-model="model.listViewRequirement">Authorized (Read Permission) and Data Owner
+                <input type="radio" name="listviewaccess" value="OWNER" v-model="model.listViewRequirement" />Authorized (Read Permission) and Data Owner
+            </label>
+        </div>
+
+        <strong>Save Information</strong><br />
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="savefunction" value="PUB" disabled />None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="savefunction" value="AUTH" checked />Authorized (Modify Permission)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="savefunction" value="OWNER" disabled />Authorized (Modify Permission) and Data Owner
+            </label>
+        </div>
+
+        <strong>Delete Information</strong><br />
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="deletefunction" value="PUB" disabled />None (Public)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="deletefunction" value="AUTH" checked />Authorized (Delete Permission)
+            </label>
+        </div>
+        <div class="form-check">
+            <label class="radio-inline">
+                <input type="radio" name="deletefunction" value="OWNER" disabled />Authorized (Delete Permission) and Data Owner
             </label>
         </div>
 

@@ -47,27 +47,34 @@ namespace Intwenty
 
         #region Create
 
+        public virtual OperationResult CreateNew(ApplicationModel model)
+        {
+            return CreateNewInternal(model);
+        }
+
         public virtual OperationResult CreateNew(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            return CreateNewInternal(model);
+        }
+
+        private OperationResult CreateNewInternal(ApplicationModel model)
         {
             var result = new OperationResult();
 
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model") { Data = "{}" };
+
+
             try
             {
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-                if (model == null)
-                {
-                    result = new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Could not find application model for applicationid {0} when creating a new empty app", state.ApplicationId));
-                    result.Data = "{}";
-                    return result;
-                }
 
                 var sb = new StringBuilder();
                 sb.Append("{");
                 sb.Append("\"" + model.Application.DbName + "\":{");
 
                 var sep = "";
-                var defval = GetDefaultValues(state);
+                var defval = GetDefaultValues(model);
                 if (defval.Count > 0)
                 {
                     foreach (var df in defval)
@@ -105,10 +112,9 @@ namespace Intwenty
             return result;
         }
 
-        protected virtual List<DefaultValue> GetDefaultValues(ClientStateInfo state)
+        protected virtual List<DefaultValue> GetDefaultValues(ApplicationModel model)
         {
             var res = new List<DefaultValue>();
-            var model = ModelRepository.GetApplicationModels().Find(p=> p.Application.Id == state.ApplicationId);
             if (model == null)
                 return new List<DefaultValue>();
 
@@ -160,8 +166,18 @@ namespace Intwenty
         #endregion
 
         #region Save
+        public OperationResult Save(ClientStateInfo state, ApplicationModel model)
+        {
+            return SaveInternal(state, model);
+        }
 
         public OperationResult Save(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            return SaveInternal(state, model);
+        }
+
+        private OperationResult SaveInternal(ClientStateInfo state, ApplicationModel model)
         {
 
             if (state == null)
@@ -173,17 +189,19 @@ namespace Intwenty
             if (!state.HasData)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
 
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+
+            if (model.Application.Id != state.ApplicationId)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
+
+
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
             OperationResult result = null;
 
             try
             {
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-                if (model == null)
-                   throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
-
                 result = new OperationResult(true, MessageCode.RESULT, string.Format("Saved application {0}", model.Application.Title), state.Id, state.Version);
 
                 var validation = Validate(model, state);
@@ -393,7 +411,7 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.OwnerUserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(valuelist, parameters);
 
@@ -543,7 +561,7 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.OwnerUserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
@@ -668,7 +686,7 @@ namespace Intwenty
                 ChangedDate = DateTime.Now,
                 CreatedBy = state.UserId,
                 MetaCode = model.Application.MetaCode,
-                OwnedBy = state.OwnerUserId,
+                OwnedBy = state.UserId,
                 PerformDate = DateTime.Now,
                 Version = state.Version,
                 EndDate = DateTime.Now,
@@ -744,35 +762,49 @@ namespace Intwenty
         #endregion
 
         #region Delete
-        public OperationResult DeleteById(ClientStateInfo state)
+
+        public OperationResult Delete(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            return DeleteInternal(state, model);
+        }
+
+        public OperationResult Delete(ClientStateInfo state, ApplicationModel model)
+        {
+            return DeleteInternal(state, model);
+        }
+
+        private OperationResult DeleteInternal(ClientStateInfo state, ApplicationModel model)
         {
             OperationResult result = null;
 
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing DeleteById(state).");
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting application.");
 
             if (state.ApplicationId < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId.");
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (state.Id < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "No state.Id found when deleting application.", 0, 0);
+
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+
+            if (model.Application.Id != state.ApplicationId)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.Applicationid");
+
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
             try
             {
 
-               
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
-
-                if (state.Id < 1)
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, "No state.Id found when performing DeleteById(state).", 0, 0);
 
                 result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, 0);
 
                 client.Open();
-                //client.BeginTransaction();
+
 
                 client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
@@ -789,16 +821,15 @@ namespace Intwenty
                 client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
-                //client.CommitTransaction();
+
             }
             catch (Exception ex)
             {
-                //client.RollbackTransaction();
                 result = new OperationResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.DeleteById: " + ex.Message);
+                LogError("IntwentyDataService.Delete: " + ex.Message);
             }
             finally
             {
@@ -904,27 +935,42 @@ namespace Intwenty
         #endregion
 
         #region Lists
+
+        public OperationResult GetPagedList(ListFilter args, ApplicationModel model)
+        {
+            return GetPagedListInternal(args, model);
+        }
+
         public OperationResult GetPagedList(ListFilter args)
         {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
+            return GetPagedListInternal(args, model);
+        }
+
+        private OperationResult GetPagedListInternal(ListFilter args, ApplicationModel model)
+        {
+
+            if (args == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter args was null");
+
+            if (args.ApplicationId < 1)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
+
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+
+            if (model.Application.Id != args.ApplicationId)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
+
             OperationResult result = null;
+
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
 
             try
             {
-                if (args == null)
-                    throw new InvalidOperationException("Parameter args was null");
-
-                if (args.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter args must contain a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("args.ApplicationId {0} is not representing a valid application model", args.ApplicationId));
-
 
                 result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
-
 
                 if (args.MaxCount == 0)
                 {
@@ -1172,7 +1218,18 @@ namespace Intwenty
 
         #region GetApplication
 
+        public OperationResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model)
+        {
+            return GetLatestVersionByIdInternal(state, model);
+        }
+
         public OperationResult GetLatestVersionById(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            return GetLatestVersionByIdInternal(state, model);
+        }
+
+        private OperationResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
         {
             if (state == null)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
@@ -1180,7 +1237,11 @@ namespace Intwenty
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "Id is required when executing DefaultDbManager.GetLatestVersionById.");
             if (state.ApplicationId < 0)
                 return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
-           
+            if (model == null)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+            if (model.Application.Id != state.ApplicationId)
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
+
             OperationResult result = null;
 
             if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
@@ -1193,14 +1254,9 @@ namespace Intwenty
             try
             {
 
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-                if (model == null)
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
-
                 client.Open();
 
                 result = GetLatestVersion(model, state, client);
-             
 
                 if (result.IsSuccess)
                 {
@@ -1231,11 +1287,11 @@ namespace Intwenty
             OperationResult result = null;
 
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
-            if (string.IsNullOrEmpty(state.OwnerUserId))
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "OwnerUserId is required when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestVersionByOwnerUser.");
+            if (!state.FilterValues.Exists(p=> p.ColumnName.ToUpper() == "OWNEDBY"))
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestVersionByOwnerUser.");
             if (state.ApplicationId < 0)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionByOwnerUser.");
+                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestVersionByOwnerUser.");
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -1252,7 +1308,7 @@ namespace Intwenty
 
                 var parameters = new List<IIntwentySqlParameter>();
                 parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = state.ApplicationId });
-                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.OwnerUserId });
+                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.FilterValues.Find(p=> p.ColumnName.ToUpper() == "OWNEDBY").Value });
 
                 var maxid = client.GetScalarValue("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy", parameters: parameters.ToArray());
                 if (maxid != null && maxid != DBNull.Value)
@@ -1262,7 +1318,7 @@ namespace Intwenty
                     if (resultset.Rows.Count == 0)
                     {
                         client.Close();
-                        return new OperationResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.OwnerUserId));
+                        return new OperationResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.ColumnName.ToUpper() == "OWNEDBY").Value));
                     }
 
                     state.Id = resultset.FirstRowGetAsInt("Id").Value;
@@ -1338,6 +1394,10 @@ namespace Intwenty
                 sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
+
+                var ownedbyfilter = state.FilterValues.Find(p => p.ColumnName == "OWNEDBY");
+                if (ownedbyfilter!=null && !string.IsNullOrEmpty(ownedbyfilter.Value))
+                    sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
 
 
                 jsonresult.Append("{");

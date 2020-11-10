@@ -16,6 +16,8 @@ namespace Intwenty.Interface
         /// <returns>An OperationResult including a json object</returns>
         OperationResult CreateNew(ClientStateInfo state);
 
+        OperationResult CreateNew(ApplicationModel model);
+
 
         /// <summary>
         /// Saves application data
@@ -23,12 +25,21 @@ namespace Intwenty.Interface
         /// <returns>An OperationResult including Id and Version for the saved application</returns>
         OperationResult Save(ClientStateInfo state);
 
+        OperationResult Save(ClientStateInfo state, ApplicationModel model);
+
         /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult DeleteById(ClientStateInfo state);
+        OperationResult Delete(ClientStateInfo state);
+
+        /// <summary>
+        /// Deletes all application data (maintable and subtables) by id.
+        /// If the application uses versioning, all versions are deleted.
+        /// </summary>
+        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
+        OperationResult Delete(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
         /// Deletes data by Id
@@ -48,8 +59,10 @@ namespace Intwenty.Interface
         /// <returns>An OperationResult including a json object</returns>
         OperationResult GetLatestVersionById(ClientStateInfo state);
 
+        OperationResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model);
+
         /// <summary>
-        /// Gets the latest version of an application based on OwnerUserId and ApplicationId
+        /// Gets the latest version of the latest id for an application based on OwnerUserId and ApplicationId
         /// </summary>
         /// <returns>An OperationResult including a json object</returns>
         OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
@@ -64,6 +77,7 @@ namespace Intwenty.Interface
         /// <returns>An OperationResult including a json array and the current paging rownum</returns>
         OperationResult GetPagedList(ListFilter args);
 
+        OperationResult GetPagedList(ListFilter args, ApplicationModel model);
 
         /// <summary>
         /// Get a list of (latest version) application data. 

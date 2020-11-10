@@ -26,5 +26,6 @@ namespace Intwenty.Areas.Identity.Entity
 
         public bool CreatedWithExternalProvider { get; set; }
 
+
     }
 }

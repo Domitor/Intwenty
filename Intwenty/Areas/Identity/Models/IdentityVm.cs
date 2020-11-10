@@ -46,7 +46,9 @@ namespace Intwenty.Areas.Identity.Models
             PhoneNumberConfirmed = entity.PhoneNumberConfirmed;
             FirstName = entity.FirstName;
             LastName = entity.LastName;
-            IsBlocked = entity.LockoutEnabled && entity.LockoutEnd.HasValue && entity.LockoutEnd > DateTime.Now;
+            IsBlocked = false;
+            if (entity.LockoutEnd.HasValue)
+                IsBlocked = entity.LockoutEnabled && entity.LockoutEnd.HasValue && entity.LockoutEnd > DateTime.Now;
             MfaActive = entity.TwoFactorEnabled;
             LastLogin = entity.LastLogin;
             AccessFailedCount = entity.AccessFailedCount;

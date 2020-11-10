@@ -6,7 +6,7 @@ namespace Intwenty.Model.Dto
 {
     public class ListFilter
     {
-        public static readonly string DEFAULT_OWNERUSERID = "SYSTEM";
+        public static readonly string DEFAULT_OWNERUSERID = "INTWENTY_USER";
 
         public int ApplicationId { get; set; }
 

@@ -107,6 +107,7 @@ namespace Intwenty.Model
             }
         }
 
+ 
         public bool UseEditListViewAuthorization
         {
             get

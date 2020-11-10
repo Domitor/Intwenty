@@ -9,7 +9,6 @@ namespace Intwenty.Model.Dto
 
     public class ClientStateInfo : HashTagPropertyObject
     {
-        public static readonly string DEFAULT_USERID = "SYSTEM";
 
         public int Id { get; set; }
 
@@ -21,30 +20,18 @@ namespace Intwenty.Model.Dto
 
         public ApplicationData Data { get; set; }
 
-        private string _owneruserid { get; set; }
+        public List<FilterValue> FilterValues { get; set; }
+
 
         public ClientStateInfo()
         {
+            FilterValues = new List<FilterValue>();
             Data = new ApplicationData();
-            UserId = DEFAULT_USERID;
-            OwnerUserId = DEFAULT_USERID;
+            UserId = ListFilter.DEFAULT_OWNERUSERID;
             Properties = "";
         }
 
-        public string OwnerUserId
-        {
-            set { _owneruserid = value; }
-
-            get
-            {
-                if (_owneruserid == DEFAULT_USERID && !string.IsNullOrEmpty(UserId))
-                    return UserId;
-                else
-                    return _owneruserid;
-
-            }
-        }
-
+  
         public bool HasData
         {
             get
@@ -53,9 +40,7 @@ namespace Intwenty.Model.Dto
             }
         }
 
-      
 
-       
 
         public static ClientStateInfo CreateFromJSON(System.Text.Json.JsonElement model)
         {
@@ -64,7 +49,7 @@ namespace Intwenty.Model.Dto
             state.ApplicationId = state.Data.ApplicationId;
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
-            state.OwnerUserId = state.Data.OwnerUserId;
+            state.UserId = state.Data.OwnerUserId;
             return state;
         }
 

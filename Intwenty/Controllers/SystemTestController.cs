@@ -420,13 +420,14 @@ namespace Intwenty.Controllers
                     var state = new ClientStateInfo();
                     state.ApplicationId = 10000;
                     state.UserId = "TESTUSER";
-                    state.OwnerUserId = "TESTUSER";
+                    state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "TESTUSER" });
+
                     if (i > 25)
-                        state.OwnerUserId = "OTHERUSER";
+                        state.FilterValues[0].Value = "OTHERUSER";
                     if (i > 50)
-                        state.OwnerUserId = "OTHERUSER1";
+                        state.FilterValues[0].Value = "OTHERUSER1";
                     if (i > 75)
-                        state.OwnerUserId = "OTHERUSER2";
+                        state.FilterValues[0].Value = "OTHERUSER2";
 
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
@@ -532,7 +533,7 @@ namespace Intwenty.Controllers
             {
                 var state = new ClientStateInfo();
                 state.ApplicationId = 10000;
-                state.OwnerUserId = "OTHERUSER";
+                state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "TESTUSER" });
                 var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
@@ -562,7 +563,7 @@ namespace Intwenty.Controllers
             {
                 var state = new ClientStateInfo();
                 state.ApplicationId = 10000;
-                state.OwnerUserId = "OTHERUSER";
+                state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "OTHERUSER" });
                 var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
@@ -571,7 +572,7 @@ namespace Intwenty.Controllers
                 if (!newstate.Data.HasData)
                     throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
 
-                newstate.OwnerUserId = "OTHERUSER2";
+                newstate.UserId = "OTHERUSER2";
                 newstate.Data.SetValue("Description", "Updated test application");
                 newstate.Data.SetValue("DecValue", 333.777M);
                 newstate.Data.SetValue("DecValue2", 444.55);
@@ -638,7 +639,7 @@ namespace Intwenty.Controllers
             {
                 var state = new ClientStateInfo();
                 state.ApplicationId = 10000;
-                state.OwnerUserId = "OTHERUSER";
+                state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "OTHERUSER" });
                 var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
@@ -660,7 +661,7 @@ namespace Intwenty.Controllers
                 if (appdata.SubTables[0].Rows.Count != 2)
                     throw new InvalidOperationException("The deleted subtable row was returned when using IntwentyDataService.GetLatestVersionById(state)");
 
-                var deleteresult = _dataservice.DeleteById(newstate);
+                var deleteresult = _dataservice.Delete(newstate);
                 if (!deleteresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(state) failed: " + deleteresult.SystemError);
 
@@ -813,7 +814,7 @@ namespace Intwenty.Controllers
 
                 var state = new ClientStateInfo();
                 state.ApplicationId = 10000;
-                state.OwnerUserId = "TESTUSER";
+                state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = "TESTUSER" });
                 var getresult = _dataservice.GetLatestVersionByOwnerUser(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
