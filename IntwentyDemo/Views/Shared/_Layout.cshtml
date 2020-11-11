@@ -43,6 +43,11 @@
                         {
                             @await Html.PartialAsync("_IntwentyAdminMenu")
                         }
+
+                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN") || User.IsInRole("APIUSER"))
+                        {
+                            @await Html.PartialAsync("_IntwentyAPIMenu")
+                        }
                     }
 
 

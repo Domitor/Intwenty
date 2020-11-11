@@ -5,7 +5,7 @@
     var systems = new List<SystemModelItem>();
     var menutitle = "Applications";
     var apps = ModelRepository.GetAuthorizedApplicationModels(User);
-    var menuobjects = ModelRepository.GetMenuModels();
+    var menuobjects = ModelRepository.GetLocalizedMenuModels();
     var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
     if (mainmenu != null)
     {
@@ -16,7 +16,7 @@
     {
         if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))
         {
-            if (a.SystemInfo != null)
+            if (a.SystemInfo != null && menuobjects.Exists(p=> p.SystemMetaCode == a.SystemMetaCode))
             {
                 systems.Add(a.SystemInfo);
             }
@@ -34,14 +34,21 @@
     <div class="dropdown-menu">
         @{
 
+
             if (mainmenu == null)
             {
                 return;
             }
 
-
+            var cnt = 0;
             foreach (var sys in systems)
             {
+                if (cnt > 0)
+                {
+                    <div class="dropdown-divider"></div>
+                }
+                <div class="dropdown-item"><strong>@sys.Title</strong></div>
+                <div class="dropdown-divider"></div>
                 foreach (var menuitem in menuobjects.Where(p => p.IsMetaTypeMenuItem && p.ParentMetaCode == mainmenu.MetaCode && p.SystemMetaCode == sys.MetaCode))
                 {
                     if (menuitem.Application != null && apps.Exists(p => p.MetaCode == menuitem.Application.MetaCode))
@@ -50,7 +57,6 @@
                     }
                     else
                     {
-
                         if (menuitem.Application == null)
                         {
                             <a class="dropdown-item" asp-controller="@menuitem.Controller" asp-action="@menuitem.Action">@menuitem.Title</a>
@@ -59,10 +65,11 @@
                     }
                 }
 
-                <hr />
-
+                cnt++;
             }
 
         }
+
+
     </div>
 </li>

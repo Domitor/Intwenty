@@ -18,7 +18,7 @@ namespace Intwenty.Interface
         /// <summary>
         /// Returns application models that the current user has permission to use
         /// </summary>
-        public List<ApplicationModelItem> GetAuthorizedApplicationsModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission);
+        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission);
 
         /// <summary>
         /// Returns application models that the current user has permission to use
@@ -28,7 +28,7 @@ namespace Intwenty.Interface
         /// <summary>
         /// Returns system models that the current user has permission to use
         /// </summary>
-        public List<SystemModelItem> GetAuthorizedSystemsModels(ClaimsPrincipal claimprincipal);
+        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal);
 
         /// <summary>
         /// Get a complete system model, used for export model

@@ -29,14 +29,38 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
-        public IActionResult Create()
+      
+
+        public IActionResult GetList()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
+
+        [HttpGet("/Model/Create")]
+        public IActionResult Create()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            return View();
+        }
+
 
         [HttpGet("/Model/Edit/{applicationid}")]
         public IActionResult Edit(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             ViewBag.SystemId = Convert.ToString(applicationid);
             return View();
         }
@@ -44,13 +68,35 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/EditDB/{applicationid}")]
         public IActionResult EditDB(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             ViewBag.SystemId = Convert.ToString(applicationid);
             return View();
         }
 
+
+        public IActionResult EditMainMenu()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            return View();
+        }
+
+
         [HttpGet("/Model/EditUI/{applicationid}/{viewtype}")]
         public IActionResult EditUI(int applicationid, string viewtype)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             ViewBag.SystemId = Convert.ToString(applicationid);
             ViewBag.ViewType = viewtype;
             return View();
@@ -58,56 +104,74 @@ namespace Intwenty.Controllers
 
         public IActionResult EditTranslations()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
         public IActionResult EditEndpoints()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
         public IActionResult EditDataviews()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
         public IActionResult EditValueDomains()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
-        [Obsolete]
-        public IActionResult EditNoSeries()
-        {
-            return View();
-        }
-
-        public IActionResult EditMainMenu()
-        {
-            return View();
-        }
-
-
-
-        public IActionResult GetList()
-        {
-            return View();
-        }
 
 
         public IActionResult ToolConfigureDatabase()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
         public IActionResult ToolValidateModel()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var res = ModelRepository.ValidateModel();
             return View(res);
         }
 
         public IActionResult ToolModelDocumentation()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var client = DataRepository.GetDataClient();
             var dbtypemap = client.GetDbTypeMap();
             var res = new List<ApplicationModel>();
@@ -124,18 +188,25 @@ namespace Intwenty.Controllers
             return View(appmodels);
         }
 
-        public IActionResult ToolGenerateTestData()
-        {
-            return View();
-        }
+    
 
         public IActionResult ImportModel()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
         public IActionResult ImportData()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             return View();
         }
 
@@ -145,9 +216,7 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             if (!User.IsInRole("SUPERADMIN") && !User.IsInRole("USERADMIN"))
-            {
                 return Forbid();
-            }
 
             ViewBag.SystemId = id;
             return View();

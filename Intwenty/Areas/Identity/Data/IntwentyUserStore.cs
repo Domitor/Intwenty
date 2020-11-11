@@ -3,6 +3,7 @@ using Intwenty.Areas.Identity.Pages.Account;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -19,9 +20,16 @@ namespace Intwenty.Areas.Identity.Data
     {
         private IntwentySettings Settings { get; }
 
-        public IntwentyUserStore(IOptions<IntwentySettings> settings)
+        private IMemoryCache UserCache { get; }
+
+        private static readonly string UserRolesCacheKey = "USERROLES";
+
+        private static readonly string RolesCacheKey = "SYSROLES";
+
+        public IntwentyUserStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             Settings = settings.Value;
+            UserCache = cache;
         }
 
         public Task<IdentityResult> CreateAsync(IntwentyUser user, CancellationToken cancellationToken)
@@ -196,6 +204,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
+
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
@@ -224,12 +234,21 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            IList<string> result = new List<string>();
+            IList<string> result = null;
+
+            if (UserCache.TryGetValue(UserRolesCacheKey + "_" + user.Id, out result))
+            {
+                return Task.FromResult(result);
+            }
+
+            result = new List<string>();
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var userroles = client.GetEntities<IntwentyUserRole>();
-            var roles = client.GetEntities<IntwentyRole>();
             client.Close();
+
+            var roles = GetRoles();
+
             foreach (var ur in userroles)
             {
                 if (ur.UserId == user.Id)
@@ -246,6 +265,8 @@ namespace Intwenty.Areas.Identity.Data
 
             }
 
+            UserCache.Set(UserRolesCacheKey + "_" + user.Id, result);
+
             return Task.FromResult(result);
         }
 
@@ -259,8 +280,10 @@ namespace Intwenty.Areas.Identity.Data
             client.Open();
             var userroles = client.GetEntities<IntwentyUserRole>();
             var users = client.GetEntities<IntwentyUser>();
-            var roles = client.GetEntities<IntwentyRole>();
             client.Close();
+
+            var roles = GetRoles();
+
             foreach (var ur in userroles)
             {
                 var role = roles.Find(p => p.Id == ur.RoleId);
@@ -298,6 +321,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
+
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
@@ -316,6 +341,26 @@ namespace Intwenty.Areas.Identity.Data
             client.Close();
 
             return Task.CompletedTask;
+        }
+
+        public List<IntwentyRole> GetRoles()
+        {
+            List <IntwentyRole> res = null;
+
+            if (UserCache.TryGetValue(RolesCacheKey, out res))
+            {
+                return res;
+            }
+
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var roles = client.GetEntities<IntwentyRole>();
+            client.Close();
+
+            UserCache.Set(RolesCacheKey, roles);
+
+            return roles;
+
         }
 
         public Task SetPhoneNumberAsync(IntwentyUser user, string phoneNumber, CancellationToken cancellationToken)

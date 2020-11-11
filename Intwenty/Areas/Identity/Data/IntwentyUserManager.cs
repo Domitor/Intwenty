@@ -51,6 +51,19 @@ namespace Intwenty.Areas.Identity.Data
 
             return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Title, permission.Read, permission.Modify, permission.Delete);
         }
+
+        public Task<IdentityResult> AddUpdateUserPermissionAsync(ClaimsPrincipal claimprincipal, IntwentyUserPermissionItem permission)
+        {
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return Task.FromResult(IdentityResult.Failed());
+
+            var user = GetUserAsync(claimprincipal).Result;
+            if (user == null || permission == null)
+                throw new InvalidOperationException("Error when adding / updating a permission.");
+
+            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Title, permission.Read, permission.Modify, permission.Delete);
+        }
+
         public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, string title, bool read, bool modify, bool delete)
         {
             if (user == null)

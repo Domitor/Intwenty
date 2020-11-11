@@ -26,7 +26,6 @@ namespace Intwenty.Controllers
     {
         public IIntwentyDataService DataRepository { get; }
         public IIntwentyModelService ModelRepository { get; }
-
         private IntwentyUserManager UserManager { get; }
 
         public ModelAPIController(IIntwentyDataService ms, IIntwentyModelService sr, IntwentyUserManager usermanager)
@@ -42,20 +41,27 @@ namespace Intwenty.Controllers
         /// Get endpoints
         /// </summary>
         [HttpGet("/Model/API/GetSystems")]
-        public JsonResult GetSystems()
+        public IActionResult GetSystems()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
 
-            var res = ModelRepository.GetSystemModels();
+            var res = ModelRepository.GetAuthorizedSystemModels(User);
             return new JsonResult(res);
 
         }
 
 
-
-
         [HttpPost("/Model/API/SaveSystem")]
-        public JsonResult SaveEndpoints([FromBody] SystemModelItem model)
+        public IActionResult SaveSystem([FromBody] SystemModelItem model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.SaveSystemModel(model);
@@ -74,8 +80,13 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/DeleteSystem")]
-        public JsonResult DeleteSystem([FromBody] SystemModelItem model)
+        public IActionResult DeleteSystem([FromBody] SystemModelItem model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                
@@ -84,7 +95,7 @@ namespace Intwenty.Controllers
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting an endpoint.");
+                r.SetError(ex.Message, "An error occured when deleting a system.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
@@ -101,8 +112,13 @@ namespace Intwenty.Controllers
         /// Get full model data for application with id
         /// </summary>
         [HttpGet("/Model/API/GetApplication/{applicationid}")]
-        public JsonResult GetApplication(int applicationid)
+        public IActionResult GetApplication(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(t.Application);
 
@@ -112,18 +128,35 @@ namespace Intwenty.Controllers
         /// Get model data for applications
         /// </summary>
         [HttpGet("/Model/API/GetApplications")]
-        public JsonResult GetApplications()
+        public IActionResult GetApplications()
         {
-            var t = ModelRepository.GetAppModels();
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var t = ModelRepository.GetAuthorizedApplicationModels(User);
             return new JsonResult(t);
 
         }
 
 
         [HttpPost("/Model/API/Save")]
-        public JsonResult Save([FromBody] ApplicationModelItem model)
+        public IActionResult Save([FromBody] ApplicationModelItem model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var res = ModelRepository.SaveAppModel(model);
+            if (res.IsSuccess)
+            {
+                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == res.Id);
+                if (t!=null)
+                     UserManager.AddUpdateUserPermissionAsync(User, new IntwentyUserPermissionItem() { Read = true, MetaCode = t.Application.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, Title = t.Application.Title  });
+            }
+
             return new JsonResult(res);
         }
 
@@ -131,8 +164,14 @@ namespace Intwenty.Controllers
         /// Delete model data for application
         /// </summary>
         [HttpPost("/Model/API/DeleteApplicationModel")]
-        public JsonResult DeleteApplicationModel([FromBody] ApplicationModelItem model)
+        public IActionResult DeleteApplicationModel([FromBody] ApplicationModelItem model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.DeleteAppModel(model);
@@ -156,8 +195,13 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/SaveDatabaseModels")]
-        public JsonResult SaveDatabaseModels([FromBody] DBVm model)
+        public IActionResult SaveDatabaseModels([FromBody] DBVm model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 if (model.Id < 1)
@@ -186,8 +230,13 @@ namespace Intwenty.Controllers
         /// Removes one database object (column / table) from the UI meta data collection
         /// </summary>
         [HttpPost("/Model/API/DeleteDatabaseModel")]
-        public JsonResult DeleteDatabaseModel([FromBody] DatabaseTableColumnVm model)
+        public IActionResult DeleteDatabaseModel([FromBody] DatabaseTableColumnVm model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 if (model.Id < 1)
@@ -214,8 +263,12 @@ namespace Intwenty.Controllers
         /// Get database model for application tables for application with id
         /// </summary>
         [HttpGet("/Model/API/GetDatabaseModels/{applicationid}")]
-        public JsonResult GetDatabaseModels(int applicationid)
+        public IActionResult GetDatabaseModels(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
 
             try
             {
@@ -242,8 +295,13 @@ namespace Intwenty.Controllers
         /// Get meta data for available datatypes
         /// </summary>
         [HttpGet("/Model/API/GetIntwentyDataTypes")]
-        public JsonResult GetIntwentyDataTypes()
+        public IActionResult GetIntwentyDataTypes()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = new DatabaseModelItem();
             return new JsonResult(DatabaseModelItem.GetAvailableDataTypes());
 
@@ -253,8 +311,13 @@ namespace Intwenty.Controllers
         /// Get model data for application tables for application with id
         /// </summary>
         [HttpGet("/Model/API/GetDatabaseTables/{applicationid}")]
-        public JsonResult GetDatabaseTables(int applicationid)
+        public IActionResult GetDatabaseTables(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(DatabaseModelCreator.GetDatabaseTableVm(t));
 
@@ -264,8 +327,13 @@ namespace Intwenty.Controllers
         /// Get model data for application tables for application with id
         /// </summary>
         [HttpGet("/Model/API/GetListviewTable/{applicationid}")]
-        public JsonResult GetListviewTable(int applicationid)
+        public IActionResult GetListviewTable(int applicationid)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             return new JsonResult(DatabaseModelCreator.GetListViewTableVm(t));
 
@@ -280,8 +348,13 @@ namespace Intwenty.Controllers
         /// Get meta data for data views
         /// </summary>
         [HttpGet("/Model/API/GetDataViewModels")]
-        public JsonResult GetDataViewModels()
+        public IActionResult GetDataViewModels()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetDataViewModels();
             var model = DataViewModelCreator.GetDataViewModelVm(t);
             model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
@@ -292,8 +365,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/SaveDataViewModels")]
-        public JsonResult SaveDataViewModels([FromBody] DataViewVm model)
+        public IActionResult SaveDataViewModels([FromBody] DataViewVm model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
 
@@ -315,8 +394,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/DeleteDataViewModel")]
-        public JsonResult DeleteDataViewModel([FromBody] DataViewVm model)
+        public IActionResult DeleteDataViewModel([FromBody] DataViewVm model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.DeleteDataViewModel(model.Id);
@@ -343,8 +428,13 @@ namespace Intwenty.Controllers
         /// Get UI view model for application with id and the viewtype
         /// </summary>
         [HttpGet("/Model/API/GetApplicationUI/{applicationid}/{viewtype}")]
-        public JsonResult GetApplicationUI(int applicationid, string viewtype)
+        public IActionResult GetApplicationUI(int applicationid, string viewtype)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             var model = UIModelCreator.GetUIVm(t, viewtype);
             return new JsonResult(model);
@@ -352,8 +442,13 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("/Model/API/SaveUserInterfaceModel")]
-        public JsonResult SaveUserInterfaceModel([FromBody] ViewVm model)
+        public IActionResult SaveUserInterfaceModel([FromBody] ViewVm model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 if (model.ApplicationId < 1)
@@ -386,8 +481,13 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("/Model/API/SaveListViewModel")]
-        public JsonResult SaveListViewModel([FromBody] ViewVm model)
+        public IActionResult SaveListViewModel([FromBody] ViewVm model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
 
@@ -427,8 +527,13 @@ namespace Intwenty.Controllers
         /// Get meta data for application ui declarations for application with id
         /// </summary>
         [HttpGet("/Model/API/GetValueDomains")]
-        public JsonResult GetValueDomains()
+        public IActionResult GetValueDomains()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetValueDomains();
             return new JsonResult(t);
 
@@ -438,16 +543,26 @@ namespace Intwenty.Controllers
         /// Get meta data for application ui declarations for application with id
         /// </summary>
         [HttpGet("/Model/API/GetValueDomainNames")]
-        public JsonResult GetValueDomainNames()
+        public IActionResult GetValueDomainNames()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetValueDomains();
             return new JsonResult(t.Select(p => p.DomainName).Distinct());
 
         }
 
         [HttpPost("/Model/API/SaveValueDomains")]
-        public JsonResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)
+        public IActionResult SaveValueDomains([FromBody] List<ValueDomainModelItem> model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.SaveValueDomains(model);
@@ -466,8 +581,13 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/RemoveValueDomain")]
-        public JsonResult RemoveValueDomain([FromBody] ValueDomainModelItem model)
+        public IActionResult RemoveValueDomain([FromBody] ValueDomainModelItem model)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 if (model.Id < 1)
@@ -499,6 +619,11 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/ExportModel")]
         public IActionResult ExportModel()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetExportModel();
             var json = System.Text.Json.JsonSerializer.Serialize(t);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
@@ -506,8 +631,13 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("/Model/API/UploadModel")]
-        public async Task<JsonResult> UploadModel(IFormFile file, bool delete)
+        public async Task<IActionResult> UploadModel(IFormFile file, bool delete)
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var result = new OperationResult();
 
             try
@@ -539,30 +669,35 @@ namespace Intwenty.Controllers
         [HttpGet("/Model/API/ExportData")]
         public IActionResult ExportData()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var client = DataRepository.GetDataClient();
             var data = new StringBuilder("{\"IntwentyData\":[");
 
             try
             {
-                var apps = ModelRepository.GetApplicationModels();
+                var apps = ModelRepository.GetAuthorizedApplicationModels(User);
                 var sep = "";
                 foreach (var app in apps)
                 {
                     client.Open();
-                    var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Application.Id);
+                    var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Id);
                     client.Close();
 
                     foreach (var istat in infostatuslist)
                     {
                         data.Append(sep + "{");
-                        data.Append(DBHelpers.GetJSONValue("ApplicationId", app.Application.Id));
-                        data.Append("," + DBHelpers.GetJSONValue("AppMetaCode", app.Application.MetaCode));
-                        data.Append("," + DBHelpers.GetJSONValue("DbName", app.Application.DbName));
+                        data.Append(DBHelpers.GetJSONValue("ApplicationId", app.Id));
+                        data.Append("," + DBHelpers.GetJSONValue("AppMetaCode", app.MetaCode));
+                        data.Append("," + DBHelpers.GetJSONValue("DbName", app.DbName));
                         data.Append("," + DBHelpers.GetJSONValue("Id", istat.Id));
                         data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
                         data.Append(",\"ApplicationData\":");
 
-                        var state = new ClientStateInfo() { ApplicationId = app.Application.Id, Id = istat.Id, Version = istat.Version };
+                        var state = new ClientStateInfo() { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
                         var appversiondata = DataRepository.GetLatestVersionById(state);
                         data.Append(appversiondata.Data);
                         data.Append("}");
@@ -593,12 +728,19 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/UploadData")]
-        public async Task<JsonResult> UploadData(IFormFile file, bool delete)
+        public async Task<IActionResult> UploadData(IFormFile file, bool delete)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var result = new OperationResult();
 
             try
             {
+                var authapps = ModelRepository.GetAuthorizedApplicationModels(User);
                 int savefail = 0;
                 int savesuccess= 0;
                 string fileContents;
@@ -608,7 +750,6 @@ namespace Intwenty.Controllers
                     fileContents = await reader.ReadToEndAsync();
                 }
 
-                var apps = ModelRepository.GetApplicationModels();
                 var json = System.Text.Json.JsonDocument.Parse(fileContents).RootElement;
                 var rootobject = json.EnumerateObject();
                 foreach (var attr in rootobject)
@@ -619,19 +760,19 @@ namespace Intwenty.Controllers
                         var jsonarr = attr.Value.EnumerateArray();
                         foreach (var rec in jsonarr)
                         {
-                            ApplicationModel app = null;
+                            ApplicationModelItem app = null;
                             var istatobject = rec.EnumerateObject();
                             foreach (var istat in istatobject)
                             {
                                 if (istat.Name == "ApplicationId")
-                                    app = apps.Find(p => p.Application.Id == istat.Value.GetInt32());
+                                    app = authapps.Find(p => p.Id == istat.Value.GetInt32());
 
                                 if (istat.Name == "ApplicationData" && app!=null)
                                 {
                                     var state = ClientStateInfo.CreateFromJSON(istat.Value);
                                     state.Id = 0;
                                     state.Version = 0;
-                                    state.ApplicationId = app.Application.Id;
+                                    state.ApplicationId = app.Id;
                                     state.AddUpdateProperty("ISIMPORT", "TRUE");
                                     if (state.HasData)
                                         state.Data.RemoveKeyValues();
@@ -676,8 +817,14 @@ namespace Intwenty.Controllers
         /// Get translations
         /// </summary>
         [HttpGet("/Model/API/GetTranslations")]
-        public JsonResult GetTranslations()
+        public IActionResult GetTranslations()
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var t = ModelRepository.GetTranslations();
             var res = new JsonResult(t);
             return res;
@@ -686,8 +833,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/SaveTranslations")]
-        public JsonResult SaveTranslations([FromBody] List<TranslationModelItem> model)
+        public IActionResult SaveTranslations([FromBody] List<TranslationModelItem> model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.SaveTranslations(model);
@@ -706,8 +859,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/DeleteTranslation")]
-        public JsonResult DeleteTranslation([FromBody] TranslationModelItem model)
+        public IActionResult DeleteTranslation([FromBody] TranslationModelItem model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.DeleteTranslation(model.Id);
@@ -733,8 +892,14 @@ namespace Intwenty.Controllers
         /// Get endpoints
         /// </summary>
         [HttpGet("/Model/API/GetEndpoints")]
-        public JsonResult GetEndpoints()
+        public IActionResult GetEndpoints()
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var res = new EndpointManagementVm();
 
             res.Endpoints = new List<EndpointVm>();
@@ -773,8 +938,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/SaveEndpoints")]
-        public JsonResult SaveEndpoints([FromBody] List<EndpointVm> model)
+        public IActionResult SaveEndpoints([FromBody] List<EndpointVm> model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 var list = new List<EndpointModelItem>();
@@ -797,8 +968,14 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/DeleteEndpoint")]
-        public JsonResult DeleteEndpoint([FromBody] EndpointModelItem model)
+        public IActionResult DeleteEndpoint([FromBody] EndpointModelItem model)
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             try
             {
                 ModelRepository.DeleteEndpointModel(model.Id);
@@ -866,7 +1043,6 @@ namespace Intwenty.Controllers
                ,new IntwentyUserRoleItem() { RoleName="USER" }
             });
 
-
          
             if (!User.IsInRole("SUPERADMIN"))
             {
@@ -876,7 +1052,6 @@ namespace Intwenty.Controllers
                     if (a.SystemInfo == null)
                         continue;
 
-                   
                     res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.MetaCode, a.Title));
                     if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.SystemInfo.MetaCode))
                         res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.SystemInfo.MetaCode, a.SystemInfo.Title));
@@ -897,7 +1072,8 @@ namespace Intwenty.Controllers
 
                     res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.MetaCode, a.Title));
                     if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.SystemInfo.MetaCode))
-                        res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.SystemInfo.MetaCode, a.SystemInfo.Title));
+                         res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.SystemInfo.MetaCode, a.SystemInfo.Title));
+
                 }
 
             }
@@ -982,30 +1158,44 @@ namespace Intwenty.Controllers
         }
 
 
-    #endregion
+        #endregion
 
-    /// <summary>
-    /// Get menu items
-    /// </summary>
-    [HttpGet("/Model/API/GetMenuModelItems")]
-        public JsonResult GetMenuModelItems()
+        #region Menu models
+
+        /// <summary>
+        /// Get menu items
+        /// </summary>
+        [HttpGet("/Model/API/GetMenuModelItems")]
+        public IActionResult GetMenuModelItems()
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+
             var t = ModelRepository.GetMenuModels();
             return new JsonResult(t.Where(p=> p.IsMetaTypeMenuItem));
 
         }
 
-      
+        #endregion
 
+        #region Tools
         /// <summary>
         /// Configure the database according to the model
         /// </summary>
         [HttpPost("/Model/API/RunDatabaseConfiguration")]
-        public JsonResult RunDatabaseConfiguration()
+        public IActionResult RunDatabaseConfiguration()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
             var res = ModelRepository.ConfigureDatabase();
             return new JsonResult(res);
         }
+
+        #endregion
 
 
     }

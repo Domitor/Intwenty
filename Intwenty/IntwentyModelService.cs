@@ -370,11 +370,11 @@ namespace Intwenty
 
         }
 
-        public List<SystemModelItem> GetAuthorizedSystemsModels(ClaimsPrincipal claimprincipal)
+        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal)
         {
             var res = new List<SystemModelItem>();
             var systems = GetSystemModels();
-            var auth_apps = GetAuthorizedApplicationsModels(claimprincipal, IntwentyPermission.Read);
+            var auth_apps = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
 
             foreach (var s in systems)
             {
@@ -387,10 +387,10 @@ namespace Intwenty
 
         public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
         {
-            return GetAuthorizedApplicationsModels(claimprincipal, IntwentyPermission.Read);
+            return GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
         }
 
-        public List<ApplicationModelItem> GetAuthorizedApplicationsModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission)
+        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission)
         {
             var res = new List<ApplicationModelItem>();
             if (!claimprincipal.Identity.IsAuthenticated)
@@ -405,7 +405,6 @@ namespace Intwenty
                 return apps;
 
             var list = UserManager.GetUserPermissions(user).Result;
-
 
             foreach (var a in apps)
             {
@@ -446,9 +445,7 @@ namespace Intwenty
             }
 
 
-
             return res;
-
 
 
         }
@@ -591,7 +588,13 @@ namespace Intwenty
 
             Client.DeleteEntity(existing);
 
+            var permissions = Client.GetEntities<IntwentyUserPermission>().Where(p => p.MetaCode == existing.MetaCode && p.PermissionType == ApplicationModelItem.MetaTypeApplication);
+            if (permissions != null && permissions.Count() > 0)
+                Client.DeleteEntities(permissions);
+
             Client.Close();
+
+         
 
             ModelCache.Remove(AppModelCacheKey);
             ModelCache.Remove(AppModelItemsCacheKey);
@@ -679,7 +682,7 @@ namespace Intwenty
                 Client.Close();
 
               
-                return new OperationResult(true, MessageCode.RESULT, "A new application model was inserted.");
+                return new OperationResult(true, MessageCode.RESULT, "A new application model was inserted.", entity.Id);
 
             }
             else
@@ -703,7 +706,7 @@ namespace Intwenty
                 Client.UpdateEntity(entity);
                 Client.Close();
 
-                return new OperationResult(true, MessageCode.RESULT, "Application model updated.");
+                return new OperationResult(true, MessageCode.RESULT, "Application model updated.", entity.Id);
 
             }
 
