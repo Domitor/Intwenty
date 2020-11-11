@@ -1172,12 +1172,12 @@ namespace Intwenty.Controllers
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
 
-            var allmenuitems = ModelRepository.GetMenuModels().Where(p=> !p.IsMetaTypeMainMenu);
+            var allmenuitems = ModelRepository.GetMenuModels();
 
             var res = new MenuManagementVm();
             res.Applications = ModelRepository.GetAuthorizedApplicationModels(User);
             res.Systems = ModelRepository.GetAuthorizedSystemModels(User);
-            res.MenuMetaTypes = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.Code == MenuModelItem.MetaTypeMenuItem || p.Code == MenuModelItem.MetaTypeSubMenuItem).ToList();
+            res.MenuMetaTypes = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.Code == MenuModelItem.MetaTypeMenuItem || p.Code == MenuModelItem.MetaTypeSubMenuItem || p.Code == MenuModelItem.MetaTypeMainMenu).ToList();
             res.MenuItems = allmenuitems.Select(p=> MenuVm.CreateMenuVm(p)).Where(p => res.Systems.Exists(x => x.MetaCode == p.SystemMetaCode)).ToList();
 
             return new JsonResult(res);

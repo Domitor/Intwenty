@@ -46,13 +46,13 @@
         <thead>
             <tr>
                 <th style="width:10%">System <span style="color: red"> *</span></th>
-                <th style="width:15%">Title <span style="color: red"> *</span></th>
-                <th style="width:15%">Type <span style="color: red"> *</span></th>
-                <th style="width:15%">Parent <span style="color: red"> *</span></th>
-                <th style="width:10%">Application <span style="color: red"></span></th>
-                <th style="width:10%">Controller <span style="color: red"></span></th>
-                <th style="width:10%">Action <span style="color: red"></span></th>
-                <th style="width:10%">Order <span style="color: red"></span></th>
+                <th style="width:16%">Title <span style="color: red"> *</span></th>
+                <th style="width:16%">Type <span style="color: red"> *</span></th>
+                <th style="width:10%">Parent <span style="color: red"> *</span></th>
+                <th style="width:16%">Application <span style="color: red"></span></th>
+                <th style="width:12%">Controller <span style="color: red"></span></th>
+                <th style="width:12%">Action <span style="color: red"></span></th>
+                <th style="width:8%">Order <span style="color: red"></span></th>
                 <th style="width:5%"></th>
             </tr>
         </thead>
@@ -74,21 +74,22 @@
 
                 <td>
                     <select v-model="entry.parentMetaCode" class="form-control form-control-sm" v-on:change="markChanged(entry)">
+                        <option  value="ROOT">Root</option>
                         <option v-for="mi in submenus" v-bind:value="mi.metaCode">{{mi.title}}</option>
                     </select>
                 </td>
 
                 <td>
-                    <select v-model="entry.appMetaCode" class="form-control form-control-sm" v-on:change="markChanged(entry)">
+                    <select v-model="entry.appMetaCode" class="form-control form-control-sm" v-on:change="markChanged(entry)" :disabled="entry.metaType!='MENUITEM'" >
                         <option v-for="app in model.applications" v-bind:value="app.metaCode">{{app.title}}</option>
                     </select>
                 </td>
 
-                <td><input type="text" class="form-control form-control-sm" v-model="entry.controller" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.controller" :disabled="entry.metaType!='MENUITEM'" /></td>
 
-                <td><input type="text" class="form-control form-control-sm" v-model="entry.action" /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="entry.action" :disabled="entry.metaType!='MENUITEM'" /></td>
 
-                <td><input type="number" class="form-control form-control-sm" v-model="entry.orderNo" /></td>
+                <td><input type="number" class="form-control form-control-sm" v-model="entry.orderNo" :disabled="entry.metaType!='MENUITEM'" /></td>
 
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteMenuItem(entry)"><span class="glyphicon glyphicon-remove"></span> Delete</div></td>
             </tr>
@@ -108,14 +109,16 @@
             el: '#app',
             data:
             {
-                model: { modelSaved:false }
+                model: { modelSaved: false },
+                newcounter: 1
 
             },
             methods: {
 
                 addMenuItem: function ()
                 {
-                    this.model.menuItems.push({ id: -1, action: "", controller: "", title: "", metaType:"", parentMetaType:"", orderNo:0, systemMetaCode:""});
+                    this.newcounter++;
+                    this.model.menuItems.push({ id: -1, action: "", controller: "", title: "", metaType:"", parentMetaType:"ROOT", orderNo:0, systemMetaCode:"", metaCode:"NEW"+this.newcounter});
                 },
                 deleteMenuItem: function (entry)
                 {
@@ -160,12 +163,7 @@
             {
                 submenus: function ()
                 {
-               
-                    for (var i = 0; i < this.model.menuItems.length; i++)
-                        if (this.model.menuItems[i].metaType == "SUBMENUITEM")
-                            res.push(this.model.menuItems[i]);
-
-                    return res;
+                    return this.model.menuItems.filter(p => p.metaType != "MENUITEM");
                 }
 
 
