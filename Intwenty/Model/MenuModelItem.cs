@@ -10,6 +10,7 @@ namespace Intwenty.Model
         //META TYPES
         public static readonly string MetaTypeMainMenu = "MAINMENU";
         public static readonly string MetaTypeMenuItem = "MENUITEM";
+        public static readonly string MetaTypeSubMenuItem = "SUBMENUITEM";
 
         public MenuModelItem()
         {
@@ -60,6 +61,11 @@ namespace Intwenty.Model
         }
 
         public bool IsMetaTypeMenuItem
+        {
+            get { return MetaType == MetaTypeMenuItem; }
+        }
+
+        public bool IsSubMenuItem
         {
             get { return MetaType == MetaTypeMenuItem; }
         }
