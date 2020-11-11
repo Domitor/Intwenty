@@ -3,6 +3,7 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,6 +21,10 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
+        private IMemoryCache UserCache { get; }
+
+        private static readonly string PermissionCacheKey = "USERPERM";
+
         public IntwentyUserManager(IUserStore<IntwentyUser> store, 
                                    IOptions<IdentityOptions> optionsAccessor, 
                                    IPasswordHasher<IntwentyUser> passwordHasher, 
@@ -29,10 +34,12 @@ namespace Intwenty.Areas.Identity.Data
                                    IdentityErrorDescriber errors, 
                                    IServiceProvider services, 
                                    ILogger<UserManager<IntwentyUser>> logger,
-                                   IOptions<IntwentySettings> settings)
+                                   IOptions<IntwentySettings> settings,
+                                   IMemoryCache cache)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             Settings = settings.Value;
+            UserCache = cache;
         }
 
         #region Intwenty Permissions
@@ -48,6 +55,8 @@ namespace Intwenty.Areas.Identity.Data
         {
             if (user == null)
                 throw new InvalidOperationException("Error when adding permission to user.");
+
+            UserCache.Remove(PermissionCacheKey + "_" + user.Id);
 
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
@@ -98,6 +107,8 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null)
                 throw new InvalidOperationException("Error when removing permission from user.");
 
+            UserCache.Remove(PermissionCacheKey + "_" + user.Id);
+
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
@@ -117,15 +128,34 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null)
                 throw new InvalidOperationException("Error when fetching user permissions.");
 
+            List<IntwentyUserPermissionItem> res = null;
+
+            if (UserCache.TryGetValue(PermissionCacheKey + "_" + user.Id, out res))
+            {
+                Task.FromResult(res);
+            }
+
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).Select(p=> new IntwentyUserPermissionItem(p)).ToList();
             client.Close();
 
+            UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
+
             return Task.FromResult(list);
         }
 
         public bool HasPermission(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
+        {
+            return HasPermissionInternal(claimprincipal, requested_app.Application, requested_action);
+        }
+
+        public bool HasPermission(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        {
+            return HasPermissionInternal(claimprincipal, requested_app, requested_action);
+        }
+
+        public bool HasPermissionInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
         {
             if (!claimprincipal.Identity.IsAuthenticated)
                 return false;
@@ -134,20 +164,27 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null || requested_app == null)
                 throw new InvalidOperationException("Error when checking for a permission.");
 
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
-            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).ToList();
-            client.Close();
+        
 
             if (this.IsInRoleAsync(user, "SUPERADMIN").Result)
                 return true;
 
-            if (list.Exists(p => p.PermissionType == ApplicationModelItem.MetaTypeApplication &&
-                                p.MetaCode == requested_app.Application.MetaCode &&
+       
+            var list = GetUserPermissions(user).Result;
+
+            var explicit_exists=false;
+
+            if (list.Exists(p => p.IsApplicationPermission && p.MetaCode == requested_app.MetaCode))            
+            {
+                explicit_exists = true;
+            }
+
+            if (list.Exists(p => p.IsApplicationPermission &&
+                                p.MetaCode == requested_app.MetaCode &&
                                 (
-                                (requested_action == IntwentyPermission.Read && (p.ReadPermission || p.DeletePermission || p.ModifyPermission)) ||
-                                (requested_action == IntwentyPermission.Modify && (p.ModifyPermission)) ||
-                                (requested_action == IntwentyPermission.Delete && (p.DeletePermission))
+                                (requested_action == IntwentyPermission.Read && (p.Read|| p.Delete|| p.Modify)) ||
+                                (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
+                                (requested_action == IntwentyPermission.Delete && (p.Delete))
                                 )))
             {
 
@@ -155,12 +192,12 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             if (list.Exists(p => p.PermissionType == SystemModelItem.MetaTypeSystem &&
-                                 p.MetaCode == requested_app.System.MetaCode &&
+                                 p.MetaCode == requested_app.SystemMetaCode &&
                                  (
-                                 (requested_action == IntwentyPermission.Read && (p.ReadPermission || p.DeletePermission || p.ModifyPermission)) ||
-                                 (requested_action == IntwentyPermission.Modify && (p.ModifyPermission)) ||
-                                 (requested_action == IntwentyPermission.Delete && (p.DeletePermission))
-                                 )))
+                                 (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
+                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
+                                 (requested_action == IntwentyPermission.Delete && (p.Delete))
+                                 )) && !explicit_exists)
             {
 
                 return true;

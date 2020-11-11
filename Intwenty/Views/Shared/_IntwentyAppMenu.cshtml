@@ -2,12 +2,25 @@
 
 @{
 
+    var systems = new List<SystemModelItem>();
     var menutitle = "Applications";
+    var apps = ModelRepository.GetAuthorizedApplicationModels(User);
     var menuobjects = ModelRepository.GetMenuModels();
     var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
     if (mainmenu != null)
     {
         menutitle = mainmenu.Title;
+    }
+
+    foreach (var a in apps)
+    {
+        if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))
+        {
+            if (a.SystemInfo != null)
+            {
+                systems.Add(a.SystemInfo);
+            }
+        }
     }
 
 }
@@ -21,24 +34,35 @@
     <div class="dropdown-menu">
         @{
 
-
             if (mainmenu == null)
             {
-                foreach (var a in ModelRepository.GetAppModels())
-                {
-                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@a.Id">@a.Title</a>
-                }
+                return;
             }
-            else
+
+
+            foreach (var sys in systems)
             {
-                foreach (var mi in menuobjects)
+                foreach (var menuitem in menuobjects.Where(p => p.IsMetaTypeMenuItem && p.ParentMetaCode == mainmenu.MetaCode && p.SystemMetaCode == sys.MetaCode))
                 {
-                    if (mi.IsMetaTypeMenuItem && mi.ParentMetaCode == mainmenu.MetaCode && mi.Application != null)
+                    if (menuitem.Application != null && apps.Exists(p => p.MetaCode == menuitem.Application.MetaCode))
                     {
-                        <a class="dropdown-item" asp-controller="@mi.Controller" asp-action="@mi.Action" asp-route-id="@mi.Application.Id">@mi.Title</a>
+                        <a class="dropdown-item" asp-controller="@menuitem.Controller" asp-action="@menuitem.Action" asp-route-id="@menuitem.Application.Id">@menuitem.Title</a>
+                    }
+                    else
+                    {
+
+                        if (menuitem.Application == null)
+                        {
+                            <a class="dropdown-item" asp-controller="@menuitem.Controller" asp-action="@menuitem.Action">@menuitem.Title</a>
+                        }
+
                     }
                 }
+
+                <hr />
+
             }
+
         }
     </div>
 </li>

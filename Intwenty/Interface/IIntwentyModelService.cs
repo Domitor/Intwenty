@@ -4,6 +4,8 @@ using Intwenty.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Security.Claims;
+using Intwenty.Areas.Identity.Models;
 
 namespace Intwenty.Interface
 {
@@ -12,10 +14,25 @@ namespace Intwenty.Interface
     /// </summary>
     public interface IIntwentyModelService
     {
+
+        /// <summary>
+        /// Returns application models that the current user has permission to use
+        /// </summary>
+        public List<ApplicationModelItem> GetAuthorizedApplicationsModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission);
+
+        /// <summary>
+        /// Returns application models that the current user has permission to use
+        /// </summary>
+        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal);
+
+        /// <summary>
+        /// Returns system models that the current user has permission to use
+        /// </summary>
+        public List<SystemModelItem> GetAuthorizedSystemsModels(ClaimsPrincipal claimprincipal);
+
         /// <summary>
         /// Get a complete system model, used for export model
         /// </summary>
-        /// <returns></returns>
         public ExportModel GetExportModel();
 
         /// <summary>
@@ -24,6 +41,9 @@ namespace Intwenty.Interface
         public OperationResult ImportModel(ExportModel model);
 
 
+        /// <summary>
+        /// Get a list of all system models
+        /// </summary>
         public List<SystemModelItem> GetSystemModels();
 
         public void SaveSystemModel(SystemModelItem model);

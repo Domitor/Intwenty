@@ -867,19 +867,20 @@ namespace Intwenty.Controllers
             });
 
 
-            var apps = ModelRepository.GetApplicationModels();
+         
             if (!User.IsInRole("SUPERADMIN"))
             {
-
+                var apps = ModelRepository.GetAuthorizedApplicationModels(User);
                 foreach (var a in apps)
                 {
-                    if (admin_permissions.Exists(p => p.IsSystemPermission && a.System.MetaCode == p.MetaCode))
-                    {
-                        res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.Application.MetaCode, a.Application.Title));
-                        if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.System.MetaCode))
-                            res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.System.MetaCode, a.System.Title));
+                    if (a.SystemInfo == null)
+                        continue;
 
-                    }
+                   
+                    res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.MetaCode, a.Title));
+                    if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.SystemInfo.MetaCode))
+                        res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.SystemInfo.MetaCode, a.SystemInfo.Title));
+
                 }
             }
             else
@@ -888,11 +889,15 @@ namespace Intwenty.Controllers
                 res.Roles.Add(new IntwentyUserRoleItem() { RoleName = "SYSTEMADMIN" });
                 res.Roles.Add(new IntwentyUserRoleItem() { RoleName = "SUPERADMIN" });
 
+                var apps = ModelRepository.GetAppModels();
                 foreach (var a in apps)
                 {
-                    res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.Application.MetaCode, a.Application.Title));
-                    if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.System.MetaCode))
-                        res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.System.MetaCode, a.System.Title));
+                    if (a.SystemInfo == null)
+                        continue;
+
+                    res.ApplicationPermissions.Add(IntwentyUserPermissionItem.CreateApplicationPermission(a.MetaCode, a.Title));
+                    if (!res.SystemPermissions.Exists(p => p.IsSystemPermission && p.MetaCode == a.SystemInfo.MetaCode))
+                        res.SystemPermissions.Add(IntwentyUserPermissionItem.CreateSystemPermission(a.SystemInfo.MetaCode, a.SystemInfo.Title));
                 }
 
             }

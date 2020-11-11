@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Identity;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using System.Media;
+using System.Security.Claims;
+using Intwenty.Areas.Identity.Models;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty
 {
@@ -28,13 +31,15 @@ namespace Intwenty
 
         private IntwentySettings Settings { get; }
 
+        private IntwentyUserManager UserManager { get; }
+
         private string CurrentCulture { get; }
 
         private List<TypeMapItem> DataTypes { get; set; }
 
         private string AppModelCacheKey = "APPMODELS";
 
-        private string AppModelItemsCacheKey = "APPMODELITEMS";
+        private static readonly string AppModelItemsCacheKey = "APPMODELITEMS";
 
         private static readonly string DefaultVersioningTableColumnsCacheKey = "DEFVERTBLCOLS";
 
@@ -49,8 +54,9 @@ namespace Intwenty
         private static readonly string SystemModelItemCacheKey = "INTWENTYSYSTEMS";
 
 
-        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IntwentyUserManager usermanager)
         {
+            UserManager = usermanager;
             ModelCache = cache;
             Settings = settings.Value;
             Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
@@ -364,6 +370,89 @@ namespace Intwenty
 
         }
 
+        public List<SystemModelItem> GetAuthorizedSystemsModels(ClaimsPrincipal claimprincipal)
+        {
+            var res = new List<SystemModelItem>();
+            var systems = GetSystemModels();
+            var auth_apps = GetAuthorizedApplicationsModels(claimprincipal, IntwentyPermission.Read);
+
+            foreach (var s in systems)
+            {
+                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
+                    res.Add(s);
+            }
+
+            return res;
+        }
+
+        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
+        {
+            return GetAuthorizedApplicationsModels(claimprincipal, IntwentyPermission.Read);
+        }
+
+        public List<ApplicationModelItem> GetAuthorizedApplicationsModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission)
+        {
+            var res = new List<ApplicationModelItem>();
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return res;
+
+            var user = UserManager.GetUserAsync(claimprincipal).Result;
+            if (user == null)
+                return res;
+
+            var apps = GetAppModels();
+            if (UserManager.IsInRoleAsync(user, "SUPERADMIN").Result)
+                return apps;
+
+            var list = UserManager.GetUserPermissions(user).Result;
+
+
+            foreach (var a in apps)
+            {
+                var exist_explicit = false;
+                foreach (var p in list)
+                {
+
+                    //There is an explicit permission set
+                    if (p.IsApplicationPermission && p.MetaCode == a.MetaCode)
+                    {
+                        exist_explicit = true;
+
+                        if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
+                            (requested_permission == IntwentyPermission.Modify && p.Modify) ||
+                            (requested_permission == IntwentyPermission.Delete && p.Delete))
+                        {
+                            res.Add(a);
+                        }
+                    }
+                }
+
+                if (!res.Exists(p => p.MetaCode == a.MetaCode) && !exist_explicit)
+                {
+                    foreach (var p in list)
+                    {
+                        if (p.IsSystemPermission && p.MetaCode == a.SystemMetaCode)
+                        {
+                            if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
+                                (requested_permission == IntwentyPermission.Modify && p.Modify) ||
+                                (requested_permission == IntwentyPermission.Delete && p.Delete))
+                            {
+                                res.Add(a);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+
+
+            return res;
+
+
+
+        }
+
         public List<MenuModelItem> GetLocalizedMenuModels()
         {
             var apps = GetAppModels();
@@ -401,6 +490,8 @@ namespace Intwenty
 
             return menu.OrderBy(p => p.OrderNo).ToList();
         }
+
+
         public List<MenuModelItem> GetMenuModels()
         {
             var apps = GetAppModels();
@@ -1399,45 +1490,7 @@ namespace Intwenty
         #endregion
 
 
-        private void LocalizeTitles(List<ILocalizableTitle> list)
-        {
-
-            //Localization
-            var translations = GetTranslations();
-
-            foreach (var item in list)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.Title = trans.Text;
-                    else
-                        item.Title = item.TitleLocalizationKey;
-
-                }
-            }
-        }
-
-        private void LocalizeTitle(ILocalizableTitle item)
-        {
-            if (item == null)
-                return;
-
-            //Localization
-            var translations = GetTranslations();
-
-
-            if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-            {
-                var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
-                if (trans != null)
-                    item.Title = trans.Text;
-                else
-                    item.Title = item.TitleLocalizationKey;
-            }
-            
-        }
+       
 
         #region misc
 
@@ -1496,8 +1549,46 @@ namespace Intwenty
             
         }
 
-       
-      
+
+        private void LocalizeTitles(List<ILocalizableTitle> list)
+        {
+
+            //Localization
+            var translations = GetTranslations();
+
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+                {
+                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+                    if (trans != null)
+                        item.Title = trans.Text;
+                    else
+                        item.Title = item.TitleLocalizationKey;
+
+                }
+            }
+        }
+
+        private void LocalizeTitle(ILocalizableTitle item)
+        {
+            if (item == null)
+                return;
+
+            //Localization
+            var translations = GetTranslations();
+
+
+            if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
+            {
+                var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+                if (trans != null)
+                    item.Title = trans.Text;
+                else
+                    item.Title = item.TitleLocalizationKey;
+            }
+
+        }
 
         public List<OperationResult> ConfigureDatabase()
         {
