@@ -3,20 +3,20 @@
 @{
 
     var systems = new List<SystemModelItem>();
-    var menutitle = "Applications";
+    var menutitle = "Menu";
     var apps = ModelRepository.GetAuthorizedApplicationModels(User);
-    var menuobjects = ModelRepository.GetLocalizedMenuModels();
-    var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
-    if (mainmenu != null)
-    {
-        menutitle = mainmenu.Title;
-    }
+    //var menuobjects = ModelRepository.GetLocalizedMenuModels();
+    //var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
+    //if (mainmenu != null)
+    //{
+    //    menutitle = mainmenu.Title;
+    //}
 
     foreach (var a in apps)
     {
         if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))
         {
-            if (a.SystemInfo != null && menuobjects.Exists(p=> p.SystemMetaCode == a.SystemMetaCode))
+            if (a.SystemInfo != null && apps.Exists(p=> p.SystemMetaCode == a.SystemMetaCode))
             {
                 systems.Add(a.SystemInfo);
             }
@@ -35,10 +35,10 @@
         @{
 
 
-            if (mainmenu == null)
-            {
-                return;
-            }
+            //if (mainmenu == null)
+            //{
+            //    return;
+            //}
 
             var cnt = 0;
             foreach (var sys in systems)
@@ -49,21 +49,29 @@
                 }
                 <div class="dropdown-item"><strong>@sys.Title</strong></div>
                 <div class="dropdown-divider"></div>
+
+                foreach (var app in apps.Where(p => p.SystemMetaCode == sys.MetaCode))
+                {
+                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@app.Id">@app.Title</a>
+                }
+
+                <!--
                 foreach (var menuitem in menuobjects.Where(p => p.IsMetaTypeMenuItem && p.ParentMetaCode == mainmenu.MetaCode && p.SystemMetaCode == sys.MetaCode))
                 {
                     if (menuitem.Application != null && apps.Exists(p => p.MetaCode == menuitem.Application.MetaCode))
                     {
-                        <a class="dropdown-item" asp-controller="@menuitem.Controller" asp-action="@menuitem.Action" asp-route-id="@menuitem.Application.Id">@menuitem.Title</a>
+                        <a class="dropdown-item" asp-controller="menuitem.Controller" asp-action="menuitem.Action" asp-route-id="menuitem.Application.Id">menuitem.Title</a>
                     }
                     else
                     {
                         if (menuitem.Application == null)
                         {
-                            <a class="dropdown-item" asp-controller="@menuitem.Controller" asp-action="@menuitem.Action">@menuitem.Title</a>
+                            <a class="dropdown-item" asp-controller="menuitem.Controller" asp-action="menuitem.Action">menuitem.Title</a>
                         }
 
                     }
                 }
+            -->
 
                 cnt++;
             }
