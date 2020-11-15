@@ -72,12 +72,21 @@ namespace Intwenty.Interface
         /// Get a list of (latest version) application data that matches the filter specified in args. 
         /// This function supports paging. It returns the number of records specified in args.BatchSize
         /// 
-        /// If args.OwnerUSerId is set only applications owned by that OwnerUserId will be returned
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
-        /// <returns>An OperationResult including a json array and the current paging rownum</returns>
+        /// <returns>An OperationResult including a string json array and the current paging rownum</returns>
         OperationResult GetPagedList(ListFilter args);
 
         OperationResult GetPagedList(ListFilter args, ApplicationModel model);
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
+        /// </summary>
+        /// <returns>An OperationResult including a list of T and the current paging rownum</returns>
+        ListOperationResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new();
 
         /// <summary>
         /// Get a list of (latest version) application data. 

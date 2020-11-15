@@ -678,7 +678,7 @@ namespace Intwenty
 
         private void InsertInformationStatus(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
-            var m = new InformationStatus()
+            var m = new Entity.InformationStatus()
             {
                 Id = state.Id,
                 ApplicationId = model.Application.Id,
@@ -935,6 +935,93 @@ namespace Intwenty
         #endregion
 
         #region Lists
+
+        public ListOperationResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
+        {
+            if (args == null)
+                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
+
+            if (args.ApplicationId < 1)
+                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
+
+            if (model == null)
+                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+
+            if (model.Application.Id != args.ApplicationId)
+                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
+
+            ListOperationResult<T> result = null;
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            client.Open();
+
+            try
+            {
+
+                result = new ListOperationResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
+
+                if (args.MaxCount == 0)
+                {
+
+                    var max = client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + model.Application.Id);
+                    if (max == DBNull.Value)
+                        args.MaxCount = 0;
+                    else
+                        args.MaxCount = Convert.ToInt32(max);
+
+                }
+
+                result.ListFilter = args;
+
+                if (args.CurrentRowNum < 1)
+                {
+                    if (client.Database != DBMS.MSSqlServer)
+                    {
+                        result.Data = client.GetEntities<T>(string.Format("select * from {0} order by Id limit {1}", model.Application.DbName, args.BatchSize));
+                    }
+                    else
+                    {
+                        result.Data = client.GetEntities<T>(string.Format("select top {0} * from {1} order by Id", args.BatchSize, model.Application.DbName));
+                    }
+                  
+                    result.ListFilter.CurrentRowNum = result.Data[result.Data.Count - 1].Id;
+                }
+                else
+                {
+                    if (client.Database != DBMS.MSSqlServer)
+                    {
+                        result.Data = client.GetEntities<T>(string.Format("select * from {0} where Id > {1} order by Id limit {2}", new object[] { model.Application.DbName, args.CurrentRowNum, args.BatchSize }));
+                    }
+                    else
+                    {
+                        result.Data = client.GetEntities<T>(string.Format("select top {0} * from {1} where Id > {2} order by Id", new object[] { args.BatchSize, model.Application.DbName, args.CurrentRowNum }));
+                    }
+
+                    result.Data = client.GetEntities<T>(string.Format("select * from hildings_Asset where id > {0} order by Id limit {1}", args.CurrentRowNum, args.BatchSize));
+                    result.ListFilter.CurrentRowNum = result.Data[result.Data.Count - 1].Id;
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                result = new ListOperationResult<T>();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                LogError("IntwentyDataService.GetPagedList: " + ex.Message);
+            }
+            finally
+            {
+                result.Finish();
+                client.Close();
+
+            }
+
+            return result;
+        }
+
 
         public OperationResult GetPagedList(ListFilter args, ApplicationModel model)
         {

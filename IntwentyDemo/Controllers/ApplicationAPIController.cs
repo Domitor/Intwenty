@@ -8,6 +8,8 @@ using Intwenty.Model.Dto;
 using Microsoft.AspNetCore.Http;
 using Intwenty;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Data;
+using IntwentyDemo.Models;
 
 namespace IntwentyDemo.Controllers
 {
@@ -16,120 +18,36 @@ namespace IntwentyDemo.Controllers
        1.   Name the controller ApplicationAPIController and put in the Controllers folder. 
        2.   Attribute routing must be used otherwise it will be conflicts with routes in the base controller.
 
+    */
 
-    
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationAPIController : Intwenty.Controllers.ApplicationAPIController
     {
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
 
-        public ApplicationAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice) : base(dataservice, modelservice)
+        public ApplicationAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager) : base(dataservice, modelservice, usermanager)
         {
             DataRepository = dataservice;
             ModelRepository = modelservice;
         }
 
 
-        /// <summary>
-        /// Get the latest version data by id for an application with applicationid 
-        /// </summary>
-        /// <param name="applicationid">The ID of the application in the meta model</param>
-        /// <param name="id">The data id</param>
-        [HttpGet("Application/API/GetLatestVersion/{applicationid}/{id}")]
-        public override JsonResult GetLatestVersion(int applicationid, int id)
-        {
-            return base.GetLatestVersion(applicationid, id);
-        }
-
-        /// <summary>
-        /// Get the latest version data for the owning user and with applicationid 
-        /// </summary>
-        /// <param name="applicationid">The ID of the application in the meta model</param>
-        [HttpGet("Application/API/GetLatestByLoggedInUser/{applicationid}")]
-        public override JsonResult GetLatestByLoggedInUser(int applicationid)
-        {
-            return base.GetLatestByLoggedInUser(applicationid);
-        }
-
+      
         /// <summary>
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
-        [HttpPost("Application/API/GetPagedList")]
-        public override JsonResult GetPagedList([FromBody] ListFilter model)
+        [HttpPost("Application/API/GetEditListData")]
+        public override IActionResult GetEditListData([FromBody] ListFilter model)
         {
-            return base.GetPagedList(model);
+            return base.GetEditListData(model);
         }
 
-        /// <summary>
-        /// Get Domain data based on the meta model for application with Id.
-        /// </summary>
-        [HttpGet("Application/API/GetValueDomains/{id}")]
-        public override JsonResult GetValueDomains(int id)
-        {
-            return base.GetValueDomains(id);
-        }
-
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost("Application/API/GetDataViewValue")]
-        public override JsonResult GetDataViewValue([FromBody] ListFilter model)
-        {
-            return base.GetDataViewValue(model);
-        }
-
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost("Application/API/GetDataView")]
-        public override JsonResult GetDataView([FromBody] ListFilter model)
-        {
-            return base.GetDataView(model);
-        }
-
-        /// <summary>
-        /// Get a json structure for a new application, including defaultvalues
-        /// </summary>
-        [HttpGet("Application/API/CreateNew/{id}")]
-        public override JsonResult CreateNew(int id)
-        {
-            return base.CreateNew(id);
-        }
-
-
-        [HttpPost("Application/API/Save")]
-        public override JsonResult Save([FromBody] System.Text.Json.JsonElement model)
-        {
-            return base.Save(model);
-        }
-
-        [HttpPost("Application/API/Delete")]
-        public override JsonResult Delete([FromBody] System.Text.Json.JsonElement model)
-        {
-            return base.Delete(model);
-        }
-
-        [HttpPost("Application/API/UploadImage")]
-        public override async Task<JsonResult> UploadImage(IFormFile file)
-        {
-            var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";
-
-            var fileandpath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\USERDOC", uniquefilename);
-            using (var fs = new FileStream(fileandpath, FileMode.Create))
-            {
-                await file.CopyToAsync(fs);
-            }
-
-            return new JsonResult(new { fileName = uniquefilename });
-        }
-
+      
 
 
 
     }
-        */
+        
 
 }

@@ -684,7 +684,7 @@ namespace Intwenty.Controllers
                 foreach (var app in apps)
                 {
                     client.Open();
-                    var infostatuslist = client.GetEntities<InformationStatus>().Where(p => p.ApplicationId == app.Id);
+                    var infostatuslist = client.GetEntities<Entity.InformationStatus>().Where(p => p.ApplicationId == app.Id);
                     client.Close();
 
                     foreach (var istat in infostatuslist)
@@ -1195,7 +1195,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var x = "";
+                
             }
             catch (Exception ex)
             {

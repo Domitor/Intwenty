@@ -1516,7 +1516,7 @@ namespace Intwenty
                 client.CreateTable<DatabaseItem>();
                 client.CreateTable<DataViewItem>();
                 client.CreateTable<EventLog>();
-                client.CreateTable<InformationStatus>();
+                client.CreateTable<Entity.InformationStatus>();
                 client.CreateTable<MenuItem>();
                 client.CreateTable<InstanceId>();
                 client.CreateTable<UserInterfaceItem>();
@@ -1736,6 +1736,13 @@ namespace Intwenty
                     return res;
                 }
 
+                var appsystem = systems.Find(p => p.MetaCode == a.Application.SystemMetaCode);
+                if (appsystem == null)
+                {
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has and invalid [SystemMetaCode].", a.Application.Title));
+                    return res;
+                }
+
                 if (!systems.Exists(p=> p.MetaCode == a.Application.SystemMetaCode))
                 {
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has an invalid [SystemMetaCode].", a.Application.Title));
@@ -1744,6 +1751,10 @@ namespace Intwenty
 
                 if (string.IsNullOrEmpty(a.Application.DbName))
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has no [DbName].", a.Application.Title));
+
+                if (!string.IsNullOrEmpty(a.Application.DbName) && !a.Application.DbName.Contains(appsystem.DbPrefix+"_"))
+                    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has an invalid [DbName]. The [DbPrefix] '{1}' of the system must be included", a.Application.Title, appsystem.DbPrefix));
+  
 
                 if (!string.IsNullOrEmpty(a.Application.MetaCode) && (a.Application.MetaCode.ToUpper() != a.Application.MetaCode))
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has a non uppercase [MetaCode].", a.Application.Title));
@@ -1848,21 +1859,18 @@ namespace Intwenty
                     }
 
                     if (string.IsNullOrEmpty(db.DbName))
-                    {
                         res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The data object: {0} in application {1} has no [DbName].", db.MetaCode, a.Application.Title));
-                    }
-
+                    
                     if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataColumn)
-                    {
-                        res.AddMessage(MessageCode.WARNING, string.Format("The data column: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
-                    }
+                        res.AddMessage(MessageCode.WARNING, string.Format("The data column: {0} in application {1} has an uppercase [DbName], ok but intwenty don't like it.", db.DbName, a.Application.Title));
+                    
 
                     if (!string.IsNullOrEmpty(db.DbName) && db.DbName.ToUpper() == db.DbName && db.IsMetaTypeDataTable)
-                    {
-                        res.AddMessage(MessageCode.WARNING, string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty thinks it's uggly.", db.DbName, a.Application.Title));
-                    }
+                        res.AddMessage(MessageCode.WARNING, string.Format("The data table: {0} in application {1} has an uppercase [DbName], ok but intwenty don't like it.", db.DbName, a.Application.Title));
+                    
+                    if (!string.IsNullOrEmpty(db.DbName) &&  db.IsMetaTypeDataTable && !db.DbName.Contains(appsystem.DbPrefix + "_"))
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has an invalid [DbName]. The [DbPrefix] '{1}' of the system must be included", a.Application.Title, appsystem.DbPrefix));
 
-                  
 
                 }
 
