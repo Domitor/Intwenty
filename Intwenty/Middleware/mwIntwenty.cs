@@ -207,6 +207,9 @@ namespace Intwenty.Middleware
 
                     foreach (var ep in epmodels)
                     {
+                        if (ep.IsMetaTypeCustomPost)
+                            continue;
+
                         endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicApplication" });
                     }
                 }

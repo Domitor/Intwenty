@@ -33,7 +33,7 @@ namespace Intwenty.Middleware
             swaggerDoc.Tags = new List<OpenApiTag>();
             swaggerDoc.Info.Title = "Intwenty";
             swaggerDoc.Info.License = new OpenApiLicense() { Name = "MIT" };
-            swaggerDoc.Info.Description = "Info.....";
+            swaggerDoc.Info.Description = "";
 
             var epmodels = _modelservice.GetEndpointModels();
 
@@ -111,6 +111,30 @@ namespace Intwenty.Middleware
                     op.Responses.Add("401", resp);
                     path.AddOperation(OperationType.Post, op);
                     swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
+
+                }
+
+
+                if (ep.IsMetaTypeCustomPost)
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description, Summary = ep.Title };
+                    op.RequestBody = new OpenApiRequestBody();
+                    var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
+                    content.Value.Schema = new OpenApiSchema();
+                    content.Value.Schema.Example = new OpenApiString("{}");
+                    op.RequestBody.Content.Add(content);
+                    op.RequestBody.Required = true;
+                    op.Tags.Add(endpoinggroup);
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Post, op);
+                    swaggerDoc.Paths.Add(ep.Path, path);
 
                 }
 

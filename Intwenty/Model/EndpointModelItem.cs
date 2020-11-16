@@ -14,7 +14,8 @@ namespace Intwenty.Model
         public static readonly string MetaTypeTableList = "TABLELIST";
         public static readonly string MetaTypeTableSave = "TABLESAVE";
         public static readonly string MetaTypeDataViewList = "DATAVIEWLIST";
-        
+        public static readonly string MetaTypeCustomPost = "CUSTOMPOST";
+
         public EndpointModelItem()
         {
             SetEmptyStrings();
@@ -159,6 +160,11 @@ namespace Intwenty.Model
         public bool IsMetaTypeDataViewList
         {
             get { return MetaType == MetaTypeDataViewList; }
+        }
+
+        public bool IsMetaTypeCustomPost
+        {
+            get { return MetaType == MetaTypeCustomPost; }
         }
 
 

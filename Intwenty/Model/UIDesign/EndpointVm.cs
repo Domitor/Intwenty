@@ -11,6 +11,8 @@ namespace Intwenty.Model.UIDesign
 
         public List<EndpointVm> Endpoints { get; set; }
 
+        public List<SystemModelItem> Systems { get; set; }
+
         public List<EndpointType> EndpointTypes
         {
             get
@@ -20,6 +22,7 @@ namespace Intwenty.Model.UIDesign
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save", datasourcetype = "TABLE" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom Post", datasourcetype = "NONE" });
                 return res;
             }
         }
@@ -43,6 +46,8 @@ namespace Intwenty.Model.UIDesign
 
         public bool Expanded { get; set; }
 
+        public string SystemMetaCode { get; set; }
+
         public List<IntwentyProperty> PropertyCollection { get; set; }
 
         public static EndpointVm CreateEndpointVm(EndpointModelItem model)
@@ -64,9 +69,12 @@ namespace Intwenty.Model.UIDesign
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeDataViewList)
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" };
+            else if (model.IsMetaTypeCustomPost)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (Post)", datasourcetype = "NONE" };
             else
                 throw new InvalidOperationException("Invalid endpoint metatype");
 
+            t.SystemMetaCode = model.SystemMetaCode;
             t.Id = model.Id;
             t.Properties = model.Properties;
             t.Description = model.Description;
@@ -80,15 +88,26 @@ namespace Intwenty.Model.UIDesign
             var t = new EndpointModelItem(model.EndpointType.id);
             t.Path = model.Path;
             var check = model.DataSource.Split('|');
-            if (check.Length > 1)
+            if (t.IsMetaTypeCustomPost)
             {
-                t.AppMetaCode = check[0];
-                t.DataMetaCode = check[1];
+                t.AppMetaCode = "";
+                t.DataMetaCode = "";
+
             }
             else
             {
-                t.DataMetaCode = model.DataSource;
+                if (check.Length > 1)
+                {
+                    t.AppMetaCode = check[0];
+                    t.DataMetaCode = check[1];
+                }
+                else
+                {
+                    t.DataMetaCode = model.DataSource;
+                }
             }
+
+            t.SystemMetaCode = model.SystemMetaCode;
             t.Id = model.Id;
             t.Properties = model.Properties;
             t.Description = model.Description;

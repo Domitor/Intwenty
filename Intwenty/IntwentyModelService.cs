@@ -771,6 +771,12 @@ namespace Intwenty
                    
                 }
 
+                if (ep.IsMetaTypeCustomPost)
+                {
+                    ep.AppMetaCode = "";
+                    ep.DataMetaCode = "";
+                }
+
             }
 
             ModelCache.Set(EndpointsCacheKey, res);
