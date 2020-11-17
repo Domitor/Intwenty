@@ -11,6 +11,8 @@ namespace Intwenty.Model.UIRendering
 
         public string Title { get; set; }
 
+        public string LocalizedTitle { get; set; }
+
         public bool Mandatory { get; set; }
 
         public bool ReadOnly { get; set; }

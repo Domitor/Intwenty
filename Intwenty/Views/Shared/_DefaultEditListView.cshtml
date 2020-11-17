@@ -34,7 +34,7 @@
                                 @{
                                     foreach (var c in Model.Columns)
                                     {
-                                        <option value="@c.DataColumnDbName">@c.Title</option>
+                                        <option value="@c.DataColumnDbName">@c.LocalizedTitle</option>
                                     }
                                 }
                             </select>
@@ -76,7 +76,7 @@
             @{
                 foreach (var c in Model.Columns)
                 {
-                    <th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.Title <span class="fa fa-sort-alpha-down-alt"></span></th>
+                    <th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
 
                 }
             }

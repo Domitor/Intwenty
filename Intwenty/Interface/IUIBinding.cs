@@ -13,6 +13,8 @@ namespace Intwenty.Interface
 
         string Title { get; }
 
+        string LocalizedTitle { get; }
+
         string DataTableDbName { get; }
 
         string DataColumnDbName { get; }

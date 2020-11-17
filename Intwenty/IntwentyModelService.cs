@@ -71,7 +71,6 @@ namespace Intwenty
                     CurrentCulture = Settings.DefaultCulture;
             }
 
-            AppModelCacheKey += "-" + CurrentCulture.Replace("-", "").ToUpper();
         }
 
         public void ClearCache(string key = "ALL")
@@ -152,6 +151,7 @@ namespace Intwenty
 
             try
             {
+
                 ModelCache.Remove(AppModelCacheKey);
                 ModelCache.Remove(AppModelItemsCacheKey);
 
@@ -230,15 +230,15 @@ namespace Intwenty
             var systems = Client.GetEntities<SystemItem>();
             Client.Close();
 
+            if (!systems.Exists(p=> p.MetaCode == "INTWENTYDEFAULTSYS"))
+                 res.Add(new SystemModelItem() { Id = 9999, DbPrefix = "def", Title = "Default", MetaCode = "INTWENTYDEFAULTSYS" });
+
             foreach (var s in systems)
             {
                 res.Add(new SystemModelItem(s));
             }
 
-            if (res.Count == 0)
-            {
-                res.Add(new SystemModelItem() { Id = 9999, DbPrefix = "def", Title = "Default", MetaCode = "INTWENTYDEFAULTSYS" });
-            }
+          
 
             ModelCache.Set(SystemModelItemCacheKey, res);
 
@@ -322,14 +322,14 @@ namespace Intwenty
 
         public List<ApplicationModel> GetLocalizedApplicationModels()
         {
+
             var res = GetApplicationModels();
-            foreach (var a in res) 
+            foreach (var a in res)
             {
                 LocalizeTitle(a.Application);
                 LocalizeTitles(a.UIStructure.ToList<ILocalizableTitle>());
             }
             return res;
-
         }
             
         public List<ApplicationModel> GetApplicationModels()
@@ -383,6 +383,13 @@ namespace Intwenty
             }
 
             return res;
+        }
+
+        public List<ApplicationModelItem> GetLocalizedAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
+        {
+            var t = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
+            LocalizeTitles(t.ToList<ILocalizableTitle>());
+            return t;
         }
 
         public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
@@ -594,25 +601,24 @@ namespace Intwenty
 
             Client.Close();
 
-         
 
             ModelCache.Remove(AppModelCacheKey);
             ModelCache.Remove(AppModelItemsCacheKey);
 
         }
 
-        public OperationResult SaveAppModel(ApplicationModelItem model)
+        public ModifyResult SaveAppModel(ApplicationModelItem model)
         {
 
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Model cannot be null");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Model cannot be null");
 
             if (string.IsNullOrEmpty(model.SystemMetaCode))
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a SystemMetaCode");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a SystemMetaCode");
             if (string.IsNullOrEmpty(model.DbName))
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a DbName");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Cannot save an application model without a DbName");
 
-           
+
             ModelCache.Remove(AppModelCacheKey);
             ModelCache.Remove(AppModelItemsCacheKey);
 
@@ -622,7 +628,7 @@ namespace Intwenty
             var system = GetSystemModels();
             var currentsystem = system.Find(p => p.MetaCode == model.SystemMetaCode);
             if (currentsystem==null)
-                return new OperationResult(false, MessageCode.USERERROR, "Please select a system");
+                return new ModifyResult(false, MessageCode.USERERROR, "Please select a system");
 
             if (model.Id < 1)
             {
@@ -649,7 +655,7 @@ namespace Intwenty
                     var dbname = currentsystem.DbPrefix + "_" + model.DbName;
                     if (apps.Exists(p => p.DbName.ToUpper() == dbname.ToUpper()))
                     {
-                        return new OperationResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
+                        return new ModifyResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
                     }
                     model.DbName = dbname;
                 }
@@ -657,7 +663,7 @@ namespace Intwenty
                 {
                     if (apps.Exists(p => p.DbName.ToUpper() == model.DbName.ToUpper()))
                     {
-                        return new OperationResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
+                        return new ModifyResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another.");
                     }
 
                 }
@@ -682,7 +688,7 @@ namespace Intwenty
                 Client.Close();
 
               
-                return new OperationResult(true, MessageCode.RESULT, "A new application model was inserted.", entity.Id);
+                return new ModifyResult(true, MessageCode.RESULT, "A new application model was inserted.", entity.Id);
 
             }
             else
@@ -690,7 +696,7 @@ namespace Intwenty
 
                 var entity = apps.FirstOrDefault(p => p.Id == model.Id);
                 if (entity == null)
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Failure updating application model, no such id {0}", model.Id));
+                    return new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("Failure updating application model, no such id {0}", model.Id));
 
                 entity.Title = model.Title;
                 entity.DbName = model.DbName;
@@ -706,7 +712,7 @@ namespace Intwenty
                 Client.UpdateEntity(entity);
                 Client.Close();
 
-                return new OperationResult(true, MessageCode.RESULT, "Application model updated.", entity.Id);
+                return new ModifyResult(true, MessageCode.RESULT, "Application model updated.", entity.Id);
 
             }
 
@@ -1122,7 +1128,7 @@ namespace Intwenty
 
         public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid)
         {
-          
+            ModelCache.Remove(AppModelCacheKey);
 
             var app = GetApplicationModels().Find(p => p.Application.Id == applicationid);
             if (app == null)
@@ -1225,13 +1231,13 @@ namespace Intwenty
             Client.Close();
 
 
-            ModelCache.Remove(AppModelCacheKey);
+        
 
         }
 
         public void DeleteDatabaseModel(int id)
         {
-           
+            ModelCache.Remove(AppModelCacheKey);
 
             var existing = Client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == id);
             if (existing != null)
@@ -1256,7 +1262,7 @@ namespace Intwenty
                     Client.Close();
                 }
 
-                ModelCache.Remove(AppModelCacheKey);
+              
             }
         }
 
@@ -1571,9 +1577,9 @@ namespace Intwenty
                 {
                     var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
                     if (trans != null)
-                        item.Title = trans.Text;
+                        item.LocalizedTitle = trans.Text;
                     else
-                        item.Title = item.TitleLocalizationKey;
+                        item.LocalizedTitle = item.TitleLocalizationKey;
 
                 }
             }
@@ -1592,9 +1598,9 @@ namespace Intwenty
             {
                 var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
                 if (trans != null)
-                    item.Title = trans.Text;
+                    item.LocalizedTitle = trans.Text;
                 else
-                    item.Title = item.TitleLocalizationKey;
+                    item.LocalizedTitle = item.TitleLocalizationKey;
             }
 
         }

@@ -155,6 +155,8 @@ namespace Intwenty.Model
             {
                 var uiview = new UIView();
                 uiview.Title = v.Title;
+                uiview.LocalizedTitle = v.LocalizedTitle;
+                uiview.TitleLocalizationKey = v.TitleLocalizationKey;
                 uiview.MetaType = v.MetaType;
                 uiview.ApplicationId = Application.Id;
                 uiview.Properties = v.Properties;
@@ -180,10 +182,10 @@ namespace Intwenty.Model
                 }
                 foreach (var sect in UIStructure.Where(p => p.IsMetaTypeSection && p.ParentMetaCode == v.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                 {
-                    var section = new UISection() { Properties = sect.Properties, Title = sect.Title };
+                    var section = new UISection() { Properties = sect.Properties, Title = sect.Title, LocalizedTitle = sect.LocalizedTitle, TitleLocalizationKey = sect.TitleLocalizationKey };
                     foreach (var pnl in UIStructure.Where(p => p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                     {
-                        var panel = new UIPanel() { Properties = pnl.Properties, Title = pnl.Title };
+                        var panel = new UIPanel() { Properties = pnl.Properties, Title = pnl.Title, LocalizedTitle = pnl.LocalizedTitle, TitleLocalizationKey = pnl.TitleLocalizationKey };
                         if (!string.IsNullOrEmpty(panel.Title) && (uiview.IsMetaTypeCreateView || uiview.IsMetaTypeEditView))
                             panel.UseFieldSet = true;
                       

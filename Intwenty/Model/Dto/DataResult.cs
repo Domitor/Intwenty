@@ -4,13 +4,11 @@ using System.Text;
 
 namespace Intwenty.Model.Dto
 {
-    public class DataResult : IntwentyResult
+    public class DataResult : IntwentyJSONStringResult
     {
         public int Version { get; set; }
 
         public int Id { get; set; }
-
-        public string Data { get; set; }
 
         public DataResult()
         {
@@ -30,169 +28,89 @@ namespace Intwenty.Model.Dto
             AddMessage(messagecode, message);
         }
 
-        public ApplicationData GetAsApplicationData()
+      
+
+    }
+    public class DataListResult : IntwentyJSONStringResult
+    {
+        public ListFilter ListFilter { get; set; }
+
+        public DataListResult()
         {
-            if (string.IsNullOrEmpty(Data))
-                return new ApplicationData();
-
-            if (Data.Length < 5)
-                return new ApplicationData();
-
-            var model = System.Text.Json.JsonDocument.Parse(Data).RootElement;
-            var result = ApplicationData.CreateFromJSON(model);
-
-
-            return result;
-
+            ListFilter = new ListFilter();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            Data = "[]";
         }
 
-        public ClientStateInfo CreateClientState()
+        public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
-            var model = System.Text.Json.JsonDocument.Parse(Data).RootElement;
-            var result = ClientStateInfo.CreateFromJSON(model);
-            return result;
+            ListFilter = new ListFilter();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            AddMessage(messagecode, message);
+            Data = "[]";
         }
 
-        public void AddApplicationJSON(string jsonname, object jsonvalue, bool isnumeric = false)
+    }
+
+    public class DataResult<T> : IntwentyResult
+    {
+        public int Version { get; set; }
+
+        public int Id { get; set; }
+
+        public T Data { get; set; }
+
+        public DataResult()
         {
-            var check = Data.IndexOf("{", 2);
-            if (check < 2)
-                return;
-
-            check = Data.IndexOf("}", check);
-            if (check < 2)
-                return;
-
-
-            string value = string.Empty;
-            if (!isnumeric)
-                value = ",\"" + jsonname + "\":" + "\"" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(jsonvalue)).ToString() + "\"";
-            else
-                value = ",\"" + jsonname + "\":" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(jsonvalue)).ToString();
-
-            Data = Data.Insert(check, value);
-
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            Data = default(T);
         }
 
-        public void RemoveJSON(string jsonname)
+        public DataResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "", int id = 0, int version = 0)
         {
-            var cnt = 0;
+            Data = default(T);
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            Id = id;
+            Version = version;
+            AddMessage(messagecode, message);
+        }
+    }
 
-            if (string.IsNullOrEmpty(jsonname))
-                return;
+    public class DataListResult<T> : IntwentyResult
+    {
+       
 
-            if (jsonname.Length < 2)
-                return;
-
-            while (Data.IndexOf(jsonname) > -1 && cnt < 1000)
-            {
-                cnt += 1;
-
-                var nameindex = Data.IndexOf(jsonname);
-                if (nameindex < 0)
-                    continue;
-
-                var test = Data.IndexOf(":", nameindex + jsonname.Length);
-                if ((nameindex + jsonname.Length + 3) < test)
-                    continue;
-
-                var startindex = Data.LastIndexOf(",", nameindex);
-                test = Data.LastIndexOf("{", nameindex);
-                if (test > startindex)
-                    startindex = test;
-
-                var endindex = Data.IndexOf(",", startindex + 1);
-                test = Data.IndexOf("}", startindex + 1);
-                if (endindex == -1)
-                {
-                    endindex = test;
-                }
-                else
-                {
-                    if (test < endindex && test > -1)
-                        endindex = test;
-                }
-
-                var count = (endindex - startindex);
-                if (count < 3)
-                    continue;
-
-                Data = Data.Remove(startindex, count);
-
-            }
+        public DataListResult()
+        {
+            ListFilter = new ListFilter();
+            Data = new List<T>();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
         }
 
-        public class DataListResult : IntwentyResult
+        public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
-            public DataListResult()
-            {
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-                Data = "[]";
-            }
-
-            public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
-            {
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-                IsSuccess = success;
-                AddMessage(messagecode, message);
-                Data = "[]";
-            }
-
-            public string Data { get; set; }
+            ListFilter = new ListFilter();
+            Data = new List<T>();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            AddMessage(messagecode, message);
         }
 
-        public class TypedDataResult<T> : IntwentyResult
-        {
-            public int Version { get; set; }
+        public ListFilter ListFilter { get; set; }
 
-            public int Id { get; set; }
-
-            public T Data { get; set; }
-
-            public TypedDataResult()
-            {
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-                Data = default(T);
-            }
-
-            public TypedDataResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "", int id = 0, int version = 0)
-            {
-                Data = default(T);
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-                IsSuccess = success;
-                Id = id;
-                Version = version;
-                AddMessage(messagecode, message);
-            }
-        }
-
-        public class TypedDataListResult<T> : IntwentyResult
-        {
-            public TypedDataListResult()
-            {
-                Data = new List<T>();
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-            }
-
-            public TypedDataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
-            {
-                new List<T>();
-                StartTime = DateTime.Now;
-                Messages = new List<OperationMessage>();
-                IsSuccess = success;
-                AddMessage(messagecode, message);
-            }
-
-            public List<T> Data { get; set; }
-        }
+        public List<T> Data { get; set; }
+    }
 
 
 
     }
 
-}
+

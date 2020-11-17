@@ -211,7 +211,7 @@ namespace Intwenty.Areas.Identity.Data
             var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
             client.Close();
             if (existingrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is nor role named {0}", roleName) } }));
+                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0}", roleName) } }));
 
             client.Open();
             var existing_userrole = client.GetEntities<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);

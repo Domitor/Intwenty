@@ -47,24 +47,24 @@ namespace Intwenty
 
         #region Create
 
-        public virtual OperationResult CreateNew(ApplicationModel model)
+        public virtual DataResult CreateNew(ApplicationModel model)
         {
             return CreateNewInternal(model);
         }
 
-        public virtual OperationResult CreateNew(ClientStateInfo state)
+        public virtual DataResult CreateNew(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return CreateNewInternal(model);
         }
 
-        private OperationResult CreateNewInternal(ApplicationModel model)
+        private DataResult CreateNewInternal(ApplicationModel model)
         {
-            var result = new OperationResult();
 
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model") { Data = "{}" };
+                return new DataResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
 
+            var result = new DataResult();
 
             try
             {
@@ -166,43 +166,43 @@ namespace Intwenty
         #endregion
 
         #region Save
-        public OperationResult Save(ClientStateInfo state, ApplicationModel model)
+        public ModifyResult Save(ClientStateInfo state, ApplicationModel model)
         {
             return SaveInternal(state, model);
         }
 
-        public OperationResult Save(ClientStateInfo state)
+        public ModifyResult Save(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return SaveInternal(state, model);
         }
 
-        private OperationResult SaveInternal(ClientStateInfo state, ApplicationModel model)
+        private ModifyResult SaveInternal(ClientStateInfo state, ApplicationModel model)
         {
 
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save application.");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save application.");
 
             if (state.ApplicationId < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
             if (!state.HasData)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
 
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
 
             if (model.Application.Id != state.ApplicationId)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
-            OperationResult result = null;
+            ModifyResult result = null;
 
             try
             {
-                result = new OperationResult(true, MessageCode.RESULT, string.Format("Saved application {0}", model.Application.Title), state.Id, state.Version);
+                result = new ModifyResult(true, MessageCode.RESULT, string.Format("Saved application {0}", model.Application.Title), state.Id, state.Version);
 
                 var validation = Validate(model, state);
                 if (validation.IsSuccess)
@@ -270,21 +270,19 @@ namespace Intwenty
                     result.Version = state.Version;
                     AfterSave(model, state, client);
 
-                    //client.CommitTransaction();
  
                 }
                 else
                 {
-                    return validation;
+                    return new ModifyResult(false, MessageCode.USERERROR) { Messages = validation.Messages };
                 }
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new ModifyResult() { Id = state.Id, Version = state.Version };
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
                 LogError("IntwentyDataService.Save: " + ex.Message);
             }
             finally
@@ -763,35 +761,35 @@ namespace Intwenty
 
         #region Delete
 
-        public OperationResult Delete(ClientStateInfo state)
+        public ModifyResult Delete(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return DeleteInternal(state, model);
         }
 
-        public OperationResult Delete(ClientStateInfo state, ApplicationModel model)
+        public ModifyResult Delete(ClientStateInfo state, ApplicationModel model)
         {
             return DeleteInternal(state, model);
         }
 
-        private OperationResult DeleteInternal(ClientStateInfo state, ApplicationModel model)
+        private ModifyResult DeleteInternal(ClientStateInfo state, ApplicationModel model)
         {
-            OperationResult result = null;
+            ModifyResult result = null;
 
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting application.");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting application.");
 
             if (state.ApplicationId < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
             if (state.Id < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "No state.Id found when deleting application.", 0, 0);
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No state.Id found when deleting application.", 0, 0);
 
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
 
             if (model.Application.Id != state.ApplicationId)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.Applicationid");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.Applicationid");
 
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
@@ -801,8 +799,8 @@ namespace Intwenty
 
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
 
-                result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, 0);
-
+                result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, state.Version);
+                
                 client.Open();
 
 
@@ -821,11 +819,12 @@ namespace Intwenty
                 client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
-
+                result.Status = LifecycleStatus.DELETED_SAVED;
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new ModifyResult() {Id=state.Id, Version = state.Version };
+                result.Status = LifecycleStatus.NONE;
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -840,23 +839,23 @@ namespace Intwenty
 
         }
 
-        public OperationResult DeleteById(int applicationid, int id, string dbname)
+        public ModifyResult DeleteById(int applicationid, int id, string dbname)
         {
-            OperationResult result = null;
+            ModifyResult result = null;
 
             if (applicationid < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must contain a valid ApplicationId.");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must contain a valid ApplicationId.");
 
             if (id < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter id can not be zero.");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter id can not be zero.");
 
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
 
             var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (modelitem == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -899,7 +898,7 @@ namespace Intwenty
 
                     client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                    result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
+                    result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
 
                 }
                 else
@@ -910,7 +909,7 @@ namespace Intwenty
                         {
                             client.RunCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                             client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                            result = new OperationResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
+                            result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
                         }
                     }
                 }
@@ -919,14 +918,16 @@ namespace Intwenty
                 if (result == null)
                     throw new InvalidOperationException("Found nothing to delete");
 
+                result.Status = LifecycleStatus.DELETED_SAVED;
+
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new ModifyResult();
+                result.Status = LifecycleStatus.NONE;
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
                 LogError("IntwentyDataService.DeleteById: " + ex.Message);
             }
 
@@ -936,21 +937,21 @@ namespace Intwenty
 
         #region Lists
 
-        public ListOperationResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
+        public DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
         {
             if (args == null)
-                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
+                return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
 
             if (args.ApplicationId < 1)
-                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
+                return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
 
             if (model == null)
-                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+                return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
 
             if (model.Application.Id != args.ApplicationId)
-                return new ListOperationResult<T>(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
+                return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
 
-            ListOperationResult<T> result = null;
+            DataListResult<T> result = null;
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
@@ -958,7 +959,7 @@ namespace Intwenty
             try
             {
 
-                result = new ListOperationResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
+                result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
 
                 if (args.MaxCount == 0)
                 {
@@ -1006,7 +1007,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new ListOperationResult<T>();
+                result = new DataListResult<T>();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -1023,33 +1024,33 @@ namespace Intwenty
         }
 
 
-        public OperationResult GetPagedList(ListFilter args, ApplicationModel model)
+        public DataListResult GetPagedList(ListFilter args, ApplicationModel model)
         {
             return GetPagedListInternal(args, model);
         }
 
-        public OperationResult GetPagedList(ListFilter args)
+        public DataListResult GetPagedList(ListFilter args)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
             return GetPagedListInternal(args, model);
         }
 
-        private OperationResult GetPagedListInternal(ListFilter args, ApplicationModel model)
+        private DataListResult GetPagedListInternal(ListFilter args, ApplicationModel model)
         {
 
             if (args == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter args was null");
+                return new DataListResult(false, MessageCode.SYSTEMERROR, "Parameter args was null");
 
             if (args.ApplicationId < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
+                return new DataListResult(false, MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
 
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
+                return new DataListResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
 
             if (model.Application.Id != args.ApplicationId)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
+                return new DataListResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
 
-            OperationResult result = null;
+            DataListResult result = null;
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
@@ -1057,7 +1058,7 @@ namespace Intwenty
             try
             {
 
-                result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
+                result = new DataListResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
 
                 if (args.MaxCount == 0)
                 {
@@ -1128,11 +1129,10 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataListResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
                 LogError("IntwentyDataService.GetPagedList: " + ex.Message);
             }
             finally
@@ -1146,9 +1146,10 @@ namespace Intwenty
         }
 
 
-        public OperationResult GetList(int applicationid)
+        public DataListResult GetList(int applicationid)
         {
-            OperationResult result = null;
+            DataListResult result = null;
+
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
 
@@ -1179,11 +1180,10 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataListResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
                 LogError("IntwentyDataService.GetList: " + ex.Message);
             }
             finally
@@ -1196,10 +1196,11 @@ namespace Intwenty
 
         }
 
-        public OperationResult GetListByOwnerUser(int applicationid, string owneruserid)
+        public DataListResult GetListByOwnerUser(int applicationid, string owneruserid)
         {
 
-            OperationResult result = null;
+            DataListResult result = null;
+
             var client = new Connection(DBMSType, Settings.DefaultConnection);
             client.Open();
 
@@ -1234,11 +1235,10 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataListResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
                 LogError("IntwentyDataService.GetListbyOwnerUser: " + ex.Message);
             }
             finally
@@ -1251,10 +1251,10 @@ namespace Intwenty
 
         }
 
-        protected virtual OperationResult GetListInternal(ApplicationModel model, string owneruserid, IDataClient client)
+        protected virtual DataListResult GetListInternal(ApplicationModel model, string owneruserid, IDataClient client)
         {
            
-            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title), 0, 0);
+            var result = new DataListResult(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
 
             var columns = new List<IIntwentyResultColumn>();
             columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
@@ -1304,32 +1304,105 @@ namespace Intwenty
         #endregion
 
         #region GetApplication
+        public DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
+        {
+            if (state == null)
+                return new DataResult<T>(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
+            if (state.Id < 0)
+                return new DataResult<T>(false, MessageCode.SYSTEMERROR, "Id is required when executing DefaultDbManager.GetLatestVersionById.");
+            if (state.ApplicationId < 0)
+                return new DataResult<T>(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
+            if (model == null)
+                return new DataResult<T>(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+            if (model.Application.Id != state.ApplicationId)
+                return new DataResult<T>(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
-        public OperationResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model)
+            DataResult<T> result = null;
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+
+                if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
+                {
+                    return result;
+                }
+
+                var sql_stmt = new StringBuilder();
+                sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
+                sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
+                sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
+
+                var ownedbyfilter = state.FilterValues.Find(p => p.ColumnName == "OWNEDBY");
+                if (ownedbyfilter != null && !string.IsNullOrEmpty(ownedbyfilter.Value))
+                    sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
+
+
+             
+                client.Open();
+                var t = client.GetEntities<T>(sql_stmt.ToString());
+                client.Close();
+                if (t.Count == 1)
+                {
+                    result = new DataResult<T>(true, MessageCode.RESULT, string.Format("GetLatestVersionById successful, application {0}.", model.Application.Title), state.Id, state.Version);
+                    result.Data = t[0];
+                    return result;
+                }
+                else
+                {
+                    result = new DataResult<T>(false, MessageCode.RESULT, string.Format("GetLatestVersionById failed, application {0}.", model.Application.Title), state.Id, state.Version);
+                    return result;
+                }
+             
+
+
+            }
+            catch (Exception ex)
+            {
+                result = new DataResult<T>() { Id = state.Id, Version = state.Version };
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
+            }
+            finally
+            {
+                client.Close();
+                result.Finish();
+            }
+
+            return result;
+
+        }
+
+        public DataResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model)
         {
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        public OperationResult GetLatestVersionById(ClientStateInfo state)
+        public DataResult GetLatestVersionById(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        private OperationResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
+        private DataResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
         {
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
             if (state.Id < 0)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Id is required when executing DefaultDbManager.GetLatestVersionById.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "Id is required when executing DefaultDbManager.GetLatestVersionById.");
             if (state.ApplicationId < 0)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
             if (model == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
             if (model.Application.Id != state.ApplicationId)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
-            OperationResult result = null;
+            DataResult result = null;
 
             if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
             {
@@ -1353,11 +1426,10 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataResult() { Id = state.Id, Version = state.Version };
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
                 LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
             }
             finally
@@ -1369,16 +1441,16 @@ namespace Intwenty
             return result;
         }
 
-        public OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state)
+        public DataResult GetLatestVersionByOwnerUser(ClientStateInfo state)
         {
-            OperationResult result = null;
+            DataResult result = null;
 
             if (state == null)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestVersionByOwnerUser.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestVersionByOwnerUser.");
             if (!state.FilterValues.Exists(p=> p.ColumnName.ToUpper() == "OWNEDBY"))
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestVersionByOwnerUser.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestVersionByOwnerUser.");
             if (state.ApplicationId < 0)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestVersionByOwnerUser.");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestVersionByOwnerUser.");
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -1405,7 +1477,7 @@ namespace Intwenty
                     if (resultset.Rows.Count == 0)
                     {
                         client.Close();
-                        return new OperationResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.ColumnName.ToUpper() == "OWNEDBY").Value));
+                        return new DataResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.ColumnName.ToUpper() == "OWNEDBY").Value),state.Id, state.Version);
                     }
 
                     state.Id = resultset.FirstRowGetAsInt("Id").Value;
@@ -1415,7 +1487,7 @@ namespace Intwenty
                 if (state.Id < 1)
                 {
                     client.Close();
-                    return new OperationResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
+                    return new DataResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
                 }
 
                 result = GetLatestVersion(model, state, client);
@@ -1423,11 +1495,10 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataResult() { Id = state.Id, Version = state.Version };
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
                 LogError("IntwentyDataService.GetLatestVersionByOwnerUser: " + ex.Message);
             }
             finally
@@ -1439,23 +1510,12 @@ namespace Intwenty
 
         }
 
-       
 
-        public OperationResult GetVersionListById(ClientStateInfo state)
-        {
-            throw new NotImplementedException();
-        }
-
-        public OperationResult GetVersion(ClientStateInfo state)
-        {
-            throw new NotImplementedException();
-        }
-
-        private OperationResult GetLatestVersion(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private DataResult GetLatestVersion(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
             var jsonresult = new StringBuilder();
 
-            var result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
+            var result = new DataResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
 
 
             try
@@ -1541,7 +1601,12 @@ namespace Intwenty
             catch (Exception ex)
             {
 
-                result = new OperationResult();
+                result = new DataResult();
+                if (state != null)
+                {
+                    result.Id = state.Id;
+                    result.Version = state.Version;
+                }
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -1562,12 +1627,12 @@ namespace Intwenty
         #endregion
 
         #region ValueDomain
-        public OperationResult GetValueDomains(int applicationid)
+        public DataListResult GetValueDomains(int applicationid)
         {
-            OperationResult result = null;
+            DataListResult result = null;
 
             if (applicationid < 1)
-                return new OperationResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must be a valid ApplicationId.");
+                return new DataListResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must be a valid ApplicationId.");
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -1642,14 +1707,14 @@ namespace Intwenty
                 }
                 sb.Append("}");
 
-                result = new OperationResult(true, MessageCode.RESULT, string.Format("Fetched domains used in ui for application {0}", model.Application.Title), 0, 0);
+                result = new DataListResult(true, MessageCode.RESULT, string.Format("Fetched domains used in ui for application {0}", model.Application.Title));
                 result.Data = sb.ToString();
 
 
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataListResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -1664,9 +1729,9 @@ namespace Intwenty
 
         }
 
-        public OperationResult GetValueDomains()
+        public DataListResult GetValueDomains()
         {
-            OperationResult result = null;
+            DataListResult result = null;
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -1723,16 +1788,16 @@ namespace Intwenty
                 }
                 sb.Append("}");
 
-                result = new OperationResult(true, MessageCode.RESULT, "Fetched all value domins", 0, 0);
+                result = new DataListResult(true, MessageCode.RESULT, "Fetched all value domins");
                 result.Data = sb.ToString();
             }
             catch (Exception ex)
             {
-                result = new OperationResult();
+                result = new DataListResult();
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, "Fetch all valuedomains failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "[]";
+                result.Data = "{}";
                 LogError("IntwentyDataService.GetValueDomains: " + ex.Message);
             }
             finally
@@ -1757,7 +1822,7 @@ namespace Intwenty
 
         #region Validation
 
-        public OperationResult Validate(ClientStateInfo state)
+        public ModifyResult Validate(ClientStateInfo state)
         {
             if (state==null)
                 throw new InvalidOperationException("Parameter state cannot be null");
@@ -1769,7 +1834,7 @@ namespace Intwenty
             return Validate(model, state);
         }
 
-        protected virtual OperationResult Validate(ApplicationModel model, ClientStateInfo state)
+        protected virtual ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
         {
 
             foreach (var t in model.UIStructure)
@@ -1779,7 +1844,7 @@ namespace Intwenty
                     var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumn1Info.DbName);
                     if (dv != null && !dv.HasValue)
                     {
-                        return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                        return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
                     }
                     foreach (var table in state.Data.SubTables)
                     {
@@ -1788,7 +1853,7 @@ namespace Intwenty
                             dv = row.Values.Find(p => p.DbName == t.DataColumn1Info.DbName);
                             if (dv != null && !dv.HasValue)
                             {
-                                return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                                return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
                             }
                         }
 
@@ -1797,16 +1862,16 @@ namespace Intwenty
                 }
             }
 
-            return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
+            return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
         }
 
         #endregion
 
         #region Dataview
 
-        public OperationResult GetDataView(ListFilter args)
+        public DataListResult GetDataView(ListFilter args)
         {
-            OperationResult result = new OperationResult();
+            DataListResult result = new DataListResult();
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
@@ -1875,7 +1940,6 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, "Fetch dataview failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
                 LogError("IntwentyDataService.GetDataView: " + ex.Message);
             }
             finally
@@ -1887,10 +1951,10 @@ namespace Intwenty
             return result;
         }
 
-        public OperationResult GetDataViewRecord(ListFilter args)
+        public DataListResult GetDataViewRecord(ListFilter args)
         {
 
-            var result = new OperationResult(true, MessageCode.RESULT, "Fetched dataview record");
+            var result = new DataListResult(true, MessageCode.RESULT, "Fetched dataview record");
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 

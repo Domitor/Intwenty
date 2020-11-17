@@ -4,7 +4,7 @@
 
     var systems = new List<SystemModelItem>();
     var menutitle = "Menu";
-    var apps = ModelRepository.GetAuthorizedApplicationModels(User);
+    var apps = ModelRepository.GetLocalizedAuthorizedApplicationModels(User);
     //var menuobjects = ModelRepository.GetLocalizedMenuModels();
     //var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
     //if (mainmenu != null)
@@ -52,7 +52,7 @@
 
                 foreach (var app in apps.Where(p => p.SystemMetaCode == sys.MetaCode))
                 {
-                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@app.Id">@app.Title</a>
+                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@app.Id">@app.LocalizedTitle</a>
                 }
 
                 <!--

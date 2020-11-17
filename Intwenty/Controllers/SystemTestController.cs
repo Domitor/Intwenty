@@ -17,6 +17,8 @@ using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Intwenty.DataClient.Reflection;
 using Intwenty.Interface;
+using InformationStatus = Intwenty.Model.Dto.InformationStatus;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Controllers
 {
@@ -28,7 +30,7 @@ namespace Intwenty.Controllers
         private readonly IIntwentyModelService _modelservice;
         private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
-        private readonly UserManager<IntwentyUser> _usermanager;
+        private readonly IntwentyUserManager _usermanager;
         private readonly SignInManager<IntwentyUser> _signinmanager;
         private readonly RoleManager<IntwentyRole> _rolemanager;
         private readonly IHubContext<ServerToClientPush> _hubContext;
@@ -36,7 +38,7 @@ namespace Intwenty.Controllers
         public SystemTestController(IIntwentyModelService modelservice,
                                     IIntwentyDataService dataservice,
                                     IOptions<IntwentySettings> settings,
-                                    UserManager<IntwentyUser> usermgr,
+                                    IntwentyUserManager usermgr,
                                     SignInManager<IntwentyUser> signinmgr,
                                     RoleManager<IntwentyRole> rolemgr,
                                     IHubContext<ServerToClientPush> hubcontext)
@@ -61,7 +63,7 @@ namespace Intwenty.Controllers
         [HttpPost]
         public JsonResult RunSystemTests()
         {
-            var res = new List<OperationResult>();
+            var res = new List<TestResult>();
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
@@ -121,6 +123,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test9GetListOfIntwentyApplicationByOwnerUser());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test10GetLatestVersionByOwnerUser());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test11UpdateIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test111GetTypedApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test12DeleteIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test13GetAllValueDomains());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test14GetDataSet());
@@ -129,6 +132,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test500GetDataView());
+           
 
 
             //TEST ALL SUPPORTED DB
@@ -183,9 +187,9 @@ namespace Intwenty.Controllers
         }
 
 
-        private OperationResult Test1ORMCreateTable()
+        private TestResult Test1ORMCreateTable()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.CreateTable<T>");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "DataClient.CreateTable<T>");
             try
             {
 
@@ -206,9 +210,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test2ORMInsert()
+        private TestResult Test2ORMInsert()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.InsertEntity(T) - 100 Records using auto increment");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "DataClient.InsertEntity(T) - 100 Records using auto increment");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -242,9 +246,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test3ORMUpdate()
+        private TestResult Test3ORMUpdate()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Update(T) - Retrieve last record and update");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "DataClient.Update(T) - Retrieve last record and update");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -298,10 +302,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test4ORMDelete()
+        private TestResult Test4ORMDelete()
         {
 
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Delete(T) - Retrieve a list of inserted records and delete them one by one");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "DataClient.Delete(T) - Retrieve a list of inserted records and delete them one by one");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
@@ -335,9 +339,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test5CreateIntwentyDb()
+        private TestResult Test5CreateIntwentyDb()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "IIntwentyModelService.CreateIntwentyDatabase()");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "IIntwentyModelService.CreateIntwentyDatabase()");
             try
             {
 
@@ -355,25 +359,29 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test6CreateIntwentyExampleModel()
+        private TestResult Test6CreateIntwentyExampleModel()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Create an intwenty application (My test application)");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Create an intwenty application (My test application)");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
 
             try
             {
-              
+
+                var system = _modelservice.GetSystemModels().Find(p => p.MetaCode == "INTWENTYDEFAULTSYS");
+                if (system == null)
+                    throw new InvalidOperationException("The default system could not be found");
+
                 dbstore.Open();
-                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode="DEFAULT", Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "TestApp", IsHierarchicalApplication = false, UseVersioning = true });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATATABLE", MetaCode = "TESTAPP_SUBTABLE", DbName = "TestAppSubTable", ParentMetaCode = "ROOT" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINETEXT", DbName = "LineHeader", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
-                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = "DEFAULT", AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINEDESCRIPTION", DbName = "LineDescription", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode="DEFAULT", Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", IsHierarchicalApplication = false, UseVersioning = true });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATATABLE", MetaCode = "TESTAPP_SUBTABLE", DbName = "def_TestAppSubTable", ParentMetaCode = "ROOT" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINETEXT", DbName = "LineHeader", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "LINEDESCRIPTION", DbName = "LineDescription", ParentMetaCode = "TESTAPP_SUBTABLE", DataType = "STRING" });
 
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 1", Code = "1" });
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
@@ -392,7 +400,7 @@ namespace Intwenty.Controllers
                 if (model==null)
                     throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
-                OperationResult configres = _modelservice.ConfigureDatabase(model);
+                var configres = _modelservice.ConfigureDatabase(model);
                 
                 if (!configres.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
@@ -410,9 +418,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test7CreateIntwentyApplication()
+        private TestResult Test7CreateIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Create 100 intwenty application based on the created test model");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Create 100 intwenty application based on the created test model");
+
             try
             {
                 for (int i = 0; i < 100; i++)
@@ -433,7 +442,7 @@ namespace Intwenty.Controllers
                     state.Data.Values.Add(new ApplicationValue() { DbName = "BoolValue", Value = true });
                     state.Data.Values.Add(new ApplicationValue() { DbName = "IntValue", Value = 25 + i });
                     state.Data.Values.Add(new ApplicationValue() { DbName = "DecValue", Value = 777.77 });
-                    var subtable = new ApplicationTable() { DbName = "TestAppSubTable" };
+                    var subtable = new ApplicationTable() { DbName = "def_TestAppSubTable" };
                     var row = new ApplicationTableRow() { Table = subtable };
                     row.Values.Add(new ApplicationValue() { DbName = "LineHeader", Value = "First Row" });
                     row.Values.Add(new ApplicationValue() { DbName = "LineDescription", Value = "First Row Description" });
@@ -467,9 +476,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test8GetListOfIntwentyApplication()
+        private TestResult Test8GetListOfIntwentyApplication()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get a list just of created intwenty applications");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list just of created intwenty applications");
+
             try
             {
                 var getlistresult = _dataservice.GetList(10000);
@@ -496,9 +506,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test9GetListOfIntwentyApplicationByOwnerUser()
+        private TestResult Test9GetListOfIntwentyApplicationByOwnerUser()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get a list of created intwenty applications by owner user");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list of created intwenty applications by owner user");
 
             try
             {
@@ -525,9 +535,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test10GetLatestVersionByOwnerUser()
+        private TestResult Test10GetLatestVersionByOwnerUser()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get the latest version of an intwenty application by owner user");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get the latest version of an intwenty application by owner user");
+
             try
             {
                 var state = new ClientStateInfo();
@@ -554,10 +565,11 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test11UpdateIntwentyApplication()
+        private TestResult Test11UpdateIntwentyApplication()
         {
 
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Update intwenty application");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Update intwenty application");
+
             try
             {
                 var state = new ClientStateInfo();
@@ -630,9 +642,52 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test12DeleteIntwentyApplication()
+        private TestResult Test111GetTypedApplication()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Delete an intwenty application");
+
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get typed intwenty application");
+
+            try
+            {
+                var args = new ListFilter() { ApplicationId = 10000,  BatchSize = 500 };
+                var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
+                if (model == null)
+                    throw new InvalidOperationException("Model not found");
+
+                var data = _dataservice.GetPagedList<def_TestApp>(args, model);
+                if (!data.IsSuccess)
+                    throw new InvalidOperationException(data.SystemError);
+
+                if (data.Data.Count < 1)
+                    throw new InvalidOperationException("No data found when using GetPagedList<def_TestApp>()");
+
+                var state = new ClientStateInfo() { ApplicationId = 10000, Id = data.Data[0].Id };
+                var data2 = _dataservice.GetLatestVersionById<def_TestApp>(state, model);
+                if (!data2.IsSuccess)
+                    throw new InvalidOperationException(data2.SystemError);
+
+                if (data2.Data == null)
+                    throw new InvalidOperationException("No data found when using GetLatestVersionById<def_TestApp>()");
+
+                if (data2.Data.Id < 1)
+                    throw new InvalidOperationException("No data found when using GetLatestVersionById<def_TestApp>()");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test111GetTypedApplication (Get typed intwenty application) lasted  {0} ms", result.Duration));
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+
+        private TestResult Test12DeleteIntwentyApplication()
+        {
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Delete an intwenty application");
 
             try
             {
@@ -688,9 +743,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test13GetAllValueDomains()
+        private TestResult Test13GetAllValueDomains()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get all value domain items");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get all value domain items");
             try
             {
 
@@ -717,9 +772,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test14GetDataSet()
+        private TestResult Test14GetDataSet()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get eventlog dataset <EventLog>");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get eventlog dataset <EventLog>");
 
             try
             {
@@ -748,10 +803,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test15Transactions()
+        private TestResult Test15Transactions()
         {
 
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "DataClient.Transactions");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "DataClient.Transactions");
             try
             {
 
@@ -804,9 +859,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test16CachePerformance()
+        private TestResult Test16CachePerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test logging and Intwenty application cache.");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Test logging and Intwenty application cache.");
 
             try
             {
@@ -842,10 +897,10 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test17GetLists()
+        private TestResult Test17GetLists()
         {
 
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test GetList(args) and paging");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Test GetList(args) and paging");
             try
             {
 
@@ -905,21 +960,21 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test18TestIdentity()
+        private TestResult Test18TestIdentity()
         {
 
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Test Asp.Net.Core.Identity.");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Test Asp.Net.Core.Identity.");
 
             try
             {
-                var retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                var retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole != null)
                     _rolemanager.DeleteAsync(retrievedrole);
 
                 var retrieveduser = _usermanager.FindByNameAsync("systemtest@systemtest.com").Result;
                 if (retrieveduser != null)
                 {
-                    _usermanager.RemoveFromRoleAsync(retrieveduser, "SYSROLE");
+                    _usermanager.RemoveFromRoleAsync(retrieveduser, "TESTXROLE");
                     _usermanager.DeleteAsync(retrieveduser);
                 }
 
@@ -932,31 +987,31 @@ namespace Intwenty.Controllers
                 if (string.IsNullOrEmpty(retrieveduser.Id))
                     throw new InvalidOperationException("The inserted user has no id");
 
-                var role = new IntwentyRole() { Name = "SYSROLE", NormalizedName = "SYSROLE" };
+                var role = new IntwentyRole() { Name = "TESTXROLE", NormalizedName = "TESTXROLE" };
                 _rolemanager.CreateAsync(role);
-                retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole == null)
                     throw new InvalidOperationException("The inserted role could not be retrieved");
                 if (string.IsNullOrEmpty(retrievedrole.Id))
                     throw new InvalidOperationException("The inserted role has no id");
 
-                _usermanager.AddToRoleAsync(retrieveduser, "SYSROLE");
-                if (!_usermanager.IsInRoleAsync(retrieveduser, "SYSROLE").Result)
-                    throw new InvalidOperationException("UserManager.IsInRoleAsync returned false for SysRole, despite it was assigned to the user");
+                _usermanager.AddToRoleAsync(retrieveduser, "TESTXROLE");
+                if (!_usermanager.IsInRoleAsync(retrieveduser, "TESTXROLE").Result)
+                    throw new InvalidOperationException("UserManager.IsInRoleAsync returned false for TESTXROLE, despite it was assigned to the user");
 
 
                 var roles = _usermanager.GetRolesAsync(retrieveduser).Result;
                 if (roles.Count != 1)
                     throw new InvalidOperationException("UserManager.GetRolesAsync() returned the wrong number of roles");
 
-                _usermanager.RemoveFromRoleAsync(retrieveduser, "SYSROLE");
+                _usermanager.RemoveFromRoleAsync(retrieveduser, "TESTXROLE");
                 roles = _usermanager.GetRolesAsync(retrieveduser).Result;
                 if (roles.Count > 0)
                     throw new InvalidOperationException("UserManager.GetRolesAsync() returned a role, despite it was removed from the user");
 
 
                 _rolemanager.DeleteAsync(retrievedrole);
-                retrievedrole = _rolemanager.FindByNameAsync("SYSROLE").Result;
+                retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole != null)
                     throw new InvalidOperationException("The delete role could be retrieved despite it was deleted");
 
@@ -987,9 +1042,9 @@ namespace Intwenty.Controllers
         }
 
         //SQLite performance
-        private OperationResult Test100SqliteInsertPerformance()
+        private TestResult Test100SqliteInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - Insert 5000 - Autoincrementation");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLite performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1023,9 +1078,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test101SqliteGetJSONArrayPerformance()
+        private TestResult Test101SqliteGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetJSONArray 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLite performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1053,9 +1108,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test102SqliteGetEntitiesPerformance()
+        private TestResult Test102SqliteGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetEntities 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLite performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1083,9 +1138,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test103SqliteGetResultSetPerformance()
+        private TestResult Test103SqliteGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetResultSet 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLite performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1113,9 +1168,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test104SqliteGetDataTablePerformance()
+        private TestResult Test104SqliteGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLite performance - GetDataTable 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLite performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.SQLite, _settings.TestDbConnectionSqlite);
 
             try
@@ -1144,9 +1199,9 @@ namespace Intwenty.Controllers
         }
 
         //SQL Server performance
-        private OperationResult Test200SqlServerInsertPerformance()
+        private TestResult Test200SqlServerInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - Insert 5000 - Autoincrementation");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLServer performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1180,9 +1235,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test201SqlServerGetJSONArrayPerformance()
+        private TestResult Test201SqlServerGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetJSONArray 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLServer performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1210,9 +1265,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test202SqlServerGetEntitiesPerformance()
+        private TestResult Test202SqlServerGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetEntities 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLServer performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1240,9 +1295,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test203SqlServerGetResultSetPerformance()
+        private TestResult Test203SqlServerGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetResultSet 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLServer performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1270,9 +1325,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test204SqlServerGetDataTablePerformance()
+        private TestResult Test204SqlServerGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "SQLServer performance - GetDataTable 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "SQLServer performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.MSSqlServer, _settings.TestDbConnectionSqlServer);
 
             try
@@ -1302,9 +1357,9 @@ namespace Intwenty.Controllers
 
 
         //MariaDB performance
-        private OperationResult Test300MariaDbInsertPerformance()
+        private TestResult Test300MariaDbInsertPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - Insert 5000 - Autoincrementation");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "MariaDb performance - Insert 5000 - Autoincrementation");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1338,9 +1393,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test301MariaDbGetJSONArrayPerformance()
+        private TestResult Test301MariaDbGetJSONArrayPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetJSONArray 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "MariaDb performance - GetJSONArray 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1368,9 +1423,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test302MariaDbGetEntitiesPerformance()
+        private TestResult Test302MariaDbGetEntitiesPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetEntities 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "MariaDb performance - GetEntities 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1398,9 +1453,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test303MariaDbGetResultSetPerformance()
+        private TestResult Test303MariaDbGetResultSetPerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetResultSet 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "MariaDb performance - GetResultSet 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1428,9 +1483,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test304MariaDbGetDataTablePerformance()
+        private TestResult Test304MariaDbGetDataTablePerformance()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "MariaDb performance - GetDataTable 5000");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "MariaDb performance - GetDataTable 5000");
             var dbstore = new Connection(DBMS.MariaDB, _settings.TestDbConnectionMariaDb);
 
             try
@@ -1459,9 +1514,9 @@ namespace Intwenty.Controllers
         }
 
         //Postgres performance
-        private OperationResult Test400PostgresInsertPerformance(bool deleteprev)
+        private TestResult Test400PostgresInsertPerformance(bool deleteprev)
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - Insert {0} - Autoincrementation", 5000));
+            TestResult result = new TestResult(true, MessageCode.RESULT, string.Format("Postgres performance - Insert {0} - Autoincrementation", 5000));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1498,9 +1553,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test401PostgresGetJSONArrayPerformance(int expectedtotal)
+        private TestResult Test401PostgresGetJSONArrayPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetJSONArray {0}", expectedtotal));
+            TestResult result = new TestResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetJSONArray {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1528,9 +1583,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test402PostgresGetEntitiesPerformance(int expectedtotal)
+        private TestResult Test402PostgresGetEntitiesPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetEntities {0}", expectedtotal));
+            TestResult result = new TestResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetEntities {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1558,9 +1613,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test403PostgresGetResultSetPerformance(int expectedtotal)
+        private TestResult Test403PostgresGetResultSetPerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetResultSet {0}", expectedtotal));
+            TestResult result = new TestResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetResultSet {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1588,9 +1643,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test404PostgresGetDataTablePerformance(int expectedtotal)
+        private TestResult Test404PostgresGetDataTablePerformance(int expectedtotal)
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetDataTable {0}", expectedtotal));
+            TestResult result = new TestResult(true, MessageCode.RESULT, string.Format("Postgres performance - GetDataTable {0}", expectedtotal));
             var dbstore = new Connection(DBMS.PostgreSQL, _settings.TestDbConnectionPostgres);
 
             try
@@ -1618,9 +1673,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private OperationResult Test500GetDataView()
+        private TestResult Test500GetDataView()
         {
-            OperationResult result = new OperationResult(true, MessageCode.RESULT, "Get an intwenty DataView");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get an intwenty DataView");
 
             try
             {
@@ -1656,7 +1711,21 @@ namespace Intwenty.Controllers
 
 
 
+   
+    public class def_TestApp : InformationStatus
+    {
+        public string Header { get; set; }
 
+        public string Description { get; set; }
+
+        public int IntValue { get; set; }
+
+        public bool BoolValue { get; set; }
+
+        public decimal DecValue { get; set; }
+
+
+    }
 
 
     [DbTablePrimaryKey("Id")]

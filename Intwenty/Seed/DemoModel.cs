@@ -45,12 +45,12 @@ namespace Intwenty.Seed
             applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "", CreateViewRequirement = "AUTH", EditViewRequirement = "OWNER", EditListViewRequirement = "OWNER", DetailViewRequirement = "PUB", ListViewRequirement = "PUB" });
 
             //MENU
-            menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", TitleLocalizationKey = "MENU", OrderNo = 1, Action = "", Controller = "" });
-            menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VEND", ParentMetaCode = "SYSMENU", Title = "Vendor", TitleLocalizationKey = "VENDOR", OrderNo = 40, Action = "", Controller = "" });
-            menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", TitleLocalizationKey = "CUSTOMER", OrderNo = 10, Action = "", Controller = "" });
-            menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", TitleLocalizationKey = "ITEM", OrderNo = 20, Action = "", Controller = "" });
-            menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", OrderNo = 30, Action = "", Controller = "" });
-            menuitems.Add(new MenuItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", MetaType = "MENUITEM", MetaCode = "M_BLOG", ParentMetaCode = "SYSMENU", Title = "Example blog", TitleLocalizationKey = "", OrderNo = 60, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", TitleLocalizationKey = "MENU", OrderNo = 1, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VEND", ParentMetaCode = "SYSMENU", Title = "Vendor", TitleLocalizationKey = "VENDOR", OrderNo = 40, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", TitleLocalizationKey = "CUSTOMER", OrderNo = 10, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", TitleLocalizationKey = "ITEM", OrderNo = 20, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", OrderNo = 30, Action = "", Controller = "" });
+            //menuitems.Add(new MenuItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", MetaType = "MENUITEM", MetaCode = "M_BLOG", ParentMetaCode = "SYSMENU", Title = "Example blog", TitleLocalizationKey = "", OrderNo = 60, Action = "", Controller = "" });
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
             valuedomains.Add(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "PROD", Value = "Products" });
@@ -69,7 +69,7 @@ namespace Intwenty.Seed
 
 
             //UI
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "CREATEVIEW", MetaCode = "ADDEDITVIEW", Title = "Create Customer", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "CREATEVIEW", MetaCode = "ADDEDITVIEW", TitleLocalizationKey= "VIEW_CUST_ADDEDITVIEW", Title = "Create Customer", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ADDEDITVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1, Properties="READONLY=TRUE" });
@@ -243,9 +243,11 @@ namespace Intwenty.Seed
 
             var translations = new List<TranslationItem>();
 
-            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
-            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
-            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
+             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VIEW_CUST_ADDEDITVIEW", Text = "New Customer" });
+             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VIEW_CUST_ADDEDITVIEW", Text = "Ny Kund" });
+             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
+             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
+             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
              translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERS", Text = "Kunder" });
              translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERLIST", Text = "Customer list" });
              translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERLIST", Text = "Kunder" });

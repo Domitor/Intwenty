@@ -14,7 +14,10 @@ namespace Intwenty.Interface
     /// </summary>
     public interface IIntwentyModelService
     {
-
+        /// <summary>
+        /// Returns localized application models that the current user has permission to use
+        /// </summary>
+        public List<ApplicationModelItem> GetLocalizedAuthorizedApplicationModels(ClaimsPrincipal claimprincipal);
         /// <summary>
         /// Returns application models that the current user has permission to use
         /// </summary>
@@ -75,7 +78,7 @@ namespace Intwenty.Interface
 
         public List<ApplicationModelItem> GetAppModels();
 
-        public OperationResult SaveAppModel(ApplicationModelItem model);
+        public ModifyResult SaveAppModel(ApplicationModelItem model);
 
         public void DeleteAppModel(ApplicationModelItem model);
 

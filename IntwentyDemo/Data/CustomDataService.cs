@@ -109,21 +109,21 @@ namespace IntwentyDemo.Data
         /// Example
         /// Serverside validation
         /// </summary>
-        protected override OperationResult Validate(ApplicationModel model, ClientStateInfo state)
+        protected override ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
         {
             if (state.HasProperty("ISIMPORT"))
-                return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
+                return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
 
             if (model.Application.MetaCode == "CUSTOMER")
             {
                 var dv = state.Data.Values.FirstOrDefault(p => p.DbName == "CustomerEmail");
                 if ((dv != null && !dv.HasValue) || dv == null)
                 {
-                    return new OperationResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", "Email"), state.Id, state.Version);
+                    return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", "Email"), state.Id, state.Version);
                 }
                 else
                 {
-                    return new OperationResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
+                    return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);
                 }
             }
             else

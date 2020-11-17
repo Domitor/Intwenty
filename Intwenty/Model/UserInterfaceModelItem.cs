@@ -61,6 +61,7 @@ namespace Intwenty.Model
             Id = entity.Id;
             MetaType = entity.MetaType;
             Title = entity.Title;
+            LocalizedTitle = entity.Title;
             TitleLocalizationKey = entity.TitleLocalizationKey;
             Description = entity.Description;
             AppMetaCode = entity.AppMetaCode;
@@ -97,6 +98,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
             if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
             if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;

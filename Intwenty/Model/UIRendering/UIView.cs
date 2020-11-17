@@ -6,11 +6,13 @@ using System.Text;
 namespace Intwenty.Model.UIRendering
 {
 
-    public class UIView : HashTagPropertyObject
+    public class UIView : HashTagPropertyObject, ILocalizableTitle
     {
         public int ApplicationId { get; set; }
         public string MetaType { get; set; }
+        public string TitleLocalizationKey { get; set; }
         public string Title { get; set; }
+        public string LocalizedTitle { get; set; }
         public List<UISection>  Sections { get; set; }
         public List<IEditListViewColumn> Columns { get; set; }
         public List<IUIControl> Modals { get; set; }
@@ -50,9 +52,11 @@ namespace Intwenty.Model.UIRendering
 
    
 
-    public class UISection : HashTagPropertyObject
+    public class UISection : HashTagPropertyObject, ILocalizableTitle
     {
+        public string TitleLocalizationKey { get; set; }
         public string Title { get; set; }
+        public string LocalizedTitle { get; set; }
         public List<UIPanel> Panels { get; set; }
 
         public UISection()
@@ -61,9 +65,11 @@ namespace Intwenty.Model.UIRendering
         }
     }
 
-    public class UIPanel : HashTagPropertyObject
+    public class UIPanel : HashTagPropertyObject, ILocalizableTitle
     {
+        public string TitleLocalizationKey { get; set; }
         public string Title { get; set; }
+        public string LocalizedTitle { get; set; }
 
         public bool UseFieldSet { get; set; }
 

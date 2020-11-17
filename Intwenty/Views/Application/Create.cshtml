@@ -5,7 +5,7 @@
     var view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
     if (view != null)
     {
-        title = view.Title;
+        title = view.LocalizedTitle;
         if (string.IsNullOrEmpty(title))
         {
             title = "Create";

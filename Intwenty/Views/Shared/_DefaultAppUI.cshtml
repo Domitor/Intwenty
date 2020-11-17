@@ -17,7 +17,7 @@
                @if (pl.UseFieldSet)
                {
                 @:<fieldset class="intwentypanel">
-                    @:<legend>@pl.Title</legend>
+                    @:<legend>@pl.LocalizedTitle</legend>
                }
 
                     @foreach (var t in pl.Controls)
@@ -101,7 +101,7 @@
                         if (t.IsMetaTypeEditGrid && t.Children.Count > 0)
                         {
 
-                            <h4>@t.Title</h4>
+                            <h4>@t.LocalizedTitle</h4>
 
                             <div>
                                 <div class="btn btn-sm btn-secondary" v-on:click="addSubTableLine('@t.DataTableDbName')">
@@ -114,7 +114,7 @@
                                     <tr>
                                         @foreach (var tf in t.Children)
                                         {
-                                            <th>@tf.Title</th>
+                                            <th>@tf.LocalizedTitle</th>
                                         }
                                     </tr>
                                 </thead>
@@ -250,7 +250,7 @@
                                                 {
                                                     if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == t.DataViewMetaCode)
                                                     {
-                                                        <th>@viewcol.Title</th>
+                                                        <th>@viewcol.LocalizedTitle</th>
                                                     }
 
                                                 }

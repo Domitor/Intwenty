@@ -17,8 +17,9 @@ namespace IntwentyDemo.Controllers
        -- This is an example of how to override the Intwenty ApplicationAPIController --
        1.   Name the controller ApplicationAPIController and put in the Controllers folder. 
        2.   Attribute routing must be used otherwise it will be conflicts with routes in the base controller.
+       3.   If this controller overides Intwenty.Controllers.ApplicationAPIController, all methods must be overridden with route attributes, otherwist there will be a route confilict
 
-    */
+
 
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
     public class ApplicationAPIController : Intwenty.Controllers.ApplicationAPIController
@@ -48,6 +49,6 @@ namespace IntwentyDemo.Controllers
 
 
     }
-        
+           */
 
 }

@@ -4,6 +4,7 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace Intwenty.Areas.Identity.Data
@@ -14,16 +15,22 @@ namespace Intwenty.Areas.Identity.Data
     public class IntwentyRoleStore : IRoleStore<IntwentyRole>
     {
 
+        private static readonly string RolesCacheKey = "SYSROLES";
+
         private IntwentySettings Settings { get; }
 
+        private IMemoryCache RoleCache { get; }
 
-        public IntwentyRoleStore(IOptions<IntwentySettings> settings)
+        public IntwentyRoleStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             Settings = settings.Value;
+            RoleCache = cache;
         }
 
         public Task<IdentityResult> CreateAsync(IntwentyRole role, CancellationToken cancellationToken)
         {
+            RoleCache.Remove(RolesCacheKey);
+
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             client.InsertEntity(role);
@@ -33,6 +40,8 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> DeleteAsync(IntwentyRole role, CancellationToken cancellationToken)
         {
+            RoleCache.Remove(RolesCacheKey);
+
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             client.DeleteEntity(role);

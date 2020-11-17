@@ -1,5 +1,4 @@
 ﻿using Intwenty.Model.Dto;
-using Intwenty.Entity;
 using Intwenty.DataClient;
 using Intwenty.Model;
 using System;
@@ -13,33 +12,37 @@ namespace Intwenty.Interface
         /// <summary>
         /// Creates a new application JSON Document including defaultvalues.
         /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult CreateNew(ClientStateInfo state);
+        /// <returns>An Result including a json object</returns>
+        DataResult CreateNew(ClientStateInfo state);
 
-        OperationResult CreateNew(ApplicationModel model);
+        DataResult CreateNew(ApplicationModel model);
 
 
         /// <summary>
         /// Saves application data
         /// </summary>
-        /// <returns>An OperationResult including Id and Version for the saved application</returns>
-        OperationResult Save(ClientStateInfo state);
+        /// <returns>A result describing the state of the saved application</returns>
+        ModifyResult Save(ClientStateInfo state);
 
-        OperationResult Save(ClientStateInfo state, ApplicationModel model);
+        /// <summary>
+        /// Saves application data
+        /// </summary>
+        /// <returns>A result describing the state of the saved application</returns>
+        ModifyResult Save(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
-        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult Delete(ClientStateInfo state);
+        /// <returns>A result describing the deleted  application</returns>
+        ModifyResult Delete(ClientStateInfo state);
 
         /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
-        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult Delete(ClientStateInfo state, ApplicationModel model);
+        /// <returns>A result describing the deleted  application</returns>
+        ModifyResult Delete(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
         /// Deletes data by Id
@@ -49,23 +52,34 @@ namespace Intwenty.Interface
         /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
-        /// <returns>An OperationResult including Id and Version for the deleted application</returns>
-        OperationResult DeleteById(int applicationid, int id, string dbname);
+        /// <returns>A result describing the deleted  application</returns>
+        ModifyResult DeleteById(int applicationid, int id, string dbname);
 
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetLatestVersionById(ClientStateInfo state);
+        /// <returns>A result including the application json data</returns>
+        DataResult GetLatestVersionById(ClientStateInfo state);
 
-        OperationResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
-        /// Gets the latest version of the latest id for an application based on OwnerUserId and ApplicationId
+        /// Get the latest version data for and application based on Id
         /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetLatestVersionByOwnerUser(ClientStateInfo state);
+        /// <returns>A result including the application json data</returns>
+        DataResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model);
+
+        /// <summary>
+        /// Get the latest version data for and application based on Id
+        /// </summary>
+        /// <returns>A result including the application data of type T</returns>
+        DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : InformationStatus, new();
+
+        /// <summary>
+        /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
+        /// </summary>
+        /// <returns>A result including the application json data</returns>
+        DataResult GetLatestVersionByOwnerUser(ClientStateInfo state);
 
 
         /// <summary>
@@ -75,9 +89,9 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a string json array and the current paging rownum</returns>
-        OperationResult GetPagedList(ListFilter args);
+        DataListResult GetPagedList(ListFilter args);
 
-        OperationResult GetPagedList(ListFilter args, ApplicationModel model);
+        DataListResult GetPagedList(ListFilter args, ApplicationModel model);
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -86,43 +100,32 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a list of T and the current paging rownum</returns>
-        ListOperationResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new();
+        DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationStatus, new();
 
         /// <summary>
         /// Get a list of (latest version) application data. 
         /// All columns from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetList(int applicationid);
+        DataListResult GetList(int applicationid);
 
         /// <summary>
         /// Get a list of (latest version) application data based on OwnedBy. 
         /// All columns from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetListByOwnerUser(int applicationid, string owneruserid);
+        DataListResult GetListByOwnerUser(int applicationid, string owneruserid);
+
 
         /// <summary>
-        /// Get a list of all versions for an application based on Id
+        /// Get value domains for an application specified by application id
         /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetVersionListById(ClientStateInfo state);
-
-        /// <summary>
-        /// Get the data for an application based on Id and Version
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetVersion(ClientStateInfo state);
-
-        /// <summary>
-        /// Get value domains used by UI in the application specified by application id
-        /// </summary>
-        OperationResult GetValueDomains(int ApplicationId);
+        DataListResult GetValueDomains(int ApplicationId);
 
         /// <summary>
         /// Get all value domains.
         /// </summary>
-        OperationResult GetValueDomains();
+        DataListResult GetValueDomains();
 
         /// <summary>
         /// Get all value domain items.
@@ -140,19 +143,19 @@ namespace Intwenty.Interface
         /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        OperationResult GetDataView(ListFilter args);
+        DataListResult GetDataView(ListFilter args);
 
         /// <summary>
         /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
         /// </summary>
         /// <returns>An OperationResult including a json object</returns>
-        OperationResult GetDataViewRecord(ListFilter args);
+        DataListResult GetDataViewRecord(ListFilter args);
 
         /// <summary>
         /// Validates an application according to validation rules in the model
         /// </summary>
         /// <returns>OperationResult as the result of the validation</returns>
-        OperationResult Validate(ClientStateInfo state);
+        ModifyResult Validate(ClientStateInfo state);
 
         void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 

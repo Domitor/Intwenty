@@ -31,6 +31,7 @@ namespace Intwenty.Model
             SQLQueryFieldName = entity.SQLQueryFieldName;
             MetaType = entity.MetaType;
             Title = entity.Title;
+            LocalizedTitle = entity.Title;
             TitleLocalizationKey = entity.TitleLocalizationKey;
             MetaCode = entity.MetaCode;
             ParentMetaCode = entity.ParentMetaCode;

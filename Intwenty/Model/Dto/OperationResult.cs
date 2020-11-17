@@ -5,7 +5,7 @@ namespace Intwenty.Model.Dto
 {
 
    
-
+    /*
   
 
     public class OperationMessage
@@ -258,7 +258,7 @@ namespace Intwenty.Model.Dto
         }
 
     }
-
+    */
    
 
     

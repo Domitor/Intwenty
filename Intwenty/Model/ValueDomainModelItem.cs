@@ -32,6 +32,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Value)) Value = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
+            if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
         }
 
@@ -47,6 +48,8 @@ namespace Intwenty.Model
         public string Value { get; set; }
 
         public string Title { get; set; }
+
+        public string LocalizedTitle { get; set; }
 
         public bool IsValid
         {

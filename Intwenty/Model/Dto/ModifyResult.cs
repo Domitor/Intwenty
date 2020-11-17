@@ -12,6 +12,7 @@ namespace Intwenty.Model.Dto
 
         public int Id { get; set; }
 
+
         public ModifyResult()
         {
             StartTime = DateTime.Now;
@@ -29,4 +30,42 @@ namespace Intwenty.Model.Dto
         }
 
     }
+
+    public class TestResult : IntwentyResult
+    {
+        public TestResult()
+        {
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+        }
+
+        public TestResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
+        {
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            AddMessage(messagecode, message);
+        }
+    }
+
+    public class OperationResult : IntwentyResult
+    {
+        public OperationResult()
+        {
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+        }
+
+        public OperationResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
+        {
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            AddMessage(messagecode, message);
+        }
+    }
+
+
+
+
 }

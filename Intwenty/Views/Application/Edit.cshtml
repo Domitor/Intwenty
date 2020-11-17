@@ -6,7 +6,7 @@
     var view = Model.UIViews.Find(p => p.IsMetaTypeEditView);
     if (view != null)
     {
-        title = view.Title;
+        title = view.LocalizedTitle;
         if (string.IsNullOrEmpty(title))
         {
             title = "Edit";

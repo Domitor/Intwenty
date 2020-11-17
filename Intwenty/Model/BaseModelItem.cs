@@ -16,6 +16,8 @@ namespace Intwenty.Model
 
         public string Title { get; set; }
 
+        public string LocalizedTitle { get; set; }
+
         public string MetaCode { get; set; }
 
         public string ParentMetaCode { get; set; }
