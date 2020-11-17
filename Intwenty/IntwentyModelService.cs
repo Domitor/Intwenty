@@ -1992,17 +1992,17 @@ namespace Intwenty
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object with MetaCode: {0} has no [Path]", ep.MetaCode));
                 }
 
-                if (string.IsNullOrEmpty(ep.Action))
+                if (string.IsNullOrEmpty(ep.Action) && (ep.IsMetaTypeDataViewList || ep.IsMetaTypeTableGet || ep.IsMetaTypeTableList || ep.IsMetaTypeTableSave))
                 {
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object with MetaCode: {0} has no [Action]", ep.MetaCode));
                 }
 
-                if (!ep.IsDataTableConnected && !ep.IsDataViewConnected)
+                if (!ep.IsDataTableConnected && !ep.IsDataViewConnected && (ep.IsMetaTypeDataViewList || ep.IsMetaTypeTableGet || ep.IsMetaTypeTableList || ep.IsMetaTypeTableSave))
                 {
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object {0} has no connection to database table or an intwenty data view", (ep.Path+ep.Action)));
                 }
 
-                if (ep.IsDataTableConnected && string.IsNullOrEmpty(ep.AppMetaCode))
+                if (ep.IsDataTableConnected && string.IsNullOrEmpty(ep.AppMetaCode) && (ep.IsMetaTypeDataViewList || ep.IsMetaTypeTableGet || ep.IsMetaTypeTableList || ep.IsMetaTypeTableSave))
                 {
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The endpoint object {0} is connected to a table but has no [AppMetaCode]", (ep.Path + ep.Action)));
                 }

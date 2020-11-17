@@ -621,7 +621,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             var t = ModelRepository.GetExportModel();
@@ -635,7 +635,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             var result = new OperationResult();
@@ -671,7 +671,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             var client = DataRepository.GetDataClient();
@@ -733,7 +733,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             var result = new OperationResult();

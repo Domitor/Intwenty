@@ -194,7 +194,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             return View();
@@ -204,7 +204,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
             return View();
