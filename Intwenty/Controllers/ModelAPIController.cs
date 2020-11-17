@@ -901,9 +901,9 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var res = new EndpointManagementVm();
-
             res.Systems = ModelRepository.GetSystemModels();
             res.Endpoints = new List<EndpointVm>();
+
             var endpoints = ModelRepository.GetEndpointModels();
             foreach (var ep in endpoints)
             {

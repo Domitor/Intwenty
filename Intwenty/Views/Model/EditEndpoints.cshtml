@@ -69,7 +69,7 @@
                     </select>
                 </td>
                 <td>
-                    <select v-bind:id="'cbdataSource_' + entry.id" v-model="entry.dataSource" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="!entry.endpointType">
+                    <select v-bind:id="'cbdataSource_' + entry.id" v-model="entry.dataSource" class="form-control form-control-sm" v-on:input="markChanged(entry)" :disabled="disableDataSource(entry)">
                         <option v-for="source in dataSourceSelection(entry)" v-bind:value="source.id">{{source.title}}</option>
                     </select>
                 </td>
@@ -247,6 +247,15 @@
                 dataSourceSelection(endpoint)
                 {
                     return this.model.endpointDataSources.filter(p => p.type === endpoint.endpointType.datasourcetype);
+                },
+                disableDataSource(endpoint)
+                {
+                    if (!endpoint.endpointType)
+                        return true;
+                    if (endpoint.endpointType.id == "CUSTOMPOST")
+                        return true;
+
+                    return false;
                 }
                 
 

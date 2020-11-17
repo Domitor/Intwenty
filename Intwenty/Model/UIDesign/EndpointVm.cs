@@ -18,11 +18,12 @@ namespace Intwenty.Model.UIDesign
             get
             {
                 var res = new List<EndpointType>();
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom Post", datasourcetype = "NONE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get (GET)", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save (POST)", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List (POST)", datasourcetype = "TABLE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View (POST)", datasourcetype = "DATAVIEW" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (POST)", datasourcetype = "NONE" });
+                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomGet, title = "Custom (GET)", datasourcetype = "NONE" });
                 return res;
             }
         }
@@ -62,15 +63,17 @@ namespace Intwenty.Model.UIDesign
                 t.DataSource = model.DataMetaCode;
 
             if (model.IsMetaTypeTableGet)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get", datasourcetype = "TABLE" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get (GET)", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeTableSave)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save", datasourcetype = "TABLE" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save (POST)", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeTableList)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List", datasourcetype = "TABLE" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List (POST)", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeDataViewList)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View", datasourcetype = "DATAVIEW" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View (POST)", datasourcetype = "DATAVIEW" };
             else if (model.IsMetaTypeCustomPost)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (Post)", datasourcetype = "NONE" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (POST)", datasourcetype = "NONE" };
+            else if (model.IsMetaTypeCustomGet)
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (GET)", datasourcetype = "NONE" };
             else
                 throw new InvalidOperationException("Invalid endpoint metatype");
 
@@ -86,9 +89,8 @@ namespace Intwenty.Model.UIDesign
         public static EndpointModelItem CreateEndpointModelItem(EndpointVm model)
         {
             var t = new EndpointModelItem(model.EndpointType.id);
-            t.Path = model.Path;
-            var check = model.DataSource.Split('|');
-            if (t.IsMetaTypeCustomPost)
+            if (t.IsMetaTypeCustomPost ||
+                t.IsMetaTypeCustomGet)
             {
                 t.AppMetaCode = "";
                 t.DataMetaCode = "";
@@ -96,6 +98,7 @@ namespace Intwenty.Model.UIDesign
             }
             else
             {
+                var check = model.DataSource.Split('|');
                 if (check.Length > 1)
                 {
                     t.AppMetaCode = check[0];
@@ -109,6 +112,7 @@ namespace Intwenty.Model.UIDesign
 
             t.SystemMetaCode = model.SystemMetaCode;
             t.Id = model.Id;
+            t.Path = model.Path;
             t.Properties = model.Properties;
             t.Description = model.Description;
             t.Title = model.Title;

@@ -291,7 +291,7 @@ namespace Intwenty.Seed
             endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "DATAVIEWLIST", MetaCode = "EP_DV_1", DataMetaCode = "VENDORVIEW", Path = "MyAPI/Vendors", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
 
             //Define free unbound endpoint
-            endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "CUSTOMPOST", MetaCode = "EP_CUST_1", DataMetaCode = "", Path = "MyAPI/PostAnyThing", Title = "Post Anything", Description = "Free unbound endpoint", ParentMetaCode = "ROOT" });
+            endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "CUSTOMPOST", MetaCode = "EP_CUST_1", DataMetaCode = "", Path = "MyAPI/PostAnyThing", Title = "Post Anything", Description = "This endpoint must be implemented in a custom controller", ParentMetaCode = "ROOT" });
 
             #endregion
 

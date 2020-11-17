@@ -4,25 +4,9 @@ using System.Collections.Generic;
 namespace Intwenty.Model.Dto
 {
 
-    public enum LifecycleStatus
-    {
-        NONE = 0
-      , NEW_NOT_SAVED = 1
-      , NEW_SAVED = 2
-      , EXISTING_NOT_SAVED = 3
-      , EXISTING_SAVED = 4
-      , DELETED_NOT_SAVED = 5
-      , DELETED_SAVED = 6
-    }
+   
 
-    public enum MessageCode
-    {
-       RESULT = 0
-      ,USERERROR = 1
-      ,SYSTEMERROR = 2
-      ,WARNING = 3
-      ,INFO = 4
-    }
+  
 
     public class OperationMessage
     {

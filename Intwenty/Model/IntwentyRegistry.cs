@@ -65,11 +65,12 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataView, Title = "Data View", ModelCode = "DATAVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewColumn, Title = "Data View Column", ModelCode = "DATAVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewKeyColumn, Title = "Data View Key Column", ModelCode = "DATAVIEWMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableList, Title = "List", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableSave, Title = "Save", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom Post", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get (GET)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableList, Title = "List (POST)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableSave, Title = "Save (POST)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View (POST)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom (POST)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMainMenu, Title = "Menu", ModelCode = "MENUMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMenuItem, Title = "Menu Item", ModelCode = "MENUMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeSubMenuItem, Title = "Sub Menu Item", ModelCode = "MENUMODEL" });
