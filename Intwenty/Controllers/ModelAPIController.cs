@@ -833,28 +833,27 @@ namespace Intwenty.Controllers
             {
                 if (string.IsNullOrEmpty(a.Application.TitleLocalizationKey))
                 {
+                    var key = "APP_LOC_" + BaseModelItem.GetQuiteUniqueString();
                     foreach (var l in langs)
                     {
-                        res.Add(new TranslationVm() { CreateOnApplicationModelId = a.Application.Id, Culture = l.Culture, Key = "LOC_" + BaseModelItem.GetQuiteUniqueString(), ModelTitle = "Application: " + a.Application.Title, Text = "" });
+                        res.Add(new TranslationVm() { ApplicationModelId = a.Application.Id, Culture = l.Culture, Key = key, ModelTitle = "Application: " + a.Application.Title, Text = "" });
                     }
                 }
                 else
                 {
                     var trans = translations.FindAll(p => p.Key == a.Application.TitleLocalizationKey);
-                    if (trans != null && trans.Count > 0)
+                    foreach (var l in langs)
                     {
-                        foreach (var ct in trans)
-                        {
-                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
-                        }
-                    }
-                    else
-                    {
-                        foreach (var l in langs)
-                        {
+                        var ct = trans.Find(p => p.Culture == l.Culture);
+                        if (ct != null)
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
+                        else
                             res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = "Application: " + a.Application.Title, Text = "" });
-                        }
+                    }
 
+                    foreach (var ct in trans.Where(p=> !langs.Exists(x=> x.Culture == p.Culture)))
+                    {
+                        res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
                     }
 
                 }
@@ -870,28 +869,27 @@ namespace Intwenty.Controllers
 
                     if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
                     {
+                        var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
                         foreach (var l in langs)
                         {
-                            res.Add(new TranslationVm() { CreateOnUserInterfaceModelId = ui.Id, Culture = l.Culture, Key = "LOC_" + BaseModelItem.GetQuiteUniqueString(), ModelTitle = title, Text = "" });
+                            res.Add(new TranslationVm() { UserInterfaceModelId = ui.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
                         }
                     }
                     else
                     {
                         var trans = translations.FindAll(p => p.Key == ui.TitleLocalizationKey);
-                        if (trans != null && trans.Count > 0)
+                        foreach (var l in langs)
                         {
-                            foreach (var ct in trans)
-                            {
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
-                            }
-                        }
-                        else
-                        {
-                            foreach (var l in langs)
-                            {
+                            var ct = trans.Find(p => p.Culture == l.Culture);
+                            if (ct != null)
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                            else
                                 res.Add(new TranslationVm() { Culture = l.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = "" });
-                            }
+                        }
 
+                        foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                        {
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
                         }
 
                     }
@@ -900,17 +898,18 @@ namespace Intwenty.Controllers
 
             }
 
-
-            return new JsonResult(res);
+            var model = new TranslationManagementVm();
+            model.Translations = res;
+            return new JsonResult(model);
 
 
         }
 
             /// <summary>
-            /// Get translations
+            /// Get translations, that is not used by a model
             /// </summary>
-            [HttpGet("/Model/API/GetTranslations")]
-        public IActionResult GetTranslations()
+            [HttpGet("/Model/API/GetNonModelTranslations")]
+        public IActionResult GetNonModelTranslations()
         {
 
             if (!User.Identity.IsAuthenticated)
@@ -918,15 +917,46 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetTranslations();
-            var res = new JsonResult(t);
-            return res;
+
+            var res = new List<TranslationVm>();
+            var translations = ModelRepository.GetTranslations();
+            var apps = ModelRepository.GetApplicationModels();
+
+            foreach (var t in translations)
+            {
+                var ismodeltrans = false;
+                foreach (var a in apps)
+                {
+                    if (!string.IsNullOrEmpty(a.Application.TitleLocalizationKey))
+                    {
+                        if (a.Application.TitleLocalizationKey == t.Key)
+                            ismodeltrans = true;
+                    }
+
+                    if (a.UIStructure.Exists(p => !string.IsNullOrEmpty(p.TitleLocalizationKey) && p.TitleLocalizationKey == t.Key))
+                    {
+                        ismodeltrans = true;
+                    }
+
+                }
+
+                if (!ismodeltrans)
+                    res.Add(new TranslationVm() { Culture = t.Culture, Key = t.Key, ModelTitle = t.Key, Text = t.Text, Id = t.Id });
+
+
+
+            }
+
+
+            var model = new TranslationManagementVm();
+            model.Translations = res;
+            return new JsonResult(model);
 
         }
 
 
-        [HttpPost("/Model/API/SaveTranslations")]
-        public IActionResult SaveTranslations([FromBody] List<TranslationModelItem> model)
+        [HttpPost("/Model/API/SaveModelTranslations")]
+        public IActionResult SaveModelTranslations([FromBody] TranslationManagementVm model)
         {
 
             if (!User.Identity.IsAuthenticated)
@@ -936,23 +966,61 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.SaveTranslations(model);
+                foreach (var t in model.Translations)
+                {
+                    if (t.ApplicationModelId > 0 && !string.IsNullOrEmpty(t.Text))
+                    {
+                        ModelRepository.SetAppModelLocalizationKey(t.ApplicationModelId, t.Key);
+                    }
+                    else if (t.UserInterfaceModelId > 0 && !string.IsNullOrEmpty(t.Text))
+                    {
+                        ModelRepository.SetUserInterfaceModelLocalizationKey(t.UserInterfaceModelId, t.Key);
+                    }
+                }
+                
+                ModelRepository.SaveTranslations(model.Translations.Where(p=> p.Changed).Select(p=> TranslationVm.CreateTranslationModelItem(p)).ToList());
             }
             catch (Exception ex)
             {
                 var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving translations.");
+                r.SetError(ex.Message, "An error occured when saving model translations.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;
             }
 
-            return GetTranslations();
+            return GetModelTranslations();
+        }
+
+        [HttpPost("/Model/API/SaveNonModelTranslations")]
+        public IActionResult SaveNonModelTranslations([FromBody] TranslationManagementVm model)
+        {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+
+                ModelRepository.SaveTranslations(model.Translations.Where(p => p.Changed).Select(p => TranslationVm.CreateTranslationModelItem(p)).ToList());
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving model translations.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetNonModelTranslations();
         }
 
 
-        [HttpPost("/Model/API/DeleteTranslation")]
-        public IActionResult DeleteTranslation([FromBody] TranslationModelItem model)
+        [HttpPost("/Model/API/DeleteModelTranslation")]
+        public IActionResult DeleteModelTranslation([FromBody] TranslationVm model)
         {
 
             if (!User.Identity.IsAuthenticated)
@@ -974,7 +1042,33 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetTranslations();
+            return GetModelTranslations();
+        }
+
+        [HttpPost("/Model/API/DeleteNonModelTranslation")]
+        public IActionResult DeleteNonModelTranslation([FromBody] TranslationVm model)
+        {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                ModelRepository.DeleteTranslation(model.Id);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting a translation.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetNonModelTranslations();
         }
 
         #endregion

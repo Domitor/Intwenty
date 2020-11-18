@@ -82,6 +82,8 @@ namespace Intwenty.Interface
 
         public ModifyResult SaveAppModel(ApplicationModelItem model);
 
+        public void SetAppModelLocalizationKey(int id, string key);
+
         public void DeleteAppModel(ApplicationModelItem model);
 
 
@@ -99,7 +101,7 @@ namespace Intwenty.Interface
 
         public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model);
 
-
+        public void SetUserInterfaceModelLocalizationKey(int id, string key);
 
         public List<DataViewModelItem> GetLocalizedDataViewModels();
         public List<DataViewModelItem> GetDataViewModels();

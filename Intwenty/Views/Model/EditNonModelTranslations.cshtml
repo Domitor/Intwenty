@@ -1,7 +1,7 @@
 ﻿
 
 @{
-    ViewData["Title"] = "Add / Edit Translations";
+    ViewData["Title"] = "Add / Edit Model Translations";
 }
 
 @await Html.PartialAsync("_Modals")
@@ -12,26 +12,32 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>Translations</h2></div>
-        <div class="card-body">Translations is key value pairs to translate the intwenty UI between languages/cultures.</div>
+        <div class="card-header"><h2>Localization Keys</h2></div>
+        <div class="card-body">Manage localization keys and texts.</div>
     </div>
     <br />
-    <br />
-
-
-    <br />
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
+        <strong>Changes have been saved !</strong><br />
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <br />
     <div>
         <div class="btn btn-sm btn-primary" v-on:click="saveChanges">
             <span class="glyphicon glyphicon-save"></span> Save changes
         </div>
 
+
         <div class="btn btn-sm btn-secondary" v-on:click="addTranslation" style="float:right">
             <span class="fa fa-plus"></span> Add translation
         </div>
+
     </div>
+
     <br />
     <br />
+
     <table class="table table">
         <thead>
             <tr>
@@ -42,7 +48,7 @@
                 <th style="width:10%"></th>
             </tr>
         </thead>
-        <tbody v-for="entry in translations">
+        <tbody v-for="entry in model.translations">
             <tr>
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.culture" v-on:input="markChanged(entry)" /></td>
                 <td><input type="text" class="form-control form-control-sm" v-model="entry.key" v-on:input="markChanged(entry)" /></td>
@@ -64,7 +70,6 @@
             data:
             {
                 model: {  },
-                translations: [],
                 idgen: -1
             },
             methods: {
@@ -72,9 +77,8 @@
 
                 addTranslation: function ()
                 {
-
                     this.idgen -= 1;
-                    this.translations.unshift({ id: this.idgen, culture: "", key: "", text: "" });
+                    this.model.translations.unshift({ id: this.idgen, culture: "", key: "", text: "" });
                 },
                 deleteTranslation: function (entry)
                 {
@@ -82,11 +86,11 @@
 
                     if (entry.id < 1)
                     {
-                        for (var i = 0; i < context.translations.length; i++)
+                        for (var i = 0; i < context.model.translations.length; i++)
                         {
-                            if (context.translations[i].id === entry.id)
+                            if (context.model.translations[i].id === entry.id)
                             {
-                                context.translations.splice(i, 1);
+                                context.model.translations.splice(i, 1);
                                 break;
                             }
                         }
@@ -97,7 +101,7 @@
                     {
 
                         var baseurl = '@Url.Content("~/Model/API/")';
-                        var endpointurl = baseurl + "DeleteTranslation";
+                        var endpointurl = baseurl + "DeleteNonModelTranslation";
 
 
                         $.ajax({
@@ -106,7 +110,8 @@
                             contentType: "application/json",
                             data: JSON.stringify(entry),
                             success: function (response) {
-                                context.translations = response;
+                                context.model = response;
+                               
                             },
                             error: function (response) {
                                 raiseErrorModal(response.responseJSON);
@@ -119,39 +124,34 @@
                 },
                 markChanged: function (entry)
                 {
-                    entry.properties = "CHANGED=TRUE";
+                    entry.changed = true;
 
                 },
                 saveChanges: function ()
                 {
 
-                        var list = [];
-                        var context = this;
+                    var context = this;
 
-                    for (var i = 0; i < context.translations.length; i++)
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "SaveNonModelTranslations";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response)
                         {
-                        if (context.translations[i].id < 1 || context.translations[i].properties.indexOf("CHANGED=TRUE") > -1)
-                            list.push(context.translations[i]);
+                            context.model = response;
+                            context.model.modelSaved = true;
+                            setTimeout(function () { context.model.modelSaved = false; }, 3000);
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
                         }
-
-                        var baseurl = '@Url.Content("~/Model/API/")';
-                        var endpointurl = baseurl + "SaveTranslations";
-
-
-                        $.ajax({
-                            url: endpointurl,
-                            type: "POST",
-                            contentType: "application/json",
-                            data: JSON.stringify(list),
-                            success: function (response)
-                            {
-                                context.translations = response;
-                            },
-                            error: function (response)
-                            {
-                                raiseErrorModal(response.responseJSON);
-                            }
-                        });
+                    });
 
                 }
             },
@@ -169,9 +169,9 @@
                 //Translations
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
-                var endpointurl = baseurl + "GetTranslations";
+                var endpointurl = baseurl + "GetNonModelTranslations";
                 $.get(endpointurl, function (response) {
-                    context.translations = response;
+                    context.model = response;
                 });
 
             }

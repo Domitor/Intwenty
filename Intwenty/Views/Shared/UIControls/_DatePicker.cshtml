@@ -8,7 +8,7 @@
 
     <div class="form-group">
         <label class="control-label">
-            @Model.Title @{ if (Model.Mandatory)
+            @Model.LocalizedTitle @{ if (Model.Mandatory)
                 { <span style="color: red"> *</span> }}
         </label>
         <input id="@Model.UIId"

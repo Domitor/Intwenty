@@ -102,7 +102,17 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        public IActionResult EditTranslations()
+        public IActionResult EditModelTranslations()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            return View();
+        }
+
+        public IActionResult EditNonModelTranslations()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();

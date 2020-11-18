@@ -5,7 +5,7 @@
 }
 <div class="form-group">
     <label class="control-label">
-        @Model.Title @{ if (Model.Mandatory)
+        @Model.LocalizedTitle @{ if (Model.Mandatory)
             { <span style="color: red"> *</span> }}
     </label>
 
@@ -18,7 +18,7 @@
                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
                v-on:input="onUserInput(event)"
                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextBox
-               data-title="@Model.Title"
+               data-title="@Model.LocalizedTitle"
                data-validationfield="@validationfield"
                data-dbtable="@Model.DataTableDbName"
                data-dbfield="@Model.DataColumnDbName"
@@ -34,7 +34,7 @@
                class="form-control form-control-sm"
                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextBox
-               data-title="@Model.Title"
+               data-title="@Model.LocalizedTitle"
                disabled />
 
     }

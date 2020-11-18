@@ -718,6 +718,22 @@ namespace Intwenty
 
         }
 
+        public void SetAppModelLocalizationKey(int id, string key)
+        {
+            ModelCache.Remove(AppModelCacheKey);
+            ModelCache.Remove(AppModelItemsCacheKey);
+
+            Client.Open();
+            var model = Client.GetEntity<ApplicationItem>(id);
+            if (model != null)
+            {
+                model.TitleLocalizationKey = key;
+                Client.UpdateEntity(model);
+            }
+            Client.Close();
+
+        }
+
 
         #endregion
 
@@ -1046,12 +1062,26 @@ namespace Intwenty
 
         }
 
-      
 
-       
+        public void SetUserInterfaceModelLocalizationKey(int id, string key)
+        {
+            ModelCache.Remove(AppModelCacheKey);
 
 
-      
+            Client.Open();
+            var model = Client.GetEntity<UserInterfaceItem>(id);
+            if (model != null)
+            {
+                model.TitleLocalizationKey = key;
+                Client.UpdateEntity(model);
+            }
+            Client.Close();
+
+        }
+
+
+
+
         #endregion
 
         #region Database

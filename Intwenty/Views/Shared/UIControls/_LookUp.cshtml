@@ -2,7 +2,7 @@
 
 <div>
     <label>
-        @Model.Title  @{ if (Model.Mandatory)
+        @Model.LocalizedTitle  @{ if (Model.Mandatory)
             { <span style="color: red"> *</span> }}
     </label>
 
@@ -20,7 +20,7 @@
                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName" 
                v-on:keydown.tab="getDataViewValue('@Model.DataViewMetaCode','@Model.DataColumnDbName','@Model.UIId')" 
                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeLookUp
-               data-title="@Model.Title"
+               data-title="@Model.LocalizedTitle"
                data-dbtable="@Model.DataTableDbName" 
                data-dbfield="@Model.DataColumnDbName" 
                data-viewfield="@Model.DataViewColumnDbName" 
