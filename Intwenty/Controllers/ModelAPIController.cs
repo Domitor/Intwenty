@@ -811,12 +811,105 @@ namespace Intwenty.Controllers
 
         #region Translations
 
-      
-
         /// <summary>
-        /// Get translations
+        /// Get translations for the Application and UI model
         /// </summary>
-        [HttpGet("/Model/API/GetTranslations")]
+        [HttpGet("/Model/API/GetModelTranslations")]
+        public IActionResult GetModelTranslations()
+        {
+
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var res = new List<TranslationVm>();
+            var translations = ModelRepository.GetTranslations();
+            var apps = ModelRepository.GetApplicationModels();
+            var langs = ModelRepository.Settings.SupportedLanguages;
+            var metatypes = IntwentyRegistry.IntwentyMetaTypes;
+
+            foreach (var a in apps)
+            {
+                if (string.IsNullOrEmpty(a.Application.TitleLocalizationKey))
+                {
+                    foreach (var l in langs)
+                    {
+                        res.Add(new TranslationVm() { CreateOnApplicationModelId = a.Application.Id, Culture = l.Culture, Key = "LOC_" + BaseModelItem.GetQuiteUniqueString(), ModelTitle = "Application: " + a.Application.Title, Text = "" });
+                    }
+                }
+                else
+                {
+                    var trans = translations.FindAll(p => p.Key == a.Application.TitleLocalizationKey);
+                    if (trans != null && trans.Count > 0)
+                    {
+                        foreach (var ct in trans)
+                        {
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
+                        }
+                    }
+                    else
+                    {
+                        foreach (var l in langs)
+                        {
+                            res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = "Application: " + a.Application.Title, Text = "" });
+                        }
+
+                    }
+
+                }
+
+                foreach (var ui in a.UIStructure)
+                {
+                    var title = "";
+                    var type = metatypes.Find(p => p.ModelCode == "UIMODEL" && p.Code == ui.MetaType);
+                    title = "Application: " + a.Application.Title;
+                    title += ", " + ui.Title;
+                    if (type != null)
+                        title += " ("+type.Title+")";
+
+                    if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
+                    {
+                        foreach (var l in langs)
+                        {
+                            res.Add(new TranslationVm() { CreateOnUserInterfaceModelId = ui.Id, Culture = l.Culture, Key = "LOC_" + BaseModelItem.GetQuiteUniqueString(), ModelTitle = title, Text = "" });
+                        }
+                    }
+                    else
+                    {
+                        var trans = translations.FindAll(p => p.Key == ui.TitleLocalizationKey);
+                        if (trans != null && trans.Count > 0)
+                        {
+                            foreach (var ct in trans)
+                            {
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                            }
+                        }
+                        else
+                        {
+                            foreach (var l in langs)
+                            {
+                                res.Add(new TranslationVm() { Culture = l.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = "" });
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            return new JsonResult(res);
+
+
+        }
+
+            /// <summary>
+            /// Get translations
+            /// </summary>
+            [HttpGet("/Model/API/GetTranslations")]
         public IActionResult GetTranslations()
         {
 

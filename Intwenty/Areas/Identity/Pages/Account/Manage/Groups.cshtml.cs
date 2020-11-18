@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Intwenty.SystemEvents;
+using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
@@ -26,12 +27,12 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
-        private readonly IIntwentySystemEventService _eventservice;
+        private readonly IIntwentyEventService _eventservice;
 
         public GroupsModel(
             IntwentyUserManager userManager,
             IOptions<IntwentySettings> settings,
-            IIntwentySystemEventService eventservice)
+            IIntwentyEventService eventservice)
         {
             _userManager = userManager;
             _settings = settings.Value;

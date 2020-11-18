@@ -14,6 +14,8 @@ namespace Intwenty.Interface
     /// </summary>
     public interface IIntwentyModelService
     {
+        public IntwentySettings Settings { get; }
+
         /// <summary>
         /// Returns localized application models that the current user has permission to use
         /// </summary>

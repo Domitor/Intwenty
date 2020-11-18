@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
+using Intwenty.Interface;
 using Intwenty.Model;
 using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
@@ -26,12 +27,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly IntwentySettings _settings;
-        private readonly IIntwentySystemEventService _eventservice;
+        private readonly IIntwentyEventService _eventservice;
 
         public ExternalLoginModel(
           IntwentyUserManager userManager,
           SignInManager<IntwentyUser> signInManager,
-          IIntwentySystemEventService eventservice,
+          IIntwentyEventService eventservice,
           IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;

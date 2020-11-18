@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Model.Dto;
 using Intwenty.SystemEvents;
+using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -29,12 +30,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly SignInManager<IntwentyUser> _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
-        private readonly IIntwentySystemEventService _eventservice;
+        private readonly IIntwentyEventService _eventservice;
 
         public RegisterModel(
             IntwentyUserManager userManager,
             SignInManager<IntwentyUser> signInManager,
-            IIntwentySystemEventService eventservice,
+            IIntwentyEventService eventservice,
             IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;

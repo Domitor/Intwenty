@@ -28,6 +28,7 @@ namespace Intwenty.Model
 
             _metatypes = new List<IntwentyMetaType>();
 
+            _metatypes.Add(new IntwentyMetaType() { Code = ApplicationModelItem.MetaTypeApplication, Title = "Application", ModelCode = "APPMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeCreateView, Title = "Create View" , ModelCode = "UIMODEL" });

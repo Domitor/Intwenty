@@ -14,7 +14,7 @@ using Intwenty.DataClient.Model;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
-namespace IntwentyDemo.Data
+namespace IntwentyDemo.Services
 {
 
     /*

@@ -29,7 +29,7 @@ namespace Intwenty
 
         private IMemoryCache ModelCache { get; }
 
-        private IntwentySettings Settings { get; }
+        public IntwentySettings Settings { get; }
 
         private IntwentyUserManager UserManager { get; }
 

@@ -16,6 +16,7 @@ namespace Intwenty.Model
 
         public string Properties { get; set; }
 
+
         public TranslationModelItem()
         {
             SetEmptyStrings();
@@ -36,9 +37,12 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Key)) Key = string.Empty;
             if (string.IsNullOrEmpty(Text)) Text = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
+
         }
 
       
+
+
     }
 
    

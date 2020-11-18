@@ -26,7 +26,8 @@ namespace Intwenty.Middleware
     public static class mwIntwenty
     {
 
-        public static void AddIntwenty<T>(this IServiceCollection services, IConfiguration configuration) where T : class, IIntwentyDataService
+        public static void AddIntwenty<TIntwentyDataService,TIntwentyEventService>(this IServiceCollection services, IConfiguration configuration) 
+                           where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService
         {
             services.AddSignalR();
 
@@ -43,9 +44,9 @@ namespace Intwenty.Middleware
 
             //Required for Intwenty: Services
             //Override default intwenty dataservice
-            services.TryAddTransient<IIntwentyDataService, T>();
+            services.TryAddTransient<IIntwentyDataService, TIntwentyDataService>();
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
-            services.TryAddTransient<IIntwentySystemEventService, IntwentySystemEventService>();
+            services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
             services.TryAddTransient<IEmailSender, EmailService>();
 
             //Required for Intwenty services to work correctly
@@ -210,7 +211,7 @@ namespace Intwenty.Middleware
                         if (ep.IsMetaTypeCustomPost)
                             continue;
 
-                        endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicApplication" });
+                        endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "CustomerAPI" });
                     }
                 }
                 //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");

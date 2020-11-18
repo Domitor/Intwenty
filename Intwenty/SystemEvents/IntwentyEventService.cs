@@ -7,20 +7,13 @@ using System.Text;
 
 namespace Intwenty.SystemEvents
 {
-    public interface IIntwentySystemEventService
-    {
-        void NewUserCreated(NewUserCreatedData data);
-        void UserInvitedToGroup(UserInvitedData data);
-        void UserRemovedFromGroup(UserRemovedFromGroupData data);
-        void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data);
-    }
-
-    public class IntwentySystemEventService : IIntwentySystemEventService
+   
+    public class IntwentyEventService : IIntwentyEventService
     {
         protected readonly IEmailSender EmailService;
         protected readonly IIntwentyDataService DataService;
 
-        public IntwentySystemEventService(IEmailSender emailsender, IIntwentyDataService dataservice)
+        public IntwentyEventService(IEmailSender emailsender, IIntwentyDataService dataservice)
         {
             EmailService = emailsender;
             DataService = dataservice;
@@ -28,14 +21,16 @@ namespace Intwenty.SystemEvents
 
         public virtual void NewUserCreated(NewUserCreatedData data) 
         {
-            EmailService.SendEmailAsync("test", "New user cretaed", "A new Intwenty user was created.");
+            EmailService.SendEmailAsync("test", "New user created", "A new Intwenty user was created.");
         }
         public virtual void UserInvitedToGroup(UserInvitedData data) { }
         public virtual void UserRemovedFromGroup(UserRemovedFromGroupData data) { }
         public virtual void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { }
-        
+
+
     }
 
+   
 
     public class SenderReceiverUserData
     {

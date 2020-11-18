@@ -15,12 +15,12 @@ using Intwenty.DataClient;
 namespace Intwenty.Controllers
 {
    
-    public class DynamicApplicationController : Controller
+    public class CustomerAPIController : Controller
     {
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
 
-        public DynamicApplicationController(IIntwentyDataService dataservice, IIntwentyModelService modelservice)
+        public CustomerAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice)
         {
             DataRepository = dataservice;
             ModelRepository = modelservice;

@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Intwenty.Services;
 using Intwenty.Interface;
-using IntwentyDemo.Data;
+using IntwentyDemo.Services;
 using Intwenty.Middleware;
 
 namespace IntwentyDemo
@@ -38,11 +38,11 @@ namespace IntwentyDemo
         public void ConfigureServices(IServiceCollection services)
         {
 
-            //Default IntwentyDataService
-            //services.AddIntwenty<IntwentyDataService>(Configuration);
+            //Default IntwentyDataService, IntwentyEventService
+            //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration);
 
-            //Customized IntwentyDataService
-            services.AddIntwenty<CustomDataService>(Configuration);
+            //Use customized IntwentyDataService and IntwentyEventService
+            services.AddIntwenty<CustomDataService, CustomEventService>(Configuration);
 
             //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
             //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
