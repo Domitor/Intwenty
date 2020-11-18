@@ -4,32 +4,20 @@ using System.Text;
 
 namespace Intwenty.Model.Dto
 {
-    public class ModifyResult : IntwentyResult
+    public class TestResult : IntwentyResult
     {
-        public LifecycleStatus Status { get; set; }
-
-        public int Version { get; set; }
-
-        public int Id { get; set; }
-
-
-        public ModifyResult()
+        public TestResult()
         {
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
         }
 
-        public ModifyResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "", int id = 0, int version = 0)
+        public TestResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
             IsSuccess = success;
-            Id = id;
-            Version = version;
             AddMessage(messagecode, message);
         }
-
     }
-
-
 }

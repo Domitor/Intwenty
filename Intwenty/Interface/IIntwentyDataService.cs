@@ -73,7 +73,7 @@ namespace Intwenty.Interface
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application data of type T</returns>
-        DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : InformationStatus, new();
+        DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : InformationHeader, new();
 
         /// <summary>
         /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
@@ -100,7 +100,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>An OperationResult including a list of T and the current paging rownum</returns>
-        DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationStatus, new();
+        DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
 
         /// <summary>
         /// Get a list of (latest version) application data. 

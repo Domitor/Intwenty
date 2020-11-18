@@ -937,7 +937,7 @@ namespace Intwenty
 
         #region Lists
 
-        public DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
+        public DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (args == null)
                 return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
@@ -1304,7 +1304,7 @@ namespace Intwenty
         #endregion
 
         #region GetApplication
-        public DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationStatus, new()
+        public DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (state == null)
                 return new DataResult<T>(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");

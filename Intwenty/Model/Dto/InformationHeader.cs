@@ -3,15 +3,15 @@ using Intwenty.Entity;
 
 namespace Intwenty.Model.Dto
 {
-    public class InformationStatus
+    public class InformationHeader
     {
 
-        public InformationStatus()
+        public InformationHeader()
         {
 
         }
 
-        public InformationStatus(Entity.InformationStatus entity)
+        public InformationHeader(InformationStatus entity)
         {
             Id = entity.Id;
             Version = entity.Version;

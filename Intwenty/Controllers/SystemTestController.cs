@@ -17,7 +17,6 @@ using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Intwenty.DataClient.Reflection;
 using Intwenty.Interface;
-using InformationStatus = Intwenty.Model.Dto.InformationStatus;
 using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Controllers
@@ -1712,7 +1711,7 @@ namespace Intwenty.Controllers
 
 
    
-    public class def_TestApp : InformationStatus
+    public class def_TestApp : InformationHeader
     {
         public string Header { get; set; }
 

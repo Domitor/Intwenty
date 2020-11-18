@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace IntwentyDemo.Models
 {
     [DbTableName("wms_Customer")]
-    public class Customer : InformationStatus
+    public class Customer : InformationHeader
     {
         public Customer()
         {
