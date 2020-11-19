@@ -195,7 +195,9 @@ namespace Intwenty.Controllers
                     client.Close();
 
                     if (users.Exists(p => p.APIKey == key[0]))
+                    {
                         return true;
+                    }
 
                 }
             }

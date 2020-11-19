@@ -207,12 +207,17 @@ namespace Intwenty
                 var validation = Validate(model, state);
                 if (validation.IsSuccess)
                 {
+                    if (state.Id > 0)
+                        RemoveFromApplicationCache(state.ApplicationId, state.Id);
+
+                    RemoveFromApplicationListCache(state.ApplicationId);
+
                     state.Data.InferModel(model);
 
                     client.Open();
-                    //client.BeginTransaction();
 
                     BeforeSave(model, state, client);
+
                     if (!state.Data.HasModel)
                         state.Data.InferModel(model);
 
@@ -275,16 +280,7 @@ namespace Intwenty
                     return new ModifyResult(false, MessageCode.USERERROR) { Messages = validation.Messages };
                 }
 
-                if (result.IsSuccess)
-                {
-                    client.Close();
-                    var refreshedapp = GetLatestVersionByIdInternal(state, model);
-                    if (refreshedapp.IsSuccess)
-                    {
-                        AddToApplicationCache(model, refreshedapp);
-                    }
-
-                }
+              
             }
             catch (Exception ex)
             {
@@ -2095,7 +2091,6 @@ namespace Intwenty
         protected void AddToApplicationListCache(ApplicationModel model, DataListResult data)
         {
             var key = string.Format("APPLIST_APPID_{0}", model.Application.Id);
-
             ApplicationCache.Set(key, data);
 
             List<CachedObjectDescription> descriptions = null;

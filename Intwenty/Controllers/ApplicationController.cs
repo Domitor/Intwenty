@@ -33,19 +33,23 @@ namespace Intwenty.Controllers
         public virtual IActionResult List(int id)
         {
             var path = this.Request.Path.Value;
-            var apps = ModelRepository.GetLocalizedApplicationModels();
-            ApplicationModel t = null;
+          
+            ApplicationModel current_model = null;
             if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-                t = apps.Find(p => p.Application.Id == id);
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModel(id);
+            }
             else
-                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+            }
 
-            if (t == null)
+            if (current_model == null)
                 return NotFound();
-            if (!t.UseListViewAuthorization)
-                return View(t);
-            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(t);
+            if (!current_model.UseListViewAuthorization)
+                return View(current_model);
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(current_model);
             else
                 return Forbid();
 
@@ -58,12 +62,15 @@ namespace Intwenty.Controllers
         {
 
             var path = this.Request.Path.Value;
-            var apps = ModelRepository.GetLocalizedApplicationModels();
             ApplicationModel current_model = null;
             if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-                current_model = apps.Find(p => p.Application.Id == id);
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModel(id);
+            }
             else
-                current_model = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+            }
 
             if (current_model == null)
                 return NotFound();
@@ -87,19 +94,22 @@ namespace Intwenty.Controllers
             ViewBag.SystemId = Convert.ToString(id);
 
             var path = this.Request.Path.Value;
-            var apps = ModelRepository.GetLocalizedApplicationModels();
-            ApplicationModel t = null;
+            ApplicationModel current_model = null;
             if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
-                t = apps.Find(p => p.Application.Id == applicationid);
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModel(applicationid);
+            }
             else
-                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+            }
 
-            if (t == null)
+            if (current_model == null)
                 return NotFound();
-            if (!t.UseEditViewAuthorization)
-                return View(t);
-            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(t);
+            if (!current_model.UseEditViewAuthorization)
+                return View(current_model);
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(current_model);
             else
                 return Forbid();
 
@@ -116,19 +126,22 @@ namespace Intwenty.Controllers
             ViewBag.SystemId = Convert.ToString(id);
 
             var path = this.Request.Path.Value;
-            var apps = ModelRepository.GetLocalizedApplicationModels();
-            ApplicationModel t = null;
+            ApplicationModel current_model = null;
             if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
-                t = apps.Find(p => p.Application.Id == applicationid);
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModel(applicationid);
+            }
             else
-                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+            }
 
-            if (t == null)
+            if (current_model == null)
                 return NotFound();
-            if (!t.UseDetailViewAuthorization)
-                return View(t);
-            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(t);
+            if (!current_model.UseDetailViewAuthorization)
+                return View(current_model);
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(current_model);
             else
                 return Forbid();
 
@@ -142,19 +155,22 @@ namespace Intwenty.Controllers
         {
 
             var path = this.Request.Path.Value;
-            var apps = ModelRepository.GetLocalizedApplicationModels();
-            ApplicationModel t = null;
+            ApplicationModel current_model = null;
             if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-                t = apps.Find(p => p.Application.Id == id);
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModel(id);
+            }
             else
-                t = apps.Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            {
+                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+            }
 
-            if (t == null)
+            if (current_model == null)
                 return NotFound();
-            if (!t.UseEditViewAuthorization)
-                return View(t);
-            if (UserManager.HasPermission(User, t, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(t);
+            if (!current_model.UseEditViewAuthorization)
+                return View(current_model);
+            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+                return View(current_model);
             else
                 return Forbid();
         }

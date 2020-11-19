@@ -76,7 +76,8 @@ namespace Intwenty.Interface
         /// Get all application models
         /// </summary>
         public List<ApplicationModel> GetLocalizedApplicationModels();
-
+        public ApplicationModel GetLocalizedApplicationModel(int applicationid);
+        public ApplicationModel GetLocalizedApplicationModelByPath(string path);
 
         public List<ApplicationModelItem> GetAppModels();
 

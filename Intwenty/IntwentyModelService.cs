@@ -400,6 +400,33 @@ namespace Intwenty
 
         #region Localization
 
+        public ApplicationModel GetLocalizedApplicationModel(int applicationid)
+        {
+
+            var res = GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            if (res == null)
+                return null;
+
+            LocalizeTitle(res.Application);
+            LocalizeTitles(res.UIStructure.ToList<ILocalizableTitle>());
+            
+            return res;
+        }
+
+        public ApplicationModel GetLocalizedApplicationModelByPath(string path)
+        {
+
+            var res = GetApplicationModels().Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
+            if (res == null)
+                return null;
+
+            LocalizeTitle(res.Application);
+            LocalizeTitles(res.UIStructure.ToList<ILocalizableTitle>());
+
+            return res;
+
+        }
+
         public List<ApplicationModel> GetLocalizedApplicationModels()
         {
 
