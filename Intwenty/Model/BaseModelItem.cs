@@ -158,12 +158,6 @@ namespace Intwenty.Model
                 return "DV_COL";
             if (item.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn)
                 return "DV_KFCOL";
-            if (item.MetaType == MenuModelItem.MetaTypeMainMenu)
-                return "MAINMENU";
-            if (item.MetaType == MenuModelItem.MetaTypeMenuItem)
-                return "MENITM";
-          
-        
             if (item.MetaType == EndpointModelItem.MetaTypeDataViewList)
                 return "EP_DV";
             if (item.MetaType == EndpointModelItem.MetaTypeTableList)

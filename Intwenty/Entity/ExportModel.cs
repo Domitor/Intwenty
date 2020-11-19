@@ -21,7 +21,7 @@ namespace Intwenty.Entity
 
         public List<DataViewItem> DataViewItems { get; set; }
 
-        public List<MenuItem> MenuItems { get; set; }
+        public List<TranslationItem> Translations { get; set; }
 
         public List<ValueDomainItem> ValueDomains { get; set; }
 
@@ -35,7 +35,7 @@ namespace Intwenty.Entity
             DatabaseItems = new List<DatabaseItem>();
             UserInterfaceItems = new List<UserInterfaceItem>();
             DataViewItems = new List<DataViewItem>();
-            MenuItems = new List<MenuItem>();
+            Translations = new List<TranslationItem>();
             ValueDomains = new List<ValueDomainItem>();
             Endpoints = new List<EndpointItem>();
             Systems = new List<SystemItem>();

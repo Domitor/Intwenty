@@ -1348,57 +1348,6 @@ namespace Intwenty.Controllers
 
         #endregion
 
-        #region Menu models
-
-        /// <summary>
-        /// Get menu items
-        /// </summary>
-        [HttpGet("/Model/API/GetMenuModelItems")]
-        public IActionResult GetMenuModelItems()
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-
-            var allmenuitems = ModelRepository.GetMenuModels();
-
-            var res = new MenuManagementVm();
-            res.Applications = ModelRepository.GetAuthorizedApplicationModels(User);
-            res.Systems = ModelRepository.GetAuthorizedSystemModels(User);
-            res.MenuMetaTypes = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.Code == MenuModelItem.MetaTypeMenuItem || p.Code == MenuModelItem.MetaTypeSubMenuItem || p.Code == MenuModelItem.MetaTypeMainMenu).ToList();
-            res.MenuItems = allmenuitems.Select(p=> MenuVm.CreateMenuVm(p)).Where(p => res.Systems.Exists(x => x.MetaCode == p.SystemMetaCode)).ToList();
-
-            return new JsonResult(res);
-
-        }
-
-        [HttpPost("/Model/API/SaveMenu")]
-        public IActionResult SaveMenu([FromBody] MenuManagementVm model)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving menu items.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetMenuModelItems();
-        }
-
-        #endregion
-
         #region Tools
         /// <summary>
         /// Configure the database according to the model

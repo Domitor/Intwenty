@@ -3,15 +3,7 @@
 @{
 
     var systems = new List<SystemModelItem>();
-    var menutitle = "Menu";
     var apps = ModelRepository.GetLocalizedAuthorizedApplicationModels(User);
-    //var menuobjects = ModelRepository.GetLocalizedMenuModels();
-    //var mainmenu = menuobjects.Find(p => p.IsMetaTypeMainMenu);
-    //if (mainmenu != null)
-    //{
-    //    menutitle = mainmenu.Title;
-    //}
-
     foreach (var a in apps)
     {
         if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))
@@ -30,15 +22,11 @@
 
 
 <li class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @menutitle</span> <span class="caret"></span></a>
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @Localizer["MAINMENUTITLE"]</span> <span class="caret"></span></a>
     <div class="dropdown-menu">
         @{
 
 
-            //if (mainmenu == null)
-            //{
-            //    return;
-            //}
 
             var cnt = 0;
             foreach (var sys in systems)
@@ -54,24 +42,6 @@
                 {
                     <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@app.Id">@app.LocalizedTitle</a>
                 }
-
-                <!--
-                foreach (var menuitem in menuobjects.Where(p => p.IsMetaTypeMenuItem && p.ParentMetaCode == mainmenu.MetaCode && p.SystemMetaCode == sys.MetaCode))
-                {
-                    if (menuitem.Application != null && apps.Exists(p => p.MetaCode == menuitem.Application.MetaCode))
-                    {
-                        <a class="dropdown-item" asp-controller="menuitem.Controller" asp-action="menuitem.Action" asp-route-id="menuitem.Application.Id">menuitem.Title</a>
-                    }
-                    else
-                    {
-                        if (menuitem.Application == null)
-                        {
-                            <a class="dropdown-item" asp-controller="menuitem.Controller" asp-action="menuitem.Action">menuitem.Title</a>
-                        }
-
-                    }
-                }
-            -->
 
                 cnt++;
             }

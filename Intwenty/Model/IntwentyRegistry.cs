@@ -72,9 +72,6 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMainMenu, Title = "Menu", ModelCode = "MENUMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeMenuItem, Title = "Menu Item", ModelCode = "MENUMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = MenuModelItem.MetaTypeSubMenuItem, Title = "Sub Menu Item", ModelCode = "MENUMODEL" });
 
 
             return _metatypes;

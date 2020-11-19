@@ -198,7 +198,19 @@ namespace Intwenty.Controllers
             return View(appmodels);
         }
 
-    
+        public IActionResult ToolCacheMonitor()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+          
+            var cachedescription = ModelRepository.GetCachedObjectDescriptions();
+            return View(cachedescription);
+        }
+
+
 
         public IActionResult ImportModel()
         {

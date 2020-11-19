@@ -38,7 +38,7 @@
         <div class="card-body">
             <ul class="nav">
                 <li class="nav-item">
-                    <a asp-action="EditList" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                    <a asp-action="EditList" asp-controller="Application" asp-route-id="@Model.Application.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Localizer["BACKTOLIST"]</a>
                 </li>
                 <li class="nav-item">
                     <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Localizer["Save"]</button>

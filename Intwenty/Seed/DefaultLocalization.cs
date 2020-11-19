@@ -40,6 +40,10 @@ namespace Intwenty.Seed
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Edit", Text = "Ändra" });
                 temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "APIKEYINFO", Text = "Create your API Key in order to integrate with our service" });
+                temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MAINMENUTITLE", Text = "Menu" });
+                temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MAINMENUTITLE", Text = "Meny" });
+                temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "BACKTOLIST", Text = "Back to list" });
+                temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "BACKTOLIST", Text = "Tillbaka" });
 
 
 

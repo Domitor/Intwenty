@@ -207,8 +207,6 @@ namespace Intwenty
                 var validation = Validate(model, state);
                 if (validation.IsSuccess)
                 {
-                    RemoveFromApplicationCache(state.ApplicationId, state.Id);
-
                     state.Data.InferModel(model);
 
                     client.Open();
@@ -275,6 +273,17 @@ namespace Intwenty
                 else
                 {
                     return new ModifyResult(false, MessageCode.USERERROR) { Messages = validation.Messages };
+                }
+
+                if (result.IsSuccess)
+                {
+                    client.Close();
+                    var refreshedapp = GetLatestVersionByIdInternal(state, model);
+                    if (refreshedapp.IsSuccess)
+                    {
+                        AddToApplicationCache(model, refreshedapp);
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -798,6 +807,7 @@ namespace Intwenty
             {
 
                 RemoveFromApplicationCache(state.ApplicationId, state.Id);
+                RemoveFromApplicationListCache(state.ApplicationId);
 
                 result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), state.Id, state.Version);
                 
@@ -874,10 +884,12 @@ namespace Intwenty
                         throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
 
                     RemoveFromApplicationCache(applicationid, sysid.ParentId);
+                    RemoveFromApplicationListCache(applicationid);
                 }
                 else
                 {
                     RemoveFromApplicationCache(applicationid, id);
+                    RemoveFromApplicationListCache(applicationid);
                 }
 
 
@@ -1171,10 +1183,10 @@ namespace Intwenty
 
                
                 result = GetListInternal(model, string.Empty, client);
-                
+
 
                 if (result.IsSuccess)
-                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}", applicationid), result);
+                    AddToApplicationListCache(model, result);
 
 
             }
@@ -1217,18 +1229,8 @@ namespace Intwenty
                 if (model == null)
                     throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
 
-                if (ApplicationCache.TryGetValue(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), out result))
-                {
-                    return result;
-                }
-
+               
                 result = GetListInternal(model, owneruserid, client);
-
-                if (result.IsSuccess)
-                {
-                    ApplicationCache.Set(string.Format("APPLIST_APPID_{0}_OWNER_{1}", applicationid, owneruserid), result);
-                    AddCachedUser(owneruserid);
-                }
 
                 return result;
                 
@@ -1304,6 +1306,7 @@ namespace Intwenty
         #endregion
 
         #region GetApplication
+
         public DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (state == null)
@@ -1323,11 +1326,6 @@ namespace Intwenty
 
             try
             {
-
-                if (ApplicationCache.TryGetValue(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), out result))
-                {
-                    return result;
-                }
 
                 var sql_stmt = new StringBuilder();
                 sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
@@ -1420,7 +1418,7 @@ namespace Intwenty
 
                 if (result.IsSuccess)
                 {
-                    ApplicationCache.Set(string.Format("APP_APPID_{0}_ID_{1}", state.ApplicationId, state.Id), result);
+                    AddToApplicationCache(model, result);
                 }
 
             }
@@ -2072,38 +2070,83 @@ namespace Intwenty
             }
         }
 
-        private void AddCachedUser(string userid)
+        protected void AddToApplicationCache(ApplicationModel model, DataResult data)
         {
+            var key = string.Format("APP_APPID_{0}_ID_{1}", model.Application.Id, data.Id);
+            ApplicationCache.Set(key, data);
 
-            List<string> users;
-            if (ApplicationCache.TryGetValue("CACHEDUSERS", out users))
+            List<CachedObjectDescription> descriptions = null;
+            if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
             {
-                if (!users.Contains(userid))
-                    users.Add(userid);
+                if (!descriptions.Exists(p => p.IsCachedApplication() && p.DataId == data.Id))
+                {
+                    descriptions.Add(new CachedObjectDescription("CACHEDAPP", key) { ApplicationId = model.Application.Id, DataId = data.Id, JsonCharcterCount = data.Data.Length, Title = model.Application.Title + ", ID: " + data.Id });
+                }
             }
             else
             {
-                users = new List<string>();
-                users.Add(userid);
+                descriptions = new List<CachedObjectDescription>();
+                descriptions.Add(new CachedObjectDescription("CACHEDAPP", key) { ApplicationId = model.Application.Id, DataId = data.Id, JsonCharcterCount = data.Data.Length, Title = model.Application.Title + ", ID: " + data.Id });
+                ApplicationCache.Set("TRANSACTIONCACHE", descriptions);
             }
 
-            ApplicationCache.Set("CACHEDUSERS", users);
+        }
+
+        protected void AddToApplicationListCache(ApplicationModel model, DataListResult data)
+        {
+            var key = string.Format("APPLIST_APPID_{0}", model.Application.Id);
+
+            ApplicationCache.Set(key, data);
+
+            List<CachedObjectDescription> descriptions = null;
+            if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
+            {
+                if (!descriptions.Exists(p => p.IsCachedApplicationList() && p.ApplicationId == model.Application.Id))
+                {
+                    descriptions.Add(new CachedObjectDescription("CACHEDAPPLIST", key) { ApplicationId = model.Application.Id, JsonCharcterCount = data.Data.Length, Title = "List of applications: " + model.Application.Title });
+                }
+            }
+            else
+            {
+                descriptions = new List<CachedObjectDescription>();
+                descriptions.Add(new CachedObjectDescription("CACHEDAPPLIST", key) { ApplicationId = model.Application.Id, JsonCharcterCount = data.Data.Length, Title = "List of applications: " + model.Application.Title });
+                ApplicationCache.Set("TRANSACTIONCACHE", descriptions);
+            }
         }
 
         protected void RemoveFromApplicationCache(int applicationid, int id)
         {
             ApplicationCache.Remove(string.Format("APP_APPID_{0}_ID_{1}", applicationid, id));
+
+            List<CachedObjectDescription> descriptions = null;
+            if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
+            {
+                var t = descriptions.Find(p => p.IsCachedApplication() && p.DataId == id);
+                if (t == null)
+                {
+                    descriptions.Remove(t);
+                }
+              
+            }
+            
+
+        }
+
+        protected void RemoveFromApplicationListCache(int applicationid)
+        {
             ApplicationCache.Remove(string.Format("APPLIST_APPID_{0}", applicationid));
 
-            List<string> users;
-            if (ApplicationCache.TryGetValue("CACHEDUSERS", out users))
+            List<CachedObjectDescription> descriptions = null;
+            if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
             {
-                foreach (var u in users)
+                var t = descriptions.Find(p => p.IsCachedApplicationList() && p.ApplicationId == applicationid);
+                if (t == null)
                 {
-                    ApplicationCache.Remove(string.Format("APPLIST_APPID_{0}_OWNER_{1}",applicationid,u));
+                    descriptions.Remove(t);
                 }
+
             }
-           
+
         }
 
 

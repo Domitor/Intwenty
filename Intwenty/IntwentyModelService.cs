@@ -73,6 +73,63 @@ namespace Intwenty
 
         }
 
+
+        #region Utils
+
+        public List<CachedObjectDescription> GetCachedObjectDescriptions()
+        {
+            var result = new List<CachedObjectDescription>();
+            List<CachedObjectDescription> descriptions = null;
+            if (ModelCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
+            {
+                result.AddRange(descriptions);
+            }
+
+            List<ApplicationModel> applicationmodels = null;
+            if (ModelCache.TryGetValue(AppModelCacheKey, out applicationmodels))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", AppModelCacheKey) { ObjectCount = applicationmodels.Count, Title = "Complete application models" });
+            }
+
+            List<ApplicationModelItem> applicationmodelitems = null;
+            if (ModelCache.TryGetValue(AppModelItemsCacheKey, out applicationmodelitems))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", AppModelItemsCacheKey) { ObjectCount = applicationmodelitems.Count, Title = "Application models" });
+            }
+
+            List<ValueDomainModelItem> valuedomains = null;
+            if (ModelCache.TryGetValue(ValueDomainsCacheKey, out valuedomains))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", ValueDomainsCacheKey) { ObjectCount = valuedomains.Count, Title = "Value Domains" });
+            }
+
+            List<TranslationModelItem> translations = null;
+            if (ModelCache.TryGetValue(TranslationsCacheKey, out translations))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", TranslationsCacheKey) { ObjectCount = translations.Count, Title = "Localizations" });
+            }
+
+            List<EndpointModelItem> endpoints = null;
+            if (ModelCache.TryGetValue(EndpointsCacheKey, out endpoints))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", EndpointsCacheKey) { ObjectCount = endpoints.Count, Title = "Endpoints" });
+            }
+
+            List<DataViewModelItem> dataviews = null;
+            if (ModelCache.TryGetValue(DataViewCacheKey, out dataviews))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", DataViewCacheKey) { ObjectCount = dataviews.Count, Title = "Data Views" });
+            }
+
+            List<IntwentyDataColumn> defcolumns = null;
+            if (ModelCache.TryGetValue(DefaultVersioningTableColumnsCacheKey, out defcolumns))
+            {
+                result.Add(new CachedObjectDescription("CACHEDMODEL", DefaultVersioningTableColumnsCacheKey) { ObjectCount = defcolumns.Count, Title = "Default Intwenty Columns" });
+            }
+
+
+            return result;
+        }
         public void ClearCache(string key = "ALL")
         {
             var clearall = false;
@@ -119,9 +176,6 @@ namespace Intwenty
             var viewitems = Client.GetEntities<DataViewItem>();
             foreach (var a in viewitems)
                 t.DataViewItems.Add(a);
-            var menuitems = Client.GetEntities<MenuItem>();
-            foreach (var a in menuitems)
-                t.MenuItems.Add(a);
             var uiitems = Client.GetEntities<UserInterfaceItem>();
             foreach (var a in uiitems)
                 t.UserInterfaceItems.Add(a);
@@ -131,6 +185,9 @@ namespace Intwenty
             var endpints = Client.GetEntities<EndpointItem>();
             foreach (var a in endpints)
                 t.Endpoints.Add(a);
+            var translations = Client.GetEntities<TranslationItem>();
+            foreach (var a in translations)
+                t.Translations.Add(a);
 
             Client.Close();
 
@@ -162,7 +219,7 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<ApplicationItem>());
                     Client.DeleteEntities(Client.GetEntities<DatabaseItem>());
                     Client.DeleteEntities(Client.GetEntities<DataViewItem>());
-                    Client.DeleteEntities(Client.GetEntities<MenuItem>());
+                    Client.DeleteEntities(Client.GetEntities<TranslationItem>());
                     Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
@@ -181,7 +238,7 @@ namespace Intwenty
                 foreach (var a in model.DataViewItems)
                     Client.InsertEntity(a);
 
-                foreach (var a in model.MenuItems)
+                foreach (var a in model.Translations)
                     Client.InsertEntity(a);
 
                 foreach (var a in model.UserInterfaceItems)
@@ -215,6 +272,10 @@ namespace Intwenty
 
         }
 
+        #endregion
+
+        #region Systems
+
         public List<SystemModelItem> GetSystemModels()
         {
             List<SystemModelItem> res = null;
@@ -241,6 +302,21 @@ namespace Intwenty
           
 
             ModelCache.Set(SystemModelItemCacheKey, res);
+
+            return res;
+        }
+
+        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal)
+        {
+            var res = new List<SystemModelItem>();
+            var systems = GetSystemModels();
+            var auth_apps = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
+
+            foreach (var s in systems)
+            {
+                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
+                    res.Add(s);
+            }
 
             return res;
         }
@@ -320,6 +396,10 @@ namespace Intwenty
         }
 
 
+        #endregion
+
+        #region Localization
+
         public List<ApplicationModel> GetLocalizedApplicationModels()
         {
 
@@ -331,7 +411,59 @@ namespace Intwenty
             }
             return res;
         }
-            
+
+        private void LocalizeTitles(List<ILocalizableTitle> list)
+        {
+            var translations = GetTranslations();
+
+            foreach (var item in list)
+            {
+                if (string.IsNullOrEmpty(item.TitleLocalizationKey))
+                    continue;
+
+                var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+                if (trans != null)
+                {
+                    item.LocalizedTitle = trans.Text;
+                    if (string.IsNullOrEmpty(trans.Text))
+                        item.LocalizedTitle = item.Title;
+                }
+                else
+                {
+                    item.LocalizedTitle = item.Title;
+                }
+                
+            }
+        }
+
+        private void LocalizeTitle(ILocalizableTitle item)
+        {
+            if (item == null)
+                return;
+            if (string.IsNullOrEmpty(item.TitleLocalizationKey))
+                return;
+
+            //Localization
+            var translations = GetTranslations();
+            var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
+            if (trans != null)
+            {
+                item.LocalizedTitle = trans.Text;
+                if (string.IsNullOrEmpty(trans.Text))
+                    item.LocalizedTitle = item.Title;
+            }
+            else
+            {
+                item.LocalizedTitle = item.Title;
+            }
+
+
+        }
+
+        #endregion
+
+        #region Application
+
         public List<ApplicationModel> GetApplicationModels()
         {
             List<ApplicationModel> res = null;
@@ -370,20 +502,7 @@ namespace Intwenty
 
         }
 
-        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal)
-        {
-            var res = new List<SystemModelItem>();
-            var systems = GetSystemModels();
-            var auth_apps = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
-
-            foreach (var s in systems)
-            {
-                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
-                    res.Add(s);
-            }
-
-            return res;
-        }
+     
 
         public List<ApplicationModelItem> GetLocalizedAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
         {
@@ -457,82 +576,13 @@ namespace Intwenty
 
         }
 
-        public List<MenuModelItem> GetLocalizedMenuModels()
-        {
-            var apps = GetAppModels();
-            Client.Open();
-            var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
-            Client.Close();
-
-            //Localization
-            LocalizeTitles(apps.ToList<ILocalizableTitle>());
-            LocalizeTitles(menu.ToList<ILocalizableTitle>());
+     
 
 
-            var res = new List<MenuModelItem>();
-            foreach (var m in menu)
-            {
-
-                //DEFAULTS
-                if (!string.IsNullOrEmpty(m.AppMetaCode) && m.IsMetaTypeMenuItem)
-                {
-                    if (string.IsNullOrEmpty(m.Controller))
-                        m.Controller = "Application";
-
-                    if (string.IsNullOrEmpty(m.Action))
-                        m.Action = "EditList";
-
-                    if (!string.IsNullOrEmpty(m.AppMetaCode))
-                    {
-                        var app = apps.Find(p => p.MetaCode == m.AppMetaCode);
-                        if (app != null)
-                            m.Application = app;
-                    }
-                }
-
-            }
-
-            return menu.OrderBy(p => p.OrderNo).ToList();
-        }
+     
 
 
-        public List<MenuModelItem> GetMenuModels()
-        {
-            var apps = GetAppModels();
-
-            Client.Open();
-            var menu = Client.GetEntities<MenuItem>().Select(p => new MenuModelItem(p)).ToList();
-            Client.Close();
-
-            var res = new List<MenuModelItem>();
-            foreach (var m in menu)
-            {
-
-                //DEFAULTS
-                if (!string.IsNullOrEmpty(m.AppMetaCode) && m.IsMetaTypeMenuItem)
-                {
-                    if (string.IsNullOrEmpty(m.Controller))
-                        m.Controller = "Application";
-
-                    if (string.IsNullOrEmpty(m.Action))
-                        m.Action = "EditList";
-
-                    if (!string.IsNullOrEmpty(m.AppMetaCode))
-                    {
-                        var app = apps.Find(p => p.MetaCode == m.AppMetaCode);
-                        if (app != null)
-                            m.Application = app;
-                    }
-                }
-
-            }
-
-            return menu.OrderBy(p=> p.OrderNo).ToList();
-        }
-
-
-
-        #region Application
+     
       
 
         public List<ApplicationModelItem> GetAppModels()
@@ -588,10 +638,6 @@ namespace Intwenty
             var uiitems = Client.GetEntities<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (uiitems != null && uiitems.Count() > 0)
                 Client.DeleteEntities(uiitems);
-
-            var menuitems = Client.GetEntities<MenuItem>().Where(p => p.AppMetaCode == existing.MetaCode);
-            if (menuitems != null && menuitems.Count() > 0)
-                Client.DeleteEntities(menuitems);
 
             Client.DeleteEntity(existing);
 
@@ -1534,10 +1580,7 @@ namespace Intwenty
         }
         #endregion
 
-
-       
-
-        #region misc
+        #region Configuration
 
 
         public void CreateIntwentyDatabase()
@@ -1559,7 +1602,6 @@ namespace Intwenty
                 client.CreateTable<DataViewItem>();
                 client.CreateTable<EventLog>();
                 client.CreateTable<Entity.InformationStatus>();
-                client.CreateTable<MenuItem>();
                 client.CreateTable<InstanceId>();
                 client.CreateTable<UserInterfaceItem>();
                 client.CreateTable<ValueDomainItem>();
@@ -1595,45 +1637,7 @@ namespace Intwenty
         }
 
 
-        private void LocalizeTitles(List<ILocalizableTitle> list)
-        {
-
-            //Localization
-            var translations = GetTranslations();
-
-            foreach (var item in list)
-            {
-                if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-                {
-                    var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
-                    if (trans != null)
-                        item.LocalizedTitle = trans.Text;
-                    else
-                        item.LocalizedTitle = item.TitleLocalizationKey;
-
-                }
-            }
-        }
-
-        private void LocalizeTitle(ILocalizableTitle item)
-        {
-            if (item == null)
-                return;
-
-            //Localization
-            var translations = GetTranslations();
-
-
-            if (!string.IsNullOrEmpty(item.TitleLocalizationKey))
-            {
-                var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.TitleLocalizationKey);
-                if (trans != null)
-                    item.LocalizedTitle = trans.Text;
-                else
-                    item.LocalizedTitle = item.TitleLocalizationKey;
-            }
-
-        }
+       
 
         public List<OperationResult> ConfigureDatabase()
         {
@@ -2082,9 +2086,6 @@ namespace Intwenty
 
 
 
-        #endregion
-
-        #region ConfigureDB
 
         private void CreateMainTable(ApplicationModelItem model, List<DatabaseModelItem> columns, OperationResult result)
         {

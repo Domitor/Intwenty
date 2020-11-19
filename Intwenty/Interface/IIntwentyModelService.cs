@@ -132,17 +132,13 @@ namespace Intwenty.Interface
         public void DeleteEndpointModel(int id);
 
 
-
-        public List<MenuModelItem> GetLocalizedMenuModels();
-        public List<MenuModelItem> GetMenuModels();
-
-
-
         public OperationResult ValidateModel();
 
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
 
         public void ClearCache(string key="ALL");
+
+        public List<CachedObjectDescription> GetCachedObjectDescriptions();
 
 
     }

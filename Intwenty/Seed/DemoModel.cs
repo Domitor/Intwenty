@@ -25,7 +25,6 @@ namespace Intwenty.Seed
 
             var systems = new List<SystemItem>();
             var applications = new List<ApplicationItem>();
-            var menuitems = new List<MenuItem>();
             var valuedomains = new List<ValueDomainItem>();
             var userinterface = new List<UserInterfaceItem>();
             var dbitems = new List<DatabaseItem>();
@@ -43,14 +42,6 @@ namespace Intwenty.Seed
             applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "SalesOrder", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
             applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Vendor", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
             applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "", CreateViewRequirement = "AUTH", EditViewRequirement = "OWNER", EditListViewRequirement = "OWNER", DetailViewRequirement = "PUB", ListViewRequirement = "PUB" });
-
-            //MENU
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "MAINMENU", MetaCode = "SYSMENU", ParentMetaCode = "ROOT", Title = "Menu", TitleLocalizationKey = "MENU", OrderNo = 1, Action = "", Controller = "" });
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaType = "MENUITEM", MetaCode = "M_VEND", ParentMetaCode = "SYSMENU", Title = "Vendor", TitleLocalizationKey = "VENDOR", OrderNo = 40, Action = "", Controller = "" });
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "MENUITEM", MetaCode = "M_CUST", ParentMetaCode = "SYSMENU", Title = "Customer", TitleLocalizationKey = "CUSTOMER", OrderNo = 10, Action = "", Controller = "" });
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", MetaType = "MENUITEM", MetaCode = "M_ITEM", ParentMetaCode = "SYSMENU", Title = "Item", TitleLocalizationKey = "ITEM", OrderNo = 20, Action = "", Controller = "" });
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "MENUITEM", MetaCode = "M_SORD", ParentMetaCode = "SYSMENU", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", OrderNo = 30, Action = "", Controller = "" });
-            //menuitems.Add(new MenuItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", MetaType = "MENUITEM", MetaCode = "M_BLOG", ParentMetaCode = "SYSMENU", Title = "Example blog", TitleLocalizationKey = "", OrderNo = 60, Action = "", Controller = "" });
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
             valuedomains.Add(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "PROD", Value = "Products" });
@@ -313,13 +304,6 @@ namespace Intwenty.Seed
             foreach (var t in applications)
             {
                 if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
-                    client.InsertEntity(t);
-            }
-
-            var current_menu = client.GetEntities<MenuItem>();
-            foreach (var t in menuitems)
-            {
-                if (!current_menu.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
                     client.InsertEntity(t);
             }
 
