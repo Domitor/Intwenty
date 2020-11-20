@@ -1141,7 +1141,7 @@ namespace Intwenty
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
                 if (args.CurrentDataId > 0)
                 {
-                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id");
+                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id ");
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                     parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.CurrentDataId });
                 }
@@ -1166,7 +1166,7 @@ namespace Intwenty
 
                         if (v.ExactMatch)
                         {
-                                sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name);
+                                sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
                                 parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
                         }
                         else
@@ -1188,7 +1188,7 @@ namespace Intwenty
                 query.IncludeExecutionInfo = true;
 
 
-                IJSonStringResult queryresult;
+                IJsonArrayResult queryresult;
                 if (columns.Count > 0)
                     queryresult = client.GetJSONArray(query, false, parameters.ToArray(), columns.ToArray());
                 else
@@ -1196,7 +1196,7 @@ namespace Intwenty
                 
    
                 result.Data = queryresult.Data;
-                result.ListFilter.CurrentDataId = queryresult.LastRecordId;
+                result.ListFilter.CurrentDataId = queryresult.LastObjectId;
                 result.ListFilter.CurrentRowNum += queryresult.ObjectCount;
 
 
