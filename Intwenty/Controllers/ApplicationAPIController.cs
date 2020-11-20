@@ -57,7 +57,7 @@ namespace Intwenty.Controllers
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
 
                 if (model.Application.EditViewRequirement == "OWNER")
-                    state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = User.Identity.Name });
+                    state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
               
                 var data = DataRepository.GetLatestVersionById(state, model);
                 return new JsonResult(data);
@@ -96,7 +96,7 @@ namespace Intwenty.Controllers
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
 
                 if (model.Application.DetailViewRequirement == "OWNER")
-                    state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = User.Identity.Name });
+                    state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
 
                 var data = DataRepository.GetLatestVersionById(state, model);
                 return new JsonResult(data);
@@ -128,7 +128,7 @@ namespace Intwenty.Controllers
 
           
             var state = new ClientStateInfo() { ApplicationId = applicationid };
-            state.FilterValues.Add(new FilterValue() { ColumnName = "OwnedBy", Value = User.Identity.Name });
+            state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
             var data = DataRepository.GetLatestVersionByOwnerUser(state);
             return new JsonResult(data);
 

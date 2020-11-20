@@ -18,6 +18,8 @@ namespace Intwenty.Model.Dto
 
         public int CurrentRowNum { get; set; }
 
+        public int CurrentDataId { get; set; }
+
         public int BatchSize { get; set; }
 
         public List<FilterValue> FilterValues { get; set; }
@@ -45,11 +47,11 @@ namespace Intwenty.Model.Dto
 
     }
 
-    public class FilterValue
+    public class FilterValue : IntwentyDataColumn
     {
-        public string ColumnName { get; set; }
-
         public string Value { get; set; }
+
+        public bool ExactMatch { get; set; }
 
     }
 }

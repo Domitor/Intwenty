@@ -399,7 +399,7 @@ namespace Intwenty.Helpers
             return dateTimeTypes.Contains(col.DataType);
         }
 
-        public static string AddSelectSqlAndCondition(string sqlquery, string columnname, string value, bool is_like_condition = true)
+        public static string AddSelectSqlAndCondition(string sqlquery, string columnname, string value, bool use_exact_match = false, bool isnumeric = false)
         {
 
             var sql = string.Format(sqlquery, " ");
@@ -431,7 +431,7 @@ namespace Intwenty.Helpers
                 }
             }
 
-            if (is_like_condition)
+            if (!use_exact_match)
             {
                 if (infer_where_stmt)
                     sql = string.Format(sql, " WHERE " + columnname + " LIKE '%" + value + "%' ");
@@ -444,10 +444,29 @@ namespace Intwenty.Helpers
                 if (!valueisparameter)
                 {
                     if (infer_where_stmt)
-                        sql = string.Format(sql, " WHERE " + columnname + " = '" + value + "' ");
+                    {
+                        if (isnumeric)
+                        {
+                            sql = string.Format(sql, " WHERE " + columnname + " = " + value + " ");
+                        }
+                        else
+                        {
+                            sql = string.Format(sql, " WHERE " + columnname + " = '" + value + "' ");
+                        }
+                      
+                    }
                     else
-                        sql = string.Format(sql, " ( " + columnname + " = '" + value + "' ) AND ");
-
+                    {
+                        if (isnumeric)
+                        {
+                            sql = string.Format(sql, " ( " + columnname + " = " + value + " ) AND ");
+                        }
+                        else
+                        {
+                            sql = string.Format(sql, " ( " + columnname + " = '" + value + "' ) AND ");
+                        }
+                       
+                    }
                 }
                 else
                 {

@@ -982,33 +982,66 @@ namespace Intwenty
 
                 result.ListFilter = args;
 
-                if (args.CurrentRowNum < 1)
+                var parameters = new List<IIntwentySqlParameter>();
+                var sql_list_stmt = new StringBuilder();
+
+                if (client.Database == DBMS.MSSqlServer)
+                    sql_list_stmt.Append(string.Format("SELECT top {0} t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ", args.BatchSize));
+                else
+                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
+
+
+                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                if (args.CurrentDataId > 0)
                 {
-                    if (client.Database != DBMS.MSSqlServer)
-                    {
-                        result.Data = client.GetEntities<T>(string.Format("select * from {0} order by Id limit {1}", model.Application.DbName, args.BatchSize));
-                    }
-                    else
-                    {
-                        result.Data = client.GetEntities<T>(string.Format("select top {0} * from {1} order by Id", args.BatchSize, model.Application.DbName));
-                    }
-                  
-                    result.ListFilter.CurrentRowNum = result.Data[result.Data.Count - 1].Id;
+                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.CurrentDataId });
                 }
                 else
                 {
-                    if (client.Database != DBMS.MSSqlServer)
-                    {
-                        result.Data = client.GetEntities<T>(string.Format("select * from {0} where Id > {1} order by Id limit {2}", new object[] { model.Application.DbName, args.CurrentRowNum, args.BatchSize }));
-                    }
-                    else
-                    {
-                        result.Data = client.GetEntities<T>(string.Format("select top {0} * from {1} where Id > {2} order by Id", new object[] { args.BatchSize, model.Application.DbName, args.CurrentRowNum }));
-                    }
+                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                }
 
-                    result.Data = client.GetEntities<T>(string.Format("select * from hildings_Asset where id > {0} order by Id limit {1}", args.CurrentRowNum, args.BatchSize));
-                    result.ListFilter.CurrentRowNum = result.Data[result.Data.Count - 1].Id;
+                if (args.HasOwnerUserId)
+                {
+                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                }
 
+                if (args.FilterValues != null && args.FilterValues.Count > 0)
+                {
+                    foreach (var v in args.FilterValues)
+                    {
+                        if (string.IsNullOrEmpty(v.Name) || string.IsNullOrEmpty(v.Value))
+                            continue;
+
+                        if (v.ExactMatch)
+                        {
+                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name);
+                            parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
+                        }
+                        else
+                        {
+                            sql_list_stmt.Append("AND t2." + v.Name + " LIKE '%" + v.Value + "%'  ");
+                        }
+                    }
+                }
+
+                sql_list_stmt.Append("ORDER BY t1.Id ");
+                if (client.Database != DBMS.MSSqlServer)
+                {
+                    sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
+                }
+
+                result.Data = client.GetEntities<T>(sql_list_stmt.ToString(),false, parameters.ToArray());
+
+                if (result.Data.Count > 0)
+                {
+                    result.ListFilter.CurrentRowNum += result.Data.Count;
+                    result.ListFilter.CurrentDataId = result.Data[result.Data.Count - 1].Id;
                 }
 
 
@@ -1017,9 +1050,9 @@ namespace Intwenty
             {
                 result = new DataListResult<T>();
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetPagedList<T> of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetPagedList: " + ex.Message);
+                LogError("IntwentyDataService.GetPagedList<T>: " + ex.Message);
             }
             finally
             {
@@ -1082,9 +1115,15 @@ namespace Intwenty
                 result.ListFilter = args;
 
 
+                var parameters = new List<IIntwentySqlParameter>();
                 var columns = new List<IIntwentyResultColumn>();
                 var sql_list_stmt = new StringBuilder();
-                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+
+                if (client.Database == DBMS.MSSqlServer)
+                    sql_list_stmt.Append(string.Format("SELECT top {0} t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ", args.BatchSize));
+                else
+                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+               
 
                 foreach (var t in model.DataStructure)
                 {
@@ -1099,32 +1138,53 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                if (args.CurrentDataId > 0)
+                {
+                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.CurrentDataId });
+                }
+                else
+                {
+                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                }
+
                 if (args.HasOwnerUserId)
+                {
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                }
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
                 {
                     foreach (var v in args.FilterValues)
                     {
-                        if (!string.IsNullOrEmpty(v.ColumnName) && !string.IsNullOrEmpty(v.Value))
-                            sql_list_stmt.Append("AND t2." + v.ColumnName + " LIKE '%" + v.Value + "%'  ");
+                        if (string.IsNullOrEmpty(v.Name) || string.IsNullOrEmpty(v.Value))
+                            continue;
+
+                        if (v.ExactMatch)
+                        {
+                                sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name);
+                                parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
+                        }
+                        else
+                        {
+                            sql_list_stmt.Append("AND t2." + v.Name + " LIKE '%" + v.Value + "%'  ");
+                        } 
                     }
                 }
+
+                sql_list_stmt.Append("ORDER BY t1.Id ");
+                if (client.Database != DBMS.MSSqlServer)
+                {
+                    sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
+                }
+
+
               
-
-                sql_list_stmt.Append("ORDER BY t1.Id");
-
-                var parameters = new List<IIntwentySqlParameter>();
-                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 string json = "[]";
-
-                if (args.HasOwnerUserId)
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
-
-
-
                 if (columns.Count > 0)
                     json = client.GetJSONArray(sql_list_stmt.ToString(), result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
                 else
@@ -1132,6 +1192,8 @@ namespace Intwenty
                 
    
                 result.Data = json;
+
+          
 
 
             }
@@ -1152,6 +1214,8 @@ namespace Intwenty
 
             return result;
         }
+
+      
 
 
         public DataListResult GetList(int applicationid)
@@ -1330,7 +1394,7 @@ namespace Intwenty
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                var ownedbyfilter = state.FilterValues.Find(p => p.ColumnName == "OWNEDBY");
+                var ownedbyfilter = state.FilterValues.Find(p => p.Name == "OWNEDBY");
                 if (ownedbyfilter != null && !string.IsNullOrEmpty(ownedbyfilter.Value))
                     sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
 
@@ -1441,7 +1505,7 @@ namespace Intwenty
 
             if (state == null)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestVersionByOwnerUser.");
-            if (!state.FilterValues.Exists(p=> p.ColumnName.ToUpper() == "OWNEDBY"))
+            if (!state.FilterValues.Exists(p=> p.Name.ToUpper() == "OWNEDBY"))
                 return new DataResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestVersionByOwnerUser.");
             if (state.ApplicationId < 0)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestVersionByOwnerUser.");
@@ -1461,7 +1525,7 @@ namespace Intwenty
 
                 var parameters = new List<IIntwentySqlParameter>();
                 parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = state.ApplicationId });
-                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.FilterValues.Find(p=> p.ColumnName.ToUpper() == "OWNEDBY").Value });
+                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.FilterValues.Find(p=> p.Name.ToUpper() == "OWNEDBY").Value });
 
                 var maxid = client.GetScalarValue("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy", parameters: parameters.ToArray());
                 if (maxid != null && maxid != DBNull.Value)
@@ -1471,7 +1535,7 @@ namespace Intwenty
                     if (resultset.Rows.Count == 0)
                     {
                         client.Close();
-                        return new DataResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.ColumnName.ToUpper() == "OWNEDBY").Value),state.Id, state.Version);
+                        return new DataResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.Name.ToUpper() == "OWNEDBY").Value),state.Id, state.Version);
                     }
 
                     state.Id = resultset.FirstRowGetAsInt("Id").Value;
@@ -1536,7 +1600,7 @@ namespace Intwenty
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                var ownedbyfilter = state.FilterValues.Find(p => p.ColumnName == "OWNEDBY");
+                var ownedbyfilter = state.FilterValues.Find(p => p.Name == "OWNEDBY");
                 if (ownedbyfilter!=null && !string.IsNullOrEmpty(ownedbyfilter.Value))
                     sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
 
@@ -1912,9 +1976,9 @@ namespace Intwenty
                 {
                     foreach (var v in args.FilterValues)
                     {
-                        if (!string.IsNullOrEmpty(v.ColumnName) && !string.IsNullOrEmpty(v.Value))
+                        if (!string.IsNullOrEmpty(v.Name) && !string.IsNullOrEmpty(v.Value))
                         {
-                            sql = DBHelpers.AddSelectSqlAndCondition(sql, v.ColumnName, v.Value);
+                            sql = DBHelpers.AddSelectSqlAndCondition(sql, v.Name, v.Value);
                         }
                     }
                 }
@@ -1968,7 +2032,7 @@ namespace Intwenty
                 if (dv == null)
                     throw new InvalidOperationException("Could not find dataview");
 
-                var dvcol = viewinfo.Find(p => p.ParentMetaCode == dv.MetaCode && p.SQLQueryFieldName == args.FilterValues[0].ColumnName);
+                var dvcol = viewinfo.Find(p => p.ParentMetaCode == dv.MetaCode && p.SQLQueryFieldName == args.FilterValues[0].Name);
                 if (dvcol == null)
                     throw new InvalidOperationException("Could not find the dataview column specified in the filterValues");
 

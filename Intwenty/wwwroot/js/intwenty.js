@@ -363,7 +363,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                         var viewfield = $(this).data('viewfield');
                         if (dbfield === keyfield) {
                             if (viewfield != '' && context.model[apptablename][dbfield]) {
-                                context.pageInfo.filterValues.push({ "columnName": viewfield, "value": context.model[apptablename][dbfield] });
+                                context.pageInfo.filterValues.push({ "name": viewfield, "value": context.model[apptablename][dbfield] });
                             }
                         }
                     }
@@ -425,7 +425,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
 
                 context.pageInfo.filterValues = [];
                 if (context.dlgFilterColumnName != '' && context.dlgFilterValue != '') {
-                    context.pageInfo.filterValues.push({ "columnName": context.dlgFilterColumnName, "value": context.dlgFilterValue });
+                    context.pageInfo.filterValues.push({ "name": context.dlgFilterColumnName, "value": context.dlgFilterValue });
                 }
 
                 var endpointurl = baseurl + "GetDataView";
@@ -534,7 +534,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
             },
             addFilterValue: function () {
                 var context = this;
-                context.pageInfo.filterValues.push({ "columnName": "", "value": "" });
+                context.pageInfo.filterValues.push({ "name": "", "value": "" });
             },
             deleteFilterValue: function (item) {
                 var context = this;
