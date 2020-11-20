@@ -1182,18 +1182,22 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
                 }
 
+                var query = new SqlQuery();
+                query.SqlStatement = sql_list_stmt.ToString();
+                query.NumericIdColumn = "Id";
+                query.IncludeExecutionInfo = true;
 
-              
-                string json = "[]";
+
+                IJSonStringResult queryresult;
                 if (columns.Count > 0)
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), false, parameters.ToArray(), columns.ToArray()).ToString();
+                    queryresult = client.GetJSONArray(query, false, parameters.ToArray(), columns.ToArray());
                 else
-                    json = client.GetJSONArray(sql_list_stmt.ToString(), result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), false, parameters.ToArray()).ToString();
+                    queryresult = client.GetJSONArray(query, false, parameters.ToArray());
                 
    
-                result.Data = json;
-
-          
+                result.Data = queryresult.Data;
+                result.ListFilter.CurrentDataId = queryresult.LastRecordId;
+                result.ListFilter.CurrentRowNum += queryresult.ObjectCount;
 
 
             }
@@ -1351,10 +1355,11 @@ namespace Intwenty
             if (!string.IsNullOrEmpty(owneruserid))
                 parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = owneruserid });
 
+            var query = new SqlQuery() { SqlStatement = sql_list_stmt.ToString() };
             if (DBMSType == DBMS.PostgreSQL)
-                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray());
+                result.Data = client.GetJSONArray(query, parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).Data;
             else
-                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray());
+                result.Data = client.GetJSONArray(query, parameters: parameters.ToArray()).Data;
 
             result.Finish();
            
@@ -1607,7 +1612,7 @@ namespace Intwenty
 
                 jsonresult.Append("{");
 
-                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray());
+                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray()).Data;
 
                 if (appjson.Length < 5)
                 {
@@ -1644,8 +1649,7 @@ namespace Intwenty
                         sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                         sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                        var tablearray = client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray());
-
+                        var tablearray = client.GetJSONArray(new SqlQuery() { SqlStatement = sql_stmt.ToString() }, resultcolumns: columns.ToArray()).Data;
 
                         jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
 
@@ -1983,11 +1987,13 @@ namespace Intwenty
                     }
                 }
 
-               
+
+                var sqlquery = new SqlQuery() { SqlStatement = sql };
 
                 client.Open();
+                var queryresult = client.GetJSONArray(sqlquery, resultcolumns: columns.ToArray());
 
-                result.Data = client.GetJSONArray(sql, result.ListFilter.CurrentRowNum, (result.ListFilter.CurrentRowNum + result.ListFilter.BatchSize), resultcolumns: columns.ToArray());
+                result.Data = queryresult.Data;
 
                 result.AddMessage(MessageCode.RESULT, string.Format("Fetched dataview {0}", dv.Title));
 
@@ -2054,10 +2060,8 @@ namespace Intwenty
                 }
 
                 client.Open();
-
-                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray());
-                if (string.IsNullOrEmpty(result.Data))
-                    result.Data = "{}";
+                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray()).Data;
+                    
 
             }
             catch (Exception ex)
