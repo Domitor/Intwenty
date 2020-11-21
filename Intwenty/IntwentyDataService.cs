@@ -980,6 +980,7 @@ namespace Intwenty
 
                 }
 
+             
                 result.ListFilter = args;
 
                 var parameters = new List<IIntwentySqlParameter>();
@@ -993,11 +994,11 @@ namespace Intwenty
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
-                if (args.CurrentDataId > 0)
+                if (args.NextDataId > 0)
                 {
                     sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id");
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.CurrentDataId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.NextDataId });
                 }
                 else
                 {
@@ -1040,8 +1041,8 @@ namespace Intwenty
 
                 if (result.Data.Count > 0)
                 {
-                    result.ListFilter.CurrentRowNum += result.Data.Count;
-                    result.ListFilter.CurrentDataId = result.Data[result.Data.Count - 1].Id;
+                    result.ListFilter.PreviousDataId = result.Data[0].Id;
+                    result.ListFilter.NextDataId = result.Data[result.Data.Count - 1].Id;
                 }
 
 
@@ -1139,11 +1140,11 @@ namespace Intwenty
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
-                if (args.CurrentDataId > 0)
+                if (args.NextDataId > 0)
                 {
                     sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id ");
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.CurrentDataId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.NextDataId });
                 }
                 else
                 {
@@ -1196,9 +1197,8 @@ namespace Intwenty
                 
    
                 result.Data = queryresult.Data;
-                result.ListFilter.CurrentDataId = queryresult.LastObjectId;
-                result.ListFilter.CurrentRowNum += queryresult.ObjectCount;
-
+                result.ListFilter.PreviousDataId = queryresult.FirstObjectId;
+                result.ListFilter.NextDataId = queryresult.LastObjectId;
 
             }
             catch (Exception ex)

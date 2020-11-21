@@ -196,7 +196,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             valuedomains: {},
             model: { [apptablename]: {} },
             validation: {},
-            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "filterValues": [] },
+            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] },
             current_edit_line: {},
             showFilter: false,
             dlgFilterColumnName: "",
@@ -405,6 +405,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 this.dlgFilterValue = "";
                 this.pageInfo.maxCount = 0;
                 this.pageInfo.currentRowNum = 0;
+                this.pageInfo.nextDataId = 0;
+                this.pageInfo.previousDataId = 0;
                 this.pageInfo.dataViewMetaCode = viewname;
                 this.getDataViewLookUpPage();
                 this.current_edit_line = line;
@@ -418,6 +420,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             prevDataViewLookUpPage: function () {
                 var context = this;
                 context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
+                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
                 context.getDataViewLookUpPage();
             },
             getDataViewLookUpPage: function () {
@@ -453,6 +456,8 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             runFilter: function () {
                 var context = this;
                 context.pageInfo.currentRowNum = 0;
+                context.pageInfo.nextDataId = 0;
+                context.pageInfo.previousDataId = 0;
                 context.getDataViewLookUpPage();
 
             },
@@ -486,7 +491,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
         data: {
             datalist: []
             , model: { "showFilter": false }
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "batchSize": pagesize, "currentRowNum": 0, "filterValues": [] }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "batchSize": pagesize, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -504,6 +509,9 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
             prevpage: function () {
                 var context = this;
                 context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
+                if (context.pageInfo.currentRowNum < 0)
+                    context.pageInfo.currentRowNum = 0;
+                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
                 context.getPage();
             },
             getPage: function () {
@@ -554,7 +562,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
                 this.currentSort = s;
             },
             exportToExcel: function () {
-                var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "currentRowNum": 0, "filterValues": [] }
+                var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
                 var context = this;
                 var endpointurl = context.baseUrl + "GetEditListData";
 
@@ -635,7 +643,7 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
         data: {
             datalist: []
             , model: {}
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "filterValues": [] }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -651,6 +659,9 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
             prevpage: function () {
                 var context = this;
                 context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
+                if (context.pageInfo.currentRowNum < 0)
+                    context.pageInfo.currentRowNum = 0;
+                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
                 context.getPage();
             },
             getPage: function () {

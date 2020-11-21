@@ -66,32 +66,27 @@ namespace Intwenty.Controllers
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-            if (model != null)
-                _modelservice.DeleteAppModel(model);
+          
 
             var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
-            if (dvmodels != null && dvmodels.Count > 0)
-            {
-                foreach (var dv in dvmodels)
-                    _modelservice.DeleteDataViewModel(dv.Id);
-            }
+           
 
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
             db.Open();
 
             db.RunCommand("DELETE FROM sysmodel_ValueDomainItem WHERE DOMAINNAME = 'TESTDOMAIN'");
 
-            if (db.TableExists("TestApp"))
+            if (db.TableExists(model.DbName))
             {
-                db.RunCommand("DROP TABLE TestApp");
+                db.RunCommand(string.Format("DROP TABLE {0}", model.DbName));
             }
-            if (db.TableExists("TestApp_Versioning"))
+            if (db.TableExists(model.VersioningTableName))
             {
-                db.RunCommand("DROP TABLE TestApp_Versioning");
+                db.RunCommand(string.Format("DROP TABLE {0}", model.VersioningTableName));
             }
-            if (db.TableExists("TestAppSubTable"))
+            if (db.TableExists("def_TestAppSubTable"))
             {
-                db.RunCommand("DROP TABLE TestAppSubTable");
+                db.RunCommand("DROP TABLE def_TestAppSubTable");
             }
             if (db.TableExists("tests_TestDataAutoInc"))
             {
@@ -109,7 +104,14 @@ namespace Intwenty.Controllers
 
             db.Close();
 
+            if (model != null)
+                _modelservice.DeleteAppModel(model);
 
+            if (dvmodels != null && dvmodels.Count > 0)
+            {
+                foreach (var dv in dvmodels)
+                    _modelservice.DeleteDataViewModel(dv.Id);
+            }
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test2ORMInsert());
@@ -491,6 +493,40 @@ namespace Intwenty.Controllers
 
                 if (state.Data.SubTables[0].Rows.Count < 5)
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
+
+                var rownum = 0;
+                var dataid = 0;
+                var filter = new ListFilter() { ApplicationId = 10000, BatchSize = 10 };
+                for (int i = 1; i < 4; i++)
+                {
+                    var pageresult = _dataservice.GetPagedList(filter);
+                    if (pageresult.Data.Length < 20)
+                        throw new InvalidOperationException("GetPagedList - No result");
+
+                    if (pageresult.ListFilter.CurrentDataId == 0)
+                        throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId was 0");
+                    if (pageresult.ListFilter.CurrentRowNum == 0)
+                        throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum was 0");
+                    if (pageresult.ListFilter.MaxCount == 0)
+                        throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
+
+
+                    if (i == 1)
+                    {
+                        rownum = pageresult.ListFilter.CurrentRowNum;
+                        dataid = pageresult.ListFilter.CurrentDataId;
+                    }
+                    else
+                    {
+                        if (pageresult.ListFilter.CurrentRowNum == rownum)
+                            throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum does not seem to increase when paging");
+                        if (pageresult.ListFilter.CurrentDataId == dataid)
+                            throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId does not seem to increase when paging");
+                    }
+
+                }
+
+
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
