@@ -1048,20 +1048,21 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
                 }
 
-                result.Data = client.GetEntities<T>(sql_list_stmt.ToString(),false, parameters.ToArray());
+                var sql = sql_list_stmt.ToString();
+                result.Data = client.GetEntities<T>(sql,false, parameters.ToArray());
 
                 if (result.Data.Count > 0)
                 {
+                    result.ListFilter.PreviousDataId = result.Data[0].Id;
+                    result.ListFilter.NextDataId = result.Data[result.Data.Count - 1].Id;
+
                     if (result.ListFilter.PageDirection == 0)
                     {
-                        result.ListFilter.PreviousDataId = 0;
-                        result.ListFilter.NextDataId = result.Data[result.Data.Count - 1].Id;
                         result.ListFilter.PageNumber = 1;
                     }
                     else
                     {
-                        result.ListFilter.PreviousDataId = result.Data[0].Id;
-                        result.ListFilter.NextDataId = result.Data[result.Data.Count - 1].Id;
+                       
                         if (result.ListFilter.PageDirection < 0)
                             result.ListFilter.PageNumber -= 1;
                         if (result.ListFilter.PageDirection > 0)
