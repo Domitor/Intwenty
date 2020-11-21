@@ -494,34 +494,37 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count < 5)
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
-                var rownum = 0;
+                var previd = 0;
                 var dataid = 0;
                 var filter = new ListFilter() { ApplicationId = 10000, BatchSize = 10 };
                 for (int i = 1; i < 4; i++)
                 {
+                    filter.PageDirection = 1;
                     var pageresult = _dataservice.GetPagedList(filter);
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
                     if (pageresult.ListFilter.NextDataId == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId was 0");
-                    if (pageresult.ListFilter.CurrentRowNum == 0)
-                        throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum was 0");
                     if (pageresult.ListFilter.MaxCount == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
 
 
                     if (i == 1)
                     {
-                        rownum = pageresult.ListFilter.CurrentRowNum;
+                        previd = pageresult.ListFilter.PreviousDataId;
                         dataid = pageresult.ListFilter.NextDataId;
                     }
                     else
                     {
-                        if (pageresult.ListFilter.CurrentRowNum == rownum)
-                            throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum does not seem to increase when paging");
+                        if (pageresult.ListFilter.PreviousDataId == 0)
+                            throw new InvalidOperationException("GetPagedList - ListFilter.PreviousDataId was 0");
+                        if (pageresult.ListFilter.PreviousDataId == previd)
+                            throw new InvalidOperationException("GetPagedList - ListFilter.PreviousDataId does not seem to increase when paging");
                         if (pageresult.ListFilter.NextDataId == dataid)
                             throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId does not seem to increase when paging");
+
+                        
                     }
 
                 }
@@ -956,8 +959,9 @@ namespace Intwenty.Controllers
 
                 var latestid = state.Data.SubTables[0].Rows.Max(p => p.Id);
 
-                args.CurrentRowNum = 30;
+                args = getlistresult.ListFilter;
                 args.BatchSize = 10;
+                args.PageDirection = 1;
 
                 getlistresult = _dataservice.GetPagedList(args);
                 if (!getlistresult.IsSuccess)

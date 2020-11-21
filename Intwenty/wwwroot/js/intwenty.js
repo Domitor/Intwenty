@@ -196,7 +196,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             valuedomains: {},
             model: { [apptablename]: {} },
             validation: {},
-            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] },
+            pageInfo: { "applicationId": applicationid, "dataViewMetaCode": "", "maxCount": 0, "batchSize": 10, "pageNumber": 0, "nextDataId": 0, "previousDataId": 0, "pageDirection" : 0, "filterValues": [] },
             current_edit_line: {},
             showFilter: false,
             dlgFilterColumnName: "",
@@ -404,7 +404,7 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 this.dlgFilterColumnName = "";
                 this.dlgFilterValue = "";
                 this.pageInfo.maxCount = 0;
-                this.pageInfo.currentRowNum = 0;
+                this.pageInfo.pageNumber = 0;
                 this.pageInfo.nextDataId = 0;
                 this.pageInfo.previousDataId = 0;
                 this.pageInfo.dataViewMetaCode = viewname;
@@ -414,13 +414,12 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
             },
             nextDataViewLookUpPage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum += context.pageInfo.batchSize;
+                context.pageInfo.pageDirection = 1;
                 context.getDataViewLookUpPage();
             },
             prevDataViewLookUpPage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
-                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
+                context.pageInfo.pageDirection = -1;
                 context.getDataViewLookUpPage();
             },
             getDataViewLookUpPage: function () {
@@ -448,14 +447,14 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                 });
             },
             isFirstDataViewPage: function () {
-                return this.pageInfo.currentRowNum <= 0;
+                return this.pageInfo.pageNumber <= 0;
             },
             isLastDataViewPage: function () {
-                return this.pageInfo.currentRowNum >= this.pageInfo.maxCount;
+                return (this.pageInfo.pageNumber * this.pageInfo.batchSize) >= this.pageInfo.maxCount;
             },
             runFilter: function () {
                 var context = this;
-                context.pageInfo.currentRowNum = 0;
+                context.pageInfo.pageNumber = 0;
                 context.pageInfo.nextDataId = 0;
                 context.pageInfo.previousDataId = 0;
                 context.getDataViewLookUpPage();
@@ -491,7 +490,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
         data: {
             datalist: []
             , model: { "showFilter": false }
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "batchSize": pagesize, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "batchSize": pagesize, "pageNumber": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -503,15 +502,12 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
             },
             nextpage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum += context.pageInfo.batchSize;
+                context.pageInfo.pageDirection = 1;
                 context.getPage();
             },
             prevpage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
-                if (context.pageInfo.currentRowNum < 0)
-                    context.pageInfo.currentRowNum = 0;
-                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
+                context.pageInfo.pageDirection = -1;
                 context.getPage();
             },
             getPage: function () {
@@ -562,7 +558,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
                 this.currentSort = s;
             },
             exportToExcel: function () {
-                var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
+                var args = { "applicationId": applicationid, "maxCount": 0, "batchSize": 2000, "pageNumber": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
                 var context = this;
                 var endpointurl = context.baseUrl + "GetEditListData";
 
@@ -619,10 +615,10 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
                 });
             },
             isFirstPage: function () {
-                return this.pageInfo.currentRowNum <= 0;
+                return (this.pageInfo.pageNumber <= 1);
             },
             isLastPage: function () {
-                return this.pageInfo.currentRowNum >= (this.pageInfo.maxCount - 1);
+                return (this.pageInfo.pageNumber * this.pageInfo.batchSize) >= this.pageInfo.maxCount;
             }
         },
         mounted: function () {
@@ -643,7 +639,7 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
         data: {
             datalist: []
             , model: {}
-            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "currentRowNum": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
+            , pageInfo: { "applicationId": applicationid, "maxCount": 0, "dataViewMetaCode": "", "batchSize": pagesize, "pageNumber": 0, "nextDataId": 0, "previousDataId": 0, "filterValues": [] }
             , currentSort: ''
             , currentSortDir: 'asc'
             , baseUrl: baseurl
@@ -653,15 +649,12 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
         {
             nextpage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum += context.pageInfo.batchSize;
+                context.pageInfo.pageDirection = 1;
                 context.getPage();
             },
             prevpage: function () {
                 var context = this;
-                context.pageInfo.currentRowNum -= context.pageInfo.batchSize;
-                if (context.pageInfo.currentRowNum < 0)
-                    context.pageInfo.currentRowNum = 0;
-                context.pageInfo.nextDataId = context.pageInfo.previousDataId;
+                context.pageInfo.pageDirection = -1;
                 context.getPage();
             },
             getPage: function () {
@@ -706,10 +699,10 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
                 });
             },
             isFirstPage: function () {
-                return this.pageInfo.currentRowNum <= 0;
+                return (this.pageInfo.pageNumber <= 1);
             },
             isLastPage: function () {
-                return this.pageInfo.currentRowNum >= this.pageInfo.maxCount;
+                return (this.pageInfo.pageNumber * this.pageInfo.batchSize) >= this.pageInfo.maxCount;
             }
         },
         mounted: function () {

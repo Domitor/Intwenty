@@ -16,11 +16,13 @@ namespace Intwenty.Model.Dto
 
         public int MaxCount { get; set; }
 
-        public int CurrentRowNum { get; set; }
+        public int PageNumber { get; set; }
 
         public int PreviousDataId { get; set; }
 
         public int NextDataId { get; set; }
+
+        public int PageDirection { get; set; }
 
         public int BatchSize { get; set; }
 
