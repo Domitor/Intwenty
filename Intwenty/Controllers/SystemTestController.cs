@@ -503,7 +503,7 @@ namespace Intwenty.Controllers
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
-                    if (pageresult.ListFilter.CurrentDataId == 0)
+                    if (pageresult.ListFilter.NextDataId == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId was 0");
                     if (pageresult.ListFilter.CurrentRowNum == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum was 0");
@@ -514,13 +514,13 @@ namespace Intwenty.Controllers
                     if (i == 1)
                     {
                         rownum = pageresult.ListFilter.CurrentRowNum;
-                        dataid = pageresult.ListFilter.CurrentDataId;
+                        dataid = pageresult.ListFilter.NextDataId;
                     }
                     else
                     {
                         if (pageresult.ListFilter.CurrentRowNum == rownum)
                             throw new InvalidOperationException("GetPagedList - ListFilter.CurrentRowNum does not seem to increase when paging");
-                        if (pageresult.ListFilter.CurrentDataId == dataid)
+                        if (pageresult.ListFilter.NextDataId == dataid)
                             throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId does not seem to increase when paging");
                     }
 
