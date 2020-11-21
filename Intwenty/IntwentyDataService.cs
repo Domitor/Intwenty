@@ -1217,30 +1217,42 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
                 }
 
-                var query = new SqlQuery();
-                query.SqlStatement = sql_list_stmt.ToString();
-                query.NumericIdColumn = "Id";
-                query.IncludeExecutionInfo = true;
-
-
                 IJsonArrayResult queryresult;
                 if (columns.Count > 0)
-                    queryresult = client.GetJSONArray(query, false, parameters.ToArray(), columns.ToArray());
+                    queryresult = client.GetJSONArray(sql_list_stmt.ToString(), false, parameters.ToArray(), columns.ToArray());
                 else
-                    queryresult = client.GetJSONArray(query, false, parameters.ToArray());
+                    queryresult = client.GetJSONArray(sql_list_stmt.ToString(), false, parameters.ToArray());
+
+                var firstid = 0;
+                var lastid = 0;
+
+                if (queryresult.ObjectCount > 0)
+                {
+                    var firstvalues = queryresult.JsonObjects[0].Values;
+                    var val1 = firstvalues.Find(p => p.Name == "Id");
+                    if (val1 != null && val1.HasValue)
+                        firstid = val1.GetAsInt().Value;
+
+                    var lastvalues = queryresult.JsonObjects[queryresult.ObjectCount - 1].Values;
+                    var val2 = lastvalues.Find(p => p.Name == "Id");
+                    if (val2 != null && val2.HasValue)
+                        lastid = val2.GetAsInt().Value;
+                }
 
                 if (result.ListFilter.PageDirection == 0)
                 {
-                    result.Data = queryresult.Data;
+                    result.Data = queryresult.GetJsonString();
                     result.ListFilter.PreviousDataId = 0;
-                    result.ListFilter.NextDataId = queryresult.LastObjectId;
+                    if (queryresult.ObjectCount > 0)
+                        result.ListFilter.NextDataId = lastid;
+
                     result.ListFilter.PageNumber = 1;
                 }
                 else
                 {
-                    result.Data = queryresult.Data;
-                    result.ListFilter.PreviousDataId = queryresult.FirstObjectId;
-                    result.ListFilter.NextDataId = queryresult.LastObjectId;
+                    result.Data = queryresult.GetJsonString();
+                    result.ListFilter.PreviousDataId = firstid;
+                    result.ListFilter.NextDataId = lastid;
                     if (result.ListFilter.PageDirection < 0)
                         result.ListFilter.PageNumber -= 1;
                     if (result.ListFilter.PageDirection > 0)
@@ -1402,11 +1414,10 @@ namespace Intwenty
             if (!string.IsNullOrEmpty(owneruserid))
                 parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = owneruserid });
 
-            var query = new SqlQuery() { SqlStatement = sql_list_stmt.ToString() };
             if (DBMSType == DBMS.PostgreSQL)
-                result.Data = client.GetJSONArray(query, parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).Data;
+                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).GetJsonString();
             else
-                result.Data = client.GetJSONArray(query, parameters: parameters.ToArray()).Data;
+                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray()).GetJsonString();
 
             result.Finish();
            
@@ -1659,7 +1670,7 @@ namespace Intwenty
 
                 jsonresult.Append("{");
 
-                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray()).Data;
+                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray()).GetJsonString();
 
                 if (appjson.Length < 5)
                 {
@@ -1696,7 +1707,7 @@ namespace Intwenty
                         sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                         sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                        var tablearray = client.GetJSONArray(new SqlQuery() { SqlStatement = sql_stmt.ToString() }, resultcolumns: columns.ToArray()).Data;
+                        var tablearray = client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray()).GetJsonString();
 
                         jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
 
@@ -2035,12 +2046,9 @@ namespace Intwenty
                 }
 
 
-                var sqlquery = new SqlQuery() { SqlStatement = sql };
-
                 client.Open();
-                var queryresult = client.GetJSONArray(sqlquery, resultcolumns: columns.ToArray());
-
-                result.Data = queryresult.Data;
+                var queryresult = client.GetJSONArray(sql, resultcolumns: columns.ToArray());
+                result.Data = queryresult.GetJsonString();
 
                 result.AddMessage(MessageCode.RESULT, string.Format("Fetched dataview {0}", dv.Title));
 
@@ -2107,8 +2115,8 @@ namespace Intwenty
                 }
 
                 client.Open();
-                result.Data = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray()).Data;
-                    
+                var qryresult = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray());
+                result.Data = qryresult.GetJsonString();
 
             }
             catch (Exception ex)

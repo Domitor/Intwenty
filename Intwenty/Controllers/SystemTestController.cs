@@ -1130,8 +1130,8 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray(new SqlQuery() { SqlStatement = "select * from tests_TestDataAutoInc" });
-                if (json.Data.Length < 100)
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
@@ -1287,8 +1287,8 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray(new SqlQuery() { SqlStatement = "select * from tests_TestDataAutoInc" });
-                if (json.Data.Length < 100)
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
@@ -1445,8 +1445,8 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray(new SqlQuery() { SqlStatement = "select * from tests_TestDataAutoInc" });
-                if (json.Data.Length < 100)
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
@@ -1605,8 +1605,8 @@ namespace Intwenty.Controllers
                 if (check < expectedtotal)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray(new SqlQuery() { SqlStatement = "select * from tests_TestDataAutoInc" });
-                if (json.Data.Length < 100)
+                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be fetched");
 
                 result.Finish();

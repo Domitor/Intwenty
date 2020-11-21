@@ -106,9 +106,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                var sql = new SqlQuery();
-                sql.IncludeExecutionInfo = false;
-                sql.SqlStatement = string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower());
+                var sql = string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower());
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var res = client.GetJSONArray(sql);
