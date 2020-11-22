@@ -986,36 +986,14 @@ namespace Intwenty
                 var parameters = new List<IIntwentySqlParameter>();
                 var sql_list_stmt = new StringBuilder();
 
-                if (client.Database == DBMS.MSSqlServer)
-                    sql_list_stmt.Append(string.Format("SELECT top {0} t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ", args.BatchSize));
-                else
-                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
-
-
+                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
 
-                if (args.PageDirection != 0)
-                {
-
-                    if (args.PageDirection < 0)
-                    {
-                        sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id < @Id ");
-                        parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                        parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.PreviousDataId });
-                    }
-                    if (args.PageDirection > 0)
-                    {
-                        sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id ");
-                        parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                        parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.NextDataId });
-                    }
-                }
-                else
-                {
-                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                }
+               
+                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                
 
                 if (args.HasOwnerUserId)
                 {
@@ -1043,32 +1021,17 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (client.Database != DBMS.MSSqlServer)
+                if (DBMSType != DBMS.MSSqlServer)
                 {
-                    sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
+                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                }
+                else
+                {
+                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
                 }
 
                 var sql = sql_list_stmt.ToString();
                 result.Data = client.GetEntities<T>(sql,false, parameters.ToArray());
-
-                if (result.Data.Count > 0)
-                {
-                    result.ListFilter.PreviousDataId = result.Data[0].Id;
-                    result.ListFilter.NextDataId = result.Data[result.Data.Count - 1].Id;
-
-                    if (result.ListFilter.PageDirection == 0)
-                    {
-                        result.ListFilter.PageNumber = 1;
-                    }
-                    else
-                    {
-                       
-                        if (result.ListFilter.PageDirection < 0)
-                            result.ListFilter.PageNumber -= 1;
-                        if (result.ListFilter.PageDirection > 0)
-                            result.ListFilter.PageNumber += 1;
-                    }
-                }
 
 
             }
@@ -1145,10 +1108,8 @@ namespace Intwenty
                 var columns = new List<IIntwentyResultColumn>();
                 var sql_list_stmt = new StringBuilder();
 
-                if (client.Database == DBMS.MSSqlServer)
-                    sql_list_stmt.Append(string.Format("SELECT top {0} t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ", args.BatchSize));
-                else
-                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+
+               sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
                
 
                 foreach (var t in model.DataStructure)
@@ -1165,27 +1126,9 @@ namespace Intwenty
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
-                if (args.PageDirection != 0)
-                {
-                   
-                    if (args.PageDirection < 0)
-                    {
-                        sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id < @Id ");
-                        parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                        parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.PreviousDataId });
-                    }
-                    if (args.PageDirection > 0)
-                    {
-                        sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId AND t1.Id > @Id ");
-                        parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                        parameters.Add(new IntwentySqlParameter() { Name = "@Id", Value = args.NextDataId });
-                    }
-                }
-                else
-                {
-                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-                }
+                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                
 
                 if (args.HasOwnerUserId)
                 {
@@ -1213,9 +1156,13 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (client.Database != DBMS.MSSqlServer)
+                if (DBMSType != DBMS.MSSqlServer)
                 {
-                    sql_list_stmt.Append(string.Format("limit {0}", args.BatchSize));
+                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                }
+                else
+                {
+                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
                 }
 
                 IJsonArrayResult queryresult;
@@ -1224,41 +1171,7 @@ namespace Intwenty
                 else
                     queryresult = client.GetJSONArray(sql_list_stmt.ToString(), false, parameters.ToArray());
 
-                var firstid = 0;
-                var lastid = 0;
-
-                if (queryresult.ObjectCount > 0)
-                {
-                    var firstvalues = queryresult.JsonObjects[0].Values;
-                    var val1 = firstvalues.Find(p => p.Name == "Id");
-                    if (val1 != null && val1.HasValue)
-                        firstid = val1.GetAsInt().Value;
-
-                    var lastvalues = queryresult.JsonObjects[queryresult.ObjectCount - 1].Values;
-                    var val2 = lastvalues.Find(p => p.Name == "Id");
-                    if (val2 != null && val2.HasValue)
-                        lastid = val2.GetAsInt().Value;
-                }
-
-                if (result.ListFilter.PageDirection == 0)
-                {
-                    result.Data = queryresult.GetJsonString();
-                    result.ListFilter.PreviousDataId = 0;
-                    if (queryresult.ObjectCount > 0)
-                        result.ListFilter.NextDataId = lastid;
-
-                    result.ListFilter.PageNumber = 1;
-                }
-                else
-                {
-                    result.Data = queryresult.GetJsonString();
-                    result.ListFilter.PreviousDataId = firstid;
-                    result.ListFilter.NextDataId = lastid;
-                    if (result.ListFilter.PageDirection < 0)
-                        result.ListFilter.PageNumber -= 1;
-                    if (result.ListFilter.PageDirection > 0)
-                        result.ListFilter.PageNumber += 1;
-                }
+                result.Data = queryresult.GetJsonString();
 
             }
             catch (Exception ex)
@@ -2045,6 +1958,9 @@ namespace Intwenty
                         }
                     }
                 }
+
+                sql = DBHelpers.AddPagingSqlStatement(sql, args.PageNumber, args.PageSize, DBMSType);
+
 
 
                 client.Open();

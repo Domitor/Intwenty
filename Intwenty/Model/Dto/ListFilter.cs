@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Intwenty.Model.Dto
 {
+
     public class ListFilter
     {
         public static readonly string DEFAULT_OWNERUSERID = "INTWENTY_USER";
@@ -18,15 +19,10 @@ namespace Intwenty.Model.Dto
 
         public int PageNumber { get; set; }
 
-        public int PreviousDataId { get; set; }
-
-        public int NextDataId { get; set; }
-
-        public int PageDirection { get; set; }
-
-        public int BatchSize { get; set; }
+        public int PageSize { get; set; }
 
         public List<FilterValue> FilterValues { get; set; }
+
 
         public bool HasFilter
         {
@@ -44,7 +40,7 @@ namespace Intwenty.Model.Dto
 
         public ListFilter()
         {
-            BatchSize = 50;
+            PageSize = 20;
             OwnerUserId = DEFAULT_OWNERUSERID;
             FilterValues = new List<FilterValue>();
         }

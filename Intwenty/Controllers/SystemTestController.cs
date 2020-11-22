@@ -494,38 +494,18 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count < 5)
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
-                var previd = 0;
-                var dataid = 0;
-                var filter = new ListFilter() { ApplicationId = 10000, BatchSize = 10 };
+
+                var filter = new ListFilter() { ApplicationId = 10000, PageSize = 10 };
                 for (int i = 1; i < 4; i++)
                 {
-                    filter.PageDirection = 1;
+                    filter.PageNumber = i;
                     var pageresult = _dataservice.GetPagedList(filter);
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
-                    if (pageresult.ListFilter.NextDataId == 0)
-                        throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId was 0");
+                  
                     if (pageresult.ListFilter.MaxCount == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
-
-
-                    if (i == 1)
-                    {
-                        previd = pageresult.ListFilter.PreviousDataId;
-                        dataid = pageresult.ListFilter.NextDataId;
-                    }
-                    else
-                    {
-                        if (pageresult.ListFilter.PreviousDataId == 0)
-                            throw new InvalidOperationException("GetPagedList - ListFilter.PreviousDataId was 0");
-                        if (pageresult.ListFilter.PreviousDataId == previd)
-                            throw new InvalidOperationException("GetPagedList - ListFilter.PreviousDataId does not seem to increase when paging");
-                        if (pageresult.ListFilter.NextDataId == dataid)
-                            throw new InvalidOperationException("GetPagedList - ListFilter.CurrentDataId does not seem to increase when paging");
-
-                        
-                    }
 
                 }
 
@@ -687,7 +667,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var args = new ListFilter() { ApplicationId = 10000,  BatchSize = 500 };
+                var args = new ListFilter() { ApplicationId = 10000,  PageSize = 500 };
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
                 if (model == null)
                     throw new InvalidOperationException("Model not found");
@@ -944,7 +924,8 @@ namespace Intwenty.Controllers
 
                 var args = new ListFilter();
                 args.ApplicationId = 10000;
-                args.BatchSize = 20;
+                args.PageSize = 20;
+                args.PageNumber = 0;
 
                 var getlistresult = _dataservice.GetPagedList(args);
                 if (!getlistresult.IsSuccess)
@@ -954,14 +935,14 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
-                if (state.Data.SubTables[0].Rows.Count != args.BatchSize)
+                if (state.Data.SubTables[0].Rows.Count != args.PageSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
                 var latestid = state.Data.SubTables[0].Rows.Max(p => p.Id);
 
                 args = getlistresult.ListFilter;
-                args.BatchSize = 10;
-                args.PageDirection = 1;
+                args.PageSize = 10;
+                args.PageNumber = 1;
 
                 getlistresult = _dataservice.GetPagedList(args);
                 if (!getlistresult.IsSuccess)
@@ -975,7 +956,7 @@ namespace Intwenty.Controllers
                 if (latestid >= newlatestid)
                     throw new InvalidOperationException("Paging not working properly");
 
-                if (state.Data.SubTables[0].Rows.Count != args.BatchSize)
+                if (state.Data.SubTables[0].Rows.Count != args.PageSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
                 getlistresult = _dataservice.GetList(10000);
@@ -1719,7 +1700,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var res = _dataservice.GetDataView(new ListFilter() { BatchSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
+                var res = _dataservice.GetDataView(new ListFilter() { PageSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
                 if (!res.IsSuccess)
                     throw new InvalidOperationException("DataView could not execute");
 

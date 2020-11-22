@@ -399,6 +399,38 @@ namespace Intwenty.Helpers
             return dateTimeTypes.Contains(col.DataType);
         }
 
+        public static string AddPagingSqlStatement(string sqlquery, int pagenumber, int pagesize, DBMS dbms)
+        {
+            var sql = string.Format(sqlquery, " ");
+            var uppersql = sql.ToUpper();
+
+            var infer_orderby_stmt = !uppersql.Contains(" ORDER ");
+            if (infer_orderby_stmt)
+            {
+                if (dbms != DBMS.MSSqlServer)
+                {
+                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber*pagesize), pagesize);
+                }
+            }
+            else
+            {
+                var ind = uppersql.IndexOf(" ORDER ");
+                sql = sql.Substring(0, ind);
+                if (dbms != DBMS.MSSqlServer)
+                {
+                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber * pagesize), pagesize);
+                }
+                else
+                {
+                    sql += string.Format(" OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (pagenumber * pagesize), pagesize);
+                }
+            }
+
+            return sql;
+
+
+        }
+
         public static string AddSelectSqlAndCondition(string sqlquery, string columnname, string value, bool use_exact_match = false, bool isnumeric = false)
         {
 
@@ -477,6 +509,8 @@ namespace Intwenty.Helpers
                 }
 
             }
+
+            
 
 
 
