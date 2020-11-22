@@ -1631,6 +1631,18 @@ namespace Intwenty
                 jsonresult.Append("}");
 
                 result.Data = jsonresult.ToString();
+
+                //WORKS
+                //System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(jsonresult.ToString());
+                //result.JElement = doc.RootElement;
+
+               
+                //var options = new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase, DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,  PropertyNameCaseInsensitive = false };
+                //result.JElement = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), options);
+     
+
+                //result.Data = System.Text.Json.JsonSerializer.Serialize(result.JElement, new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+                //result.Data = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
             }
             catch (Exception ex)
             {

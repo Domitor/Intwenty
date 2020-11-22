@@ -466,10 +466,20 @@ namespace Intwenty.Helpers
             if (!use_exact_match)
             {
                 if (infer_where_stmt)
-                    sql = string.Format(sql, " WHERE " + columnname + " LIKE '%" + value + "%' ");
+                {
+                    if (!valueisparameter)
+                        sql = string.Format(sql, " WHERE " + columnname + " LIKE '%" + value + "%' ");
+                    else
+                        sql = string.Format(sql, " WHERE " + columnname + " LIKE '%'" + value + "'%' ");
+                }
                 else
-                    sql = string.Format(sql, " ( " + columnname + " LIKE '%" + value + "%' ) AND ");
+                {
+                    if (!valueisparameter)
+                        sql = string.Format(sql, " ( " + columnname + " LIKE '%" + value + "%' ) AND ");
+                    else
+                        sql = string.Format(sql, " ( " + columnname + " LIKE '%'" + value + "'%' ) AND ");
 
+                }
             }
             else
             {

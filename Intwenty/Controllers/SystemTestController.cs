@@ -58,6 +58,12 @@ namespace Intwenty.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult ParsingTest()
+        {
+            return View();
+        }
+
 
         [HttpPost]
         public JsonResult RunSystemTests()

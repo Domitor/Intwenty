@@ -134,6 +134,8 @@ namespace Intwenty.Model.Dto
     {
         public string Data { get; set; }
 
+        public object JElement { get; set; }
+
         public ApplicationData GetAsApplicationData()
         {
             if (string.IsNullOrEmpty(Data))
