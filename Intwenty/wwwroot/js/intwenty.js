@@ -543,7 +543,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
                 var context = this;
 
                 for (var i = 0; i < context.pageInfo.filterValues.length; i++) {
-                    if (context.pageInfo.filterValues[i].columnName === item.columnName) {
+                    if (context.pageInfo.filterValues[i].name === item.name) {
                         context.pageInfo.filterValues.splice(i, 1);
                         break;
                     }

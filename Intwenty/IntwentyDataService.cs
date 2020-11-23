@@ -1010,7 +1010,7 @@ namespace Intwenty
 
                         if (v.ExactMatch)
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name);
+                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
                             parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
                         }
                         else
@@ -1134,7 +1134,7 @@ namespace Intwenty
 
                         if (v.ExactMatch)
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name);
+                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
                             parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
                         }
                         else
