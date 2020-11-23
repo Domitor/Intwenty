@@ -685,6 +685,13 @@ namespace Intwenty.Controllers
                 if (data.Data.Count < 1)
                     throw new InvalidOperationException("No data found when using GetPagedList<def_TestApp>()");
 
+                data = _dataservice.GetList<def_TestApp>(10000);
+                if (!data.IsSuccess)
+                    throw new InvalidOperationException(data.SystemError);
+
+                if (data.Data.Count < 1)
+                    throw new InvalidOperationException("No data found when using GetList<def_TestApp>()");
+
                 var state = new ClientStateInfo() { ApplicationId = 10000, Id = data.Data[0].Id };
                 var data2 = _dataservice.Get<def_TestApp>(state, model);
                 if (!data2.IsSuccess)
@@ -947,7 +954,6 @@ namespace Intwenty.Controllers
                 var latestid = state.Data.SubTables[0].Rows.Max(p => p.Id);
 
                 args = getlistresult.ListFilter;
-                args.PageSize = 10;
                 args.PageNumber = 1;
 
                 getlistresult = _dataservice.GetPagedList(args);
