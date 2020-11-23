@@ -43,7 +43,7 @@ namespace Intwenty.Controllers
             if (!model.UseEditViewAuthorization)
             {
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-                var data = DataRepository.GetLatestVersionById(state, model);
+                var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
             } 
             else 
@@ -59,7 +59,7 @@ namespace Intwenty.Controllers
                 if (model.Application.EditViewRequirement == "OWNER")
                     state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
               
-                var data = DataRepository.GetLatestVersionById(state, model);
+                var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
                 
             }
@@ -83,7 +83,7 @@ namespace Intwenty.Controllers
             if (!model.UseDetailViewAuthorization)
             {
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-                var data = DataRepository.GetLatestVersionById(state, model);
+                var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
             }
             else
@@ -98,7 +98,7 @@ namespace Intwenty.Controllers
                 if (model.Application.DetailViewRequirement == "OWNER")
                     state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
 
-                var data = DataRepository.GetLatestVersionById(state, model);
+                var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
 
             }
@@ -129,7 +129,7 @@ namespace Intwenty.Controllers
           
             var state = new ClientStateInfo() { ApplicationId = applicationid };
             state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-            var data = DataRepository.GetLatestVersionByOwnerUser(state);
+            var data = DataRepository.GetLatestByOwnerUser(state);
             return new JsonResult(data);
 
         }
@@ -252,7 +252,7 @@ namespace Intwenty.Controllers
         public virtual JsonResult CreateNew(int id)
         {
             var state = new ClientStateInfo() { ApplicationId = id };
-            var t = DataRepository.CreateNew(state);
+            var t = DataRepository.New(state);
             return new JsonResult(t);
 
         }

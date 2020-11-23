@@ -698,7 +698,7 @@ namespace Intwenty.Controllers
                         data.Append(",\"ApplicationData\":");
 
                         var state = new ClientStateInfo() { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
-                        var appversiondata = DataRepository.GetLatestVersionById(state);
+                        var appversiondata = DataRepository.Get(state);
                         data.Append(appversiondata.Data);
                         data.Append("}");
                         sep = ",";

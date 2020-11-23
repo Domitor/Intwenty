@@ -50,7 +50,7 @@ namespace Intwenty.Controllers
             {
               
                 var state = new ClientStateInfo() { Id = id.Value, ApplicationId = model.Application.Id };
-                var data = DataRepository.GetLatestVersionById(state);
+                var data = DataRepository.Get(state);
                 if (!data.IsSuccess)
                     return new JsonResult(data.UserError) { StatusCode = 400 };
                 

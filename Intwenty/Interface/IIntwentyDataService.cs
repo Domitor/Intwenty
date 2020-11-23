@@ -13,9 +13,9 @@ namespace Intwenty.Interface
         /// Creates a new application JSON Document including defaultvalues.
         /// </summary>
         /// <returns>An Result including a json object</returns>
-        DataResult CreateNew(ClientStateInfo state);
+        DataResult New(ClientStateInfo state);
 
-        DataResult CreateNew(ApplicationModel model);
+        DataResult New(ApplicationModel model);
 
 
         /// <summary>
@@ -53,33 +53,33 @@ namespace Intwenty.Interface
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult DeleteById(int applicationid, int id, string dbname);
+        ModifyResult Delete(int applicationid, int id, string dbname);
 
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult GetLatestVersionById(ClientStateInfo state);
+        DataResult Get(ClientStateInfo state);
 
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model);
+        DataResult Get(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application data of type T</returns>
-        DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : InformationHeader, new();
+        DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : InformationHeader, new();
 
         /// <summary>
         /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult GetLatestVersionByOwnerUser(ClientStateInfo state);
+        DataResult GetLatestByOwnerUser(ClientStateInfo state);
 
 
         /// <summary>
@@ -104,7 +104,14 @@ namespace Intwenty.Interface
 
         /// <summary>
         /// Get a list of (latest version) application data. 
-        /// All columns from the application's main table is returned.
+        /// All columns and rows from the application's main table is returned.
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
+
+        /// <summary>
+        /// Get a list of (latest version) application data. 
+        /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
         DataListResult GetList(int applicationid);

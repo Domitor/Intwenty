@@ -47,12 +47,12 @@ namespace Intwenty
 
         #region Create
 
-        public virtual DataResult CreateNew(ApplicationModel model)
+        public virtual DataResult New(ApplicationModel model)
         {
             return CreateNewInternal(model);
         }
 
-        public virtual DataResult CreateNew(ClientStateInfo state)
+        public virtual DataResult New(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return CreateNewInternal(model);
@@ -845,7 +845,7 @@ namespace Intwenty
 
         }
 
-        public ModifyResult DeleteById(int applicationid, int id, string dbname)
+        public ModifyResult Delete(int applicationid, int id, string dbname)
         {
             ModifyResult result = null;
 
@@ -1192,7 +1192,73 @@ namespace Intwenty
             return result;
         }
 
-      
+        public DataListResult<T> GetList<T>(int applicationid) where T : Intwenty.Model.Dto.InformationHeader, new()
+        {
+            DataListResult<T> result = null;
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+
+                if (applicationid < 1)
+                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
+
+                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
+
+                result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
+
+                var columns = new List<IIntwentyResultColumn>();
+                columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
+                columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
+                columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
+
+                var sql_list_stmt = new StringBuilder();
+                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+
+
+                foreach (var col in model.DataStructure)
+                {
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                    {
+                        sql_list_stmt.Append(", t2." + col.DbName + " ");
+                        columns.Add(col);
+                    }
+                }
+
+                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
+                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                sql_list_stmt.Append("ORDER BY t1.Id");
+
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+
+               
+                client.Open();
+                result.Data = client.GetEntities<T>(sql_list_stmt.ToString(), false, parameters.ToArray());
+
+            }
+            catch (Exception ex)
+            {
+                result = new DataListResult<T>();
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                LogError("IntwentyDataService.GetList: " + ex.Message);
+            }
+            finally
+            {
+                client.Close();
+                result.Finish();
+            }
+
+            return result;
+
+        }
 
 
         public DataListResult GetList(int applicationid)
@@ -1344,7 +1410,7 @@ namespace Intwenty
 
         #region GetApplication
 
-        public DataResult<T> GetLatestVersionById<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (state == null)
                 return new DataResult<T>(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
@@ -1371,24 +1437,19 @@ namespace Intwenty
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                var ownedbyfilter = state.FilterValues.Find(p => p.Name == "OWNEDBY");
-                if (ownedbyfilter != null && !string.IsNullOrEmpty(ownedbyfilter.Value))
-                    sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
-
-
-             
+            
                 client.Open();
                 var t = client.GetEntities<T>(sql_stmt.ToString());
                 client.Close();
                 if (t.Count == 1)
                 {
-                    result = new DataResult<T>(true, MessageCode.RESULT, string.Format("GetLatestVersionById successful, application {0}.", model.Application.Title), state.Id, state.Version);
+                    result = new DataResult<T>(true, MessageCode.RESULT, string.Format("Get<T> successful, application {0}.", model.Application.Title), state.Id, state.Version);
                     result.Data = t[0];
                     return result;
                 }
                 else
                 {
-                    result = new DataResult<T>(false, MessageCode.RESULT, string.Format("GetLatestVersionById failed, application {0}.", model.Application.Title), state.Id, state.Version);
+                    result = new DataResult<T>(false, MessageCode.RESULT, string.Format("Get<T> failed, application {0}.", model.Application.Title), state.Id, state.Version);
                     return result;
                 }
              
@@ -1399,7 +1460,7 @@ namespace Intwenty
             {
                 result = new DataResult<T>() { Id = state.Id, Version = state.Version };
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById failed"));
+                result.AddMessage(MessageCode.USERERROR, string.Format("Get<T> failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
             }
@@ -1413,15 +1474,84 @@ namespace Intwenty
 
         }
 
-        public DataResult GetLatestVersionById(ClientStateInfo state, ApplicationModel model)
+        public DataResult Get(ClientStateInfo state, ApplicationModel model)
         {
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        public DataResult GetLatestVersionById(ClientStateInfo state)
+        public DataResult Get(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return GetLatestVersionByIdInternal(state, model);
+        }
+
+        public DataResult GetLatestByOwnerUser(ClientStateInfo state)
+        {
+            ApplicationModel model = null;
+            DataResult result = null;
+
+            if (state == null)
+                return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestByOwnerUser.");
+            if (!state.FilterValues.Exists(p => p.Name.ToUpper() == "OWNEDBY"))
+                return new DataResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestByOwnerUser.");
+            if (state.ApplicationId < 0)
+                return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestByOwnerUser.");
+
+            var client = new Connection(DBMSType, Settings.DefaultConnection);
+
+            try
+            {
+                if (state.ApplicationId < 1)
+                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
+
+                model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+                if (model == null)
+                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
+
+
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = state.ApplicationId });
+                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.FilterValues.Find(p => p.Name.ToUpper() == "OWNEDBY").Value });
+
+                client.Open();
+                var maxid = client.GetScalarValue("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy", parameters: parameters.ToArray());
+                if (maxid != null && maxid != DBNull.Value)
+                {
+
+                    var resultset = client.GetResultSet("SELECT Id,Version from sysdata_InformationStatus where Id = @Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = maxid } });
+                    if (resultset.Rows.Count == 0)
+                    {
+                        client.Close();
+                        return new DataResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.Name.ToUpper() == "OWNEDBY").Value), state.Id, state.Version);
+                    }
+
+                    state.Id = resultset.FirstRowGetAsInt("Id").Value;
+                    state.Version = resultset.FirstRowGetAsInt("Version").Value;
+                }
+
+                if (state.Id < 1)
+                {
+                    client.Close();
+                    return new DataResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = new DataResult() { Id = state.Id, Version = state.Version };
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestByOwnerUser(state) of Intwenty application failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                LogError("IntwentyDataService.GetLatestByOwnerUser: " + ex.Message);
+                return result;
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            return GetLatestVersionByIdInternal(state, model);
+
         }
 
         private DataResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
@@ -1444,114 +1574,11 @@ namespace Intwenty
                 return result;
             }
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
-
-            try
-            {
-
-                client.Open();
-
-                result = GetLatestVersion(model, state, client);
-
-                if (result.IsSuccess)
-                {
-                    AddToApplicationCache(model, result);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                result = new DataResult() { Id = state.Id, Version = state.Version };
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionById(state) of Intwenty application failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
-            }
-            finally
-            {
-                client.Close();
-                result.Finish();
-            }
-
-            return result;
-        }
-
-        public DataResult GetLatestVersionByOwnerUser(ClientStateInfo state)
-        {
-            DataResult result = null;
-
-            if (state == null)
-                return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing GetLatestVersionByOwnerUser.");
-            if (!state.FilterValues.Exists(p=> p.Name.ToUpper() == "OWNEDBY"))
-                return new DataResult(false, MessageCode.SYSTEMERROR, "FilterValue with 'OwnedBy' parameter is required when executing GetLatestVersionByOwnerUser.");
-            if (state.ApplicationId < 0)
-                return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestVersionByOwnerUser.");
+            result = new DataResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
 
-            try
-            {
-                if (state.ApplicationId < 1)
-                    throw new InvalidOperationException("Parameter state must contain a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
-
-                client.Open();
-
-                var parameters = new List<IIntwentySqlParameter>();
-                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = state.ApplicationId });
-                parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = state.FilterValues.Find(p=> p.Name.ToUpper() == "OWNEDBY").Value });
-
-                var maxid = client.GetScalarValue("SELECT max(id) from sysdata_InformationStatus where ApplicationId=@ApplicationId and OwnedBy=@OwnedBy", parameters: parameters.ToArray());
-                if (maxid != null && maxid != DBNull.Value)
-                {
-
-                    var resultset = client.GetResultSet("SELECT Id,Version from sysdata_InformationStatus where Id = @Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = maxid } });
-                    if (resultset.Rows.Count == 0)
-                    {
-                        client.Close();
-                        return new DataResult(false, MessageCode.USERERROR, string.Format("Latest id for application {0} for Owner {1} could not be found", model.Application.Title, state.FilterValues.Find(p => p.Name.ToUpper() == "OWNEDBY").Value),state.Id, state.Version);
-                    }
-
-                    state.Id = resultset.FirstRowGetAsInt("Id").Value;
-                    state.Version = resultset.FirstRowGetAsInt("Version").Value;
-                }
-
-                if (state.Id < 1)
-                {
-                    client.Close();
-                    return new DataResult(false, MessageCode.SYSTEMERROR, "Requested data could not be found.");
-                }
-
-                result = GetLatestVersion(model, state, client);
-
-            }
-            catch (Exception ex)
-            {
-                result = new DataResult() { Id = state.Id, Version = state.Version };
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetLatestVersionByOwnerUser(state) of Intwenty application failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetLatestVersionByOwnerUser: " + ex.Message);
-            }
-            finally
-            {
-                client.Close();
-            }
-
-            return result;
-
-        }
-
-
-        private DataResult GetLatestVersion(ApplicationModel model, ClientStateInfo state, IDataClient client)
-        {
-            var jsonresult = new StringBuilder();
-
-            var result = new DataResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
-
+           
 
             try
             {
@@ -1577,23 +1604,17 @@ namespace Intwenty
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                var ownedbyfilter = state.FilterValues.Find(p => p.Name == "OWNEDBY");
-                if (ownedbyfilter!=null && !string.IsNullOrEmpty(ownedbyfilter.Value))
-                    sql_stmt.Append(string.Format("AND t1.OwnedBy = {0}", ownedbyfilter.Value));
 
-
-                jsonresult.Append("{");
-
+                var jsonresult = new StringBuilder("{");
                 var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray()).GetJsonString();
-
                 if (appjson.Length < 5)
                 {
                     jsonresult.Append("}");
                     result.Messages.Clear();
                     result.Data = jsonresult.ToString();
                     result.IsSuccess = false;
-                    result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} returned no data", model.Application.Title));
-                    result.AddMessage(MessageCode.SYSTEMERROR, string.Format("Get latest version for application {0} returned no data", model.Application.Title));
+                    result.AddMessage(MessageCode.USERERROR, string.Format("Get application {0} returned no data", model.Application.Title));
+                    result.AddMessage(MessageCode.SYSTEMERROR, string.Format("Get application {0} returned no data", model.Application.Title));
                     return result;
                 }
 
@@ -1632,17 +1653,20 @@ namespace Intwenty
 
                 result.Data = jsonresult.ToString();
 
+                AddToApplicationCache(model, result);
+
                 //WORKS
                 //System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(jsonresult.ToString());
                 //result.JElement = doc.RootElement;
 
-               
+
                 //var options = new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase, DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,  PropertyNameCaseInsensitive = false };
                 //result.JElement = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), options);
-     
+
 
                 //result.Data = System.Text.Json.JsonSerializer.Serialize(result.JElement, new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
                 //result.Data = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
             }
             catch (Exception ex)
             {
@@ -1654,20 +1678,24 @@ namespace Intwenty
                     result.Version = state.Version;
                 }
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("Get latest version for application {0} failed", model.Application.Title));
+                result.AddMessage(MessageCode.USERERROR, string.Format("Get application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                LogError("IntwentyDataService.GetLatestVersion: " + ex.Message);
-
+                LogError("IntwentyDataService.Get: " + ex.Message);
             }
             finally
             {
+                client.Close();
                 result.Finish();
             }
 
             return result;
-
         }
+
+     
+
+
+     
 
 
         #endregion
