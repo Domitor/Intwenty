@@ -97,7 +97,7 @@ namespace Intwenty.Controllers
             if (m != null)
             {
                 model.ApplicationId = m.Application.Id;
-                var res = DataRepository.GetPagedList(model);
+                var res = DataRepository.GetPagedJsonArray(model);
                 if (!res.IsSuccess)
                     return new JsonResult(res.UserError) { StatusCode = 400 };
                 

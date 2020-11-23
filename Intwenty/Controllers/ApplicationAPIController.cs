@@ -153,7 +153,7 @@ namespace Intwenty.Controllers
 
             if (!appmodel.UseEditListViewAuthorization)
             {
-                var listdata = DataRepository.GetPagedList(model, appmodel);
+                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
                 return new JsonResult(listdata);
             }
             else
@@ -167,7 +167,7 @@ namespace Intwenty.Controllers
                     model.OwnerUserId = User.Identity.Name;
                   
 
-                var listdata = DataRepository.GetPagedList(model, appmodel);
+                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
                 return new JsonResult(listdata);
 
             }
@@ -192,7 +192,7 @@ namespace Intwenty.Controllers
 
             if (!appmodel.UseListViewAuthorization)
             {
-                var listdata = DataRepository.GetPagedList(model, appmodel);
+                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
                 return new JsonResult(listdata);
             }
             else
@@ -205,7 +205,7 @@ namespace Intwenty.Controllers
                 if (appmodel.Application.EditListViewRequirement == "OWNER")
                     model.OwnerUserId = User.Identity.Name;
 
-                var listdata = DataRepository.GetPagedList(model, appmodel);
+                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
                 return new JsonResult(listdata);
 
             }

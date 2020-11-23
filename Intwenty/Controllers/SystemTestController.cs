@@ -489,7 +489,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var getlistresult = _dataservice.GetList(10000);
+                var getlistresult = _dataservice.GetJsonArray(10000);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(1000) failed: " + getlistresult.SystemError);
 
@@ -505,7 +505,7 @@ namespace Intwenty.Controllers
                 for (int i = 1; i < 4; i++)
                 {
                     filter.PageNumber = i;
-                    var pageresult = _dataservice.GetPagedList(filter);
+                    var pageresult = _dataservice.GetPagedJsonArray(filter);
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
@@ -536,7 +536,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var getlistresult = _dataservice.GetListByOwnerUser(10000, "OTHERUSER");
+                var getlistresult = _dataservice.GetJsonArrayByOwnerUser(10000, "OTHERUSER");
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetListByOwnerUser(1000, OTHERUSER) failed: " + getlistresult.SystemError);
 
@@ -940,7 +940,7 @@ namespace Intwenty.Controllers
                 args.PageSize = 20;
                 args.PageNumber = 0;
 
-                var getlistresult = _dataservice.GetPagedList(args);
+                var getlistresult = _dataservice.GetPagedJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
@@ -956,7 +956,7 @@ namespace Intwenty.Controllers
                 args = getlistresult.ListFilter;
                 args.PageNumber = 1;
 
-                getlistresult = _dataservice.GetPagedList(args);
+                getlistresult = _dataservice.GetPagedJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
@@ -971,7 +971,7 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count != args.PageSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
-                getlistresult = _dataservice.GetList(10000);
+                getlistresult = _dataservice.GetJsonArray(10000);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(applicationid) failed: " + getlistresult.SystemError);
 

@@ -82,7 +82,7 @@ namespace Intwenty.Model.Dto
         }
     }
 
-    public class DataListResult<T> : IntwentyResult
+    public class DataListResult<T> : IntwentyResult where T : InformationHeader, new ()
     {
        
 

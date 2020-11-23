@@ -82,16 +82,8 @@ namespace Intwenty.Interface
         DataResult GetLatestByOwnerUser(ClientStateInfo state);
 
 
-        /// <summary>
-        /// Get a list of (latest version) application data that matches the filter specified in args. 
-        /// This function supports paging. It returns the number of records specified in args.BatchSize
-        /// 
-        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
-        /// </summary>
-        /// <returns>An OperationResult including a string json array and the current paging rownum</returns>
-        DataListResult GetPagedList(ListFilter args);
 
-        DataListResult GetPagedList(ListFilter args, ApplicationModel model);
+
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -99,29 +91,98 @@ namespace Intwenty.Interface
         /// 
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
-        /// <returns>An OperationResult including a list of T and the current paging rownum</returns>
+        /// <returns>A DataListResult including a string json array</returns>
+        DataListResult GetPagedJsonArray(ListFilter args);
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
+        /// </summary>
+        /// <returns>A DataListResult including a string json array</returns>
+        DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model);
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
+        /// </summary>
+        /// <returns>A result object that inhertits DataListResult including a string json array</returns>
+        TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
+                                                                                                           
+
+
+
+
+
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
+        /// </summary>
+        /// <returns>A result object that inhertits DataListResult including a list of DataType</returns>
+        TDataListResult GetPagedList<TDataListResult, TEntityType>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult<TEntityType>, new() 
+                                                                                                            where TEntityType : InformationHeader, new();
+
+        /// <summary>
+        /// Get a list of (latest version) application data that matches the filter specified in args. 
+        /// This function supports paging. It returns the number of records specified in args.BatchSize
+        /// 
+        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
+        /// </summary>
+        /// <returns>A DataListResult including a list of T and the current paging rownum</returns>
         DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
 
+
+
+
+
+        /// <summary>
+        /// Get a list of application data. 
+        /// All columns and rows from the application's main table is returned.
+        /// </summary>
+        /// <returns>A result object that inhertits DataListResult including a list of DataType</returns>
+        TDataListResult GetList<TDataListResult, TEntityType>(int applicationid) where TDataListResult : DataListResult<TEntityType>, new()
+                                                                                 where TEntityType : InformationHeader, new();
+
+
         /// <summary>
         /// Get a list of (latest version) application data. 
         /// All columns and rows from the application's main table is returned.
         /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
+        /// <returns>An DataListResult including a list of T</returns>
         DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
+
+
+
+
 
         /// <summary>
         /// Get a list of (latest version) application data. 
         /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetList(int applicationid);
+        TDataListResult GetJsonArray<TDataListResult>(int applicationid) where TDataListResult : DataListResult, new();
+
+        /// <summary>
+        /// Get a list of (latest version) application data. 
+        /// All columns and rows from the application's main table is returned.
+        /// </summary>
+        /// <returns>An OperationResult including a json array</returns>
+        DataListResult GetJsonArray(int applicationid);
+
+
 
         /// <summary>
         /// Get a list of (latest version) application data based on OwnedBy. 
         /// All columns from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetListByOwnerUser(int applicationid, string owneruserid);
+        DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid);
 
 
         /// <summary>
