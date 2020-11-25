@@ -225,7 +225,11 @@ namespace Intwenty
                     {
                         state.Id = GetNewInstanceId(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
                         result.Status = LifecycleStatus.NEW_NOT_SAVED;
-                        state.Version = CreateVersionRecord(model, state, client);
+
+                        if (model.Application.UseVersioning)
+                            state.Version = CreateVersionRecord(model, state, client);
+                        else
+                            state.Version = 1;
 
                         BeforeSaveNew(model, state, client);
                         if (!state.Data.HasModel)
@@ -625,6 +629,7 @@ namespace Intwenty
 
         private int CreateVersionRecord(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
+           
             int newversion = 0;
             string sql = String.Empty;
             sql = "select max(version) from " + model.Application.VersioningTableName;
