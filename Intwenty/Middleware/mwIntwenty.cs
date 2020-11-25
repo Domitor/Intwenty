@@ -210,6 +210,8 @@ namespace Intwenty.Middleware
                     {
                         if (ep.IsMetaTypeCustomPost)
                             continue;
+                        if (ep.IsMetaTypeCustomGet)
+                            continue;
 
                         endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "CustomerAPI" });
                     }

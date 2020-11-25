@@ -138,6 +138,22 @@ namespace Intwenty.Middleware
 
                 }
 
+                if (ep.IsMetaTypeCustomGet)
+                {
+                    var path = new OpenApiPathItem();
+                    var op = new OpenApiOperation() { Description = ep.Description, Summary = ep.Title };
+                    op.Tags.Add(endpoinggroup);
+                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
+                    resp.Content.Add("application/json", new OpenApiMediaType());
+                    op.Responses.Add("200", resp);
+                    resp = new OpenApiResponse() { Description = "ERROR" };
+                    op.Responses.Add("400", resp);
+                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
+                    op.Responses.Add("401", resp);
+                    path.AddOperation(OperationType.Get, op);
+                    swaggerDoc.Paths.Add(ep.Path, path);
+                }
+
 
                 if (ep.IsMetaTypeDataViewList && ep.IsDataViewConnected)
                 {

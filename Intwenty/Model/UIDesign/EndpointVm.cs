@@ -73,7 +73,7 @@ namespace Intwenty.Model.UIDesign
             else if (model.IsMetaTypeCustomPost)
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (POST)", datasourcetype = "NONE" };
             else if (model.IsMetaTypeCustomGet)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (GET)", datasourcetype = "NONE" };
+                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomGet, title = "Custom (GET)", datasourcetype = "NONE" };
             else
                 throw new InvalidOperationException("Invalid endpoint metatype");
 
