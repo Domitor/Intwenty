@@ -13,13 +13,12 @@ namespace Intwenty.Seed
     {
 
 
-        public static void Seed(IServiceProvider services)
+        public static void SeedDemoUsersAndRoles(IServiceProvider services)
         {
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.SeedModelOnStartUp ||
-                !Settings.Value.UseDemoSettings)
+            if (!Settings.Value.UseDemoSettings)
                 return;
 
             if (string.IsNullOrEmpty(Settings.Value.DemoAdminUser) ||

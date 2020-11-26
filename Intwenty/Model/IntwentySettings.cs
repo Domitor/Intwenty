@@ -29,11 +29,13 @@ namespace Intwenty.Model
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
 
+        public bool SeedModelOnStartUp { get; set; }
+        public bool ConfigureModelOnStartUp { get; set; }
+        public bool SeedDataOnStartUp { get; set; }
+        public bool SeedLocalizationsOnStartUp { get; set; }
 
 
         //FOR DEBUG AND DEMO MODE
-        public bool ReCreateDatabaseOnStartup { get; set; }
-        public bool SeedModelOnStartUp { get; set; }
         public bool UseDemoSettings { get; set; }
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }

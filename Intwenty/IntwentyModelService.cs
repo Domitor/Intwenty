@@ -1613,7 +1613,7 @@ namespace Intwenty
         public void CreateIntwentyDatabase()
         {
 
-            if (!Settings.ReCreateDatabaseOnStartup)
+            if (!Settings.SeedModelOnStartUp)
                 return;
 
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
@@ -1628,7 +1628,7 @@ namespace Intwenty
                 client.CreateTable<DatabaseItem>();
                 client.CreateTable<DataViewItem>();
                 client.CreateTable<EventLog>();
-                client.CreateTable<Entity.InformationStatus>();
+                client.CreateTable<InformationStatus>();
                 client.CreateTable<InstanceId>();
                 client.CreateTable<UserInterfaceItem>();
                 client.CreateTable<ValueDomainItem>();
