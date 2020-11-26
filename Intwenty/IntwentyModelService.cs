@@ -1698,7 +1698,8 @@ namespace Intwenty
 
 
                 CreateMainTable(model, maintable_default_cols, res);
-                CreateApplicationVersioningTable(model, res);
+                if (model.UseVersioning)
+                    CreateApplicationVersioningTable(model, res);
 
                 foreach (var t in databasemodel)
                 {

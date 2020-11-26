@@ -117,6 +117,7 @@ namespace Intwenty.Model
             prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
             prop.ValidFor.Add(DataViewModelItem.MetaTypeDataView);
             prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeListView);
+            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeEditListView);
             _properties.Add(prop);
 
 

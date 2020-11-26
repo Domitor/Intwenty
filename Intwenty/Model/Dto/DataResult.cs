@@ -84,7 +84,7 @@ namespace Intwenty.Model.Dto
 
     public class DataListResult<T> : IntwentyResult
     {
-       
+
 
         public DataListResult()
         {
@@ -109,8 +109,34 @@ namespace Intwenty.Model.Dto
         public List<T> Data { get; set; }
     }
 
+    public class DataListResult<TData,TFilter> : IntwentyResult where TFilter : ListFilter, new()
+    {
 
+        public DataListResult()
+        {
+            ListFilter = new TFilter();
+            Data = new List<TData>();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+        }
 
+        public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
+        {
+            ListFilter = new TFilter();
+            Data = new List<TData>();
+            StartTime = DateTime.Now;
+            Messages = new List<OperationMessage>();
+            IsSuccess = success;
+            AddMessage(messagecode, message);
+        }
+
+        public TFilter ListFilter { get; set; }
+
+        public List<TData> Data { get; set; }
     }
+
+
+
+}
 
 
