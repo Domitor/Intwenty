@@ -361,10 +361,10 @@ namespace Intwenty.Seed
             client.Close();
         }
 
-        public static void ConfigureModel(IServiceProvider services)
+        public static void ConfigureDatabase(IServiceProvider services)
         {
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
-            if (!Settings.Value.ConfigureModelOnStartUp)
+            if (!Settings.Value.ConfigureDatabaseOnStartUp)
                 return;
 
             var modelservice = services.GetRequiredService<IIntwentyModelService>();

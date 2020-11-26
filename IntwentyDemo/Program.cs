@@ -31,10 +31,12 @@ namespace IntwentyDemo
 
 
                     //Create intwenty db objects and identity db objects
-                    Identity.Seed(services);
+                    Identity.SeedDemoUsersAndRoles(services);
                     DefaultLocalization.Seed(services);
-                    DemoModel.Seed(services);
-                    DemoModel.ConfigureDataBase(services);
+                    DemoModel.SeedModel(services);
+                    DemoModel.SeedLocalizations(services);
+                    DemoModel.ConfigureDatabase(services);
+                    DemoModel.SeedData(services);
 
 
                 }

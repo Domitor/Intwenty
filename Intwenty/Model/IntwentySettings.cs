@@ -29,9 +29,21 @@ namespace Intwenty.Model
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
 
+        /// <summary>
+        /// If model is programaticly defined, create model container tables and seed the model
+        /// </summary>
         public bool SeedModelOnStartUp { get; set; }
-        public bool ConfigureModelOnStartUp { get; set; }
+        /// <summary>
+        /// Create database objects according to the model
+        /// </summary>
+        public bool ConfigureDatabaseOnStartUp { get; set; }
+        /// <summary>
+        /// Seed user data 
+        /// </summary>
         public bool SeedDataOnStartUp { get; set; }
+        /// <summary>
+        /// Seed localization definitions 
+        /// </summary>
         public bool SeedLocalizationsOnStartUp { get; set; }
 
 
