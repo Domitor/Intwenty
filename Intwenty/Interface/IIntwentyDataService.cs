@@ -10,11 +10,14 @@ namespace Intwenty.Interface
     public interface IIntwentyDataService
     {
         /// <summary>
-        /// Creates a new application JSON Document including defaultvalues.
+        /// Creates a new application including defaultvalues.
         /// </summary>
         /// <returns>An Result including a json object</returns>
         DataResult New(ClientStateInfo state);
-
+        /// <summary>
+        /// Creates a new application including defaultvalues.
+        /// </summary>
+        /// <returns>An Result including a json object</returns>
         DataResult New(ApplicationModel model);
 
 
@@ -103,6 +106,7 @@ namespace Intwenty.Interface
         /// <returns>A DataListResult including a string json array</returns>
         DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model);
 
+
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
         /// This function supports paging. It returns the number of records specified in args.BatchSize
@@ -111,22 +115,8 @@ namespace Intwenty.Interface
         /// </summary>
         /// <returns>A result object that inhertits DataListResult including a string json array</returns>
         TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
-                                                                                                           
 
 
-
-
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data that matches the filter specified in args. 
-        /// This function supports paging. It returns the number of records specified in args.BatchSize
-        /// 
-        /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
-        /// </summary>
-        /// <returns>A result object that inhertits DataListResult including a list of DataType</returns>
-        TDataListResult GetPagedList<TDataListResult, TEntityType>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult<TEntityType>, new() 
-                                                                                                            where TEntityType : InformationHeader, new();
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -141,14 +131,6 @@ namespace Intwenty.Interface
 
 
 
-        /// <summary>
-        /// Get a list of application data. 
-        /// All columns and rows from the application's main table is returned.
-        /// </summary>
-        /// <returns>A result object that inhertits DataListResult including a list of DataType</returns>
-        TDataListResult GetList<TDataListResult, TEntityType>(int applicationid) where TDataListResult : DataListResult<TEntityType>, new()
-                                                                                 where TEntityType : InformationHeader, new();
-
 
         /// <summary>
         /// Get a list of (latest version) application data. 
@@ -158,15 +140,6 @@ namespace Intwenty.Interface
         DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
 
 
-
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data. 
-        /// All columns and rows from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        TDataListResult GetJsonArray<TDataListResult>(int applicationid) where TDataListResult : DataListResult, new();
 
         /// <summary>
         /// Get a list of (latest version) application data. 

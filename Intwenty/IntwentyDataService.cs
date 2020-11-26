@@ -1058,132 +1058,7 @@ namespace Intwenty
             return result;
         }
 
-        public TDataListResult GetPagedList<TDataListResult, TEntityType>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult<TEntityType>, new() where TEntityType : InformationHeader,  new()
-        {
-            if (args == null)
-            {
-                var t  = new TDataListResult() { IsSuccess = false };
-                t.AddMessage(MessageCode.SYSTEMERROR, "Parameter args was null");
-                return t;
-            }
-
-            if (args.ApplicationId < 1)
-            {
-                var t = new TDataListResult() { IsSuccess = false };
-                t.AddMessage(MessageCode.SYSTEMERROR, "Parameter args must contain a valid ApplicationId");
-                return t;
-            }
-
-            if (model == null)
-            {
-                var t = new TDataListResult() { IsSuccess = false };
-                t.AddMessage(MessageCode.SYSTEMERROR, "Could not find the requested application model");
-                return t;
-            }
-
-            if (model.Application.Id != args.ApplicationId)
-            {
-                var t = new TDataListResult() { IsSuccess = false };
-                t.AddMessage(MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
-                return t;
-            }
-
-
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
-            client.Open();
-
-            try
-            {
-
-                var result = new TDataListResult();
-                result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
-
-                if (args.MaxCount == 0)
-                {
-
-                    var max = client.GetScalarValue("select count(*) FROM sysdata_InformationStatus where ApplicationId = " + model.Application.Id);
-                    if (max == DBNull.Value)
-                        args.MaxCount = 0;
-                    else
-                        args.MaxCount = Convert.ToInt32(max);
-
-                }
-
-
-                result.ListFilter = args;
-
-                var parameters = new List<IIntwentySqlParameter>();
-                var sql_list_stmt = new StringBuilder();
-
-                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
-                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
-
-
-                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
-                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-
-
-                if (args.HasOwnerUserId)
-                {
-                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
-                }
-
-                if (args.FilterValues != null && args.FilterValues.Count > 0)
-                {
-                    foreach (var v in args.FilterValues)
-                    {
-                        if (string.IsNullOrEmpty(v.Name) || string.IsNullOrEmpty(v.Value))
-                            continue;
-
-                        if (v.ExactMatch)
-                        {
-                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
-                            parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
-                        }
-                        else
-                        {
-                            sql_list_stmt.Append("AND t2." + v.Name + " LIKE '%" + v.Value + "%'  ");
-                        }
-                    }
-                }
-
-                sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (DBMSType != DBMS.MSSqlServer)
-                {
-                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
-                }
-                else
-                {
-                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
-                }
-
-                var sql = sql_list_stmt.ToString();
-                result.Data = client.GetEntities<TEntityType>(sql, false, parameters.ToArray());
-                result.Finish();
-
-                return result;
-
-            }
-            catch (Exception ex)
-            {
-                var result = new TDataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetPagedList<T> of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetPagedList<T>: " + ex.Message);
-                return result;
-            }
-            finally
-            {
-                client.Close();
-            }
-
-         
-        }
-
-
+     
 
         public DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model)
         {
@@ -1414,111 +1289,9 @@ namespace Intwenty
 
         }
 
-        public TDataListResult GetList<TDataListResult, TEntityType>(int applicationid) where TDataListResult : DataListResult<TEntityType>, new()
-                                                                                        where TEntityType : InformationHeader, new()
-        {
+       
 
-
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
-
-            try
-            {
-
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-                var result = new TDataListResult();
-                result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
-
-                var columns = new List<IIntwentyResultColumn>();
-                columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
-                columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
-
-                var sql_list_stmt = new StringBuilder();
-                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-
-
-                foreach (var col in model.DataStructure)
-                {
-                    if (col.IsMetaTypeDataColumn && col.IsRoot)
-                    {
-                        sql_list_stmt.Append(", t2." + col.DbName + " ");
-                        columns.Add(col);
-                    }
-                }
-
-                sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
-                sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
-                sql_list_stmt.Append("ORDER BY t1.Id");
-
-                var parameters = new List<IIntwentySqlParameter>();
-                parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
-
-               
-                client.Open();
-                result.Data = client.GetEntities<TEntityType>(sql_list_stmt.ToString(), false, parameters.ToArray());
-                result.Finish();
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                var result = new TDataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetList: " + ex.Message);
-                return result;
-            }
-            finally
-            {
-                client.Close();
-            }
-
-        }
-
-        public TDataListResult GetJsonArray<TDataListResult>(int applicationid) where TDataListResult : DataListResult, new()
-        {
-
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
-            client.Open();
-
-            try
-            {
-
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-                return GetListInternal<TDataListResult>(model, string.Empty, client);
-
-            }
-            catch (Exception ex)
-            {
-                var result = new TDataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetList(applicationid) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetList: " + ex.Message);
-                return result;
-            }
-            finally
-            {
-                client.Close();
-            }
-
-        }
-
+        
         public DataListResult GetJsonArray(int applicationid)
         {
             DataListResult result = null;
@@ -1611,7 +1384,7 @@ namespace Intwenty
 
         }
 
-        protected virtual TDataListResult GetListInternal<TDataListResult>(ApplicationModel model, string owneruserid, IDataClient client) where TDataListResult : DataListResult, new()
+        private TDataListResult GetListInternal<TDataListResult>(ApplicationModel model, string owneruserid, IDataClient client) where TDataListResult : DataListResult, new()
         {
 
             var result = new TDataListResult();
