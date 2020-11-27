@@ -26,6 +26,24 @@ namespace Intwenty.Areas.Identity.Entity
 
         public bool CreatedWithExternalProvider { get; set; }
 
+        [Ignore]
+        public string FullName
+        {
+
+            get
+            {
+                var s = "";
+                if (!string.IsNullOrEmpty(FirstName))
+                    s += FirstName;
+                if (!string.IsNullOrEmpty(LastName))
+                    s += " " + LastName;
+
+                return s;
+
+            }
+
+        }
+
 
     }
 }

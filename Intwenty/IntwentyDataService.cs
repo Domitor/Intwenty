@@ -12,6 +12,7 @@ using Intwenty.DataClient;
 using System.Runtime.InteropServices;
 using Intwenty.DataClient.Model;
 using Intwenty.Interface;
+using System.Threading.Tasks;
 
 namespace Intwenty
 {
@@ -2140,6 +2141,21 @@ namespace Intwenty
         public void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
             LogEvent("WARNING", message, applicationid, appmetacode, username);
+        }
+
+        public void LogErrorAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            Task.Run(() => LogEvent("ERROR", message, applicationid, appmetacode, username));
+        }
+
+        public void LogInfoAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            Task.Run(() => LogEvent("INFO", message, applicationid, appmetacode, username));
+        }
+
+        public void LogWarningAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        {
+            Task.Run(() => LogEvent("WARNING", message, applicationid, appmetacode, username));
         }
 
         private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")

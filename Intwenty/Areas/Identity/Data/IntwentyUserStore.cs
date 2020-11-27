@@ -22,6 +22,8 @@ namespace Intwenty.Areas.Identity.Data
 
         private IMemoryCache UserCache { get; }
 
+        private static readonly string UsersCacheKey = "ALLUSERS";
+
         private static readonly string UserRolesCacheKey = "USERROLES";
 
         private static readonly string RolesCacheKey = "SYSROLES";
@@ -40,6 +42,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            UserCache.Remove(UsersCacheKey);
+
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             client.InsertEntity(user);
@@ -54,6 +58,8 @@ namespace Intwenty.Areas.Identity.Data
             {
                 throw new ArgumentNullException(nameof(user));
             }
+
+            UserCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
@@ -155,6 +161,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            UserCache.Remove(UsersCacheKey);
+
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
             client.UpdateEntity(user);
@@ -204,6 +212,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            UserCache.Remove(UsersCacheKey);
             UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
@@ -360,6 +369,24 @@ namespace Intwenty.Areas.Identity.Data
             UserCache.Set(RolesCacheKey, roles);
 
             return roles;
+
+        }
+
+        public List<IntwentyUser> GetAllUsers()
+        {
+            List<IntwentyUser> res = null;
+
+            if (UserCache.TryGetValue(UsersCacheKey, out res))
+            {
+                return res;
+            }
+
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var users = client.GetEntities<IntwentyUser>();
+            client.Close();
+            UserCache.Set(UsersCacheKey, users);
+            return users;
 
         }
 

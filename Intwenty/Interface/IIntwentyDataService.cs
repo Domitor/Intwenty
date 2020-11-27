@@ -204,6 +204,12 @@ namespace Intwenty.Interface
 
         void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 
+        void LogErrorAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
+        void LogWarningAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
+        void LogInfoAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
         IDataClient GetDataClient();
 
     }

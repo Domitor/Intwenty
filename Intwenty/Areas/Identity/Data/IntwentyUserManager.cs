@@ -424,6 +424,12 @@ namespace Intwenty.Areas.Identity.Data
 
         #endregion
 
+        public List<IntwentyUser> GetUsers()
+        {
+            var t = ((IntwentyUserStore)Store).GetAllUsers();
+            return t;
+        }
+
         public override Task<IdentityResult> DeleteAsync(IntwentyUser user)
         {
            
