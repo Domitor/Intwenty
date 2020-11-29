@@ -1123,7 +1123,7 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                var json = dbstore.GetJsonArray("select * from tests_TestDataAutoInc");
                 if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
@@ -1280,7 +1280,7 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                var json = dbstore.GetJsonArray("select * from tests_TestDataAutoInc");
                 if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
@@ -1438,7 +1438,7 @@ namespace Intwenty.Controllers
                 if (check < 5000)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                var json = dbstore.GetJsonArray("select * from tests_TestDataAutoInc");
                 if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be feteched");
 
@@ -1598,7 +1598,7 @@ namespace Intwenty.Controllers
                 if (check < expectedtotal)
                     throw new InvalidOperationException("Cannot run since prevoius case failed");
 
-                var json = dbstore.GetJSONArray("select * from tests_TestDataAutoInc");
+                var json = dbstore.GetJsonArray("select * from tests_TestDataAutoInc");
                 if (json.GetJsonString().Length < 100)
                     throw new InvalidOperationException("JSON could not be fetched");
 

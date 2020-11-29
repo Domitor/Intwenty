@@ -1135,23 +1135,29 @@ namespace Intwenty
 
 
                 var parameters = new List<IIntwentySqlParameter>();
-                var columns = new List<IIntwentyResultColumn>();
                 var sql_list_stmt = new StringBuilder();
-
-
-               sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-               
-
-                foreach (var t in model.DataStructure)
+                if (DBMSType != DBMS.PostgreSQL)
                 {
-                    if (t.IsMetaTypeDataColumn && t.IsRoot)
+                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                    foreach (var col in model.DataStructure)
                     {
-                        sql_list_stmt.Append(", t2." + t.DbName + " ");
-                        if (DBMSType == DBMS.PostgreSQL)
+                        if (col.IsMetaTypeDataColumn && col.IsRoot)
                         {
-                            columns.Add(t);
+                            sql_list_stmt.Append(", t2." + col.DbName + " ");
                         }
                     }
+                }
+                else
+                {
+                    sql_list_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
+                    foreach (var col in model.DataStructure)
+                    {
+                        if (col.IsMetaTypeDataColumn && col.IsRoot)
+                        {
+                            sql_list_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
+                        }
+                    }
+
                 }
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
@@ -1195,12 +1201,7 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
                 }
 
-                IJsonArrayResult queryresult;
-                if (columns.Count > 0)
-                    queryresult = client.GetJSONArray(sql_list_stmt.ToString(), false, parameters.ToArray(), columns.ToArray());
-                else
-                    queryresult = client.GetJSONArray(sql_list_stmt.ToString(), false, parameters.ToArray());
-
+                var queryresult = client.GetJsonArray(sql_list_stmt.ToString(), false, parameters.ToArray());
                 result.Data = queryresult.GetJsonString();
 
                 result.Finish();
@@ -1393,23 +1394,29 @@ namespace Intwenty
             var result = new TDataListResult();
             result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
 
-            var columns = new List<IIntwentyResultColumn>();
-            columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
-            columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
-            columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
-            columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
-
             var sql_list_stmt = new StringBuilder();
-            sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-
-               
-            foreach (var col in model.DataStructure)
+            if (DBMSType != DBMS.PostgreSQL)
             {
-                if (col.IsMetaTypeDataColumn && col.IsRoot)
+                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                foreach (var col in model.DataStructure)
                 {
-                    sql_list_stmt.Append(", t2." + col.DbName + " ");
-                    columns.Add(col);
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                    {
+                        sql_list_stmt.Append(", t2." + col.DbName + " ");
+                    }
                 }
+            }
+            else
+            {
+                sql_list_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
+                foreach (var col in model.DataStructure)
+                {
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                    {
+                        sql_list_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
+                    }
+                }
+
             }
 
             sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
@@ -1426,10 +1433,7 @@ namespace Intwenty
             if (!string.IsNullOrEmpty(owneruserid))
                 parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = owneruserid });
 
-            if (DBMSType == DBMS.PostgreSQL)
-                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray(), resultcolumns: columns.ToArray()).GetJsonString();
-            else
-                result.Data = client.GetJSONArray(sql_list_stmt.ToString(), parameters: parameters.ToArray()).GetJsonString();
+            result.Data = client.GetJsonArray(sql_list_stmt.ToString(), false, parameters: parameters.ToArray()).GetJsonString();
 
             result.Finish();
            
@@ -1613,21 +1617,24 @@ namespace Intwenty
 
             try
             {
-                //MAINTABLE
-                var columns = new List<IIntwentyResultColumn>();
-                columns.Add(new IntwentyDataColumn() { Name = "MetaCode", DataType = DatabaseModelItem.DataTypeString });
-                columns.Add(new IntwentyDataColumn() { Name = "PerformDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                columns.Add(new IntwentyDataColumn() { Name = "StartDate", DataType = DatabaseModelItem.DataTypeDateTime });
-                columns.Add(new IntwentyDataColumn() { Name = "EndDate", DataType = DatabaseModelItem.DataTypeDateTime });
 
                 var sql_stmt = new StringBuilder();
-                sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-                foreach (var col in model.DataStructure)
+                if (DBMSType != DBMS.PostgreSQL)
                 {
-                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                    sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                    foreach (var col in model.DataStructure)
                     {
-                        sql_stmt.Append(", t2." + col.DbName + " ");
-                        columns.Add(col);
+                        if (col.IsMetaTypeDataColumn && col.IsRoot)
+                            sql_stmt.Append(", t2." + col.DbName + " ");
+                    }
+                }
+                else
+                {
+                    sql_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
+                    foreach (var col in model.DataStructure)
+                    {
+                        if (col.IsMetaTypeDataColumn && col.IsRoot)
+                            sql_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
                     }
                 }
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
@@ -1637,7 +1644,7 @@ namespace Intwenty
 
 
                 var jsonresult = new StringBuilder("{");
-                var appjson = client.GetJSONObject(sql_stmt.ToString(), resultcolumns: columns.ToArray()).GetJsonString();
+                var appjson = client.GetJsonArray(sql_stmt.ToString()).GetJsonString();
                 if (appjson.Length < 5)
                 {
                     jsonresult.Append("}");
@@ -1657,14 +1664,19 @@ namespace Intwenty
                     if (t.IsMetaTypeDataTable && t.IsRoot)
                     {
                         char sep = ' ';
-                        columns = new List<IIntwentyResultColumn>();
                         sql_stmt = new StringBuilder("SELECT ");
                         foreach (var col in model.DataStructure)
                         {
                             if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                             {
-                                sql_stmt.Append(sep + " t2." + col.DbName + " ");
-                                columns.Add(col);
+                                if (DBMSType != DBMS.PostgreSQL)
+                                {
+                                    sql_stmt.Append(sep + " t2." + col.DbName + " ");
+                                }
+                                else
+                                {
+                                    sql_stmt.Append(sep + string.Format(", t2.{0} as \"{0}\" ", col.DbName));
+                                }
                                 sep = ',';
                             }
                         }
@@ -1673,7 +1685,7 @@ namespace Intwenty
                         sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                         sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
-                        var tablearray = client.GetJSONArray(sql_stmt.ToString(), resultcolumns: columns.ToArray()).GetJsonString();
+                        var tablearray = client.GetJsonArray(sql_stmt.ToString()).GetJsonString();
 
                         jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
 
@@ -1685,18 +1697,6 @@ namespace Intwenty
                 result.Data = jsonresult.ToString();
 
                 AddToApplicationCache(model, result);
-
-                //WORKS
-                //System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(jsonresult.ToString());
-                //result.JElement = doc.RootElement;
-
-
-                //var options = new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase, DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,  PropertyNameCaseInsensitive = false };
-                //result.JElement = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), options);
-
-
-                //result.Data = System.Text.Json.JsonSerializer.Serialize(result.JElement, new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
-                //result.Data = System.Text.Json.JsonSerializer.Serialize(jsonresult.ToString(), new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 
             }
             catch (Exception ex)
@@ -2035,7 +2035,7 @@ namespace Intwenty
 
 
                 client.Open();
-                var queryresult = client.GetJSONArray(sql, resultcolumns: columns.ToArray());
+                var queryresult = client.GetJsonArray(sql);
                 result.Data = queryresult.GetJsonString();
 
                 result.AddMessage(MessageCode.RESULT, string.Format("Fetched dataview {0}", dv.Title));
@@ -2093,17 +2093,9 @@ namespace Intwenty
                 if (string.IsNullOrEmpty(sql))
                     throw new InvalidOperationException("GetDataViewRecord - Could not build sql statement.");
 
-                var columns = new List<IIntwentyResultColumn>();
-                foreach (var viewcol in viewinfo)
-                {
-                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == args.DataViewMetaCode)
-                    {
-                        columns.Add(new IntwentyDataColumn() { Name = viewcol.SQLQueryFieldName, DataType = viewcol.DataType });
-                    }
-                }
-
+                
                 client.Open();
-                var qryresult = client.GetJSONObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) }, resultcolumns: columns.ToArray());
+                var qryresult = client.GetJsonObject(sql, parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", args.FilterValues[0].Value) });
                 result.Data = qryresult.GetJsonString();
 
             }

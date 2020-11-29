@@ -62,9 +62,9 @@ namespace Intwenty.Controllers
                 var prms = new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", id.Value) };
                 var client = DataRepository.GetDataClient();
                 client.Open();
-                var res = client.GetJSONObject(string.Format("select * from {0} where id = @P1", ep.DataTableInfo.DbName), parameters: prms);
+                var res = client.GetJsonObject(string.Format("select * from {0} where id = @P1", ep.DataTableInfo.DbName), parameters: prms);
                 client.Close();
-                return new JsonResult(res);
+                return new JsonResult(res.GetJsonString());
 
             }
 
@@ -109,9 +109,9 @@ namespace Intwenty.Controllers
                 var sql = string.Format("select * from {0} order by id", ep.DataTableInfo.DbName.ToLower());
                 var client = DataRepository.GetDataClient();
                 client.Open();
-                var res = client.GetJSONArray(sql);
+                var res = client.GetJsonArray(sql);
                 client.Close();
-                return new JsonResult(res);
+                return new JsonResult(res.GetJsonString());
 
             }   
         }
