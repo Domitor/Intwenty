@@ -1029,13 +1029,17 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (DBMSType != DBMS.MSSqlServer)
+                if (DBMSType == DBMS.MSSqlServer)
                 {
-                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                }
+                else if (DBMSType == DBMS.PostgreSQL)
+                {
+                    sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
                 }
                 else
                 {
-                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
                 }
 
                 var sql = sql_list_stmt.ToString();
@@ -1136,29 +1140,15 @@ namespace Intwenty
 
                 var parameters = new List<IIntwentySqlParameter>();
                 var sql_list_stmt = new StringBuilder();
-                if (DBMSType != DBMS.PostgreSQL)
+                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                foreach (var col in model.DataStructure)
                 {
-                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-                    foreach (var col in model.DataStructure)
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
                     {
-                        if (col.IsMetaTypeDataColumn && col.IsRoot)
-                        {
-                            sql_list_stmt.Append(", t2." + col.DbName + " ");
-                        }
+                        sql_list_stmt.Append(", t2." + col.DbName + " ");
                     }
                 }
-                else
-                {
-                    sql_list_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
-                    foreach (var col in model.DataStructure)
-                    {
-                        if (col.IsMetaTypeDataColumn && col.IsRoot)
-                        {
-                            sql_list_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
-                        }
-                    }
-
-                }
+               
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
@@ -1192,13 +1182,17 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (DBMSType != DBMS.MSSqlServer)
+                if (DBMSType == DBMS.MSSqlServer)
                 {
-                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                }
+                else if (DBMSType == DBMS.PostgreSQL)
+                {
+                    sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
                 }
                 else
                 {
-                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
                 }
 
                 var queryresult = client.GetJsonArray(sql_list_stmt.ToString(), false, parameters.ToArray());
@@ -1395,29 +1389,15 @@ namespace Intwenty
             result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
 
             var sql_list_stmt = new StringBuilder();
-            if (DBMSType != DBMS.PostgreSQL)
+            sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+            foreach (var col in model.DataStructure)
             {
-                sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-                foreach (var col in model.DataStructure)
+                if (col.IsMetaTypeDataColumn && col.IsRoot)
                 {
-                    if (col.IsMetaTypeDataColumn && col.IsRoot)
-                    {
-                        sql_list_stmt.Append(", t2." + col.DbName + " ");
-                    }
+                    sql_list_stmt.Append(string.Format(", t2.{0} ", col.DbName));
                 }
             }
-            else
-            {
-                sql_list_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
-                foreach (var col in model.DataStructure)
-                {
-                    if (col.IsMetaTypeDataColumn && col.IsRoot)
-                    {
-                        sql_list_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
-                    }
-                }
-
-            }
+          
 
             sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
             sql_list_stmt.Append("JOIN " + model.Application.DbName + " t2 on t1.Id=t2.Id and t1.Version = t2.Version ");
@@ -1619,24 +1599,13 @@ namespace Intwenty
             {
 
                 var sql_stmt = new StringBuilder();
-                if (DBMSType != DBMS.PostgreSQL)
+                sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                foreach (var col in model.DataStructure)
                 {
-                    sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
-                    foreach (var col in model.DataStructure)
-                    {
-                        if (col.IsMetaTypeDataColumn && col.IsRoot)
-                            sql_stmt.Append(", t2." + col.DbName + " ");
-                    }
+                    if (col.IsMetaTypeDataColumn && col.IsRoot)
+                        sql_stmt.Append(string.Format(", t2.{0} ", col.DbName));
                 }
-                else
-                {
-                    sql_stmt.Append("SELECT t1.MetaCode as \"MetaCode\", t1.PerformDate as \"PerformDate\", t1.StartDate as \"StartDate\", t1.EndDate as \"EndDate\" ");
-                    foreach (var col in model.DataStructure)
-                    {
-                        if (col.IsMetaTypeDataColumn && col.IsRoot)
-                            sql_stmt.Append(string.Format(", t2.{0} as \"{0}\" ", col.DbName));
-                    }
-                }
+              
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
                 sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
@@ -1644,7 +1613,7 @@ namespace Intwenty
 
 
                 var jsonresult = new StringBuilder("{");
-                var appjson = client.GetJsonArray(sql_stmt.ToString()).GetJsonString();
+                var appjson = client.GetJsonObject(sql_stmt.ToString()).GetJsonString();
                 if (appjson.Length < 5)
                 {
                     jsonresult.Append("}");
@@ -1669,14 +1638,7 @@ namespace Intwenty
                         {
                             if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
                             {
-                                if (DBMSType != DBMS.PostgreSQL)
-                                {
-                                    sql_stmt.Append(sep + " t2." + col.DbName + " ");
-                                }
-                                else
-                                {
-                                    sql_stmt.Append(sep + string.Format(", t2.{0} as \"{0}\" ", col.DbName));
-                                }
+                                sql_stmt.Append(sep + string.Format(" t2.{0} ", col.DbName));
                                 sep = ',';
                             }
                         }
@@ -1997,15 +1959,6 @@ namespace Intwenty
                 if (dv.HasNonSelectSql)
                     throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " (" + dv.MetaCode + ")"));
 
-
-                var columns = new List<IIntwentyResultColumn>();
-                foreach (var viewcol in viewinfo)
-                {
-                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == dv.MetaCode)
-                    {
-                        columns.Add(new IntwentyDataColumn() { Name = viewcol.SQLQueryFieldName, DataType = viewcol.DataType });
-                    }
-                }
 
                 if (result.ListFilter.MaxCount == 0 && !string.IsNullOrEmpty(dv.QueryTableDbName))
                 {

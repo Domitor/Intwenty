@@ -407,22 +407,36 @@ namespace Intwenty.Helpers
             var infer_orderby_stmt = !uppersql.Contains(" ORDER ");
             if (infer_orderby_stmt)
             {
-                if (dbms != DBMS.MSSqlServer)
+                if (dbms == DBMS.MSSqlServer)
                 {
-                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber*pagesize), pagesize);
+                    sql += string.Format(" ORDER BY Id OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (pagenumber * pagesize), pagesize);
+                }
+                else if (dbms == DBMS.PostgreSQL)
+                {
+                    sql += string.Format(" ORDER BY Id LIMIT {0} OFFSET {1}", pagesize, (pagenumber * pagesize));
+                }
+                else
+                {
+                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber * pagesize), pagesize);
+
                 }
             }
             else
             {
                 var ind = uppersql.IndexOf(" ORDER ");
                 sql = sql.Substring(0, ind);
-                if (dbms != DBMS.MSSqlServer)
+                if (dbms == DBMS.MSSqlServer)
                 {
-                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber * pagesize), pagesize);
+                    sql += string.Format(" ORDER BY Id OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (pagenumber * pagesize), pagesize);
+                }
+                else if (dbms == DBMS.PostgreSQL)
+                {
+                    sql += string.Format(" ORDER BY Id LIMIT {0} OFFSET {1}", pagesize, (pagenumber * pagesize));
                 }
                 else
                 {
-                    sql += string.Format(" OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (pagenumber * pagesize), pagesize);
+                    sql += string.Format(" ORDER BY Id LIMIT {0},{1}", (pagenumber * pagesize), pagesize);
+
                 }
             }
 

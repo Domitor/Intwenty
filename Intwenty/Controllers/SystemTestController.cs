@@ -82,11 +82,11 @@ namespace Intwenty.Controllers
 
             db.RunCommand("DELETE FROM sysmodel_ValueDomainItem WHERE DOMAINNAME = 'TESTDOMAIN'");
 
-            if (db.TableExists(model.DbName))
+            if (model != null && db.TableExists(model.DbName))
             {
                 db.RunCommand(string.Format("DROP TABLE {0}", model.DbName));
             }
-            if (db.TableExists(model.VersioningTableName))
+            if (model != null && db.TableExists(model.VersioningTableName))
             {
                 db.RunCommand(string.Format("DROP TABLE {0}", model.VersioningTableName));
             }
