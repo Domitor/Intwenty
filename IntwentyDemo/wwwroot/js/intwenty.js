@@ -34,6 +34,44 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
+function updateFunction(el, binding)
+{
+    // get options from binding value. 
+    // v-select="THIS-IS-THE-BINDING-VALUE"
+    let options = binding.value || {};
+
+    // set up select2
+    // v-model looks for
+    //  - an event named "change"
+    //  - a value with property path "$event.target.value"
+    $(el).select2(options).on("select2:select", (e) =>
+    {
+        el.dispatchEvent(new Event('change', { target: e.target }));
+
+    }).on("select2:unselect", (e) =>
+    {
+        el.dispatchEvent(new Event('change', { target: e.target }));
+    });
+}
+
+Vue.prototype.getSelect2Format = function getSelect2Format(valuedomain)
+{
+    if (!valuedomain)
+        return [];
+
+    var t = { data: [] };
+    for (var i = 0; i < valuedomain.length; i++) {
+        t.data.push({ id: valuedomain[i].Id, text: valuedomain[i].Value });
+    }
+
+    return t;
+};
+
+Vue.directive('multiselect', {
+    inserted: updateFunction,
+    componentUpdated: updateFunction,
+});
+
 Vue.prototype.selectableProperties = function (item) {
     var context = this;
 

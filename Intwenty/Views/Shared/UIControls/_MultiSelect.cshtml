@@ -1,0 +1,29 @@
+﻿@model IUIComplexBinding
+@{
+    var validationfield = Model.UIId + "_validationmsg";
+
+}
+<div class="form-group">
+    <label class="control-label">
+        @Model.LocalizedTitle @{ if (Model.Mandatory)
+            { <span style="color: red"> *</span> }}
+    </label>
+
+    <select id="@Model.UIId"
+            name="@Model.UIId"
+            class="form-control form-control-sm"
+            v-multiselect="getSelect2Format(valuedomains.VALUEDOMAIN_@Model.DomainName)"
+            v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
+            data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeMultiSelect
+            data-title="@Model.LocalizedTitle"
+            data-validationfield="@validationfield"
+            data-dbtable="@Model.DataTableDbName"
+            data-dbfield="@Model.DataColumnDbName"
+            data-required="@Model.Mandatory"
+            multiple="multiple">
+
+    </select>
+
+
+   
+</div>

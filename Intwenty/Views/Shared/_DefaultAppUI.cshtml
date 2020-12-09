@@ -96,6 +96,12 @@
 
                         }
 
+                        if (t.IsMetaTypeMultiSelect)
+                        {
+                            @await Html.PartialAsync("UIControls/_MultiSelect", t)
+
+                        }
+
 
 
                         if (t.IsMetaTypeEditGrid && t.Children.Count > 0)

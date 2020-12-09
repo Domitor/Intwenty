@@ -60,7 +60,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextBlock, Title = "Text Block" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditView, Title = "Edit View" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = ApplicationModelItem.MetaTypeApplication, Title = "Application", ModelCode = "APPMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeMultiSelect, Title = "Multi Select", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataView, Title = "Data View", ModelCode = "DATAVIEWMODEL" });

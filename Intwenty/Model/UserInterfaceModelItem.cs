@@ -10,6 +10,7 @@ namespace Intwenty.Model
     public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
+        public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
         public static readonly string MetaTypeLabel = "LABEL";
         public static readonly string MetaTypeImage = "IMAGE";
@@ -171,7 +172,7 @@ namespace Intwenty.Model
                 return IsMetaTypeCheckBox || IsMetaTypeComboBox || IsMetaTypeDatePicker ||
                        IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
                        IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
-                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox;
+                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeMultiSelect;
 
             }
 
@@ -279,6 +280,11 @@ namespace Intwenty.Model
                     return string.Empty;
 
             }
+        }
+
+        public bool IsMetaTypeMultiSelect
+        {
+            get { return MetaType == MetaTypeMultiSelect; }
         }
 
         public bool IsMetaTypeCreateView
