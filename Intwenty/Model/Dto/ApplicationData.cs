@@ -82,8 +82,6 @@ namespace Intwenty.Model.Dto
                                 res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
                             if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
                                 res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
-                            if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
-                                res.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetRawText() });
 
 
                         }
@@ -106,8 +104,7 @@ namespace Intwenty.Model.Dto
                                     tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetDecimal() });
                                 if (av.Value.ValueKind == System.Text.Json.JsonValueKind.False || av.Value.ValueKind == System.Text.Json.JsonValueKind.True)
                                     tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetBoolean() });
-                                if (av.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
-                                    tablerow.Values.Add(new ApplicationValue() { DbName = av.Name, Value = av.Value.GetRawText() });
+
                             }
                             var rowid = tablerow.Values.Find(p => p.DbName == "Id");
                             if (rowid != null)

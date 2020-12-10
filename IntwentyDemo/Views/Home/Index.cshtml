@@ -12,7 +12,13 @@
 
 
 <div id="app">
-    <select2 :options="getSelect2Format(valuedomain)" class="form-control form-control-lg" v-model="model.somefield"></select2>
+    <multislect class="form-control form-control-lg" v-model="model.somefield">
+        <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
+    </multislect>
+
+    <multiselect2 class="form-control form-control-lg" v-bind.sync="model" idfield="somefield2" textfield="sometextfield2">
+        <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
+    </multiselect2>
     {{model}}
 </div>
 
@@ -26,61 +32,120 @@
    
 
     <script>
-        Vue.prototype.getSelect2Format = function getSelect2Format(valuedomain) {
-            if (!valuedomain)
-                return [];
+      
 
-            var t = [];
-            for (var i = 0; i < valuedomain.length; i++) {
-                t.push({ id: valuedomain[i].Id, text: valuedomain[i].Value });
-            }
-
-            return t;
-        };
-
-        Vue.component("select2", {
-            props: ["options", "value"],
+        Vue.component("multislect", {
+            props: ["value"],
             template: '<select multiple="multiple"><slot></slot></select>',
             mounted: function () {
                 var vm = this;
                 var element = $(this.$el);
 
-               // init select2
-                element.select2({ multiple: true, data: this.options }).on("select2:select", function () {
-                    //var selections = (JSON.stringify(element.select2('data')));
+                element.select2({theme:"classic"}).on("select2:select", function ()
+                {
+                    var selectionstring = "";
                     var selections = element.val();
-                    vm.$emit("input", selections);
+                    for (var i = 0; i < selections.length; i++)
+                    {
+                        if (selectionstring == "")
+                            selectionstring += selections[i];
+                        else
+                            selectionstring += "," + selections[i];
+                    }
+                        
+                    vm.$emit("input", selectionstring);
 
-                }).on("select2:unselect", function () {
-                    //var selections = (JSON.stringify(element.select2('data')));
+                }).on("select2:unselect", function ()
+                {
+                    var selectionstring = "";
                     var selections = element.val();
-                    vm.$emit("input", selections);
+                    for (var i = 0; i < selections.length; i++) {
+                        if (selectionstring == "")
+                            selectionstring += selections[i];
+                        else
+                            selectionstring += "," + selections[i];
+                    }
+
+                    vm.$emit("input", selectionstring);
                 });
 
-                element.val(this.value);
+          
             },
-            updated: function () {
-                var vm = this;
-              
+            updated: function ()
+            {
+                if (!this.value)
+                    return;
+
+                $(this.$el).val(this.value.split(","));
+                $(this.$el).trigger("select2:select");
             },
             watch:
             {
                 value: function (value)
                 {
-                    // update value
-                    $(this.$el).val(value).trigger("change");
-
                 },
-                options: function (options) {
-                    // update options
-                    $(this.$el).select2({ data: options });
-                }
+                
             },
             destroyed: function ()
             {
-                $(this.$el)
-                    .off()
-                    .select2("destroy");
+                $(this.$el).off().select2("destroy");
+            }
+        });
+
+        Vue.component("multiselect2", {
+            props: ["appmodel,idfield,textfield"],
+            template: '<select multiple="multiple"><slot></slot></select>',
+            mounted: function () {
+                var vm = this;
+                var element = $(this.$el);
+
+                element.select2({ theme: "classic" }).on("select2:select", function () {
+                    var selectionstring = "";
+                    var selections = element.val();
+                    for (var i = 0; i < selections.length; i++) {
+                        if (selectionstring == "")
+                            selectionstring += selections[i];
+                        else
+                            selectionstring += "," + selections[i];
+                    }
+
+
+                    vm.$attrs[vm.$attrs.idfield]= selectionstring;
+                    vm.$attrs[vm.$attrs.textfield] = "ZZZZZZZZZZ";
+
+                    //TODO: HOW TO GET NEW VALUES BCK TO THE CONSUMER, EVENTS ?
+
+
+                }).on("select2:unselect", function () {
+                    var selectionstring = "";
+                    var selections = element.val();
+                    for (var i = 0; i < selections.length; i++) {
+                        if (selectionstring == "")
+                            selectionstring += selections[i];
+                        else
+                            selectionstring += "," + selections[i];
+                    }
+
+
+                });
+
+
+            },
+            updated: function () {
+                if (!this[this.idfield])
+                    return;
+
+                $(this.$el).val(this[this.idfield].split(","));
+                $(this.$el).trigger("select2:select");
+            },
+            watch:
+            {
+                value: function (value) {
+                },
+
+            },
+            destroyed: function () {
+                $(this.$el).off().select2("destroy");
             }
         });
 
@@ -89,7 +154,7 @@
             el: '#app',
             data: {
                 model: {
-                    somefield: "" },
+                    somefield: "", sometextfield:"" },
                 valuedomain: []
             },
             methods:
@@ -102,8 +167,11 @@
 
             },
             mounted: function () {
-                this.valuedomain = [{ Id: 5, Code: "1", Value: "Tag 1" }, { Id: 2, Code: "2", Value: "Tag 2" }, { Id: 6, Code: "3", Value: "Tag 3" }];
-                this.model.somefield = ["5","6"];
+                this.valuedomain = [{ Id: 50, Code: "T1", Value: "Tag 1" }, { Id: 20, Code: "T2", Value: "Tag 2" }, { Id: 65, Code: "T3", Value: "Tag 3" }];
+                this.model.somefield = "T2";
+                this.model.sometextfield = "Tag 2";
+                this.model.somefield2 = "T2";
+                this.model.sometextfield2 = "Tag 2";
             }
         })
 

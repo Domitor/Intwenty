@@ -34,7 +34,62 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
+Vue.component("multislect", {
+    props: ["value","jsobject","textfield"],
+    template: '<select multiple="multiple"><slot></slot></select>',
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
 
+        element.select2({ theme: "classic" }).on("select2:select", function () {
+            var selectionstring = "";
+            var selections = element.val();
+            if (selections.length == 0)
+                return;
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "")
+                    selectionstring += selections[i];
+                else
+                    selectionstring += "," + selections[i];
+            }
+
+
+            vm.$emit("input", selectionstring);
+
+        }).on("select2:unselect", function () {
+            var selectionstring = "";
+            var selections = element.val();
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "")
+                    selectionstring += selections[i];
+                else
+                    selectionstring += "," + selections[i];
+            }
+
+            vm.$emit("input", selectionstring);
+        });
+
+
+    },
+    updated: function ()
+    {
+        if (!this.value)
+            return;
+
+        var values = this.value.split(",");
+        $(this.$el).val(values);
+        $(this.$el).trigger("select2:select");
+    },
+    watch:
+    {
+        value: function (value) {
+        },
+
+    },
+    destroyed: function () {
+        $(this.$el).off().select2("destroy");
+    }
+});
 
 
 
