@@ -12,13 +12,9 @@
 
 
 <div id="app">
-    <multislect class="form-control form-control-lg" v-model="model.somefield">
+    <intwentyselect class="form-control form-control-sm" v-bind:idfield.sync="model.somefield2" v-bind:textfield.sync="model.sometextfield2">
         <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
-    </multislect>
-
-    <multiselect2 class="form-control form-control-lg" v-bind.sync="model" idfield="somefield2" textfield="sometextfield2">
-        <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
-    </multiselect2>
+    </intwentyselect>
     {{model}}
 </div>
 
@@ -34,114 +30,70 @@
     <script>
       
 
-        Vue.component("multislect", {
-            props: ["value"],
-            template: '<select multiple="multiple"><slot></slot></select>',
+        Vue.component("intwentyselect", {
+            template: '<select><slot></slot></select>',
             mounted: function () {
                 var vm = this;
                 var element = $(this.$el);
 
-                element.select2({theme:"classic"}).on("select2:select", function ()
-                {
+                element.select2().on("select2:select", function () {
                     var selectionstring = "";
-                    var selections = element.val();
+                    var selectiontextstring = "";
+                    var selections = element.select2('data');
                     for (var i = 0; i < selections.length; i++)
                     {
                         if (selectionstring == "")
-                            selectionstring += selections[i];
-                        else
-                            selectionstring += "," + selections[i];
+                        {
+                            selectionstring += selections[i].id;
+                            selectiontextstring += selections[i].text;
+                        }
+                        else {
+                            selectionstring += "," + selections[i].id;
+                            selectiontextstring += "," + selections[i].text;
+                        }
                     }
-                        
-                    vm.$emit("input", selectionstring);
 
-                }).on("select2:unselect", function ()
-                {
+                    vm.$emit('update:idfield', selectionstring); 
+                    vm.$emit('update:textfield', selectiontextstring); 
+
+                }).on("select2:unselect", function () {
                     var selectionstring = "";
-                    var selections = element.val();
+                    var selectiontextstring = "";
+                    var selections = element.select2('data');
                     for (var i = 0; i < selections.length; i++) {
-                        if (selectionstring == "")
-                            selectionstring += selections[i];
-                        else
-                            selectionstring += "," + selections[i];
+                        if (selectionstring == "") {
+                            selectionstring += selections[i].id;
+                            selectiontextstring += selections[i].text;
+                        }
+                        else {
+                            selectionstring += "," + selections[i].id;
+                            selectiontextstring += "," + selections[i].text;
+                        }
                     }
 
-                    vm.$emit("input", selectionstring);
+                    vm.$emit('update:idfield', selectionstring);
+                    vm.$emit('update:textfield', selectiontextstring); 
                 });
 
-          
+
             },
             updated: function ()
             {
-                if (!this.value)
+
+                if (!this.$attrs.idfield)
                     return;
 
-                $(this.$el).val(this.value.split(","));
+                var arr = this.$attrs.idfield.split(",");
+                $(this.$el).val(arr);
                 $(this.$el).trigger("select2:select");
+
             },
             watch:
             {
                 value: function (value)
                 {
-                },
-                
-            },
-            destroyed: function ()
-            {
-                $(this.$el).off().select2("destroy");
-            }
-        });
-
-        Vue.component("multiselect2", {
-            props: ["appmodel,idfield,textfield"],
-            template: '<select multiple="multiple"><slot></slot></select>',
-            mounted: function () {
-                var vm = this;
-                var element = $(this.$el);
-
-                element.select2({ theme: "classic" }).on("select2:select", function () {
-                    var selectionstring = "";
-                    var selections = element.val();
-                    for (var i = 0; i < selections.length; i++) {
-                        if (selectionstring == "")
-                            selectionstring += selections[i];
-                        else
-                            selectionstring += "," + selections[i];
-                    }
-
-
-                    vm.$attrs[vm.$attrs.idfield]= selectionstring;
-                    vm.$attrs[vm.$attrs.textfield] = "ZZZZZZZZZZ";
-
-                    //TODO: HOW TO GET NEW VALUES BCK TO THE CONSUMER, EVENTS ?
-
-
-                }).on("select2:unselect", function () {
-                    var selectionstring = "";
-                    var selections = element.val();
-                    for (var i = 0; i < selections.length; i++) {
-                        if (selectionstring == "")
-                            selectionstring += selections[i];
-                        else
-                            selectionstring += "," + selections[i];
-                    }
-
-
-                });
-
-
-            },
-            updated: function () {
-                if (!this[this.idfield])
-                    return;
-
-                $(this.$el).val(this[this.idfield].split(","));
-                $(this.$el).trigger("select2:select");
-            },
-            watch:
-            {
-                value: function (value) {
-                },
+                    var x = "";
+                }
 
             },
             destroyed: function () {
@@ -154,7 +106,7 @@
             el: '#app',
             data: {
                 model: {
-                    somefield: "", sometextfield:"" },
+                    somefield: "", sometextfield: "", somefield2:"", sometextfield2:"" },
                 valuedomain: []
             },
             methods:
