@@ -34,56 +34,66 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
-Vue.component("multislect", {
-    props: ["value","jsobject","textfield"],
-    template: '<select multiple="multiple"><slot></slot></select>',
+Vue.component("intwentyselect", {
+    template: '<select><slot></slot></select>',
     mounted: function () {
         var vm = this;
         var element = $(this.$el);
 
-        element.select2({ theme: "classic" }).on("select2:select", function () {
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
             var selectionstring = "";
-            var selections = element.val();
-            if (selections.length == 0)
-                return;
+            var selectiontextstring = "";
+            var selections = element.select2('data');
             for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "")
-                    selectionstring += selections[i];
-                else
-                    selectionstring += "," + selections[i];
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
             }
 
-
-            vm.$emit("input", selectionstring);
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
 
         }).on("select2:unselect", function () {
             var selectionstring = "";
-            var selections = element.val();
+            var selectiontextstring = "";
+            var selections = element.select2('data');
             for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "")
-                    selectionstring += selections[i];
-                else
-                    selectionstring += "," + selections[i];
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
             }
 
-            vm.$emit("input", selectionstring);
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
         });
 
 
     },
-    updated: function ()
-    {
-        if (!this.value)
+    updated: function () {
+
+        if (!this.$attrs.idfield)
             return;
 
-        var values = this.value.split(",");
-        $(this.$el).val(values);
+        var arr = this.$attrs.idfield.split(",");
+        $(this.$el).val(arr);
         $(this.$el).trigger("select2:select");
+
     },
     watch:
     {
         value: function (value) {
-        },
+            var x = "";
+        }
 
     },
     destroyed: function () {

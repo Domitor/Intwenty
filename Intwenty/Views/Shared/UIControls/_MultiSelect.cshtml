@@ -9,20 +9,20 @@
             { <span style="color: red"> *</span> }}
     </label>
 
-    <multislect id="@Model.UIId"
+    <intwentyselect id="@Model.UIId"
                  name="@Model.UIId"
                  class="form-control form-control-lg" 
-                 v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
-                 v-bind ="@Model.JavaScriptObjectName.@Model.DataTableDbName"
-                 v-bind:textfield="@Model.DataViewColumn2DbName"
+                 v-bind:idfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName" 
+                 v-bind:textfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumn2DbName"
                  data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeMultiSelect
                  data-title="@Model.LocalizedTitle"
                  data-validationfield="@validationfield"
                  data-dbtable="@Model.DataTableDbName"
                  data-dbfield="@Model.DataColumnDbName"
-                 data-required="@Model.Mandatory">
+                 data-required="@Model.Mandatory" 
+                 multiple="multiple">
         <option v-for="item in valuedomains.VALUEDOMAIN_@Model.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
-    </multislect>
+    </intwentyselect>
 
 
 

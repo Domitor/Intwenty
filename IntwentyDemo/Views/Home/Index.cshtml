@@ -12,7 +12,7 @@
 
 
 <div id="app">
-    <intwentyselect class="form-control form-control-sm" v-bind:idfield.sync="model.somefield2" v-bind:textfield.sync="model.sometextfield2">
+    <intwentyselect class="form-control form-control-sm" v-bind:idfield.sync="model.somefield2" v-bind:textfield.sync="model.sometextfield2" multiple>
         <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
     </intwentyselect>
     {{model}}
@@ -36,7 +36,7 @@
                 var vm = this;
                 var element = $(this.$el);
 
-                element.select2().on("select2:select", function () {
+                element.select2({theme:"bootstrap", closeOnSelect:true}).on("select2:select", function () {
                     var selectionstring = "";
                     var selectiontextstring = "";
                     var selections = element.select2('data');
