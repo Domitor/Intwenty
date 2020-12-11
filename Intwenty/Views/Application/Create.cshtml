@@ -45,7 +45,7 @@
     @if (view != null)
     {
         @await Html.PartialAsync("_DefaultAppUI", view);
-   }
+    }
     else
     {
         <h3>There's no 'create' view model defined for this application yet.</h3>
@@ -58,57 +58,81 @@
 
 
     <script>
-        Vue.prototype.runMounted = function () {
 
-           var context = this;
-            var baseurl = '@Url.Content("~/Application/API/")';
-            var endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
-            $.get(endpointurl, function (response) {
-                context.valuedomains = JSON.parse(response.data);
-                endpointurl = baseurl + "CreateNew/@Model.Application.Id";
-                $.get(endpointurl, function (response)
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                dataview: [],
+                valuedomains: {},
+                model: { ['@Model.Application.DbName']: {} },
+                validation: {},
+                pageInfo: { "applicationId": @Model.Application.Id, "dataViewMetaCode": "", "maxCount": 0, "pageSize": 8, "pageNumber": 0, "filterValues": [] },
+                current_edit_line: {},
+                showFilter: false,
+                dlgFilterColumnName: "",
+                dlgFilterValue: "",
+                baseurl: '@Url.Content("~/Application/API/")',
+                appMainTable: '@Model.Application.DbName',
+                appId: @Model.Application.Id,
+                instanceId: 0
+
+            },
+            methods:
+            {
+                saveApplication: function ()
                 {
-                    context.model = JSON.parse(response.data);
-                });
-            });
+                    var context = this;
+                    var endpointurl = context.baseurl + "Save";
 
-        };
+                    context.model[context.appMainTable].ApplicationId = context.appId;
 
-        Vue.prototype.runSave = function () {
-
-            var context = this;
-            var baseurl = '@Url.Content("~/Application/API/")';
-            var endpointurl = baseurl + "Save";
-
-            this.model['@Model.Application.DbName'].ApplicationId = @Model.Application.Id;
-
-            if (!context.canSave())
-                return;
+                    if (!context.canSave())
+                        return;
 
 
-            $.ajax({
-                url: endpointurl,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(this.model),
-                success: function (response) {
-                    if (response.isSuccess) {
-                        context.model['@Model.Application.DbName'].Id = response.id;
-                        context.model['@Model.Application.DbName'].Version = response.version;
-                        endpointurl = '@Url.Content("~/Application/EditList")' + "/@Model.Application.Id";
-                        window.location.href = endpointurl;
-                    }
-                    else {
-                        raiseErrorModal(response);
-                    }
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                context.model[context.appMainTable].Id = response.id;
+                                context.model[context.appMainTable].Version = response.version;
+                                endpointurl = '@Url.Content("~/Application/EditList")' + "/" + context.appId;
+                                window.location.href = endpointurl;
+                            }
+                            else {
+                                raiseErrorModal(response);
+                            }
+                        }
+                    });
+                }, 
+                onImageChanged: function (event)
+                {
+                    this.uploadImage(event);
                 }
-            });
 
-        };
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
+                $.get(endpointurl, function (response) {
+                    context.valuedomains = JSON.parse(response.data);
+                    endpointurl = context.baseurl + "CreateNew/@Model.Application.Id";
+                    $.get(endpointurl, function (response)
+                    {
+                        context.model = JSON.parse(response.data);
+                    });
+                });
 
-        var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/API/")');
+            }
+        });
 
-   
+
+
 
     </script>
 

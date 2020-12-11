@@ -67,56 +67,75 @@
 
 
     <script>
-        Vue.prototype.runMounted = function () {
-
-            var context = this;
-            var baseurl = '@Url.Content("~/Application/API/")';
-            var endpointurl = baseurl + "GetEditData/@Model.Application.Id/@ViewBag.SystemId";
-
-            $.get(endpointurl, function (response) {
-                context.model = JSON.parse(response.data);
-                endpointurl = baseurl + "GetValueDomains/@Model.Application.Id";
-                $.get(endpointurl, function (response) {
-                    context.valuedomains = JSON.parse(response.data);
-                });
-            });
-
-        };
-
-        Vue.prototype.runSave = function () {
-
-            var context = this;
-            var baseurl = '@Url.Content("~/Application/API/")';
-            var endpointurl = baseurl + "Save";
-
-            this.model['@Model.Application.DbName'].ApplicationId = @Model.Application.Id;
-
-            if (!context.canSave())
-                return;
 
 
-            $.ajax({
-                url: endpointurl,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(this.model),
-                success: function (response)
+       var app = new Vue({
+            el: '#app',
+            data: {
+                dataview: [],
+                valuedomains: {},
+                model: { ['@Model.Application.DbName']: {} },
+                validation: {},
+                pageInfo: { "applicationId": @Model.Application.Id, "dataViewMetaCode": "", "maxCount": 0, "pageSize": 8, "pageNumber": 0, "filterValues": [] },
+                current_edit_line: {},
+                showFilter: false,
+                dlgFilterColumnName: "",
+                dlgFilterValue: "",
+                baseurl: '@Url.Content("~/Application/API/")',
+                appMainTable: '@Model.Application.DbName',
+                appId: @Model.Application.Id,
+                instanceId: @ViewBag.SystemId
+
+            },
+            methods:
+            {
+                saveApplication: function ()
                 {
-                    if (response.isSuccess) {
-                        window.location.reload(true);
-                    }
-                    else
-                    {
-                       raiseErrorModal(response);
-                    }
+                    var context = this;
+
+                    var endpointurl = context.baseurl + "Save";
+
+                    this.model[context.appMainTable].ApplicationId = context.appId;
+
+                    if (!context.canSave())
+                        return;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                window.location.reload(true);
+                            }
+                            else {
+                                raiseErrorModal(response);
+                            }
+                        }
+                    });
+                },
+                onImageChanged: function (event) {
+                    this.uploadImage(event);
                 }
-            });
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var endpointurl = context.baseurl + "GetEditData/" + context.appId + "/" + context.instanceId;
 
-        };
+                $.get(endpointurl, function (response) {
+                    context.model = JSON.parse(response.data);
+                    endpointurl = context.baseurl + "GetValueDomains/@Model.Application.Id";
+                    $.get(endpointurl, function (response) {
+                        context.valuedomains = JSON.parse(response.data);
+                    });
+                });
 
-        var app = getVueCreateUpdate('#app',@Model.Application.Id, '@Model.Application.DbName','@Url.Content("~/Application/API/")');
+            }
+        });
 
-      
+
     </script>
 
 

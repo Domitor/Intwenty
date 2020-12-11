@@ -66,7 +66,120 @@
     
     <script>
 
-        var app = getEditListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")', @pagesize);
+ 
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                ,model: { "showFilter": false }
+                ,pageInfo: { "applicationId": @Model.Application.Id, "maxCount": 0, "pageSize": 20, "pageNumber": 0, "filterValues": [] }
+                ,currentSort: ''
+                ,currentSortDir: 'asc'
+                ,baseurl: '@Url.Content("~/Application/API/")'
+                ,appMainTable: '@Model.Application.DbName'
+                ,appId: @Model.Application.Id
+            },
+            methods:
+            {
+
+                getPage: function () {
+                    var context = this;
+                    var endpointurl = context.baseurl + "GetEditListData";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.pageInfo),
+                        success: function (response) {
+                            //DATA
+                            context.datalist = JSON.parse(response.data);
+
+                            //UPDATE CURRENT PAGE INFO
+                            context.pageInfo = response.listFilter;
+                            if (context.pageInfo.filterValues.length === 0)
+                                context.addFilterValue();
+                        }
+                    });
+                },
+                sortBycolumn: function (s) {
+                    //if s == current sort, reverse
+                    if (s === this.currentSort) {
+                        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+                    }
+                    this.currentSort = s;
+                },
+                exportToExcel: function ()
+                {
+                    var context = this;
+                    var args = { "applicationId": context.appId, "maxCount": 0, "pageSize": 2000, "pageNumber": 0, "filterValues": [] }
+                    var endpointurl = context.baseurl + "GetEditListData";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(args),
+                        success: function (response) {
+                            var data = JSON.parse(response.data);
+                            alasql.promise('SELECT * INTO XLSX("download.xlsx",{headers:true}) FROM ?', [data])
+                                .then(function (data) {
+                                    console.log('Data saved');
+                                }).catch(function (err) {
+                                    console.log('Error:', err);
+                                });
+                        }
+                    });
+                },
+                deleteApplication: function (item) {
+                    var context = this;
+                    var endpointurl = context.baseurl + "Delete";
+
+                    var deleteapp = function () {
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+
+                                if (response.isSuccess) {
+                                    window.location.reload(true);
+                                }
+                                else {
+                                    raiseErrorModal(response);
+                                }
+                            }
+                        });
+                    };
+
+                    raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
+                }
+            },
+            computed: {
+
+                sortedResults: function () {
+                    return this.datalist.sort((a, b) => {
+                        let modifier = 1;
+                        if (this.currentSortDir === 'desc') modifier = -1;
+                        if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+                        if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+                        return 0;
+                    });
+                },
+                isFirstPage: function () {
+                    return (this.pageInfo.pageNumber <= 0);
+                },
+                isLastPage: function () {
+                    return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
+                }
+            },
+            mounted: function () {
+                var context = this;
+                context.getPage();
+            }
+        });
 
 
     </script>

@@ -50,7 +50,75 @@
     
     <script>
 
-        var app = getListView('#app',@Model.Application.Id, '@Url.Content("~/Application/API/")', @pagesize);
+         var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                ,model: { "showFilter": false }
+                ,pageInfo: { "applicationId": @Model.Application.Id, "maxCount": 0, "pageSize": 20, "pageNumber": 0, "filterValues": [] }
+                ,currentSort: ''
+                ,currentSortDir: 'asc'
+                ,baseurl: '@Url.Content("~/Application/API/")'
+                ,appMainTable: '@Model.Application.DbName'
+                ,appId: @Model.Application.Id
+            },
+            methods:
+            {
+
+                getPage: function () {
+                    var context = this;
+                    var endpointurl = context.baseurl + "GetListData";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.pageInfo),
+                        success: function (response) {
+                            //DATA
+                            context.datalist = JSON.parse(response.data);
+
+                            //UPDATE CURRENT PAGE INFO
+                            context.pageInfo = response.listFilter;
+                            if (context.pageInfo.filterValues.length === 0)
+                                context.addFilterValue();
+                        }
+                    });
+                },
+                sortBycolumn: function (s) {
+                    //if s == current sort, reverse
+                    if (s === this.currentSort) {
+                        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+                    }
+                    this.currentSort = s;
+                }
+              
+            },
+            computed: {
+
+                sortedResults: function () {
+                    return this.datalist.sort((a, b) => {
+                        let modifier = 1;
+                        if (this.currentSortDir === 'desc') modifier = -1;
+                        if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+                        if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+                        return 0;
+                    });
+                },
+                isFirstPage: function () {
+                    return (this.pageInfo.pageNumber <= 0);
+                },
+                isLastPage: function () {
+                    return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
+                }
+            },
+            mounted: function () {
+                var context = this;
+                context.getPage();
+            }
+        });
+
 
 
     </script>

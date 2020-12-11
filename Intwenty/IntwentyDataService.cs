@@ -2042,7 +2042,7 @@ namespace Intwenty
                 result.ListFilter = new ListFilter();
                 result.ListFilter = args;
 
-                var sql = DBHelpers.AddSelectSqlAndCondition(dv.SQLQuery, dvcol.SQLQueryFieldName, "@P1", false); 
+                var sql = DBHelpers.AddSelectSqlAndCondition(dv.SQLQuery, dvcol.SQLQueryFieldName, "@P1", true); 
                 if (string.IsNullOrEmpty(sql))
                     throw new InvalidOperationException("GetDataViewRecord - Could not build sql statement.");
 
