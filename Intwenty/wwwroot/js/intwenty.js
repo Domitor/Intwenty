@@ -34,18 +34,80 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
-Vue.directive('selecttwo', {
-    twoWay: true,
-    bind: function () {
-        $(this.el).select2()
-            .on("select2:select", function (e) {
-                this.set($(this.el).val());
-            }.bind(this));
+Vue.component("intwentyselect", {
+    template: '<select><slot></slot></select>',
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function ()
+        {
+            var selectionstring = "";
+            var selectiontextstring = "";
+            var selections = element.select2('data');
+
+            //CANT BE ZERO IN THIS EVENT
+            if (selections.length == 0)
+                return;
+
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
+            }
+
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
+
+        }).on("select2:unselect", function () {
+            var selectionstring = "";
+            var selectiontextstring = "";
+            var selections = element.select2('data');
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
+            }
+
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
+        });
+
+
     },
-    update: function (nv, ov) {
-        $(this.el).trigger("change");
+    updated: function () {
+
+        if (!this.$attrs.idfield)
+            return;
+
+        var arr = this.$attrs.idfield.split(",");
+        $(this.$el).val(arr);
+        $(this.$el).trigger("select2:select");
+
+    },
+    watch:
+    {
+        value: function (value) {
+            var x = "";
+        }
+
+    },
+    destroyed: function () {
+        $(this.$el).off().select2("destroy");
     }
 });
+
+
 
 Vue.prototype.selectableProperties = function (item) {
     var context = this;
@@ -459,11 +521,13 @@ function getVueCreateUpdate(vueelement, applicationid, apptablename, baseurl) {
                     }
                 });
             },
-            isFirstDataViewPage: function () {
-                return this.pageInfo.pageNumber <= 0;
+            isFirstDataViewPage: function ()
+            {
+                return (this.pageInfo.pageNumber <= 0);
             },
-            isLastDataViewPage: function () {
-                return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
+            isLastDataViewPage: function ()
+            {
+                return (((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount);
             },
             runFilter: function () {
                 var context = this;
@@ -630,7 +694,7 @@ function getEditListView(vueelement, applicationid, baseurl, pagesize) {
                 return (this.pageInfo.pageNumber <= 0);
             },
             isLastPage: function () {
-                return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
+                return ((this.pageInfo.pageNumber+1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
             }
         },
         mounted: function () {
@@ -715,7 +779,8 @@ function getListView(vueelement, applicationid, baseurl, pagesize) {
             isFirstPage: function () {
                 return (this.pageInfo.pageNumber <= 0);
             },
-            isLastPage: function () {
+            isLastPage: function ()
+            {
                 return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
             }
         },

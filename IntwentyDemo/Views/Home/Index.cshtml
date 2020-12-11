@@ -12,10 +12,7 @@
 
 
 <div id="app">
-    <intwentyselect class="form-control form-control-sm" v-bind:idfield.sync="model.somefield2" v-bind:textfield.sync="model.sometextfield2" multiple>
-        <option v-for="item in valuedomain" v-bind:value="item.Code">{{item.Value}}</option>
-    </intwentyselect>
-    {{model}}
+    
 </div>
 
 
@@ -29,101 +26,22 @@
 
     <script>
       
-
-        Vue.component("intwentyselect", {
-            template: '<select><slot></slot></select>',
-            mounted: function () {
-                var vm = this;
-                var element = $(this.$el);
-
-                element.select2({theme:"bootstrap", closeOnSelect:true}).on("select2:select", function () {
-                    var selectionstring = "";
-                    var selectiontextstring = "";
-                    var selections = element.select2('data');
-                    for (var i = 0; i < selections.length; i++)
-                    {
-                        if (selectionstring == "")
-                        {
-                            selectionstring += selections[i].id;
-                            selectiontextstring += selections[i].text;
-                        }
-                        else {
-                            selectionstring += "," + selections[i].id;
-                            selectiontextstring += "," + selections[i].text;
-                        }
-                    }
-
-                    vm.$emit('update:idfield', selectionstring); 
-                    vm.$emit('update:textfield', selectiontextstring); 
-
-                }).on("select2:unselect", function () {
-                    var selectionstring = "";
-                    var selectiontextstring = "";
-                    var selections = element.select2('data');
-                    for (var i = 0; i < selections.length; i++) {
-                        if (selectionstring == "") {
-                            selectionstring += selections[i].id;
-                            selectiontextstring += selections[i].text;
-                        }
-                        else {
-                            selectionstring += "," + selections[i].id;
-                            selectiontextstring += "," + selections[i].text;
-                        }
-                    }
-
-                    vm.$emit('update:idfield', selectionstring);
-                    vm.$emit('update:textfield', selectiontextstring); 
-                });
-
-
-            },
-            updated: function ()
-            {
-
-                if (!this.$attrs.idfield)
-                    return;
-
-                var arr = this.$attrs.idfield.split(",");
-                $(this.$el).val(arr);
-                $(this.$el).trigger("select2:select");
-
-            },
-            watch:
-            {
-                value: function (value)
-                {
-                    var x = "";
-                }
-
-            },
-            destroyed: function () {
-                $(this.$el).off().select2("destroy");
-            }
-        });
-
-
         var app = new Vue({
             el: '#app',
             data: {
-                model: {
-                    somefield: "", sometextfield: "", somefield2:"", sometextfield2:"" },
+                model: {},
                 valuedomain: []
             },
             methods:
             {
                 test: function () {
 
-
-
                 }
 
             },
-            mounted: function () {
-                this.valuedomain = [{ Id: 50, Code: "T1", Value: "Tag 1" }, { Id: 20, Code: "T2", Value: "Tag 2" }, { Id: 65, Code: "T3", Value: "Tag 3" }];
-                this.model.somefield = "T2";
-                this.model.sometextfield = "Tag 2";
-                this.model.somefield2 = "T2";
-                this.model.sometextfield2 = "Tag 2";
+            mounted: function ()
+            {
+                
             }
         })
 

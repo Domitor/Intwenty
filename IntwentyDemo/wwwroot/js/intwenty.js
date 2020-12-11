@@ -40,10 +40,16 @@ Vue.component("intwentyselect", {
         var vm = this;
         var element = $(this.$el);
 
-        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function ()
+        {
             var selectionstring = "";
             var selectiontextstring = "";
             var selections = element.select2('data');
+
+            //CANT BE ZERO IN THIS EVENT
+            if (selections.length == 0)
+                return;
+
             for (var i = 0; i < selections.length; i++) {
                 if (selectionstring == "") {
                     selectionstring += selections[i].id;
