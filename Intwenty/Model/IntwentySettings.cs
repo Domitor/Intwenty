@@ -100,7 +100,11 @@ namespace Intwenty.Model
         /// A group admin can invite users to the group
         /// </summary>
         public bool EnableUserGroups { get; set; }
-     
+
+        /// <summary>
+        /// Allow new visitors to register
+        /// </summary>
+        public bool AllowUserRegistration { get; set; }
 
         //EMAIL
         public string MailServiceServer { get; set; }

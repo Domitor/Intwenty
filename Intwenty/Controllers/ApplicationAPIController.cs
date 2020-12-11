@@ -50,9 +50,9 @@ namespace Intwenty.Controllers
             {
 
                 if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You are not authorized to this data"));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
                 if (!UserManager.HasPermission(User, model, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to this data, apply for read permission for application {0}", model.Application.Title)));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
 
@@ -89,9 +89,9 @@ namespace Intwenty.Controllers
             else
             {
                 if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You are not authorized to this data"));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
                 if (!UserManager.HasPermission(User, model, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to this data, apply for read permission for application {0}", model.Application.Title)));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                 var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
 
@@ -122,9 +122,9 @@ namespace Intwenty.Controllers
                 return BadRequest();
 
             if (!User.Identity.IsAuthenticated)
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You are not authorized to this data"));
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
             if (!UserManager.HasPermission(User, model, IntwentyPermission.Read))
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to this data, apply for read permission for application {0}", model.Application.Title)));
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
           
             var state = new ClientStateInfo() { ApplicationId = applicationid };
@@ -159,9 +159,9 @@ namespace Intwenty.Controllers
             else
             {
                 if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You are not authorized to this data"));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
                 if (!UserManager.HasPermission(User, appmodel, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to this data, apply for read permission for application {0}", appmodel.Application.Title)));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
                 if (appmodel.Application.EditListViewRequirement == "OWNER")
                     model.OwnerUserId = User.Identity.Name;
@@ -198,9 +198,9 @@ namespace Intwenty.Controllers
             else
             {
                 if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You are not authorized to this data"));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
                 if (!UserManager.HasPermission(User, appmodel, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to this data, apply for read permission for application {0}", appmodel.Application.Title)));
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
                 if (appmodel.Application.EditListViewRequirement == "OWNER")
                     model.OwnerUserId = User.Identity.Name;

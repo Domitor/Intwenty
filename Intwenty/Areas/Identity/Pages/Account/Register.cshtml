@@ -6,6 +6,14 @@
 
 @await Html.PartialAsync("_Modals")
 
+@if (!Settings.Value.AllowUserRegistration)
+{
+   <br />
+   <br />
+    <h1>The requested page is not available</h1>
+
+    return;
+}
 
 <div id="app">
 

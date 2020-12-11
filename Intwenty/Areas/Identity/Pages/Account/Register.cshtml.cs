@@ -84,7 +84,10 @@ namespace Intwenty.Areas.Identity.Pages.Account
         {
             try
             {
-
+                if (!_settings.AllowUserRegistration)
+                {
+                    throw new InvalidOperationException("User registration is closed");
+                }
 
                 model.Message = "";
                 model.ReturnUrl = Url.Content("~/");
