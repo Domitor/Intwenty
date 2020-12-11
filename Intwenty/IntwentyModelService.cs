@@ -2127,7 +2127,7 @@ namespace Intwenty
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, model.DbName);
+                string create_sql = GetCreateTableStmt(columns, model.DbName, model.UseVersioning, false);
                 Client.RunCommand(create_sql);
                 result.AddMessage(MessageCode.INFO, "Main table: " + model.DbName + " for application: " + model.Title + "  was created successfully");
 
@@ -2155,7 +2155,7 @@ namespace Intwenty
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, table.DbName);
+                string create_sql = GetCreateTableStmt(columns, table.DbName, model.UseVersioning, true);
                 Client.RunCommand(create_sql);
                 result.AddMessage(MessageCode.INFO, "Subtable: " + table.DbName + " in application: " + model.Title + "  was created successfully");
 
@@ -2270,7 +2270,7 @@ namespace Intwenty
 
         }
 
-        private string GetCreateTableStmt(List<DatabaseModelItem> columns, string tablename)
+        private string GetCreateTableStmt(List<DatabaseModelItem> columns, string tablename, bool useversioning, bool issubtable)
         {
             var res = string.Format("CREATE TABLE {0}", tablename) + " (";
             var sep = "";
@@ -2284,7 +2284,46 @@ namespace Intwenty
                 else
                     dt = DataTypes.Find(p => p.IntwentyType == c.DataType && p.DbEngine == Client.Database);
 
-                res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                if (!issubtable)
+                {
+                    res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                }
+                else
+                {
+
+                    if (c.DbName.ToUpper() == "ID" && !useversioning)
+                    {
+                        if (Client.Database == DBMS.MSSqlServer)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MSSqlServer && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, autoinccmd.Command, "NOT NULL" });
+                        }
+                        else if (Client.Database == DBMS.MariaDB || Client.Database == DBMS.MySql)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MariaDB && p.Key == "AUTOINC");
+                            res += string.Format("`{0}` {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
+                        }
+                        else if (Client.Database == DBMS.SQLite)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.SQLite && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
+                        }
+                        else if (Client.Database == DBMS.PostgreSQL)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.PostgreSQL && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2}", new object[] { c.Name, autoinccmd.Command, "NOT NULL" });
+                        }
+                        else
+                        {
+                            res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                        }
+                    }
+                    else
+                    {
+                        res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                    }
+
+                }
                 sep = ", ";
             }
 

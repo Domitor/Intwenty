@@ -213,8 +213,6 @@ namespace Intwenty
 
                     RemoveFromApplicationListCache(state.ApplicationId);
 
-                    state.Data.InferModel(model);
-
                     client.Open();
 
                     BeforeSave(model, state, client);
@@ -233,9 +231,6 @@ namespace Intwenty
                             state.Version = 1;
 
                         BeforeSaveNew(model, state, client);
-                        if (!state.Data.HasModel)
-                            state.Data.InferModel(model);
-
                         InsertMainTable(model, state, client);
                         InsertInformationStatus(model, state, client);
                         HandleSubTables(model, state, client);
@@ -250,9 +245,6 @@ namespace Intwenty
                         state.Version = CreateVersionRecord(model, state, client);
 
                         BeforeSaveUpdate(model, state, client);
-                        if (!state.Data.HasModel)
-                            state.Data.InferModel(model);
-
                         InsertMainTable(model, state, client);
                         UpdateInformationStatus(state, client);
                         HandleSubTables(model, state, client);
@@ -265,9 +257,6 @@ namespace Intwenty
 
                         result.Status = LifecycleStatus.EXISTING_NOT_SAVED;
                         BeforeSaveUpdate(model, state, client);
-                        if (!state.Data.HasModel)
-                            state.Data.InferModel(model);
-
                         UpdateMainTable(model, state, client);
                         UpdateInformationStatus(state, client);
                         HandleSubTables(model, state, client);
@@ -438,25 +427,43 @@ namespace Intwenty
                 foreach (var row in table.Rows)
                 {
                     BeforeSaveSubTableRow(model, row, client);
-                    if (!state.Data.HasModel)
-                        state.Data.InferModel(model);
 
-                    if (row.Id < 1 || model.Application.UseVersioning)
+                    //NEW ROW
+                    if (row.Id < 1)
                     {
                         BeforeInsertSubTableRow(model, row, client);
-                        if (!state.Data.HasModel)
-                            state.Data.InferModel(model);
+                        if (model.Application.UseVersioning)
+                        {
+                            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, table.Model.MetaCode, state, client);
+                            if (rowid < 1)
+                                throw new InvalidOperationException("Could not get a new row id for table " + table.DbName);
 
-                        InsertTableRow(model, row, state, client);
+                            //NEW ROW ID
+                            row.Id = rowid;
 
+                            InsertVersionedTableRow(model, row, state, client);
+                        }
+                        else
+                        {
+                            InsertAutoIncrementalTableRow(model, row, state, client);
+                        }
+                      
                     }
                     else
                     {
-                        BeforeUpdateSubTableRow(model, row, client);
-                        if (!state.Data.HasModel)
-                            state.Data.InferModel(model);
-
-                        UpdateTableRow(row, state, client);
+                        //CURRENT ROW
+                        //VERSIONING = CREATE ROW WITH NEW VERSION, BUT SAME ID
+                        if (model.Application.UseVersioning)
+                        {
+                            BeforeInsertSubTableRow(model, row, client);
+                            InsertVersionedTableRow(model, row, state, client);
+                        }
+                        else
+                        {
+                            //NO VERSIONG = JUST UPDATE
+                            BeforeUpdateSubTableRow(model, row, client);
+                            UpdateTableRow(row, state, client);
+                        }
 
                     }
 
@@ -514,14 +521,11 @@ namespace Intwenty
 
 
 
-        private void InsertTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        private void InsertVersionedTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
-            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
-            if (rowid < 1)
-                throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
-
+         
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
             sql_insert.Append("INSERT INTO " + data.Table.DbName + " (");
@@ -564,7 +568,71 @@ namespace Intwenty
             sql_insert.Append(sql_insert_value.ToString());
 
             var parameters = new List<IIntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter("@Id", rowid));
+            parameters.Add(new IntwentySqlParameter("@Id", data.Id));
+            parameters.Add(new IntwentySqlParameter("@Version", state.Version));
+            parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
+            parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
+            SetParameters(paramlist, parameters);
+
+            client.RunCommand(sql_insert.ToString(), parameters: parameters.ToArray());
+
+
+        }
+
+        private void InsertAutoIncrementalTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        {
+            var paramlist = new List<ApplicationValue>();
+
+            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
+            if (rowid < 1)
+                throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
+
+            var sql_insert = new StringBuilder();
+            var sql_insert_value = new StringBuilder();
+            sql_insert.Append("INSERT INTO " + data.Table.DbName + " (");
+            sql_insert_value.Append(" VALUES (");
+            char sep = ' ';
+
+
+            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == data.Table.Model.MetaCode && p.DbName.ToUpper() != "ID"))
+            {
+                sql_insert.Append(sep + t.DbName);
+                sql_insert_value.Append(sep + "@" + t.DbName);
+                sep = ',';
+            }
+
+
+            foreach (var t in data.Values)
+            {
+                if (!t.HasModel)
+                    continue;
+
+                if (t.Model.IsFrameworkItem)
+                    continue;
+
+                sql_insert.Append("," + t.DbName);
+
+                if (!t.HasValue)
+                {
+                    sql_insert_value.Append(",null");
+                }
+                else
+                {
+                    sql_insert_value.Append(",@" + t.DbName);
+                    paramlist.Add(t);
+                }
+
+            }
+
+            sql_insert.Append(")");
+            sql_insert_value.Append(")");
+            sql_insert.Append(sql_insert_value.ToString());
+
+            var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
@@ -772,13 +840,13 @@ namespace Intwenty
 
         #region Delete
 
-        public ModifyResult Delete(ClientStateInfo state)
+        public virtual ModifyResult Delete(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return DeleteInternal(state, model);
         }
 
-        public ModifyResult Delete(ClientStateInfo state, ApplicationModel model)
+        public virtual ModifyResult Delete(ClientStateInfo state, ApplicationModel model)
         {
             return DeleteInternal(state, model);
         }
@@ -953,7 +1021,7 @@ namespace Intwenty
 
         #region Lists
 
-        public DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public virtual DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (args == null)
                 return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
@@ -1067,18 +1135,18 @@ namespace Intwenty
 
      
 
-        public DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model)
+        public virtual DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model)
         {
             return GetPagedListInternal<DataListResult>(args, model);
         }
 
-        public DataListResult GetPagedJsonArray(ListFilter args)
+        public virtual DataListResult GetPagedJsonArray(ListFilter args)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
             return GetPagedListInternal<DataListResult>(args, model);
         }
 
-        public TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
+        public virtual TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
         {
             return GetPagedListInternal<TDataListResult>(args, model);
         }
@@ -1219,7 +1287,7 @@ namespace Intwenty
 
         }
 
-        public DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new()
+        public virtual DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new()
         {
             DataListResult<T> result = null;
 
@@ -1290,7 +1358,7 @@ namespace Intwenty
        
 
         
-        public DataListResult GetJsonArray(int applicationid)
+        public virtual DataListResult GetJsonArray(int applicationid)
         {
             DataListResult result = null;
 
@@ -1340,7 +1408,7 @@ namespace Intwenty
 
         }
 
-        public DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid)
+        public virtual DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid)
         {
 
             var client = new Connection(DBMSType, Settings.DefaultConnection);
@@ -1425,7 +1493,7 @@ namespace Intwenty
 
         #region GetApplication
 
-        public DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public virtual DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (state == null)
                 return new DataResult<T>(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
@@ -1489,18 +1557,18 @@ namespace Intwenty
 
         }
 
-        public DataResult Get(ClientStateInfo state, ApplicationModel model)
+        public virtual DataResult Get(ClientStateInfo state, ApplicationModel model)
         {
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        public DataResult Get(ClientStateInfo state)
+        public virtual DataResult Get(ClientStateInfo state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        public DataResult GetLatestByOwnerUser(ClientStateInfo state)
+        public virtual DataResult GetLatestByOwnerUser(ClientStateInfo state)
         {
             ApplicationModel model = null;
             DataResult result = null;
@@ -1694,7 +1762,7 @@ namespace Intwenty
         #endregion
 
         #region ValueDomain
-        public DataListResult GetValueDomains(int applicationid)
+        public virtual DataListResult GetValueDomains(int applicationid)
         {
             DataListResult result = null;
 
@@ -1796,7 +1864,7 @@ namespace Intwenty
 
         }
 
-        public DataListResult GetValueDomains()
+        public virtual DataListResult GetValueDomains()
         {
             DataListResult result = null;
 
@@ -1875,12 +1943,12 @@ namespace Intwenty
             return result;
         }
 
-        public List<ValueDomainModelItem> GetValueDomainItems()
+        public virtual List<ValueDomainModelItem> GetValueDomainItems()
         {
             return ModelRepository.GetValueDomains();
         }
 
-        public List<ValueDomainModelItem> GetValueDomainItems(string domainname)
+        public virtual List<ValueDomainModelItem> GetValueDomainItems(string domainname)
         {
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
@@ -1936,7 +2004,7 @@ namespace Intwenty
 
         #region Dataview
 
-        public DataListResult GetDataView(ListFilter args)
+        public virtual DataListResult GetDataView(ListFilter args)
         {
             DataListResult result = new DataListResult();
 
@@ -2011,7 +2079,7 @@ namespace Intwenty
             return result;
         }
 
-        public DataListResult GetDataViewRecord(ListFilter args)
+        public virtual DataListResult GetDataViewRecord(ListFilter args)
         {
 
             var result = new DataListResult(true, MessageCode.RESULT, "Fetched dataview record");
@@ -2073,32 +2141,18 @@ namespace Intwenty
 
         #endregion
 
+   
         public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            LogEvent("ERROR",message,applicationid,appmetacode,username);
-        }
-
-        public void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            LogEvent("INFO",message, applicationid, appmetacode, username);
-        }
-
-        public void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            LogEvent("WARNING", message, applicationid, appmetacode, username);
-        }
-
-        public void LogErrorAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
             Task.Run(() => LogEvent("ERROR", message, applicationid, appmetacode, username));
         }
 
-        public void LogInfoAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        public void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
             Task.Run(() => LogEvent("INFO", message, applicationid, appmetacode, username));
         }
 
-        public void LogWarningAsync(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
+        public void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
             Task.Run(() => LogEvent("WARNING", message, applicationid, appmetacode, username));
         }
