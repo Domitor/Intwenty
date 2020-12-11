@@ -84,7 +84,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
         {
             try
             {
-                if (!_settings.AllowUserRegistration)
+                if (!_settings.UserRegistrationAllow)
                 {
                     throw new InvalidOperationException("User registration is closed");
                 }
@@ -93,6 +93,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 model.ReturnUrl = Url.Content("~/");
 
                 var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };
+                if (_settings.UserRegistrationRequireName)
+                {
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                }
+
                 if (string.IsNullOrEmpty(user.Culture))
                     user.Culture = _settings.DefaultCulture;
 

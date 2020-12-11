@@ -6,7 +6,7 @@
 
 @await Html.PartialAsync("_Modals")
 
-@if (!Settings.Value.AllowUserRegistration)
+@if (!Settings.Value.UserRegistrationAllow)
 {
    <br />
    <br />
@@ -55,6 +55,21 @@
                         <label>Email <span style="color: red"> *</span></label>
                         <input type="email" v-model="model.email" class="form-control" id="email" v-on:input="onUserInput(event)" data-required="True" />
                     </div>
+
+                    @if (Settings.Value.UserRegistrationRequireName)
+                    {
+                        <div class="form-group">
+                            <label>First Name <span style="color: red"> *</span></label>
+                            <input type="text" v-model="model.firstName" class="form-control" id="firstname" v-on:input="onUserInput(event)" data-required="True" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Last Name <span style="color: red"> *</span></label>
+                            <input type="text" v-model="model.lastName" class="form-control" id="lastname" v-on:input="onUserInput(event)" data-required="True" />
+                        </div>
+
+                    }
+
                     <div class="form-group">
                         <label>Password <span style="color: red"> *</span></label>
                         <input v-model="model.password" type="password" class="form-control" id="password" v-on:input="onUserInput(event)" data-required="True" />
@@ -145,7 +160,20 @@
                         </text>
                     }
 
-
+                    @if (Settings.Value.UserRegistrationRequireName)
+                    {
+                        <text>
+                        if (!context.model.firstName)
+                        {
+                            $("#firstname").addClass('requiredNotValid');
+                            valid = false;
+                        }
+                        if (!context.model.lastName) {
+                            $("#lastname").addClass('requiredNotValid');
+                            valid = false;
+                        }
+                        </text>
+                    }
 
                     if (!context.model.email) {
                         $("#email").addClass('requiredNotValid');
