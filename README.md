@@ -107,6 +107,8 @@ client.InsertEntity(new UserInterfaceItem() { AppMetaCode = "CUSTOMER", MetaType
 - jquery 3.3.1
 - alasql 0.5.5
 - fontawesome-free-5.12.1-web
+- Select2 4.0.13
+- Select2 Bootstrap Theme v0.1.0-beta.10
 
 # Works with the following databases
 - MS Sql Server
