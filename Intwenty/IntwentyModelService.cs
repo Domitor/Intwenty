@@ -1209,7 +1209,7 @@ namespace Intwenty
                     foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.ParentMetaCode == table.MetaCode && !p.IsRoot))
                     {
                         if (res.Exists(p => p.DbName.ToUpper() == column.DbName.ToUpper() && 
-                                            p.ParentMetaCode == table.ParentMetaCode &&
+                                            p.ParentMetaCode == table.MetaCode &&
                                             p.AppMetaCode == app.MetaCode && 
                                             p.IsMetaTypeDataColumn))
                             continue;
@@ -2227,9 +2227,12 @@ namespace Intwenty
 
             try
             {
-                //Create index on versioning table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.VersioningTableName);
-                Client.RunCommand(sql);
+                if (model.UseVersioning)
+                {
+                    //Create index on versioning table
+                    sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.VersioningTableName);
+                    Client.RunCommand(sql);
+                }
             }
             catch { }
             finally { Client.Close(); }
