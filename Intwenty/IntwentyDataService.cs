@@ -217,8 +217,7 @@ namespace Intwenty
 
                     BeforeSave(model, state, client);
 
-                    if (!state.Data.HasModel)
-                        state.Data.InferModel(model);
+                    state.Data.InferModel(model);
 
                     if (state.Id < 1)
                     {
@@ -320,6 +319,11 @@ namespace Intwenty
 
         }
 
+        protected virtual void AfterSaveSubTableRow(ApplicationModel model, ApplicationTableRow row, IDataClient client)
+        {
+
+        }
+
         protected virtual void BeforeInsertSubTableRow(ApplicationModel model, ApplicationTableRow row, IDataClient client) 
         {
 
@@ -379,7 +383,7 @@ namespace Intwenty
 
             foreach (var t in state.Data.Values)
             {
-                if (!t.HasModel)
+                if (!t.HasModel && !t.IgnoreModelValidation)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -467,6 +471,8 @@ namespace Intwenty
 
                     }
 
+                    AfterSaveSubTableRow(model, row, client);
+
                 }
 
             }
@@ -488,7 +494,7 @@ namespace Intwenty
 
             foreach (var t in state.Data.Values)
             {
-                if (!t.HasModel)
+                if (!t.HasModel && !t.IgnoreModelValidation)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -521,19 +527,19 @@ namespace Intwenty
 
 
 
-        private void InsertVersionedTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        private void InsertVersionedTableRow(ApplicationModel model, ApplicationTableRow row, ClientStateInfo state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
          
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + data.Table.DbName + " (");
+            sql_insert.Append("INSERT INTO " + row.Table.DbName + " (");
             sql_insert_value.Append(" VALUES (");
             char sep = ' ';
 
 
-            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == data.Table.Model.MetaCode))
+            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == row.Table.Model.MetaCode))
             {
                 sql_insert.Append(sep + t.DbName);
                 sql_insert_value.Append(sep + "@" + t.DbName);
@@ -541,9 +547,9 @@ namespace Intwenty
             }
 
 
-            foreach (var t in data.Values)
+            foreach (var t in row.Values)
             {
-                if (!t.HasModel)
+                if (!t.HasModel && !t.IgnoreModelValidation)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -568,7 +574,7 @@ namespace Intwenty
             sql_insert.Append(sql_insert_value.ToString());
 
             var parameters = new List<IIntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter("@Id", data.Id));
+            parameters.Add(new IntwentySqlParameter("@Id", row.Id));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
@@ -583,22 +589,22 @@ namespace Intwenty
 
         }
 
-        private void InsertAutoIncrementalTableRow(ApplicationModel model, ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        private void InsertAutoIncrementalTableRow(ApplicationModel model, ApplicationTableRow row, ClientStateInfo state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
-            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, data.Table.Model.MetaCode, state, client);
+            var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, row.Table.Model.MetaCode, state, client);
             if (rowid < 1)
-                throw new InvalidOperationException("Could not get a new row id for table " + data.Table.DbName);
+                throw new InvalidOperationException("Could not get a new row id for table " + row.Table.DbName);
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + data.Table.DbName + " (");
+            sql_insert.Append("INSERT INTO " + row.Table.DbName + " (");
             sql_insert_value.Append(" VALUES (");
             char sep = ' ';
 
 
-            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == data.Table.Model.MetaCode && p.DbName.ToUpper() != "ID"))
+            foreach (var t in model.DataStructure.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && p.ParentMetaCode == row.Table.Model.MetaCode && p.DbName.ToUpper() != "ID"))
             {
                 sql_insert.Append(sep + t.DbName);
                 sql_insert_value.Append(sep + "@" + t.DbName);
@@ -606,9 +612,9 @@ namespace Intwenty
             }
 
 
-            foreach (var t in data.Values)
+            foreach (var t in row.Values)
             {
-                if (!t.HasModel)
+                if (!t.HasModel && !t.IgnoreModelValidation)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -647,18 +653,18 @@ namespace Intwenty
 
         }
 
-        private void UpdateTableRow(ApplicationTableRow data, ClientStateInfo state, IDataClient client)
+        private void UpdateTableRow(ApplicationTableRow row, ClientStateInfo state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
             int rowid = 0;
             StringBuilder sql_update = new StringBuilder();
-            sql_update.Append("UPDATE " + data.Table.DbName);
+            sql_update.Append("UPDATE " + row.Table.DbName);
             sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",ChangedBy=@ChangedBy");
 
 
-            foreach (var t in data.Values)
+            foreach (var t in row.Values)
             {
                 if (t.DbName.ToLower() == "id")
                     rowid = t.GetAsInt().Value;
@@ -666,7 +672,7 @@ namespace Intwenty
                 if (rowid < 1)
                     continue;
 
-                if (!t.HasModel)
+                if (!t.HasModel && !t.IgnoreModelValidation)
                     continue;
 
                 if (t.Model.IsFrameworkItem)

@@ -42,12 +42,6 @@ namespace Intwenty.Model.Dto
                     if (!tbl.HasModel)
                         return false;
 
-                    foreach (var row in tbl.Rows)
-                    {
-
-                        if (row.Values.Exists(p => !p.HasModel))
-                            return false;
-                    }
                 }
 
                 return true;
@@ -229,6 +223,8 @@ namespace Intwenty.Model.Dto
 
         }
 
+      
+
         public void RemoveKeyValues()
         {
             Id = 0;
@@ -254,6 +250,8 @@ namespace Intwenty.Model.Dto
         public object Value { get; set; }
 
         public DatabaseModelItem Model { get; set; }
+
+        public bool IgnoreModelValidation { get; set; }
 
         public ApplicationValue()
         {
@@ -451,6 +449,29 @@ namespace Intwenty.Model.Dto
             Values = new List<ApplicationValue>();
         }
 
+        public void InferModel(ApplicationModel model)
+        {
+            if (Table == null)
+                return;
+
+            if (Table.Model == null)
+                return;
+
+            foreach (var item in model.DataStructure)
+            {
+                if (item.IsRoot)
+                    continue;
+
+                if (item.IsMetaTypeDataColumn && item.ParentMetaCode == Table.Model.MetaCode)
+                {
+                    var v = this.Values.Find(p => p.DbName == item.DbName);
+                    if (v != null)
+                        v.Model = item;
+
+                }
+            }
+
+        }
 
     }
 
@@ -527,6 +548,34 @@ namespace Intwenty.Model.Dto
             {
                 this.Values.Add(new ApplicationValue() { DbName = dbname, Value = value });
             }
+        }
+
+        public void SetValue(string dbname, object value, bool ignoremodel)
+        {
+            var t = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (t != null)
+            {
+                t.IgnoreModelValidation = ignoremodel;
+                t.SetValue(value);
+            }
+            else
+            {
+                this.Values.Add(new ApplicationValue() { DbName = dbname, Value = value, IgnoreModelValidation = ignoremodel });
+            }
+        }
+
+        public void DisableModelValidation()
+        {
+            foreach (var v in Values)
+                v.IgnoreModelValidation = true;
+
+        }
+
+        public void EnableModelValidation()
+        {
+            foreach (var v in Values)
+                v.IgnoreModelValidation = false;
+
         }
 
     }

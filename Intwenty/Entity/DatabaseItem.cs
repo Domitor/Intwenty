@@ -5,7 +5,6 @@ using System;
 namespace Intwenty.Entity
 {
     [DbTableIndex("DBITEM_IDX_1", true, "AppMetaCode,MetaCode")]
-    [DbTableIndex("DBITEM_IDX_2", true, "AppMetaCode,ParentMetaCode,MetaType,DbName")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_DatabaseItem")]
     public class DatabaseItem
