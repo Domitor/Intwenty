@@ -2,7 +2,8 @@
 
 
 # Intwenty
-Is a meta data driven CMS / Blog Engine built on Vue.js and ASP.NET Core. 
+Is a meta data driven Template that simplifies developing CMS, Blog Engines and other systems. Intwenty is built on Vue.js and ASP.NET Core.
+
 - It lets you create meta models that describes UI and data.
 - Models are stored as data instead of strongly typed objects.
 - It uses the model to build the database, SQL statements, UI and integration endpoints.
