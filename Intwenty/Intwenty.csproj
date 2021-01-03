@@ -5,7 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.4.8</Version>
+    <Version>1.4.9</Version>
     <Authors>Johan Filipsson</Authors>
     <Company>Domitor Consulting AB</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -19,8 +19,8 @@
     <Description>Create metadata driven applications with vue.js and ASP.NET Core. Use this package with visual studio 2019 or later. See https://github.com/Domitor/Intwenty for instructions about using this package.</Description>
     <EnableDefaultContentItems>true</EnableDefaultContentItems>
     <PackageReleaseNotes>- Minor changes and fixes</PackageReleaseNotes>
-    <AssemblyVersion>1.4.8.0</AssemblyVersion>
-    <FileVersion>1.4.8.0</FileVersion>
+    <AssemblyVersion>1.4.9.0</AssemblyVersion>
+    <FileVersion>1.4.9.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Intwenty.DataClient" Version="1.0.8" />
+    <PackageReference Include="Intwenty.DataClient" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="3.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.8" />

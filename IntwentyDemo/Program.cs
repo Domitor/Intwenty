@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Intwenty;
 using Microsoft.Extensions.Configuration;
 using Intwenty.Interface;
+using IntwentyDemo.Seed;
 
 namespace IntwentyDemo
 {

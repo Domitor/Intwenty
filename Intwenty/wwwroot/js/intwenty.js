@@ -137,11 +137,14 @@ Vue.component("intwentyselect", {
     },
     updated: function () {
 
+        $(this.$el).val(null).trigger("change");
+
         if (!this.$attrs.idfield)
             return;
 
         var arr = this.$attrs.idfield.split(",");
         $(this.$el).val(arr);
+        $(this.$el).val(arr).trigger("change");
         $(this.$el).trigger("select2:select");
 
     },

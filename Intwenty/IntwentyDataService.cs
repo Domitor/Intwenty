@@ -2248,7 +2248,7 @@ namespace Intwenty
             if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
             {
                 var t = descriptions.Find(p => p.IsCachedApplication() && p.DataId == id);
-                if (t == null)
+                if (t != null)
                 {
                     descriptions.Remove(t);
                 }
@@ -2266,7 +2266,7 @@ namespace Intwenty
             if (ApplicationCache.TryGetValue("TRANSACTIONCACHE", out descriptions))
             {
                 var t = descriptions.Find(p => p.IsCachedApplicationList() && p.ApplicationId == applicationid);
-                if (t == null)
+                if (t != null)
                 {
                     descriptions.Remove(t);
                 }

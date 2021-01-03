@@ -90,8 +90,7 @@ Vue.component("intwentyselect", {
         var vm = this;
         var element = $(this.$el);
 
-        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function ()
-        {
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
             var selectionstring = "";
             var selectiontextstring = "";
             var selections = element.select2('data');
@@ -137,11 +136,14 @@ Vue.component("intwentyselect", {
     },
     updated: function () {
 
+        $(this.$el).val(null).trigger("change");
+
         if (!this.$attrs.idfield)
             return;
 
         var arr = this.$attrs.idfield.split(",");
         $(this.$el).val(arr);
+        $(this.$el).val(arr).trigger("change");
         $(this.$el).trigger("select2:select");
 
     },
@@ -258,13 +260,11 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 };
 
 
-Vue.prototype.onFileUpload = function ()
-{
-   
+Vue.prototype.onFileUpload = function () {
+
 };
 
-Vue.prototype.uploadImage = function (event)
-{
+Vue.prototype.uploadImage = function (event) {
     var context = this;
     var endpoint = context.baseurl + 'UploadImage';
     var formData = new FormData();
@@ -273,8 +273,7 @@ Vue.prototype.uploadImage = function (event)
     formData.append('FileSize', event.srcElement.files[0].size);
 
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function ()
-    {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             var dbtable = event.srcElement.dataset.dbtable;
             var dbfield = event.srcElement.dataset.dbfield;
@@ -291,8 +290,7 @@ Vue.prototype.uploadImage = function (event)
 Vue.prototype.canSave = function () {
     var context = this;
     var result = true;
-    $("[data-required]").each(function ()
-    {
+    $("[data-required]").each(function () {
         var required = $(this).data('required');
         if (required === "True") {
             var validationfield = $(this).data('validationfield');
@@ -342,8 +340,7 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text)
-{
+Vue.prototype.setValidationText = function (validationfield, text) {
     if (!this.validation)
         return;
     if (!validationfield)
@@ -367,8 +364,7 @@ Vue.prototype.clearValidationText = function (validationfield) {
     this.$forceUpdate();
 };
 
-Vue.prototype.onUserInput = function (event)
-{
+Vue.prototype.onUserInput = function (event) {
     if (!event)
         return;
 
@@ -390,8 +386,7 @@ Vue.prototype.onUserInput = function (event)
     });
 };
 
-Vue.prototype.setSelectedDataViewValue = function (item, lookupid)
-{
+Vue.prototype.setSelectedDataViewValue = function (item, lookupid) {
     var context = this;
 
     $("input[data-lookupid]").each(function () {
@@ -406,8 +401,7 @@ Vue.prototype.setSelectedDataViewValue = function (item, lookupid)
     context.$forceUpdate();
 };
 
-Vue.prototype.getDataViewValue = function (viewname, keyfield, lookupid)
-{
+Vue.prototype.getDataViewValue = function (viewname, keyfield, lookupid) {
 
     var context = this;
 
@@ -524,8 +518,7 @@ Vue.prototype.runDataViewFilter = function () {
     context.getDataViewLookUpPage();
 };
 
-Vue.prototype.addSubTableLine = function (tablename)
-{
+Vue.prototype.addSubTableLine = function (tablename) {
     var context = this;
     context.model[tablename].push({ Id: 0, ParentId: 0 });
     context.$forceUpdate();
@@ -535,8 +528,7 @@ Vue.prototype.downloadExcel = function () {
 
 };
 
-Vue.prototype.nextpage = function ()
-{
+Vue.prototype.nextpage = function () {
     var context = this;
     context.pageInfo.pageNumber++;
     context.getPage();
@@ -564,10 +556,8 @@ Vue.prototype.addFilterValue = function () {
 
 Vue.prototype.deleteFilterValue = function (item) {
     var context = this;
-    for (var i = 0; i < context.pageInfo.filterValues.length; i++)
-    {
-        if (context.pageInfo.filterValues[i].name === item.name)
-        {
+    for (var i = 0; i < context.pageInfo.filterValues.length; i++) {
+        if (context.pageInfo.filterValues[i].name === item.name) {
             context.pageInfo.filterValues.splice(i, 1);
             context.getPage();
             break;

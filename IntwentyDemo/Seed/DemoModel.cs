@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using Intwenty.DataClient;
 using Intwenty.Interface;
 
-namespace Intwenty.Seed
+namespace IntwentyDemo.Seed
 {
     public static class DemoModel
     {
