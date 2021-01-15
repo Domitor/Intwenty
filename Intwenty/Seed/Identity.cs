@@ -31,7 +31,7 @@ namespace Intwenty.Seed
 
             var userManager = services.GetRequiredService<IntwentyUserManager>();
             var roleManager = services.GetRequiredService<RoleManager<IntwentyProductRole>>();
-            var productManager = services.GetRequiredService<IntwentyProductManager>();
+            var productManager = services.GetRequiredService<IIntwentyProductManager>();
 
             IntwentyProduct product = null;
             product = productManager.FindByIdAsync(Settings.Value.ProductId).Result;

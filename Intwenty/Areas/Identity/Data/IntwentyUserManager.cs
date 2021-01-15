@@ -23,7 +23,6 @@ namespace Intwenty.Areas.Identity.Data
 
         private IMemoryCache UserCache { get; }
 
-        private IIntwentyPermissionManager PermissionManager { get; }
 
         private static readonly string PermissionCacheKey = "USERPERM";
 
@@ -37,13 +36,11 @@ namespace Intwenty.Areas.Identity.Data
                                    IServiceProvider services, 
                                    ILogger<UserManager<IntwentyUser>> logger,
                                    IOptions<IntwentySettings> settings,
-                                   IMemoryCache cache,
-                                   IntwentyPermissionManager permissionmanager)
+                                   IMemoryCache cache)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             Settings = settings.Value;
             UserCache = cache;
-            PermissionManager = permissionmanager;
         }
 
         #region Intwenty Permissions
@@ -183,7 +180,7 @@ namespace Intwenty.Areas.Identity.Data
             if (!claimprincipal.Identity.IsAuthenticated)
                 return false;
 
-            var user = GetUserAsync(claimprincipal).Result;
+            var user = await GetUserAsync(claimprincipal);
             if (user == null || requested_app == null)
                 throw new InvalidOperationException("Error when checking for a permission.");
 
@@ -193,7 +190,7 @@ namespace Intwenty.Areas.Identity.Data
                 return true;
 
        
-            var list = GetUserPermissions(user).Result;
+            var list = await GetUserPermissions(user);
 
             var explicit_exists=false;
 
@@ -235,7 +232,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IntwentyProductGroup> AddGroupAsync(string groupname)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var t = new IntwentyProductGroup();
             t.Id = Guid.NewGuid().ToString();
             t.ProductId = Settings.ProductId;
@@ -248,7 +245,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IntwentyProductGroup> GetGroupByNameAsync(string groupname)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
             client.Close();
@@ -257,7 +254,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IntwentyProductGroup> GetGroupByIdAsync(string groupid)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Id== groupid && p.ProductId == Settings.ProductId);
             client.Close();
@@ -269,7 +266,7 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null || group == null)
                 throw new InvalidOperationException("Error when adding member to group.");
 
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var check = client.GetEntities<IntwentyUserProductGroup>().Exists(p => p.UserName.ToUpper() == user.UserName.ToUpper() && p.GroupName.ToUpper() == group.Name.ToUpper() && p.ProductId == Settings.ProductId);
             client.Close();
@@ -295,7 +292,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, string groupname, string membershipstatus)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var result = IdentityResult.Success;
             
             client.Open();
@@ -316,7 +313,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyProductGroup group, string membershipstatus)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var result = IdentityResult.Success;
 
             client.Open();
@@ -337,7 +334,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> ChangeGroupNameAsync(string groupid, string newgroupname)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var result = IdentityResult.Success;
 
             client.Open();
@@ -368,7 +365,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<bool> GroupExists(string groupname)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             var t = client.GetEntities<IntwentyProductGroup>().Exists(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
@@ -379,7 +376,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<List<IntwentyUserProductGroup>> GetUserGroups(IntwentyUser user)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).ToList();
@@ -392,7 +389,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<List<IntwentyUserProductGroup>> GetGroupMembers(IntwentyProductGroup group)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.GroupId == group.Id);
@@ -404,7 +401,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<bool> IsWaitingToJoinGroup(string username)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             var list = client.GetEntities<IntwentyUserProductGroup>();
@@ -421,7 +418,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task<IdentityResult> RemoveFromGroupAsync(string userid, string groupid)
         {
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.UserId == userid && p.GroupId == groupid && p.ProductId == Settings.ProductId);
@@ -450,9 +447,9 @@ namespace Intwenty.Areas.Identity.Data
             {
                 if (t != null && t.Result != null)
                 {
-                    IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+                    var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
                     client.Open();
-                    var logins = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id);
+                    var logins = client.GetEntities<IntwentyUserProductLogin>().Where(p => p.UserId == user.Id);
                     foreach (var l in logins)
                     {
                         client.DeleteEntity(l);

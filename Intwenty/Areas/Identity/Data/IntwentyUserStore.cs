@@ -34,7 +34,7 @@ namespace Intwenty.Areas.Identity.Data
             UserCache = cache;
         }
 
-        public Task<IdentityResult> CreateAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -45,13 +45,14 @@ namespace Intwenty.Areas.Identity.Data
             UserCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            client.InsertEntity(user);
-            client.Close();
-            return Task.FromResult(IdentityResult.Success);
+            await client.OpenAsync();
+            await client.InsertEntityAsync(user);
+            await client.InsertEntityAsync(new IntwentyUserProduct() { UserId = user.Id, ProductId = Settings.ProductId });
+            await client.CloseAsync();
+            return IdentityResult.Success;
         }
 
-        public Task<IdentityResult> DeleteAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -62,10 +63,10 @@ namespace Intwenty.Areas.Identity.Data
             UserCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            client.DeleteEntity(user);
-            client.Close();
-            return Task.FromResult(IdentityResult.Success);
+            await client.OpenAsync();
+            await client.DeleteEntityAsync(user);
+            await client.CloseAsync();
+            return IdentityResult.Success;
         }
 
         public void Dispose()
@@ -692,7 +693,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            client.InsertEntity(new IntwentyUserLogin() { Id = Guid.NewGuid().ToString(), LoginProvider = login.LoginProvider, ProviderDisplayName = login.ProviderDisplayName, ProviderKey = login.ProviderKey, UserId = user.Id   });
+            client.InsertEntity(new IntwentyUserProductLogin() { Id = Guid.NewGuid().ToString(), LoginProvider = login.LoginProvider, ProviderDisplayName = login.ProviderDisplayName, ProviderKey = login.ProviderKey, UserId = user.Id   });
             client.Close();
 
             return Task.FromResult(true);
@@ -702,13 +703,13 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var model = client.GetEntities<IntwentyUserLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
+            var model = client.GetEntities<IntwentyUserProductLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
             client.Close();
 
             if (model != null)
             {
                 client.Open();
-                client.DeleteEntity<IntwentyUserLogin>(model);
+                client.DeleteEntity<IntwentyUserProductLogin>(model);
                 client.Close();
             }
             return Task.CompletedTask;
@@ -725,7 +726,7 @@ namespace Intwenty.Areas.Identity.Data
             IList<UserLoginInfo> result = null;
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            result = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
+            result = client.GetEntities<IntwentyUserProductLogin>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
             client.Close();
 
             return Task.FromResult(result);
@@ -737,7 +738,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var login = client.GetEntities<IntwentyUserLogin>().Find(p => p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
+            var login = client.GetEntities<IntwentyUserProductLogin>().Find(p => p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
             client.Close();
             if (login != null)
             {

@@ -267,8 +267,12 @@ namespace IntwentyDemo.Seed
             {
                 if (!current_systems.Exists(p => p.MetaCode == t.MetaCode))
                     client.InsertEntity(t);
+
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.PermissionType == SystemModelItem.MetaTypeSystem))
-                    iamclient.InsertEntity(new IntwentyProductPermission() { Id = new Guid().ToString(), MetaCode = t.MetaCode, PermissionType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId, Title = t.Title });
+                {
+                    var sysperm = new IntwentyProductPermission() { Id = Guid.NewGuid().ToString(), MetaCode = t.MetaCode, PermissionType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId, Title = t.Title };
+                    iamclient.InsertEntity(sysperm);
+                }
             }
 
             var current_apps = client.GetEntities<ApplicationItem>();
@@ -276,8 +280,12 @@ namespace IntwentyDemo.Seed
             {
                 if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
                     client.InsertEntity(t);
+
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.PermissionType == ApplicationModelItem.MetaTypeApplication))
-                    iamclient.InsertEntity(new IntwentyProductPermission() { Id = new Guid().ToString(), MetaCode = t.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId, Title = t.Title });
+                {
+                    var apperm = new IntwentyProductPermission() { Id = Guid.NewGuid().ToString(), MetaCode = t.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId, Title = t.Title };
+                    iamclient.InsertEntity(apperm);
+                }
             }
 
             var current_domains = client.GetEntities<ValueDomainItem>();
