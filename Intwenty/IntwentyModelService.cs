@@ -1637,23 +1637,18 @@ namespace Intwenty
                 client.CreateTable<EndpointItem>();
 
                 client.CreateTable<IntwentyUser>(); //security_User
-                client.CreateTable<IntwentyProductRole>(); //security_Role
                 client.CreateTable<IntwentyProduct>(); //security_Product
+                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
-                client.CreateTable<IntwentyGroup>(); //security_Group
-                client.CreateTable<IntwentyUserProduct>(); //security_Product
-                client.CreateTable<IntwentyUserProductRole>(); //security_UserRoles
-                client.CreateTable<IntwentyUserProductPermission>(); //security_UserPermission
-                client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
-
-                client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
-                client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
-               
-              
-               
-
-                //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
-                //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
+                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
+                client.CreateTable<IntwentyUserProduct>(); //security_UserProduct
+                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
+                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
+                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
+                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
+                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
 
                 client.Close();
 
@@ -1666,7 +1661,44 @@ namespace Intwenty
             {
                 client.Close();
             }
-            
+
+            if (!Settings.UseSeparateIAMDatabase)
+                return;
+
+            client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+
+            try
+            {
+
+
+                client.Open();
+
+                client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyProduct>(); //security_Product
+                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
+                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
+                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
+                client.CreateTable<IntwentyUserProduct>(); //security_UserProduct
+                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
+                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
+                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
+                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
+                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
+
+                client.Close();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                client.Close();
+            }
+
         }
 
 

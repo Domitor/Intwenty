@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_UserRoles")]
+    [DbTableName("security_UserProductRole")]
     [DbTablePrimaryKey("UserId,RoleId,ProductId")]
     public class IntwentyUserProductRole : IdentityUserRole<string>
     {

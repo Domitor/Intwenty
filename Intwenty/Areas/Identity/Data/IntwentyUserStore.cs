@@ -702,7 +702,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var model = client.GetEntities<IntwentyUserLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey);
+            var model = client.GetEntities<IntwentyUserLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
             client.Close();
 
             if (model != null)
@@ -725,7 +725,7 @@ namespace Intwenty.Areas.Identity.Data
             IList<UserLoginInfo> result = null;
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            result = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
+            result = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
             client.Close();
 
             return Task.FromResult(result);
@@ -737,7 +737,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var login = client.GetEntities<IntwentyUserLogin>().Find(p => p.LoginProvider == loginProvider && p.ProviderKey == providerKey);
+            var login = client.GetEntities<IntwentyUserLogin>().Find(p => p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
             client.Close();
             if (login != null)
             {
@@ -762,7 +762,7 @@ namespace Intwenty.Areas.Identity.Data
             IList<Claim> result = null;
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            result = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id).Select(p=> p.ToClaim()).ToList();
+            result = client.GetEntities<IntwentyUserProductClaim>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).Select(p=> p.ToClaim()).ToList();
             client.Close();
             return Task.FromResult(result);
             
@@ -786,7 +786,7 @@ namespace Intwenty.Areas.Identity.Data
             client.Open();
             foreach (var claim in claims)
             {
-                client.InsertEntity(new IntwentyUserClaim() { ClaimType = claim.Type, ClaimValue = claim.Value,  UserId = user.Id   });
+                client.InsertEntity(new IntwentyUserProductClaim() { ClaimType = claim.Type, ClaimValue = claim.Value,  UserId = user.Id, ProductId = Settings.ProductId   });
             }
             client.Close();
             return Task.FromResult(false);
@@ -811,7 +811,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var mclaims = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type).ToList();
+            var mclaims = client.GetEntities<IntwentyUserProductClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type && p.ProductId == Settings.ProductId).ToList();
             client.Close();
             foreach (var matchedClaim in mclaims)
             {
@@ -841,7 +841,7 @@ namespace Intwenty.Areas.Identity.Data
             foreach (var claim in claims)
             {
                 
-                var mclaims = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type).ToList();
+                var mclaims = client.GetEntities<IntwentyUserProductClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type && p.ProductId == Settings.ProductId).ToList();
                 foreach (var c in mclaims)
                 {
                     client.DeleteEntity(c);
@@ -864,12 +864,12 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var Users = client.GetEntities<IntwentyUser>();
-            var UserClaims = client.GetEntities<IntwentyUserClaim>();
+            var UserClaims = client.GetEntities<IntwentyUserProductClaim>();
             client.Close();
             IList<IntwentyUser> query = (from userclaims in UserClaims
                         join user in Users on userclaims.UserId equals user.Id
                         where userclaims.ClaimValue == claim.Value
-                        && userclaims.ClaimType == claim.Type
+                        && userclaims.ClaimType == claim.Type && userclaims.ProductId == Settings.ProductId
                         select user).ToList();
 
 

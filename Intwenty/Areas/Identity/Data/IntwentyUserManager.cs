@@ -233,11 +233,12 @@ namespace Intwenty.Areas.Identity.Data
 
         #region Intwenty Groups
 
-        public Task<IntwentyGroup> AddGroupAsync(string groupname)
+        public Task<IntwentyProductGroup> AddGroupAsync(string groupname)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            var t = new IntwentyGroup();
+            var t = new IntwentyProductGroup();
             t.Id = Guid.NewGuid().ToString();
+            t.ProductId = Settings.ProductId;
             t.Name = groupname;
             client.Open();
             var user = client.InsertEntity(t);
@@ -245,38 +246,39 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(t);
         }
 
-        public Task<IntwentyGroup> GetGroupByNameAsync(string groupname)
+        public Task<IntwentyProductGroup> GetGroupByNameAsync(string groupname)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
-            var t = client.GetEntities<IntwentyGroup>().Find(p => p.Name.ToUpper() == groupname.ToUpper());
+            var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
             client.Close();
             return Task.FromResult(t);
         }
 
-        public Task<IntwentyGroup> GetGroupByIdAsync(string groupid)
+        public Task<IntwentyProductGroup> GetGroupByIdAsync(string groupid)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
-            var t = client.GetEntities<IntwentyGroup>().Find(p => p.Id== groupid);
+            var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Id== groupid && p.ProductId == Settings.ProductId);
             client.Close();
             return Task.FromResult(t);
         }
 
-        public Task<IdentityResult> AddGroupMemberAsync(IntwentyUser user, IntwentyGroup group, string membershiptype, string membershipstatus)
+        public Task<IdentityResult> AddGroupMemberAsync(IntwentyUser user, IntwentyProductGroup group, string membershiptype, string membershipstatus)
         {
             if (user == null || group == null)
                 throw new InvalidOperationException("Error when adding member to group.");
 
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
-            var check = client.GetEntities<IntwentyUserGroup>().Exists(p => p.UserName.ToUpper() == user.UserName.ToUpper() && p.GroupName.ToUpper() == group.Name.ToUpper());
+            var check = client.GetEntities<IntwentyUserProductGroup>().Exists(p => p.UserName.ToUpper() == user.UserName.ToUpper() && p.GroupName.ToUpper() == group.Name.ToUpper() && p.ProductId == Settings.ProductId);
             client.Close();
             if (check)
                 return Task.FromResult(IdentityResult.Success);
 
-            var t = new IntwentyUserGroup();
+            var t = new IntwentyUserProductGroup();
             t.Id = Guid.NewGuid().ToString();
+            t.ProductId = Settings.ProductId;
             t.UserId = user.Id;
             t.UserName = user.UserName;
             t.GroupId = group.Id;
@@ -297,7 +299,7 @@ namespace Intwenty.Areas.Identity.Data
             var result = IdentityResult.Success;
             
             client.Open();
-            var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.GroupName.ToUpper() == groupname.ToUpper() && p.UserId == user.Id);
+            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.GroupName.ToUpper() == groupname.ToUpper() && p.UserId == user.Id && p.ProductId == Settings.ProductId);
             if (t != null)
             {
                 t.MembershipStatus = membershipstatus;
@@ -312,13 +314,13 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(result);
         }
 
-        public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyGroup group, string membershipstatus)
+        public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyProductGroup group, string membershipstatus)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             var result = IdentityResult.Success;
 
             client.Open();
-            var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.GroupId == group.Id && p.UserId == user.Id);
+            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.GroupId == group.Id && p.UserId == user.Id && p.ProductId == Settings.ProductId);
             if (t != null)
             {
                 t.MembershipStatus = membershipstatus;
@@ -339,13 +341,13 @@ namespace Intwenty.Areas.Identity.Data
             var result = IdentityResult.Success;
 
             client.Open();
-            var t = client.GetEntity<IntwentyGroup>(groupid);
+            var t = client.GetEntity<IntwentyProductGroup>(groupid);
             if (t != null)
             {
                 t.Name = newgroupname;
                 client.UpdateEntity(t);
 
-                var l = client.GetEntities<IntwentyUserGroup>();
+                var l = client.GetEntities<IntwentyUserProductGroup>();
                 foreach (var g in l)
                 {
                     if (g.GroupId == groupid)
@@ -369,18 +371,18 @@ namespace Intwenty.Areas.Identity.Data
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Open();
-            var t = client.GetEntities<IntwentyGroup>().Exists(p => p.Name.ToUpper() == groupname.ToUpper());
+            var t = client.GetEntities<IntwentyProductGroup>().Exists(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
             client.Close();
 
             return Task.FromResult(t);
         }
 
-        public Task<List<IntwentyUserGroup>> GetUserGroups(IntwentyUser user)
+        public Task<List<IntwentyUserProductGroup>> GetUserGroups(IntwentyUser user)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Open();
-            var t = client.GetEntities<IntwentyUserGroup>().Where(p => p.UserId == user.Id).ToList();
+            var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).ToList();
             client.Close();
 
             return Task.FromResult(t);
@@ -388,12 +390,12 @@ namespace Intwenty.Areas.Identity.Data
         }
 
 
-        public Task<List<IntwentyUserGroup>> GetGroupMembers(IntwentyGroup group)
+        public Task<List<IntwentyUserProductGroup>> GetGroupMembers(IntwentyProductGroup group)
         {
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Open();
-            var t = client.GetEntities<IntwentyUserGroup>().Where(p => p.GroupId == group.Id);
+            var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.GroupId == group.Id);
             client.Close();
 
             return Task.FromResult(t.ToList());
@@ -405,7 +407,7 @@ namespace Intwenty.Areas.Identity.Data
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Open();
-            var list = client.GetEntities<IntwentyUserGroup>();
+            var list = client.GetEntities<IntwentyUserProductGroup>();
             client.Close();
 
             var t = list.Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "WAITING");
@@ -422,7 +424,7 @@ namespace Intwenty.Areas.Identity.Data
             IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
 
             client.Open();
-            var t = client.GetEntities<IntwentyUserGroup>().Find(p => p.UserId == userid && p.GroupId == groupid);
+            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.UserId == userid && p.GroupId == groupid && p.ProductId == Settings.ProductId);
             if (t!=null)
                 client.DeleteEntity(t);
 

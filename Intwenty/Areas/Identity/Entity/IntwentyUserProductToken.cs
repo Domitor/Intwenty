@@ -6,11 +6,13 @@ using System.Text;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_UserToken")]
+    [DbTableName("security_UserProductToken")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyUserToken : IdentityUserToken<string>
+    public class IntwentyUserProductToken : IdentityUserToken<string>
     {
        public string Id { get; set; }
+
+        public string ProductId { get; set; }
 
     }
 }

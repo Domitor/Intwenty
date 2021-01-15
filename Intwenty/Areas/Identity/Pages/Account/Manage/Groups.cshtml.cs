@@ -100,7 +100,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             }
         }
 
-        public class IntwentyUserGroupVm : IntwentyUserGroup
+        public class IntwentyUserGroupVm : IntwentyUserProductGroup
         {
             public string UserRole { get; set; }
 
@@ -145,7 +145,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             /// </summary>
             public bool CanRenameGroup { get; set; }
 
-            public IntwentyUserGroupVm(IntwentyUserGroup model)
+            public IntwentyUserGroupVm(IntwentyUserProductGroup model)
             {
                 this.GroupId = model.GroupId;
                 this.GroupName = model.GroupName;
@@ -212,7 +212,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 }
                 foreach (var group in result.MyGroupsMembers) 
                 {
-                    var groupmembers = _userManager.GetGroupMembers(new IntwentyGroup() { Id = group.GroupId, Name=group.GroupName }).Result;
+                    var groupmembers = _userManager.GetGroupMembers(new IntwentyProductGroup() { Id = group.GroupId, Name=group.GroupName }).Result;
                     foreach (var gm in groupmembers)
                     {
                         group.Members.Add(new IntwentyUserGroupVm(gm));

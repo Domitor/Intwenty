@@ -5,11 +5,13 @@ using System.Text;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_UserGroup")]
+    [DbTableName("security_UserProductGroup")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyUserGroup
+    public class IntwentyUserProductGroup
     {
         public string Id { get; set; }
+
+        public string ProductId { get; set; }
 
         public string UserId { get; set; }
 

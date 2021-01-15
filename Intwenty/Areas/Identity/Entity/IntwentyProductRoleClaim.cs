@@ -6,12 +6,10 @@ using System.Text;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_UserLogin")]
+    [DbTableName("security_ProductRoleClaim")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyUserLogin : IdentityUserLogin<string>
+    public class IntwentyProductRoleClaim : IdentityRoleClaim<string>
     {
-        public string Id { get; set; }
-
-        public string ProductId { get; set; }
+       
     }
 }

@@ -156,6 +156,19 @@ namespace Intwenty.Model
         public string TestDbConnectionSqlServer { get; set; }
         public string TestDbConnectionPostgres { get; set; }
 
+        public bool UseSeparateIAMDatabase
+        {
+
+            get
+            {
+                if (DefaultConnection.ToUpper() != IAMConnection.ToUpper())
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
 
         public bool UseExternalLogins
         {

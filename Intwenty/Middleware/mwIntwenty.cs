@@ -39,6 +39,13 @@ namespace Intwenty.Middleware
 
             var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
 
+            if (string.IsNullOrEmpty(settings.DefaultConnection))
+                throw new InvalidOperationException("Could not find default database connection in setting file");
+            if (string.IsNullOrEmpty(settings.IAMConnection))
+                throw new InvalidOperationException("Could not find IAM database connection in setting file");
+            if (string.IsNullOrEmpty(settings.ProductId))
+                throw new InvalidOperationException("Could not find a valid productid in setting file");
+
             //Required for Intwenty: Settings
             services.Configure<IntwentySettings>(configuration.GetSection("IntwentySettings"));
 
