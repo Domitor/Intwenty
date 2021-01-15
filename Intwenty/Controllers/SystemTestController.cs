@@ -31,7 +31,7 @@ namespace Intwenty.Controllers
         private readonly IntwentySettings _settings;
         private readonly IntwentyUserManager _usermanager;
         private readonly SignInManager<IntwentyUser> _signinmanager;
-        private readonly RoleManager<IntwentyRole> _rolemanager;
+        private readonly RoleManager<IntwentyProductRole> _rolemanager;
         private readonly IHubContext<ServerToClientPush> _hubContext;
 
         public SystemTestController(IIntwentyModelService modelservice,
@@ -39,7 +39,7 @@ namespace Intwenty.Controllers
                                     IOptions<IntwentySettings> settings,
                                     IntwentyUserManager usermgr,
                                     SignInManager<IntwentyUser> signinmgr,
-                                    RoleManager<IntwentyRole> rolemgr,
+                                    RoleManager<IntwentyProductRole> rolemgr,
                                     IHubContext<ServerToClientPush> hubcontext)
         {
             _modelservice = modelservice;
@@ -1019,7 +1019,7 @@ namespace Intwenty.Controllers
                 if (string.IsNullOrEmpty(retrieveduser.Id))
                     throw new InvalidOperationException("The inserted user has no id");
 
-                var role = new IntwentyRole() { Name = "TESTXROLE", NormalizedName = "TESTXROLE" };
+                var role = new IntwentyProductRole() { Name = "TESTXROLE", NormalizedName = "TESTXROLE" };
                 _rolemanager.CreateAsync(role);
                 retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole == null)

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using Intwenty.DataClient;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Entity;
 
 namespace IntwentyDemo.Seed
 {
@@ -253,14 +254,21 @@ namespace IntwentyDemo.Seed
 
 
             //Insert models if not existing
+            var iamclient = new Connection(Settings.Value.IAMConnectionDBMS, Settings.Value.IAMConnection);
+            iamclient.Open();
+
             var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
             client.Open();
+
+            var current_permissions = iamclient.GetEntities<IntwentyProductPermission>();
 
             var current_systems = client.GetEntities<SystemItem>();
             foreach (var t in systems)
             {
                 if (!current_systems.Exists(p => p.MetaCode == t.MetaCode))
                     client.InsertEntity(t);
+                if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.PermissionType == SystemModelItem.MetaTypeSystem))
+                    iamclient.InsertEntity(new IntwentyProductPermission() { Id = new Guid().ToString(), MetaCode = t.MetaCode, PermissionType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId, Title = t.Title });
             }
 
             var current_apps = client.GetEntities<ApplicationItem>();
@@ -268,6 +276,8 @@ namespace IntwentyDemo.Seed
             {
                 if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
                     client.InsertEntity(t);
+                if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.PermissionType == ApplicationModelItem.MetaTypeApplication))
+                    iamclient.InsertEntity(new IntwentyProductPermission() { Id = new Guid().ToString(), MetaCode = t.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId, Title = t.Title });
             }
 
             var current_domains = client.GetEntities<ValueDomainItem>();
@@ -307,9 +317,9 @@ namespace IntwentyDemo.Seed
                     client.InsertEntity(t);
             }
 
-
+            iamclient.Close();
             client.Close();
-
+           
         }
 
         public static void SeedLocalizations(IServiceProvider services)

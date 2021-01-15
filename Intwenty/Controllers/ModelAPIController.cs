@@ -152,9 +152,9 @@ namespace Intwenty.Controllers
             var res = ModelRepository.SaveAppModel(model);
             if (res.IsSuccess)
             {
-                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == res.Id);
-                if (t!=null)
-                     UserManager.AddUpdateUserPermissionAsync(User, new IntwentyUserPermissionItem() { Read = true, MetaCode = t.Application.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, Title = t.Application.Title  });
+                //var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == res.Id);
+                //if (t!=null)
+                //     UserManager.AddUpdateUserPermissionAsync(User, new IntwentyUserPermissionItem() { Read = true, MetaCode = t.Application.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, Title = t.Application.Title  });
             }
 
             return new JsonResult(res);
@@ -1188,6 +1188,9 @@ namespace Intwenty.Controllers
         [HttpGet("Model/API/GetUserPermissions/{id}")]
         public IActionResult GetUserPermissions(string id)
         {
+            return new JsonResult(new IntwentyUserPermissionVm());
+
+            /*
             if (!User.Identity.IsAuthenticated)
                 new JsonResult(new IntwentyUserPermissionVm());
 
@@ -1267,11 +1270,16 @@ namespace Intwenty.Controllers
             }
 
             return new JsonResult(res);
+
+            */
         }
 
         [HttpPost("Model/API/SaveUserPermissions")]
         public IActionResult SaveUserPermissions([FromBody] IntwentyUserPermissionVm model)
         {
+            return new JsonResult("{}");
+
+            /*
             if (!User.Identity.IsAuthenticated)
                 new JsonResult(new IntwentyUserPermissionVm());
 
@@ -1311,11 +1319,15 @@ namespace Intwenty.Controllers
 
 
             return GetUserPermissions(model.Id);
+            */
         }
 
         [HttpPost("Model/API/DeleteUserPermission")]
         public IActionResult DeleteUserPermission([FromBody] IntwentyUserPermissionItem model)
         {
+            return new JsonResult("{}");
+
+            /*
             if (!User.Identity.IsAuthenticated)
                 new JsonResult(new IntwentyUserPermissionVm());
 
@@ -1343,6 +1355,8 @@ namespace Intwenty.Controllers
             }
 
             return GetUserPermissions(user.Id);
+
+            */
         }
 
 

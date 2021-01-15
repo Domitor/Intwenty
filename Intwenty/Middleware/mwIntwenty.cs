@@ -48,6 +48,9 @@ namespace Intwenty.Middleware
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
             services.TryAddTransient<IEmailSender, EmailService>();
+            services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
+            services.TryAddTransient<IIntwentyPermissionManager, IntwentyPermissionManager>();
+
 
             //Required for Intwenty services to work correctly
             services.AddControllersWithViews().AddJsonOptions(options =>
@@ -78,10 +81,11 @@ namespace Intwenty.Middleware
 
 
             })
-             .AddRoles<IntwentyRole>()
+             .AddRoles<IntwentyProductRole>()
              .AddUserStore<IntwentyUserStore>()
-             .AddRoleStore<IntwentyRoleStore>()
+             .AddRoleStore<IntwentyProductRoleStore>()
              .AddUserManager<IntwentyUserManager>();
+            
 
 
             if (settings.UseExternalLogins && settings.UseFacebookLogin)
@@ -130,7 +134,9 @@ namespace Intwenty.Middleware
 
             services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
 
-           
+         
+
+
 
             services.AddRazorPages().AddViewLocalization();
 

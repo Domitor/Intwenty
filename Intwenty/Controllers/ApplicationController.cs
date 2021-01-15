@@ -30,7 +30,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Generate a presentation UI based on UIStructure for the application with the supplied application model
         /// </summary>
-        public virtual IActionResult List(int id)
+        public virtual async Task<IActionResult> List(int id)
         {
             var path = this.Request.Path.Value;
           
@@ -48,7 +48,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseListViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -58,7 +58,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Generate create UI based on UIStructure for the application with the supplied application model id.
         /// </summary>
-        public virtual IActionResult Create(int id)
+        public virtual async Task<IActionResult> Create(int id)
         {
 
             var path = this.Request.Path.Value;
@@ -76,7 +76,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseCreateViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
+            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
                 return View(current_model);
             else
                 return Forbid();
@@ -86,7 +86,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Generate edit UI based on UIStructure for the application with the supplied application model id and application data id.
         /// </summary>
-        public virtual IActionResult Edit(int applicationid, int id)
+        public virtual async Task<IActionResult> Edit(int applicationid, int id)
         {
             if (id < 0)
                 return NotFound();
@@ -108,7 +108,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseEditViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -118,7 +118,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Generate a detail presentation UI based on UIStructure for the application with the supplied application model id and application data id.
         /// </summary>
-        public virtual IActionResult Detail(int applicationid, int id)
+        public virtual async Task<IActionResult> Detail(int applicationid, int id)
         {
             if (id < 0)
                 return NotFound();
@@ -140,7 +140,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseDetailViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -151,7 +151,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Renders a list view for application with supplied application model id.
         /// </summary>
-        public virtual IActionResult EditList(int id)
+        public virtual async Task<IActionResult> EditList(int id)
         {
 
             var path = this.Request.Path.Value;
@@ -169,7 +169,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseEditViewAuthorization)
                 return View(current_model);
-            if (UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();

@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_Role")]
+    [DbTableName("security_ProductRole")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyRole : IdentityRole
+    public class IntwentyProductRole : IdentityRole
     {
-       
+       public string ProductId { get; set; }
        
     }
 }

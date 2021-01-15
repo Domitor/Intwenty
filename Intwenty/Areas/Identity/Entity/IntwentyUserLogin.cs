@@ -11,5 +11,7 @@ namespace Intwenty.Areas.Identity.Entity
     public class IntwentyUserLogin : IdentityUserLogin<string>
     {
         public string Id { get; set; }
+
+        public string ProductId { get; set; }
     }
 }

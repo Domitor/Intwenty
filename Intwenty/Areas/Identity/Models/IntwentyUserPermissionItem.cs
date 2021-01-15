@@ -14,11 +14,10 @@ namespace Intwenty.Areas.Identity.Models
     {
      
 
-        public IntwentyUserPermissionItem(IntwentyUserPermission p)
+        public IntwentyUserPermissionItem(IntwentyUserProductPermission p)
         {
-            Id = p.Id;
+            PermissionId = p.PermissionId;
             UserId = p.UserId;
-            UserName = p.UserName;
             Title = p.Title;
             PermissionType = p.PermissionType;
             MetaCode = p.MetaCode;
@@ -52,11 +51,9 @@ namespace Intwenty.Areas.Identity.Models
             return res;
         }
 
-        public string Id { get; set; }
+        public string PermissionId { get; set; }
 
         public string UserId { get; set; }
-
-        public string UserName { get; set; }
 
         public string PermissionType { get; set; }
 

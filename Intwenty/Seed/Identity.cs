@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Text;
 using Intwenty.Model;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Seed
 {
@@ -28,13 +29,29 @@ namespace Intwenty.Seed
                 return;
 
 
-            var userManager = services.GetRequiredService<UserManager<IntwentyUser>>();
-            var roleManager = services.GetRequiredService<RoleManager<IntwentyRole>>();
+            var userManager = services.GetRequiredService<IntwentyUserManager>();
+            var roleManager = services.GetRequiredService<RoleManager<IntwentyProductRole>>();
+            var productManager = services.GetRequiredService<IntwentyProductManager>();
+
+            IntwentyProduct product = null;
+            product = productManager.FindByIdAsync(Settings.Value.ProductId).Result;
+            if (product == null)
+            {
+                product = new IntwentyProduct();
+                product.Id = Settings.Value.ProductId;
+                product.WebAPIPath = "API";
+                product.ApplicationPath = "APPLICATION";
+                product.ApplicationAPIPath = "APPLICATION/API";
+                product.ProductName = Settings.Value.SiteTitle;
+                product.ProductURI = "https://localhost:33333";
+                productManager.CreateAsync(product);
+            }
 
             var admrole = roleManager.FindByNameAsync("SUPERADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyRole();
+                var role = new IntwentyProductRole();
+                role.ProductId = product.Id;
                 role.Name = "SUPERADMIN";
                 roleManager.CreateAsync(role);
             }
@@ -42,7 +59,8 @@ namespace Intwenty.Seed
             admrole = roleManager.FindByNameAsync("USERADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyRole();
+                var role = new IntwentyProductRole();
+                role.ProductId = product.Id;
                 role.Name = "USERADMIN";
                 roleManager.CreateAsync(role);
             }
@@ -50,7 +68,8 @@ namespace Intwenty.Seed
             admrole = roleManager.FindByNameAsync("SYSTEMADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyRole();
+                var role = new IntwentyProductRole();
+                role.ProductId = product.Id;
                 role.Name = "SYSTEMADMIN";
                 roleManager.CreateAsync(role);
             }
@@ -58,7 +77,8 @@ namespace Intwenty.Seed
             var userrole = roleManager.FindByNameAsync("USER");
             if (userrole.Result == null)
             {
-                var role = new IntwentyRole();
+                var role = new IntwentyProductRole();
+                role.ProductId = product.Id;
                 role.Name = "USER";
                 roleManager.CreateAsync(role);
             }
@@ -66,7 +86,8 @@ namespace Intwenty.Seed
             userrole = roleManager.FindByNameAsync("APIUSER");
             if (userrole.Result == null)
             {
-                var role = new IntwentyRole();
+                var role = new IntwentyProductRole();
+                role.ProductId = product.Id;
                 role.Name = "APIUSER";
                 roleManager.CreateAsync(role);
             }

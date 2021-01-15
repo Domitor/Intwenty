@@ -44,7 +44,7 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(UsersCacheKey);
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             client.InsertEntity(user);
             client.Close();
@@ -61,7 +61,7 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(UsersCacheKey);
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             client.DeleteEntity(user);
             client.Close();
@@ -77,7 +77,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var user = client.GetEntity<IntwentyUser>(userId);
             client.Close();
@@ -88,7 +88,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var user = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedUserName == normalizedUserName);
             client.Close();
@@ -163,7 +163,7 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(UsersCacheKey);
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             client.UpdateEntity(user);
             client.Close();
@@ -215,25 +215,27 @@ namespace Intwenty.Areas.Identity.Data
             UserCache.Remove(UsersCacheKey);
             UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
+            var existingrole = client.GetEntities<IntwentyProductRole>().Find(p => p.NormalizedName == roleName && p.ProductId == Settings.ProductId);
             client.Close();
             if (existingrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0}", roleName) } }));
+                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0} in this product", roleName) } }));
 
             client.Open();
-            var existing_userrole = client.GetEntities<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
+            var existing_userrole = client.GetEntities<IntwentyUserProductRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id && p.ProductId == Settings.ProductId);
             client.Close();
             if (existing_userrole != null)
                 return Task.FromResult(IdentityResult.Success);
 
-            var urole = new IntwentyUserRole() { RoleId = existingrole.Id, UserId = user.Id };
+            var urole = new IntwentyUserProductRole() { RoleId = existingrole.Id, UserId = user.Id, ProductId = existingrole.ProductId };
             client.Open();
             client.InsertEntity(urole);
             client.Close();
             return Task.CompletedTask;
         }
+
+       
 
         public Task<IList<string>> GetRolesAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
@@ -251,9 +253,9 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             result = new List<string>();
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var userroles = client.GetEntities<IntwentyUserRole>();
+            var userroles = client.GetEntities<IntwentyUserProductRole>().Where(p=> p.ProductId == Settings.ProductId);
             client.Close();
 
             var roles = GetRoles();
@@ -285,9 +287,9 @@ namespace Intwenty.Areas.Identity.Data
            
 
             IList<IntwentyUser> result = new List<IntwentyUser>();
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var userroles = client.GetEntities<IntwentyUserRole>();
+            var userroles = client.GetEntities<IntwentyUserProductRole>().Where(p=> p.ProductId == Settings.ProductId).ToList();
             var users = client.GetEntities<IntwentyUser>();
             client.Close();
 
@@ -310,7 +312,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(result);
         }
 
-        public Task<bool> IsInRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
+        public async Task<bool> IsInRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -319,7 +321,7 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var userroles = GetRolesAsync(user, cancellationToken);
-            return Task.FromResult(userroles.Result.Contains(roleName));
+            return await Task.FromResult(userroles.Result.Contains(roleName));
         }
 
         public Task RemoveFromRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
@@ -332,15 +334,15 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var existingrole = client.GetEntities<IntwentyRole>().Find(p => p.NormalizedName == roleName);
+            var existingrole = client.GetEntities<IntwentyProductRole>().Find(p => p.NormalizedName == roleName && p.ProductId == Settings.ProductId);
             client.Close();
             if (existingrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is nor role named {0}", roleName) } }));
+                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0} in this product", roleName) } }));
 
             client.Open();
-            var existing_userrole = client.GetEntities<IntwentyUserRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
+            var existing_userrole = client.GetEntities<IntwentyUserProductRole>().Find(p => p.UserId == user.Id && p.RoleId == existingrole.Id);
             client.Close();
             if (existing_userrole == null)
                 return Task.FromResult(IdentityResult.Success);
@@ -352,18 +354,43 @@ namespace Intwenty.Areas.Identity.Data
             return Task.CompletedTask;
         }
 
-        public List<IntwentyRole> GetRoles()
+        public Task RemoveFromRoleAsync(IntwentyUser user, IntwentyProductRole role, CancellationToken cancellationToken)
         {
-            List <IntwentyRole> res = null;
+            cancellationToken.ThrowIfCancellationRequested();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+
+            client.Open();
+            var existing_userrole = client.GetEntities<IntwentyUserProductRole>().Find(p => p.UserId == user.Id && p.RoleId == role.Id);
+            client.Close();
+            if (existing_userrole == null)
+                return Task.FromResult(IdentityResult.Success);
+
+            client.Open();
+            client.DeleteEntity(role);
+            client.Close();
+
+            return Task.CompletedTask;
+        }
+
+        public List<IntwentyProductRole> GetRoles()
+        {
+            List <IntwentyProductRole> res = null;
 
             if (UserCache.TryGetValue(RolesCacheKey, out res))
             {
                 return res;
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
-            var roles = client.GetEntities<IntwentyRole>();
+            var roles = client.GetEntities<IntwentyProductRole>().Where(p=> p.ProductId == Settings.ProductId).ToList();
             client.Close();
 
             UserCache.Set(RolesCacheKey, roles);
@@ -381,7 +408,7 @@ namespace Intwenty.Areas.Identity.Data
                 return res;
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var users = client.GetEntities<IntwentyUser>();
             client.Close();
@@ -486,7 +513,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var user = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == normalizedEmail);
             client.Close();
@@ -663,7 +690,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(login));
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             client.InsertEntity(new IntwentyUserLogin() { Id = Guid.NewGuid().ToString(), LoginProvider = login.LoginProvider, ProviderDisplayName = login.ProviderDisplayName, ProviderKey = login.ProviderKey, UserId = user.Id   });
             client.Close();
@@ -673,7 +700,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task RemoveLoginAsync(IntwentyUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var model = client.GetEntities<IntwentyUserLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey);
             client.Close();
@@ -696,7 +723,7 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             IList<UserLoginInfo> result = null;
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             result = client.GetEntities<IntwentyUserLogin>().Where(p => p.UserId == user.Id).Select(p => new UserLoginInfo(p.LoginProvider, p.ProviderKey, p.ProviderDisplayName)).ToList();
             client.Close();
@@ -708,7 +735,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var login = client.GetEntities<IntwentyUserLogin>().Find(p => p.LoginProvider == loginProvider && p.ProviderKey == providerKey);
             client.Close();
@@ -733,7 +760,7 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             IList<Claim> result = null;
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             result = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id).Select(p=> p.ToClaim()).ToList();
             client.Close();
@@ -755,7 +782,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(claims));
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             foreach (var claim in claims)
             {
@@ -782,7 +809,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(newClaim));
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var mclaims = client.GetEntities<IntwentyUserClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type).ToList();
             client.Close();
@@ -808,7 +835,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(claims));
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             client.Open();
             foreach (var claim in claims)
@@ -834,7 +861,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var Users = client.GetEntities<IntwentyUser>();
             var UserClaims = client.GetEntities<IntwentyUserClaim>();

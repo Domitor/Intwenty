@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Identity;
 namespace Intwenty.Areas.Identity.Entity
 {
     [DbTableName("security_UserRoles")]
-    [DbTablePrimaryKey("UserId,RoleId")]
-    public class IntwentyUserRole : IdentityUserRole<string>
+    [DbTablePrimaryKey("UserId,RoleId,ProductId")]
+    public class IntwentyUserProductRole : IdentityUserRole<string>
     {
 
         public string Id { get; set; }
 
+        public string ProductId { get; set; }
 
         public override string UserId
         {

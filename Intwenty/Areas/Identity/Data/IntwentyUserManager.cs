@@ -23,6 +23,8 @@ namespace Intwenty.Areas.Identity.Data
 
         private IMemoryCache UserCache { get; }
 
+        private IIntwentyPermissionManager PermissionManager { get; }
+
         private static readonly string PermissionCacheKey = "USERPERM";
 
         public IntwentyUserManager(IUserStore<IntwentyUser> store, 
@@ -35,15 +37,18 @@ namespace Intwenty.Areas.Identity.Data
                                    IServiceProvider services, 
                                    ILogger<UserManager<IntwentyUser>> logger,
                                    IOptions<IntwentySettings> settings,
-                                   IMemoryCache cache)
+                                   IMemoryCache cache,
+                                   IntwentyPermissionManager permissionmanager)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             Settings = settings.Value;
             UserCache = cache;
+            PermissionManager = permissionmanager;
         }
 
         #region Intwenty Permissions
 
+        /*
         public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionItem permission)
         {
             if (user == null || permission == null)
@@ -71,7 +76,7 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(PermissionCacheKey + "_" + user.Id);
 
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
             client.Close();
@@ -122,7 +127,7 @@ namespace Intwenty.Areas.Identity.Data
 
             UserCache.Remove(PermissionCacheKey + "_" + user.Id);
 
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
             var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
             client.Close();
@@ -136,7 +141,9 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public Task<List<IntwentyUserPermissionItem>> GetUserPermissions(IntwentyUser user)
+             */
+
+        public async Task<List<IntwentyUserPermissionItem>> GetUserPermissions(IntwentyUser user)
         {
             if (user == null)
                 throw new InvalidOperationException("Error when fetching user permissions.");
@@ -145,30 +152,33 @@ namespace Intwenty.Areas.Identity.Data
 
             if (UserCache.TryGetValue(PermissionCacheKey + "_" + user.Id, out res))
             {
-                Task.FromResult(res);
+                return res;
             }
 
-            IDataClient client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
-            client.Open();
-            var list = client.GetEntities<IntwentyUserPermission>().Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).Select(p=> new IntwentyUserPermissionItem(p)).ToList();
-            client.Close();
-
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyUserProductPermission>();
+            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.ProductId == Settings.ProductId).Select(p => new IntwentyUserPermissionItem(p)).ToList();
+            await client.CloseAsync();
+            
             UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
 
-            return Task.FromResult(list);
+            return res;
         }
 
-        public bool HasPermission(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
+   
+
+        public async Task<bool> HasPermission(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
-            return HasPermissionInternal(claimprincipal, requested_app.Application, requested_action);
+            return await HasPermissionInternal(claimprincipal, requested_app.Application, requested_action);
         }
 
-        public bool HasPermission(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        public async Task<bool> HasPermission(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
         {
-            return HasPermissionInternal(claimprincipal, requested_app, requested_action);
+            return await HasPermissionInternal(claimprincipal, requested_app, requested_action);
         }
 
-        public bool HasPermissionInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        public async Task<bool> HasPermissionInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
         {
             if (!claimprincipal.Identity.IsAuthenticated)
                 return false;
@@ -218,7 +228,7 @@ namespace Intwenty.Areas.Identity.Data
 
             return false;
         }
-
+        
         #endregion
 
         #region Intwenty Groups

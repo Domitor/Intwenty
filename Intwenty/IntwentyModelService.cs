@@ -668,7 +668,7 @@ namespace Intwenty
 
             Client.DeleteEntity(existing);
 
-            var permissions = Client.GetEntities<IntwentyUserPermission>().Where(p => p.MetaCode == existing.MetaCode && p.PermissionType == ApplicationModelItem.MetaTypeApplication);
+            var permissions = Client.GetEntities<IntwentyUserProductPermission>().Where(p => p.MetaCode == existing.MetaCode && p.PermissionType == ApplicationModelItem.MetaTypeApplication);
             if (permissions != null && permissions.Count() > 0)
                 Client.DeleteEntities(permissions);
 
@@ -1637,17 +1637,23 @@ namespace Intwenty
                 client.CreateTable<EndpointItem>();
 
                 client.CreateTable<IntwentyUser>(); //security_User
-                client.CreateTable<IntwentyRole>(); //security_Role
-                client.CreateTable<IntwentyUserRole>(); //security_UserRoles
+                client.CreateTable<IntwentyProductRole>(); //security_Role
+                client.CreateTable<IntwentyProduct>(); //security_Product
+                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
                 client.CreateTable<IntwentyGroup>(); //security_Group
+                client.CreateTable<IntwentyUserProduct>(); //security_Product
+                client.CreateTable<IntwentyUserProductRole>(); //security_UserRoles
+                client.CreateTable<IntwentyUserProductPermission>(); //security_UserPermission
                 client.CreateTable<IntwentyUserGroup>(); //security_UserGroup
 
                 client.CreateTable<IntwentyUserClaim>(); //security_UserClaims
                 client.CreateTable<IntwentyUserLogin>(); //security_UserLogins
-                client.CreateTable<IntwentyUserPermission>(); //security_UserPermission
+               
+              
+               
 
-                                                         //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
-                                                         //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
+                //client.CreateTable<IntwentyRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserToken>(true, true); //security_UserTokens
 
                 client.Close();
 

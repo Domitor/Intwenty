@@ -24,6 +24,8 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string LastLogin { get; set; }
 
+        public string LastLoginProduct { get; set; }
+
         public bool CreatedWithExternalProvider { get; set; }
 
         [Ignore]

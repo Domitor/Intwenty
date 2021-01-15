@@ -16,6 +16,8 @@ namespace Intwenty.Model
 
     public class IntwentySettings
     {
+        public string ProductId { get; set; }
+
         public IntwentySettings()
         {
             LogVerbosity = LogVerbosityTypes.Error;
@@ -24,10 +26,12 @@ namespace Intwenty.Model
         public LogVerbosityTypes LogVerbosity { get; set; }
 
         /// <summary>
-        /// Database connection
+        /// Database connections
         /// </summary>
         public string DefaultConnection { get; set; }
         public DBMS DefaultConnectionDBMS { get; set; }
+        public string IAMConnection { get; set; }
+        public DBMS IAMConnectionDBMS { get; set; }
 
         /// <summary>
         /// If model is programaticly defined, create model container tables and seed the model
