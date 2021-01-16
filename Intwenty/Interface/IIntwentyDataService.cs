@@ -206,5 +206,7 @@ namespace Intwenty.Interface
 
         IDataClient GetDataClient();
 
+        IDataClient GetIAMDataClient();
+
     }
 }

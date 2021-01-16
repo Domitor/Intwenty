@@ -44,9 +44,14 @@
                     {
                         @await Html.PartialAsync("_IntwentyAppMenu")
 
-                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("USERADMIN") || User.IsInRole("SYSTEMADMIN"))
+                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN"))
                         {
                             @await Html.PartialAsync("_IntwentyAdminMenu")
+                        }
+
+                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("USERADMIN"))
+                        {
+                            @await Html.PartialAsync("_IntwentyIdentityAccessMenu")
                         }
 
                         @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN") || User.IsInRole("APIUSER"))

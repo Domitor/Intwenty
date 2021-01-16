@@ -1,0 +1,108 @@
+﻿@page
+@model ProductsModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+@await Html.PartialAsync("_Modals")
+
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>Products</h2></div>
+        <div class="card-body">Add and remove products available to users</div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+    <div>
+
+        <div class="btn btn-sm btn-secondary" v-on:click="addProduct">
+            <span class="fa fa-plus"></span>
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:5%"></th>
+                <th style="width:5%"></th>
+                <th style="width:25%">Id</th>
+                <th style="width:15%">Name</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in products">
+            <tr>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteProduct(item)" title=" Delete"><i class="fa fa-trash"></i></div></td>
+                <td><div class="btn btn-sm btn-secondary" v-on:click="editProduct(item)" title="Edit"><i class="fas fa-edit"></i></div></td>
+                <td>{{item.id}}</td>
+                <td>{{item.productName}}</td>
+
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {  },
+                products: [],
+                idgen: -1
+            },
+            methods: {
+
+
+                addProduct: function ()
+                {
+
+
+                },
+                editProduct: function ()
+                {
+                   
+                },
+                deleteProduct: function (entry)
+                {
+                  
+                }
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                var baseurl = '@Url.Content("~/Identity/IAM/")';
+                var endpointurl = baseurl + "Products?handler=Load";
+                $.get(endpointurl, function (response) {
+                  context.products = response;
+                });
+
+            }
+        });
+    </script>
+
+}
+

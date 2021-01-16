@@ -2,25 +2,21 @@
     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-cog"></span> System Administration</span> <span class="caret"></span></a>
     <div class="dropdown-menu">
 
-        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("USERADMIN"))
-        {
-            <a class="dropdown-item" asp-area="Identity" asp-page="/Admin/UserAdministration"><span class="fa fa-cogs"></span> Manage Users</a>
-        }
 
         @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN"))
         {
             <a class="dropdown-item" asp-controller="Model" asp-action="GetList"><span class="fa fa-cogs"></span> Manage applications</a>
-            <a class="dropdown-item" asp-controller="Model" asp-action="ToolConfigureDatabase"><span class="fa fa-meteor"></span> Configure database</a>
+            <a class="dropdown-item" asp-controller="Model" asp-action="ToolConfigureDatabase"><span class="fa fa-cogs"></span> Configure database</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>
-            <!-- a class="dropdown-item" asp-controller="Model" asp-action="EditMainMenu"><span class="fa fa-bookmark"></span> Main menu</a  -->
+
 
             <div class="dropdown-divider"></div>
 
             <a class="dropdown-item" asp-controller="Model" asp-action="ToolValidateModel"><span class="fa fa-info"></span> Validate model</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="ToolModelDocumentation"><span class="fa fa-book"></span> Model documentation</a>
-            <a class="dropdown-item" asp-controller="SystemTest" asp-action="RunTests"><span class="fa fa-meteor"></span> Run System Tests</a>
-            <a class="dropdown-item" asp-controller="Model" asp-action="ToolCacheMonitor"><span class="fa fa-meteor"></span> Cache Monitor</a>
+            <a class="dropdown-item" asp-controller="SystemTest" asp-action="RunTests"><span class="fa fa-cogs"></span> Run System Tests</a>
+            <a class="dropdown-item" asp-controller="Model" asp-action="ToolCacheMonitor"><span class="fa fa-cogs"></span> Cache Monitor</a>
 
 
 

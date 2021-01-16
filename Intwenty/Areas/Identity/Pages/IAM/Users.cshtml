@@ -1,5 +1,5 @@
 ﻿@page
-@model UserAdministrationModel
+@model UsersModel
 @{
     ViewData["Title"] = "User administration";
 }
@@ -12,8 +12,8 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>User administration</h2></div>
-        <div class="card-body">Manage users.</div>
+        <div class="card-header"><h2>Users</h2></div>
+        <div class="card-body">Add users and manage access.</div>
     </div>
     <br />
     <br />
@@ -24,7 +24,7 @@
     <div>
 
         <div class="btn btn-sm btn-secondary" v-on:click="addUser">
-            <span class="fa fa-plus"></span> Add user
+            <span class="fa fa-plus"></span>
         </div>
     </div>
     <br />
@@ -88,8 +88,8 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/Identity/Admin/")';
-                        var endpointurl = baseurl + "UserAdministration?handler=BlockUser";
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Users?handler=BlockUser";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -118,8 +118,8 @@
 
                     var yesfunc = function ()
                     {
-                        var baseurl = '@Url.Content("~/Identity/Admin/")';
-                        var endpointurl = baseurl + "UserAdministration?handler=UnblockUser";
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Users?handler=UnblockUser";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -148,8 +148,8 @@
                     var yesfunc = function ()
                     {
 
-                        var baseurl = '@Url.Content("~/Identity/Admin/")';
-                        var endpointurl = baseurl + "UserAdministration?handler=ResetMFA";
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Users?handler=ResetMFA";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -181,8 +181,8 @@
                     var context = this;
                     var yesfunc = function () {
 
-                        var baseurl = '@Url.Content("~/Identity/Admin/")';
-                        var endpointurl = baseurl + "UserAdministration?handler=DeleteUser";
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Users?handler=DeleteUser";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -217,8 +217,8 @@
             {
 
                 var context = this;
-                var baseurl = '@Url.Content("~/Identity/Admin/")';
-                var endpointurl = baseurl + "UserAdministration?handler=LoadUsers";
+                var baseurl = '@Url.Content("~/Identity/IAM/")';
+                var endpointurl = baseurl + "Users?handler=Load";
                 $.get(endpointurl, function (response) {
                   context.users = response;
                 });

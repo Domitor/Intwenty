@@ -10,18 +10,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Intwenty.Areas.Identity.Pages.Account.Admin
+namespace Intwenty.Areas.Identity.Pages.IAM
 {
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class UserAdministrationModel : PageModel
+    public class UsersModel : PageModel
     {
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
-
         private UserManager<IntwentyUser> UserManager { get; }
 
-        public UserAdministrationModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
+        public UsersModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
         {
             DataRepository = ms;
             ModelRepository = sr;
@@ -33,17 +32,23 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
            
         }
 
-        public JsonResult OnGetLoadUsers()
+        public async Task<JsonResult> OnGetLoad()
         {
-            var mapper = DataRepository.GetDataClient();
-            var list = mapper.GetEntities<IntwentyUser>().Select(p => new IntwentyUserVm(p));
+            var client = DataRepository.GetIAMDataClient();
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyUser>();
+            var list = result.Select(p => new IntwentyUserVm(p));
+            await client.CloseAsync();
             return new JsonResult(list);
         }
 
-        public JsonResult LoadUsers()
+        public async Task<JsonResult> Load()
         {
-            var mapper = DataRepository.GetDataClient();
-            var list = mapper.GetEntities<IntwentyUser>().Select(p => new IntwentyUserVm(p));
+            var client = DataRepository.GetIAMDataClient();
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyUser>();
+            var list = result.Select(p => new IntwentyUserVm(p));
+            await client.CloseAsync();
             return new JsonResult(list);
         }
 
@@ -57,8 +62,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
                 UserManager.SetLockoutEndDateAsync(user, DateTime.Now.AddYears(100));
             }
 
-
-            return LoadUsers();
+            return Load().Result;
         }
 
 
@@ -74,7 +78,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             }
 
 
-            return LoadUsers();
+            return Load().Result;
         }
 
         public JsonResult OnPostResetMFA([FromBody] IntwentyUserVm model)
@@ -88,7 +92,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
             }
 
 
-            return LoadUsers();
+            return Load().Result;
         }
 
         public JsonResult OnPostDeleteUser([FromBody] IntwentyUserVm model)
@@ -98,7 +102,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Admin
                 UserManager.DeleteAsync(user);
 
 
-            return LoadUsers();
+            return Load().Result;
         }
 
     }

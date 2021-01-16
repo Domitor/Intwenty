@@ -23,8 +23,6 @@ namespace Intwenty
 
         protected IntwentySettings Settings { get; }
 
-        protected DBMS DBMSType { get; }
-
         protected IIntwentyModelService ModelRepository { get; }
 
         protected IMemoryCache ApplicationCache { get; }
@@ -36,14 +34,18 @@ namespace Intwenty
         {
             Settings = settings.Value;
             ModelRepository = modelservice;
-            DBMSType = Settings.DefaultConnectionDBMS;
             ApplicationCache = cache;
             ApplicationSaveTimeStamp = DateTime.Now;
         }
 
         public IDataClient GetDataClient()
         {
-           return new Connection(DBMSType, Settings.DefaultConnection);
+           return new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+        }
+
+        public IDataClient GetIAMDataClient()
+        {
+            return new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
         }
 
         #region Create
@@ -119,7 +121,7 @@ namespace Intwenty
             if (model == null)
                 return new List<DefaultValue>();
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
             client.Open();
 
             foreach (var dbcol in model.DataStructure)
@@ -197,7 +199,7 @@ namespace Intwenty
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             ModifyResult result = null;
 
@@ -722,7 +724,7 @@ namespace Intwenty
                 newversion = 1;
             }
 
-            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == DBMSType);
+            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
 
             //DefaultVersioningTableColumns
             sql = "insert into " + model.Application.VersioningTableName;
@@ -783,7 +785,7 @@ namespace Intwenty
         private void UpdateInformationStatus(ClientStateInfo state, IDataClient client)
         {
 
-            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == DBMSType);
+            var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
 
             var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter() { Name = "@ChangedBy", Value = state.UserId });
@@ -877,7 +879,7 @@ namespace Intwenty
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.Applicationid");
 
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -944,7 +946,7 @@ namespace Intwenty
             if (modelitem == null)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -1043,7 +1045,7 @@ namespace Intwenty
 
             DataListResult<T> result = null;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
             client.Open();
 
             try
@@ -1103,11 +1105,11 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (DBMSType == DBMS.MSSqlServer)
+                if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
                 {
                     sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
                 }
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
                 {
                     sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
                 }
@@ -1189,7 +1191,7 @@ namespace Intwenty
             }
 
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
             client.Open();
 
             try
@@ -1256,11 +1258,11 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (DBMSType == DBMS.MSSqlServer)
+                if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
                 {
                     sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
                 }
-                else if (DBMSType == DBMS.PostgreSQL)
+                else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
                 {
                     sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
                 }
@@ -1297,7 +1299,7 @@ namespace Intwenty
         {
             DataListResult<T> result = null;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -1368,7 +1370,7 @@ namespace Intwenty
         {
             DataListResult result = null;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
             client.Open();
 
             try
@@ -1417,8 +1419,8 @@ namespace Intwenty
         public virtual DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid)
         {
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
-            
+            var client = GetDataClient();
+
 
             try
             {
@@ -1514,7 +1516,7 @@ namespace Intwenty
 
             DataResult<T> result = null;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -1586,7 +1588,7 @@ namespace Intwenty
             if (state.ApplicationId < 0)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing GetLatestByOwnerUser.");
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -1665,9 +1667,9 @@ namespace Intwenty
 
             result = new DataResult(true, MessageCode.RESULT, string.Format("Fetched latest version for application {0}", model.Application.Title), state.Id, state.Version);
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
-           
+
 
             try
             {
@@ -1775,7 +1777,7 @@ namespace Intwenty
             if (applicationid < 1)
                 return new DataListResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must be a valid ApplicationId.");
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -1874,7 +1876,7 @@ namespace Intwenty
         {
             DataListResult result = null;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -2014,7 +2016,7 @@ namespace Intwenty
         {
             DataListResult result = new DataListResult();
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -2057,7 +2059,7 @@ namespace Intwenty
                     }
                 }
 
-                sql = DBHelpers.AddPagingSqlStatement(sql, args.PageNumber, args.PageSize, DBMSType);
+                sql = DBHelpers.AddPagingSqlStatement(sql, args.PageNumber, args.PageSize, Settings.DefaultConnectionDBMS);
 
 
 
@@ -2090,7 +2092,7 @@ namespace Intwenty
 
             var result = new DataListResult(true, MessageCode.RESULT, "Fetched dataview record");
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
 
             try
             {
@@ -2170,7 +2172,7 @@ namespace Intwenty
             if (Settings.LogVerbosity == LogVerbosityTypes.Warning && verbosity == "INFO")
                 return;
 
-            var client = new Connection(DBMSType, Settings.DefaultConnection);
+            var client = GetDataClient();
             client.Open();
 
             try

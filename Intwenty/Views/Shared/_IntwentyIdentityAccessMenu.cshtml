@@ -1,0 +1,12 @@
+﻿<li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fas-users"></span> Identiy Management</span> <span class="caret"></span></a>
+    <div class="dropdown-menu">
+
+        @if (User.IsInRole("SUPERADMIN"))
+        {
+            <a class="dropdown-item" asp-area="Identity" asp-page="/IAM/Products"><span class="fab fa-product-hunt"></span> Manage Products</a>
+            <a class="dropdown-item" asp-area="Identity" asp-page="/IAM/Users"><span class="fas fa-users"></span> Manage Users</a>
+        }
+
+    </div>
+</li>
