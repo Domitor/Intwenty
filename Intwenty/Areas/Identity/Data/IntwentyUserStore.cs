@@ -47,7 +47,7 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
             await client.InsertEntityAsync(user);
-            await client.InsertEntityAsync(new IntwentyUserProduct() { UserId = user.Id, ProductId = Settings.ProductId });
+            await client.InsertEntityAsync(new IntwentyProductCustomer() { UserId = user.Id, ProductId = Settings.ProductId });
             await client.CloseAsync();
             return IdentityResult.Success;
         }

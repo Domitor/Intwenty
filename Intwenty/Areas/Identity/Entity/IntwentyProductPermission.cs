@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty.Areas.Identity.Entity
 {
+
     [DbTableName("security_ProductPermission")]
     [DbTablePrimaryKey("Id")]
     public class IntwentyProductPermission

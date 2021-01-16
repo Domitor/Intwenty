@@ -1641,7 +1641,7 @@ namespace Intwenty
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProduct>(); //security_UserProduct
+                client.CreateTable<IntwentyProductCustomer>(); //security_UserProduct
                 client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
                 client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
@@ -1678,7 +1678,7 @@ namespace Intwenty
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProduct>(); //security_UserProduct
+                client.CreateTable<IntwentyProductCustomer>(); //security_UserProduct
                 client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
                 client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
