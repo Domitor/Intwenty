@@ -14,14 +14,14 @@ using Intwenty.Areas.Identity.Data;
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class ProductsModel : PageModel
+    public class ProductListModel : PageModel
     {
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
         private IIntwentyProductManager ProductManager { get; }
 
-        public ProductsModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyProductManager prodmanager)
+        public ProductListModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyProductManager prodmanager)
         {
             DataRepository = ms;
             ModelRepository = sr;

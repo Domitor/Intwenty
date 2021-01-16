@@ -1,0 +1,290 @@
+﻿@page
+@model UserListModel
+@{
+    ViewData["Title"] = "User administration";
+}
+
+@await Html.PartialAsync("_Modals")
+
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>Users</h2></div>
+        <div class="card-body">Add users and manage access.</div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+    <div>
+
+        <div class="btn btn-sm btn-secondary" v-on:click="addUser">
+            <span class="fa fa-plus"></span>
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:5%"></th>
+                <th style="width:20%">User Name</th>
+                <th style="width:15%">IsBlocked</th>
+                <th style="width:15%">MFA Active</th>
+                <th style="width:25%">Last login</th>
+                <th style="width:5%">Block</th>
+                <th style="width:5%">Reset MFA</th>
+                <th style="width:5%">Delete</th>
+            </tr>
+        </thead>
+        <tbody v-for="entry in users">
+            <tr>
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'User/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
+                <td>{{entry.userName}}</td>
+                <td>{{entry.isBlocked}}</td>
+                <td>{{entry.mfaActive}}</td>
+                <td>{{entry.lastLogin}}</td>
+                <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
+                <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
+                <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
+                <td v-if="!entry.mfaActive"></td>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteUser(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="modal" id="addusermodal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">Email<span style="color: red"> *</span></label>
+                        <input id="tb_email" type="text" class="form-control form-control-sm" v-model="model.email" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">First Name<span style="color: red"> *</span></label>
+                        <input id="tb_firstname" type="text" class="form-control form-control-sm" v-model="model.firstName" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Last Name<span style="color: red"> *</span></label>
+                        <input id="tb_lastname" type="text" class="form-control form-control-sm" v-model="model.lastName" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="addusermodal_okbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {  },
+                users: [],
+                idgen: -1
+            },
+            methods: {
+
+
+                addUser: function ()
+                {
+                     var context = this;
+
+                    var okfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "UserList?handler=AddUser";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = {};
+                                context.users = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addusermodal_okbtn").off().on('click', okfunc);
+                    $("#addusermodal").modal();
+                },
+                blockUser: function (entry)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "UserList?handler=BlockUser";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Block user ?", "The user will be blocked, continue ?", yesfunc);
+
+                },
+                unblockUser: function (entry)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "UserList?handler=UnblockUser";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Unblock user ?", "The user will gain access again, continue ?", yesfunc);
+
+                },
+                resetMFA: function ()
+                {
+                    var context = this;
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "UserList?handler=ResetMFA";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Reset Twofactor Authentication ?", "Twofactor authentication will be removed from the user. The user can configure it again.", yesfunc);
+
+                },
+                editUser: function ()
+                {
+                    raiseYesNoModal("Not implemented", "Editing user details is not implemented");
+                },
+                deleteUser: function (entry)
+                {
+                    var context = this;
+                    var yesfunc = function () {
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "UserList?handler=DeleteUser";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(entry),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.users = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete user ?", "The user will be deleted, continue ?", yesfunc);
+                }
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                var baseurl = '@Url.Content("~/Identity/IAM/")';
+                var endpointurl = baseurl + "UserList?handler=Load";
+                $.get(endpointurl, function (response) {
+                  context.users = response;
+                });
+
+            }
+        });
+    </script>
+
+}
+

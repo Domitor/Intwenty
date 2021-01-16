@@ -1,5 +1,5 @@
-﻿@page
-@model UsersModel
+﻿@page "{Id}"
+@model UserModel
 @{
     ViewData["Title"] = "User administration";
 }
@@ -12,52 +12,25 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>Users</h2></div>
-        <div class="card-body">Add users and manage access.</div>
+        <div class="card-header"><h2>User</h2></div>
+        <div class="card-body">Manage the user <b>{{model.userName}}</b> @Model.Id</div>
     </div>
     <br />
     <br />
 
-
-    <br />
-    <br />
-    <div>
-
-        <div class="btn btn-sm btn-secondary" v-on:click="addUser">
-            <span class="fa fa-plus"></span>
-        </div>
+    <div class="form-group">
+        <label class="control-label">Email<span style="color: red"> *</span></label>
+        <input id="tb_email" type="text" class="form-control form-control-sm" v-model="model.email" />
     </div>
-    <br />
-    <br />
-    <table class="table table">
-        <thead>
-            <tr>
+    <div class="form-group">
+        <label class="control-label">First Name<span style="color: red"> *</span></label>
+        <input id="tb_firstname" type="text" class="form-control form-control-sm" v-model="model.firstName" />
+    </div>
+    <div class="form-group">
+        <label class="control-label">Last Name<span style="color: red"> *</span></label>
+        <input id="tb_lastname" type="text" class="form-control form-control-sm" v-model="model.lastName" />
+    </div>
 
-                <th style="width:25%">User Name</th>
-                <th style="width:15%">IsBlocked</th>
-                <th style="width:15%">MFA Active</th>
-                <th style="width:25%">Last login</th>
-                <th style="width:5%">Permissions</th>
-                <th style="width:5%">Block</th>
-                <th style="width:5%">Reset MFA</th>
-                <th style="width:5%">Delete</th>
-            </tr>
-        </thead>
-        <tbody v-for="entry in users">
-            <tr>
-                <td>{{entry.userName}}</td>
-                <td>{{entry.isBlocked}}</td>
-                <td>{{entry.mfaActive}}</td>
-                <td>{{entry.lastLogin}}</td>
-                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'../../Model/UserPermission/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
-                <td v-if="!entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="blockUser(entry)" title="Block"><i class="fas fa-lock"></i></div></td>
-                <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
-                <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
-                <td v-if="!entry.mfaActive"></td>
-                <td><div class="btn btn-sm btn-danger" v-on:click="deleteUser(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
-            </tr>
-        </tbody>
-    </table>
 
 </div>
 
@@ -76,12 +49,6 @@
             },
             methods: {
 
-
-                addUser: function ()
-                {
-
-
-                },
                 blockUser: function (entry)
                 {
                     var context = this;
@@ -89,7 +56,7 @@
                     var yesfunc = function ()
                     {
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "Users?handler=BlockUser";
+                        var endpointurl = baseurl + "UserList?handler=BlockUser";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -119,7 +86,7 @@
                     var yesfunc = function ()
                     {
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "Users?handler=UnblockUser";
+                        var endpointurl = baseurl + "UserList?handler=UnblockUser";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -149,7 +116,7 @@
                     {
 
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "Users?handler=ResetMFA";
+                        var endpointurl = baseurl + "UserList?handler=ResetMFA";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -175,35 +142,8 @@
                 editUser: function ()
                 {
                     raiseYesNoModal("Not implemented", "Editing user details is not implemented");
-                },
-                deleteUser: function (entry)
-                {
-                    var context = this;
-                    var yesfunc = function () {
-
-                        var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "Users?handler=DeleteUser";
-                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
-
-                        $.ajax({
-                            url: endpointurl,
-                            type: "POST",
-                            contentType: "application/json",
-                            data: JSON.stringify(entry),
-                            headers: {
-                                RequestVerificationToken: antiforgerytoken
-                            },
-                            success: function (response) {
-                                context.users = response;
-                            },
-                            error: function (response) {
-                                raiseErrorModal(response.responseJSON);
-                            }
-                        });
-                    }
-
-                    raiseYesNoModal("Delete user ?", "The user will be deleted, continue ?", yesfunc);
                 }
+               
             },
             computed:
             {
@@ -215,14 +155,13 @@
             },
             mounted: function ()
             {
-
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/IAM/")';
-                var endpointurl = baseurl + "Users?handler=Load";
-                $.get(endpointurl, function (response) {
-                  context.users = response;
+                var endpointurl = baseurl + "User/@Model.Id?handler=Load";
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
                 });
-
             }
         });
     </script>

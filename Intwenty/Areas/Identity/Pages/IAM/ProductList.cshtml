@@ -1,5 +1,5 @@
 ﻿@page
-@model ProductsModel
+@model ProductListModel
 @{
     ViewData["Title"] = "Products";
 }
@@ -95,7 +95,7 @@
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/IAM/")';
-                var endpointurl = baseurl + "Products?handler=Load";
+                var endpointurl = baseurl + "ProductList?handler=Load";
                 $.get(endpointurl, function (response) {
                   context.products = response;
                 });

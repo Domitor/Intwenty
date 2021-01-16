@@ -13,14 +13,14 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class UsersModel : PageModel
+    public class UserListModel : PageModel
     {
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
         private UserManager<IntwentyUser> UserManager { get; }
 
-        public UsersModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
+        public UserListModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
         {
             DataRepository = ms;
             ModelRepository = sr;
@@ -50,6 +50,20 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             var list = result.Select(p => new IntwentyUserVm(p));
             await client.CloseAsync();
             return new JsonResult(list);
+        }
+
+        public async Task<JsonResult> OnPostAddUser([FromBody] IntwentyUserVm model)
+        {
+            var user = new IntwentyUser();
+            user.UserName = model.Email;
+            user.Email = model.Email;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.EmailConfirmed = true;
+
+            await UserManager.CreateAsync(user);
+
+            return await Load();
         }
 
         public JsonResult OnPostBlockUser([FromBody] IntwentyUserVm model)
