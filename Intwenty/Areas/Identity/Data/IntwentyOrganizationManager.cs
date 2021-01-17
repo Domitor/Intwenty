@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.DataClient.Model;
 
 namespace Intwenty.Areas.Identity.Data
 {
@@ -27,6 +28,10 @@ namespace Intwenty.Areas.Identity.Data
         Task<List<IntwentyOrganizationProduct>> GetProductsAsync(int organizationid);
         Task<IdentityResult> AddProductAsync(IntwentyOrganizationProduct product);
         Task<IdentityResult> RemoveProductAsync(IntwentyOrganizationProduct product);
+        Task<bool> IsProductUser(string productid, IntwentyUser user);
+        Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(string productid, string userid);
+
+
     }
 
     public class IntwentyOrganizationManager : IIntwentyOrganizationManager
@@ -149,7 +154,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProductVm>();
+            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProduct>();
             await client.CloseAsync();
             if (allexisting.Exists(p => p.OrganizationId == product.OrganizationId && p.ProductId == product.ProductId))
                 return IdentityResult.Success;
@@ -164,7 +169,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProductVm>();
+            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProduct>();
             await client.CloseAsync();
             var current = allexisting.Find(p => p.OrganizationId == product.OrganizationId && p.ProductId == product.ProductId);
             if (current == null)
@@ -176,6 +181,47 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
+        public async Task<bool> IsProductUser(string productid, IntwentyUser user)
+        {
 
+            var sql = "SELECT 1 from security_Organization t1 WHERE ";
+            sql += "EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId=@UserId AND OrganizationId=t1.Id) ";
+            sql += "AND EXISTS (SELECT 1 FROM security_OrganizationProducts WHERE ProductId=@ProductId AND OrganizationId=t1.Id)";
+
+            var parameters = new List<IntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { Name = "@UserId", Value= user.Id });
+            parameters.Add(new IntwentySqlParameter() { Name = "@ProductId", Value = productid });
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetScalarValueAsync(sql, false, parameters.ToArray());
+            await client.CloseAsync();
+
+            if (result == null)
+                return false;
+            if (result == DBNull.Value)
+                return false;
+            if (Convert.ToInt32(result) == 1)
+                return true;
+
+            return false;
+        }
+
+        public async Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(string productid, string userid)
+        {
+            var sql = "SELECT * from security_OrganizationProducts t1  ";
+            sql += "WHERE t1.ProductId = @ProductId ";
+            sql += "AND EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t1.Id)";
+            var parameters = new List<IntwentySqlParameter>();
+            parameters.Add(new IntwentySqlParameter() { Name = "@ProductId", Value = productid });
+            parameters.Add(new IntwentySqlParameter() { Name = "@UserId", Value = userid });
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetEntityAsync<IntwentyOrganizationProduct>(sql, false, parameters.ToArray());
+            await client.CloseAsync();
+            if (result != null)
+                return new IntwentyOrganizationProductVm(result);
+            else
+                return null;
+        }
     }
 }

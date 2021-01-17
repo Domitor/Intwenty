@@ -20,11 +20,7 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string ProductURI { get; set; }
 
-        public string ApplicationPath { get; set; }
-
-        public string ApplicationAPIPath { get; set; }
-
-        public string WebAPIPath { get; set; }
+        public string APIPath { get; set; }
 
     }
 }

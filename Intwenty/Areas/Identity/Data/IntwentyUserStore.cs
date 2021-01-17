@@ -405,7 +405,7 @@ namespace Intwenty.Areas.Identity.Data
 
         }
 
-        public async Task<List<IntwentyUser>> GetAllUsers()
+        public async Task<List<IntwentyUser>> GetAllUsersAsync()
         {
             List<IntwentyUser> res = null;
 

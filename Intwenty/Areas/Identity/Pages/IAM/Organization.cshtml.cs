@@ -44,7 +44,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             var org = await OrganizationManager.FindByIdAsync(id);
             var members = await OrganizationManager.GetMembersAsync(id);
             var products = await OrganizationManager.GetProductsAsync(id);
-            var users = await UserManager.GetUsers();
+            var users = await UserManager.GetUsersAsync();
 
             var model = new IntwentyOrganizationVm(org);
 
@@ -73,7 +73,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<JsonResult> OnGetLoadUsers(int id)
         {
-            var t = await UserManager.GetUsers();
+            var t = await UserManager.GetUsersAsync();
             return new JsonResult(t);
         }
 

@@ -160,7 +160,7 @@ namespace Intwenty.Areas.Identity.Data
             
             UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
 
-            return res;
+            return list;
         }
 
    
@@ -433,9 +433,9 @@ namespace Intwenty.Areas.Identity.Data
 
         #endregion
 
-        public async Task<List<IntwentyUser>> GetUsers()
+        public async Task<List<IntwentyUser>> GetUsersAsync()
         {
-            var t = await ((IntwentyUserStore)Store).GetAllUsers();
+            var t = await ((IntwentyUserStore)Store).GetAllUsersAsync();
             return t;
         }
 

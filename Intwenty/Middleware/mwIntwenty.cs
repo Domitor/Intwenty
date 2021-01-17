@@ -8,6 +8,7 @@ using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+
 
 namespace Intwenty.Middleware
 {
@@ -92,7 +94,8 @@ namespace Intwenty.Middleware
              .AddRoles<IntwentyProductRole>()
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyProductRoleStore>()
-             .AddUserManager<IntwentyUserManager>();
+             .AddUserManager<IntwentyUserManager>()
+             .AddSignInManager<IntwentySignInManager>();
             
 
 

@@ -12,10 +12,9 @@ namespace Intwenty.Areas.Identity.Entity
     public class IntwentyProduct
     {
         public string Id { get; set; }
-
         public string ProductName { get; set; }
-
-      
+        public string IntwentyApplicationPath { get; set; }
+        public string IntwentyApplicationAPIPath { get; set; }
 
 
 
