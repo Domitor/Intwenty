@@ -57,6 +57,7 @@ namespace Intwenty.Middleware
             services.TryAddTransient<IEmailSender, EmailService>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
             services.TryAddTransient<IIntwentyPermissionManager, IntwentyPermissionManager>();
+            services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();
 
 
             //Required for Intwenty services to work correctly

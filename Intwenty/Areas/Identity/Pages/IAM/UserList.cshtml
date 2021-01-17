@@ -15,15 +15,13 @@
         <div class="card-header"><h2>Users</h2></div>
         <div class="card-body">Add users and manage access.</div>
     </div>
-    <br />
-    <br />
-
 
     <br />
     <br />
+
     <div>
 
-        <div class="btn btn-sm btn-secondary" v-on:click="addUser">
+        <div class="btn btn-sm btn-secondary" v-on:click="addEntity">
             <span class="fa fa-plus"></span>
         </div>
     </div>
@@ -32,7 +30,7 @@
     <table class="table table">
         <thead>
             <tr>
-
+                <th style="width:5%"></th>
                 <th style="width:5%"></th>
                 <th style="width:20%">User Name</th>
                 <th style="width:15%">IsBlocked</th>
@@ -40,11 +38,12 @@
                 <th style="width:25%">Last login</th>
                 <th style="width:5%">Block</th>
                 <th style="width:5%">Reset MFA</th>
-                <th style="width:5%">Delete</th>
+
             </tr>
         </thead>
         <tbody v-for="entry in users">
             <tr>
+                <td><div class="btn btn-sm btn-danger" v-on:click="deleteEntity(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
                 <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'User/' + entry.id" title="Edit"><i class="fas fa-edit"></i></a></td>
                 <td>{{entry.userName}}</td>
                 <td>{{entry.isBlocked}}</td>
@@ -54,12 +53,12 @@
                 <td v-if="entry.isBlocked"><div class="btn btn-sm btn-secondary" v-on:click="unblockUser(entry)" title="Unblock"><i class="fas fa-lock-open"></i></div></td>
                 <td v-if="entry.mfaActive"><div class="btn btn-sm btn-secondary" v-on:click="resetMFA(entry)" title="Reset MFA"><i class="fas fa-key"></i></div></td>
                 <td v-if="!entry.mfaActive"></td>
-                <td><div class="btn btn-sm btn-danger" v-on:click="deleteUser(entry)" title=" Delete user"><i class="fa fa-trash"></i></div></td>
+
             </tr>
         </tbody>
     </table>
 
-    <div class="modal" id="addusermodal" role="dialog">
+    <div class="modal" id="addEntityModal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -83,7 +82,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="addusermodal_okbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
+                    <button id="addEntityModal_okBtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -108,7 +107,7 @@
             methods: {
 
 
-                addUser: function ()
+                addEntity: function ()
                 {
                      var context = this;
 
@@ -138,8 +137,8 @@
                         });
                     }
 
-                    $("#addusermodal_okbtn").off().on('click', okfunc);
-                    $("#addusermodal").modal();
+                    $("#addEntityModal_okBtn").off().on('click', okfunc);
+                    $("#addEntityModal").modal();
                 },
                 blockUser: function (entry)
                 {
@@ -231,17 +230,13 @@
                     raiseYesNoModal("Reset Twofactor Authentication ?", "Twofactor authentication will be removed from the user. The user can configure it again.", yesfunc);
 
                 },
-                editUser: function ()
-                {
-                    raiseYesNoModal("Not implemented", "Editing user details is not implemented");
-                },
-                deleteUser: function (entry)
+                deleteEntity: function (entry)
                 {
                     var context = this;
                     var yesfunc = function () {
 
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "UserList?handler=DeleteUser";
+                        var endpointurl = baseurl + "UserList?handler=DeleteEntity";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({

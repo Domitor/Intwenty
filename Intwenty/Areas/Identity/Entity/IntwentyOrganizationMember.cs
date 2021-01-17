@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_OrganizationUser")]
+    [DbTableName("security_OrganizationMembers")]
     [DbTablePrimaryKey("Id")]
     public class IntwentyOrganizationMember
     {

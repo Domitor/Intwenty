@@ -14,52 +14,48 @@ using Intwenty.Areas.Identity.Data;
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class ProductListModel : PageModel
+    public class ProductModel : PageModel
     {
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
         private IIntwentyProductManager ProductManager { get; }
 
-        public ProductListModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyProductManager prodmanager)
+        public string Id { get; set; }
+
+        public ProductModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyProductManager prodmanager)
         {
             DataRepository = ms;
             ModelRepository = sr;
             ProductManager = prodmanager;
         }
 
-        public void OnGet()
+        public void OnGet(string id)
         {
-           
+            Id = id;
         }
 
-        public async Task<IActionResult> OnGetLoad()
+        public async Task<JsonResult> OnGetLoad(string id)
         {
-            var list = await ProductManager.GetAll();
-            return new JsonResult(list);
+            var result = await ProductManager.FindByIdAsync(id);
+            return new JsonResult(new IntwentyProductVm(result));
         }
 
-        public async Task<IActionResult> OnPostAddEntity([FromBody] IntwentyProductVm model)
+        public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyProductVm model)
         {
-            var product = new IntwentyProduct();
-            product.Id = Guid.NewGuid().ToString();
-            product.ProductName = model.ProductName;
-            await ProductManager.CreateAsync(product);
-            return await OnGetLoad();
-        }
-        public async Task<IActionResult> OnPostDeleteEntity([FromBody] IntwentyProductVm model)
-        {
+
             var product = await ProductManager.FindByIdAsync(model.Id);
             if (product != null)
-                await ProductManager.DeleteAsync(product);
+            {
+                product.ProductName = model.ProductName;
+                await ProductManager.UpdateAsync(product);
+                return await OnGetLoad(product.Id);
+            }
 
-            return await OnGetLoad();
+            return new JsonResult("{}");
+
+
+
         }
-
-
-
-
-
-
     }
 }

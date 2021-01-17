@@ -12,27 +12,27 @@ using System.Linq;
 
 namespace Intwenty.Areas.Identity.Data
 {
-    public interface IIntwentyProductManager
+    public interface IIntwentyOrganizationManager
     {
-        Task<IdentityResult> CreateAsync(IntwentyProduct product);
-        Task<IdentityResult> UpdateAsync(IntwentyProduct product);
-        Task<IdentityResult> DeleteAsync(IntwentyProduct product);
-        Task<IntwentyProduct> FindByIdAsync(string productid);
-        Task<List<IntwentyProduct>> GetAll();
+        Task<IdentityResult> CreateAsync(IntwentyOrganization product);
+        Task<IdentityResult> UpdateAsync(IntwentyOrganization product);
+        Task<IdentityResult> DeleteAsync(IntwentyOrganization product);
+        Task<IntwentyOrganization> FindByIdAsync(int id);
+        Task<List<IntwentyOrganization>> GetAll();
     }
 
-    public class IntwentyProductManager : IIntwentyProductManager
+    public class IntwentyOrganizationManager : IIntwentyOrganizationManager
     {
 
         private IntwentySettings Settings { get; }
 
 
-        public IntwentyProductManager(IOptions<IntwentySettings> settings) 
+        public IntwentyOrganizationManager(IOptions<IntwentySettings> settings) 
         {
             Settings = settings.Value;
         }
 
-        public async Task<IdentityResult> CreateAsync(IntwentyProduct product)
+        public async Task<IdentityResult> CreateAsync(IntwentyOrganization product)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -41,7 +41,7 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> UpdateAsync(IntwentyProduct product)
+        public async Task<IdentityResult> UpdateAsync(IntwentyOrganization product)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -50,7 +50,7 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> DeleteAsync(IntwentyProduct product)
+        public async Task<IdentityResult> DeleteAsync(IntwentyOrganization product)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -61,23 +61,23 @@ namespace Intwenty.Areas.Identity.Data
 
        
 
-        public async Task<IntwentyProduct> FindByIdAsync(string productid)
+        public async Task<IntwentyOrganization> FindByIdAsync(int id)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var products = await client.GetEntitiesAsync<IntwentyProduct>();
-            var product = products.Find(p => p.Id == productid);
+            var orgs = await client.GetEntitiesAsync<IntwentyOrganization>();
+            var org = orgs.Find(p => p.Id == id);
             await client.CloseAsync();
-            return product;
+            return org;
         }
 
-        public async Task<List<IntwentyProduct>> GetAll()
+        public async Task<List<IntwentyOrganization>> GetAll()
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var products = await client.GetEntitiesAsync<IntwentyProduct>();
+            var orgs = await client.GetEntitiesAsync<IntwentyOrganization>();
             await client.CloseAsync();
-            return products;
+            return orgs;
         }
 
      

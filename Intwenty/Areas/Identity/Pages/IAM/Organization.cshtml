@@ -1,7 +1,7 @@
 ﻿@page "{Id}"
-@model UserModel
+@model OrganizationModel
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "Edit Organization";
 }
 
 @await Html.PartialAsync("_Modals")
@@ -12,12 +12,9 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>User</h2></div>
-        <div class="card-body">
-            Manage the user <b>{{model.userName}}</b>
-        </div>
+        <div class="card-header"><h2>Organization</h2></div>
+        <div class="card-body">Manage the organization <b>{{model.name}}</b></div>
     </div>
-
     <br />
 
     <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
@@ -30,7 +27,7 @@
 
     <ul class="nav">
         <li class="nav-item">
-            <a asp-area="Identity" asp-page="/IAM/UserList" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+            <a asp-area="Identity" asp-page="/IAM/OrganizationList" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
         </li>
         <li class="nav-item">
             <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="updateEntity()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
@@ -41,16 +38,8 @@
     <br />
 
     <div class="form-group">
-        <label class="control-label">Email<span style="color: red"> *</span></label>
-        <input id="tb_email" type="text" class="form-control form-control-sm" v-model="model.email" />
-    </div>
-    <div class="form-group">
-        <label class="control-label">First Name<span style="color: red"> *</span></label>
-        <input id="tb_firstname" type="text" class="form-control form-control-sm" v-model="model.firstName" />
-    </div>
-    <div class="form-group">
-        <label class="control-label">Last Name<span style="color: red"> *</span></label>
-        <input id="tb_lastname" type="text" class="form-control form-control-sm" v-model="model.lastName" />
+        <label class="control-label">Name<span style="color: red"> *</span></label>
+        <input id="tb_email" type="text" class="form-control form-control-sm" v-model="model.name" />
     </div>
 
 
@@ -66,16 +55,15 @@
             data:
             {
                 model: {  },
-                users: [],
                 idgen: -1
             },
-            methods:
-            {
-                updateEntity: function ()
+            methods: {
+
+               updateEntity: function ()
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/IAM/")';
-                    var endpointurl = baseurl + "User/@Model.Id?handler=UpdateEntity";
+                    var endpointurl = baseurl + "Organization/@Model.Id?handler=UpdateEntity";
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                     $.ajax({
@@ -99,6 +87,7 @@
                     });
                 }
 
+
             },
             computed:
             {
@@ -112,7 +101,7 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/IAM/")';
-                var endpointurl = baseurl + "User/@Model.Id?handler=Load";
+                var endpointurl = baseurl + "Organization/@Model.Id?handler=Load";
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;

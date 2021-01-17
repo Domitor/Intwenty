@@ -34,7 +34,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             Id = id;   
         }
 
-        public async Task<JsonResult> OnGetLoad(string id)
+        public async Task<IActionResult> OnGetLoad(string id)
         {
             var client = DataRepository.GetIAMDataClient();
             await client.OpenAsync();
@@ -44,21 +44,23 @@ namespace Intwenty.Areas.Identity.Pages.IAM
         }
 
 
-        /*
-        public async Task<JsonResult> OnPostAddUser([FromBody] IntwentyUserVm model)
+        
+        public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyUserVm model)
         {
-            var user = new IntwentyUser();
-            user.UserName = model.Email;
-            user.Email = model.Email;
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.EmailConfirmed = true;
 
-            await UserManager.CreateAsync(user);
+            var user = await UserManager.FindByNameAsync(model.UserName);
+            if (user != null)
+            {
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                await UserManager.UpdateAsync(user);
+                return await OnGetLoad(user.Id);
+            }
 
-            return await Load();
+            return new JsonResult("{}");
+          
         }
-        */
+        
 
 
     }

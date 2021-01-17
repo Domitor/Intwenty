@@ -31,6 +31,8 @@ namespace Intwenty.Areas.Identity.Models
 
         public string LastLogin { get; set; }
 
+        public bool ModelSaved { get; set; }
+
         public IntwentyUserVm()
         {
 
@@ -57,7 +59,4 @@ namespace Intwenty.Areas.Identity.Models
 
     }
 
-    public class IntwentyRoleVm
-    {
-    }
 }

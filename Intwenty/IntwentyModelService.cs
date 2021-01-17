@@ -1637,6 +1637,8 @@ namespace Intwenty
                 client.CreateTable<EndpointItem>();
 
                 client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyOrganization>(); //security_Organization
+                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
                 client.CreateTable<IntwentyProduct>(); //security_Product
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
@@ -1674,6 +1676,8 @@ namespace Intwenty
                 client.Open();
 
                 client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyOrganization>(); //security_Organization
+                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
                 client.CreateTable<IntwentyProduct>(); //security_Product
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission

@@ -109,14 +109,13 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             return Load().Result;
         }
 
-        public JsonResult OnPostDeleteUser([FromBody] IntwentyUserVm model)
+        public async Task<JsonResult> OnPostDeleteEntity([FromBody] IntwentyUserVm model)
         {
-            var user = UserManager.FindByIdAsync(model.Id).Result;
+            var user = await UserManager.FindByIdAsync(model.Id);
             if (user != null)
-                UserManager.DeleteAsync(user);
+                await UserManager.DeleteAsync(user);
 
-
-            return Load().Result;
+            return await Load();
         }
 
     }
