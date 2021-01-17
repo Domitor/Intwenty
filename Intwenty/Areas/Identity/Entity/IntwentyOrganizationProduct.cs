@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableName("security_ProductCustomer")]
+    [DbTableName("security_OrganizationProducts")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyProductCustomer
+    public class IntwentyOrganizationProduct
     {
         [AutoIncrement]
         public int Id { get; set; }
 
         public string ProductId { get; set; }
 
+        public string ProductName { get; set; }
+
         public int OrganizationId { get; set; }
-
-        public string UserId { get; set; }
-
 
     }
 }

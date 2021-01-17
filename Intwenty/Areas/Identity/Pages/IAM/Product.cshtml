@@ -13,7 +13,19 @@
     <br />
     <div class="card">
         <div class="card-header"><h2>Product</h2></div>
-        <div class="card-body">Manage the product <b>{{model.productName}}</b></div>
+        <div class="card-body">
+            Manage the product <b>{{model.productName}}</b>
+            <br />
+            <br />
+            <ul class="nav">
+                <li class="nav-item">
+                    <a asp-area="Identity" asp-page="/IAM/ProductList" role="button" class="btn btn-sm btn-outline-secondary"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="updateEntity()" style="margin-left:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
+                </li>
+            </ul>
+        </div>
     </div>
     <br />
     <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="model.modelSaved">
@@ -24,14 +36,7 @@
     </div>
 
 
-    <ul class="nav">
-        <li class="nav-item">
-            <a asp-area="Identity" asp-page="/IAM/ProductList" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
-        </li>
-        <li class="nav-item">
-            <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="updateEntity()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
-        </li>
-    </ul>
+  
     <br />
 
     <div class="form-group">

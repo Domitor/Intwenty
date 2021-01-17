@@ -19,17 +19,19 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
-        private UserManager<IntwentyUser> UserManager { get; }
+        private IntwentyUserManager UserManager { get; }
         private IIntwentyOrganizationManager OrganizationManager  { get; }
+        private IIntwentyProductManager ProductManager { get; }
 
         public int Id { get; set; }
 
-        public OrganizationModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyOrganizationManager orgmanager, UserManager<IntwentyUser> usermanager)
+        public OrganizationModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyOrganizationManager orgmanager, IntwentyUserManager usermanager, IIntwentyProductManager productmanager)
         {
             DataRepository = ms;
             ModelRepository = sr;
             OrganizationManager = orgmanager;
             UserManager = usermanager;
+            ProductManager = productmanager;
         }
 
         public void OnGet(int id)
@@ -39,8 +41,39 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<JsonResult> OnGetLoad(int id)
         {
-            var result = await OrganizationManager.FindByIdAsync(id);
-            return new JsonResult(new IntwentyOrganizationVm(result));
+            var org = await OrganizationManager.FindByIdAsync(id);
+            var members = await OrganizationManager.GetMembers(id);
+            var users = await UserManager.GetUsers();
+
+            var model = new IntwentyOrganizationVm(org);
+
+            foreach (var m in members)
+            {
+                var orgmembervm = new IntwentyOrganizationMemberVm(m);
+                var user = users.Find(p => p.Id == m.UserId);
+                if (user != null)
+                {
+                    orgmembervm.FirstName = user.FirstName;
+                    orgmembervm.LastName = user.LastName;
+                }
+
+                model.Members.Add(orgmembervm);
+
+            }
+
+            return new JsonResult(model);
+        }
+
+        public async Task<JsonResult> OnGetLoadUsers(int id)
+        {
+            var t = await UserManager.GetUsers();
+            return new JsonResult(t);
+        }
+
+        public async Task<JsonResult> OnGetLoadProducts(int id)
+        {
+            var t = await ProductManager.GetAll();
+            return new JsonResult(t);
         }
 
         public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyOrganizationVm model)
@@ -55,6 +88,37 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             }
 
             return new JsonResult("{}");
+
+        }
+
+        public async Task<IActionResult> OnPostAddMember([FromBody] IntwentyOrganizationMemberVm model)
+        {
+            var user = await UserManager.FindByIdAsync(model.UserId);
+            if (user==null)
+                return await OnGetLoad(model.OrganizationId);
+
+            await OrganizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = model.OrganizationId,  UserId = model.UserId, UserName = user.UserName });
+            return await OnGetLoad(model.OrganizationId);
+
+        }
+
+        public async Task<IActionResult> OnPostRemoveMember([FromBody] IntwentyOrganizationMemberVm model)
+        {
+            await OrganizationManager.RemoveMemberAsync(new IntwentyOrganizationMember() { Id = model.Id, OrganizationId = model.OrganizationId, UserId = model.UserId });
+            return await OnGetLoad(model.OrganizationId);
+
+        }
+
+        public async Task<IActionResult> OnPostAddProduct([FromBody] IntwentyOrganizationProduct model)
+        {
+            await OrganizationManager.AddProductAsync(model);
+            return await OnGetLoad(model.OrganizationId);
+        }
+
+        public async Task<IActionResult> OnPostRemoveProduct([FromBody] IntwentyOrganizationProduct model)
+        {
+            await OrganizationManager.RemoveProductAsync(model);
+            return await OnGetLoad(model.OrganizationId);
 
         }
 

@@ -1,7 +1,7 @@
 ﻿@page
-@model OrganizationListModel
+@model AjazRazorPageEditTemplateModel
 @{
-    ViewData["Title"] = "Organizations";
+    ViewData["Title"] = "[Entities]";
 }
 
 @await Html.PartialAsync("_Modals")
@@ -12,8 +12,8 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>Organizations</h2></div>
-        <div class="card-body">Add and remove user organizations</div>
+        <div class="card-header"><h2>[Entities]</h2></div>
+        <div class="card-body">Add and remove [Entities]</div>
     </div>
 
     <br />
@@ -21,7 +21,7 @@
 
     <div>
 
-        <div class="btn btn-sm btn-secondary" v-on:click="addEntity">
+        <div class="btn btn-sm btn-secondary" v-on:click="addEntity()">
             <span class="fa fa-plus"></span>
         </div>
     </div>
@@ -40,7 +40,7 @@
         <tbody v-for="item in list">
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="deleteEntity(item)" title=" Delete"><i class="fa fa-trash"></i></div></td>
-                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'Organization/' + item.id" title="Edit"><i class="fas fa-edit"></i></a></td>
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'Product/' + item.id" title="Edit"><i class="fas fa-edit"></i></a></td>
                 <td>{{item.id}}</td>
                 <td>{{item.name}}</td>
 
@@ -52,7 +52,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Organization</h5>
+                    <h5 class="modal-title">Add [Entity]</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -60,7 +60,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="control-label">Name<span style="color: red"> *</span></label>
-                        <input id="tb_firstname" type="text" class="form-control form-control-sm" v-model="model.name" />
+                        <input id="tb_firstname" type="text" class="form-control form-control-sm" v-model="model.productName" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -96,7 +96,7 @@
                     var okfunc = function ()
                     {
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "OrganizationList?handler=AddEntity";
+                        var endpointurl = baseurl + "AjazRazorPageListTemplate?handler=AddEntity";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -130,7 +130,7 @@
                     {
 
                         var baseurl = '@Url.Content("~/Identity/IAM/")';
-                        var endpointurl = baseurl + "OrganizationList?handler=DeleteEntity";
+                        var endpointurl = baseurl + "AjazRazorPageListTemplate?handler=DeleteEntity";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                         $.ajax({
@@ -145,12 +145,12 @@
                                 context.list = response;
                             },
                             error: function (response) {
-                                //raiseErrorModal(response.responseJSON);
+                                raiseErrorModal(response.responseJSON);
                             }
                         });
                      }
 
-                    raiseYesNoModal("Delete Organization ?", "No users will be deleted, continue ?", yesfunc);
+                    raiseYesNoModal("Delete Product ?", "If you proceed all access to it will be deleted, continue ?", yesfunc);
                 }
             },
             computed:
@@ -166,7 +166,7 @@
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/IAM/")';
-                var endpointurl = baseurl + "OrganizationList?handler=Load";
+                var endpointurl = baseurl + "AjazRazorPageListTemplate?handler=Load";
                 $.get(endpointurl, function (response) {
                   context.list = response;
                 });

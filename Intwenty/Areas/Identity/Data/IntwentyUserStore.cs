@@ -400,7 +400,7 @@ namespace Intwenty.Areas.Identity.Data
 
         }
 
-        public List<IntwentyUser> GetAllUsers()
+        public async Task<List<IntwentyUser>> GetAllUsers()
         {
             List<IntwentyUser> res = null;
 
@@ -410,9 +410,9 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var users = client.GetEntities<IntwentyUser>();
-            client.Close();
+            await client.OpenAsync();
+            var users = await client.GetEntitiesAsync<IntwentyUser>();
+            await client.CloseAsync();
             UserCache.Set(UsersCacheKey, users);
             return users;
 

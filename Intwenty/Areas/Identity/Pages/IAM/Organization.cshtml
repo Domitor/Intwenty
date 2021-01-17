@@ -13,7 +13,19 @@
     <br />
     <div class="card">
         <div class="card-header"><h2>Organization</h2></div>
-        <div class="card-body">Manage the organization <b>{{model.name}}</b></div>
+        <div class="card-body">
+            Manage the organization <b>{{model.name}}</b>
+            <br />
+            <br />
+            <ul class="nav">
+                <li class="nav-item">
+                    <a asp-area="Identity" asp-page="/IAM/OrganizationList" role="button" class="btn btn-sm btn-outline-secondary"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="updateEntity()" style="margin-left:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
+                </li>
+            </ul>
+        </div>
     </div>
     <br />
 
@@ -24,17 +36,6 @@
         </button>
     </div>
 
-
-    <ul class="nav">
-        <li class="nav-item">
-            <a asp-area="Identity" asp-page="/IAM/OrganizationList" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
-        </li>
-        <li class="nav-item">
-            <button class="btn btn-sm btn-outline-primary" type="button" v-on:click="updateEntity()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> Save</button>
-        </li>
-    </ul>
-
-
     <br />
 
     <div class="form-group">
@@ -42,6 +43,117 @@
         <input id="tb_email" type="text" class="form-control form-control-sm" v-model="model.name" />
     </div>
 
+    <br />
+
+
+
+    <ul class="nav">
+        <li class="nav-item">
+            <button class="btn btn-sm btn-secondary" v-on:click="addMember" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+        </li>
+        <li class="nav-item">
+            <h5>Members</h5>
+        </li>
+    </ul>
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:5%"></th>
+                <th style="width:30%">Name</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in model.members">
+            <tr>
+                <td><div class="btn btn-sm btn-danger" v-on:click="removeMember(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
+                <td>{{item.userName}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <nr />
+
+    <ul class="nav">
+        <li class="nav-item">
+            <button class="btn btn-sm btn-secondary" v-on:click="addProduct" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+        </li>
+        <li class="nav-item">
+            <h5>Products</h5>
+        </li>
+    </ul>
+    <br />
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:5%"></th>
+                <th style="width:30%">Id</th>
+                <th style="width:30%">Name</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in model.products">
+            <tr>
+                <td><div class="btn btn-sm btn-danger" v-on:click="removeProduct(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
+                <td>{{item.id}}</td>
+                <td>{{item.productName}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="modal" id="addMemberModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Member</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="control-label">Select User<span style="color: red"> *</span></label>
+                        <select v-model="member.userId" class="form-control form-control-sm">
+                            <option v-for="item in users" v-bind:value="item.id">{{item.userName}}</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="addMemberModal_okBtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addProductModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Member</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="control-label">Select Product<span style="color: red"> *</span></label>
+                        <select v-model="product.id" class="form-control form-control-sm">
+                            <option v-for="item in products" v-bind:value="item.id">{{item.productName}}</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="addProductModal_okBtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
@@ -54,7 +166,11 @@
             el: '#app',
             data:
             {
-                model: {  },
+                model: {},
+                member: {},
+                product: {},
+                users: [],
+                products: [],
                 idgen: -1
             },
             methods: {
@@ -85,6 +201,140 @@
                             //raiseErrorModal(response.responseJSON);
                         }
                     });
+                },
+                addMember: function ()
+                {
+
+                    var context = this;
+
+                    context.updateEntity();
+
+                    context.member = {organizationId:@Model.Id};
+
+                    var okfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Organization/@Model.Id?handler=AddMember";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.member),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addMemberModal_okBtn").off().on('click', okfunc);
+                    $("#addMemberModal").modal();
+
+                },
+               removeMember: function (item)
+                {
+                    var context = this;
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Organization/@Model.Id?handler=RemoveMember";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.model = response;
+                            },
+                            error: function (response) {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                     }
+
+                    raiseYesNoModal("Remove member ?", "The user will be removed from the organization, continue ?", yesfunc);
+                },
+                addProduct: function ()
+                {
+
+                    var context = this;
+
+                    context.updateEntity();
+
+                    context.product = {organizationId:@Model.Id};
+
+                    var okfunc = function ()
+                    {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Organization/@Model.Id?handler=AddProduct";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.product),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addMemberModal_okBtn").off().on('click', okfunc);
+                    $("#addMemberModal").modal();
+
+                },
+               removeProduct: function (item)
+                {
+                    var context = this;
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "Organization/@Model.Id?handler=RemoveProduct";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.model = response;
+                            },
+                            error: function (response) {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                     }
+
+                    raiseYesNoModal("Remove from Organization ?", "The user will be removed from the organization, continue ?", yesfunc);
                 }
 
 
@@ -105,6 +355,16 @@
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;
+                     var endpointurl = baseurl + "Organization/@Model.Id?handler=LoadUsers";
+                     $.get(endpointurl, function (response)
+                     {
+                         context.users = response;
+                         var endpointurl = baseurl + "Organization/@Model.Id?handler=LoadProducts";
+                         $.get(endpointurl, function (response)
+                         {
+                             context.products = response;
+                         });
+                      });
                 });
             }
         });

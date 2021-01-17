@@ -433,9 +433,9 @@ namespace Intwenty.Areas.Identity.Data
 
         #endregion
 
-        public List<IntwentyUser> GetUsers()
+        public async Task<List<IntwentyUser>> GetUsers()
         {
-            var t = ((IntwentyUserStore)Store).GetAllUsers();
+            var t = await ((IntwentyUserStore)Store).GetAllUsers();
             return t;
         }
 

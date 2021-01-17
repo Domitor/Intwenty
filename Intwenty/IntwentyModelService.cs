@@ -1639,11 +1639,11 @@ namespace Intwenty
                 client.CreateTable<IntwentyUser>(); //security_User
                 client.CreateTable<IntwentyOrganization>(); //security_Organization
                 client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
+                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
                 client.CreateTable<IntwentyProduct>(); //security_Product
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyProductCustomer>(); //security_UserProduct
                 client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
                 client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
@@ -1678,11 +1678,11 @@ namespace Intwenty
                 client.CreateTable<IntwentyUser>(); //security_User
                 client.CreateTable<IntwentyOrganization>(); //security_Organization
                 client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
+                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
                 client.CreateTable<IntwentyProduct>(); //security_Product
                 client.CreateTable<IntwentyProductRole>(); //security_ProductRole
                 client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyProductCustomer>(); //security_UserProduct
                 client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
                 client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
