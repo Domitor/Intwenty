@@ -33,6 +33,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnGetLoad()
         {
+            await Task.Delay(1);
             //Fetch list of entities in the database
             var list = new List<object>();
             return new JsonResult(list);
@@ -40,6 +41,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnPostAddEntity([FromBody] object model)
         {
+            await Task.Delay(1);
             //Create object from model and save it.
             //Return the list
             return await OnGetLoad();

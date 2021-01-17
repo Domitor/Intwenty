@@ -33,12 +33,14 @@ namespace Intwenty.Areas.Identity.Pages
 
         public async Task<JsonResult> OnGetLoad(string id)
         {
+            await Task.Delay(1);
             //FIND OBJECT IN DB AND RETURN
             return new JsonResult(new object());
         }
 
         public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyProductVm model)
         {
+            await Task.Delay(1);
             //FIND OBJECT IN DB, UPDATE FROM MODEL AND SAVE
             /*
             var product = await Manager.FindByIdAsync(model.Id);

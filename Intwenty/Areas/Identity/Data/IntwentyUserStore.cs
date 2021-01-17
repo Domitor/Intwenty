@@ -46,8 +46,13 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
+            var allorgs = await client.GetEntitiesAsync<IntwentyOrganization>();
+            await client.CloseAsync();
+            var defaultorg = allorgs.Find(p => p.Name.ToUpper() == "DEFAULT ORG");
+
+            await client.OpenAsync();
             await client.InsertEntityAsync(user);
-            await client.InsertEntityAsync(new IntwentyProductCustomer() { UserId = user.Id, ProductId = Settings.ProductId });
+            await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = defaultorg.Id });
             await client.CloseAsync();
             return IdentityResult.Success;
         }

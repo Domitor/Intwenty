@@ -19,6 +19,7 @@ namespace Intwenty.Areas.Identity.Data
         Task<IdentityResult> UpdateAsync(IntwentyOrganization organization);
         Task<IdentityResult> DeleteAsync(IntwentyOrganization organization);
         Task<IntwentyOrganization> FindByIdAsync(int id);
+        Task<IntwentyOrganization> FindByNameAsync(string name);
         Task<List<IntwentyOrganization>> GetAllAsync();
         Task<List<IntwentyOrganizationMember>> GetMembersAsync(int organizationid);
         Task<IdentityResult> AddMemberAsync(IntwentyOrganizationMember member);
@@ -75,6 +76,15 @@ namespace Intwenty.Areas.Identity.Data
             var org = await client.GetEntityAsync<IntwentyOrganization>(id);
             await client.CloseAsync();
             return org;
+        }
+
+        public async Task<IntwentyOrganization> FindByNameAsync(string name)
+        {
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var allorgs = await client.GetEntitiesAsync<IntwentyOrganization>();
+            await client.CloseAsync();
+            return allorgs.Find(p=> p.Name.ToUpper() == name.ToUpper());
         }
 
         public async Task<List<IntwentyOrganization>> GetAllAsync()
@@ -139,7 +149,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProduct>();
+            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProductVm>();
             await client.CloseAsync();
             if (allexisting.Exists(p => p.OrganizationId == product.OrganizationId && p.ProductId == product.ProductId))
                 return IdentityResult.Success;
@@ -154,7 +164,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProduct>();
+            var allexisting = await client.GetEntitiesAsync<IntwentyOrganizationProductVm>();
             await client.CloseAsync();
             var current = allexisting.Find(p => p.OrganizationId == product.OrganizationId && p.ProductId == product.ProductId);
             if (current == null)

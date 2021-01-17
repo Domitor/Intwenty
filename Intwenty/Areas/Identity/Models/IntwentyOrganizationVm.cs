@@ -14,6 +14,7 @@ namespace Intwenty.Areas.Identity.Models
         public IntwentyOrganizationVm()
         {
             Members = new List<IntwentyOrganizationMemberVm>();
+            Products = new List<IntwentyOrganizationProductVm>();
         }
 
         public IntwentyOrganizationVm(IntwentyOrganization entity)
@@ -21,6 +22,7 @@ namespace Intwenty.Areas.Identity.Models
             Id = entity.Id;
             Name = entity.Name;
             Members = new List<IntwentyOrganizationMemberVm>();
+            Products = new List<IntwentyOrganizationProductVm>();
         }
 
         public int Id { get; set; }
@@ -28,6 +30,8 @@ namespace Intwenty.Areas.Identity.Models
         public string Name { get; set; }
 
         public List<IntwentyOrganizationMemberVm> Members { get; set; }
+
+        public List<IntwentyOrganizationProductVm> Products { get; set; }
 
         public bool ModelSaved { get; set; }
 

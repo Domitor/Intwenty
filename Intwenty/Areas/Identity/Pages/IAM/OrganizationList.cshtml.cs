@@ -35,7 +35,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnGetLoad()
         {
-            var list = await OrganizationManager.GetAll();
+            var list = await OrganizationManager.GetAllAsync();
             return new JsonResult(list.Select(p=> new IntwentyOrganizationVm(p)).ToList());
         }
 

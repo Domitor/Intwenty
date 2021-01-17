@@ -32,6 +32,7 @@ namespace Intwenty.Seed
             var userManager = services.GetRequiredService<IntwentyUserManager>();
             var roleManager = services.GetRequiredService<RoleManager<IntwentyProductRole>>();
             var productManager = services.GetRequiredService<IIntwentyProductManager>();
+            var organizationManager = services.GetRequiredService<IIntwentyOrganizationManager>();
 
             IntwentyProduct product = null;
             product = productManager.FindByIdAsync(Settings.Value.ProductId).Result;
@@ -39,13 +40,22 @@ namespace Intwenty.Seed
             {
                 product = new IntwentyProduct();
                 product.Id = Settings.Value.ProductId;
-                product.WebAPIPath = "API";
-                product.ApplicationPath = "APPLICATION";
-                product.ApplicationAPIPath = "APPLICATION/API";
                 product.ProductName = Settings.Value.SiteTitle;
-                product.ProductURI = "https://localhost:33333";
                 productManager.CreateAsync(product);
             }
+
+            IntwentyOrganization org = null;
+            org = organizationManager.FindByNameAsync("Default Org").Result;
+            if (org == null)
+            {
+                org = new IntwentyOrganization();
+                org.Name = "Default Org";
+                organizationManager.CreateAsync(org);
+                org = organizationManager.FindByNameAsync("Default Org").Result;
+                organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName  });
+            }
+
+           
 
             var admrole = roleManager.FindByNameAsync("SUPERADMIN");
             if (admrole.Result == null)
