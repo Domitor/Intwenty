@@ -35,7 +35,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnGetLoad()
         {
-            var list = await ProductManager.GetAll();
+            var list = await ProductManager.GetAllAsync();
             return new JsonResult(list);
         }
 

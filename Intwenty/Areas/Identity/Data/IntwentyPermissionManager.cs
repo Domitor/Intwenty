@@ -12,12 +12,16 @@ using System.Linq;
 
 namespace Intwenty.Areas.Identity.Data
 {
+
+    /// <summary>
+    /// OBSOLETE 20210118
+    /// </summary>
     public interface IIntwentyPermissionManager
     {
-        Task<IdentityResult> CreateAsync(IntwentyProductPermission permission);
-        Task<IdentityResult> DeleteAsync(IntwentyProductPermission permission);
-        Task<IntwentyProductPermission> FindByIdAsync(string permissionid);
-        Task<List<IntwentyProductPermission>> GetPermissions(string productid);
+        Task<IdentityResult> CreateAsync(IntwentyProductAuthorizationItem permission);
+        Task<IdentityResult> DeleteAsync(IntwentyProductAuthorizationItem permission);
+        Task<IntwentyProductAuthorizationItem> FindByIdAsync(string permissionid);
+        Task<List<IntwentyProductAuthorizationItem>> GetPermissions(string productid);
     }
 
     public class IntwentyPermissionManager : IIntwentyPermissionManager
@@ -31,7 +35,7 @@ namespace Intwenty.Areas.Identity.Data
             Settings = settings.Value;
         }
 
-        public async Task<IdentityResult> CreateAsync(IntwentyProductPermission permission)
+        public async Task<IdentityResult> CreateAsync(IntwentyProductAuthorizationItem permission)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -40,7 +44,7 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> DeleteAsync(IntwentyProductPermission permission)
+        public async Task<IdentityResult> DeleteAsync(IntwentyProductAuthorizationItem permission)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -51,21 +55,21 @@ namespace Intwenty.Areas.Identity.Data
 
        
 
-        public async Task<IntwentyProductPermission> FindByIdAsync(string permissionid)
+        public async Task<IntwentyProductAuthorizationItem> FindByIdAsync(string permissionid)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var permissions = await client.GetEntitiesAsync<IntwentyProductPermission>();
+            var permissions = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
             var permission = permissions.Find(p => p.Id == permissionid);
             await client.CloseAsync();
             return permission;
         }
 
-        public async Task<List<IntwentyProductPermission>> GetPermissions(string productid)
+        public async Task<List<IntwentyProductAuthorizationItem>> GetPermissions(string productid)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var permissions = await client.GetEntitiesAsync<IntwentyProductPermission>();
+            var permissions = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
             await client.CloseAsync();
             return permissions;
         }

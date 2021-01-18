@@ -1323,7 +1323,7 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("Model/API/DeleteUserPermission")]
-        public IActionResult DeleteUserPermission([FromBody] IntwentyUserPermissionItem model)
+        public IActionResult DeleteUserPermission([FromBody] IntwentyAuthorizationVm model)
         {
             return new JsonResult("{}");
 

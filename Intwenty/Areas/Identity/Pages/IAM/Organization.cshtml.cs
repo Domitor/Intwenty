@@ -79,7 +79,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<JsonResult> OnGetLoadProducts(int id)
         {
-            var t = await ProductManager.GetAll();
+            var t = await ProductManager.GetAllAsync();
             return new JsonResult(t);
         }
 

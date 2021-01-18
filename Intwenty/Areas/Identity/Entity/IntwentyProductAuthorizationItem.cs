@@ -4,22 +4,27 @@ using Microsoft.AspNetCore.Identity;
 namespace Intwenty.Areas.Identity.Entity
 {
 
-    [DbTableName("security_ProductPermission")]
+    [DbTableName("security_ProductAuthorizationItem")]
     [DbTablePrimaryKey("Id")]
-    public class IntwentyProductPermission
+    public class IntwentyProductAuthorizationItem : IdentityRole
     {
-        public string Id { get; set; }
 
         public string ProductId { get; set; }
 
-        public string Title { get; set; }
 
-        public string PermissionType { get; set; }
+        //ROLE, SYSTEM, APP, VIEW
+        public string AuthorizationType { get; set; }
 
         /// <summary>
         /// Reference to an Intwenty.Model.SystemModelItem or Intwenty.Model.ApplicationModelItem  
         /// </summary>
-        public string MetaCode { get; set; }
+        public string MetaCode 
+        {
+            get
+            {
+                return NormalizedName;
+            }
+        }
 
        
     }

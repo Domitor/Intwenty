@@ -30,7 +30,7 @@ namespace Intwenty.Seed
 
 
             var userManager = services.GetRequiredService<IntwentyUserManager>();
-            var roleManager = services.GetRequiredService<RoleManager<IntwentyProductRole>>();
+            var roleManager = services.GetRequiredService<RoleManager<IntwentyProductAuthorizationItem>>();
             var productManager = services.GetRequiredService<IIntwentyProductManager>();
             var organizationManager = services.GetRequiredService<IIntwentyOrganizationManager>();
 
@@ -60,45 +60,50 @@ namespace Intwenty.Seed
             var admrole = roleManager.FindByNameAsync("SUPERADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyProductRole();
+                var role = new IntwentyProductAuthorizationItem();
                 role.ProductId = product.Id;
                 role.Name = "SUPERADMIN";
+                role.AuthorizationType = "ROLE";
                 roleManager.CreateAsync(role);
             }
 
             admrole = roleManager.FindByNameAsync("USERADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyProductRole();
+                var role = new IntwentyProductAuthorizationItem();
                 role.ProductId = product.Id;
                 role.Name = "USERADMIN";
+                role.AuthorizationType = "ROLE";
                 roleManager.CreateAsync(role);
             }
 
             admrole = roleManager.FindByNameAsync("SYSTEMADMIN");
             if (admrole.Result == null)
             {
-                var role = new IntwentyProductRole();
+                var role = new IntwentyProductAuthorizationItem();
                 role.ProductId = product.Id;
                 role.Name = "SYSTEMADMIN";
+                role.AuthorizationType = "ROLE";
                 roleManager.CreateAsync(role);
             }
 
             var userrole = roleManager.FindByNameAsync("USER");
             if (userrole.Result == null)
             {
-                var role = new IntwentyProductRole();
+                var role = new IntwentyProductAuthorizationItem();
                 role.ProductId = product.Id;
                 role.Name = "USER";
+                role.AuthorizationType = "ROLE";
                 roleManager.CreateAsync(role);
             }
 
             userrole = roleManager.FindByNameAsync("APIUSER");
             if (userrole.Result == null)
             {
-                var role = new IntwentyProductRole();
+                var role = new IntwentyProductAuthorizationItem();
                 role.ProductId = product.Id;
                 role.Name = "APIUSER";
+                role.AuthorizationType = "ROLE";
                 roleManager.CreateAsync(role);
             }
 

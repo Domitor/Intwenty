@@ -48,7 +48,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseListViewAuthorization)
                 return View(current_model);
-            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -76,7 +76,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseCreateViewAuthorization)
                 return View(current_model);
-            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
+            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
                 return View(current_model);
             else
                 return Forbid();
@@ -108,7 +108,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseEditViewAuthorization)
                 return View(current_model);
-            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -140,7 +140,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseDetailViewAuthorization)
                 return View(current_model);
-            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();
@@ -169,7 +169,7 @@ namespace Intwenty.Controllers
                 return NotFound();
             if (!current_model.UseEditViewAuthorization)
                 return View(current_model);
-            if (await UserManager.HasPermission(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
+            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
                 return View(current_model);
             else
                 return Forbid();

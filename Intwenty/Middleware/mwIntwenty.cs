@@ -62,7 +62,6 @@ namespace Intwenty.Middleware
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
             services.TryAddTransient<IEmailSender, EmailService>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
-            services.TryAddTransient<IIntwentyPermissionManager, IntwentyPermissionManager>();
             services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();
 
 
@@ -95,9 +94,9 @@ namespace Intwenty.Middleware
 
 
             })
-             .AddRoles<IntwentyProductRole>()
+             .AddRoles<IntwentyProductAuthorizationItem>()
              .AddUserStore<IntwentyUserStore>()
-             .AddRoleStore<IntwentyProductRoleStore>()
+             .AddRoleStore<IntwentyProductAuthorizationStore>()
              .AddUserManager<IntwentyUserManager>()
              .AddSignInManager<IntwentySignInManager>();
             
@@ -321,16 +320,14 @@ namespace Intwenty.Middleware
                 client.CreateTable<TranslationItem>();
                 client.CreateTable<EndpointItem>();
 
+                client.CreateTable<IntwentyAuthorization>(); //security_Authorization
                 client.CreateTable<IntwentyUser>(); //security_User
                 client.CreateTable<IntwentyOrganization>(); //security_Organization
                 client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
                 client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
                 client.CreateTable<IntwentyProduct>(); //security_Product
-                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
-                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
+                client.CreateTable<IntwentyProductAuthorizationItem>(); //security_ProductAuthorizationItem
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
-                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
                 client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
                 client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
@@ -360,16 +357,14 @@ namespace Intwenty.Middleware
 
                 client.Open();
 
+                client.CreateTable<IntwentyAuthorization>(); //security_Authorization
                 client.CreateTable<IntwentyUser>(); //security_User
                 client.CreateTable<IntwentyOrganization>(); //security_Organization
                 client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
                 client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
                 client.CreateTable<IntwentyProduct>(); //security_Product
-                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
-                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
+                client.CreateTable<IntwentyProductAuthorizationItem>(); //security_ProductAuthorizationItem
                 client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
-                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
                 client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
                 client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin

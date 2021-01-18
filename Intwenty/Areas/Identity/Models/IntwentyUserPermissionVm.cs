@@ -15,24 +15,24 @@ namespace Intwenty.Areas.Identity.Models
 
         public List<IntwentyUserRoleItem> UserRoles { get; set; }
 
-        public List<IntwentyUserPermissionItem> UserSystemPermissions { get; set; }
+        public List<IntwentyAuthorizationVm> UserSystemPermissions { get; set; }
 
-        public List<IntwentyUserPermissionItem> UserApplicationPermissions { get; set; }
+        public List<IntwentyAuthorizationVm> UserApplicationPermissions { get; set; }
 
         public List<IntwentyUserRoleItem> Roles { get; set; }
 
-        public List<IntwentyUserPermissionItem> ApplicationPermissions { get; set; }
+        public List<IntwentyAuthorizationVm> ApplicationPermissions { get; set; }
 
-        public List<IntwentyUserPermissionItem> SystemPermissions { get; set; }
+        public List<IntwentyAuthorizationVm> SystemPermissions { get; set; }
 
         public IntwentyUserPermissionVm()
         {
             UserRoles = new List<IntwentyUserRoleItem>();
             Roles = new List<IntwentyUserRoleItem>();
-            UserSystemPermissions = new List<IntwentyUserPermissionItem>();
-            UserApplicationPermissions = new List<IntwentyUserPermissionItem>();
-            SystemPermissions = new List<IntwentyUserPermissionItem>();
-            ApplicationPermissions = new List<IntwentyUserPermissionItem>();
+            UserSystemPermissions = new List<IntwentyAuthorizationVm>();
+            UserApplicationPermissions = new List<IntwentyAuthorizationVm>();
+            SystemPermissions = new List<IntwentyAuthorizationVm>();
+            ApplicationPermissions = new List<IntwentyAuthorizationVm>();
         }
     }
 }

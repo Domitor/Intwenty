@@ -557,7 +557,7 @@ namespace Intwenty
             if (UserManager.IsInRoleAsync(user, "SUPERADMIN").Result)
                 return apps;
 
-            var list = UserManager.GetUserPermissions(user).Result;
+            var list = UserManager.GetUserAuthorizations(user).Result;
 
             foreach (var a in apps)
             {
@@ -566,7 +566,7 @@ namespace Intwenty
                 {
 
                     //There is an explicit permission set
-                    if (p.IsApplicationPermission && p.MetaCode == a.MetaCode)
+                    if (p.IsApplicationAuthorization && p.AuthorizationItemNormalizedName == a.MetaCode)
                     {
                         exist_explicit = true;
 
@@ -583,7 +583,7 @@ namespace Intwenty
                 {
                     foreach (var p in list)
                     {
-                        if (p.IsSystemPermission && p.MetaCode == a.SystemMetaCode)
+                        if (p.IsSystemAuthorization && p.AuthorizationItemNormalizedName == a.SystemMetaCode)
                         {
                             if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
                                 (requested_permission == IntwentyPermission.Modify && p.Modify) ||
@@ -668,7 +668,7 @@ namespace Intwenty
 
             Client.DeleteEntity(existing);
 
-            var permissions = Client.GetEntities<IntwentyUserProductPermission>().Where(p => p.MetaCode == existing.MetaCode && p.PermissionType == ApplicationModelItem.MetaTypeApplication);
+            var permissions = Client.GetEntities<IntwentyAuthorization>().Where(p => p.AuthorizationItemNormalizedName == existing.MetaCode && p.AutorizationItemType == ApplicationModelItem.MetaTypeApplication);
             if (permissions != null && permissions.Count() > 0)
                 Client.DeleteEntities(permissions);
 

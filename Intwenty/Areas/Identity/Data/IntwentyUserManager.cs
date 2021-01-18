@@ -140,12 +140,12 @@ namespace Intwenty.Areas.Identity.Data
 
              */
 
-        public async Task<List<IntwentyUserPermissionItem>> GetUserPermissions(IntwentyUser user)
+        public async Task<List<IntwentyAuthorizationVm>> GetUserAuthorizations(IntwentyUser user)
         {
             if (user == null)
                 throw new InvalidOperationException("Error when fetching user permissions.");
 
-            List<IntwentyUserPermissionItem> res = null;
+            List<IntwentyAuthorizationVm> res = null;
 
             if (UserCache.TryGetValue(PermissionCacheKey + "_" + user.Id, out res))
             {
@@ -154,9 +154,12 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var result = await client.GetEntitiesAsync<IntwentyUserProductPermission>();
-            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.ProductId == Settings.ProductId).Select(p => new IntwentyUserPermissionItem(p)).ToList();
+            var result = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.ProductId == Settings.ProductId).Select(p => new IntwentyAuthorizationVm(p)).ToList();
             await client.CloseAsync();
+
+
+            //TODO: ADD Organization Authorizations that is not explitly set on the user
             
             UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
 
@@ -165,17 +168,17 @@ namespace Intwenty.Areas.Identity.Data
 
    
 
-        public async Task<bool> HasPermission(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
-            return await HasPermissionInternal(claimprincipal, requested_app.Application, requested_action);
+            return await HasAuthorizationInternal(claimprincipal, requested_app.Application, requested_action);
         }
 
-        public async Task<bool> HasPermission(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
         {
-            return await HasPermissionInternal(claimprincipal, requested_app, requested_action);
+            return await HasAuthorizationInternal(claimprincipal, requested_app, requested_action);
         }
 
-        public async Task<bool> HasPermissionInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        private async Task<bool> HasAuthorizationInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
         {
             if (!claimprincipal.Identity.IsAuthenticated)
                 return false;
@@ -186,21 +189,21 @@ namespace Intwenty.Areas.Identity.Data
 
         
 
-            if (this.IsInRoleAsync(user, "SUPERADMIN").Result)
+            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
                 return true;
 
        
-            var list = await GetUserPermissions(user);
+            var list = await GetUserAuthorizations(user);
 
             var explicit_exists=false;
 
-            if (list.Exists(p => p.IsApplicationPermission && p.MetaCode == requested_app.MetaCode))            
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationItemNormalizedName == requested_app.MetaCode))            
             {
                 explicit_exists = true;
             }
 
-            if (list.Exists(p => p.IsApplicationPermission &&
-                                p.MetaCode == requested_app.MetaCode &&
+            if (list.Exists(p => p.IsApplicationAuthorization &&
+                                 p.AuthorizationItemNormalizedName == requested_app.MetaCode &&
                                 (
                                 (requested_action == IntwentyPermission.Read && (p.Read|| p.Delete|| p.Modify)) ||
                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
@@ -211,8 +214,8 @@ namespace Intwenty.Areas.Identity.Data
                 return true;
             }
 
-            if (list.Exists(p => p.PermissionType == SystemModelItem.MetaTypeSystem &&
-                                 p.MetaCode == requested_app.SystemMetaCode &&
+            if (list.Exists(p => p.IsSystemAuthorization &&
+                                 p.AuthorizationItemNormalizedName == requested_app.SystemMetaCode &&
                                  (
                                  (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
                                  (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
