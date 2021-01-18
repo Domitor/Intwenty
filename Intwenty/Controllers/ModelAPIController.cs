@@ -1275,7 +1275,7 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("Model/API/SaveUserPermissions")]
-        public IActionResult SaveUserPermissions([FromBody] IntwentyUserPermissionVm model)
+        public IActionResult SaveUserPermissions([FromBody] dynamic model)
         {
             return new JsonResult("{}");
 

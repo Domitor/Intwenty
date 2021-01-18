@@ -668,7 +668,7 @@ namespace Intwenty
 
             Client.DeleteEntity(existing);
 
-            var permissions = Client.GetEntities<IntwentyAuthorization>().Where(p => p.AuthorizationItemNormalizedName == existing.MetaCode && p.AutorizationItemType == ApplicationModelItem.MetaTypeApplication);
+            var permissions = Client.GetEntities<IntwentyAuthorization>().Where(p => p.AuthorizationItemNormalizedName == existing.MetaCode && p.AuthorizationItemType == ApplicationModelItem.MetaTypeApplication);
             if (permissions != null && permissions.Count() > 0)
                 Client.DeleteEntities(permissions);
 

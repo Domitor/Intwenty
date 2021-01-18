@@ -21,10 +21,10 @@ namespace Intwenty.Areas.Identity.Entity
         public string AuthorizationItemId { get; set; }
         public string AuthorizationItemName { get; set; }
         public string AuthorizationItemNormalizedName { get; set; }
-        public string AutorizationItemType { get; set; }
-        public bool Read { get; set; }
-        public bool Modify { get; set; }
-        public bool Delete { get; set; }
+        public string AuthorizationItemType { get; set; }
+        public bool ReadAuth { get; set; }
+        public bool ModifyAuth { get; set; }
+        public bool DeleteAuth { get; set; }
 
     }
 }

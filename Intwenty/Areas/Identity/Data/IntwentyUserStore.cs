@@ -235,7 +235,7 @@ namespace Intwenty.Areas.Identity.Data
                 return Task.FromResult(IdentityResult.Success);
 
             var urole = new IntwentyAuthorization() { AuthorizationItemId = productrole.Id, UserId = user.Id, ProductId = productrole.ProductId, 
-                                                      AuthorizationItemName = productrole.Name, AutorizationItemType = "ROLE", UserName = user.UserName, 
+                                                      AuthorizationItemName = productrole.Name, AuthorizationItemType = "ROLE", UserName = user.UserName, 
                                                       AuthorizationItemNormalizedName = productrole.NormalizedName };
             client.Open();
             client.InsertEntity(urole);
@@ -263,13 +263,13 @@ namespace Intwenty.Areas.Identity.Data
             result = new List<string>();
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var userroles = await client.GetResultSetAsync(string.Format("SELECT IntwentyAutorizationItemNormalizedName FROM security_Authorization WHERE IntwentyAutorizationItemType='ROLE' AND UserId='{0}' AND ProductId='{1}'", user.Id, Settings.ProductId), false);
+            var userroles = await client.GetResultSetAsync(string.Format("SELECT AuthorizationItemNormalizedName FROM security_Authorization WHERE AuthorizationItemType='ROLE' AND UserId='{0}' AND ProductId='{1}'", user.Id, Settings.ProductId), false);
             await client.CloseAsync();
 
            
             foreach (var ur in userroles.Rows)
             {
-                result.Add(ur.GetAsString("IntwentyAutorizationItemNormalizedName"));
+                result.Add(ur.GetAsString("AuthorizationItemNormalizedName"));
             }
 
             UserCache.Set(UserRolesCacheKey + "_" + user.Id, result);

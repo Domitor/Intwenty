@@ -18,6 +18,8 @@ namespace Intwenty.Areas.Identity.Entity
         /// <summary>
         /// Reference to an Intwenty.Model.SystemModelItem or Intwenty.Model.ApplicationModelItem  
         /// </summary>
+        
+        [Ignore]
         public string MetaCode 
         {
             get

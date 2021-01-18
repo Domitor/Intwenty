@@ -82,7 +82,7 @@ namespace Intwenty.Controllers
                 return Unauthorized();
             }
 
-            var productinfo = await OrganizationManager.GetOrganizationProductAsync(productid, user.Id);
+            var productinfo = await OrganizationManager.GetOrganizationProductInfoAsync(productid, user.Id);
             if (productinfo == null)
             {
                 DataRepository.LogError(string.Format("Could not find the organization product, IP {0}", ip));

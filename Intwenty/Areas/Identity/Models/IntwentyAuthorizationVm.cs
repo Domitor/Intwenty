@@ -17,18 +17,18 @@ namespace Intwenty.Areas.Identity.Models
         public IntwentyAuthorizationVm(IntwentyAuthorization entity)
         {
             Id = entity.Id;
-            AutorizationItemType = entity.AutorizationItemType;
-            AutorizationItemId = entity.AuthorizationItemId;
-            AutorizationItemName = entity.AuthorizationItemName;
+            AuthorizationItemType = entity.AuthorizationItemType;
+            AuthorizationItemId = entity.AuthorizationItemId;
+            AuthorizationItemName = entity.AuthorizationItemName;
             AuthorizationItemNormalizedName = entity.AuthorizationItemNormalizedName;
             UserId = entity.UserId;
             UserName = entity.UserName;
             ProductId = entity.ProductId;
             OrganizationId = entity.OrganizationId;
             OrganizationName = entity.OrganizationName;
-            Read = entity.Read;
-            Modify = entity.Modify;
-            Delete = entity.Delete;
+            Read = entity.ReadAuth;
+            Modify = entity.ModifyAuth;
+            Delete = entity.DeleteAuth;
         }
 
         public IntwentyAuthorizationVm()
@@ -64,32 +64,32 @@ namespace Intwenty.Areas.Identity.Models
         public string UserName { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
-        public string AutorizationItemId { get; set; }
-        public string AutorizationItemName { get; set; }
+        public string AuthorizationItemId { get; set; }
+        public string AuthorizationItemName { get; set; }
         public string AuthorizationItemNormalizedName { get; set; }
-        public string AutorizationItemType { get; set; }
+        public string AuthorizationItemType { get; set; }
         public bool Read { get; set; }
         public bool Modify { get; set; }
         public bool Delete { get; set; }
 
         public bool IsSystemAuthorization
         {
-            get { return AutorizationItemType == SystemModelItem.MetaTypeSystem; }
+            get { return AuthorizationItemType == SystemModelItem.MetaTypeSystem; }
         }
 
         public bool IsApplicationAuthorization
         {
-            get { return AutorizationItemType == ApplicationModelItem.MetaTypeApplication; }
+            get { return AuthorizationItemType == ApplicationModelItem.MetaTypeApplication; }
         }
 
         public bool IsProductAuthorization
         {
-            get { return AutorizationItemType == "ROLE"; }
+            get { return AuthorizationItemType == "ROLE"; }
         }
 
         public bool IsViewAuthorization
         {
-            get { return AutorizationItemType == "VIEW"; }
+            get { return AuthorizationItemType == "VIEW"; }
         }
 
 

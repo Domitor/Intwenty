@@ -33,9 +33,11 @@ namespace Intwenty.Areas.Identity.Models
 
         public bool ModelSaved { get; set; }
 
+        public List<IntwentyAuthorizationVm> Authorizations { get; set; }
+
         public IntwentyUserVm()
         {
-
+            Authorizations = new List<IntwentyAuthorizationVm>();
         }
 
         public IntwentyUserVm(IntwentyUser entity)
@@ -54,7 +56,7 @@ namespace Intwenty.Areas.Identity.Models
             MfaActive = entity.TwoFactorEnabled;
             LastLogin = entity.LastLogin;
             AccessFailedCount = entity.AccessFailedCount;
-            
+            Authorizations = new List<IntwentyAuthorizationVm>();
         }
 
     }

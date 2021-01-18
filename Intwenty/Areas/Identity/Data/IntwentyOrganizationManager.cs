@@ -29,7 +29,8 @@ namespace Intwenty.Areas.Identity.Data
         Task<IdentityResult> AddProductAsync(IntwentyOrganizationProduct product);
         Task<IdentityResult> RemoveProductAsync(IntwentyOrganizationProduct product);
         Task<bool> IsProductUser(string productid, IntwentyUser user);
-        Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(string productid, string userid);
+        Task<IntwentyOrganizationProductInfoVm> GetOrganizationProductInfoAsync(string productid, string userid);
+        Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid);
 
 
     }
@@ -206,9 +207,9 @@ namespace Intwenty.Areas.Identity.Data
             return false;
         }
 
-        public async Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(string productid, string userid)
+        public async Task<IntwentyOrganizationProductInfoVm> GetOrganizationProductInfoAsync(string productid, string userid)
         {
-            var sql = "SELECT * from security_OrganizationProducts t1  ";
+            var sql = "SELECT t1.*, t2.Name as OrganizationName FROM security_OrganizationProducts t1 JOIN security_Organization t2 ON t1.OrganizationId = t2.Id ";
             sql += "WHERE t1.ProductId = @ProductId ";
             sql += "AND EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t1.Id)";
             var parameters = new List<IntwentySqlParameter>();
@@ -216,12 +217,37 @@ namespace Intwenty.Areas.Identity.Data
             parameters.Add(new IntwentySqlParameter() { Name = "@UserId", Value = userid });
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var result = await client.GetEntityAsync<IntwentyOrganizationProduct>(sql, false, parameters.ToArray());
+            var result = await client.GetEntityAsync<IntwentyOrganizationProductInfoVm>(sql, false, parameters.ToArray());
             await client.CloseAsync();
-            if (result != null)
-                return new IntwentyOrganizationProductVm(result);
-            else
-                return null;
+            return result;
+        }
+
+        public async Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid)
+        {
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            var product = await client.GetEntityAsync<IntwentyProduct>(productid);
+            var orgproduct = await client.GetEntityAsync<IntwentyOrganizationProduct>(string.Format("SELECT * from security_OrganizationProducts WHERE OrganizationId={0} AND ProductId='{1}'", organizationid, productid), false);
+            var authorizations = await client.GetEntitiesAsync<IntwentyAuthorization>(string.Format("SELECT * from security_Authorization WHERE OrganizationId={0} AND ProductId='{1}'", organizationid, productid), false);
+            await client.CloseAsync();
+
+            var result = new IntwentyOrganizationProductVm();
+            result.APIPath = orgproduct.APIPath;
+            result.RoleAuthorizations = authorizations.Where(p=> p.AuthorizationItemType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.Id = orgproduct.Id;
+            result.OrganizationId = org.Id;
+            result.OrganizationName = org.Name;
+            result.ProductId = product.Id;
+            result.ProductName = product.ProductName;
+            result.ProductURI = orgproduct.ProductURI;
+
+            return result;
+
         }
     }
 }

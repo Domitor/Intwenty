@@ -11,48 +11,54 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Intwenty.Areas.Identity.Data;
 
-namespace Intwenty.Areas.Identity.Pages.IAM
+namespace Intwenty.Areas.Identity.Pages
 {
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
-    public class ProductModel : PageModel
+    public class OrganizationProductModel : PageModel
     {
 
         private IIntwentyDataService DataRepository { get; }
-        private IIntwentyModelService ModelRepository { get; }
+
+        private IIntwentyOrganizationManager OrganizationManager { get; }
+
         private IIntwentyProductManager ProductManager { get; }
 
-        public string Id { get; set; }
+        public int OrganizationId { get; set; }
+        public string ProductId { get; set; }
 
-        public ProductModel(IIntwentyDataService ms, IIntwentyModelService sr, IIntwentyProductManager prodmanager)
+
+        public OrganizationProductModel(IIntwentyDataService ms, IIntwentyOrganizationManager orgmanager, IIntwentyProductManager prodmanager)
         {
             DataRepository = ms;
-            ModelRepository = sr;
+            OrganizationManager = orgmanager;
             ProductManager = prodmanager;
         }
 
-        public void OnGet(string id)
+        public void OnGet(int organizationid, string productid)
         {
-            Id = id;
+            OrganizationId = organizationid;
+            ProductId = productid;
         }
 
-        public async Task<JsonResult> OnGetLoad(string id)
+        public async Task<JsonResult> OnGetLoad(int organizationid, string productid)
         {
-            var result = await ProductManager.FindByIdAsync(id);
-            var model = new IntwentyProductVm(result);
-            model.AuthorizationItems = await ProductManager.GetAthorizationItemsAsync(id);
-            return new JsonResult(model);
+            var result = await OrganizationManager.GetOrganizationProductAsync(organizationid, productid);
+            return new JsonResult(result);
         }
 
         public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyProductVm model)
         {
-
-            var product = await ProductManager.FindByIdAsync(model.Id);
+            await Task.Delay(1);
+            //FIND OBJECT IN DB, UPDATE FROM MODEL AND SAVE
+            /*
+            var product = await Manager.FindByIdAsync(model.Id);
             if (product != null)
             {
                 product.ProductName = model.ProductName;
                 await ProductManager.UpdateAsync(product);
                 return await OnGetLoad(product.Id);
             }
+            */
 
             return new JsonResult("{}");
 

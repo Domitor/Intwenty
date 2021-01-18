@@ -88,6 +88,7 @@
             <tr>
 
                 <th style="width:5%"></th>
+                <th style="width:5%"></th>
                 <th style="width:30%">Id</th>
                 <th style="width:30%">Name</th>
             </tr>
@@ -95,6 +96,7 @@
         <tbody v-for="item in model.products">
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeProduct(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'/Identity/IAM/OrganizationProduct/@Model.Id/' + item.productId" title="Product Setup"><i class="fas fa-cogs"></i></a></td>
                 <td>{{item.id}}</td>
                 <td>{{item.productName}}</td>
             </tr>

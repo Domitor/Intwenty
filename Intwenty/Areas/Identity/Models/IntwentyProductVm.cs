@@ -13,17 +13,21 @@ namespace Intwenty.Areas.Identity.Models
     {
         public IntwentyProductVm()
         {
+            AuthorizationItems = new List<IntwentyProductAuthorizationItem>();
         }
 
         public IntwentyProductVm(IntwentyProduct entity)
         {
             Id = entity.Id;
             ProductName = entity.ProductName;
+            AuthorizationItems = new List<IntwentyProductAuthorizationItem>();
         }
 
         public string Id { get; set; }
 
         public string ProductName { get; set; }
+
+        public List<IntwentyProductAuthorizationItem> AuthorizationItems { get; set; }
 
         public bool ModelSaved { get; set; }
 
