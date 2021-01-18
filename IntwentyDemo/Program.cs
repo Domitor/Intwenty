@@ -28,7 +28,7 @@ namespace IntwentyDemo
                     var modelservice = services.GetRequiredService<IIntwentyModelService>();
 
                     //Create intwenty db objects and identity db objects
-                    modelservice.CreateIntwentyDatabase();
+                    //modelservice.CreateIntwentyDatabase();
 
 
                     //Create intwenty db objects and identity db objects

@@ -20,9 +20,9 @@ namespace Intwenty.Controllers
     {
         private IIntwentyDataService DataRepository { get; }
         private IntwentyUserManager UserManager { get; }
-        private IntwentyOrganizationManager OrganizationManager { get; }
+        private IIntwentyOrganizationManager OrganizationManager { get; }
 
-        public ExternalAuthenticationController(IIntwentyDataService dataservice, IntwentyUserManager usermanager, IntwentyOrganizationManager orgmanager)
+        public ExternalAuthenticationController(IIntwentyDataService dataservice, IntwentyUserManager usermanager, IIntwentyOrganizationManager orgmanager)
         {
             DataRepository = dataservice;
             UserManager = usermanager;
@@ -32,7 +32,7 @@ namespace Intwenty.Controllers
 
         /// <summary>
         /// Login and return the user API key
-        /// Example: { "username":"user1@intwenty.dev","password":"lowride" }
+        /// Example: {"username":"admin@aaaaaa.com","password":"bbbbbb","productid":"INTWENTYDEMO"}
         /// </summary>
         [HttpPost("API/Authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] System.Text.Json.JsonElement data)

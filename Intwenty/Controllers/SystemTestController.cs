@@ -123,7 +123,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test2ORMInsert());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test3ORMUpdate());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test4ORMDelete());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test5CreateIntwentyDb());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test5NotUsed());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test6CreateIntwentyExampleModel());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test7CreateIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test8GetListOfIntwentyApplication());
@@ -346,16 +346,14 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test5CreateIntwentyDb()
+        private TestResult Test5NotUsed()
         {
-            TestResult result = new TestResult(true, MessageCode.RESULT, "IIntwentyModelService.CreateIntwentyDatabase()");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "IIntwentyModelService.Test5NotUsed()");
             try
             {
 
-                _modelservice.CreateIntwentyDatabase();
-
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test5CreateIntwentyDb lasted  {0} ms", result.Duration));
+                _dataservice.LogInfo(string.Format("Test Case: Test5NotUsed lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)

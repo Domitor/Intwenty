@@ -56,11 +56,6 @@ namespace Intwenty.Interface
         public void DeleteSystemModel(SystemModelItem model);
 
 
-        /// <summary>
-        /// Create database objects used for persisting the intwenty model
-        /// </summary>
-        public void CreateIntwentyDatabase();
-
 
         public List<OperationResult> ConfigureDatabase();
 

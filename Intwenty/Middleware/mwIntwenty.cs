@@ -21,7 +21,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-
+using Intwenty.DataClient;
+using Intwenty.Entity;
 
 namespace Intwenty.Middleware
 {
@@ -47,6 +48,9 @@ namespace Intwenty.Middleware
                 throw new InvalidOperationException("Could not find IAM database connection in setting file");
             if (string.IsNullOrEmpty(settings.ProductId))
                 throw new InvalidOperationException("Could not find a valid productid in setting file");
+
+            //Create 
+            CreateIntwentyDatabase(settings);
 
             //Required for Intwenty: Settings
             services.Configure<IntwentySettings>(configuration.GetSection("IntwentySettings"));
@@ -288,6 +292,101 @@ namespace Intwenty.Middleware
 
 
             return builder;
+
+        }
+
+        private static void CreateIntwentyDatabase(IntwentySettings settings)
+        {
+
+            if (!settings.SeedModelOnStartUp)
+                return;
+
+            var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+
+            try
+            {
+
+
+                client.Open();
+                client.CreateTable<SystemItem>();
+                client.CreateTable<ApplicationItem>();
+                client.CreateTable<DatabaseItem>();
+                client.CreateTable<DataViewItem>();
+                client.CreateTable<EventLog>();
+                client.CreateTable<InformationStatus>();
+                client.CreateTable<InstanceId>();
+                client.CreateTable<UserInterfaceItem>();
+                client.CreateTable<ValueDomainItem>();
+                client.CreateTable<DefaultValue>();
+                client.CreateTable<TranslationItem>();
+                client.CreateTable<EndpointItem>();
+
+                client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyOrganization>(); //security_Organization
+                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
+                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
+                client.CreateTable<IntwentyProduct>(); //security_Product
+                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
+                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
+                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
+                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
+                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
+                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
+                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
+                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
+
+                client.Close();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                client.Close();
+            }
+
+            if (!settings.UseSeparateIAMDatabase)
+                return;
+
+            client = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);
+
+            try
+            {
+
+
+                client.Open();
+
+                client.CreateTable<IntwentyUser>(); //security_User
+                client.CreateTable<IntwentyOrganization>(); //security_Organization
+                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
+                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
+                client.CreateTable<IntwentyProduct>(); //security_Product
+                client.CreateTable<IntwentyProductRole>(); //security_ProductRole
+                client.CreateTable<IntwentyProductPermission>(); //security_ProductPermission
+                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
+                client.CreateTable<IntwentyUserProductRole>(); //security_UserProductRole
+                client.CreateTable<IntwentyUserProductPermission>(); //security_UserProductPermission
+                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
+                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
+                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
+                //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
+
+                client.Close();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                client.Close();
+            }
 
         }
     }
