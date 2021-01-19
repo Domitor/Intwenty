@@ -25,8 +25,6 @@ namespace Intwenty.Areas.Identity.Data
         private IMemoryCache UserCache { get; }
 
 
-        private static readonly string PermissionCacheKey = "USERPERM";
-
         private static readonly string UsersCacheKey = "ALLUSERS";
 
         private static readonly string UserAuthCacheKey = "USERAUTH";
@@ -112,7 +110,7 @@ namespace Intwenty.Areas.Identity.Data
             return userorgproducts;
         }
 
-        public async Task<IdentityResult> AddUserRoleAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid)
+        public async Task<IdentityResult> AddUpdateUserRoleAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid)
         {
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
@@ -273,9 +271,6 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
-
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
             var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
@@ -288,7 +283,41 @@ namespace Intwenty.Areas.Identity.Data
             if (existing_auth == null)
                 return IdentityResult.Success;
 
+
+            UserCache.Remove(UsersCacheKey);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+
+            await client.OpenAsync();
+            await client.DeleteEntityAsync(existing_auth);
+            await client.CloseAsync();
+
+            return IdentityResult.Success;
+        }
+
+        public async Task<IdentityResult> RemoveUserAuthorizationAsync(IntwentyUser user, int authorizationId)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
          
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            await client.CloseAsync();
+            var existing_auth = existing_auths.Find(p => p.UserId == user.Id &&
+                                                         p.Id == authorizationId);
+
+            if (existing_auth == null)
+                return IdentityResult.Success;
+
+
+            UserCache.Remove(UsersCacheKey);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+
+
             await client.OpenAsync();
             await client.DeleteEntityAsync(existing_auth);
             await client.CloseAsync();
@@ -305,7 +334,7 @@ namespace Intwenty.Areas.Identity.Data
 
             List<IntwentyAuthorization> res = null;
 
-            if (UserCache.TryGetValue(PermissionCacheKey + "_" + user.Id, out res))
+            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
             {
                 return res;
             }
@@ -319,7 +348,7 @@ namespace Intwenty.Areas.Identity.Data
 
             //TODO: ADD Organization Authorizations that is not explitly set on the user
 
-            UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
+            UserCache.Set(UserAuthCacheKey + "_" + user.Id, list);
 
             return list;
         }

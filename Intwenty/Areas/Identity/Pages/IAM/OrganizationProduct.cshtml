@@ -46,15 +46,17 @@
 
     <br />
 
-    <ul class="nav">
-        <li class="nav-item">
-            <button class="btn btn-sm btn-secondary" v-on:click="addRoleAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
-        </li>
-        <li class="nav-item">
-            <h5>Roles</h5>
-        </li>
-    </ul>
-    <p>By adding roles all users in the organization will be granted access according to the role</p>
+    <div style="margin-left:10px">
+        <ul class="nav">
+            <li class="nav-item">
+                <button class="btn btn-sm btn-secondary" v-on:click="addRoleAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+            </li>
+            <li class="nav-item">
+                <h5>Roles</h5>
+            </li>
+        </ul>
+        <p><i>By adding roles the user will be granted access to the product according to the role</i></p>
+    </div>
     <br />
     <table class="table table">
         <thead>
@@ -71,17 +73,20 @@
         </tbody>
     </table>
 
+    <hr />
     <br />
 
-    <ul class="nav">
-        <li class="nav-item">
-            <button class="btn btn-sm btn-secondary" v-on:click="addSystemAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
-        </li>
-        <li class="nav-item">
-            <h5>Systems</h5>
-        </li>
-    </ul>
-    <p>By adding (Intwenty) system permissions all users in the organization will be granted access to all applications in the system</p>
+    <div style="margin-left:10px">
+        <ul class="nav">
+            <li class="nav-item">
+                <button class="btn btn-sm btn-secondary" v-on:click="addSystemAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+            </li>
+            <li class="nav-item">
+                <h5>Systems</h5>
+            </li>
+        </ul>
+        <p><i>By adding system-permissions the user will be granted access to all applications in a system in the product</i></p>
+    </div>
     <br />
     <table class="table table">
         <thead>
@@ -97,24 +102,27 @@
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationItemName}}</td>
-                <td><input type="checkbox" v-model="item.readAuth" /></td>
-                <td><input type="checkbox" v-model="item.modifyAuth" /></td>
-                <td><input type="checkbox" v-model="item.deleteAuth" /></td>
+                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
+                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
+                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
             </tr>
         </tbody>
     </table>
 
+    <hr />
     <br />
 
-    <ul class="nav">
-        <li class="nav-item">
-            <button class="btn btn-sm btn-secondary" v-on:click="addApplicationAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
-        </li>
-        <li class="nav-item">
-            <h5>Applications</h5>
-        </li>
-    </ul>
-    <p>By adding (Intwenty) application permissions all users in the organization will be granted access to the application</p>
+    <div style="margin-left:10px">
+        <ul class="nav">
+            <li class="nav-item">
+                <button class="btn btn-sm btn-secondary" v-on:click="addApplicationAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+            </li>
+            <li class="nav-item">
+                <h5>Applications</h5>
+            </li>
+        </ul>
+        <p><i>By adding application-permissions the user will be granted access to applications in the product</i></p>
+    </div>
     <br />
     <table class="table table">
         <thead>
@@ -130,23 +138,30 @@
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationItemName}}</td>
-                <td><input type="checkbox" v-model="item.readAuth" /></td>
-                <td><input type="checkbox" v-model="item.modifyAuth" /></td>
-                <td><input type="checkbox" v-model="item.deleteAuth" /></td>
+                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
+                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
+                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
             </tr>
         </tbody>
     </table>
 
-    <ul class="nav">
-        <li class="nav-item">
-            <button class="btn btn-sm btn-secondary" v-on:click="addViewAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
-        </li>
-        <li class="nav-item">
-            <h5>Views</h5>
-        </li>
-    </ul>
-    <p>By adding (Intwenty) application-view permissions all users in the organization will be granted access to the view</p>
+    <hr />
     <br />
+
+    <div style="margin-left:10px">
+        <ul class="nav">
+            <li class="nav-item">
+                <button class="btn btn-sm btn-secondary" v-on:click="addViewAuth()" style="margin-right:10px"><span class="fa fa-plus"></span></button>
+            </li>
+            <li class="nav-item">
+                <h5>Views</h5>
+            </li>
+        </ul>
+        <p><i>By adding application-view permissions the user will be granted access to views in the product</i></p>
+    </div>
+
+    <br />
+
     <table class="table table">
         <thead>
             <tr>
@@ -161,12 +176,66 @@
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationItemName}}</td>
-                <td><input type="checkbox" v-model="item.readAuth" /></td>
-                <td><input type="checkbox" v-model="item.modifyAuth" /></td>
-                <td><input type="checkbox" v-model="item.deleteAuth" /></td>
+                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
+                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
+                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
             </tr>
         </tbody>
     </table>
+
+    <hr />
+
+    <div class="modal" id="addAuthorizationModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Authorize {{authorization.authorizationItemTypeName}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" v-if="authorization.authorizationItemType=='ROLE'">
+                        <label class="control-label">Select Role<span style="color: red"> *</span></label>
+                        <select v-model="authorization.authorizationItemId" class="form-control form-control-sm">
+                            <option v-for="item in authitem.roleItems" v-bind:value="item.id">{{item.name}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group" v-if="authorization.authorizationItemType=='SYSTEM'">
+                        <label class="control-label">Select System<span style="color: red"> *</span></label>
+                        <select v-model="authorization.authorizationItemId" class="form-control form-control-sm">
+                            <option v-for="item in authitem.systemItems" v-bind:value="item.id">{{item.name}}</option>
+                        </select>
+                        <input type="checkbox" v-model="authorization.read" /> Read
+                        <input type="checkbox" v-model="authorization.modify" /> Modify
+                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                    </div>
+                    <div class="form-group" v-if="authorization.authorizationItemType=='APPLICATION'">
+                        <label class="control-label">Select Application<span style="color: red"> *</span></label>
+                        <select v-model="authorization.authorizationItemId" class="form-control form-control-sm">
+                            <option v-for="item in authitem.applicationItems" v-bind:value="item.id">{{item.name}}</option>
+                        </select>
+                        <input type="checkbox" v-model="authorization.read" /> Read
+                        <input type="checkbox" v-model="authorization.modify" /> Modify
+                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                    </div>
+                    <div class="form-group" v-if="authorization.authorizationItemType=='VIEW'">
+                        <label class="control-label">Select View<span style="color: red"> *</span></label>
+                        <select v-model="authorization.authorizationItemId" class="form-control form-control-sm">
+                            <option v-for="item in authitem.viewItems" v-bind:value="item.id">{{item.name}}</option>
+                        </select>
+                        <input type="checkbox" v-model="authorization.read" /> Read
+                        <input type="checkbox" v-model="authorization.modify" /> Modify
+                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="addAuthorizationModal_okBtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal" :disabled="authorization.authorizationItemId==0">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 </div>
@@ -180,7 +249,9 @@
             el: '#app',
             data:
             {
-                model: {  },
+                model: {},
+                authorization: {},
+                authitem: {},
                 users: [],
                 idgen: -1
             },
@@ -213,20 +284,184 @@
                         }
                     });
                 },
-                removeAuthorizationItem: function ()
+                removeAuthorizationItem: function (item)
                 {
-                  
+                    var context = this;
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=RemoveAuthorization";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response) {
+                                context.model = response;
+                            },
+                            error: function (response) {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                     }
+
+                    raiseYesNoModal("Remove Authorization ?", "Selected authorization item will be removed from the user, continue ?", yesfunc);
                 },
-                addRoleAuth: function () {
+                addRoleAuth: function ()
+                {
+
+                    var context = this;
+
+                    context.authorization = { authorizationItemType: "ROLE", authorizationItemId: 0, authorizationItemTypeName: "Role", userId:"", organizationId:0, productId:"" }
+
+                    var okfunc = function ()
+                    {
+
+                        context.authorization.organizationId = @Model.OrganizationId;
+                        context.authorization.productId = "@Model.ProductId";
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=AddRoleAuthorization";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.authorization),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addAuthorizationModal_okBtn").off().on('click', okfunc);
+                    $("#addAuthorizationModal").modal();
+                },
+                addSystemAuth: function ()
+                {
+                    var context = this;
+                    context.authorization = { authorizationItemType: "SYSTEM", authorizationItemId: 0, authorizationItemTypeName: "System", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
+
+                    var okfunc = function ()
+                    {
+
+                        context.authorization.organizationId = @Model.OrganizationId;
+                        context.authorization.productId = "@Model.ProductId";
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=AddSystemAuthorization";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.authorization),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addAuthorizationModal_okBtn").off().on('click', okfunc);
+                    $("#addAuthorizationModal").modal();
+                },
+                addApplicationAuth: function ()
+                {
+                     var context = this;
+                    context.authorization = { authorizationItemType: "APPLICATION", authorizationItemId: 0, authorizationItemTypeName: "Application", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
+
+                    var okfunc = function ()
+                    {
+
+                        context.authorization.organizationId = @Model.OrganizationId;
+                        context.authorization.productId = "@Model.ProductId";
+
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=AddApplicationAuthorization";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.authorization),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addAuthorizationModal_okBtn").off().on('click', okfunc);
+                    $("#addAuthorizationModal").modal();
 
                 },
-                addSystemAuth: function () {
+                addViewAuth: function ()
+                {
+                     var context = this;
+                    context.authorization = { authorizationItemType: "VIEW", authorizationItemId: 0, authorizationItemTypeName: "View", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
 
-                },
-                addApplicationAuth: function () {
+                    var okfunc = function ()
+                    {
+                        context.authorization.organizationId = @Model.OrganizationId;
+                        context.authorization.productId = "@Model.ProductId";
 
-                },
-                addViewAuth: function () {
+                        var baseurl = '@Url.Content("~/Identity/IAM/")';
+                        var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=AddViewAuthorization";
+                        var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.authorization),
+                            headers: {
+                                RequestVerificationToken: antiforgerytoken
+                            },
+                            success: function (response)
+                            {
+                                context.model = response;
+                            },
+                            error: function (response)
+                            {
+                                //raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    $("#addAuthorizationModal_okBtn").off().on('click', okfunc);
+                    $("#addAuthorizationModal").modal();
 
                 }
 
@@ -247,6 +482,12 @@
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;
+                     var endpointurl = baseurl +  "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=LoadAuthItems";
+                     $.get(endpointurl, function (response)
+                     {
+                         context.authitem = response;
+
+                     });
                 });
             }
         });

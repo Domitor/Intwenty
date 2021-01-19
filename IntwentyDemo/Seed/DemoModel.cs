@@ -273,7 +273,7 @@ namespace IntwentyDemo.Seed
 
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.AuthorizationType == SystemModelItem.MetaTypeSystem))
                 {
-                    var sysperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.MetaCode, NormalizedName=t.MetaCode.ToUpper(), AuthorizationType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId };
+                    var sysperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName=t.MetaCode.ToUpper(), AuthorizationType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId };
                     iamclient.InsertEntity(sysperm);
                 }
             }
@@ -286,7 +286,7 @@ namespace IntwentyDemo.Seed
 
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.AuthorizationType == ApplicationModelItem.MetaTypeApplication))
                 {
-                    var apperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.MetaCode, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId };
+                    var apperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId };
                     iamclient.InsertEntity(apperm);
                 }
             }
