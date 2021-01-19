@@ -143,8 +143,8 @@
 
                     <div class="form-group">
                         <label class="control-label">Select Product<span style="color: red"> *</span></label>
-                        <select v-model="product.id" class="form-control form-control-sm">
-                            <option v-for="item in products" v-bind:value="item.id">{{item.productName}}</option>
+                        <select v-model="product" class="form-control form-control-sm">
+                            <option v-for="item in products" v-bind:value="item">{{item.productName}}</option>
                         </select>
                     </div>
 
@@ -278,7 +278,8 @@
 
                     context.updateEntity();
 
-                    context.product = {organizationId:@Model.Id};
+                    context.product = {};
+
 
                     var okfunc = function ()
                     {
@@ -286,11 +287,13 @@
                         var endpointurl = baseurl + "Organization/@Model.Id?handler=AddProduct";
                         var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
+                        var senddata = { organizationId:@Model.Id, productId: context.product.id, productName: context.product.productName };
+
                         $.ajax({
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
-                            data: JSON.stringify(context.product),
+                            data: JSON.stringify(senddata),
                             headers: {
                                 RequestVerificationToken: antiforgerytoken
                             },

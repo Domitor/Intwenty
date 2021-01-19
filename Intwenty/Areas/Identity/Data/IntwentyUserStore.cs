@@ -24,9 +24,8 @@ namespace Intwenty.Areas.Identity.Data
 
         private static readonly string UsersCacheKey = "ALLUSERS";
 
-        private static readonly string UserRolesCacheKey = "USERROLES";
+        private static readonly string UserAuthCacheKey = "USERAUTH";
 
-        private static readonly string RolesCacheKey = "SYSROLES";
 
         public IntwentyUserStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
@@ -42,17 +41,16 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            var allusers = await GetUsersAsync();
+            if (allusers.Exists(p => p.UserName == user.UserName))
+                return IdentityResult.Failed();
+
             UserCache.Remove(UsersCacheKey);
 
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            await client.OpenAsync();
-            var allorgs = await client.GetEntitiesAsync<IntwentyOrganization>();
-            await client.CloseAsync();
-            var defaultorg = allorgs.Find(p => p.Name.ToUpper() == "DEFAULT ORG");
 
             await client.OpenAsync();
             await client.InsertEntityAsync(user);
-            await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = defaultorg.Id });
             await client.CloseAsync();
             return IdentityResult.Success;
         }
@@ -219,7 +217,7 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
@@ -255,7 +253,7 @@ namespace Intwenty.Areas.Identity.Data
 
             IList<string> result = null;
 
-            if (UserCache.TryGetValue(UserRolesCacheKey + "_" + user.Id, out result))
+            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out result))
             {
                 return result;
             }
@@ -266,13 +264,14 @@ namespace Intwenty.Areas.Identity.Data
             var userroles = await client.GetResultSetAsync(string.Format("SELECT AuthorizationItemNormalizedName FROM security_Authorization WHERE AuthorizationItemType='ROLE' AND UserId='{0}' AND ProductId='{1}'", user.Id, Settings.ProductId), false);
             await client.CloseAsync();
 
-           
+            //TODO: CHECK IF USER ORG HAS ROLE (USER IS IMPLICIT IN ROLE)
+
             foreach (var ur in userroles.Rows)
             {
                 result.Add(ur.GetAsString("AuthorizationItemNormalizedName"));
             }
 
-            UserCache.Set(UserRolesCacheKey + "_" + user.Id, result);
+            UserCache.Set(UserAuthCacheKey + "_" + user.Id, result);
 
             return result;
         }
@@ -341,7 +340,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(UserRolesCacheKey + "_" + user.Id);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             client.Open();
@@ -389,7 +388,7 @@ namespace Intwenty.Areas.Identity.Data
 
         }*/
 
-        public async Task<List<IntwentyUser>> GetAllUsersAsync()
+        public async Task<List<IntwentyUser>> GetUsersAsync()
         {
             List<IntwentyUser> res = null;
 

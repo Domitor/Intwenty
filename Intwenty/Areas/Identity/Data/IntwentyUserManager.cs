@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Intwenty.Areas.Identity.Data
@@ -25,6 +26,10 @@ namespace Intwenty.Areas.Identity.Data
 
 
         private static readonly string PermissionCacheKey = "USERPERM";
+
+        private static readonly string UsersCacheKey = "ALLUSERS";
+
+        private static readonly string UserAuthCacheKey = "USERAUTH";
 
         public IntwentyUserManager(IUserStore<IntwentyUser> store, 
                                    IOptions<IdentityOptions> optionsAccessor, 
@@ -42,6 +47,121 @@ namespace Intwenty.Areas.Identity.Data
             Settings = settings.Value;
             UserCache = cache;
         }
+
+        public async Task<IdentityResult> CreateAsync(IntwentyUser user, int organizationid)
+        {
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            var allusers = await GetUsersAsync();
+            if (allusers.Exists(p => p.UserName == user.UserName))
+                return IdentityResult.Failed();
+
+            UserCache.Remove(UsersCacheKey);
+
+            IntwentyOrganization org=null;
+
+
+            if (organizationid > 0)
+            {
+                await client.OpenAsync();
+                org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+                await client.CloseAsync();
+            }
+
+            await client.OpenAsync();
+            await client.InsertEntityAsync(user);
+
+            if (org != null)
+            {
+                await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = org.Id });
+            }
+
+            await client.CloseAsync();
+            return IdentityResult.Success;
+        }
+
+        /// <summary>
+        /// Gets products that the user has access to (via organization membership)
+        /// Products is only available to users via an organization
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<IntwentyUserProductVm>> GetOrganizationProductsAsync(IntwentyUser user)
+        {
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var sql = "SELECT t1.UserId, t2.ProductId, t2.ProductName, t3.Id as OrganizationId, t3.Name as OrganizationName FROM security_OrganizationMembers t1 ";
+            sql += "JOIN security_OrganizationProducts t2 ON t1.OrganizationId == t2.OrganizationId ";
+            sql += "JOIN security_Organization t3 ON t3.Id == t1.OrganizationId ";
+            sql += "WHERE UserId = '{0}'";
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            var userorgproducts = await client.GetEntitiesAsync<IntwentyUserProductVm>(string.Format(sql,user.Id), false);
+            await client.CloseAsync();
+            foreach (var t in userorgproducts)
+                t.UserName = user.UserName;
+         
+            return userorgproducts;
+        }
+
+        public async Task<IdentityResult> AddAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            UserCache.Remove(UsersCacheKey);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var productauths = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
+            await client.CloseAsync();
+            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationItemNormalizedName && p.ProductId == Settings.ProductId && p.AuthorizationType == authorization.AuthorizationItemType);
+            if (productauth == null)
+                return IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOAUTH", Description = string.Format("There is no authentication named {0} in this product", authorization.AuthorizationItemName) } });
+
+
+            client.Open();
+            var existing_auths = client.GetEntities<IntwentyAuthorization>();
+            var existing_auth = existing_auths.Find(p => p.UserId == user.Id && 
+                                                         p.AuthorizationItemId == authorization.AuthorizationItemId && 
+                                                         p.ProductId == authorization.ProductId && 
+                                                         p.OrganizationId == authorization.OrganizationId);
+            client.Close();
+            if (existing_auth != null)
+                return IdentityResult.Success;
+
+            var urole = new IntwentyAuthorization()
+            {
+                AuthorizationItemId = authorization.AuthorizationItemId,
+                UserId = user.Id,
+                ProductId = authorization.ProductId,
+                AuthorizationItemName = authorization.AuthorizationItemName,
+                AuthorizationItemType = authorization.AuthorizationItemType,
+                UserName = user.UserName,
+                AuthorizationItemNormalizedName = authorization.AuthorizationItemNormalizedName
+            };
+            client.Open();
+            client.InsertEntity(urole);
+            client.Close();
+
+            return IdentityResult.Success;
+        }
+
+      
+
+
 
         #region Intwenty Permissions
 
@@ -438,7 +558,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public async Task<List<IntwentyUser>> GetUsersAsync()
         {
-            var t = await ((IntwentyUserStore)Store).GetAllUsersAsync();
+            var t = await ((IntwentyUserStore)Store).GetUsersAsync();
             return t;
         }
 

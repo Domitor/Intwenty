@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
@@ -18,15 +19,15 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
-        private UserManager<IntwentyUser> UserManager { get; }
+        private IntwentyUserManager UserManager { get; }
 
         public string Id { get; set; }
 
-        public UserModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
+        public UserModel(IIntwentyDataService ms, IIntwentyModelService sr, IntwentyUserManager usermanager)
         {
             DataRepository = ms;
             ModelRepository = sr;
-            UserManager = umgr;
+            UserManager = usermanager;
         }
 
         public void OnGet(string id)
@@ -36,11 +37,10 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnGetLoad(string id)
         {
-            var client = DataRepository.GetIAMDataClient();
-            await client.OpenAsync();
-            var result = await client.GetEntityAsync<IntwentyUser>(id);
-            await client.CloseAsync();
-            return new JsonResult(new IntwentyUserVm(result));
+            var result = await UserManager.FindByIdAsync(id);
+            var model = new IntwentyUserVm(result);
+            model.UserProducts = await UserManager.GetOrganizationProductsAsync(result);
+            return new JsonResult(model);
         }
 
 

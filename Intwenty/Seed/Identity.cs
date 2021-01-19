@@ -45,13 +45,13 @@ namespace Intwenty.Seed
             }
 
             IntwentyOrganization org = null;
-            org = organizationManager.FindByNameAsync("Default Org").Result;
+            org = organizationManager.FindByNameAsync(Settings.Value.DefaultProductOrganization).Result;
             if (org == null)
             {
                 org = new IntwentyOrganization();
-                org.Name = "Default Org";
+                org.Name = Settings.Value.DefaultProductOrganization;
                 organizationManager.CreateAsync(org);
-                org = organizationManager.FindByNameAsync("Default Org").Result;
+                org = organizationManager.FindByNameAsync(Settings.Value.DefaultProductOrganization).Result;
                 organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName  });
             }
 
@@ -118,6 +118,7 @@ namespace Intwenty.Seed
                 user.EmailConfirmed = true;
                 user.Culture = Settings.Value.DefaultCulture;
                 userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
+                organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
                 userManager.AddToRoleAsync(user, "SUPERADMIN");
             }
 
@@ -132,6 +133,7 @@ namespace Intwenty.Seed
                 user.EmailConfirmed = true;
                 user.Culture = Settings.Value.DefaultCulture;
                 userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
+                organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
                 userManager.AddToRoleAsync(user, "USER");
             }
 

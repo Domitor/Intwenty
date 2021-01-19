@@ -16,6 +16,8 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string Name { get; set; }
 
-     
+        public string NormalizedName { get; set; }
+
+
     }
 }

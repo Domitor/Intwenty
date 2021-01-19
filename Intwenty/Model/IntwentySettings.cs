@@ -18,6 +18,8 @@ namespace Intwenty.Model
     {
         public string ProductId { get; set; }
 
+        public string DefaultProductOrganization { get; set; }
+
         public IntwentySettings()
         {
             LogVerbosity = LogVerbosityTypes.Error;

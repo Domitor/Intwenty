@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
@@ -18,13 +19,13 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
-        private UserManager<IntwentyUser> UserManager { get; }
+        private IntwentyUserManager UserManager { get; }
 
-        public UserListModel(IIntwentyDataService ms, IIntwentyModelService sr, UserManager<IntwentyUser> umgr)
+        public UserListModel(IIntwentyDataService ms, IIntwentyModelService sr, IntwentyUserManager usermanager)
         {
             DataRepository = ms;
             ModelRepository = sr;
-            UserManager = umgr;
+            UserManager = usermanager;
         }
 
         public void OnGet()

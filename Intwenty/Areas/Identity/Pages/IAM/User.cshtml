@@ -38,7 +38,7 @@
     </div>
 
 
-   
+
 
 
     <br />
@@ -55,6 +55,30 @@
         <label class="control-label">Last Name<span style="color: red"> *</span></label>
         <input id="tb_lastname" type="text" class="form-control form-control-sm" v-model="model.lastName" />
     </div>
+
+    <br />
+    <br />
+    <h5>User Products</h5>
+    <p><i>Products is added or removed from the user through organization membership</i></p>
+    <table class="table table">
+        <thead>
+            <tr>
+
+                <th style="width:5%"></th>
+                <th style="width:25%">Organization</th>
+                <th style="width:25%">Product</th>
+            </tr>
+        </thead>
+        <tbody v-for="item in model.userProducts">
+            <tr>
+
+                <td><a role="button" class="btn btn-sm btn-secondary" v-bind:href="'/Identity/IAM/UserProduct/@Model.Id/' + item.organizationId + '/' + item.productId" title="Product Setup"><i class="fas fa-cogs"></i></a></td>
+                <td>{{item.organizationName}}</td>
+                <td>{{item.productName}}</td>
+
+            </tr>
+        </tbody>
+    </table>
 
 
 </div>

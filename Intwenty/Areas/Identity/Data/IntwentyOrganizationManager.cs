@@ -48,6 +48,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public async Task<IdentityResult> CreateAsync(IntwentyOrganization organization)
         {
+            organization.NormalizedName = organization.Name.ToUpper();
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
             var t = await client.InsertEntityAsync(organization);
