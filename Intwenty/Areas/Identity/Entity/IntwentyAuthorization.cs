@@ -13,15 +13,22 @@ namespace Intwenty.Areas.Identity.Entity
     {
         [AutoIncrement]
         public int Id { get; set; }
+        [NotNull]
         public string ProductId { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
+        [NotNull]
         public int OrganizationId { get; set; }
+        [NotNull]
         public string OrganizationName { get; set; }
-        public string AuthorizationItemId { get; set; }
-        public string AuthorizationItemName { get; set; }
-        public string AuthorizationItemNormalizedName { get; set; }
-        public string AuthorizationItemType { get; set; }
+        [NotNull]
+        public string AuthorizationId { get; set; }
+        [NotNull]
+        public string AuthorizationName { get; set; }
+        [NotNull]
+        public string AuthorizationNormalizedName { get; set; }
+        [NotNull]
+        public string AuthorizationType { get; set; }
         public bool ReadAuth { get; set; }
         public bool ModifyAuth { get; set; }
         public bool DeleteAuth { get; set; }

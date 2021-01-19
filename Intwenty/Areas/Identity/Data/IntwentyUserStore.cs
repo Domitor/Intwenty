@@ -33,6 +33,9 @@ namespace Intwenty.Areas.Identity.Data
             UserCache = cache;
         }
 
+        /// <summary>
+        /// Creates a new user if username not already exists
+        /// </summary>
         public async Task<IdentityResult> CreateAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -55,6 +58,9 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
+        /// <summary>
+        /// Delete a user
+        /// </summary>
         public async Task<IdentityResult> DeleteAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -77,30 +83,26 @@ namespace Intwenty.Areas.Identity.Data
             //throw new NotImplementedException();
         }
 
-        public Task<IntwentyUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        public async Task<IntwentyUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var user = client.GetEntity<IntwentyUser>(userId);
-            client.Close();
-            return Task.FromResult(user);
+            await client.OpenAsync();
+            var user = await client.GetEntityAsync<IntwentyUser>(userId);
+            await client.CloseAsync();
+            return user;
         }
 
-        public Task<IntwentyUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public async Task<IntwentyUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var user = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedUserName == normalizedUserName);
-            client.Close();
-            return Task.FromResult(user);
-
+            var users = await GetUsersAsync();
+            var user = users.Find(p => p.NormalizedUserName == normalizedUserName);
+            return user;
         }
 
-        public Task<string> GetNormalizedUserNameAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<string> GetNormalizedUserNameAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -108,10 +110,10 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult<string>(user.NormalizedUserName);
+            return await Task.FromResult(user.NormalizedUserName);
         }
 
-        public Task<string> GetUserIdAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<string> GetUserIdAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -119,10 +121,10 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.Id);
+            return await Task.FromResult(user.Id);
         }
 
-        public Task<string> GetUserNameAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<string> GetUserNameAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -130,7 +132,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.UserName);
+            return await Task.FromResult(user.UserName);
         }
 
         public Task SetNormalizedUserNameAsync(IntwentyUser user, string normalizedName, CancellationToken cancellationToken)
@@ -140,7 +142,6 @@ namespace Intwenty.Areas.Identity.Data
             {
                 throw new ArgumentNullException(nameof(user));
             }
-
             user.NormalizedUserName = normalizedName;
             return Task.CompletedTask;
         }
@@ -157,7 +158,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.CompletedTask;
         }
 
-        public Task<IdentityResult> UpdateAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -168,13 +169,14 @@ namespace Intwenty.Areas.Identity.Data
             UserCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            client.UpdateEntity(user);
-            client.Close();
-            return Task.FromResult(IdentityResult.Success);
+            await client.OpenAsync();
+            await client.UpdateEntityAsync(user);
+            await client.CloseAsync();
+
+            return IdentityResult.Success;
         }
 
-        public Task<string> GetPasswordHashAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<string> GetPasswordHashAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -182,10 +184,10 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.PasswordHash);
+            return await Task.FromResult(user.PasswordHash);
         }
 
-        public Task<bool> HasPasswordAsync(IntwentyUser user, CancellationToken cancellationToken)
+        public async Task<bool> HasPasswordAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (user == null)
@@ -193,7 +195,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.PasswordHash != string.Empty);
+            return await Task.FromResult(user.PasswordHash != string.Empty);
         }
 
         public Task SetPasswordHashAsync(IntwentyUser user, string passwordHash, CancellationToken cancellationToken)
@@ -208,9 +210,13 @@ namespace Intwenty.Areas.Identity.Data
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Replaced by UserManager.AddUserAuthemticationAsync
+        /// </summary>
+        [Obsolete]
         public Task AddToRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
        
@@ -223,27 +229,12 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            IList<string> result = null;
-
-            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out result))
+            IList<string> result = new List<string>();
+            var userauth = await GetUserAuthorizationsAsync(user, Settings.ProductId);
+            foreach (var a in userauth.Where(p=> p.AuthorizationType=="ROLE"))
             {
-                return result;
+                result.Add(a.AuthorizationNormalizedName);
             }
-
-            result = new List<string>();
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            await client.OpenAsync();
-            var userroles = await client.GetResultSetAsync(string.Format("SELECT AuthorizationItemNormalizedName FROM security_Authorization WHERE AuthorizationItemType='ROLE' AND UserId='{0}' AND ProductId='{1}'", user.Id, Settings.ProductId), false);
-            await client.CloseAsync();
-
-            //TODO: CHECK IF USER ORG HAS ROLE (USER IS IMPLICIT IN ROLE)
-
-            foreach (var ur in userroles.Rows)
-            {
-                result.Add(ur.GetAsString("AuthorizationItemNormalizedName"));
-            }
-
-            UserCache.Set(UserAuthCacheKey + "_" + user.Id, result);
 
             return result;
         }
@@ -251,35 +242,6 @@ namespace Intwenty.Areas.Identity.Data
         public Task<IList<IntwentyUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
-            /*
-            cancellationToken.ThrowIfCancellationRequested();
-           
-
-            IList<IntwentyUser> result = new List<IntwentyUser>();
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var userroles = client.GetEntities<IntwentyUserProductRole>().Where(p=> p.ProductId == Settings.ProductId).ToList();
-            var users = client.GetEntities<IntwentyUser>();
-            client.Close();
-
-            var roles = GetRoles();
-
-            foreach (var ur in userroles)
-            {
-                var role = roles.Find(p => p.Id == ur.RoleId);
-                if (role == null)
-                    continue;
-                if (role.NormalizedName != roleName)
-                    continue;
-
-                var user = users.Find(p => p.Id == ur.UserId);
-                if (user != null)
-                    result.Add(user);
-
-            }
-
-            return Task.FromResult(result);
-            */
         }
 
         public async Task<bool> IsInRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
@@ -291,27 +253,26 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var userroles = await GetRolesAsync(user, cancellationToken);
-            var is_on_user = userroles.Contains(roleName);
-            if (is_on_user)
-                return is_on_user;
-
-
-            //TODO: CHECK IF USER ORG HAS ROLE (USER IS IMPLICIT IN ROLE)
-
-
-            return false;
-
+            return userroles.Contains(roleName);
 
         }
 
+        /// <summary>
+        /// Replaced by UserManager.RemoveUserAuthemticationAsync
+        /// </summary>
+        [Obsolete]
         public Task RemoveFromRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Replaced by UserManager.RemoveUserAuthemticationAsync
+        /// </summary>
+        [Obsolete]
         public Task RemoveFromRoleAsync(IntwentyUser user, IntwentyProductAuthorizationItem role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
       
@@ -319,7 +280,6 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<List<IntwentyUser>> GetUsersAsync()
         {
             List<IntwentyUser> res = null;
-
             if (UserCache.TryGetValue(UsersCacheKey, out res))
             {
                 return res;
@@ -329,10 +289,65 @@ namespace Intwenty.Areas.Identity.Data
             await client.OpenAsync();
             var users = await client.GetEntitiesAsync<IntwentyUser>();
             await client.CloseAsync();
+
             UserCache.Set(UsersCacheKey, users);
+
             return users;
 
         }
+
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user)
+        {
+           
+            List<IntwentyAuthorization> res = null;
+            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
+            {
+                return res;
+            }
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            var list = result.Where(p => !string.IsNullOrEmpty(p.UserId) && p.UserId == user.Id).ToList();
+            await client.CloseAsync();
+
+            //ADD IMPLICIT (Organization Member) Authorization
+            var implicitauth = await GetImplictUserAuthorizationsAsync(user);
+            foreach (var t in implicitauth)
+            {
+                if (!list.Exists(p => p.AuthorizationType == t.AuthorizationType &&
+                                      p.AuthorizationNormalizedName == t.AuthorizationNormalizedName &&
+                                      p.OrganizationId == t.OrganizationId &&
+                                      p.ProductId == t.ProductId))
+                {
+                    list.Add(t);
+                }
+            }
+        
+
+            UserCache.Set(UserAuthCacheKey + "_" + user.Id, list);
+
+            return list;
+        }
+
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user, string productid)
+        {
+            var userauths = await GetUserAuthorizationsAsync(user);
+            return userauths.Where(p => p.ProductId == productid).ToList();
+        }
+
+        private async Task<List<IntwentyAuthorization>> GetImplictUserAuthorizationsAsync(IntwentyUser user) 
+        {
+            var sql = "SELECT t1.* FROM security_Authorization t1 ";
+            sql += "JOIN security_OrganizationMembers t2 ON t1.OrganizationId = t2.OrganizationId ";
+            sql += "WHERE (t1.UserId is NULL OR t1.UserId = '') AND t2.UserId = '{0}'";
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyAuthorization>(string.Format(sql, user.Id),false);
+            await client.CloseAsync();
+            return result;
+        }
+           
 
         public Task SetPhoneNumberAsync(IntwentyUser user, string phoneNumber, CancellationToken cancellationToken)
         {

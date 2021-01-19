@@ -119,7 +119,7 @@ namespace Intwenty.Areas.Identity.Data
             await client.CloseAsync();
 
             var user = await FindByIdAsync(userid);
-            var auth = new IntwentyAuthorization() { AuthorizationItemNormalizedName = normalizedAuthName, AuthorizationItemType = "ROLE", OrganizationId=org.Id, OrganizationName=org.Name, UserId=user.Id, UserName=user.UserName, ProductId = productid };
+            var auth = new IntwentyAuthorization() { AuthorizationNormalizedName = normalizedAuthName, AuthorizationType = "ROLE", OrganizationId=org.Id, OrganizationName=org.Name, UserId=user.Id, UserName=user.UserName, ProductId = productid };
             return await AddUpdateUserAuthorizationAsync(user, auth);
         }
 
@@ -132,8 +132,8 @@ namespace Intwenty.Areas.Identity.Data
             await client.CloseAsync();
 
             var user = await FindByIdAsync(userid);
-            var auth = new IntwentyAuthorization() { AuthorizationItemNormalizedName = normalizedAuthName, 
-                                                     AuthorizationItemType = "SYSTEM", 
+            var auth = new IntwentyAuthorization() { AuthorizationNormalizedName = normalizedAuthName, 
+                                                     AuthorizationType = "SYSTEM", 
                                                      OrganizationId = org.Id, 
                                                      OrganizationName = org.Name, 
                                                      UserId = user.Id, 
@@ -157,8 +157,8 @@ namespace Intwenty.Areas.Identity.Data
             var user = await FindByIdAsync(userid);
             var auth = new IntwentyAuthorization()
             {
-                AuthorizationItemNormalizedName = normalizedAuthName,
-                AuthorizationItemType = "APPLICATION",
+                AuthorizationNormalizedName = normalizedAuthName,
+                AuthorizationType = "APPLICATION",
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 UserId = user.Id,
@@ -183,8 +183,8 @@ namespace Intwenty.Areas.Identity.Data
             var user = await FindByIdAsync(userid);
             var auth = new IntwentyAuthorization()
             {
-                AuthorizationItemNormalizedName = normalizedAuthName,
-                AuthorizationItemType = "APPLICATION",
+                AuthorizationNormalizedName = normalizedAuthName,
+                AuthorizationType = "APPLICATION",
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 UserId = user.Id,
@@ -198,7 +198,7 @@ namespace Intwenty.Areas.Identity.Data
             return await AddUpdateUserAuthorizationAsync(user, auth);
         }
 
-        public async Task<IdentityResult> AddUpdateUserAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization)
+        private async Task<IdentityResult> AddUpdateUserAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization)
         {
             if (user == null)
             {
@@ -212,20 +212,20 @@ namespace Intwenty.Areas.Identity.Data
             await client.OpenAsync();
             var productauths = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
             await client.CloseAsync();
-            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationItemNormalizedName && p.ProductId == authorization.ProductId && p.AuthorizationType == authorization.AuthorizationItemType);
+            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationNormalizedName && p.ProductId == authorization.ProductId && p.AuthorizationType == authorization.AuthorizationType);
             if (productauth == null)
-                return IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOAUTH", Description = string.Format("There is no authentication named {0} in this product", authorization.AuthorizationItemName) } });
+                return IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOAUTH", Description = string.Format("There is no authentication named {0} in this product", authorization.AuthorizationName) } });
 
 
             await client.OpenAsync();
             var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
             await client.CloseAsync();
             var existing_auth = existing_auths.Find(p => p.UserId == user.Id && 
-                                                         p.AuthorizationItemId == productauth.Id && 
+                                                         p.AuthorizationId == productauth.Id && 
                                                          p.ProductId == productauth.ProductId && 
                                                          p.OrganizationId == authorization.OrganizationId);
 
-            if (existing_auth != null && existing_auth.AuthorizationItemType == "ROLE")
+            if (existing_auth != null && existing_auth.AuthorizationType == "ROLE")
             {
                 return IdentityResult.Success;
             }
@@ -235,6 +235,15 @@ namespace Intwenty.Areas.Identity.Data
                 existing_auth.ReadAuth = authorization.ReadAuth;
                 existing_auth.ModifyAuth = authorization.ModifyAuth;
                 existing_auth.DeleteAuth = authorization.DeleteAuth;
+                if (existing_auth.DeleteAuth)
+                {
+                    existing_auth.ModifyAuth = true;
+                    existing_auth.ReadAuth = true;
+                }
+                if (existing_auth.ModifyAuth)
+                {
+                    existing_auth.ReadAuth = true;
+                }
                 await client.OpenAsync();
                 await client.UpdateEntityAsync(existing_auth);
                 await client.CloseAsync();
@@ -244,19 +253,28 @@ namespace Intwenty.Areas.Identity.Data
 
             var auth = new IntwentyAuthorization()
             {
-                AuthorizationItemId = productauth.Id,
+                AuthorizationId = productauth.Id,
                 UserId = user.Id,
                 UserName = user.UserName,
                 ProductId = productauth.ProductId,
                 OrganizationId = authorization.OrganizationId,
                 OrganizationName = authorization.OrganizationName,
-                AuthorizationItemName = productauth.Name,
-                AuthorizationItemType = productauth.AuthorizationType,
-                AuthorizationItemNormalizedName = productauth.NormalizedName,
+                AuthorizationName = productauth.Name,
+                AuthorizationType = productauth.AuthorizationType,
+                AuthorizationNormalizedName = productauth.NormalizedName,
                 ReadAuth = authorization.ReadAuth,
                 ModifyAuth = authorization.ModifyAuth,
                 DeleteAuth = authorization.DeleteAuth,
             };
+            if (auth.DeleteAuth)
+            {
+                auth.ModifyAuth = true;
+                auth.ReadAuth = true;
+            }
+            if (auth.ModifyAuth)
+            {
+                auth.ReadAuth = true;
+            }
             await client.OpenAsync();
             await client.InsertEntityAsync(auth);
             await client.CloseAsync();
@@ -276,7 +294,7 @@ namespace Intwenty.Areas.Identity.Data
             var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
             await client.CloseAsync();
             var existing_auth = existing_auths.Find(p => p.UserId == user.Id &&
-                                                         p.AuthorizationItemId == authorization.AuthorizationItemId &&
+                                                         p.AuthorizationId == authorization.AuthorizationId &&
                                                          p.ProductId == authorization.ProductId &&
                                                          p.OrganizationId == authorization.OrganizationId);
 
@@ -327,40 +345,7 @@ namespace Intwenty.Areas.Identity.Data
 
 
 
-        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user)
-        {
-            if (user == null)
-                throw new InvalidOperationException("Error when fetching user authorizations.");
-
-            List<IntwentyAuthorization> res = null;
-
-            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
-            {
-                return res;
-            }
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            await client.OpenAsync();
-            var result = await client.GetEntitiesAsync<IntwentyAuthorization>();
-            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).ToList();
-            await client.CloseAsync();
-
-
-            //TODO: ADD Organization Authorizations that is not explitly set on the user
-
-            UserCache.Set(UserAuthCacheKey + "_" + user.Id, list);
-
-            return list;
-        }
-
-        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user, string productid)
-        {
-            if (user == null)
-                throw new InvalidOperationException("Error when fetching user authorizations.");
-
-            var userauths = await GetUserAuthorizationsAsync(user);
-            return userauths.Where(p=>p.ProductId==productid).ToList();
-        }
+       
 
 
         public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
@@ -393,13 +378,13 @@ namespace Intwenty.Areas.Identity.Data
 
             var explicit_exists=false;
 
-            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationItemNormalizedName == requested_app.MetaCode))            
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requested_app.MetaCode))            
             {
                 explicit_exists = true;
             }
 
             if (list.Exists(p => p.IsApplicationAuthorization &&
-                                 p.AuthorizationItemNormalizedName == requested_app.MetaCode &&
+                                 p.AuthorizationNormalizedName == requested_app.MetaCode &&
                                 (
                                 (requested_action == IntwentyPermission.Read && (p.Read|| p.Delete|| p.Modify)) ||
                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
@@ -411,7 +396,7 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             if (list.Exists(p => p.IsSystemAuthorization &&
-                                 p.AuthorizationItemNormalizedName == requested_app.SystemMetaCode &&
+                                 p.AuthorizationNormalizedName == requested_app.SystemMetaCode &&
                                  (
                                  (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
                                  (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
@@ -424,7 +409,30 @@ namespace Intwenty.Areas.Identity.Data
 
             return false;
         }
-        
+
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user)
+        {
+            return await ((IntwentyUserStore)Store).GetUserAuthorizationsAsync(user);
+        }
+
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user, string productid)
+        {
+            return await ((IntwentyUserStore)Store).GetUserAuthorizationsAsync(user, productid);
+        }
+
+        public async Task<List<IntwentyAuthorization>> GetExplicitUserAuthorizationsAsync(IntwentyUser user)
+        {
+            var alluserauth = await ((IntwentyUserStore)Store).GetUserAuthorizationsAsync(user);
+            return alluserauth.Where(p => !string.IsNullOrEmpty(p.UserId) && p.UserId == user.Id).ToList();
+        }
+
+        public async Task<List<IntwentyAuthorization>> GetExplicitUserAuthorizationsAsync(IntwentyUser user, string productid)
+        {
+            var alluserauth = await ((IntwentyUserStore)Store).GetUserAuthorizationsAsync(user);
+            return alluserauth.Where(p => !string.IsNullOrEmpty(p.UserId) && p.UserId == user.Id && p.ProductId==productid).ToList();
+        }
+
+
 
 
         #region Intwenty Groups

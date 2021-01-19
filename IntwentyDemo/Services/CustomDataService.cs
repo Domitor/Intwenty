@@ -58,7 +58,7 @@ namespace IntwentyDemo.Services
                     if (string.IsNullOrEmpty(customerid))
                         return;
 
-                    client.RunCommand(string.Format("update customer set customerstatus='ACTIVE' where customerid='{0}'", customerid));
+                    client.RunCommand(string.Format("update wms_customer set customerstatus='ACTIVE' where customerid='{0}'", customerid));
 
                     var customer = client.GetResultSet(string.Format("select * from customer where customerid='{0}'", customerid));
 
@@ -94,7 +94,7 @@ namespace IntwentyDemo.Services
             if (!string.IsNullOrEmpty(itemname))
                 return;
 
-            var item = client.GetResultSet("select * from item where ItemId=@P1", parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", itemid) });
+            var item = client.GetResultSet("select * from wms_item where ItemId=@P1", parameters: new IIntwentySqlParameter[] { new IntwentySqlParameter("@P1", itemid) });
             if (!item.HasRows)
                 return;
 

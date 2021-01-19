@@ -568,7 +568,7 @@ namespace Intwenty
                 {
 
                     //There is an explicit permission set
-                    if (p.IsApplicationAuthorization && p.AuthorizationItemNormalizedName == a.MetaCode)
+                    if (p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.MetaCode)
                     {
                         exist_explicit = true;
 
@@ -585,7 +585,7 @@ namespace Intwenty
                 {
                     foreach (var p in list)
                     {
-                        if (p.IsSystemAuthorization && p.AuthorizationItemNormalizedName == a.SystemMetaCode)
+                        if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode)
                         {
                             if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
                                 (requested_permission == IntwentyPermission.Modify && p.Modify) ||
@@ -670,7 +670,7 @@ namespace Intwenty
 
             Client.DeleteEntity(existing);
 
-            var permissions = Client.GetEntities<IntwentyAuthorization>().Where(p => p.AuthorizationItemNormalizedName == existing.MetaCode && p.AuthorizationItemType == ApplicationModelItem.MetaTypeApplication);
+            var permissions = Client.GetEntities<IntwentyAuthorization>().Where(p => p.AuthorizationNormalizedName == existing.MetaCode && p.AuthorizationType == ApplicationModelItem.MetaTypeApplication);
             if (permissions != null && permissions.Count() > 0)
                 Client.DeleteEntities(permissions);
 

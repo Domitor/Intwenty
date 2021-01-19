@@ -60,31 +60,33 @@ namespace Intwenty.Areas.Identity.Pages
             return new JsonResult(authitems);
         }
 
-        public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyProductVm model)
+        public async Task<IActionResult> OnPostUpdateEntity([FromBody] IntwentyOrganizationProductVm model)
         {
-            await Task.Delay(1);
+
             //FIND OBJECT IN DB, UPDATE FROM MODEL AND SAVE
-            /*
-            var product = await Manager.FindByIdAsync(model.Id);
-            if (product != null)
+            var client = DataRepository.GetIAMDataClient();
+            await client.OpenAsync();
+            var orgproduct = await client.GetEntityAsync<IntwentyOrganizationProduct>(model.Id);
+            await client.CloseAsync();
+            if (orgproduct != null)
             {
-                product.ProductName = model.ProductName;
-                await ProductManager.UpdateAsync(product);
-                return await OnGetLoad(product.Id);
+                orgproduct.ProductURI = model.ProductURI;
+                orgproduct.APIPath = model.APIPath;
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(orgproduct);
+                await client.CloseAsync();
+
             }
-            */
 
-            return new JsonResult("{}");
-
-
+            return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
 
         public async Task<IActionResult> OnPostAddRoleAuthorization([FromBody] IntwentyAuthorizationVm model)
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
-            var authitem = allauths.Find(p => p.Id == model.AuthorizationItemId);
-            //await OrganizationManager.AddUpdateRoleAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId);
+            var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
+            await OrganizationManager.AddUpdateRoleAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId);
             return await OnGetLoad( model.OrganizationId, model.ProductId);
 
         }
@@ -92,8 +94,8 @@ namespace Intwenty.Areas.Identity.Pages
         public async Task<IActionResult> OnPostAddSystemAuthorization([FromBody] IntwentyAuthorizationVm model)
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
-            var authitem = allauths.Find(p => p.Id == model.AuthorizationItemId);
-            //await OrganizationManager.AddUpdateSystemAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
+            await OrganizationManager.AddUpdateSystemAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
@@ -101,8 +103,8 @@ namespace Intwenty.Areas.Identity.Pages
         public async Task<IActionResult> OnPostAddApplicationAuthorization([FromBody] IntwentyAuthorizationVm model)
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
-            var authitem = allauths.Find(p => p.Id == model.AuthorizationItemId);
-            //await OrganizationManager.AddUpdateApplicationAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
+            await OrganizationManager.AddUpdateApplicationAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
@@ -110,15 +112,15 @@ namespace Intwenty.Areas.Identity.Pages
         public async Task<IActionResult> OnPostAddViewAuthorization([FromBody] IntwentyAuthorizationVm model)
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
-            var authitem = allauths.Find(p => p.Id == model.AuthorizationItemId);
-            //await OrganizationManager.AddUpdateViewAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
+            await OrganizationManager.AddUpdateViewAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
 
         public async Task<IActionResult> OnPostRemoveAuthorization([FromBody] IntwentyAuthorizationVm model)
         {
-            //await OrganizationManager.RemoveUserAuthorizationAsync(model.OrganizationId, model.Id);
+            await OrganizationManager.RemoveAuthorizationAsync(model.OrganizationId, model.Id);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }

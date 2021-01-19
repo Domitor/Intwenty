@@ -31,8 +31,11 @@ namespace Intwenty.Areas.Identity.Data
         Task<bool> IsProductUser(string productid, IntwentyUser user);
         Task<IntwentyOrganizationProductInfoVm> GetOrganizationProductInfoAsync(string productid, string userid);
         Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid);
-
-
+        Task<IdentityResult> AddUpdateRoleAuthorizationAsync(string normalizedAuthName, int organizationid, string productid);
+        Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
+        Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
+        Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
+        Task<IdentityResult> RemoveAuthorizationAsync(int organizationid, int authorizationId);
     }
 
     public class IntwentyOrganizationManager : IIntwentyOrganizationManager
@@ -236,10 +239,10 @@ namespace Intwenty.Areas.Identity.Data
 
             var result = new IntwentyOrganizationProductVm();
             result.APIPath = orgproduct.APIPath;
-            result.RoleAuthorizations = authorizations.Where(p=> p.AuthorizationItemType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
-            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
-            result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
-            result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.RoleAuthorizations = authorizations.Where(p=> p.AuthorizationType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.Id = orgproduct.Id;
             result.OrganizationId = org.Id;
             result.OrganizationName = org.Name;
@@ -249,6 +252,182 @@ namespace Intwenty.Areas.Identity.Data
 
             return result;
 
+        }
+
+        public async Task<IdentityResult> AddUpdateRoleAuthorizationAsync(string normalizedAuthName, int organizationid, string productid)
+        {
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var auth = new IntwentyAuthorization() { AuthorizationNormalizedName = normalizedAuthName, AuthorizationType = "ROLE", OrganizationId = org.Id, OrganizationName = org.Name, ProductId = productid };
+            return await AddUpdateAuthorizationAsync(auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationNormalizedName = normalizedAuthName,
+                AuthorizationType = "SYSTEM",
+                OrganizationId = org.Id,
+                OrganizationName = org.Name,
+                ProductId = productid,
+                ReadAuth = read,
+                ModifyAuth = modify,
+                DeleteAuth = delete
+            };
+
+            return await AddUpdateAuthorizationAsync(auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationNormalizedName = normalizedAuthName,
+                AuthorizationType = "APPLICATION",
+                OrganizationId = org.Id,
+                OrganizationName = org.Name,
+                ProductId = productid,
+                ReadAuth = read,
+                ModifyAuth = modify,
+                DeleteAuth = delete
+            };
+
+            return await AddUpdateAuthorizationAsync(auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationNormalizedName = normalizedAuthName,
+                AuthorizationType = "APPLICATION",
+                OrganizationId = org.Id,
+                OrganizationName = org.Name,
+                ProductId = productid,
+                ReadAuth = read,
+                ModifyAuth = modify,
+                DeleteAuth = delete
+            };
+
+            return await AddUpdateAuthorizationAsync(auth);
+        }
+
+        public async Task<IdentityResult> RemoveAuthorizationAsync(int organizationid, int authorizationId)
+        {
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            await client.CloseAsync();
+            var existing_auth = existing_auths.Find(p => p.OrganizationId == organizationid &&
+                                                         p.Id == authorizationId);
+
+            if (existing_auth == null)
+                return IdentityResult.Success;
+
+            await client.OpenAsync();
+            await client.DeleteEntityAsync(existing_auth);
+            await client.CloseAsync();
+
+            return IdentityResult.Success;
+        }
+
+        /// <summary>
+        /// Add or update an authorization for a product in an organization
+        /// (UserId must be empty otherwise the authorization applies on the user level)
+        /// </summary>
+        private async Task<IdentityResult> AddUpdateAuthorizationAsync(IntwentyAuthorization authorization)
+        {
+           
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var productauths = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
+            await client.CloseAsync();
+            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationNormalizedName && p.ProductId == authorization.ProductId && p.AuthorizationType == authorization.AuthorizationType);
+            if (productauth == null)
+                return IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOAUTH", Description = string.Format("There is no authentication named {0} in this product", authorization.AuthorizationName) } });
+
+
+            await client.OpenAsync();
+            var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            await client.CloseAsync();
+            var existing_auth = existing_auths.Find(p => string.IsNullOrEmpty(p.UserId) &&
+                                                         p.AuthorizationId == productauth.Id &&
+                                                         p.ProductId == productauth.ProductId &&
+                                                         p.OrganizationId == authorization.OrganizationId);
+
+            if (existing_auth != null && existing_auth.AuthorizationType == "ROLE")
+            {
+                return IdentityResult.Success;
+            }
+
+            if (existing_auth != null)
+            {
+                existing_auth.ReadAuth = authorization.ReadAuth;
+                existing_auth.ModifyAuth = authorization.ModifyAuth;
+                existing_auth.DeleteAuth = authorization.DeleteAuth;
+                if (existing_auth.DeleteAuth)
+                {
+                    existing_auth.ModifyAuth = true;
+                    existing_auth.ReadAuth = true;
+                }
+                if (existing_auth.ModifyAuth)
+                {
+                    existing_auth.ReadAuth = true;
+                }
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(existing_auth);
+                await client.CloseAsync();
+                return IdentityResult.Success;
+            }
+
+
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationId = productauth.Id,
+                ProductId = productauth.ProductId,
+                OrganizationId = authorization.OrganizationId,
+                OrganizationName = authorization.OrganizationName,
+                AuthorizationName = productauth.Name,
+                AuthorizationType = productauth.AuthorizationType,
+                AuthorizationNormalizedName = productauth.NormalizedName,
+                ReadAuth = authorization.ReadAuth,
+                ModifyAuth = authorization.ModifyAuth,
+                DeleteAuth = authorization.DeleteAuth,
+            };
+            if (auth.DeleteAuth)
+            {
+                auth.ModifyAuth = true;
+                auth.ReadAuth = true;
+            }
+            if (auth.ModifyAuth)
+            {
+                auth.ReadAuth = true;
+            }
+            await client.OpenAsync();
+            await client.InsertEntityAsync(auth);
+            await client.CloseAsync();
+
+            return IdentityResult.Success;
         }
     }
 }
