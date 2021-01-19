@@ -47,6 +47,13 @@ namespace Intwenty.Areas.Identity.Pages
             var user = await UserManager.FindByIdAsync(userid);
             var products = await UserManager.GetOrganizationProductsAsync(user);
             var result = products.Find(p => p.UserId == userid && p.OrganizationId == organizationid && p.ProductId == productid);
+            var authorizations = await UserManager.GetUserAuthorizationsAsync(user, productid);
+
+            result.RoleAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationItemType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+
             return new JsonResult(result);
         }
 

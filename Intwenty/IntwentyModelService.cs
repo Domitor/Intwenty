@@ -557,7 +557,9 @@ namespace Intwenty
             if (UserManager.IsInRoleAsync(user, "SUPERADMIN").Result)
                 return apps;
 
-            var list = UserManager.GetUserAuthorizations(user).Result;
+            var authorizations = UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId).Result;
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
+
 
             foreach (var a in apps)
             {

@@ -98,10 +98,10 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            var sql = "SELECT t1.UserId, t2.ProductId, t2.ProductName, t3.Id as OrganizationId, t3.Name as OrganizationName FROM security_OrganizationMembers t1 ";
+            var sql = "SELECT t1.UserId, t2.ProductId, t2.ProductName, t2.ProductURI, t2.APIPath, t3.Id as OrganizationId, t3.Name as OrganizationName FROM security_OrganizationMembers t1 ";
             sql += "JOIN security_OrganizationProducts t2 ON t1.OrganizationId == t2.OrganizationId ";
             sql += "JOIN security_Organization t3 ON t3.Id == t1.OrganizationId ";
-            sql += "WHERE UserId = '{0}'";
+            sql += "WHERE t1.UserId = '{0}'";
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var userorgproducts = await client.GetEntitiesAsync<IntwentyUserProductVm>(string.Format(sql,user.Id), false);
@@ -112,9 +112,96 @@ namespace Intwenty.Areas.Identity.Data
             return userorgproducts;
         }
 
-        public async Task<IdentityResult> AddAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization, CancellationToken cancellationToken)
+        public async Task<IdentityResult> AddUserRoleAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var user = await FindByIdAsync(userid);
+            var auth = new IntwentyAuthorization() { AuthorizationItemNormalizedName = normalizedAuthName, AuthorizationItemType = "ROLE", OrganizationId=org.Id, OrganizationName=org.Name, UserId=user.Id, UserName=user.UserName, ProductId = productid };
+            return await AddUpdateUserAuthorizationAsync(user, auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateUserSystemAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var user = await FindByIdAsync(userid);
+            var auth = new IntwentyAuthorization() { AuthorizationItemNormalizedName = normalizedAuthName, 
+                                                     AuthorizationItemType = "SYSTEM", 
+                                                     OrganizationId = org.Id, 
+                                                     OrganizationName = org.Name, 
+                                                     UserId = user.Id, 
+                                                     UserName = user.UserName, 
+                                                     ProductId = productid,
+                                                     ReadAuth=read,
+                                                     ModifyAuth=modify,
+                                                     DeleteAuth=delete };
+
+            return await AddUpdateUserAuthorizationAsync(user, auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateUserApplicationAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var user = await FindByIdAsync(userid);
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationItemNormalizedName = normalizedAuthName,
+                AuthorizationItemType = "APPLICATION",
+                OrganizationId = org.Id,
+                OrganizationName = org.Name,
+                UserId = user.Id,
+                UserName = user.UserName,
+                ProductId = productid,
+                ReadAuth = read,
+                ModifyAuth = modify,
+                DeleteAuth = delete
+            };
+
+            return await AddUpdateUserAuthorizationAsync(user, auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateUserViewAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        {
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
+            await client.CloseAsync();
+
+            var user = await FindByIdAsync(userid);
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationItemNormalizedName = normalizedAuthName,
+                AuthorizationItemType = "APPLICATION",
+                OrganizationId = org.Id,
+                OrganizationName = org.Name,
+                UserId = user.Id,
+                UserName = user.UserName,
+                ProductId = productid,
+                ReadAuth = read,
+                ModifyAuth = modify,
+                DeleteAuth = delete
+            };
+
+            return await AddUpdateUserAuthorizationAsync(user, auth);
+        }
+
+        public async Task<IdentityResult> AddUpdateUserAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization)
+        {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
@@ -127,145 +214,96 @@ namespace Intwenty.Areas.Identity.Data
             await client.OpenAsync();
             var productauths = await client.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
             await client.CloseAsync();
-            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationItemNormalizedName && p.ProductId == Settings.ProductId && p.AuthorizationType == authorization.AuthorizationItemType);
+            var productauth = productauths.Find(p => p.NormalizedName == authorization.AuthorizationItemNormalizedName && p.ProductId == authorization.ProductId && p.AuthorizationType == authorization.AuthorizationItemType);
             if (productauth == null)
                 return IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOAUTH", Description = string.Format("There is no authentication named {0} in this product", authorization.AuthorizationItemName) } });
 
 
-            client.Open();
-            var existing_auths = client.GetEntities<IntwentyAuthorization>();
+            await client.OpenAsync();
+            var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            await client.CloseAsync();
             var existing_auth = existing_auths.Find(p => p.UserId == user.Id && 
-                                                         p.AuthorizationItemId == authorization.AuthorizationItemId && 
-                                                         p.ProductId == authorization.ProductId && 
+                                                         p.AuthorizationItemId == productauth.Id && 
+                                                         p.ProductId == productauth.ProductId && 
                                                          p.OrganizationId == authorization.OrganizationId);
-            client.Close();
-            if (existing_auth != null)
-                return IdentityResult.Success;
 
-            var urole = new IntwentyAuthorization()
+            if (existing_auth != null && existing_auth.AuthorizationItemType == "ROLE")
             {
-                AuthorizationItemId = authorization.AuthorizationItemId,
+                return IdentityResult.Success;
+            }
+
+            if (existing_auth != null)
+            {
+                existing_auth.ReadAuth = authorization.ReadAuth;
+                existing_auth.ModifyAuth = authorization.ModifyAuth;
+                existing_auth.DeleteAuth = authorization.DeleteAuth;
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(existing_auth);
+                await client.CloseAsync();
+                return IdentityResult.Success;
+            }
+              
+
+            var auth = new IntwentyAuthorization()
+            {
+                AuthorizationItemId = productauth.Id,
                 UserId = user.Id,
-                ProductId = authorization.ProductId,
-                AuthorizationItemName = authorization.AuthorizationItemName,
-                AuthorizationItemType = authorization.AuthorizationItemType,
                 UserName = user.UserName,
-                AuthorizationItemNormalizedName = authorization.AuthorizationItemNormalizedName
+                ProductId = productauth.ProductId,
+                OrganizationId = authorization.OrganizationId,
+                OrganizationName = authorization.OrganizationName,
+                AuthorizationItemName = productauth.Name,
+                AuthorizationItemType = productauth.AuthorizationType,
+                AuthorizationItemNormalizedName = productauth.NormalizedName,
+                ReadAuth = authorization.ReadAuth,
+                ModifyAuth = authorization.ModifyAuth,
+                DeleteAuth = authorization.DeleteAuth,
             };
-            client.Open();
-            client.InsertEntity(urole);
-            client.Close();
+            await client.OpenAsync();
+            await client.InsertEntityAsync(auth);
+            await client.CloseAsync();
 
             return IdentityResult.Success;
         }
 
-      
-
-
-
-        #region Intwenty Permissions
-
-        /*
-        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionItem permission)
-        {
-            if (user == null || permission == null)
-                throw new InvalidOperationException("Error when adding permission to user.");
-
-            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Title, permission.Read, permission.Modify, permission.Delete);
-        }
-
-        public Task<IdentityResult> AddUpdateUserPermissionAsync(ClaimsPrincipal claimprincipal, IntwentyUserPermissionItem permission)
-        {
-            if (!claimprincipal.Identity.IsAuthenticated)
-                return Task.FromResult(IdentityResult.Failed());
-
-            var user = GetUserAsync(claimprincipal).Result;
-            if (user == null || permission == null)
-                throw new InvalidOperationException("Error when adding / updating a permission.");
-
-            return AddUpdateUserPermissionAsync(user, permission.PermissionType, permission.MetaCode, permission.Title, permission.Read, permission.Modify, permission.Delete);
-        }
-
-        public Task<IdentityResult> AddUpdateUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode, string title, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> RemoveUserAuthorizationAsync(IntwentyUser user, IntwentyAuthorization authorization)
         {
             if (user == null)
-                throw new InvalidOperationException("Error when adding permission to user.");
-
-            UserCache.Remove(PermissionCacheKey + "_" + user.Id);
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
-            client.Close();
-            if (existing != null)
             {
-                existing.ReadPermission = read;
-                existing.ModifyPermission = modify;
-                existing.DeletePermission = delete;
-
-                client.Open();
-                client.UpdateEntity(existing);
-                client.Close();
-
-                return Task.FromResult(IdentityResult.Success);
-
+                throw new ArgumentNullException(nameof(user));
             }
 
-            var t = new IntwentyUserPermission();
-            t.Id = Guid.NewGuid().ToString();
-            t.UserId = user.Id;
-            t.Title = title;
-            t.UserName = user.UserName;
-            t.MetaCode = metacode;
-            t.PermissionType = permissiontype;
-            t.ReadPermission = read;
-            t.ModifyPermission = modify;
-            t.DeletePermission = delete;
-            client.Open();
-            client.InsertEntity(t);
-            client.Close();
-
-
-            return Task.FromResult(IdentityResult.Success);
-        }
-
-        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, IntwentyUserPermissionItem permission)
-        {
-            if (user == null || permission == null)
-                throw new InvalidOperationException("Error when removing permission from user.");
-
-            return RemoveUserPermissionAsync(user, permission.PermissionType, permission.MetaCode);
-        }
-
-        public Task<IdentityResult> RemoveUserPermissionAsync(IntwentyUser user, string permissiontype, string metacode)
-        {
-            if (user == null)
-                throw new InvalidOperationException("Error when removing permission from user.");
-
-            UserCache.Remove(PermissionCacheKey + "_" + user.Id);
+            UserCache.Remove(UsersCacheKey);
+            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var existing = client.GetEntities<IntwentyUserPermission>().Find(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.PermissionType == permissiontype && p.MetaCode == metacode);
-            client.Close();
-            if (existing != null)
-            {
-                client.Open();
-                client.DeleteEntity(existing);
-                client.Close();
-            }
+            await client.OpenAsync();
+            var existing_auths = await client.GetEntitiesAsync<IntwentyAuthorization>();
+            await client.CloseAsync();
+            var existing_auth = existing_auths.Find(p => p.UserId == user.Id &&
+                                                         p.AuthorizationItemId == authorization.AuthorizationItemId &&
+                                                         p.ProductId == authorization.ProductId &&
+                                                         p.OrganizationId == authorization.OrganizationId);
 
-            return Task.FromResult(IdentityResult.Success);
+            if (existing_auth == null)
+                return IdentityResult.Success;
+
+         
+            await client.OpenAsync();
+            await client.DeleteEntityAsync(existing_auth);
+            await client.CloseAsync();
+
+            return IdentityResult.Success;
         }
 
-             */
 
-        public async Task<List<IntwentyAuthorizationVm>> GetUserAuthorizations(IntwentyUser user)
+
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user)
         {
             if (user == null)
-                throw new InvalidOperationException("Error when fetching user permissions.");
+                throw new InvalidOperationException("Error when fetching user authorizations.");
 
-            List<IntwentyAuthorizationVm> res = null;
+            List<IntwentyAuthorization> res = null;
 
             if (UserCache.TryGetValue(PermissionCacheKey + "_" + user.Id, out res))
             {
@@ -275,18 +313,26 @@ namespace Intwenty.Areas.Identity.Data
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
             var result = await client.GetEntitiesAsync<IntwentyAuthorization>();
-            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper() && p.ProductId == Settings.ProductId).Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            var list = result.Where(p => p.UserId.ToUpper() == user.Id.ToUpper()).ToList();
             await client.CloseAsync();
 
 
             //TODO: ADD Organization Authorizations that is not explitly set on the user
-            
+
             UserCache.Set(PermissionCacheKey + "_" + user.Id, list);
 
             return list;
         }
 
-   
+        public async Task<List<IntwentyAuthorization>> GetUserAuthorizationsAsync(IntwentyUser user, string productid)
+        {
+            if (user == null)
+                throw new InvalidOperationException("Error when fetching user authorizations.");
+
+            var userauths = await GetUserAuthorizationsAsync(user);
+            return userauths.Where(p=>p.ProductId==productid).ToList();
+        }
+
 
         public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
@@ -313,7 +359,8 @@ namespace Intwenty.Areas.Identity.Data
                 return true;
 
        
-            var list = await GetUserAuthorizations(user);
+            var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
 
             var explicit_exists=false;
 
@@ -349,7 +396,7 @@ namespace Intwenty.Areas.Identity.Data
             return false;
         }
         
-        #endregion
+
 
         #region Intwenty Groups
 

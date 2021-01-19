@@ -234,7 +234,7 @@
             {
                 var context = this;
                 var baseurl = '@Url.Content("~/Identity/IAM/")';
-                var endpointurl = baseurl + "OrganizationProduct/@Model.OrganizationId/@Model.ProductId?handler=Load";
+                var endpointurl = baseurl + "UserProduct/@Model.UserId/@Model.OrganizationId/@Model.ProductId?handler=Load";
                 $.get(endpointurl, function (response)
                 {
                     context.model = response;

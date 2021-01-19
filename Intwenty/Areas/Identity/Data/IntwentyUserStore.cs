@@ -210,35 +210,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task AddToRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var productrole = client.GetEntities<IntwentyProductAuthorizationItem>().Find(p => p.NormalizedName == roleName && p.ProductId == Settings.ProductId && p.AuthorizationType == "ROLE");
-            client.Close();
-            if (productrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0} in this product", roleName) } }));
-
-            client.Open();
-            var existing_userrole = client.GetEntities<IntwentyAuthorization>().Find(p => p.UserId == user.Id && p.AuthorizationItemId == productrole.Id && p.ProductId == Settings.ProductId);
-            client.Close();
-            if (existing_userrole != null)
-                return Task.FromResult(IdentityResult.Success);
-
-            var urole = new IntwentyAuthorization() { AuthorizationItemId = productrole.Id, UserId = user.Id, ProductId = productrole.ProductId, 
-                                                      AuthorizationItemName = productrole.Name, AuthorizationItemType = "ROLE", UserName = user.UserName, 
-                                                      AuthorizationItemNormalizedName = productrole.NormalizedName };
-            client.Open();
-            client.InsertEntity(urole);
-            client.Close();
-            return Task.CompletedTask;
+            throw new NotImplementedException();
         }
 
        
@@ -334,59 +306,15 @@ namespace Intwenty.Areas.Identity.Data
 
         public Task RemoveFromRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var productrole = client.GetEntities<IntwentyProductAuthorizationItem>().Find(p => p.NormalizedName == roleName && p.ProductId == Settings.ProductId && p.AuthorizationType == "ROLE");
-            client.Close();
-            if (productrole == null)
-                return Task.FromResult(IdentityResult.Failed(new IdentityError[] { new IdentityError() { Code = "NOROLE", Description = string.Format("There is no role named {0} in this product", roleName) } }));
-
-            client.Open();
-            var existing_userrole = client.GetEntities<IntwentyAuthorization>().Find(p => p.UserId == user.Id && p.AuthorizationItemId == productrole.Id);
-            client.Close();
-            if (existing_userrole == null)
-                return Task.FromResult(IdentityResult.Success);
-
-            client.Open();
-            client.DeleteEntity(existing_userrole);
-            client.Close();
-
-            return Task.CompletedTask;
+            throw new NotImplementedException();
         }
 
         public Task RemoveFromRoleAsync(IntwentyUser user, IntwentyProductAuthorizationItem role, CancellationToken cancellationToken)
         {
-            return RemoveFromRoleAsync(user, role.NormalizedName, cancellationToken);
+            throw new NotImplementedException();
         }
 
-        /*
-        public List<IntwentyProductRole> GetRoles()
-        {
-            List <IntwentyProductRole> res = null;
-
-            if (UserCache.TryGetValue(RolesCacheKey, out res))
-            {
-                return res;
-            }
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var roles = client.GetEntities<IntwentyProductRole>().Where(p=> p.ProductId == Settings.ProductId).ToList();
-            client.Close();
-
-            UserCache.Set(RolesCacheKey, roles);
-
-            return roles;
-
-        }*/
+      
 
         public async Task<List<IntwentyUser>> GetUsersAsync()
         {

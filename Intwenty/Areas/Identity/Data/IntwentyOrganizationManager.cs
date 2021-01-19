@@ -231,7 +231,7 @@ namespace Intwenty.Areas.Identity.Data
             var org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
             var product = await client.GetEntityAsync<IntwentyProduct>(productid);
             var orgproduct = await client.GetEntityAsync<IntwentyOrganizationProduct>(string.Format("SELECT * from security_OrganizationProducts WHERE OrganizationId={0} AND ProductId='{1}'", organizationid, productid), false);
-            var authorizations = await client.GetEntitiesAsync<IntwentyAuthorization>(string.Format("SELECT * from security_Authorization WHERE OrganizationId={0} AND ProductId='{1}'", organizationid, productid), false);
+            var authorizations = await client.GetEntitiesAsync<IntwentyAuthorization>(string.Format("SELECT * from security_Authorization WHERE OrganizationId={0} AND ProductId='{1}' AND (UserId IS NULL OR UserId='')", organizationid, productid), false);
             await client.CloseAsync();
 
             var result = new IntwentyOrganizationProductVm();

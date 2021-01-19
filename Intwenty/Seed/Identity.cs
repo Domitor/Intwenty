@@ -119,7 +119,7 @@ namespace Intwenty.Seed
                 user.Culture = Settings.Value.DefaultCulture;
                 userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
                 organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
-                userManager.AddToRoleAsync(user, "SUPERADMIN");
+                var result = userManager.AddUserRoleAuthorizationAsync("SUPERADMIN", user.Id, org.Id, Settings.Value.ProductId);
             }
 
             var curr_user = userManager.FindByNameAsync(Settings.Value.DemoUser).Result;
@@ -134,7 +134,7 @@ namespace Intwenty.Seed
                 user.Culture = Settings.Value.DefaultCulture;
                 userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
                 organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
-                userManager.AddToRoleAsync(user, "USER");
+                var result = userManager.AddUserRoleAuthorizationAsync("USER", user.Id, org.Id, Settings.Value.ProductId);
             }
 
            
