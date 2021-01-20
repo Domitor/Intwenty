@@ -4,6 +4,8 @@ using Intwenty.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Intwenty.Entity;
+using System.Threading.Tasks;
 
 namespace Intwenty.Interface
 {
@@ -203,6 +205,12 @@ namespace Intwenty.Interface
         void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 
         void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
+        /// <summary>
+        /// Get eventlog items
+        /// </summary>
+        /// <returns>A list of eventlog items</returns>
+        Task<List<EventLog>> GetEventLog(string verbosity);
 
         IDataClient GetDataClient();
 

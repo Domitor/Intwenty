@@ -22,5 +22,7 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string APIPath { get; set; }
 
+        public string MobileClientVersion { get; set; }
+
     }
 }

@@ -72,6 +72,7 @@ namespace Intwenty.Areas.Identity.Pages
             {
                 orgproduct.ProductURI = model.ProductURI;
                 orgproduct.APIPath = model.APIPath;
+                orgproduct.MobileClientVersion = model.MobileClientVersion;
                 await client.OpenAsync();
                 await client.UpdateEntityAsync(orgproduct);
                 await client.CloseAsync();

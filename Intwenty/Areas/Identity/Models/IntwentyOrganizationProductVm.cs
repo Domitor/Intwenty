@@ -24,6 +24,7 @@ namespace Intwenty.Areas.Identity.Models
             OrganizationId = entity.OrganizationId;
             APIPath = entity.APIPath;
             ProductURI = entity.ProductURI;
+            MobileClientVersion = entity.MobileClientVersion;
             RoleAuthorizations = new List<IntwentyAuthorizationVm>();
             ViewAuthorizations = new List<IntwentyAuthorizationVm>();
             SystemAuthorizations = new List<IntwentyAuthorizationVm>();
@@ -37,7 +38,8 @@ namespace Intwenty.Areas.Identity.Models
         public string OrganizationName { get; set; }
         public string ProductURI { get; set; }
         public string APIPath { get; set; }
-       
+        public string MobileClientVersion { get; set; }
+
 
         public List<IntwentyAuthorizationVm> RoleAuthorizations { get; set; }
 

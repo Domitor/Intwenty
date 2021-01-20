@@ -21,6 +21,7 @@ namespace Intwenty.Areas.Identity.Models
             OrganizationId = entity.OrganizationId;
             APIPath = entity.APIPath;
             ProductURI = entity.ProductURI;
+            MobileClientVersion = entity.MobileClientVersion;
         }
 
         public int Id { get; set; }
@@ -30,6 +31,7 @@ namespace Intwenty.Areas.Identity.Models
         public string OrganizationName { get; set; }
         public string ProductURI { get; set; }
         public string APIPath { get; set; }
+        public string MobileClientVersion { get; set; }
 
 
     }

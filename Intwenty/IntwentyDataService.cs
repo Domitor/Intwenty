@@ -2165,6 +2165,40 @@ namespace Intwenty
             Task.Run(() => LogEvent("WARNING", message, applicationid, appmetacode, username));
         }
 
+        public virtual async Task<List<EventLog>> GetEventLog(string verbosity)
+        {
+
+            var client = GetDataClient();
+            await client.OpenAsync();
+
+            try
+            {
+                if (string.IsNullOrEmpty(verbosity))
+                {
+
+                    var result = await client.GetEntitiesAsync<EventLog>("SELECT * FROM sysdata_EventLog ORDER BY Id DESC", false);
+                    return result;
+                }
+                else
+                {
+                    var parameters = new List<IIntwentySqlParameter>();
+                    parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
+                    var result = await client.GetEntitiesAsync<EventLog>("SELECT * FROM sysdata_EventLog WHERE Verbosity=@Verbosity ORDER BY Id DESC", false, parameters.ToArray());
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("Error fetching eventlog - GetEventLog(string verbosity): " + ex.Message);
+            }
+            finally
+            {
+                await client.CloseAsync();
+            }
+
+            return new List<EventLog>();
+        }
+
         private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {
             if (Settings.LogVerbosity == LogVerbosityTypes.Error && (verbosity == "WARNING" || verbosity == "INFO"))

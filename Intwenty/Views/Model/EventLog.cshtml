@@ -1,0 +1,89 @@
+﻿@{
+    ViewData["Title"] = "Logviewer";
+}
+
+<div id="app">
+
+    <br />
+    <br />
+    <div class="card">
+        <div class="card-header"><h2>Logviewer</h2></div>
+        <div class="card-body"></div>
+    </div>
+
+    <br />
+
+    <br />
+
+    <h5>System Permissions</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Event Date</th>
+                <th>Verbosity</th>
+                <th>Message</th>
+                <th>User</th>
+                <th>App</th>
+            </tr>
+        </thead>
+        <tr v-for="item in list">
+            <td>{{item.id}}</td>
+            <td>{{item.eventDate}}</td>
+            <td>{{item.verbosity}}</td>
+            <td>{{item.message}}</td>
+            <td>{{item.userName}}</td>
+            <td>{{item.appMetaCode}}</td>
+        </tr>
+    </table>
+
+
+
+</div>
+
+@section Scripts
+{
+
+
+    <script>
+
+      var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: {},
+                idgen: 0,
+                list:[]
+
+            },
+            methods: {
+
+
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                var baseurl = '@Url.Content("~/Model/API/")';
+                var endpointurl = baseurl + "GetEventlog";
+                $.get(endpointurl, function (response)
+                {
+                    context.list = response;
+                });
+
+            }
+        });
+
+
+    </script>
+
+
+}

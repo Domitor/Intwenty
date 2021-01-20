@@ -152,7 +152,15 @@ namespace Intwenty.Controllers
             return View();
         }
 
+        public IActionResult EventLog()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
 
+            return View();
+        }
 
         public IActionResult ToolConfigureDatabase()
         {

@@ -89,7 +89,7 @@ namespace IntwentyDemo
             {
                 var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
                 var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
-                client.InsertEntity<EventLog>(new EventLog() { ApplicationId=0, AppMetaCode = "", EventDate = DateTime.Now, Id=0, Message = "Application was stopped", UserName = "", Verbosity = "INFO" });
+                client.InsertEntity<EventLog>(new EventLog() { ApplicationId=0, AppMetaCode = "", EventDate = DateTime.Now, Id=0, Message = "Instance stopped", UserName = "", Verbosity = "INFO" });
             }
             catch { }
         }
@@ -100,7 +100,7 @@ namespace IntwentyDemo
             {
                 var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
                 var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
-                client.InsertEntity<EventLog>(new EventLog() { ApplicationId = 0, AppMetaCode = "", EventDate = DateTime.Now, Id = 0, Message = "Application was started", UserName = "", Verbosity = "INFO" });
+                client.InsertEntity<EventLog>(new EventLog() { ApplicationId = 0, AppMetaCode = "", EventDate = DateTime.Now, Id = 0, Message = "Instance started", UserName = "", Verbosity = "INFO" });
             }
             catch { }
         }

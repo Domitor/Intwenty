@@ -62,34 +62,30 @@ namespace Intwenty.Controllers
             var user = users.Find(p => p.NormalizedUserName == username.ToUpper());
             if (user == null)
             {
-                DataRepository.LogInfo(string.Format("Call to API/Login with invalid username {0}, IP {1}", username, ip));
+                DataRepository.LogInfo(string.Format("Call to API/Authenticate with invalid username {0}, IP {1}", username, ip));
                 return Unauthorized();
             }
 
-            var client = DataRepository.GetIAMDataClient();
-            await client.OpenAsync();
-            var products = await client.GetEntitiesAsync<IntwentyProduct>();
-            await client.CloseAsync();
-            if (!products.Exists(p=>p.Id==productid))
+
+            var user_org_products = await OrganizationManager.GetUserOrganizationProductsInfoAsync(user.Id, productid);
+            if (user_org_products == null)
             {
-                DataRepository.LogInfo(string.Format("Call to API/Login with invalid productid {0}, IP {1}", productid, ip));
+                DataRepository.LogInfo(string.Format("Call to API/Authenticate the user is not member of an organization that uses the product: {0}, IP {1}", productid, ip));
                 return Unauthorized();
             }
-
-            if (!await OrganizationManager.IsProductUser(productid, user))
+            if (user_org_products.Count == 0)
             {
-                DataRepository.LogInfo(string.Format("Call to API/Login without being product user {0}, IP {1}", username, ip));
+                DataRepository.LogInfo(string.Format("Call to API/Authenticate the user is not member of an organization that uses the product: {0}, IP {1}", productid, ip));
                 return Unauthorized();
             }
-
-            var productinfo = await OrganizationManager.GetOrganizationProductInfoAsync(productid, user.Id);
-            if (productinfo == null)
+            if (user_org_products.Count > 1)
             {
-                DataRepository.LogError(string.Format("Could not find the organization product, IP {0}", ip));
-                return Unauthorized();
+                DataRepository.LogWarning(string.Format("Call to API/Authenticate with productid {0} returned the same product in multiple organizations, IP {1}", productid, ip));
             }
 
-            var result = UserManager.CheckPasswordAsync(user, password).Result;
+
+
+            var result = await UserManager.CheckPasswordAsync(user, password);
             if (result)
             {
                 if (string.IsNullOrEmpty(user.APIKey))
@@ -99,8 +95,8 @@ namespace Intwenty.Controllers
 
                 DataRepository.LogInfo(string.Format("User {0} logged in via api, IP {1}", user.UserName, ip));
 
-                var returnobject = new AuthenticatedProductInfo() { UserApiKey = user.APIKey, UserFullName = user.FullName, ForceAppVersion = "1.0.0", ProductURI = productinfo.ProductURI, ProductAPIPath = productinfo.APIPath, Organization = "", ProductId = productid, ProductName = productinfo.ProductName };
-
+                var returnobject = new UserClientInfo() { UserApiKey = user.APIKey, UserFullName = user.FullName };
+                returnobject.ProductInfo = user_org_products;
                 return new JsonResult(returnobject);
 
             }

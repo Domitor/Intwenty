@@ -29,7 +29,8 @@ namespace Intwenty.Areas.Identity.Data
         Task<IdentityResult> AddProductAsync(IntwentyOrganizationProduct product);
         Task<IdentityResult> RemoveProductAsync(IntwentyOrganizationProduct product);
         Task<bool> IsProductUser(string productid, IntwentyUser user);
-        Task<IntwentyOrganizationProductInfoVm> GetOrganizationProductInfoAsync(string productid, string userid);
+        Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid);
+        Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid, string productid);
         Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid);
         Task<IdentityResult> AddUpdateRoleAuthorizationAsync(string normalizedAuthName, int organizationid, string productid);
         Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
@@ -211,19 +212,24 @@ namespace Intwenty.Areas.Identity.Data
             return false;
         }
 
-        public async Task<IntwentyOrganizationProductInfoVm> GetOrganizationProductInfoAsync(string productid, string userid)
+        public async Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid)
         {
-            var sql = "SELECT t1.*, t2.Name as OrganizationName FROM security_OrganizationProducts t1 JOIN security_Organization t2 ON t1.OrganizationId = t2.Id ";
-            sql += "WHERE t1.ProductId = @ProductId ";
-            sql += "AND EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t1.Id)";
+            var sql = "SELECT t1.*, t2.Name as OrganizationName FROM security_OrganizationProducts t1 ";
+            sql += "JOIN security_Organization t2 ON t1.OrganizationId = t2.Id ";
+            sql += "WHERE EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t2.Id)";
             var parameters = new List<IntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter() { Name = "@ProductId", Value = productid });
             parameters.Add(new IntwentySqlParameter() { Name = "@UserId", Value = userid });
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
-            var result = await client.GetEntityAsync<IntwentyOrganizationProductInfoVm>(sql, false, parameters.ToArray());
+            var result = await client.GetEntitiesAsync<IntwentyOrganizationProductInfoVm>(sql, false, parameters.ToArray());
             await client.CloseAsync();
             return result;
+        }
+
+        public async Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid, string productid)
+        {
+            var userorgproducts = await GetUserOrganizationProductsInfoAsync(userid);
+            return userorgproducts.Where(p => p.ProductId == productid).ToList();
         }
 
         public async Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid)
@@ -237,8 +243,7 @@ namespace Intwenty.Areas.Identity.Data
             var authorizations = await client.GetEntitiesAsync<IntwentyAuthorization>(string.Format("SELECT * from security_Authorization WHERE OrganizationId={0} AND ProductId='{1}' AND (UserId IS NULL OR UserId='')", organizationid, productid), false);
             await client.CloseAsync();
 
-            var result = new IntwentyOrganizationProductVm();
-            result.APIPath = orgproduct.APIPath;
+            var result = new IntwentyOrganizationProductVm(orgproduct);
             result.RoleAuthorizations = authorizations.Where(p=> p.AuthorizationType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
@@ -248,7 +253,7 @@ namespace Intwenty.Areas.Identity.Data
             result.OrganizationName = org.Name;
             result.ProductId = product.Id;
             result.ProductName = product.ProductName;
-            result.ProductURI = orgproduct.ProductURI;
+      
 
             return result;
 
