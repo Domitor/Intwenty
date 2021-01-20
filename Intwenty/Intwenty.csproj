@@ -5,7 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.5.0</Version>
+    <Version>1.5.1</Version>
     <Authors>Johan Filipsson</Authors>
     <Company>Domitor Consulting AB</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -21,8 +21,8 @@
     <PackageReleaseNotes>- Bugfixes
 - Identity extended with product and organization management
 - New feature, use an intwenty instance as a centralized IAM (Identity Access Management)</PackageReleaseNotes>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
+    <AssemblyVersion>1.5.1.0</AssemblyVersion>
+    <FileVersion>1.5.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

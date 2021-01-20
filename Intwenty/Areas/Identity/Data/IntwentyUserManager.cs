@@ -103,8 +103,8 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var sql = "SELECT t1.UserId, t2.ProductId, t2.ProductName, t2.ProductURI, t2.APIPath, t3.Id as OrganizationId, t3.Name as OrganizationName FROM security_OrganizationMembers t1 ";
-            sql += "JOIN security_OrganizationProducts t2 ON t1.OrganizationId == t2.OrganizationId ";
-            sql += "JOIN security_Organization t3 ON t3.Id == t1.OrganizationId ";
+            sql += "JOIN security_OrganizationProducts t2 ON t1.OrganizationId = t2.OrganizationId ";
+            sql += "JOIN security_Organization t3 ON t3.Id = t1.OrganizationId ";
             sql += "WHERE t1.UserId = '{0}'";
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
