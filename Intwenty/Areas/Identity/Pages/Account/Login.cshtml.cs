@@ -89,7 +89,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var client = _dataService.GetDataClient();
+                var client = _dataService.GetIAMDataClient();
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
@@ -101,6 +101,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
                     {
+                        signedinuser.LastLoginProduct = _settings.Value.ProductId;
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                         client.UpdateEntity(signedinuser);
                     }

@@ -27,14 +27,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
         private readonly IIntwentyEventService _eventservice;
 
         public RegisterModel(
             IntwentyUserManager userManager,
-            SignInManager<IntwentyUser> signInManager,
+            IntwentySignInManager signInManager,
             IIntwentyEventService eventservice,
             IOptions<IntwentySettings> settings)
         {

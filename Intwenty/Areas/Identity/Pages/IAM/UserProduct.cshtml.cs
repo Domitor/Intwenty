@@ -13,7 +13,7 @@ using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages
 {
-    [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
+    [Authorize(Policy = "IntwentyUserAdminAuthorizationPolicy")]
     public class UserProductModel : PageModel
     {
 

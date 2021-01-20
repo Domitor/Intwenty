@@ -40,6 +40,15 @@ namespace IntwentyDemo
         public void ConfigureServices(IServiceCollection services)
         {
 
+            var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
+            var adminroles = new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
+            var userroles = new string[] { "USER", "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
+            var iamroles = new string[] { };
+            if (settings.UseSeparateIAMDatabase)
+                iamroles = new string[] { "SUPERADMIN" };
+            else
+                iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
+
             //Default IntwentyDataService, IntwentyEventService
             //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration);
 
@@ -53,14 +62,24 @@ namespace IntwentyDemo
                 options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                 {
                     policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                    //policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN", "USER" });
+                    policy.RequireRole(userroles);
                 });
 
                 options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
                 {
                     //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                    policy.RequireRole(new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" });
+                    policy.RequireRole(adminroles);
 
+                });
+
+                var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
+               
+                options.AddPolicy("IntwentyUserAdminAuthorizationPolicy", policy =>
+                {
+                    //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    policy.RequireRole(iamroles);
+
+                
                 });
             });
 

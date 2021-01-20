@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.DataClient.Model;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Intwenty.Areas.Identity.Data
 {
@@ -44,10 +45,12 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
+        private IMemoryCache UserCache { get; }
 
-        public IntwentyOrganizationManager(IOptions<IntwentySettings> settings) 
+        public IntwentyOrganizationManager(IOptions<IntwentySettings> settings, IMemoryCache cache) 
         {
             Settings = settings.Value;
+            UserCache = cache;
         }
 
         public async Task<IdentityResult> CreateAsync(IntwentyOrganization organization)
@@ -349,6 +352,10 @@ namespace Intwenty.Areas.Identity.Data
             if (existing_auth == null)
                 return IdentityResult.Success;
 
+            var members = await GetMembersAsync(organizationid);
+            foreach(var m in members)
+                UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
+
             await client.OpenAsync();
             await client.DeleteEntityAsync(existing_auth);
             await client.CloseAsync();
@@ -384,6 +391,10 @@ namespace Intwenty.Areas.Identity.Data
             {
                 return IdentityResult.Success;
             }
+
+            var members = await GetMembersAsync(authorization.OrganizationId);
+            foreach (var m in members)
+                UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
 
             if (existing_auth != null)
             {

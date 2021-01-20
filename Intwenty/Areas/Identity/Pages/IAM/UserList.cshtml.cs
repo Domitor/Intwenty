@@ -12,10 +12,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
+using Intwenty.Helpers;
 
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
-    [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
+    [Authorize(Policy = "IntwentyUserAdminAuthorizationPolicy")]
     public class UserListModel : PageModel
     {
 
@@ -57,7 +58,12 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             user.EmailConfirmed = true;
             user.Culture = Settings.DefaultCulture;
 
-            await UserManager.CreateAsync(user);
+            var password = PasswordGenerator.GeneratePassword(false, true, true, false, 6);
+
+            var result = await UserManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+                DataRepository.LogInfo(string.Format("A new user {0} with temporary password {1} was created", user.UserName, password), username: user.UserName);
 
             return await OnGetLoad();
         }

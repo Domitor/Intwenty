@@ -25,10 +25,6 @@ namespace Intwenty.Areas.Identity.Data
         private IMemoryCache UserCache { get; }
 
 
-        private static readonly string UsersCacheKey = "ALLUSERS";
-
-        private static readonly string UserAuthCacheKey = "USERAUTH";
-
         public IntwentyUserManager(IUserStore<IntwentyUser> store, 
                                    IOptions<IdentityOptions> optionsAccessor, 
                                    IPasswordHasher<IntwentyUser> passwordHasher, 
@@ -59,7 +55,7 @@ namespace Intwenty.Areas.Identity.Data
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            UserCache.Remove(UsersCacheKey);
+            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
 
             IntwentyOrganization org=null;
 
@@ -76,7 +72,17 @@ namespace Intwenty.Areas.Identity.Data
 
             if (org != null)
             {
-                await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = org.Id });
+                await client.OpenAsync();
+
+                var orgmemembers = await client.GetEntitiesAsync<IntwentyOrganizationMember>();
+                if (!orgmemembers.Exists(p => p.UserId == user.Id && p.OrganizationId == org.Id))
+                    await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = org.Id });
+
+                await client.CloseAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("There is no organization with Id {0}", organizationid));
             }
 
             await client.CloseAsync();
@@ -205,8 +211,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
+            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -302,8 +308,8 @@ namespace Intwenty.Areas.Identity.Data
                 return IdentityResult.Success;
 
 
-            UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
+            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
             await client.OpenAsync();
             await client.DeleteEntityAsync(existing_auth);
@@ -332,8 +338,8 @@ namespace Intwenty.Areas.Identity.Data
                 return IdentityResult.Success;
 
 
-            UserCache.Remove(UsersCacheKey);
-            UserCache.Remove(UserAuthCacheKey + "_" + user.Id);
+            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
+            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
 
             await client.OpenAsync();
@@ -646,28 +652,38 @@ namespace Intwenty.Areas.Identity.Data
             return t;
         }
 
-        public override Task<IdentityResult> DeleteAsync(IntwentyUser user)
+        public override async Task<IdentityResult> DeleteAsync(IntwentyUser user)
         {
            
-            var t = base.DeleteAsync(user);
-            if (t.Result.Succeeded)
+            var t = await base.DeleteAsync(user);
+            if (t.Succeeded)
             {
-                if (t != null && t.Result != null)
+               
+                 var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+                await client.OpenAsync();
+                var logins = await client.GetEntitiesAsync<IntwentyUserProductLogin>();
+                foreach (var l in logins.Where(p => p.UserId == user.Id))
                 {
-                    var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-                    client.Open();
-                    var logins = client.GetEntities<IntwentyUserProductLogin>().Where(p => p.UserId == user.Id);
-                    foreach (var l in logins)
-                    {
-                        client.DeleteEntity(l);
-                    }
-                    client.Close();
+                    await client.DeleteEntityAsync(l);
+                }
+                var orgmembers = await client.GetEntitiesAsync<IntwentyOrganizationMember>();
+                foreach (var l in orgmembers.Where(p => p.UserId == user.Id))
+                {
+                    await client.DeleteEntityAsync(l);
+                }
+                var auth = await client.GetEntitiesAsync<IntwentyAuthorization>();
+                foreach (var l in auth.Where(p => !string.IsNullOrEmpty(p.UserId) && p.UserId == user.Id))
+                {
+                    await client.DeleteEntityAsync(l);
+                }
+
+                await client.CloseAsync();
+
                     /*
                     var usergroup = GetUserGroup(user);
                     if (usergroup!= null && usergroup.Result != null)
                         client.Delete(usergroup.Result);
                     */
-                }
 
                 return t;
             }

@@ -22,9 +22,9 @@ namespace Intwenty.Areas.Identity.Data
 
         private IMemoryCache UserCache { get; }
 
-        private static readonly string UsersCacheKey = "ALLUSERS";
+        public static readonly string UsersCacheKey = "ALLUSERS";
 
-        private static readonly string UserAuthCacheKey = "USERAUTH";
+        public static readonly string UserAuthCacheKey = "USERAUTH";
 
 
         public IntwentyUserStore(IOptions<IntwentySettings> settings, IMemoryCache cache)

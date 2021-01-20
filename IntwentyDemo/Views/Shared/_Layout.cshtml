@@ -49,8 +49,9 @@
                             @await Html.PartialAsync("_IntwentyAdminMenu")
                         }
 
-                        @if (User.IsInRole("SUPERADMIN") || User.IsInRole("USERADMIN"))
+                        @if (User.IsInRole("SUPERADMIN") || (User.IsInRole("USERADMIN") && !Settings.Value.UseSeparateIAMDatabase))
                         {
+                            //IF NOT CENTRALIZED IAM DB, ALLOW USERADMIN TO IAM
                             @await Html.PartialAsync("_IntwentyIdentityAccessMenu")
                         }
 

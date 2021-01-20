@@ -23,6 +23,7 @@ using System.Linq;
 using System.Text;
 using Intwenty.DataClient;
 using Intwenty.Entity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace Intwenty.Middleware
 {
@@ -151,9 +152,15 @@ namespace Intwenty.Middleware
          
 
 
+            //CHANGE 20210120
+            //services.AddRazorPages().AddViewLocalization();
 
-            services.AddRazorPages().AddViewLocalization();
-
+            services.AddMvc(options =>
+            {
+                // This pushes users to login if not authenticated
+                options.Filters.Add(new AuthorizeFilter());
+                
+            }).AddViewLocalization();
 
             if (settings.UseIntwentyAPI)
             {

@@ -31,6 +31,10 @@ namespace Intwenty.Areas.Identity.Models
 
         public string LastLogin { get; set; }
 
+        public string LastLoginProduct { get; set; }
+
+        public string APIKey { get; set; }
+
         public bool ModelSaved { get; set; }
 
         public List<IntwentyUserProductVm> UserProducts { get; set; }
@@ -55,7 +59,9 @@ namespace Intwenty.Areas.Identity.Models
                 IsBlocked = entity.LockoutEnabled && entity.LockoutEnd.HasValue && entity.LockoutEnd > DateTime.Now;
             MfaActive = entity.TwoFactorEnabled;
             LastLogin = entity.LastLogin;
+            LastLoginProduct = entity.LastLoginProduct;
             AccessFailedCount = entity.AccessFailedCount;
+            APIKey = entity.APIKey;
             UserProducts = new List<IntwentyUserProductVm>();
         }
 

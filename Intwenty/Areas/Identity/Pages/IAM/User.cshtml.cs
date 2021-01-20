@@ -13,7 +13,7 @@ using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
-    [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
+    [Authorize(Policy = "IntwentyUserAdminAuthorizationPolicy")]
     public class UserModel : PageModel
     {
 
@@ -60,7 +60,21 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             return new JsonResult("{}");
           
         }
-        
+
+        public async Task<IActionResult> OnPostCreateAPIKey([FromBody] IntwentyUserVm model)
+        {
+            var user = await UserManager.FindByNameAsync(model.UserName);
+            if (user != null)
+            {
+                user.APIKey = Intwenty.Model.BaseModelItem.GetQuiteUniqueString();
+                await UserManager.UpdateAsync(user);
+                return await OnGetLoad(user.Id);
+            }
+
+            return new JsonResult("{}");
+         
+        }
+
 
 
     }

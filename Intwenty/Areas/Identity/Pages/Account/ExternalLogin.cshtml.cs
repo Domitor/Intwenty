@@ -24,21 +24,24 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly IntwentySignInManager _signInManager;
+        private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
         private readonly IIntwentyEventService _eventservice;
+        private readonly IntwentyOrganizationManager _organizationManager;
 
         public ExternalLoginModel(
           IntwentyUserManager userManager,
-          SignInManager<IntwentyUser> signInManager,
+          IntwentySignInManager signInManager,
           IIntwentyEventService eventservice,
-          IOptions<IntwentySettings> settings)
+          IOptions<IntwentySettings> settings,
+          IntwentyOrganizationManager organizationManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _eventservice = eventservice;
             _settings = settings.Value;
+            _organizationManager = organizationManager;
         }
 
         [BindProperty]
@@ -122,12 +125,15 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 {
                     if (!string.IsNullOrEmpty(_settings.NewUserRoles))
                     {
-                        var roles = _settings.NewUserRoles.Split(",".ToCharArray());
-                        foreach (var r in roles)
+                        var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
+                        if (org != null)
                         {
-                           await _userManager.AddToRoleAsync(user, r);
+                            var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                            foreach (var r in roles)
+                            {
+                                await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
+                            }
                         }
-
                     }
 
                     createaccount_result = await _userManager.AddLoginAsync(user, info);
