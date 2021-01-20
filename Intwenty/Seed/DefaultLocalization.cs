@@ -8,6 +8,7 @@ using System.Text;
 using Intwenty.Model;
 using Intwenty.Entity;
 using Intwenty.DataClient;
+using System.Threading.Tasks;
 
 namespace Intwenty.Seed
 {
@@ -15,7 +16,7 @@ namespace Intwenty.Seed
     {
 
 
-        public static void Seed(IServiceProvider services)
+        public static async Task Seed(IServiceProvider services)
         {
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
@@ -82,14 +83,14 @@ namespace Intwenty.Seed
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "COPYRIGHT", Text = "2020 Intwenty - Alla rättighter reserverade" });
 
 
-                client.Open();
+                await client.OpenAsync();
 
-                var existing = client.GetEntities<TranslationItem>();
+                var existing = await client.GetEntitiesAsync<TranslationItem>();
 
                 foreach (var t in temp)
                 {
                     if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
-                        client.InsertEntity(t);
+                        await client.InsertEntityAsync(t);
                 }
             }
             catch (Exception ex)
@@ -98,7 +99,7 @@ namespace Intwenty.Seed
             }
             finally
             {
-                client.Close();
+                await client.CloseAsync();
             }
 
           

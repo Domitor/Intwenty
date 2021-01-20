@@ -3,19 +3,19 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Intwenty.Seed;
 using Microsoft.Extensions.Hosting;
 using Intwenty;
 using Microsoft.Extensions.Configuration;
 using Intwenty.Interface;
 using IntwentyDemo.Seed;
+using System.Threading.Tasks;
 
 namespace IntwentyDemo
 {
     public class Program
     {
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
             
@@ -27,13 +27,13 @@ namespace IntwentyDemo
                 {
                     var modelservice = services.GetRequiredService<IIntwentyModelService>();
 
-                    //Create intwenty db objects and identity db objects
-                    //modelservice.CreateIntwentyDatabase();
+
+                    //Use intwenty to create an admin user and more
+                    await Intwenty.Seed.Identity.SeedDemoUsersAndRoles(services);
+                    //Use intwenty to seed some common localization
+                    await Intwenty.Seed.DefaultLocalization.Seed(services);
 
 
-                    //Create intwenty db objects and identity db objects
-                    Identity.SeedDemoUsersAndRoles(services);
-                    DefaultLocalization.Seed(services);
                     DemoModel.SeedModel(services);
                     DemoModel.SeedLocalizations(services);
                     DemoModel.ConfigureDatabase(services);
@@ -44,12 +44,10 @@ namespace IntwentyDemo
                 catch (Exception ex)
                 {
                     throw ex;
-                    //var logger = services.GetRequiredService<ILogger<Program>>();
-                    //logger.LogError(ex, "An error occurred seeding the DB.");
                 }
             }
 
-            host.Run();
+            await host.RunAsync();
 
 
         }
@@ -62,8 +60,9 @@ namespace IntwentyDemo
               })
              .ConfigureWebHostDefaults(webBuilder =>
              {
-                 
+                 //To allow local folders, needed by sqlite, local documents and so on....
                  webBuilder.UseStaticWebAssets();
+
                  webBuilder.UseStartup<Startup>();
                 
              });
