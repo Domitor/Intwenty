@@ -5,6 +5,9 @@ using System;
 
 namespace Intwenty.Areas.Identity.Entity
 {
+    [DbTableIndex("USR_IDX_1", true, "UserName")]
+    [DbTableIndex("USR_IDX_2", true, "Email")]
+    [DbTableIndex("USR_IDX_3", true, "APIKey")]
     [DbTableName("security_User")]
     [DbTablePrimaryKey("Id")]
     public class IntwentyUser : IdentityUser

@@ -25,9 +25,17 @@ namespace IntwentyDemo
 
                 try
                 {
-                    var modelservice = services.GetRequiredService<IIntwentyModelService>();
+                    //Below can be activated/deactivated in the appsetting.json file
+                    //-SeedProductAndOrganizationOnStartUp
+                    //-UseDemoSettings
+                    //-SeedModelOnStartUp
+                    //-SeedLocalizationsOnStartUp
+                    //-ConfigureDatabaseOnStartUp
+                    //-SeedDataOnStartUp
 
 
+                    //Use intwenty to create the configured product and the organization
+                    await Intwenty.Seed.Product.SeedProductAndOrganization(services);
                     //Use intwenty to create an admin user and more
                     await Intwenty.Seed.Identity.SeedDemoUsersAndRoles(services);
                     //Use intwenty to seed some common localization

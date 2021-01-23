@@ -50,8 +50,9 @@ namespace Intwenty.Middleware
             if (string.IsNullOrEmpty(settings.ProductId))
                 throw new InvalidOperationException("Could not find a valid productid in setting file");
 
-            //Create 
-            CreateIntwentyDatabase(settings);
+            //Create Intwenty database objects
+            CreateIntwentyFrameworkTables(settings);
+            CreateIntwentyIAMTables(settings);
 
             //Required for Intwenty: Settings
             services.Configure<IntwentySettings>(configuration.GetSection("IntwentySettings"));
@@ -301,7 +302,7 @@ namespace Intwenty.Middleware
 
         }
 
-        private static void CreateIntwentyDatabase(IntwentySettings settings)
+        private static void CreateIntwentyFrameworkTables(IntwentySettings settings)
         {
 
             if (!settings.SeedModelOnStartUp)
@@ -311,8 +312,6 @@ namespace Intwenty.Middleware
 
             try
             {
-
-
                 client.Open();
                 client.CreateTable<SystemItem>();
                 client.CreateTable<ApplicationItem>();
@@ -326,21 +325,6 @@ namespace Intwenty.Middleware
                 client.CreateTable<DefaultValue>();
                 client.CreateTable<TranslationItem>();
                 client.CreateTable<EndpointItem>();
-
-                client.CreateTable<IntwentyAuthorization>(); //security_Authorization
-                client.CreateTable<IntwentyUser>(); //security_User
-                client.CreateTable<IntwentyOrganization>(); //security_Organization
-                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
-                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
-                client.CreateTable<IntwentyProduct>(); //security_Product
-                client.CreateTable<IntwentyProductAuthorizationItem>(); //security_ProductAuthorizationItem
-                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
-                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
-                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
-                //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
-                //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
-
                 client.Close();
 
             }
@@ -353,17 +337,23 @@ namespace Intwenty.Middleware
                 client.Close();
             }
 
-            if (!settings.UseSeparateIAMDatabase)
+
+
+        }
+
+        private static void CreateIntwentyIAMTables(IntwentySettings settings)
+        {
+
+            if (!settings.SeedModelOnStartUp)
                 return;
 
-            client = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);
+            var client = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);
 
             try
             {
 
 
                 client.Open();
-
                 client.CreateTable<IntwentyAuthorization>(); //security_Authorization
                 client.CreateTable<IntwentyUser>(); //security_User
                 client.CreateTable<IntwentyOrganization>(); //security_Organization
@@ -377,7 +367,6 @@ namespace Intwenty.Middleware
                 client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
                 //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
                 //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
-
                 client.Close();
 
             }

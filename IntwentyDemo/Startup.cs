@@ -49,11 +49,9 @@ namespace IntwentyDemo
             else
                 iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
 
-            //Default IntwentyDataService, IntwentyEventService
-            //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration);
-
-            //Use customized IntwentyDataService and IntwentyEventService
-            services.AddIntwenty<CustomDataService, CustomEventService>(Configuration);
+            //Add intwenty 
+            //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation
+            services.AddIntwenty<CustomDataService, CustomEventService>(Configuration); //customized services
 
             //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
             //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
@@ -61,7 +59,7 @@ namespace IntwentyDemo
             {
                 options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                 {
-                    policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                    //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
                     policy.RequireRole(userroles);
                 });
 

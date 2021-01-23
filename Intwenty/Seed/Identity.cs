@@ -23,20 +23,14 @@ namespace Intwenty.Seed
             if (!Settings.Value.UseDemoSettings)
                 return;
 
-            if (string.IsNullOrEmpty(Settings.Value.DemoAdminUser) ||
-                string.IsNullOrEmpty(Settings.Value.DemoUser) ||
-                string.IsNullOrEmpty(Settings.Value.DemoAdminPassword) ||
-                string.IsNullOrEmpty(Settings.Value.DemoUserPassword))
-                return;
-
-
+          
             var userManager = services.GetRequiredService<IntwentyUserManager>();
             var roleManager = services.GetRequiredService<RoleManager<IntwentyProductAuthorizationItem>>();
             var productManager = services.GetRequiredService<IIntwentyProductManager>();
             var organizationManager = services.GetRequiredService<IIntwentyOrganizationManager>();
 
-            IntwentyProduct product = null;
-            product = await productManager.FindByIdAsync(Settings.Value.ProductId);
+            //ENSURE WE HAVE A PRODUCT AND ORG
+            IntwentyProduct product = await productManager.FindByIdAsync(Settings.Value.ProductId);
             if (product == null)
             {
                 product = new IntwentyProduct();
@@ -45,21 +39,22 @@ namespace Intwenty.Seed
                 await productManager.CreateAsync(product);
             }
 
-            IntwentyOrganization org = null;
-            org = await organizationManager.FindByNameAsync(Settings.Value.DefaultProductOrganization);
+            IntwentyOrganization org = await organizationManager.FindByNameAsync(Settings.Value.DefaultProductOrganization);
             if (org == null)
             {
                 org = new IntwentyOrganization();
                 org.Name = Settings.Value.DefaultProductOrganization;
-                var t = await organizationManager.CreateAsync(org);
-                if (t.Succeeded)
-                {
-                    org = await organizationManager.FindByNameAsync(Settings.Value.DefaultProductOrganization);
-                    await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
-                }
+                await organizationManager.CreateAsync(org);
             }
 
-           
+            var all_products = await organizationManager.GetProductsAsync(org.Id);
+            var thisproduct = all_products.Find(p => p.ProductId == product.Id);
+            if (thisproduct == null)
+            {
+                await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
+            }
+
+
 
             var admrole = await roleManager.FindByNameAsync("SUPERADMIN");
             if (admrole == null)
@@ -111,35 +106,55 @@ namespace Intwenty.Seed
                 await roleManager.CreateAsync(role);
             }
 
-            var currr_admin = await userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
-            if (currr_admin == null)
+            if (!string.IsNullOrEmpty(Settings.Value.DemoAdminUser) && !string.IsNullOrEmpty(Settings.Value.DemoAdminPassword))
             {
-                var user = new IntwentyUser();
-                user.UserName = Settings.Value.DemoAdminUser;
-                user.Email = Settings.Value.DemoAdminUser;
-                user.FirstName = "Admin";
-                user.LastName = "Adminsson";
-                user.EmailConfirmed = true;
-                user.Culture = Settings.Value.DefaultCulture;
-                await userManager.CreateAsync(user, Settings.Value.DemoAdminPassword);
-                await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
-                var result = await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", user.Id, org.Id, Settings.Value.ProductId);
+                IntwentyUser admin_user = await userManager.FindByNameAsync(Settings.Value.DemoAdminUser);
+                if (admin_user == null)
+                {
+                    admin_user = new IntwentyUser();
+                    admin_user.UserName = Settings.Value.DemoAdminUser;
+                    admin_user.Email = Settings.Value.DemoAdminUser;
+                    admin_user.FirstName = "Admin";
+                    admin_user.LastName = "Adminsson";
+                    admin_user.EmailConfirmed = true;
+                    admin_user.Culture = Settings.Value.DefaultCulture;
+                    await userManager.CreateAsync(admin_user, Settings.Value.DemoAdminPassword);
+                }
+
+                var all_members = await organizationManager.GetMembersAsync(org.Id);
+                var admin_member = all_members.Find(p => p.UserId == admin_user.Id);
+                if (admin_member == null)
+                {
+                    await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = admin_user.Id, UserName = admin_user.UserName });
+                    await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", admin_user.Id, org.Id, Settings.Value.ProductId);
+                }
             }
 
-            var curr_user = await userManager.FindByNameAsync(Settings.Value.DemoUser);
-            if (curr_user == null)
+            if (!string.IsNullOrEmpty(Settings.Value.DemoUser) && !string.IsNullOrEmpty(Settings.Value.DemoUserPassword))
             {
-                var user = new IntwentyUser();
-                user.UserName = Settings.Value.DemoUser;
-                user.Email = Settings.Value.DemoUser;
-                user.FirstName = "User";
-                user.LastName = "Usersson";
-                user.EmailConfirmed = true;
-                user.Culture = Settings.Value.DefaultCulture;
-                await userManager.CreateAsync(user, Settings.Value.DemoUserPassword);
-                await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
-                var result = await userManager.AddUpdateUserRoleAuthorizationAsync("USER", user.Id, org.Id, Settings.Value.ProductId);
+                IntwentyUser default_user = await userManager.FindByNameAsync(Settings.Value.DemoUser);
+                if (default_user == null)
+                {
+                    default_user = new IntwentyUser();
+                    default_user.UserName = Settings.Value.DemoUser;
+                    default_user.Email = Settings.Value.DemoUser;
+                    default_user.FirstName = "User";
+                    default_user.LastName = "Usersson";
+                    default_user.EmailConfirmed = true;
+                    default_user.Culture = Settings.Value.DefaultCulture;
+                    await userManager.CreateAsync(default_user, Settings.Value.DemoUserPassword);
+                }
+
+                var all_members = await organizationManager.GetMembersAsync(org.Id);
+                var user_member = all_members.Find(p => p.UserId == default_user.Id);
+                if (user_member == null)
+                {
+                    await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = default_user.Id, UserName = default_user.UserName });
+                    await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", default_user.Id, org.Id, Settings.Value.ProductId);
+                }
             }
+            
+
 
            
 

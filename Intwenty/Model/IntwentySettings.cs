@@ -52,6 +52,11 @@ namespace Intwenty.Model
         /// </summary>
         public bool SeedLocalizationsOnStartUp { get; set; }
 
+        /// <summary>
+        /// Seed product and organization
+        /// </summary>
+        public bool SeedProductAndOrganizationOnStartUp { get; set; }
+
 
         //FOR DEBUG AND DEMO MODE
         public bool UseDemoSettings { get; set; }
