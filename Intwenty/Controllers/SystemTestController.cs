@@ -30,6 +30,7 @@ namespace Intwenty.Controllers
         private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
         private readonly IntwentyUserManager _usermanager;
+        private readonly IIntwentyOrganizationManager _orgmanager;
         private readonly SignInManager<IntwentyUser> _signinmanager;
         private readonly RoleManager<IntwentyProductAuthorizationItem> _rolemanager;
         private readonly IHubContext<ServerToClientPush> _hubContext;
@@ -40,6 +41,7 @@ namespace Intwenty.Controllers
                                     IntwentyUserManager usermgr,
                                     SignInManager<IntwentyUser> signinmgr,
                                     RoleManager<IntwentyProductAuthorizationItem> rolemgr,
+                                    IIntwentyOrganizationManager orgmanager,
                                     IHubContext<ServerToClientPush> hubcontext)
         {
             _modelservice = modelservice;
@@ -48,6 +50,7 @@ namespace Intwenty.Controllers
             _usermanager = usermgr;
             _signinmanager = signinmgr;
             _rolemanager = rolemgr;
+            _orgmanager = orgmanager;
             _hubContext = hubcontext;
 
         }
@@ -1005,7 +1008,7 @@ namespace Intwenty.Controllers
                 if (retrieveduser != null)
                 {
                     _usermanager.RemoveFromRoleAsync(retrieveduser, "TESTXROLE");
-                    _usermanager.DeleteAsync(retrieveduser);
+                    var retval = _usermanager.DeleteAsync(retrieveduser).Result;
                 }
 
                 var user = new IntwentyUser() { Email = "systemtest@systemtest.com", FirstName = "Testony", LastName = "Testson", UserName = "systemtest@systemtest.com" };
@@ -1025,7 +1028,8 @@ namespace Intwenty.Controllers
                 if (string.IsNullOrEmpty(retrievedrole.Id))
                     throw new InvalidOperationException("The inserted role has no id");
 
-                _usermanager.AddToRoleAsync(retrieveduser, "TESTXROLE");
+                IntwentyOrganization org = _orgmanager.FindByNameAsync(_settings.DefaultProductOrganization).Result;
+                var addresult = _usermanager.AddUpdateUserRoleAuthorizationAsync("TESTXROLE", retrieveduser.Id, org.Id, _settings.ProductId).Result;
                 if (!_usermanager.IsInRoleAsync(retrieveduser, "TESTXROLE").Result)
                     throw new InvalidOperationException("UserManager.IsInRoleAsync returned false for TESTXROLE, despite it was assigned to the user");
 
@@ -1034,7 +1038,9 @@ namespace Intwenty.Controllers
                 if (roles.Count != 1)
                     throw new InvalidOperationException("UserManager.GetRolesAsync() returned the wrong number of roles");
 
-                _usermanager.RemoveFromRoleAsync(retrieveduser, "TESTXROLE");
+                var userauths = _usermanager.GetExplicitUserAuthorizationsAsync(retrieveduser).Result;
+                var TESTXROLE_AUTH = userauths.Find(p => p.AuthorizationNormalizedName == "TESTXROLE");
+                var delroleres = _usermanager.RemoveUserAuthorizationAsync(retrieveduser, TESTXROLE_AUTH).Result;
                 roles = _usermanager.GetRolesAsync(retrieveduser).Result;
                 if (roles.Count > 0)
                     throw new InvalidOperationException("UserManager.GetRolesAsync() returned a role, despite it was removed from the user");
@@ -1045,7 +1051,7 @@ namespace Intwenty.Controllers
                 if (retrievedrole != null)
                     throw new InvalidOperationException("The delete role could be retrieved despite it was deleted");
 
-                _usermanager.DeleteAsync(retrieveduser);
+                var deleteres = _usermanager.DeleteAsync(retrieveduser).Result;
                 retrieveduser = _usermanager.FindByNameAsync(user.UserName).Result;
                 if (retrieveduser != null)
                     throw new InvalidOperationException("The delete user could be retrieved despite it was deleted");

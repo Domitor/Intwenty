@@ -37,7 +37,7 @@ namespace IntwentyDemo
                     //Use intwenty to create the configured product and the organization
                     await Intwenty.Seed.Product.SeedProductAndOrganization(services);
                     //Use intwenty to create an admin user and more
-                    await Intwenty.Seed.Identity.SeedDemoUsersAndRoles(services);
+                    await Intwenty.Seed.Demo.SeedDemoUsersAndRoles(services);
                     //Use intwenty to seed some common localization
                     await Intwenty.Seed.DefaultLocalization.Seed(services);
 
@@ -46,6 +46,9 @@ namespace IntwentyDemo
                     DemoModel.SeedLocalizations(services);
                     DemoModel.ConfigureDatabase(services);
                     DemoModel.SeedData(services);
+
+                    //At last create product athorization items (based on systems and applications in the model)
+                    await Intwenty.Seed.Product.SeedProductAuthorizationItems(services);
 
 
                 }

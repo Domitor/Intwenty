@@ -20,7 +20,7 @@ namespace Intwenty.Areas.Identity.Data
     {
         private IntwentySettings Settings { get; }
 
-        private IMemoryCache AuthCache { get; }
+        private IMemoryCache IAMCache { get; }
 
         public static readonly string UsersCacheKey = "ALLUSERS";
         public static readonly string UserAuthCacheKey = "USERAUTH";
@@ -30,7 +30,7 @@ namespace Intwenty.Areas.Identity.Data
         public IntwentyUserStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             Settings = settings.Value;
-            AuthCache = cache;
+            IAMCache = cache;
             
         }
 
@@ -50,7 +50,7 @@ namespace Intwenty.Areas.Identity.Data
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            AuthCache.Remove(UsersCacheKey);
+            IAMCache.Remove(UsersCacheKey);
 
 
             await client.OpenAsync();
@@ -70,7 +70,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            AuthCache.Remove(UsersCacheKey);
+            IAMCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -167,7 +167,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            AuthCache.Remove(UsersCacheKey);
+            IAMCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -281,7 +281,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<List<IntwentyUser>> GetUsersAsync()
         {
             List<IntwentyUser> res = null;
-            if (AuthCache.TryGetValue(UsersCacheKey, out res))
+            if (IAMCache.TryGetValue(UsersCacheKey, out res))
             {
                 return res;
             }
@@ -293,7 +293,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var cacheEntryOptions = new MemoryCacheEntryOptions();
             cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(AuthCacheExpirationSeconds));
-            AuthCache.Set(UsersCacheKey, users, cacheEntryOptions);
+            IAMCache.Set(UsersCacheKey, users, cacheEntryOptions);
 
             return users;
 
@@ -303,7 +303,7 @@ namespace Intwenty.Areas.Identity.Data
         {
            
             List<IntwentyAuthorization> res = null;
-            if (AuthCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
+            if (IAMCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
             {
                 return res;
             }
@@ -329,7 +329,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var cacheEntryOptions = new MemoryCacheEntryOptions();
             cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(AuthCacheExpirationSeconds));
-            AuthCache.Set(UserAuthCacheKey + "_" + user.Id, list, cacheEntryOptions);
+            IAMCache.Set(UserAuthCacheKey + "_" + user.Id, list, cacheEntryOptions);
 
             return list;
         }

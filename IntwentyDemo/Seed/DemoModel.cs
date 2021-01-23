@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using Intwenty.DataClient;
 using Intwenty.Interface;
-using Intwenty.Areas.Identity.Entity;
 
 namespace IntwentyDemo.Seed
 {
@@ -257,25 +256,14 @@ namespace IntwentyDemo.Seed
 
 
             //Insert models if not existing
-            var iamclient = new Connection(Settings.Value.IAMConnectionDBMS, Settings.Value.IAMConnection);
-            iamclient.Open();
-
             var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
             client.Open();
-
-            var current_permissions = iamclient.GetEntities<IntwentyProductAuthorizationItem>();
 
             var current_systems = client.GetEntities<SystemItem>();
             foreach (var t in systems)
             {
                 if (!current_systems.Exists(p => p.MetaCode == t.MetaCode))
                     client.InsertEntity(t);
-
-                if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.AuthorizationType == SystemModelItem.MetaTypeSystem))
-                {
-                    var sysperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName=t.MetaCode.ToUpper(), AuthorizationType = SystemModelItem.MetaTypeSystem, ProductId = Settings.Value.ProductId };
-                    iamclient.InsertEntity(sysperm);
-                }
             }
 
             var current_apps = client.GetEntities<ApplicationItem>();
@@ -283,12 +271,6 @@ namespace IntwentyDemo.Seed
             {
                 if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
                     client.InsertEntity(t);
-
-                if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == Settings.Value.ProductId && p.AuthorizationType == ApplicationModelItem.MetaTypeApplication))
-                {
-                    var apperm = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId };
-                    iamclient.InsertEntity(apperm);
-                }
             }
 
             var current_domains = client.GetEntities<ValueDomainItem>();
@@ -328,7 +310,6 @@ namespace IntwentyDemo.Seed
                     client.InsertEntity(t);
             }
 
-            iamclient.Close();
             client.Close();
            
         }
@@ -409,6 +390,8 @@ namespace IntwentyDemo.Seed
           
 
         }
+
+      
 
 
     }

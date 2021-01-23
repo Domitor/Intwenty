@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Seed
 {
-    public static class Identity
+    public static class Demo
     {
 
 

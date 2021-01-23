@@ -21,12 +21,12 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
-        private IMemoryCache RoleCache { get; }
+        private IMemoryCache IAMCache { get; }
 
         public IntwentyProductAuthorizationStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             Settings = settings.Value;
-            RoleCache = cache;
+            IAMCache = cache;
         }
 
         public async Task<IdentityResult> CreateAsync(IntwentyProductAuthorizationItem item, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ namespace Intwenty.Areas.Identity.Data
 
             item.NormalizedName = item.Name.ToUpper();
 
-            RoleCache.Remove(RolesCacheKey);
+            IAMCache.Remove(RolesCacheKey);
 
             if (string.IsNullOrEmpty(item.ProductId))
                 item.ProductId = Settings.ProductId;
@@ -52,7 +52,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public async Task<IdentityResult> DeleteAsync(IntwentyProductAuthorizationItem item, CancellationToken cancellationToken)
         {
-            RoleCache.Remove(RolesCacheKey);
+            IAMCache.Remove(RolesCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -124,13 +124,14 @@ namespace Intwenty.Areas.Identity.Data
             if (string.IsNullOrEmpty(item.ProductId))
                 item.ProductId = Settings.ProductId;
 
-            RoleCache.Remove(RolesCacheKey);
+            IAMCache.Remove(RolesCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
             await client.UpdateEntityAsync(item);
             await client.CloseAsync();
-            return await Task.FromResult(IdentityResult.Success);
+
+            return IdentityResult.Success;
         }
     }
 }
