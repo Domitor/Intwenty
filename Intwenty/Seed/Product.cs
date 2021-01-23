@@ -52,7 +52,7 @@ namespace Intwenty.Seed
         public static async Task SeedProductAuthorizationItems(IServiceProvider services)
         {
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
-            if (!Settings.Value.SeedDataOnStartUp)
+            if (!Settings.Value.SeedProductAndOrganizationOnStartUp)
                 return;
 
             var client = new Connection(Settings.Value.DefaultConnectionDBMS, Settings.Value.DefaultConnection);
