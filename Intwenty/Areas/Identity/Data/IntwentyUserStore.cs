@@ -20,17 +20,18 @@ namespace Intwenty.Areas.Identity.Data
     {
         private IntwentySettings Settings { get; }
 
-        private IMemoryCache UserCache { get; }
+        private IMemoryCache AuthCache { get; }
 
         public static readonly string UsersCacheKey = "ALLUSERS";
-
         public static readonly string UserAuthCacheKey = "USERAUTH";
+        public static readonly int AuthCacheExpirationSeconds = 30;
 
 
         public IntwentyUserStore(IOptions<IntwentySettings> settings, IMemoryCache cache)
         {
             Settings = settings.Value;
-            UserCache = cache;
+            AuthCache = cache;
+            
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace Intwenty.Areas.Identity.Data
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            UserCache.Remove(UsersCacheKey);
+            AuthCache.Remove(UsersCacheKey);
 
 
             await client.OpenAsync();
@@ -69,7 +70,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(UsersCacheKey);
+            AuthCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -166,7 +167,7 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(UsersCacheKey);
+            AuthCache.Remove(UsersCacheKey);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -280,7 +281,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<List<IntwentyUser>> GetUsersAsync()
         {
             List<IntwentyUser> res = null;
-            if (UserCache.TryGetValue(UsersCacheKey, out res))
+            if (AuthCache.TryGetValue(UsersCacheKey, out res))
             {
                 return res;
             }
@@ -290,7 +291,9 @@ namespace Intwenty.Areas.Identity.Data
             var users = await client.GetEntitiesAsync<IntwentyUser>();
             await client.CloseAsync();
 
-            UserCache.Set(UsersCacheKey, users);
+            var cacheEntryOptions = new MemoryCacheEntryOptions();
+            cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(AuthCacheExpirationSeconds));
+            AuthCache.Set(UsersCacheKey, users, cacheEntryOptions);
 
             return users;
 
@@ -300,7 +303,7 @@ namespace Intwenty.Areas.Identity.Data
         {
            
             List<IntwentyAuthorization> res = null;
-            if (UserCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
+            if (AuthCache.TryGetValue(UserAuthCacheKey + "_" + user.Id, out res))
             {
                 return res;
             }
@@ -323,9 +326,10 @@ namespace Intwenty.Areas.Identity.Data
                     list.Add(t);
                 }
             }
-        
 
-            UserCache.Set(UserAuthCacheKey + "_" + user.Id, list);
+            var cacheEntryOptions = new MemoryCacheEntryOptions();
+            cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(AuthCacheExpirationSeconds));
+            AuthCache.Set(UserAuthCacheKey + "_" + user.Id, list, cacheEntryOptions);
 
             return list;
         }
@@ -724,7 +728,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.FromResult(false);
         }
 
-        public Task ReplaceClaimAsync(IntwentyUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        public async Task ReplaceClaimAsync(IntwentyUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -742,19 +746,23 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var mclaims = client.GetEntities<IntwentyUserProductClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type && p.ProductId == Settings.ProductId).ToList();
-            client.Close();
-            foreach (var matchedClaim in mclaims)
+            await client.OpenAsync();
+            var claims = await client.GetEntitiesAsync<IntwentyUserProductClaim>();
+            var filter = claims.Where(p => p.UserId == user.Id &&   
+                                           p.ClaimValue == claim.Value &&
+                                           p.ClaimType == claim.Type && 
+                                           p.ProductId == Settings.ProductId);
+            await client.CloseAsync();
+
+            foreach (var matchedClaim in filter)
             {
                 matchedClaim.ClaimValue = newClaim.Value;
                 matchedClaim.ClaimType = newClaim.Type;
             }
 
-            return Task.CompletedTask;
         }
 
-        public Task RemoveClaimsAsync(IntwentyUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        public async Task RemoveClaimsAsync(IntwentyUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -769,19 +777,22 @@ namespace Intwenty.Areas.Identity.Data
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
-            client.Open();
+            await client.OpenAsync();
             foreach (var claim in claims)
             {
-                
-                var mclaims = client.GetEntities<IntwentyUserProductClaim>().Where(p => p.UserId == user.Id && p.ClaimValue == claim.Value && p.ClaimType == claim.Type && p.ProductId == Settings.ProductId).ToList();
-                foreach (var c in mclaims)
+
+                var mclaims = await client.GetEntitiesAsync<IntwentyUserProductClaim>();
+                var filter = mclaims.Where(p => p.UserId == user.Id && 
+                                                p.ClaimValue == claim.Value && 
+                                                p.ClaimType == claim.Type && 
+                                                p.ProductId == Settings.ProductId);
+                foreach (var c in filter)
                 {
-                    client.DeleteEntity(c);
+                    await client.DeleteEntityAsync(c);
                 }
             }
-            client.Close();
+            await client.CloseAsync();
 
-            return Task.CompletedTask;
         }
 
         public Task<IList<IntwentyUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)

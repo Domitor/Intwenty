@@ -22,7 +22,7 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
-        private IMemoryCache UserCache { get; }
+        private IMemoryCache AuthCache { get; }
 
 
         public IntwentyUserManager(IUserStore<IntwentyUser> store, 
@@ -39,7 +39,7 @@ namespace Intwenty.Areas.Identity.Data
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             Settings = settings.Value;
-            UserCache = cache;
+            AuthCache = cache;
         }
 
         public async Task<IdentityResult> CreateAsync(IntwentyUser user, int organizationid)
@@ -55,7 +55,7 @@ namespace Intwenty.Areas.Identity.Data
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
+            AuthCache.Remove(IntwentyUserStore.UsersCacheKey);
 
             IntwentyOrganization org=null;
 
@@ -211,8 +211,8 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
-            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
+            AuthCache.Remove(IntwentyUserStore.UsersCacheKey);
+            AuthCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -308,8 +308,8 @@ namespace Intwenty.Areas.Identity.Data
                 return IdentityResult.Success;
 
 
-            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
-            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
+            AuthCache.Remove(IntwentyUserStore.UsersCacheKey);
+            AuthCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
             await client.OpenAsync();
             await client.DeleteEntityAsync(existing_auth);
@@ -338,8 +338,8 @@ namespace Intwenty.Areas.Identity.Data
                 return IdentityResult.Success;
 
 
-            UserCache.Remove(IntwentyUserStore.UsersCacheKey);
-            UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
+            AuthCache.Remove(IntwentyUserStore.UsersCacheKey);
+            AuthCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + user.Id);
 
 
             await client.OpenAsync();
@@ -372,8 +372,6 @@ namespace Intwenty.Areas.Identity.Data
             var user = await GetUserAsync(claimprincipal);
             if (user == null || requested_app == null)
                 throw new InvalidOperationException("Error when checking for a permission.");
-
-        
 
             if (await this.IsInRoleAsync(user, "SUPERADMIN"))
                 return true;

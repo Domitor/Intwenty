@@ -45,12 +45,12 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
-        private IMemoryCache UserCache { get; }
+        private IMemoryCache AuthCache { get; }
 
         public IntwentyOrganizationManager(IOptions<IntwentySettings> settings, IMemoryCache cache) 
         {
             Settings = settings.Value;
-            UserCache = cache;
+            AuthCache = cache;
         }
 
         public async Task<IdentityResult> CreateAsync(IntwentyOrganization organization)
@@ -354,7 +354,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var members = await GetMembersAsync(organizationid);
             foreach(var m in members)
-                UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
+                AuthCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
 
             await client.OpenAsync();
             await client.DeleteEntityAsync(existing_auth);
@@ -394,7 +394,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var members = await GetMembersAsync(authorization.OrganizationId);
             foreach (var m in members)
-                UserCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
+                AuthCache.Remove(IntwentyUserStore.UserAuthCacheKey + "_" + m.UserId);
 
             if (existing_auth != null)
             {
