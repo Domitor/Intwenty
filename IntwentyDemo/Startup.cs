@@ -69,8 +69,6 @@ namespace IntwentyDemo
                     policy.RequireRole(adminroles);
 
                 });
-
-                var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
                
                 options.AddPolicy("IntwentyUserAdminAuthorizationPolicy", policy =>
                 {

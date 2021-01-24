@@ -28,14 +28,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
         private readonly IIntwentyEventService _eventservice;
-        private readonly IntwentyOrganizationManager _organizationManager;
+        private readonly IIntwentyOrganizationManager _organizationManager;
 
         public ExternalLoginModel(
           IntwentyUserManager userManager,
           IntwentySignInManager signInManager,
           IIntwentyEventService eventservice,
           IOptions<IntwentySettings> settings,
-          IntwentyOrganizationManager organizationManager)
+          IIntwentyOrganizationManager organizationManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -123,19 +123,22 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var createaccount_result = await _userManager.CreateAsync(user);
                 if (createaccount_result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                    var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
+                    if (org != null)
                     {
-                        var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
-                        if (org != null)
+                        if (!string.IsNullOrEmpty(_settings.NewUserRoles))
                         {
+
                             var roles = _settings.NewUserRoles.Split(",".ToCharArray());
                             foreach (var r in roles)
                             {
                                 await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
                             }
                         }
-                    }
 
+                        await _organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
+                    }
+                
                     createaccount_result = await _userManager.AddLoginAsync(user, info);
                     if (createaccount_result.Succeeded)
                     {

@@ -89,6 +89,7 @@ namespace Intwenty.Areas.Identity.Data
             return IdentityResult.Success;
         }
 
+
         /// <summary>
         /// Gets products that the user has access to (via organization membership)
         /// Products is only available to users via an organization
@@ -674,8 +675,16 @@ namespace Intwenty.Areas.Identity.Data
                 {
                     await client.DeleteEntityAsync(l);
                 }
+                var alluserlogins = await client.GetEntitiesAsync<IntwentyUserProductLogin>();
+                foreach (var l in alluserlogins.Where(p => p.UserId == user.Id))
+                {
+                    await client.DeleteEntityAsync(l);
+                }
 
+              
                 await client.CloseAsync();
+
+           
 
                     /*
                     var usergroup = GetUserGroup(user);

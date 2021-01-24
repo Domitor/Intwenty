@@ -31,17 +31,20 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
         private readonly IIntwentyEventService _eventservice;
+        private readonly IIntwentyOrganizationManager _organizationManager;
 
         public RegisterModel(
             IntwentyUserManager userManager,
             IntwentySignInManager signInManager,
             IIntwentyEventService eventservice,
+            IIntwentyOrganizationManager orgmanager,
             IOptions<IntwentySettings> settings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _eventservice = eventservice;
             _settings = settings.Value;
+            _organizationManager = orgmanager;
         }
 
         [BindProperty]
@@ -80,7 +83,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public IActionResult OnPost([FromBody] RegisterVm model)
+        public async Task<IActionResult> OnPost([FromBody] RegisterVm model)
         {
             try
             {
@@ -106,14 +109,20 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var result = _userManager.CreateAsync(user, model.Password).Result;
                 if (result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                    var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
+                    if (org != null)
                     {
-                        var roles = _settings.NewUserRoles.Split(",".ToCharArray());
-                        foreach (var r in roles)
+                        if (!string.IsNullOrEmpty(_settings.NewUserRoles))
                         {
-                            _userManager.AddToRoleAsync(user, r);
+
+                            var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                            foreach (var r in roles)
+                            {
+                                await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
+                            }
                         }
 
+                        await _organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
                     }
 
                     var code = _userManager.GenerateEmailConfirmationTokenAsync(user).Result;
@@ -125,7 +134,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         protocol: Request.Scheme);
 
                     _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
-                    _signInManager.SignInAsync(user, isPersistent: false);
+                    await _signInManager.SignInAsync(user, isPersistent: false);
 
                   
                 }

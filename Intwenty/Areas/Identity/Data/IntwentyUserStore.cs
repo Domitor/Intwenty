@@ -612,7 +612,7 @@ namespace Intwenty.Areas.Identity.Data
             return Task.CompletedTask;
         }
 
-        public Task AddLoginAsync(IntwentyUser user, UserLoginInfo login, CancellationToken cancellationToken)
+        public async Task AddLoginAsync(IntwentyUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -627,27 +627,28 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            client.InsertEntity(new IntwentyUserProductLogin() { Id = Guid.NewGuid().ToString(), LoginProvider = login.LoginProvider, ProviderDisplayName = login.ProviderDisplayName, ProviderKey = login.ProviderKey, UserId = user.Id   });
-            client.Close();
+            await client.OpenAsync();
+            await client.InsertEntityAsync(new IntwentyUserProductLogin() { Id = Guid.NewGuid().ToString(), ProductId = Settings.ProductId, LoginProvider = login.LoginProvider, ProviderDisplayName = login.ProviderDisplayName, ProviderKey = login.ProviderKey, UserId = user.Id   });
+            await client.CloseAsync();
 
-            return Task.FromResult(true);
         }
 
-        public Task RemoveLoginAsync(IntwentyUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public async Task RemoveLoginAsync(IntwentyUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var model = client.GetEntities<IntwentyUserProductLogin>().Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
-            client.Close();
+            await client.OpenAsync();
+            var userlogins = await client.GetEntitiesAsync<IntwentyUserProductLogin>();
+            await client.CloseAsync();
+            var model = userlogins.Find(p => p.UserId == user.Id && p.LoginProvider == loginProvider && p.ProviderKey == providerKey && p.ProductId == Settings.ProductId);
+           
 
             if (model != null)
             {
-                client.Open();
-                client.DeleteEntity<IntwentyUserProductLogin>(model);
-                client.Close();
+                await client.OpenAsync();
+                await client.DeleteEntityAsync<IntwentyUserProductLogin>(model);
+                await client.CloseAsync();
             }
-            return Task.CompletedTask;
+
         }
 
         public Task<IList<UserLoginInfo>> GetLoginsAsync(IntwentyUser user, CancellationToken cancellationToken)

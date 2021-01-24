@@ -39,7 +39,7 @@ namespace Intwenty.Areas.Identity.Data
             Settings = settings.Value;
         }
 
-        /*
+        
         public override async Task<SignInResult> ExternalLoginSignInAsync(string loginProvider, string providerKey, bool isPersistent, bool bypassTwoFactor)
         {
             var user = await UserManager.FindByLoginAsync(loginProvider, providerKey);
@@ -48,6 +48,9 @@ namespace Intwenty.Areas.Identity.Data
                 return SignInResult.Failed;
             }
 
+            if (!await OrganizationManager.IsProductUser(Settings.ProductId, user))
+                return SignInResult.NotAllowed;
+
             var error = await PreSignInCheck(user);
             if (error != null)
             {
@@ -55,7 +58,9 @@ namespace Intwenty.Areas.Identity.Data
             }
             return await SignInOrTwoFactorAsync(user, isPersistent, loginProvider, bypassTwoFactor);
         }
-        */
+
+      
+
 
         public override async Task<SignInResult> PasswordSignInAsync(IntwentyUser user, string password, bool isPersistent, bool lockoutOnFailure)
         {
