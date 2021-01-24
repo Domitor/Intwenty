@@ -41,21 +41,21 @@ namespace Intwenty.Controllers
         /// Get endpoints
         /// </summary>
         [HttpGet("/Model/API/GetSystems")]
-        public IActionResult GetSystems()
+        public async Task<IActionResult> GetSystems()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var res = ModelRepository.GetAuthorizedSystemModelsAsync(User);
+            var res = await ModelRepository.GetAuthorizedSystemModelsAsync(User);
             return new JsonResult(res);
 
         }
 
 
         [HttpPost("/Model/API/SaveSystem")]
-        public IActionResult SaveSystem([FromBody] SystemModelItem model)
+        public async Task<IActionResult> SaveSystem([FromBody] SystemModelItem model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -75,12 +75,12 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetSystems();
+            return await GetSystems();
         }
 
 
         [HttpPost("/Model/API/DeleteSystem")]
-        public IActionResult DeleteSystem([FromBody] SystemModelItem model)
+        public async Task<IActionResult> DeleteSystem([FromBody] SystemModelItem model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -101,7 +101,7 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetSystems();
+            return await GetSystems();
         }
 
         #endregion
@@ -128,14 +128,14 @@ namespace Intwenty.Controllers
         /// Get model data for applications
         /// </summary>
         [HttpGet("/Model/API/GetApplications")]
-        public IActionResult GetApplications()
+        public async Task<IActionResult> GetApplications()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetAuthorizedApplicationModelsAsync(User);
+            var t = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
             return new JsonResult(t);
 
         }
@@ -164,7 +164,7 @@ namespace Intwenty.Controllers
         /// Delete model data for application
         /// </summary>
         [HttpPost("/Model/API/DeleteApplicationModel")]
-        public IActionResult DeleteApplicationModel([FromBody] ApplicationModelItem model)
+        public async Task<IActionResult> DeleteApplicationModel([FromBody] ApplicationModelItem model)
         {
 
             if (!User.Identity.IsAuthenticated)
@@ -185,7 +185,7 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
-            return GetApplications();
+            return await GetApplications();
         }
 
         #endregion
