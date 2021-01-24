@@ -17,6 +17,7 @@ using System.Media;
 using System.Security.Claims;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Data;
+using System.Threading.Tasks;
 
 namespace Intwenty
 {
@@ -306,11 +307,11 @@ namespace Intwenty
             return res;
         }
 
-        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal)
+        public async Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal)
         {
             var res = new List<SystemModelItem>();
             var systems = GetSystemModels();
-            var auth_apps = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
+            var auth_apps = await GetAuthorizedApplicationModelsAsync(claimprincipal);
 
             foreach (var s in systems)
             {
@@ -531,34 +532,30 @@ namespace Intwenty
 
      
 
-        public List<ApplicationModelItem> GetLocalizedAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
+        public async Task<List<ApplicationModelItem>> GetLocalizedAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal)
         {
-            var t = GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
+            var t = await GetAuthorizedApplicationModelsAsync(claimprincipal);
             LocalizeTitles(t.ToList<ILocalizableTitle>());
             return t;
         }
 
-        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal)
-        {
-            return GetAuthorizedApplicationModels(claimprincipal, IntwentyPermission.Read);
-        }
-
-        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission)
+      
+        public async Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal)
         {
             var res = new List<ApplicationModelItem>();
             if (!claimprincipal.Identity.IsAuthenticated)
                 return res;
 
-            var user = UserManager.GetUserAsync(claimprincipal).Result;
+            var user = await UserManager.GetUserAsync(claimprincipal);
             if (user == null)
                 return res;
 
             var apps = GetAppModels();
-            if (UserManager.IsInRoleAsync(user, "SUPERADMIN").Result)
+            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
                 return apps;
 
-            var authorizations = UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId).Result;
-            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p));
 
 
             foreach (var a in apps)
@@ -571,13 +568,7 @@ namespace Intwenty
                     if (p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.MetaCode)
                     {
                         exist_explicit = true;
-
-                        if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
-                            (requested_permission == IntwentyPermission.Modify && p.Modify) ||
-                            (requested_permission == IntwentyPermission.Delete && p.Delete))
-                        {
-                            res.Add(a);
-                        }
+                        res.Add(a);
                     }
                 }
 
@@ -587,12 +578,7 @@ namespace Intwenty
                     {
                         if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode)
                         {
-                            if ((requested_permission == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
-                                (requested_permission == IntwentyPermission.Modify && p.Modify) ||
-                                (requested_permission == IntwentyPermission.Delete && p.Delete))
-                            {
-                                res.Add(a);
-                            }
+                            res.Add(a);
                         }
                     }
                 }
@@ -606,13 +592,6 @@ namespace Intwenty
         }
 
      
-
-
-     
-
-
-     
-      
 
         public List<ApplicationModelItem> GetAppModels()
         {

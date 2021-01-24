@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Claims;
 using Intwenty.Areas.Identity.Models;
+using System.Threading.Tasks;
 
 namespace Intwenty.Interface
 {
@@ -19,21 +20,18 @@ namespace Intwenty.Interface
         /// <summary>
         /// Returns localized application models that the current user has permission to use
         /// </summary>
-        public List<ApplicationModelItem> GetLocalizedAuthorizedApplicationModels(ClaimsPrincipal claimprincipal);
-        /// <summary>
-        /// Returns application models that the current user has permission to use
-        /// </summary>
-        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal, IntwentyPermission requested_permission);
+        public Task<List<ApplicationModelItem>> GetLocalizedAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
+
 
         /// <summary>
         /// Returns application models that the current user has permission to use
         /// </summary>
-        public List<ApplicationModelItem> GetAuthorizedApplicationModels(ClaimsPrincipal claimprincipal);
+        public Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
 
         /// <summary>
         /// Returns system models that the current user has permission to use
         /// </summary>
-        public List<SystemModelItem> GetAuthorizedSystemModels(ClaimsPrincipal claimprincipal);
+        public Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal);
 
         /// <summary>
         /// Get a complete system model, used for export model

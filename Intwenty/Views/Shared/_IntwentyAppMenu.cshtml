@@ -3,7 +3,7 @@
 @{
 
     var systems = new List<SystemModelItem>();
-    var apps = ModelRepository.GetLocalizedAuthorizedApplicationModels(User);
+    var apps = await ModelRepository.GetLocalizedAuthorizedApplicationModelsAsync(User);
     foreach (var a in apps)
     {
         if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))

@@ -48,7 +48,7 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var res = ModelRepository.GetAuthorizedSystemModels(User);
+            var res = ModelRepository.GetAuthorizedSystemModelsAsync(User);
             return new JsonResult(res);
 
         }
@@ -135,7 +135,7 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetAuthorizedApplicationModels(User);
+            var t = ModelRepository.GetAuthorizedApplicationModelsAsync(User);
             return new JsonResult(t);
 
         }
@@ -667,7 +667,7 @@ namespace Intwenty.Controllers
         /// Create a json file containing all data registered with the current model
         /// </summary>
         [HttpGet("/Model/API/ExportData")]
-        public IActionResult ExportData()
+        public async Task<IActionResult> ExportData()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -679,7 +679,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var apps = ModelRepository.GetAuthorizedApplicationModels(User);
+                var apps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
                 var sep = "";
                 foreach (var app in apps)
                 {
@@ -740,7 +740,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var authapps = ModelRepository.GetAuthorizedApplicationModels(User);
+                var authapps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
                 int savefail = 0;
                 int savesuccess= 0;
                 string fileContents;
