@@ -191,7 +191,7 @@ namespace Intwenty.Controllers
                 StringValues key;
                 if (Request.Headers.TryGetValue("Authorization", out key))
                 {
-                    var client = DataRepository.GetDataClient();
+                    var client = DataRepository.GetIAMDataClient();
                     client.Open();
                     var users = client.GetEntities<IntwentyUser>();
                     client.Close();
