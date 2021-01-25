@@ -44,7 +44,7 @@ namespace Intwenty.Model
         /// </summary>
         public bool ConfigureDatabaseOnStartUp { get; set; }
         /// <summary>
-        /// Seed user data 
+        /// Seed application data 
         /// </summary>
         public bool SeedDataOnStartUp { get; set; }
         /// <summary>
@@ -53,13 +53,21 @@ namespace Intwenty.Model
         public bool SeedLocalizationsOnStartUp { get; set; }
 
         /// <summary>
-        /// Seed product and organization
+        /// Seed product and organization info
         /// </summary>
         public bool SeedProductAndOrganizationOnStartUp { get; set; }
 
+        /// <summary>
+        /// Seed demo user accounts
+        /// </summary>
+        public bool SeedDemoUserAccountsOnStartUp { get; set; }
+
 
         //FOR DEBUG AND DEMO MODE
-        public bool UseDemoSettings { get; set; }
+        /// <summary>
+        /// If true this will show the username and password to use on the login page, DO NOT USE IN PRODUCTION
+        /// </summary>
+        public bool ShowDemoLoginInfo { get; set; }
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }
         public string DemoUser { get; set; }

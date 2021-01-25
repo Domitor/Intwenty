@@ -20,7 +20,7 @@ namespace Intwenty.Seed
 
             var Settings = services.GetRequiredService<IOptions<IntwentySettings>>();
 
-            if (!Settings.Value.UseDemoSettings)
+            if (!Settings.Value.SeedDemoUserAccountsOnStartUp)
                 return;
 
           

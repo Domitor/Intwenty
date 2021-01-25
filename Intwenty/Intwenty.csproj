@@ -5,7 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.5.1</Version>
+    <Version>1.5.2</Version>
     <Authors>Johan Filipsson</Authors>
     <Company>Domitor Consulting AB</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -18,11 +18,9 @@
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
     <Description>Create metadata driven applications with vue.js and ASP.NET Core. Use this package with visual studio 2019 or later. See https://github.com/Domitor/Intwenty for instructions about using this package.</Description>
     <EnableDefaultContentItems>true</EnableDefaultContentItems>
-    <PackageReleaseNotes>- Bugfixes
-- Identity extended with product and organization management
-- New feature, use an intwenty instance as a centralized IAM (Identity Access Management)</PackageReleaseNotes>
-    <AssemblyVersion>1.5.1.0</AssemblyVersion>
-    <FileVersion>1.5.1.0</FileVersion>
+    <PackageReleaseNotes>- IAM Bugfixes</PackageReleaseNotes>
+    <AssemblyVersion>1.5.2.0</AssemblyVersion>
+    <FileVersion>1.5.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
