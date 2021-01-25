@@ -18,11 +18,13 @@ using Intwenty.DataClient.Model;
 using Intwenty.DataClient.Reflection;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intwenty.Controllers
 {
 
-
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class SystemTestController : Controller
     {
 

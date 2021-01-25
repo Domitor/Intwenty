@@ -15,6 +15,7 @@ using Intwenty.DataClient;
 namespace Intwenty.Controllers
 {
    
+    [AllowAnonymous]
     public class DynamicEndpointController : Controller
     {
         private IIntwentyDataService DataRepository { get; }
