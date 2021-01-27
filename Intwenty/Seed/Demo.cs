@@ -150,7 +150,7 @@ namespace Intwenty.Seed
                 if (user_member == null)
                 {
                     await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = default_user.Id, UserName = default_user.UserName });
-                    await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", default_user.Id, org.Id, Settings.Value.ProductId);
+                    await userManager.AddUpdateUserRoleAuthorizationAsync("USER", default_user.Id, org.Id, Settings.Value.ProductId);
                 }
             }
             
