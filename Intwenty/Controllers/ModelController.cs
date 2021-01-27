@@ -240,18 +240,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        public IActionResult UserPermission(string id)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-
-            if (!User.IsInRole("SUPERADMIN") && !User.IsInRole("USERADMIN"))
-                return Forbid();
-
-            ViewBag.SystemId = id;
-            return View();
-        }
-
+      
 
 
 
