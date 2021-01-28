@@ -10,15 +10,13 @@ namespace Intwenty.Model
     public class UserInterfaceModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
+        public static readonly string MetaTypeUserInterface = "USERINTERFACE";
+        public static readonly string MetaTypeTextListColumn = "TEXTLISTCOLUMN";
         public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
         public static readonly string MetaTypeLabel = "LABEL";
         public static readonly string MetaTypeImage = "IMAGE";
         public static readonly string MetaTypeStaticHTML = "STATICHTML";
-        public static readonly string MetaTypeCreateView = "CREATEVIEW";
-        public static readonly string MetaTypeEditView = "EDITVIEW";
-        public static readonly string MetaTypeDetailView = "DETAILVIEW";
-        public static readonly string MetaTypeListView = "LISTVIEW";
         public static readonly string MetaTypeEmailBox = "EMAILBOX";
         public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
@@ -27,8 +25,6 @@ namespace Intwenty.Model
         public static readonly string MetaTypeNumBox = "NUMBOX";
         public static readonly string MetaTypeCheckBox = "CHECKBOX";
         public static readonly string MetaTypeComboBox = "COMBOBOX";
-        public static readonly string MetaTypeEditListView = "EDITLISTVIEW";
-        public static readonly string MetaTypeEditListViewColumn = "EDITLISTVIEWCOLUMN";
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeEditGrid = "EDITGRID";
@@ -209,22 +205,12 @@ namespace Intwenty.Model
 
         }
 
-        public bool IsUIViewType
-        {
-            get
-            {
-                return IsMetaTypeCreateView || IsMetaTypeEditView || IsMetaTypeListView ||
-                       IsMetaTypeDetailView || IsMetaTypeEditListView;
-
-            }
-
-        }
 
         public bool IsUIContainerType
         {
             get
             {
-                return IsUIViewType || IsMetaTypeSection || IsMetaTypePanel;
+                return IsMetaTypeUserInterface || IsMetaTypeSection || IsMetaTypePanel;
             }
 
         }
@@ -287,30 +273,17 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeMultiSelect; }
         }
 
-        public bool IsMetaTypeCreateView
+        public bool IsMetaTypeUserInterface
         {
-            get { return MetaType == MetaTypeCreateView; }
+            get { return MetaType == MetaTypeUserInterface; }
         }
 
-        public bool IsMetaTypeEditView
+        public bool IsMetaTypeTextListColumn
         {
-            get { return MetaType == MetaTypeEditView; }
+            get { return MetaType == MetaTypeTextListColumn; }
         }
 
-        public bool IsMetaTypeDetailView
-        {
-            get { return MetaType == MetaTypeDetailView; }
-        }
-
-        public bool IsMetaTypeListView
-        {
-            get { return MetaType == MetaTypeListView; }
-        }
-
-        public bool IsMetaTypeEditListView
-        {
-            get { return MetaType == MetaTypeEditListView; }
-        }
+       
 
         public bool IsMetaTypeStaticHTML
         {
@@ -384,11 +357,7 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeImageBox; }
         }
 
-        public bool IsMetaTypeEditListViewColumn
-        {
-            get { return MetaType == MetaTypeEditListViewColumn; }
-        }
-
+      
        
 
         public bool IsMetaTypePanel

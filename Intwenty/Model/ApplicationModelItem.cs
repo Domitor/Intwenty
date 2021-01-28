@@ -10,6 +10,20 @@ namespace Intwenty.Model
 
    public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
    {
+        public enum TenantIsolationOptions
+        {
+           None=0  //All users can access the same data
+          ,User=1  //A user can only access owned data
+          ,Organization=2 //An organization can only access owned data
+        }
+
+        public enum TenantIsolationMethodOptions
+        {
+            None = 0
+           ,ByRows = 1
+           ,ByTables = 2
+        }
+
         public static readonly string MetaTypeApplication = "APPLICATION";
 
         public ApplicationModelItem()
@@ -37,6 +51,8 @@ namespace Intwenty.Model
             DetailViewRequirement = entity.DetailViewRequirement;
             ListViewRequirement = entity.ListViewRequirement;
             ApplicationPath = entity.ApplicationPath;
+            TenantIsolationLevel = (TenantIsolationOptions)entity.TenantIsolationLevel;
+            TenantIsolationMethod = (TenantIsolationMethodOptions)entity.TenantIsolationMethod;
             SetEmptyStrings();
         }
 
@@ -56,6 +72,10 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ListViewRequirement)) ListViewRequirement = string.Empty;
             if (string.IsNullOrEmpty(ApplicationPath)) ApplicationPath = string.Empty;
         }
+
+        public TenantIsolationOptions TenantIsolationLevel { get; set; }
+
+        public TenantIsolationMethodOptions TenantIsolationMethod { get; set; }
 
         public SystemModelItem SystemInfo { get; set; }
 

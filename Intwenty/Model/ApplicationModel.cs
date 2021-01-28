@@ -32,6 +32,71 @@ namespace Intwenty.Model
         /// </summary>
         public List<UserInterfaceModelItem> UIStructure { get; set; }
 
+        public List<ViewModelItem> Views { get; set; }
+
+        public bool UseCreateViewAuthorization
+        {
+            get
+            {
+                if (Application.CreateViewRequirement != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool UseEditViewAuthorization
+        {
+            get
+            {
+                if (Application.EditViewRequirement != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+
+        public bool UseEditListViewAuthorization
+        {
+            get
+            {
+                if (Application.EditListViewRequirement != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool UseDetailViewAuthorization
+        {
+            get
+            {
+                if (Application.DetailViewRequirement != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool UseListViewAuthorization
+        {
+            get
+            {
+                if (Application.ListViewRequirement != "PUB")
+                    return true;
+
+                return false;
+            }
+        }
+
+
+        /*
+        /// <summary>
+        /// All UI model items, describing the UI for this application
+        /// </summary>
+        public List<UserInterfaceModelItem> UIStructure { get; set; }
+
         /// <summary>
         /// UIView models to use when rendering html
         /// </summary>
@@ -85,62 +150,7 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseCreateViewAuthorization
-        {
-            get
-            {
-                if (Application.CreateViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseEditViewAuthorization
-        {
-            get
-            {
-                if (Application.EditViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
- 
-        public bool UseEditListViewAuthorization
-        {
-            get
-            {
-                if (Application.EditListViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseDetailViewAuthorization
-        {
-            get
-            {
-                if (Application.DetailViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseListViewAuthorization
-        {
-            get
-            {
-                if (Application.ListViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
+        
 
         private List<UIView> GetUIViews()
         {
@@ -242,7 +252,7 @@ namespace Intwenty.Model
 
             return res;
         }
-
+        */
 
     }
 

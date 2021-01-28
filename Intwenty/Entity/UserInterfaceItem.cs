@@ -17,6 +17,7 @@ namespace Intwenty.Entity
         public string Description { get; set; }
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
+        public string ViewMetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string MetaCode { get; set; }
 

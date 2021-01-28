@@ -120,18 +120,14 @@ namespace Intwenty.Model
                 return "TBL_NUMBOX";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox)
                 return "TBL_TB";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeCreateView)
-                return "CRV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditView)
-                return "EDV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeDetailView)
-                return "DEV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeListView)
-                return "LV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditListView)
-                return "EDLV";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditListViewColumn)
-                return "LV_COL";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeUserInterface)
+                return "UIFE";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextListColumn)
+                return "TLCOL";
+            if (item.MetaType == ViewModelItem.MetaTypeInputView)
+                return "IVIEW";
+            if (item.MetaType == ViewModelItem.MetaTypeListView)
+                return "LVIEW";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
                 return "LOOKUP";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeNumBox)

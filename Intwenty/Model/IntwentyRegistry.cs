@@ -31,7 +31,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = ApplicationModelItem.MetaTypeApplication, Title = "Application", ModelCode = "APPMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeCreateView, Title = "Create View" , ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeUserInterface, Title = "User Interface" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeDatePicker, Title = "Datepicker" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditGrid, Title = "Grid" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditGridCheckBox, Title = "Grid Checkbox" , ModelCode = "UIMODEL" });
@@ -46,20 +46,16 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeImage, Title = "Image" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeImageBox, Title = "Image Upload" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeLabel, Title = "Label" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditListView, Title = "Edit List View" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditListViewColumn, Title = "Edit List Column" , ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextListColumn, Title = "Text List Column" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeLookUp, Title = "Look Up" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeNumBox, Title = "Numbox" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePanel, Title = "Panel" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypePasswordBox, Title = "Password Box" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeDetailView, Title = "Detail View" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeListView, Title = " List View", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeSection, Title = "Section" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeStaticHTML, Title = "HTML" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextArea, Title = "Text Area" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextBlock, Title = "Text Block" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UIMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeEditView, Title = "Edit View" , ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeMultiSelect, Title = "Multi Select", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
@@ -72,6 +68,13 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = ViewModelItem.MetaTypeInputView, Title = "Input View", ModelCode = "UIVIEWMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = ViewModelItem.MetaTypeListView, Title = "List View", ModelCode = "UIVIEWMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeCreate, Title = "Create", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeSave, Title = "Save", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeDelete, Title = "Delete", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeEdit, Title = "Edit", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeBack, Title = "Back", ModelCode = "FUNCTIONMODEL" });
 
 
             return _metatypes;
@@ -116,8 +119,6 @@ namespace Intwenty.Model
 
             prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
             prop.ValidFor.Add(DataViewModelItem.MetaTypeDataView);
-            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeListView);
-            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeEditListView);
             _properties.Add(prop);
 
 
@@ -181,8 +182,6 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
-            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeListView);
-            prop.ValidFor.Add(UserInterfaceModelItem.MetaTypeEditListView);
             _properties.Add(prop);
 
             return _properties;

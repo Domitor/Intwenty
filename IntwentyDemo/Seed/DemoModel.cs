@@ -26,7 +26,10 @@ namespace IntwentyDemo.Seed
             var systems = new List<SystemItem>();
             var applications = new List<ApplicationItem>();
             var valuedomains = new List<ValueDomainItem>();
+            var views = new List<ViewItem>();
             var userinterface = new List<UserInterfaceItem>();
+            var view_userinterface = new List<ViewUserInterfaceItem>();
+            var functions = new List<FunctionItem>();
             var dbitems = new List<DatabaseItem>();
             var dataviews = new List<DataViewItem>();
             var endpoints = new List<EndpointItem>();
@@ -37,11 +40,11 @@ namespace IntwentyDemo.Seed
             systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", DbPrefix = "blog" });
 
             //APPLICATIONS
-            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath="Customers", CreateViewRequirement="AUTH", EditViewRequirement="AUTH", EditListViewRequirement="AUTH", DetailViewRequirement="AUTH", ListViewRequirement = "AUTH" });
-            applications.Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", SystemMetaCode = "WAREHOUSE", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "wms_Item", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Items", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
-            applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "SalesOrder", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
-            applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Vendor", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
-            applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "", CreateViewRequirement = "AUTH", EditViewRequirement = "OWNER", EditListViewRequirement = "OWNER", DetailViewRequirement = "PUB", ListViewRequirement = "PUB" });
+            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath="Customers", CreateViewRequirement="AUTH", EditViewRequirement="AUTH", EditListViewRequirement="AUTH", DetailViewRequirement="AUTH", ListViewRequirement = "AUTH", TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
+            //applications.Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", SystemMetaCode = "WAREHOUSE", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "wms_Item", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Items", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
+            //applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "SalesOrder", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
+            //applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "Vendor", CreateViewRequirement = "AUTH", EditViewRequirement = "AUTH", EditListViewRequirement = "AUTH", DetailViewRequirement = "AUTH", ListViewRequirement = "AUTH" });
+            //applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", IsHierarchicalApplication = false, UseVersioning = false, ApplicationPath = "", CreateViewRequirement = "AUTH", EditViewRequirement = "OWNER", EditListViewRequirement = "OWNER", DetailViewRequirement = "PUB", ListViewRequirement = "PUB" });
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
             valuedomains.Add(new ValueDomainItem() { DomainName = "ITEMCATEGORY", Code = "PROD", Value = "Products" });
@@ -51,7 +54,8 @@ namespace IntwentyDemo.Seed
             valuedomains.Add(new ValueDomainItem() { DomainName = "CUSTOMERTAGS", Code = "3", Value = "Tag 3" });
 
 
-            #region customer
+            #region Customer
+
             //APPLICATION CUSTOMER
             //--------------------
             //DATABASE - MAINTABLE
@@ -63,8 +67,14 @@ namespace IntwentyDemo.Seed
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERTAGS", DbName = "CustomerTags", ParentMetaCode = "ROOT", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERTAGSTEXT", DbName = "CustomerTagsText", ParentMetaCode = "ROOT", DataType = "TEXT" });
 
-            //UI
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "CREATEVIEW", MetaCode = "ADDEDITVIEW", TitleLocalizationKey= "VIEW_CUST_ADDEDITVIEW", Title = "Create Customer", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
+            //APPLICATION - VIEWS
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "LV_CUSTOMER1", MetaType = "LISTVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", DataTableMetaCode = "CUSTOMER", Path = "Application/EditList/10", IsPrimaryView = true });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER1", MetaType = "INPUTVIEW", Title = "Create Customer", TitleLocalizationKey = "VIEW_CUST_ADDEDITVIEW", DataTableMetaCode = "CUSTOMER", Path = "Application/Create/10", IsPrimaryView = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER2", MetaType = "INPUTVIEW", Title = "Edit Customer", TitleLocalizationKey = "", DataTableMetaCode = "CUSTOMER", Path = "Application/Edit/10", IsPrimaryView = false });
+
+
+            //INPUT UI
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "USERINTERFACE", MetaCode = "CUST_INPUTVIEW", TitleLocalizationKey= "VIEW_CUST_ADDEDITVIEW", Title = "Create Customer", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ADDEDITVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1, Properties="READONLY=TRUE" });
@@ -75,13 +85,31 @@ namespace IntwentyDemo.Seed
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "NUMBOX", MetaCode = "TBCUSTPHONE", DataColumn1MetaCode = "CUSTOMERPHONE", Title = "Phone", TitleLocalizationKey = "CUSTOMERPHONE", ParentMetaCode = "CUSTPNL2", RowOrder = 2, ColumnOrder = 2 });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTBOX", MetaCode = "TBCUSTSTAT", DataColumn1MetaCode = "CUSTOMERSTATUS", Title = "Status", TitleLocalizationKey = "", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2, Properties="READONLY=TRUE" });
 
-            //EDIT LISTVIEW
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "EDITLISTVIEW", MetaCode = "MAIN_EDITLISTVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_ID", DataColumn1MetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 1 });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "EDITLISTVIEWCOLUMN", MetaCode = "LV_CUSTNAME", DataColumn1MetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 3 });
-            #endregion
+            //LIST UI
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "USERINTERFACE", MetaCode = "CUST_LISTVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTLISTCOLUMN", MetaCode = "LV_ID", DataColumn1MetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 1 });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTLISTCOLUMN", MetaCode = "LV_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TEXTLISTCOLUMN", MetaCode = "LV_CUSTNAME", DataColumn1MetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
+            //CONNECT VIEWS WITH UI
+            view_userinterface.Add(new ViewUserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", UserInterfaceMetaCode = "CUST_LISTVIEW" });
+            view_userinterface.Add(new ViewUserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", UserInterfaceMetaCode = "CUST_INPUTVIEW" });
+            view_userinterface.Add(new ViewUserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", UserInterfaceMetaCode = "CUST_INPUTVIEW" });
+
+            //UI FUNCTIONS
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "CREATE", DataTableMetaCode= "CUSTOMER", MetaCode = "CUST_FUNC_CREATE", Path = "Application/Create/10", RequiredAuthorization = 0, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "EDIT", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_EDIT", Path = "Application/Edit/10", RequiredAuthorization = 0, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "DELETE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_DELETE", Path = "Application/API/Delete", RequiredAuthorization = 0, Title = "Delete" });
+
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", MetaType = "SAVE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_SAVE", Path = "Application/API/Save", RequiredAuthorization = 0, Title = "Save" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", MetaType = "BACK", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_BACK", Path = "Application/EditList/10", RequiredAuthorization = 0, Title = "Back to list" });
+
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", MetaType = "SAVE", MetaCode = "CUST_FUNC_SAVE1", DataTableMetaCode = "CUSTOMER", Path = "Application/API/Save", RequiredAuthorization = 0, Title = "Save" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", MetaType = "BACK", MetaCode = "CUST_FUNC_BACK1", DataTableMetaCode = "CUSTOMER", Path = "Application/EditList/10", RequiredAuthorization = 0, Title = "Back to list" });
+
+
+            #endregion
+            /*
             #region item
             //APPLICATION ITEM
             //---------------------
@@ -235,7 +263,7 @@ namespace IntwentyDemo.Seed
             dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName", SQLQueryFieldDataType = "STRING" });
 
             #endregion
-
+            */
             #region endpoints
 
             //Define som endpoints for the customer application 

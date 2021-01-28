@@ -28,6 +28,8 @@ namespace Intwenty.Entity
         public string DetailViewRequirement { get; set; }
         public string ListViewRequirement { get; set; }
         public string ApplicationPath { get; set; }
+        public int TenantIsolationLevel { get; set; }
+        public int TenantIsolationMethod { get; set; }
 
 
 
