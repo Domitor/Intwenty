@@ -3,7 +3,7 @@ using System;
 
 namespace Intwenty.Entity
 {
-    [DbTableIndex("UI_IDX_1", true, "SystemMetaCode,AppMetaCode,MetaCode")]
+    [DbTableIndex("UISTRUCT_IDX_1", true, "SystemMetaCode,AppMetaCode,MetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_UserInterfaceStructureItem")]
     public class UserInterfaceStructureItem

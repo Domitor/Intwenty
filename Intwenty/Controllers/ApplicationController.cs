@@ -175,6 +175,11 @@ namespace Intwenty.Controllers
                 return Forbid();
         }
 
+        public IActionResult View(int? id)
+        {
+            return Ok();
+        }
+
 
 
     }

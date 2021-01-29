@@ -8,7 +8,7 @@ namespace Intwenty.Entity
     /// <summary>
     /// Defines UI:s in a view
     /// </summary>
-    [DbTableIndex("UI_IDX_1", true, "SystemMetaCode,AppMetaCode,MetaCode")]
+    [DbTableIndex("UI_IDX_1", true, "SystemMetaCode,AppMetaCode,ViewMetaCode,MetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_UserInterfaceItem")]
    public class UserInterfaceItem
