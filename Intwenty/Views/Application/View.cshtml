@@ -1,0 +1,42 @@
+﻿@model Intwenty.Model.ViewModel
+
+@await Html.PartialAsync("_Modals")
+
+<br />
+<br />
+
+<div id="app">
+    <div class="card">
+        <div class="card-header"><h2>@Model.Title</h2></div>
+        <div class="card-body">
+
+            <p>@Model.Description</p>
+
+            @if (Model.Functions.Count > 0)
+            {
+                <ul class="nav">
+                    @if (Model.HasNavigateFunction)
+                    {
+                        <li class="nav-item">
+                            <a href="@Model.NavigateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.Title</a>
+                        </li>
+                    }
+
+                    @if (Model.HasExportFunction)
+                    {
+                        <li class="nav-item">
+                            <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()"  style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</button>
+                        </li>
+                    }
+
+                     @if (Model.HasSaveFunction)
+                    {
+                         <li class="nav-item">
+                            <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Localizer["Save"]</button>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

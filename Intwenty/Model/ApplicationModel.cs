@@ -28,7 +28,7 @@ namespace Intwenty.Model
         public List<DatabaseModelItem> DataStructure { get; set; }
 
 
-        public List<ViewModelItem> Views { get; set; }
+        public List<ViewModel> Views { get; set; }
 
        
         public bool HasListView

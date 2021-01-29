@@ -3,7 +3,8 @@ using System;
 
 namespace Intwenty.Entity
 {
-
+    [DbTableIndex("VIEW_IDX1", true, "Path")]
+    [DbTableIndex("VIEW_IDX2", true, "SystemMetaCode,AppMetaCode,MetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_ViewItem")]
    public class ViewItem
@@ -15,9 +16,13 @@ namespace Intwenty.Entity
 
         [AutoIncrement]
         public int Id { get; set; }
+        [NotNull]
         public string SystemMetaCode { get; set; }
+        [NotNull]
         public string AppMetaCode { get; set; }
+        [NotNull]
         public string MetaCode { get; set; }
+        [NotNull]
         public string MetaType { get; set; }
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
@@ -27,6 +32,7 @@ namespace Intwenty.Entity
         /// <summary>
         /// How to navigate to this view
         /// </summary>
+        [NotNull]
         public string Path { get; set; }
 
         /// <summary>
@@ -39,7 +45,16 @@ namespace Intwenty.Entity
         /// </summary>
         public string DataTableMetaCode { get; set; }
 
-        public bool IsPrimaryView { get; set; }
+        /// <summary>
+        /// Use this view in menus
+        /// </summary>
+        public bool IsPrimary { get; set; }
+
+        /// <summary>
+        /// Overrides application settings and makes it public
+        /// </summary>
+        public bool IsPublic { get; set; }
+
 
         public string Properties { get; set; }
 

@@ -15,10 +15,14 @@ namespace Intwenty.Entity
 
         [AutoIncrement]
         public int Id { get; set; }
+        [NotNull]
         public string SystemMetaCode { get; set; }
+        [NotNull]
         public string AppMetaCode { get; set; }
-        public string MetaType { get; set; }
+        [NotNull]
         public string MetaCode { get; set; }
+        [NotNull]
+        public string MetaType { get; set; }
         public string ViewMetaCode{ get; set; }
         public string DataTableMetaCode { get; set; }
         public string Title { get; set; }

@@ -11,15 +11,19 @@ namespace Intwenty.Entity
 
         [AutoIncrement]
         public int Id { get; set; }
+        [NotNull]
+        public string SystemMetaCode { get; set; }
+        [NotNull]
+        public string AppMetaCode { get; set; }
+        [NotNull]
+        public string MetaCode { get; set; }
+        [NotNull]
         public string MetaType { get; set; }
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string Description { get; set; }
-        public string SystemMetaCode { get; set; }
-        public string AppMetaCode { get; set; }
         public string UserInterfaceMetaCode { get; set; }
         public string ParentMetaCode { get; set; }
-        public string MetaCode { get; set; }
 
 
         /// <summary>

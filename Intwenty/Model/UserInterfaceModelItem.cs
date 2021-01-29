@@ -36,6 +36,7 @@ namespace Intwenty.Model
             SystemMetaCode = entity.SystemMetaCode;
             ViewMetaCode = entity.ViewMetaCode;
             MetaCode = entity.MetaCode;
+            MetaType = entity.MetaType;
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }

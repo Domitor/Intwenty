@@ -11,11 +11,10 @@ namespace Intwenty.Model
     public class FunctionModelItem : BaseModelItem
     {
         //META TYPES
-        public static readonly string MetaTypeCreate = "CREATE";
-        public static readonly string MetaTypeEdit = "EDIT";
         public static readonly string MetaTypeSave = "SAVE";
         public static readonly string MetaTypeDelete = "DELETE";
-        public static readonly string MetaTypeBack = "BACK";
+        public static readonly string MetaTypeNavigate = "NAVIGATE";
+        public static readonly string MetaTypeExport = "EXPORT";
 
 
 
@@ -43,6 +42,11 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
             Path = entity.Path;
+            if (!string.IsNullOrEmpty(Path))
+            {
+                if (!Path.StartsWith("/"))
+                    Path = "/" + Path;
+            }
             ViewMetaCode = entity.ViewMetaCode;
             DataTableMetaCode = entity.DataTableMetaCode;
             RequiredAuthorization = (IntwentyPermission)entity.RequiredAuthorization;
@@ -114,29 +118,26 @@ namespace Intwenty.Model
     
 
 
-        public bool IsMetaTypeBack
+        public bool IsMetaTypeNavigate
         {
-            get { return MetaType == MetaTypeBack; }
+            get { return MetaType == MetaTypeNavigate; }
         }
 
-        public bool IsMetaTypeCreate
-        {
-            get { return MetaType == MetaTypeCreate; }
-        }
 
         public bool IsMetaTypeDelete
         {
             get { return MetaType == MetaTypeDelete; }
         }
 
-        public bool IsMetaTypeEdit
-        {
-            get { return MetaType == MetaTypeEdit; }
-        }
 
         public bool IsMetaTypeSave
         {
             get { return MetaType == MetaTypeSave; }
+        }
+
+        public bool IsMetaTypeExport
+        {
+            get { return MetaType == MetaTypeExport; }
         }
 
 

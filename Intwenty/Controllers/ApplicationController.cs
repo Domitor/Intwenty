@@ -41,7 +41,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
             }
 
             if (current_model == null)
@@ -69,7 +69,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
             }
 
             if (current_model == null)
@@ -101,7 +101,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
             }
 
             if (current_model == null)
@@ -133,7 +133,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
             }
 
             if (current_model == null)
@@ -162,7 +162,7 @@ namespace Intwenty.Controllers
             }
             else
             {
-                current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
+                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
             }
 
             if (current_model == null)
@@ -175,9 +175,20 @@ namespace Intwenty.Controllers
                 return Forbid();
         }
 
-        public IActionResult View(int? id)
+        public virtual async Task<IActionResult> View(int? id)
         {
-            return Ok();
+            var path = this.Request.Path.Value;
+            var current_view = ModelRepository.GetLocalizedViewModelByPath(path);
+            if (current_view == null)
+                return NotFound();
+            if (current_view.IsPublic)
+                return View(current_view);
+            if (await UserManager.HasAuthorization(User, current_view))
+                return View(current_view);
+            else
+                return Forbid();
+
+
         }
 
 

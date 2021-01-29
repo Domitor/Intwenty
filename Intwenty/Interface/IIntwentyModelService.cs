@@ -70,7 +70,7 @@ namespace Intwenty.Interface
         /// </summary>
         public List<ApplicationModel> GetLocalizedApplicationModels();
         public ApplicationModel GetLocalizedApplicationModel(int applicationid);
-        public ApplicationModel GetLocalizedApplicationModelByPath(string path);
+        public ViewModel GetLocalizedViewModelByPath(string path);
 
         public List<ApplicationModelItem> GetAppModels();
 
@@ -91,7 +91,7 @@ namespace Intwenty.Interface
 
 
 
-        public List<ViewModelItem> GetViewModels();
+        public List<ViewModel> GetViewModels();
 
         public void SaveUserInterfaceModels(List<UserInterfaceStructureModelItem> model);
 

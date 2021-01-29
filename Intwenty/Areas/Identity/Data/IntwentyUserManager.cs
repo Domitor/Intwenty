@@ -352,8 +352,11 @@ namespace Intwenty.Areas.Identity.Data
 
 
 
-       
 
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ViewModel requestedview)
+        {
+            return await HasViewAuthorizationInternal(claimprincipal,requestedview);
+        }
 
         public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
         {
@@ -411,6 +414,44 @@ namespace Intwenty.Areas.Identity.Data
 
                 return true;
             }
+
+            return false;
+        }
+
+        private async Task<bool> HasViewAuthorizationInternal(ClaimsPrincipal claimprincipal, ViewModel requestedview)
+        {
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return false;
+
+            var user = await GetUserAsync(claimprincipal);
+            if (user == null || requestedview == null)
+                throw new InvalidOperationException("Error authorizing view usage.");
+
+            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+                return true;
+
+
+            var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
+
+            var explicit_exists = false;
+
+            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode))
+            {
+                return true;
+            }
+
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode))
+            {
+                return true;
+            }
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode))
+            {
+                return true;
+            }
+
+           
 
             return false;
         }

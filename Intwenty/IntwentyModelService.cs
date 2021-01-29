@@ -428,30 +428,40 @@ namespace Intwenty
             return res;
         }
 
-        public ApplicationModel GetLocalizedApplicationModelByPath(string path)
+        public ViewModel GetLocalizedViewModelByPath(string path)
         {
-
-            var res = GetApplicationModels().Find(p => !string.IsNullOrEmpty(p.Application.ApplicationPath) && path.ToUpper().Contains(p.Application.ApplicationPath.ToUpper()));
-            if (res == null)
+            if (string.IsNullOrEmpty(path))
                 return null;
 
-            LocalizeTitle(res.Application);
-            foreach (var v in res.Views)
+            var appmodels = GetApplicationModels();
+            foreach (var app in appmodels)
             {
-                LocalizeTitle(v);
-                foreach (var ui in v.UserInterface)
+                foreach (var view in app.Views)
                 {
-                    //LocalizeTitle(ui);
-                    foreach (var uiitem in ui.UIStructure)
+                    if (path.ToUpper().Contains(view.Path.ToUpper()))
                     {
-                        LocalizeTitle(uiitem);
+
+                        LocalizeTitle(view);
+                        foreach (var ui in view.UserInterface)
+                        {
+                            //LocalizeTitle(ui);
+                            foreach (var uiitem in ui.UIStructure)
+                            {
+                                LocalizeTitle(uiitem);
+                            }
+                        }
+
+
+                        return view;
 
                     }
                 }
-
             }
 
-            return res;
+
+          
+
+            return null;
 
         }
 
@@ -554,7 +564,7 @@ namespace Intwenty
                 t.System = app.SystemInfo;
                 t.Application = app;
                 t.DataStructure = new List<DatabaseModelItem>();
-                t.Views = new List<ViewModelItem>();
+                t.Views = new List<ViewModel>();
                 t.DataStructure.AddRange(dbitems.Where(p=> p.AppMetaCode== app.MetaCode && p.SystemMetaCode==app.SystemMetaCode));
                 t.Views.AddRange(views.Where(p => p.AppMetaCode == app.MetaCode && p.SystemMetaCode == app.SystemMetaCode));
                 res.Add(t);
@@ -971,7 +981,7 @@ namespace Intwenty
     
       
 
-        public List<ViewModelItem> GetViewModels()
+        public List<ViewModel> GetViewModels()
         {
 
             var dbmodelitems = GetDatabaseModels();
@@ -979,7 +989,7 @@ namespace Intwenty
             var dataviews = GetDataViewModels();
 
             Client.Open();
-            var application_views = Client.GetEntities<ViewItem>().Select(p => new ViewModelItem(p)).ToList();
+            var application_views = Client.GetEntities<ViewItem>().Select(p => new ViewModel(p)).ToList();
             var userinterfaces = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
             var userinterfacestructures = Client.GetEntities<UserInterfaceStructureItem>().Select(p => new UserInterfaceStructureModelItem(p)).ToList();
             var functions = Client.GetEntities<FunctionItem>().Select(p => new FunctionModelItem(p)).ToList();
@@ -995,6 +1005,14 @@ namespace Intwenty
                 {
                     appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
+
+                    foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
+                    {
+                        function.ApplicationInfo = app;
+                        function.SystemInfo = app.SystemInfo;
+                        appview.Functions.Add(function);
+                    }
+
                     foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
                     {
                         userinterface.ApplicationInfo = app;

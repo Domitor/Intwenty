@@ -69,12 +69,11 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = ViewModelItem.MetaTypeUIView, Title = "Input View", ModelCode = "UIVIEWMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeCreate, Title = "Create", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = ViewModel.MetaTypeUIView, Title = "Input View", ModelCode = "UIVIEWMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeNavigate, Title = "Navigate", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeSave, Title = "Save", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeDelete, Title = "Delete", ModelCode = "FUNCTIONMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeEdit, Title = "Edit", ModelCode = "FUNCTIONMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeBack, Title = "Back", ModelCode = "FUNCTIONMODEL" });
+
 
 
             return _metatypes;

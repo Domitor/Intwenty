@@ -11,10 +11,14 @@ namespace Intwenty.Entity
     {
         [AutoIncrement]
         public int Id { get; set; }
-        public string MetaType { get; set; }
+        [NotNull]
         public string SystemMetaCode { get; set; }
+        [NotNull]
         public string AppMetaCode { get; set; }
+        [NotNull]
         public string MetaCode { get; set; }
+        [NotNull]
+        public string MetaType { get; set; }
         public string ParentMetaCode { get; set; }
         public string Title { get; set; }
         public string Path { get; set; }

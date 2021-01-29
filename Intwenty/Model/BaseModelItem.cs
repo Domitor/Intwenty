@@ -122,7 +122,7 @@ namespace Intwenty.Model
                 return "TBL_TB";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextListColumn)
                 return "TLCOL";
-            if (item.MetaType == ViewModelItem.MetaTypeUIView)
+            if (item.MetaType == ViewModel.MetaTypeUIView)
                 return "IVIEW";
             if (item.MetaType == UserInterfaceModelItem.MetaTypeInputUI)
                 return "IUI";

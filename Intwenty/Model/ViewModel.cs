@@ -7,18 +7,18 @@ namespace Intwenty.Model
 {
 
 
-    public class ViewModelItem : BaseModelItem, ILocalizableTitle
+    public class ViewModel : BaseModelItem, ILocalizableTitle
     {
         public static readonly string MetaTypeUIView = "UIVIEW";
 
-        public ViewModelItem()
+        public ViewModel()
         {
             SetEmptyStrings();
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
 
-        public ViewModelItem(string metatype)
+        public ViewModel(string metatype)
         {
             MetaType = metatype;
             SetEmptyStrings();
@@ -26,7 +26,7 @@ namespace Intwenty.Model
             Functions = new List<FunctionModelItem>();
         }
 
-        public ViewModelItem(ViewItem entity)
+        public ViewModel(ViewItem entity)
         {
             Id = entity.Id;
             MetaType = entity.MetaType;
@@ -44,6 +44,8 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
             Path = entity.Path;
+            IsPrimary = entity.IsPrimary;
+            IsPublic = entity.IsPublic;
             SetEmptyStrings();
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
@@ -77,6 +79,8 @@ namespace Intwenty.Model
         public string DataTableMetaCode { get; set; }
         public string DataViewMetaCode { get; set; }
         public string Path { get; set; }
+        public bool IsPrimary { get; set; }
+        public bool IsPublic { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
         public DataViewModelItem DataViewInfo { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
@@ -183,6 +187,68 @@ namespace Intwenty.Model
             }
 
         }
+
+        public bool HasNavigateFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeNavigate))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem NavigateFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeNavigate);
+            }
+        }
+
+        public bool HasExportFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeExport))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem ExportFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeExport);
+            }
+        }
+
+        public bool HasSaveFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeSave))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem SaveFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeSave);
+            }
+        }
+
+     
 
     }
 
