@@ -321,8 +321,8 @@ namespace Intwenty.Middleware
                 client.CreateTable<InformationStatus>();
                 client.CreateTable<InstanceId>();
                 client.CreateTable<ViewItem>();
+                client.CreateTable<UserInterfaceStructureItem>();
                 client.CreateTable<UserInterfaceItem>();
-                client.CreateTable<ViewUserInterfaceItem>();
                 client.CreateTable<FunctionItem>();
                 client.CreateTable<ValueDomainItem>();
                 client.CreateTable<DefaultValue>();

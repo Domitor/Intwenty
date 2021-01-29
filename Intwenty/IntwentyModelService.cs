@@ -177,7 +177,7 @@ namespace Intwenty
             var viewitems = Client.GetEntities<DataViewItem>();
             foreach (var a in viewitems)
                 t.DataViewItems.Add(a);
-            var uiitems = Client.GetEntities<UserInterfaceItem>();
+            var uiitems = Client.GetEntities<UserInterfaceStructureItem>();
             foreach (var a in uiitems)
                 t.UserInterfaceItems.Add(a);
             var valuedomainitems = Client.GetEntities<ValueDomainItem>();
@@ -221,7 +221,7 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<DatabaseItem>());
                     Client.DeleteEntities(Client.GetEntities<DataViewItem>());
                     Client.DeleteEntities(Client.GetEntities<TranslationItem>());
-                    Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
+                    Client.DeleteEntities(Client.GetEntities<UserInterfaceStructureItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
                     Client.DeleteEntities(Client.GetEntities<SystemItem>());
@@ -409,7 +409,21 @@ namespace Intwenty
                 return null;
 
             LocalizeTitle(res.Application);
-            LocalizeTitles(res.UIStructure.ToList<ILocalizableTitle>());
+            foreach (var v in res.Views)
+            {
+                LocalizeTitle(v);
+                foreach (var ui in v.UserInterface)
+                {
+                    //LocalizeTitle(ui);
+                    foreach (var uiitem in ui.UIStructure)
+                    {
+                       LocalizeTitle(uiitem);
+
+                    }
+                }
+
+            }
+
             
             return res;
         }
@@ -422,7 +436,20 @@ namespace Intwenty
                 return null;
 
             LocalizeTitle(res.Application);
-            LocalizeTitles(res.UIStructure.ToList<ILocalizableTitle>());
+            foreach (var v in res.Views)
+            {
+                LocalizeTitle(v);
+                foreach (var ui in v.UserInterface)
+                {
+                    //LocalizeTitle(ui);
+                    foreach (var uiitem in ui.UIStructure)
+                    {
+                        LocalizeTitle(uiitem);
+
+                    }
+                }
+
+            }
 
             return res;
 
@@ -435,7 +462,20 @@ namespace Intwenty
             foreach (var a in res)
             {
                 LocalizeTitle(a.Application);
-                LocalizeTitles(a.UIStructure.ToList<ILocalizableTitle>());
+                foreach (var v in a.Views)
+                {
+                    LocalizeTitle(v);
+                    foreach (var ui in v.UserInterface)
+                    {
+                        //LocalizeTitle(ui);
+                        foreach (var uiitem in ui.UIStructure)
+                        {
+                            LocalizeTitle(uiitem);
+
+                        }
+                    }
+
+                }
             }
             return res;
         }
@@ -504,23 +544,19 @@ namespace Intwenty
             res = new List<ApplicationModel>();
             var appitems =  GetAppModels();
             var dbitems = GetDatabaseModels();
-            var uiitems = GetUserInterfaceModels();
+            var views = GetViewModels();
             var systems = GetSystemModels();
 
 
             foreach (var app in appitems)
             {
                 var t = new ApplicationModel();
-
-                var system = systems.Find(p => p.MetaCode == app.SystemMetaCode);
-                if (system != null)
-                    t.System = system;
-
+                t.System = app.SystemInfo;
                 t.Application = app;
                 t.DataStructure = new List<DatabaseModelItem>();
-                t.UIStructure = new List<UserInterfaceModelItem>();
-                t.DataStructure.AddRange(dbitems.Where(p=> p.AppMetaCode== app.MetaCode));
-                t.UIStructure.AddRange(uiitems.Where(p => p.AppMetaCode == app.MetaCode));
+                t.Views = new List<ViewModelItem>();
+                t.DataStructure.AddRange(dbitems.Where(p=> p.AppMetaCode== app.MetaCode && p.SystemMetaCode==app.SystemMetaCode));
+                t.Views.AddRange(views.Where(p => p.AppMetaCode == app.MetaCode && p.SystemMetaCode == app.SystemMetaCode));
                 res.Add(t);
             }
 
@@ -643,7 +679,7 @@ namespace Intwenty
             if (dbitems != null && dbitems.Count() > 0)
                 Client.DeleteEntities(dbitems);
 
-            var uiitems = Client.GetEntities<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+            var uiitems = Client.GetEntities<UserInterfaceStructureItem>().Where(p => p.AppMetaCode == existing.MetaCode);
             if (uiitems != null && uiitems.Count() > 0)
                 Client.DeleteEntities(uiitems);
 
@@ -932,189 +968,118 @@ namespace Intwenty
 
         #region UI
 
-        public List<ViewModelItem> GetViewModels()
-        {
-            Client.Open();
-            var views = Client.GetEntities<ViewItem>().Select(p => new ViewModelItem(p)).ToList();
-            var viewui = Client.GetEntities<ViewUserInterfaceItem>().Select(p => new ViewUserInterfaceModelItem(p)).ToList();
-            var functions = Client.GetEntities<FunctionItem>().Select(p => new FunctionModelItem(p)).ToList();
-            Client.Close();
-
-            foreach (var a in views)
-            {
-                foreach (var b in viewui)
-                {
-                    if (a.SystemMetaCode == b.SystemMetaCode &&
-                        a.AppMetaCode == b.AppMetaCode &&
-                        a.MetaCode == b.ViewMetaCode)
-                    {
-
-                        a.UserInterface.Add(b);
-                    }
-
-                }
-                foreach (var c in functions)
-                {
-                    if (a.SystemMetaCode == c.SystemMetaCode &&
-                        a.AppMetaCode == c.AppMetaCode &&
-                        a.MetaCode == c.ViewMetaCode)
-                    {
-
-                        a.Functions.Add(c);
-                    }
-
-                }
-
-            }
-
-            return views;
-        }
-
+    
       
 
         public List<ViewModelItem> GetViewModels()
         {
 
-            Client.Open();
-            var appviews = Client.GetEntities<ViewItem>().Select(p => new ViewModelItem(p)).ToList();
-            var appview_userinterfaces = Client.GetEntities<ViewUserInterfaceItem>().Select(p => new ViewUserInterfaceModelItem(p)).ToList();
-            var functions = Client.GetEntities<FunctionItem>().Select(p => new FunctionModelItem(p)).ToList();
-            var uistructure = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
-            Client.Close();
-
-           
-
             var dbmodelitems = GetDatabaseModels();
             var apps = GetAppModels();
             var dataviews = GetDataViewModels();
 
+            Client.Open();
+            var application_views = Client.GetEntities<ViewItem>().Select(p => new ViewModelItem(p)).ToList();
+            var userinterfaces = Client.GetEntities<UserInterfaceItem>().Select(p => new UserInterfaceModelItem(p)).ToList();
+            var userinterfacestructures = Client.GetEntities<UserInterfaceStructureItem>().Select(p => new UserInterfaceStructureModelItem(p)).ToList();
+            var functions = Client.GetEntities<FunctionItem>().Select(p => new FunctionModelItem(p)).ToList();
+            Client.Close();
+
+           
+
+        
+
             foreach (var app in apps)
             {
-                foreach (var appview in appviews.Where(p=> p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode)) 
+                foreach (var appview in application_views.Where(p=> p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode)) 
                 {
+                    appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
-                    foreach (var appview_userinterface in appview_userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
+                    foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
                     {
-                        appview.UserInterface.Add(appview_userinterface);
+                        userinterface.ApplicationInfo = app;
+                        userinterface.SystemInfo = app.SystemInfo;
+                        appview.UserInterface.Add(userinterface);
 
-                        //TODO: NEW TABLE WITH UI AND NEW COLUMN IN CURRENT UI TABLE = UserInterFaceMetaCode
-                        foreach (var item in uistructure.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode ).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                        foreach (var item in userinterfacestructures.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.UserInterfaceMetaCode==userinterface.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                         {
-                            if (item.AppMetaCode == app.MetaCode)
+                            userinterface.UIStructure.Add(item);
+
+                            item.ApplicationInfo = app;
+                            item.SystemInfo = app.SystemInfo;
+                            if (!string.IsNullOrEmpty(item.DataTableMetaCode))
                             {
-                                item.SystemInfo = app.SystemInfo;
-                                if (!string.IsNullOrEmpty(item.DataTableMetaCode))
+                                var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                                if (dinf != null)
                                 {
-                                    var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
-                                    if (dinf != null)
-                                    {
-                                        item.DataTableInfo = dinf;
-                                        item.DataTableMetaCode = dinf.MetaCode;
-                                    }
+                                    item.DataTableInfo = dinf;
+                                    item.DataTableMetaCode = dinf.MetaCode;
                                 }
-
-                                if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
-                                {
-                                    var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
-                                    if (dinf != null)
-                                        item.DataColumn1Info = dinf;
-
-                                    if (item.DataColumn1Info != null && item.DataTableInfo == null)
-                                    {
-                                        if (!item.DataColumn1Info.IsRoot)
-                                        {
-                                            dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1Info.ParentMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
-                                            if (dinf != null)
-                                            {
-                                                item.DataTableInfo = dinf;
-                                                item.DataTableMetaCode = dinf.MetaCode;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            item.DataTableMetaCode = app.MetaCode;
-                                            item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id = 0, DbName = app.DbName, TableName = app.DbName, MetaCode = app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem = true };
-                                        }
-                                    }
-                                }
-
-                                if (!string.IsNullOrEmpty(item.DataColumn2MetaCode))
-                                {
-                                    var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn2MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
-                                    if (dinf != null)
-                                        item.DataColumn2Info = dinf;
-                                }
-
-                                if (!string.IsNullOrEmpty(item.DataViewMetaCode))
-                                {
-                                    var vinf = dataviews.Find(p => p.MetaCode == item.DataViewMetaCode && p.IsRoot);
-                                    if (vinf != null)
-                                        item.DataViewInfo = vinf;
-
-                                    if (!string.IsNullOrEmpty(item.DataViewColumn1MetaCode))
-                                    {
-                                        vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn1MetaCode && !p.IsRoot);
-                                        if (vinf != null)
-                                            item.DataViewColumn1Info = vinf;
-                                    }
-                                    if (!string.IsNullOrEmpty(item.DataViewColumn2MetaCode))
-                                    {
-                                        vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn2MetaCode && !p.IsRoot);
-                                        if (vinf != null)
-                                            item.DataViewColumn2Info = vinf;
-                                    }
-                                }
-
-
                             }
+
+                            if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
+                            {
+                                var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
+                                if (dinf != null)
+                                    item.DataColumn1Info = dinf;
+
+                                if (item.DataColumn1Info != null && item.DataTableInfo == null)
+                                {
+                                    if (!item.DataColumn1Info.IsRoot)
+                                    {
+                                        dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1Info.ParentMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                                        if (dinf != null)
+                                        {
+                                            item.DataTableInfo = dinf;
+                                            item.DataTableMetaCode = dinf.MetaCode;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        item.DataTableMetaCode = app.MetaCode;
+                                        item.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id = 0, DbName = app.DbName, TableName = app.DbName, MetaCode = app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem = true };
+                                    }
+                                }
+                            }
+
+                            if (!string.IsNullOrEmpty(item.DataColumn2MetaCode))
+                            {
+                                var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn2MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
+                                if (dinf != null)
+                                    item.DataColumn2Info = dinf;
+                            }
+
+                            if (!string.IsNullOrEmpty(item.DataViewMetaCode))
+                            {
+                                var vinf = dataviews.Find(p => p.MetaCode == item.DataViewMetaCode && p.IsRoot);
+                                if (vinf != null)
+                                    item.DataViewInfo = vinf;
+
+                                if (!string.IsNullOrEmpty(item.DataViewColumn1MetaCode))
+                                {
+                                    vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn1MetaCode && !p.IsRoot);
+                                    if (vinf != null)
+                                        item.DataViewColumn1Info = vinf;
+                                }
+                                if (!string.IsNullOrEmpty(item.DataViewColumn2MetaCode))
+                                {
+                                    vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn2MetaCode && !p.IsRoot);
+                                    if (vinf != null)
+                                        item.DataViewColumn2Info = vinf;
+                                }
+                            }
+                            
                         }
                     }
                 }
-                    foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
-                    {
-                        appview.Functions.Add(function);
-                    }
-
-                }
-               
-
-            foreach (var a in appviews)
-            {
-                foreach (var b in viewui)
-                {
-                    if (a.SystemMetaCode == b.SystemMetaCode &&
-                        a.AppMetaCode == b.AppMetaCode &&
-                        a.MetaCode == b.ViewMetaCode)
-                    {
-
-                        a.UserInterface.Add(b);
-                        foreach (var d in uistructure.Where(p=> p.SystemMetaCode==a.SystemMetaCode && p.AppMetaCode==a.AppMetaCode && a.MetaCode == b.ViewMetaCode && p.MetaCode == b.UserInterfaceMetaCode))
-                        {
-                            b.UIModel.Add(d);
-                        }
-
-                    }
-
-                }
-                foreach (var c in functions)
-                {
-                    if (a.SystemMetaCode == c.SystemMetaCode &&
-                        a.AppMetaCode == c.AppMetaCode &&
-                        a.MetaCode == c.ViewMetaCode)
-                    {
-
-                        a.Functions.Add(c);
-                    }
-
-                }
+                   
 
             }
-
-
-            return appviews;
+               
+            return application_views;
         }
 
-        public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model)
+        public void SaveUserInterfaceModels(List<UserInterfaceStructureModelItem> model)
         {
             var apps = GetAppModels();
 
@@ -1124,7 +1089,7 @@ namespace Intwenty
             {
                 if (t.Id > 0 && t.HasProperty("REMOVED"))
                 {
-                    var existing = Client.GetEntities<UserInterfaceItem>().FirstOrDefault(p => p.Id == t.Id);
+                    var existing = Client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == t.Id);
                     if (existing != null)
                     {
                         Client.DeleteEntity(existing);
@@ -1153,7 +1118,7 @@ namespace Intwenty
                     if (app==null)
                         throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a valid AppMetaCode");
 
-                    var entity = new UserInterfaceItem()
+                    var entity = new UserInterfaceStructureItem()
                     {
                         AppMetaCode = uic.AppMetaCode,
                         ColumnOrder = uic.ColumnOrder,
@@ -1180,7 +1145,7 @@ namespace Intwenty
                 }
                 else
                 {
-                    var existing = Client.GetEntities<UserInterfaceItem>().FirstOrDefault(p => p.Id == uic.Id);
+                    var existing = Client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == uic.Id);
                     if (existing != null)
                     {
                         existing.Title = uic.Title;
@@ -1214,7 +1179,7 @@ namespace Intwenty
 
 
             Client.Open();
-            var model = Client.GetEntity<UserInterfaceItem>(id);
+            var model = Client.GetEntity<UserInterfaceStructureItem>(id);
             if (model != null)
             {
                 model.TitleLocalizationKey = key;
@@ -1854,6 +1819,7 @@ namespace Intwenty
                 if (a.DataStructure.Count == 0)
                     res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
 
+                 /*
                 if (a.UIStructure.Count == 0)
                     res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no UI objects.", a.Application.Title));
 
@@ -1925,7 +1891,7 @@ namespace Intwenty
 
                 }
 
-                /*
+            
                 if (a.UIStructure.Count(p => p.IsMetaTypeEditListView) > 1)
                 {
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has multiple EDITLISTVIEW ui objects, which is not allowd", a.Application.Title));

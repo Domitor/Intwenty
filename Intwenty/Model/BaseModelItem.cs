@@ -50,7 +50,7 @@ namespace Intwenty.Model
             var res = GetMetaTypeAbbreviation(item);
            
             var title = "";
-            if (item is UserInterfaceModelItem ui)
+            if (item is UserInterfaceStructureModelItem ui)
             {
                 if (ui.IsDataColumn1Connected)
                     title += ui.DataColumn1Info.DbName.ToUpper();
@@ -100,49 +100,49 @@ namespace Intwenty.Model
                 return "APP";
             if (item.MetaType == SystemModelItem.MetaTypeSystem || item is SystemModelItem)
                 return "SYS";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeCheckBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeCheckBox)
                 return "CBOX";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeCheckBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeCheckBox)
                 return "CBOX";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeComboBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeComboBox)
                 return "CB";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeDatePicker)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeDatePicker)
                 return "DP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGrid)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGrid)
                 return "TBL";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridCheckBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox)
                 return "TBL_CBOX";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridComboBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridComboBox)
                 return "TBL_CB";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridDatePicker)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker)
                 return "TBL_DP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridNumBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridNumBox)
                 return "TBL_NUMBOX";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridTextBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridTextBox)
                 return "TBL_TB";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeUserInterface)
-                return "UIFE";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextListColumn)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextListColumn)
                 return "TLCOL";
-            if (item.MetaType == ViewModelItem.MetaTypeInputView)
+            if (item.MetaType == ViewModelItem.MetaTypeUIView)
                 return "IVIEW";
-            if (item.MetaType == ViewModelItem.MetaTypeListView)
-                return "LVIEW";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeLookUp)
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeInputUI)
+                return "IUI";
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeListUI)
+                return "LUI";
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeLookUp)
                 return "LOOKUP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeNumBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeNumBox)
                 return "NUMBOX";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypePanel)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypePanel)
                 return "PNL";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeSection)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeSection)
                 return "SECT";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextArea)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextArea)
                 return "TA";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeTextBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextBox)
                 return "TB";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEditGridLookUp)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridLookUp)
                 return "TBL_LOOKUP";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeEmailBox)
+            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEmailBox)
                 return "EB";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)
                 return "DCOL";

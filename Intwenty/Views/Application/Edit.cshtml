@@ -3,7 +3,8 @@
 
 @{
     var title = "";
-    var view = Model.UIViews.Find(p => p.IsMetaTypeEditView);
+    //var view = Model.UIViews.Find(p => p.IsMetaTypeEditView);
+    Intwenty.Model.UIRendering.UIView view = null;
     if (view != null)
     {
         title = view.LocalizedTitle;
@@ -14,7 +15,8 @@
     }
     else
     {
-        view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
+        //view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
+        view = null;
         if (view != null)
         {
             title = "Edit";

@@ -858,44 +858,50 @@ namespace Intwenty.Controllers
 
                 }
 
-                foreach (var ui in a.UIStructure)
+                foreach (var view in a.Views)
                 {
-                    var title = "";
-                    var type = metatypes.Find(p => p.ModelCode == "UIMODEL" && p.Code == ui.MetaType);
-                    title = "Application: " + a.Application.Title;
-                    title += ", " + ui.Title;
-                    if (type != null)
-                        title += " ("+type.Title+")";
+                    foreach (var iface in view.UserInterface)
+                    {
+                        foreach (var ui in iface.UIStructure)
+                        {
+                            var title = "";
+                            var type = metatypes.Find(p => p.ModelCode == "UIMODEL" && p.Code == ui.MetaType);
+                            title = "Application: " + a.Application.Title;
+                            title += ", " + ui.Title;
+                            if (type != null)
+                                title += " (" + type.Title + ")";
 
-                    if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
-                    {
-                        var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
-                        foreach (var l in langs)
-                        {
-                            res.Add(new TranslationVm() { UserInterfaceModelId = ui.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
-                        }
-                    }
-                    else
-                    {
-                        var trans = translations.FindAll(p => p.Key == ui.TitleLocalizationKey);
-                        foreach (var l in langs)
-                        {
-                            var ct = trans.Find(p => p.Culture == l.Culture);
-                            if (ct != null)
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                            if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
+                            {
+                                var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
+                                foreach (var l in langs)
+                                {
+                                    res.Add(new TranslationVm() { UserInterfaceModelId = ui.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
+                                }
+                            }
                             else
-                                res.Add(new TranslationVm() { Culture = l.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = "" });
-                        }
+                            {
+                                var trans = translations.FindAll(p => p.Key == ui.TitleLocalizationKey);
+                                foreach (var l in langs)
+                                {
+                                    var ct = trans.Find(p => p.Culture == l.Culture);
+                                    if (ct != null)
+                                        res.Add(new TranslationVm() { Culture = ct.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                    else
+                                        res.Add(new TranslationVm() { Culture = l.Culture, Key = ui.TitleLocalizationKey, ModelTitle = title, Text = "" });
+                                }
 
-                        foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
-                        {
-                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                                {
+                                    res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                }
+
+                            }
+
                         }
 
                     }
-
                 }
-
             }
 
             var model = new TranslationManagementVm();
@@ -933,9 +939,15 @@ namespace Intwenty.Controllers
                             ismodeltrans = true;
                     }
 
-                    if (a.UIStructure.Exists(p => !string.IsNullOrEmpty(p.TitleLocalizationKey) && p.TitleLocalizationKey == t.Key))
+                    foreach (var view in a.Views)
                     {
-                        ismodeltrans = true;
+                        foreach (var iface in view.UserInterface)
+                        {
+                            if (iface.UIStructure.Exists(p => !string.IsNullOrEmpty(p.TitleLocalizationKey) && p.TitleLocalizationKey == t.Key))
+                            {
+                                ismodeltrans = true;
+                            }
+                        }
                     }
 
                 }

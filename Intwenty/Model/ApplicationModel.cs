@@ -27,12 +27,18 @@ namespace Intwenty.Model
         /// </summary>
         public List<DatabaseModelItem> DataStructure { get; set; }
 
-        /// <summary>
-        /// All UI model items, describing the UI for this application
-        /// </summary>
-        public List<UserInterfaceModelItem> UIStructure { get; set; }
 
         public List<ViewModelItem> Views { get; set; }
+
+       
+        public bool HasListView
+        {
+            get
+            {
+                return false;
+            }
+
+        }
 
         public bool UseCreateViewAuthorization
         {
@@ -88,6 +94,28 @@ namespace Intwenty.Model
 
                 return false;
             }
+        }
+
+        public List<string> GetDomainReferences()
+        {
+            var res = new List<string>();
+
+            foreach (var v in Views)
+            {
+                foreach (var ui in v.UserInterface)
+                {
+                    foreach (var uiitem in ui.UIStructure)
+                    {
+
+                        if (uiitem.HasValueDomain)
+                            res.Add(uiitem.Domain);
+                    }
+
+                }
+
+            }
+
+            return res;
         }
 
 

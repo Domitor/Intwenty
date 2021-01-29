@@ -9,7 +9,8 @@
     @{
         var pagesize = 20;
         var title = "";
-        var view = Model.UIViews.Find(p => p.IsMetaTypeListView);
+        //var view = Model.UIViews.Find(p => p.IsMetaTypeListView);
+        Intwenty.Model.UIRendering.UIView view = null;
         if (view != null)
         {
             title = view.LocalizedTitle;

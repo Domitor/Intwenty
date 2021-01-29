@@ -9,15 +9,15 @@ namespace Intwenty.Model.UIDesign
     public static class UIModelCreator
     {
 
-        public static List<UserInterfaceModelItem> GetUIModel(ViewVm model, ApplicationModel app, List<DataViewModelItem> views)
+        public static List<UserInterfaceStructureModelItem> GetUIModel(ViewVm model, ApplicationModel app, List<DataViewModelItem> views)
         {
-            var res = new List<UserInterfaceModelItem>();
+            var res = new List<UserInterfaceStructureModelItem>();
 
-
+            /*
             var viewitem = app.UIStructure.Find(p => p.MetaType == model.MetaType);
             if (viewitem == null)
             {
-                viewitem = new UserInterfaceModelItem(model.MetaType) { Id = -1, AppMetaCode = app.Application.MetaCode, MetaCode = "", ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = BaseModelItem.MetaTypeRoot };
+                viewitem = new UserInterfaceStructureModelItem(model.MetaType) { Id = -1, AppMetaCode = app.Application.MetaCode, MetaCode = "", ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = BaseModelItem.MetaTypeRoot };
                 viewitem.MetaCode = BaseModelItem.GenerateNewMetaCode(viewitem);
             }
 
@@ -35,7 +35,7 @@ namespace Intwenty.Model.UIDesign
                 if (section.Id == 0 && section.IsRemoved)
                     continue;
 
-                var sect = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = viewitem.MetaCode };
+                var sect = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = viewitem.MetaCode };
                 res.Add(sect);
                 if (sect.Id == 0)
                     sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
@@ -53,7 +53,7 @@ namespace Intwenty.Model.UIDesign
                     if (panel.Id == 0 && panel.IsRemoved)
                         continue;
 
-                    var pnl = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = app.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
+                    var pnl = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = app.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
                     res.Add(pnl);
                     if (pnl.Id == 0)
                         pnl.MetaCode = BaseModelItem.GenerateNewMetaCode(pnl);
@@ -68,7 +68,7 @@ namespace Intwenty.Model.UIDesign
                             if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType) || (input.Id == 0 && input.IsRemoved))
                                 continue;
 
-                            var dto = new UserInterfaceModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode, Properties = input.CompilePropertyString() };
+                            var dto = new UserInterfaceStructureModelItem(input.MetaType) { Id = input.Id, AppMetaCode = app.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode, Properties = input.CompilePropertyString() };
                             res.Add(dto);
 
                             if (dto.Id == 0)
@@ -161,7 +161,7 @@ namespace Intwenty.Model.UIDesign
                                     if (tcol.Id == 0 && tcol.IsRemoved)
                                         continue;
 
-                                    var column = new UserInterfaceModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode, Properties = tcol.CompilePropertyString() };
+                                    var column = new UserInterfaceStructureModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode, Properties = tcol.CompilePropertyString() };
                                     res.Add(column);
 
                                     if (column.Id == 0)
@@ -235,13 +235,15 @@ namespace Intwenty.Model.UIDesign
                 }
             }
 
+            */
+
             return res;
 
         }
 
-        public static List<UserInterfaceModelItem> GetListViewUIModel(ViewVm model, ApplicationModel app)
+        public static List<UserInterfaceStructureModelItem> GetListViewUIModel(ViewVm model, ApplicationModel app)
         {
-            var res = new List<UserInterfaceModelItem>();
+            var res = new List<UserInterfaceStructureModelItem>();
             /*
             var t = new UserInterfaceModelItem(UserInterfaceModelItem.MetaTypeEditListView) { Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT", Id = model.Id, AppMetaCode = app.Application.MetaCode, Properties = model.CompilePropertyString() };
             if (string.IsNullOrEmpty(model.MetaCode))
@@ -340,37 +342,37 @@ namespace Intwenty.Model.UIDesign
 
             var temp = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.ModelCode == "UIMODEL").ToList();
 
-            res.UIControls.Add(temp.Find(p=> p.Code == UserInterfaceModelItem.MetaTypeCheckBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeComboBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeDatePicker));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEmailBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeImage));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeImageBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeLabel));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeLookUp));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeNumBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypePasswordBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeStaticHTML));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextArea));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextBlock));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeTextBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGrid));
+            res.UIControls.Add(temp.Find(p=> p.Code == UserInterfaceStructureModelItem.MetaTypeCheckBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeComboBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeDatePicker));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEmailBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeImage));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeImageBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeLabel));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeLookUp));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeNumBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypePasswordBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeStaticHTML));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextArea));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBlock));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBox));
+            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGrid));
 
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridCheckBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridComboBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridDatePicker));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridEmailBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridLookUp));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridNumBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridStaticHTML));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceModelItem.MetaTypeEditGridTextBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridComboBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridEmailBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridLookUp));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridNumBox));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridStaticHTML));
+            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridTextBox));
 
 
         }
 
-        public static void BuildVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
+        public static void BuildVm(ViewVm res, UserInterfaceStructureModelItem viewitem, ApplicationModel app)
         {
-
+            /*
             foreach (var uic in app.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
             {
                 if (uic.ParentMetaCode != viewitem.MetaCode)
@@ -516,10 +518,10 @@ namespace Intwenty.Model.UIDesign
 
                 section.LayoutPanelCount = app.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
             }
-
+            */
         }
 
-        public static void BuildEditListViewVm(ViewVm res, UserInterfaceModelItem viewitem, ApplicationModel app)
+        public static void BuildEditListViewVm(ViewVm res, UserInterfaceStructureModelItem viewitem, ApplicationModel app)
         {
             /*/
             foreach (var f in app.UIStructure)
@@ -576,12 +578,12 @@ namespace Intwenty.Model.UIDesign
     {
         public int Id { get; set; }
 
-        public List<UserInterfaceModelItem> Components { get; set; }
+        public List<UserInterfaceStructureModelItem> Components { get; set; }
 
 
         public UIDeleteVm()
         {
-            Components = new List<UserInterfaceModelItem>();
+            Components = new List<UserInterfaceStructureModelItem>();
         }
 
     }

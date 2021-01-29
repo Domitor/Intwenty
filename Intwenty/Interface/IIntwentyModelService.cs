@@ -91,9 +91,9 @@ namespace Intwenty.Interface
 
 
 
-        public List<UserInterfaceModelItem> GetUserInterfaceModels();
+        public List<ViewModelItem> GetViewModels();
 
-        public void SaveUserInterfaceModels(List<UserInterfaceModelItem> model);
+        public void SaveUserInterfaceModels(List<UserInterfaceStructureModelItem> model);
 
         public void SetUserInterfaceModelLocalizationKey(int id, string key);
 

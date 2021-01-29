@@ -1793,17 +1793,15 @@ namespace Intwenty
                 var domains = new List<IResultSet>();
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
-                foreach (var t in model.UIStructure)
+                foreach (var t in model.GetDomainReferences())
                 {
-                    if (t.HasValueDomain)
+                    var domainparts = t.Split(".".ToCharArray()).ToList();
+                    if (domainparts.Count >= 2)
                     {
-                        var domainparts = t.Domain.Split(".".ToCharArray()).ToList();
-                        if (domainparts.Count >= 2)
-                        {
-                            if (!valuedomains.Exists(p => p == domainparts[1]))
-                                valuedomains.Add(domainparts[1]);
-                        }
+                        if (!valuedomains.Exists(p => p == domainparts[1]))
+                            valuedomains.Add(domainparts[1]);
                     }
+                    
                 }
 
                 client.Open();
@@ -1979,7 +1977,7 @@ namespace Intwenty
 
         protected virtual ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
         {
-
+            /*
             foreach (var t in model.UIStructure)
             {
                 if (t.IsDataColumn1Connected && t.DataColumn1Info.Mandatory)
@@ -2004,7 +2002,7 @@ namespace Intwenty
 
                 }
             }
-
+            */
             return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
         }
 

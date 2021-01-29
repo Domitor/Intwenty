@@ -64,6 +64,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
+        public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string TitleLocalizationKey { get; set; }
@@ -145,6 +146,15 @@ namespace Intwenty.Model
             get
             {
                 return this.SystemInfo != null;
+            }
+
+        }
+
+        public bool HasApplicationInfo
+        {
+            get
+            {
+                return this.ApplicationInfo != null;
             }
 
         }

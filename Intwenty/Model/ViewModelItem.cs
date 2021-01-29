@@ -7,18 +7,14 @@ namespace Intwenty.Model
 {
 
 
-    public class ViewModelItem : BaseModelItem
+    public class ViewModelItem : BaseModelItem, ILocalizableTitle
     {
-        //META TYPES
-        public static readonly string MetaTypeInputView = "INPUTVIEW";
-        public static readonly string MetaTypeListView = "LISTVIEW";
-       
-
+        public static readonly string MetaTypeUIView = "UIVIEW";
 
         public ViewModelItem()
         {
             SetEmptyStrings();
-            UserInterface = new List<ViewUserInterfaceModelItem>();
+            UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
 
@@ -26,7 +22,7 @@ namespace Intwenty.Model
         {
             MetaType = metatype;
             SetEmptyStrings();
-            UserInterface = new List<ViewUserInterfaceModelItem>();
+            UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
 
@@ -47,8 +43,9 @@ namespace Intwenty.Model
             DataViewMetaCode = entity.DataViewMetaCode;
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
+            Path = entity.Path;
             SetEmptyStrings();
-            UserInterface = new List<ViewUserInterfaceModelItem>();
+            UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
 
@@ -67,8 +64,10 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DescriptionLocalizationKey)) DescriptionLocalizationKey = string.Empty;
+            if (string.IsNullOrEmpty(Path)) Path = string.Empty;
         }
 
+        public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string TitleLocalizationKey { get; set; }
@@ -77,9 +76,10 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string DataTableMetaCode { get; set; }
         public string DataViewMetaCode { get; set; }
+        public string Path { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
         public DataViewModelItem DataViewInfo { get; set; }
-        public List<ViewUserInterfaceModelItem> UserInterface { get; set; }
+        public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }
 
@@ -134,18 +134,12 @@ namespace Intwenty.Model
 
      
 
-        public bool IsMetaTypeInputView
+        public bool IsMetaTypeUIView
         {
-            get { return MetaType == MetaTypeInputView; }
+            get { return MetaType == MetaTypeUIView; }
         }
 
-        public bool IsMetaTypeListView
-        {
-            get { return MetaType == MetaTypeListView; }
-        }
-
-   
-
+  
         public string UIId
         {
             get { return MetaCode; }
@@ -177,6 +171,15 @@ namespace Intwenty.Model
             get
             {
                 return this.SystemInfo != null;
+            }
+
+        }
+
+        public bool HasApplicationInfo
+        {
+            get
+            {
+                return this.ApplicationInfo != null;
             }
 
         }
