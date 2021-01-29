@@ -11,8 +11,8 @@ namespace Intwenty.Model
     {
 
         //META TYPES
-        public static readonly string MetaTypeInputUI = "INPUTUI";
-        public static readonly string MetaTypeListUI = "LISTUI";
+        public static readonly string MetaTypeInputInterface = "INPUTINTERFACE";
+        public static readonly string MetaTypeListInterface = "LISTINTERFACE";
 
 
 
@@ -58,6 +58,18 @@ namespace Intwenty.Model
         public string ViewMetaCode { get; set; }
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
+
+
+        public bool IsMetaTypeInputInterface
+        {
+            get { return MetaType == MetaTypeInputInterface; }
+        }
+
+        public bool IsMetaTypeListInterface
+        {
+            get { return MetaType == MetaTypeListInterface; }
+        }
+
 
         public override string ModelCode
         {

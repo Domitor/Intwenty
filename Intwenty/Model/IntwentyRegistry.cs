@@ -29,8 +29,8 @@ namespace Intwenty.Model
             _metatypes = new List<IntwentyMetaType>();
 
             _metatypes.Add(new IntwentyMetaType() { Code = ApplicationModelItem.MetaTypeApplication, Title = "Application", ModelCode = "APPMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeInputUI, Title = "Input user interface", ModelCode = "UMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeListUI, Title = "List user interface", ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeInputInterface, Title = "Input interface", ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeListInterface, Title = "List interface", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeDatePicker, Title = "Datepicker" , ModelCode = "UISTRUCTUREMODEL" });
@@ -71,8 +71,11 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = ViewModel.MetaTypeUIView, Title = "Input View", ModelCode = "UIVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeNavigate, Title = "Navigate", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeCreate, Title = "Create", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeEdit, Title = "Edit", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeSave, Title = "Save", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeDelete, Title = "Delete", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeExport, Title = "Export", ModelCode = "FUNCTIONMODEL" });
 
 
 

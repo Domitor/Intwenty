@@ -11,9 +11,11 @@ namespace Intwenty.Model
     public class FunctionModelItem : BaseModelItem
     {
         //META TYPES
+        public static readonly string MetaTypeCreate = "CREATE";
+        public static readonly string MetaTypeEdit = "EDIT";
+        public static readonly string MetaTypeNavigate = "NAVIGATE";
         public static readonly string MetaTypeSave = "SAVE";
         public static readonly string MetaTypeDelete = "DELETE";
-        public static readonly string MetaTypeNavigate = "NAVIGATE";
         public static readonly string MetaTypeExport = "EXPORT";
 
 
@@ -115,8 +117,14 @@ namespace Intwenty.Model
             }
         }
 
-    
-
+        public bool IsMetaTypeCreate
+        {
+            get { return MetaType == MetaTypeCreate; }
+        }
+        public bool IsMetaTypeEdit
+        {
+            get { return MetaType == MetaTypeEdit; }
+        }
 
         public bool IsMetaTypeNavigate
         {

@@ -1,13 +1,24 @@
 ﻿@model Intwenty.Model.ViewModel
 
+@{
+
+    int instanceid = 0;
+    if (ViewBag.SystemId != null)
+    {
+        instanceid = (int)ViewBag.SystemId;
+    }
+}
+
+
 @await Html.PartialAsync("_Modals")
 
 <br />
 <br />
 
 <div id="app">
+
     <div class="card">
-        <div class="card-header"><h2>@Model.Title</h2></div>
+        <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
         <div class="card-body">
 
             <p>@Model.Description</p>
@@ -15,28 +26,251 @@
             @if (Model.Functions.Count > 0)
             {
                 <ul class="nav">
+                    @if (Model.HasCreateFunction)
+                    {
+                        <li class="nav-item">
+                            <a href="@Model.CreateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
+                        </li>
+                    }
+
                     @if (Model.HasNavigateFunction)
                     {
                         <li class="nav-item">
-                            <a href="@Model.NavigateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.Title</a>
+                            <a href="@Model.NavigateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
                         </li>
                     }
 
                     @if (Model.HasExportFunction)
                     {
                         <li class="nav-item">
-                            <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()"  style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> Export</button>
+                            <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
                         </li>
                     }
 
-                     @if (Model.HasSaveFunction)
+                    @if (Model.HasSaveFunction)
                     {
-                         <li class="nav-item">
-                            <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Localizer["Save"]</button>
+                        <li class="nav-item">
+                            <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
                         </li>
                     }
                 </ul>
             }
         </div>
     </div>
+
+    @foreach (var iface in Model.UserInterface)
+    {
+        if (iface.IsMetaTypeInputInterface)
+        {
+
+        }
+
+        if (iface.IsMetaTypeListInterface)
+        {
+            <table class="table table-responsive-sm">
+                <thead>
+                    <tr>
+                        @if (Model.HasDeleteFunction)
+                        {
+                            <th style="width:5%"></th>
+                        }
+                        @if (Model.HasEditFunction)
+                        {
+                            <th style="width:5%"></th>
+                        }
+
+                        @{
+                            foreach (var c in iface.UIStructure.Where(p => !p.IsRoot))
+                            {
+                                <th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
+
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tr v-for="item in sortedResults">
+                    @if (Model.HasDeleteFunction)
+                    {
+                        <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
+                    }
+                    @if (Model.HasEditFunction)
+                    {
+                        <td style="vertical-align:middle"><a v-bind:href="'@Model.EditFunction.Path/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                    }
+
+                    @{
+                        foreach (var c in iface.UIStructure.Where(p => !p.IsRoot))
+                        {
+
+                            if (c.IsMetaTypeImage)
+                            {
+                                <td>
+                                    <img v-bind:src="item.@c.DataColumnDbName" width="80" class="rounded" />
+                                </td>
+                            }
+                            else
+                            {
+                                <td>{{item.@c.DataColumnDbName}}</td>
+                            }
+                        }
+
+                    }
+
+                </tr>
+
+            </table>
+
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{pageInfo.pageSize}}</a></li>
+                    <li class="page-item" v-bind:class="{ disabled: isLastPage }"><a class="page-link" href="#" v-on:click="nextpage()">Next {{pageInfo.pageSize}}</a></li>
+                </ul>
+            </nav>
+        }
+
+     
+
+
+
+
+    }
+
+
+
 </div>
+
+@section Scripts
+{
+
+    <script>
+
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                ,model: { "showFilter": false,  ['@Model.ApplicationInfo.DbName']: {} }
+                ,pageInfo: { "applicationId": @Model.ApplicationInfo.Id, "maxCount": 0, "pageSize": 20, "pageNumber": 0, "filterValues": [] }
+                ,currentSort: ''
+                ,currentSortDir: 'asc'
+                ,baseurl: '@Url.Content("~/Application/API/")'
+                ,appMainTable: '@Model.ApplicationInfo.DbName'
+                ,dataview: []
+                ,valuedomains: {}
+                ,validation: {}
+                ,current_edit_line: {}
+                ,dlgFilterColumnName: ""
+                ,dlgFilterValue: ""
+                ,appId: @Model.ApplicationInfo.Id
+                ,instanceId: @instanceid
+            },
+            methods:
+            {
+
+                getPage: function () {
+                    var context = this;
+                    var endpointurl = context.baseurl + "GetEditListData";
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.pageInfo),
+                        success: function (response) {
+                            //DATA
+                            context.datalist = JSON.parse(response.data);
+
+                            //UPDATE CURRENT PAGE INFO
+                            context.pageInfo = response.listFilter;
+                            if (context.pageInfo.filterValues.length === 0)
+                                context.addFilterValue();
+                        }
+                    });
+                },
+                sortBycolumn: function (s) {
+                    //if s == current sort, reverse
+                    if (s === this.currentSort) {
+                        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+                    }
+                    this.currentSort = s;
+                },
+                exportToExcel: function ()
+                {
+                    var context = this;
+                    var args = { "applicationId": context.appId, "maxCount": 0, "pageSize": 2000, "pageNumber": 0, "filterValues": [] }
+                    var endpointurl = context.baseurl + "GetEditListData";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(args),
+                        success: function (response) {
+                            var data = JSON.parse(response.data);
+                            alasql.promise('SELECT * INTO XLSX("download.xlsx",{headers:true}) FROM ?', [data])
+                                .then(function (data) {
+                                    console.log('Data saved');
+                                }).catch(function (err) {
+                                    console.log('Error:', err);
+                                });
+                        }
+                    });
+                },
+                deleteApplication: function (item) {
+                    var context = this;
+                    var endpointurl = context.baseurl + "Delete";
+
+                    var deleteapp = function () {
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+
+                                if (response.isSuccess) {
+                                    window.location.reload(true);
+                                }
+                                else {
+                                    raiseErrorModal(response);
+                                }
+                            }
+                        });
+                    };
+
+                    raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
+                }
+            },
+            computed: {
+
+                sortedResults: function () {
+                    return this.datalist.sort((a, b) => {
+                        let modifier = 1;
+                        if (this.currentSortDir === 'desc') modifier = -1;
+                        if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+                        if (a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+                        return 0;
+                    });
+                },
+                isFirstPage: function () {
+                    return (this.pageInfo.pageNumber <= 0);
+                },
+                isLastPage: function () {
+                    return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                @if(Model.IsListView())
+                {
+                    <text>context.getPage();</text>
+                }
+            }
+        });
+
+
+    </script>
+
+}

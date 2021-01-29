@@ -124,9 +124,9 @@ namespace Intwenty.Model
                 return "TLCOL";
             if (item.MetaType == ViewModel.MetaTypeUIView)
                 return "IVIEW";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeInputUI)
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeInputInterface)
                 return "IUI";
-            if (item.MetaType == UserInterfaceModelItem.MetaTypeListUI)
+            if (item.MetaType == UserInterfaceModelItem.MetaTypeListInterface)
                 return "LUI";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeLookUp)
                 return "LOOKUP";

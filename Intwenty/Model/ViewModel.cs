@@ -248,7 +248,86 @@ namespace Intwenty.Model
             }
         }
 
-     
+        public bool HasDeleteFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeDelete))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem DeleteFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete);
+            }
+        }
+
+        public bool HasCreateFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeCreate))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem CreateFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
+            }
+        }
+
+        public bool HasEditFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeEdit))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem EditFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeEdit);
+            }
+        }
+
+        public bool IsListView()
+        {
+            if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface))
+                return true;
+
+
+            return false;
+
+        }
+
+        public bool IsInputView()
+        {
+            if (UserInterface.Exists(p => p.IsMetaTypeInputInterface))
+                return true;
+
+
+            return false;
+
+        }
+
 
     }
 

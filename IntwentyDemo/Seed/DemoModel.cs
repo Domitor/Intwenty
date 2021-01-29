@@ -73,9 +73,9 @@ namespace IntwentyDemo.Seed
             views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER2", MetaType = "UIVIEW", Title = "Edit Customer", TitleLocalizationKey = "", DataTableMetaCode = "CUSTOMER", Path = "Customers/Edit/{id}", IsPrimary= false, IsPublic = true });
 
             //UI
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaCode = "CUST_LISTVIEW", MetaType = "LISTUI" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", MetaCode = "CUST_INPUTVIEW", MetaType = "INPUTUI" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", MetaCode = "CUST_INPUTVIEW", MetaType = "INPUTUI" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaCode = "CUST_LISTVIEW", MetaType = "LISTINTERFACE" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", MetaCode = "CUST_INPUTVIEW", MetaType = "INPUTINTERFACE" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", MetaCode = "CUST_INPUTVIEW", MetaType = "INPUTINTERFACE" });
 
             //INPUT UI
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode= "CUST_INPUTVIEW", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
@@ -97,8 +97,8 @@ namespace IntwentyDemo.Seed
           
 
             //UI FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "NAVIGATE", DataTableMetaCode= "CUSTOMER", MetaCode = "CUST_FUNC_CREATE", Path = "Customers/Create", RequiredAuthorization = 0, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "NAVIGATE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_EDIT", Path = "Customers/Edit", RequiredAuthorization = 0, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "CREATE", DataTableMetaCode= "CUSTOMER", MetaCode = "CUST_FUNC_CREATE", Path = "Customers/Create", RequiredAuthorization = 0, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "EDIT", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_EDIT", Path = "Customers/Edit", RequiredAuthorization = 0, Title = "Edit" });
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaType = "DELETE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_DELETE", Path = "Customers/API/Delete", RequiredAuthorization = 0, Title = "Delete" });
 
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER1", MetaType = "SAVE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_SAVE", Path = "Customers/API/Save", RequiredAuthorization = 0, Title = "Save" });
