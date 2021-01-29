@@ -19,12 +19,16 @@ namespace Intwenty.Model
         public UserInterfaceModelItem()
         {
             SetEmptyStrings();
+            Sections = new List<UISection>();
+            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
         public UserInterfaceModelItem(string systemmetacode, string appmetacode, string viewmetacode, string userinterfacemetacode)
         {
             SetEmptyStrings();
+            Sections = new List<UISection>();
+            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
@@ -38,6 +42,8 @@ namespace Intwenty.Model
             MetaCode = entity.MetaCode;
             MetaType = entity.MetaType;
             SetEmptyStrings();
+            Sections = new List<UISection>();
+            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
@@ -57,7 +63,11 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
 
+        public List<UISection> Sections { get; set; }
+        public List<IUIControl> Modals { get; set; }
+
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
+        public int PageSize { get; set; }
 
 
         public bool IsMetaTypeInputInterface
@@ -124,6 +134,35 @@ namespace Intwenty.Model
 
         }
 
+    }
+
+    public class UISection : HashTagPropertyObject, ILocalizableTitle
+    {
+        public string TitleLocalizationKey { get; set; }
+        public string Title { get; set; }
+        public string LocalizedTitle { get; set; }
+        public List<UIPanel> Panels { get; set; }
+
+        public UISection()
+        {
+            Panels = new List<UIPanel>();
+        }
+    }
+
+    public class UIPanel : HashTagPropertyObject, ILocalizableTitle
+    {
+        public string TitleLocalizationKey { get; set; }
+        public string Title { get; set; }
+        public string LocalizedTitle { get; set; }
+
+        public bool UseFieldSet { get; set; }
+
+        public List<IUIControl> Controls { get; set; }
+
+        public UIPanel()
+        {
+            Controls = new List<IUIControl>();
+        }
     }
 
 }
