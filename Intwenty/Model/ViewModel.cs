@@ -328,6 +328,21 @@ namespace Intwenty.Model
 
         }
 
+        public bool IsOnPath(string path)
+        {
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(this.Path))
+                return false;
+
+            var comparepath = this.Path;
+            var lastindex = comparepath.IndexOf("/{");
+            if (lastindex > 0)
+                comparepath = comparepath.Substring(0, lastindex);
+
+            if (path.ToUpper().Contains(comparepath.ToUpper()))
+                return true;
+
+            return false;
+        }
 
     }
 

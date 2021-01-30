@@ -27,158 +27,17 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
-        /// <summary>
-        /// Generate a presentation UI based on UIStructure for the application with the supplied application model
-        /// </summary>
-        public virtual async Task<IActionResult> List(int id)
-        {
-            var path = this.Request.Path.Value;
-          
-            ApplicationModel current_model = null;
-            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-            {
-                current_model = ModelRepository.GetLocalizedApplicationModel(id);
-            }
-            else
-            {
-                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
-            }
-
-            if (current_model == null)
-                return NotFound();
-            if (!current_model.UseListViewAuthorization)
-                return View(current_model);
-            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(current_model);
-            else
-                return Forbid();
-
-        }
-
-        /// <summary>
-        /// Generate create UI based on UIStructure for the application with the supplied application model id.
-        /// </summary>
-        public virtual async Task<IActionResult> Create(int id)
-        {
-
-            var path = this.Request.Path.Value;
-            ApplicationModel current_model = null;
-            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-            {
-                current_model = ModelRepository.GetLocalizedApplicationModel(id);
-            }
-            else
-            {
-                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
-            }
-
-            if (current_model == null)
-                return NotFound();
-            if (!current_model.UseCreateViewAuthorization)
-                return View(current_model);
-            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Modify))
-                return View(current_model);
-            else
-                return Forbid();
-        }
-
-
-        /// <summary>
-        /// Generate edit UI based on UIStructure for the application with the supplied application model id and application data id.
-        /// </summary>
-        public virtual async Task<IActionResult> Edit(int applicationid, int id)
-        {
-            if (id < 0)
-                return NotFound();
-
-            ViewBag.SystemId = Convert.ToString(id);
-
-            var path = this.Request.Path.Value;
-            ApplicationModel current_model = null;
-            if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
-            {
-                current_model = ModelRepository.GetLocalizedApplicationModel(applicationid);
-            }
-            else
-            {
-                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
-            }
-
-            if (current_model == null)
-                return NotFound();
-            if (!current_model.UseEditViewAuthorization)
-                return View(current_model);
-            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(current_model);
-            else
-                return Forbid();
-
-        }
-
-        /// <summary>
-        /// Generate a detail presentation UI based on UIStructure for the application with the supplied application model id and application data id.
-        /// </summary>
-        public virtual async Task<IActionResult> Detail(int applicationid, int id)
-        {
-            if (id < 0)
-                return NotFound();
-
-            ViewBag.SystemId = Convert.ToString(id);
-
-            var path = this.Request.Path.Value;
-            ApplicationModel current_model = null;
-            if (path.ToUpper().Contains("/APPLICATION/") && applicationid > 0)
-            {
-                current_model = ModelRepository.GetLocalizedApplicationModel(applicationid);
-            }
-            else
-            {
-                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
-            }
-
-            if (current_model == null)
-                return NotFound();
-            if (!current_model.UseDetailViewAuthorization)
-                return View(current_model);
-            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(current_model);
-            else
-                return Forbid();
-
-        }
-
-
-        /// <summary>
-        /// Renders a list view for application with supplied application model id.
-        /// </summary>
-        public virtual async Task<IActionResult> EditList(int id)
-        {
-
-            var path = this.Request.Path.Value;
-            ApplicationModel current_model = null;
-            if (path.ToUpper().Contains("/APPLICATION/") && id > 0)
-            {
-                current_model = ModelRepository.GetLocalizedApplicationModel(id);
-            }
-            else
-            {
-                //current_model = ModelRepository.GetLocalizedApplicationModelByPath(path);
-            }
-
-            if (current_model == null)
-                return NotFound();
-            if (!current_model.UseEditViewAuthorization)
-                return View(current_model);
-            if (await UserManager.HasAuthorization(User, current_model, Areas.Identity.Models.IntwentyPermission.Read))
-                return View(current_model);
-            else
-                return Forbid();
-        }
+      
 
         public virtual async Task<IActionResult> View(int? id)
         {
+            ViewBag.Id = 0;
+            if (id.HasValue && id.Value > 0)
+                ViewBag.Id = id;
+
             var path = this.Request.Path.Value;
             var current_view = ModelRepository.GetLocalizedViewModelByPath(path);
+
             if (current_view == null)
                 return NotFound();
             if (current_view.IsPublic)

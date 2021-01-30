@@ -356,16 +356,7 @@ namespace Intwenty.Model.UIDesign
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextArea));
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBlock));
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBox));
-            res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGrid));
-
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridComboBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridEmailBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridLookUp));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridNumBox));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridStaticHTML));
-            res.GridUIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeEditGridTextBox));
+          
 
 
         }

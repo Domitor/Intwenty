@@ -438,7 +438,7 @@ namespace Intwenty
             {
                 foreach (var view in app.Views)
                 {
-                    if (path.ToUpper().Contains(view.Path.ToUpper()))
+                    if (view.IsOnPath(path))
                     {
 
                         LocalizeTitle(view);

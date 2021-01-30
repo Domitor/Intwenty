@@ -222,8 +222,8 @@ namespace Intwenty.Middleware
                 endpoints.MapDefaultControllerRoute();
 
                 //INTWENTY ROUTING
-                endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
-                endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
+                //endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
+                //endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
                 endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 

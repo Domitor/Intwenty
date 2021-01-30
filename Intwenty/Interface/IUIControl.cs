@@ -24,15 +24,6 @@ namespace Intwenty.Interface
         bool IsMetaTypeComboBox { get; }
         bool IsMetaTypeImageBox { get; }
         bool IsMetaTypeDatePicker { get; }
-        bool IsMetaTypeEditGrid { get; }
-        bool IsMetaTypeEditGridCheckBox { get; }
-        bool IsMetaTypeEditGridComboBox { get; }
-        bool IsMetaTypeEditGridDatePicker { get; }
-        bool IsMetaTypeEditGridTextBox { get; }
-        bool IsMetaTypeEditGridNumBox { get; }
-        bool IsMetaTypeEditGridLookUp { get; }
-        bool IsMetaTypeEditGridStaticHTML { get; }
-        bool IsMetaTypeEditGridEmailBox { get; }
         bool HasValueDomain { get; }
 
         //Optionals

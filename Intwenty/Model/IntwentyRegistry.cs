@@ -34,15 +34,6 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeDatePicker, Title = "Datepicker" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGrid, Title = "Grid" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox, Title = "Grid Checkbox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridComboBox, Title = "Grid Combobox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker, Title = "Grid Datepicker" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridEmailBox, Title = "Grid Emailbox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridLookUp, Title = "Grid Look Up" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridNumBox, Title = "Grid Numbox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridStaticHTML, Title = "Grid HTML" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEditGridTextBox, Title = "Grid Textbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeEmailBox, Title = "Emailbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImage, Title = "Image" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImageBox, Title = "Image Upload" , ModelCode = "UISTRUCTUREMODEL" });
@@ -136,12 +127,6 @@ namespace Intwenty.Model
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeCheckBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeComboBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeDatePicker);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridComboBox);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridEmailBox);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridLookUp);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGridTextBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEmailBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeLookUp);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeNumBox);
@@ -152,14 +137,14 @@ namespace Intwenty.Model
 
 
             prop = new IntwentyProperty("EDITMODE", "Edit Mode", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGrid);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeListView);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CELL", DisplayValue = "Line" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
             _properties.Add(prop);
 
             prop = new IntwentyProperty("GRIDLAYOUT", "Layout", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEditGrid);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeListView);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GRID", DisplayValue = "Grid" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
             _properties.Add(prop);

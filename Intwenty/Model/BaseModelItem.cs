@@ -108,18 +108,6 @@ namespace Intwenty.Model
                 return "CB";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeDatePicker)
                 return "DP";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGrid)
-                return "TBL";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridCheckBox)
-                return "TBL_CBOX";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridComboBox)
-                return "TBL_CB";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridDatePicker)
-                return "TBL_DP";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridNumBox)
-                return "TBL_NUMBOX";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridTextBox)
-                return "TBL_TB";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextListColumn)
                 return "TLCOL";
             if (item.MetaType == ViewModel.MetaTypeUIView)
@@ -140,8 +128,6 @@ namespace Intwenty.Model
                 return "TA";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeTextBox)
                 return "TB";
-            if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEditGridLookUp)
-                return "TBL_LOOKUP";
             if (item.MetaType == UserInterfaceStructureModelItem.MetaTypeEmailBox)
                 return "EB";
             if (item.MetaType == DatabaseModelItem.MetaTypeDataColumn)

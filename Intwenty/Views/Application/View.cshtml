@@ -2,11 +2,8 @@
 
 @{
 
-    int instanceid = 0;
-    if (ViewBag.SystemId != null)
-    {
-        instanceid = (int)ViewBag.SystemId;
-    }
+    var instanceid = ViewBag.Id;
+    var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
 }
 
 
@@ -62,6 +59,121 @@
     {
         if (iface.IsMetaTypeInputInterface)
         {
+            @foreach (var sect in iface.GetSections())
+            {
+
+                <div class="row">
+
+                    @foreach (var pl in sect.Panels)
+                    {
+
+                        <div class="col-md-@(12/sect.Panels.Count)">
+
+                            @if (pl.UseFieldSet)
+                            {
+                                @:<fieldset class="intwentypanel">
+                                    @:<legend>@pl.LocalizedTitle</legend>
+                                }
+
+                            @foreach (var t in pl.Controls)
+                            {
+                                if (t.IsMetaTypeTextBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextBox", t)
+                                }
+
+                                if (t.IsMetaTypeNumBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_NumBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeDatePicker)
+                                {
+                                    @await Html.PartialAsync("UIControls/_DatePicker", t)
+
+                                }
+
+                                if (t.IsMetaTypeCheckBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_CheckBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeTextArea)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextArea", t)
+
+                                }
+
+                                if (t.IsMetaTypeComboBox && t.HasValueDomain)
+                                {
+                                    @await Html.PartialAsync("UIControls/_ComboBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeImageBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_ImageBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeImage)
+                                {
+                                    @await Html.PartialAsync("UIControls/_Image", t)
+
+                                }
+
+                                if (t.IsMetaTypeEmailBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_EmailBox", t)
+
+                                }
+
+                                //LOOKUP bound to DATAVIEW
+                                if (t.IsMetaTypeLookUp)
+                                {
+                                    @await Html.PartialAsync("UIControls/_LookUp", t)
+
+                                    <br />
+                                    <br />
+                                }
+
+                                if (t.IsMetaTypeLabel)
+                                {
+                                    @await Html.PartialAsync("UIControls/_Label", t)
+
+                                }
+
+                                if (t.IsMetaTypeTextBlock)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextBlock", t)
+
+                                }
+
+                                if (t.IsMetaTypeMultiSelect)
+                                {
+                                    @await Html.PartialAsync("UIControls/_MultiSelect", t)
+
+                                }
+
+
+
+                            }  <!--FOR-->
+                            @if (pl.UseFieldSet)
+                            {
+                            @: </fieldset>
+                        }
+
+                        </div> <!--COL-->
+
+
+                    }
+
+                </div>
+
+            }
+
 
         }
 
@@ -128,11 +240,6 @@
             </nav>
         }
 
-     
-
-
-
-
     }
 
 
@@ -148,25 +255,54 @@
         var app = new Vue({
             el: '#app',
             data: {
-                datalist: []
+                baseurl: '@Url.Content("~/Application/API/")'
+                ,appMainTable: '@Model.ApplicationInfo.DbName'
+                ,appId: @Model.ApplicationInfo.Id
+                ,instanceId: @instanceid
+                ,datalist: []
                 ,model: { "showFilter": false,  ['@Model.ApplicationInfo.DbName']: {} }
                 ,pageInfo: { "applicationId": @Model.ApplicationInfo.Id, "maxCount": 0, "pageSize": 20, "pageNumber": 0, "filterValues": [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
-                ,baseurl: '@Url.Content("~/Application/API/")'
-                ,appMainTable: '@Model.ApplicationInfo.DbName'
                 ,dataview: []
                 ,valuedomains: {}
                 ,validation: {}
                 ,current_edit_line: {}
                 ,dlgFilterColumnName: ""
                 ,dlgFilterValue: ""
-                ,appId: @Model.ApplicationInfo.Id
-                ,instanceId: @instanceid
+
             },
             methods:
             {
+                saveApplication: function () {
+                    var context = this;
 
+                    var endpointurl = context.baseurl + "Save";
+
+                    this.model[context.appMainTable].ApplicationId = context.appId;
+
+                    if (!context.canSave())
+                        return;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(this.model),
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                //window.location.reload(true);
+                            }
+                            else {
+                                raiseErrorModal(response);
+                            }
+                        }
+                    });
+                },
+                onImageChanged: function (event)
+                {
+                    this.uploadImage(event);
+                },
                 getPage: function () {
                     var context = this;
                     var endpointurl = context.baseurl + "GetEditListData";
@@ -267,6 +403,20 @@
                 {
                     <text>context.getPage();</text>
                 }
+                else if(Model.IsInputView() && instanceid > 0)
+                {
+                    <text>
+                        var endpointurl = context.baseurl + "GetEditData/" + context.appId + "/" + context.instanceId;
+                        $.get(endpointurl, function (response) {
+                            context.model = JSON.parse(response.data);
+                            endpointurl = context.baseurl + "GetValueDomains/@Model.ApplicationInfo.Id";
+                            $.get(endpointurl, function (response) {
+                                context.valuedomains = JSON.parse(response.data);
+                            });
+                        });
+                    </text>
+                }
+
             }
         });
 

@@ -10,6 +10,7 @@ namespace Intwenty.Model
     public class UserInterfaceStructureModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
+        public static readonly string MetaTypeListView = "LISTVIEW";
         public static readonly string MetaTypeTextListColumn = "TEXTLISTCOLUMN";
         public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
@@ -26,17 +27,8 @@ namespace Intwenty.Model
         public static readonly string MetaTypeComboBox = "COMBOBOX";
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
-        public static readonly string MetaTypeEditGrid = "EDITGRID";
         public static readonly string MetaTypeSection = "SECTION";
         public static readonly string MetaTypeImageBox = "IMAGEBOX";
-        public static readonly string MetaTypeEditGridTextBox = "EDITGRID_TEXTBOX";
-        public static readonly string MetaTypeEditGridNumBox = "EDITGRID_NUMBOX";
-        public static readonly string MetaTypeEditGridDatePicker = "EDITGRID_DATEPICKER";
-        public static readonly string MetaTypeEditGridCheckBox = "EDITGRID_CHECKBOX";
-        public static readonly string MetaTypeEditGridComboBox = "EDITGRID_COMBOBOX";
-        public static readonly string MetaTypeEditGridLookUp = "EDITGRID_LOOKUP";
-        public static readonly string MetaTypeEditGridEmailBox = "EDITGRID_EMAILBOX";
-        public static readonly string MetaTypeEditGridStaticHTML = "EDITGRID_STATICHTML";
 
 
         public UserInterfaceStructureModelItem()
@@ -187,26 +179,7 @@ namespace Intwenty.Model
 
         }
 
-        public bool IsEditGridUIBindingType
-        {
-            get
-            {
-                return IsMetaTypeEditGridCheckBox || IsMetaTypeEditGridComboBox || IsMetaTypeEditGridDatePicker ||
-                       IsMetaTypeEditGridEmailBox || IsMetaTypeEditGridNumBox || IsMetaTypeEditGridTextBox;
-
-            }
-
-        }
-
-        public bool IsEditGridUIComplexBindingType
-        {
-            get
-            {
-                return IsMetaTypeEditGridLookUp;
-
-            }
-
-        }
+       
 
 
         public bool IsUIContainerType
@@ -356,8 +329,6 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeImageBox; }
         }
 
-      
-       
 
         public bool IsMetaTypePanel
         {
@@ -370,58 +341,13 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeDatePicker; }
         }
 
-        public bool IsMetaTypeEditGrid
-        {
-            get { return MetaType == MetaTypeEditGrid; }
-        }
+      
 
         public bool IsMetaTypeSection
         {
             get { return MetaType == MetaTypeSection; }
         }
 
-        public bool IsMetaTypeEditGridCheckBox
-        {
-            get { return MetaType == MetaTypeEditGridCheckBox; }
-        }
-
-
-        public bool IsMetaTypeEditGridComboBox
-        {
-            get { return MetaType == MetaTypeEditGridComboBox; }
-        }
-
-        public bool IsMetaTypeEditGridDatePicker
-        {
-            get { return MetaType == MetaTypeEditGridDatePicker; }
-        }
-
-        public bool IsMetaTypeEditGridTextBox
-        {
-            get { return MetaType == MetaTypeEditGridTextBox; }
-        }
-
-        public bool IsMetaTypeEditGridNumBox
-        {
-            get { return MetaType == MetaTypeEditGridNumBox; }
-        }
-
-        public bool IsMetaTypeEditGridLookUp
-        {
-            get { return MetaType == MetaTypeEditGridLookUp; }
-        }
-
-        public bool IsMetaTypeEditGridStaticHTML
-        {
-            get { return MetaType == MetaTypeEditGridStaticHTML; }
-        }
-
-        public bool IsMetaTypeEditGridEmailBox
-        {
-            get { return MetaType == MetaTypeEditGridEmailBox; }
-        }
-
-     
 
         public string UIId
         {

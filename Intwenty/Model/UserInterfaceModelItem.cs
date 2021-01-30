@@ -1,5 +1,6 @@
 ﻿using Intwenty.Entity;
 using Intwenty.Interface;
+using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,16 +20,12 @@ namespace Intwenty.Model
         public UserInterfaceModelItem()
         {
             SetEmptyStrings();
-            Sections = new List<UISection>();
-            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
         public UserInterfaceModelItem(string systemmetacode, string appmetacode, string viewmetacode, string userinterfacemetacode)
         {
             SetEmptyStrings();
-            Sections = new List<UISection>();
-            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
@@ -42,8 +39,6 @@ namespace Intwenty.Model
             MetaCode = entity.MetaCode;
             MetaType = entity.MetaType;
             SetEmptyStrings();
-            Sections = new List<UISection>();
-            Modals = new List<IUIControl>();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
@@ -62,9 +57,6 @@ namespace Intwenty.Model
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
-
-        public List<UISection> Sections { get; set; }
-        public List<IUIControl> Modals { get; set; }
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public int PageSize { get; set; }
@@ -134,7 +126,66 @@ namespace Intwenty.Model
 
         }
 
+        public List<IUIControl> GetModals()
+        {
+            var res = new List<IUIControl>();
+            foreach (var ctrl in UIStructure)
+            {
+                if (ctrl.IsMetaTypeLookUp)
+                    res.Add(ctrl);
+            }
+            return res;
+        }
+
+        public List<UISection> GetSections()
+        {
+
+            var res = new List<UISection>();
+
+            foreach (var sect in UIStructure.Where(p => p.IsMetaTypeSection).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+            {
+                var section = new UISection() { Properties = sect.Properties, Title = sect.Title, LocalizedTitle = sect.LocalizedTitle, TitleLocalizationKey = sect.TitleLocalizationKey };
+                foreach (var pnl in UIStructure.Where(p => p.IsMetaTypePanel && p.ParentMetaCode == sect.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                {
+                    var panel = new UIPanel() { Properties = pnl.Properties, Title = pnl.Title, LocalizedTitle = pnl.LocalizedTitle, TitleLocalizationKey = pnl.TitleLocalizationKey };
+                    if (!string.IsNullOrEmpty(panel.Title))
+                        panel.UseFieldSet = true;
+
+                    foreach (var ctrl in UIStructure.Where(p => p.ParentMetaCode == pnl.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                    {
+                        //Should not happen, just in case, remove container controls
+                        if (ctrl.IsUIContainerType)
+                            continue;
+
+                        if ((ctrl.IsUIBindingType || ctrl.IsUIComplexBindingType) && (!ctrl.IsDataColumn1Connected || !ctrl.IsDataTableConnected))
+                            continue;
+
+                        if (ctrl.IsUIComplexBindingType && (!ctrl.IsDataViewColumn1Connected || !ctrl.IsDataViewConnected))
+                            continue;
+
+                        if (IsMetaTypeInputInterface)
+                            ctrl.JavaScriptObjectName = "model";
+                        if (IsMetaTypeListInterface)
+                            ctrl.JavaScriptObjectName = "item";
+
+       
+        
+                        panel.Controls.Add(ctrl);
+                    }
+                    section.Panels.Add(panel);
+                }
+                res.Add(section);
+            }
+
+
+            return res;
+
+
+        }
+
+
     }
+
 
     public class UISection : HashTagPropertyObject, ILocalizableTitle
     {
