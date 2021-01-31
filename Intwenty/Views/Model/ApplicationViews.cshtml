@@ -33,7 +33,7 @@
             </thead>
             <tr v-for="item in datalist">
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a></td>
-                <td><a v-bind:href="'/Model/EditApplicationView/' + item.id" role="button" class="btn btn-sm btn-secondary">Edit</a></td>
+                <td><a v-bind:href="'/Model/EditApplicationView/' + item.id" role="button" class="btn btn-sm btn-secondary">Design</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.path}}</td>
 
@@ -92,15 +92,15 @@
                 {
                     var context = this;
 
-                    context.model = {};
+                    context.model = {applicationId:@Model.Application.Id};
 
                     var yesfunc = function ()
                     {
 
                        var baseurl = '@Url.Content("~/Model/API/")';
-                       var endpointurl = baseurl + "SaveApplicationView";
+                       var endpointurl = baseurl + "CreateApplicationView";
 
-
+                      
                         $.ajax({
                             url: endpointurl,
                             type: "POST",

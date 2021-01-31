@@ -39,8 +39,6 @@ namespace Intwenty.Model
             AppMetaCode = entity.AppMetaCode;
             MetaCode = entity.MetaCode;
             ParentMetaCode = "ROOT";
-            DataTableMetaCode = entity.DataTableMetaCode;
-            DataViewMetaCode = entity.DataViewMetaCode;
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
             Path = entity.Path;
@@ -53,12 +51,11 @@ namespace Intwenty.Model
 
         private void SetEmptyStrings()
         {
+            if (string.IsNullOrEmpty(MetaType)) MetaType = string.Empty;
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
@@ -76,8 +73,7 @@ namespace Intwenty.Model
         public string Description { get; set; }
         public string DescriptionLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }
-        public string DataTableMetaCode { get; set; }
-        public string DataViewMetaCode { get; set; }
+      
         public string Path { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
@@ -125,17 +121,6 @@ namespace Intwenty.Model
     
 
 
-        public bool IsDataTableConnected
-        {
-            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
-        }
-
-   
-        public bool IsDataViewConnected
-        {
-            get { return (DataViewInfo != null && !string.IsNullOrEmpty(DataViewMetaCode) && DataViewInfo.IsMetaTypeDataView); }
-        }
-
      
 
         public bool IsMetaTypeUIView
@@ -158,16 +143,7 @@ namespace Intwenty.Model
             }
         }
 
-        public string DataTableDbName
-        {
-            get 
-            { 
-                if (IsDataTableConnected)
-                    return DataTableInfo.DbName;
-
-                return string.Empty;
-            }
-        }
+      
 
 
         public bool HasSystemInfo

@@ -81,6 +81,14 @@ namespace Intwenty.Interface
 
 
 
+        public ModifyResult SaveApplicationView(ViewModel model);
+
+
+
+
+
+
+
         public List<DatabaseModelItem> GetDatabaseModels();
 
         public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid);

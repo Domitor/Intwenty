@@ -436,7 +436,8 @@ namespace Intwenty.Controllers
 
             try
             {
-                return new JsonResult("{}");
+                var t = ModelRepository.GetApplicationModel(model.ApplicationId);
+                ModelRepository.SaveApplicationView(new ViewModel() { Path = model.Path, Title = model.Title, AppMetaCode = t.Application.MetaCode, SystemMetaCode=t.System.MetaCode });
 
             }
             catch (Exception ex)
@@ -448,6 +449,7 @@ namespace Intwenty.Controllers
                 return jres;
             }
 
+            return GetApplicationViews(model.ApplicationId);
         }
 
         /// <summary>

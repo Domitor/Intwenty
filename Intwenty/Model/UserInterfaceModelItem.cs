@@ -23,12 +23,6 @@ namespace Intwenty.Model
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
 
-        public UserInterfaceModelItem(string systemmetacode, string appmetacode, string viewmetacode, string userinterfacemetacode)
-        {
-            SetEmptyStrings();
-            UIStructure = new List<UserInterfaceStructureModelItem>();
-        }
-
         public UserInterfaceModelItem(UserInterfaceItem entity)
         {
             Id = entity.Id;
@@ -38,6 +32,8 @@ namespace Intwenty.Model
             ViewMetaCode = entity.ViewMetaCode;
             MetaCode = entity.MetaCode;
             MetaType = entity.MetaType;
+            DataTableMetaCode = entity.DataTableMetaCode;
+            DataViewMetaCode = entity.DataViewMetaCode;
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
@@ -50,6 +46,8 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -60,7 +58,8 @@ namespace Intwenty.Model
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public int PageSize { get; set; }
-
+        public string DataTableMetaCode { get; set; }
+        public string DataViewMetaCode { get; set; }
 
         public bool IsMetaTypeInputInterface
         {

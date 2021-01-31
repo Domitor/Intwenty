@@ -29,8 +29,8 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
-      
 
+        [HttpGet("/Model/Applications")]
         public IActionResult Applications()
         {
             if (!User.Identity.IsAuthenticated)
