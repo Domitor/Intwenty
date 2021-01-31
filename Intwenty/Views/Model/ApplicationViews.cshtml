@@ -1,0 +1,182 @@
+﻿@model ApplicationModel
+
+@await Html.PartialAsync("_Modals")
+
+<div id="app">
+    <div>
+        <br />
+        <br />
+
+        <div class="card">
+            <div class="card-header"><h2>Manage UI</h2></div>
+            <div class="card-body">Create and manage views for application <b>@Model.Application.Title</b></div>
+        </div>
+
+        <br />
+        <br />
+
+        <button class="btn btn-sm btn-primary" v-on:click="openCreateViewDlg()"><span class="fa fa-plus"></span> Create View</button>
+
+        <br />
+        <br />
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:5%"></th>
+                    <th style="width:5%"></th>
+                    <th style="width:45%">Title</th>
+                    <th style="width:45%">Path</th>
+
+
+                </tr>
+            </thead>
+            <tr v-for="item in datalist">
+                <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a></td>
+                <td><a v-bind:href="'/Model/EditApplicationView/' + item.id" role="button" class="btn btn-sm btn-secondary">Edit</a></td>
+                <td>{{item.title}}</td>
+                <td>{{item.path}}</td>
+
+            </tr>
+        </table>
+
+    </div>
+
+
+    <div class="modal" id="create_app_view_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Create Application View</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">Title<span style="color: red"> *</span></label>
+                        <input id="viewtitle" type="text" class="form-control form-control-sm" v-model="model.title"  />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">Path<span style="color: red"> *</span></label>
+                        <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path"  />
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="create_app_view_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Save</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                ,model: {}
+            },
+            methods: {
+
+                openCreateViewDlg: function ()
+                {
+                    var context = this;
+
+                    context.model = {};
+
+                    var yesfunc = function ()
+                    {
+
+                       var baseurl = '@Url.Content("~/Model/API/")';
+                       var endpointurl = baseurl + "SaveApplicationView";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+
+                    $('#create_app_view_modal_yesbtn').off('click', yesfunc);
+                    $('#create_app_view_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_app_view_modal").modal();
+
+
+                },
+                getList: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "GetApplicationViews/@Model.Application.Id";
+                    $.get(endpointurl, function (response)
+                    {
+                        context.datalist = response;
+                    });
+                },
+                deleteView: function (item)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteApplicationView";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+                    raiseYesNoModal("Delete application view ?", "This will delete the view and can not be undone, continue ?", yesfunc);
+
+
+                }
+            },
+            computed: {
+
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                context.getList();
+
+            }
+        });
+    </script>
+
+
+}

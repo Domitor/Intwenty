@@ -14,13 +14,13 @@
     <br />
     <div class="card">
         <div class="card-header"><h2>Database model designer</h2></div>
-        <div class="card-body">Define the data structure for the {{model.title}} application</div>
+        <div class="card-body">Define the datastructure for the {{model.title}} application</div>
     </div>
 
     <br />
 
+    <a asp-action="Applications" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
 
-    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-default"><span class="fa fa-backward"></span> Back to list</a>
     <br />
     <br />
 
@@ -80,7 +80,7 @@
                         <option v-for="tbl in model.tables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm" v-model="modelitem.dbName" :disabled="modelitem.isFrameworkItem"  /></td>
+                <td><input type="text" class="form-control form-control-sm" v-model="modelitem.dbName" :disabled="modelitem.isFrameworkItem" /></td>
                 <td>
                     <select v-model="modelitem.dataType" class="form-control form-control-sm" :disabled="modelitem.isFrameworkItem">
                         <option v-for="tp in datatypes" v-bind:value="tp">{{tp}}</option>

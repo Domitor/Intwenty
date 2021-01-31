@@ -542,6 +542,13 @@ namespace Intwenty
 
         #region Application
 
+        public ApplicationModel GetApplicationModel(int applicationid)
+        {
+            var t = GetApplicationModels();
+            return t.Find(p => p.Application.Id == applicationid);
+
+        }
+
         public List<ApplicationModel> GetApplicationModels()
         {
             List<ApplicationModel> res = null;

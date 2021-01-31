@@ -31,7 +31,7 @@ namespace Intwenty.Controllers
 
       
 
-        public IActionResult GetList()
+        public IActionResult Applications()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -65,8 +65,22 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/EditDB/{applicationid}")]
-        public IActionResult EditDB(int applicationid)
+        [HttpGet("/Model/ApplicationViews/{applicationid}")]
+        public IActionResult ApplicationViews(int applicationid)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var model = ModelRepository.GetApplicationModel(applicationid);
+
+
+            return View(model);
+        }
+
+        [HttpGet("/Model/Database/{applicationid}")]
+        public IActionResult Database(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();

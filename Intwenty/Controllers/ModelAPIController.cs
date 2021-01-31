@@ -423,6 +423,48 @@ namespace Intwenty.Controllers
 
         #region UI Model
 
+        /// <summary>
+        /// Create an application view
+        /// </summary>
+        [HttpPost("/Model/API/CreateApplicationView")]
+        public IActionResult CreateApplicationView([FromBody] ApplicationViewVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                return new JsonResult("{}");
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating an application view.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
+        /// <summary>
+        /// Get application views for an application
+        /// </summary>
+        [HttpGet("/Model/API/GetApplicationViews/{applicationid}")]
+        public IActionResult GetApplicationViews(int applicationid)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var t = ModelRepository.GetApplicationModel(applicationid);
+            return new JsonResult(t.Views);
+
+        }
 
         /// <summary>
         /// Get UI view model for application with id and the viewtype

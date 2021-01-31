@@ -65,9 +65,8 @@ namespace Intwenty.Interface
         /// </summary>
         public List<ApplicationModel> GetApplicationModels();
 
-        /// <summary>
-        /// Get all application models
-        /// </summary>
+        public ApplicationModel GetApplicationModel(int applicationid);
+
         public List<ApplicationModel> GetLocalizedApplicationModels();
         public ApplicationModel GetLocalizedApplicationModel(int applicationid);
         public ViewModel GetLocalizedViewModelByPath(string path);
