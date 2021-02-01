@@ -29,9 +29,9 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
-
-        [HttpGet("/Model/Applications")]
-        public IActionResult Applications()
+        
+        [HttpGet("/Model/ApplicationList")]
+        public IActionResult ApplicationList()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -41,8 +41,8 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/Create")]
-        public IActionResult Create()
+        [HttpGet("/Model/ApplicationCreate")]
+        public IActionResult ApplicationCreate()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -53,8 +53,8 @@ namespace Intwenty.Controllers
         }
 
 
-        [HttpGet("/Model/Edit/{applicationid}")]
-        public IActionResult Edit(int applicationid)
+        [HttpGet("/Model/ApplicationEdit/{applicationid}")]
+        public IActionResult ApplicationEdit(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -65,8 +65,8 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/ApplicationViews/{applicationid}")]
-        public IActionResult ApplicationViews(int applicationid)
+        [HttpGet("/Model/ApplicationViewList/{applicationid}")]
+        public IActionResult ApplicationViewList(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();

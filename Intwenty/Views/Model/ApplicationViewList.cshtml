@@ -1,0 +1,500 @@
+﻿@model ApplicationModel
+
+@await Html.PartialAsync("_Modals")
+
+<div id="app">
+    <div>
+        <br />
+        <br />
+
+        <div class="card">
+            <div class="card-header"><h2>Manage UI</h2></div>
+            <div class="card-body">
+                Create and manage views for application <b>@Model.Application.Title</b>
+                <br />
+                First you define one or more views and then you create and connect user interfaces to the views. Views can share userinterfaces among them.
+            </div>
+        </div>
+
+        <br />
+        <br />
+
+        <button class="btn btn-primary" v-on:click="openCreateViewDlg()"><span class="fa fa-plus"></span> New View</button>
+
+        <br />
+        <br />
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:5%"></th>
+                    <th style="width:5%"></th>
+                    <th style="width:23%">View</th>
+                    <th style="width:42%">UI</th>
+                    <th style="width:25%">Functions</th>
+
+                </tr>
+            </thead>
+            <tr v-for="item in datalist">
+                <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a></td>
+                <td><a v-bind:href="'/Model/EditApplicationView/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a></td>
+                <td>
+                    <b>Title</b>
+                    <br />
+                    {{item.title}}
+                    <br />
+                    <br />
+                    <b>Path</b>
+                    <br />
+                    {{item.path}}
+                </td>
+
+                <td>
+                    <a href="#" role="button" class="btn btn-sm btn-primary" v-on:click="openCreateUIDlg(item)"><i class="fa fa-plus"></i> Add UI</a>
+                    <hr />
+                    <table class="table table-borderless">
+                        <tr v-for="ui in item.userInterface">
+                            <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteUI(ui)"><i class="fa fa-trash"></i></a></td>
+                            <td style="width:30%"><a href="#" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
+                            <td style="width:60%">{{ui.description}}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <a href="#" role="button" class="btn btn-sm btn-primary" v-on:click="openAddFunctionDlg(item)"><i class="fa fa-plus"></i> Add Function</a>
+                    <hr />
+                    <table class="table table-borderless">
+                        <tr v-for="func in item.functions">
+                            <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteFunction(func)"><i class="fa fa-trash"></i></a></td>
+                            <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-secondary" v-on:click="openEditFunctionDlg(func)"><i class="fa fa-edit"></i></a></td>
+                            <td style="width:80%">{{func.title}}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+
+    <div class="modal" id="create_app_view_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Create Application View</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">Title<span style="color: red"> *</span></label>
+                        <input id="viewtitle" type="text" class="form-control form-control-sm" v-model="model.title" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">Path<span style="color: red"> *</span></label>
+                        <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path" />
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="create_app_view_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Save</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="create_ui_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Create UI</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="radio" name="createmethod" v-model="uisettings.method" value="new" /> New UI
+                    <input type="radio" name="createmethod" v-model="uisettings.method" value="reuse" /> Reuse UI from other view
+                    <br />
+                    <br />
+                    <div v-if="uisettings.method=='new'">
+                        <div class="form-group">
+                            <label class="control-label">UI Type<span style="color: red"> *</span></label>
+                            <select class="form-control form-control-sm" v-model="uisettings.uitype">
+                                <option value="1">List UI</option>
+                                <option value="2">Input UI</option>
+                            </select>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <label class="control-label">Data Table<span style="color: red"> *</span></label>
+                            <select class="form-control form-control-sm" v-model="uisettings.datatable">
+                                <option v-for="item in datatables" v-bind:value="item">{{item.dbName}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" v-if="uisettings.method=='reuse'">
+                        <label class="control-label">Select Current UI<span style="color: red"> *</span></label>
+                        <select class="form-control form-control-sm" v-model="uisettings.currentui">
+                            <option v-for="item in currentuilist" v-bind:value="item">{{item.description}}</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="create_ui_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal" :disabled="!canCreateUI()">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="create_edit_function_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">{{functionsettings.dlgHeader}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="control-label">Function Type<span style="color: red"> *</span></label>
+                        <select class="form-control form-control-sm" v-model="functionsettings.functionType">
+                            <option v-for="item in functions" v-bind:value="item.metaCode">{{item.title}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Data Table<span style="color: red"> *</span></label>
+                        <select class="form-control form-control-sm" v-model="functionsettings.datatable">
+                            <option v-for="item in datatables" v-bind:value="item">{{item.dbName}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Path</label>
+                        <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.path" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="create_edit_function_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="delete_ui_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Delete UI ?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>This userinterface is used in more than one view. Would you like to delete it just for this view or from all views ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="delete_ui_modal_one" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Only this</button>
+                    <button id="delete_ui_modal_all" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">All</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                datalist: []
+                ,model: {}
+                ,uisettings: {}
+                ,currentuilist: []
+                ,functionsettings: {}
+            },
+            methods:
+            {
+
+                openAddFunctionDlg: function (item)
+                {
+                    var context = this;
+
+                    context.functionsettings = { id:0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", functionType: "", path: ""};
+
+                    var yesfunc = function ()
+                    {
+
+
+                    }
+
+
+                    $('#create_edit_function_modal_yesbtn').off('click', yesfunc);
+                    $('#create_edit_function_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_edit_function_modal").modal();
+
+
+                },
+                openEditFunctionDlg: function (item)
+                {
+                    var context = this;
+
+                     context.functionsettings = { id:item.id, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Edit Function", functionType: item.metaCode, path: item.path};
+
+                    var yesfunc = function ()
+                    {
+
+
+                    }
+
+
+                    $('#create_edit_function_modal_yesbtn').off('click', yesfunc);
+                    $('#create_edit_function_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_edit_function_modal").modal();
+
+
+                },
+                canCreateUI: function ()
+                {
+                    var context = this;
+
+                    if (context.uisettings.method == '')
+                        return false;
+                    if (context.uisettings.method == 'new' && context.uisettings.uitype=="0")
+                        return false;
+                    if (context.uisettings.method == 'new' && !context.uisettings.datatable)
+                        return false;
+                    if (context.uisettings.method == 'reuse' && !context.uisettings.currentui)
+                        return false;
+
+                    return true;
+                },
+                openCreateUIDlg: function (item)
+                {
+
+                    var context = this;
+
+                    context.uisettings = {applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, method: "new",uitype:"0" };
+                    context.currentuilist = context.getCurrentUIList(item);
+
+                    var yesfunc = function ()
+                    {
+                        var senddata = context.uisettings;
+                        var t = "";
+
+                    }
+
+
+                    $('#create_ui_modal_yesbtn').off('click', yesfunc);
+                    $('#create_ui_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_ui_modal").modal();
+
+                },
+                openCreateViewDlg: function ()
+                {
+                    var context = this;
+
+                    context.model = {applicationId:@Model.Application.Id};
+
+                    var yesfunc = function ()
+                    {
+
+                       var baseurl = '@Url.Content("~/Model/API/")';
+                       var endpointurl = baseurl + "CreateApplicationView";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+
+                    $('#create_app_view_modal_yesbtn').off('click', yesfunc);
+                    $('#create_app_view_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_app_view_modal").modal();
+
+
+                },
+                getList: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "GetApplicationViews/@Model.Application.Id";
+                    $.get(endpointurl, function (response)
+                    {
+                        context.datalist = response;
+                    });
+                },
+                deleteUI: function (item)
+                {
+                    var context = this;
+                    var existsonmultiple = false;
+                    for (var i = 0; i < context.datalist.length; i++)
+                    {
+                        var view = context.datalist[i];
+                        for (var z = 0; z < view.userInterface.length; z++)
+                        {
+                            var ui = view.userInterface[z];
+                            if (ui.metaCode == item.metaCode && ui.id != item.id)
+                                existsonmultiple = true;
+                        }
+                    }
+
+                    var deleteonefunc = function () {
+
+
+                    };
+
+                    var deleteallfunc = function () {
+
+
+                    };
+
+                    if (existsonmultiple) {
+                        $('#delete_ui_modal_one').off('click', deleteonefunc);
+                        $('#delete_ui_modal_all').off().on('click', deleteallfunc);
+                        $("#delete_ui_modal").modal();
+                    } else {
+
+                        raiseYesNoModal("Delete UI ?", "This will delete the userinterface and can not be undone, continue ?", deleteonefunc);
+                    }
+
+                },
+                deleteView: function (item)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteApplicationView";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                         });
+                    }
+
+                    raiseYesNoModal("Delete application view ?", "This will delete the view and can not be undone, continue ?", yesfunc);
+
+
+                },
+                deleteFunction: function (item)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+
+
+                    }
+
+                    raiseYesNoModal("Delete function ?", "The function will be deleted, continue ?", yesfunc);
+
+
+                },
+                getCurrentUIList: function (item)
+                {
+                    var context = this;
+                    var res = [];
+
+                    for (var i = 0; i < context.datalist.length; i++)
+                    {
+                        var view = context.datalist[i];
+                        for (var z = 0; z < view.userInterface.length; z++) {
+                            var ui = view.userInterface[z];
+                            if (ui.viewMetaCode != item.metaCode)
+                            {
+                                var exists = false;
+                                for (var y = 0; y < res.length; y++)
+                                {
+                                    var current = res[y];
+                                    if (ui.metaCode == current.metaCode)
+                                    {
+                                        exists = true;
+                                    }
+
+                                }
+                                if (!exists)
+                                    res.push(ui);
+
+                            }
+                        }
+                    }
+
+                    return res;
+                }
+            },
+            computed: {
+
+                datatables: function ()
+                {
+                    var res = [{ dbName: "@Model.Application.DbName", metaCode: "@Model.Application.MetaCode" }];
+                    @foreach (var t in Model.DataStructure.Where(p => p.IsMetaTypeDataTable))
+                    {
+                        <text>res.push({ dbName: "@t.DbName", metaCode: "@t.MetaCode" });</text>
+                    }
+
+                    return res;
+                },
+                functions: function ()
+                {
+                    var res = [];
+                    res.push({ title: "Create", metaCode: "CREATE" });
+                    res.push({ title: "Edit", metaCode: "EDIT" });
+                    res.push({ title: "Delete", metaCode: "DELETE" });
+                    res.push({ title: "Navigate", metaCode: "NAVIGATE" });
+                    res.push({ title: "Save", metaCode: "SAVE" });
+                    res.push({ title: "Export", metaCode: "EXPORT" });
+                    return res;
+                }
+
+            },
+            mounted: function ()
+            {
+
+                var context = this;
+                context.getList();
+
+            }
+        });
+    </script>
+
+
+}

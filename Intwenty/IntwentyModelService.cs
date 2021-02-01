@@ -1060,7 +1060,27 @@ namespace Intwenty
                     {
                         userinterface.ApplicationInfo = app;
                         userinterface.SystemInfo = app.SystemInfo;
+
+                        if (!string.IsNullOrEmpty(userinterface.DataTableMetaCode))
+                        {
+                            if (userinterface.DataTableMetaCode == app.MetaCode)
+                            {
+                                userinterface.DataTableMetaCode = app.MetaCode;
+                                userinterface.DataTableInfo = new DatabaseModelItem(DatabaseModelItem.MetaTypeDataTable) { AppMetaCode = app.MetaCode, Id = 0, DbName = app.DbName, TableName = app.DbName, MetaCode = app.MetaCode, ParentMetaCode = "ROOT", Title = app.DbName, IsFrameworkItem = true };
+                            }
+                            else
+                            {
+                                var dinf = dbmodelitems.Find(p => p.MetaCode == userinterface.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
+                                if (dinf != null)
+                                {
+                                    userinterface.DataTableInfo = dinf;
+                                    userinterface.DataTableMetaCode = dinf.MetaCode;
+                                }
+                            }
+                        }
+
                         appview.UserInterface.Add(userinterface);
+
 
                         foreach (var item in userinterfacestructures.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.UserInterfaceMetaCode==userinterface.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                         {
@@ -1068,15 +1088,9 @@ namespace Intwenty
 
                             item.ApplicationInfo = app;
                             item.SystemInfo = app.SystemInfo;
-                            if (!string.IsNullOrEmpty(item.DataTableMetaCode))
-                            {
-                                var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataTableMetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataTable);
-                                if (dinf != null)
-                                {
-                                    item.DataTableInfo = dinf;
-                                    item.DataTableMetaCode = dinf.MetaCode;
-                                }
-                            }
+                            item.DataTableInfo = userinterface.DataTableInfo;
+                            item.DataTableMetaCode = userinterface.DataTableMetaCode;
+
 
                             if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
                             {

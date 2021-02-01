@@ -31,10 +31,7 @@ namespace Intwenty.Entity
         [NotNull]
         public string ViewMetaCode { get; set; }
 
-        /// <summary>
-        /// Reference to an Intwenty DataView
-        /// </summary>
-        public string DataViewMetaCode { get; set; }
+      
 
         /// <summary>
         /// Reference to a DataTable

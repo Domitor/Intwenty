@@ -33,7 +33,14 @@ namespace Intwenty.Model
             MetaCode = entity.MetaCode;
             MetaType = entity.MetaType;
             DataTableMetaCode = entity.DataTableMetaCode;
-            DataViewMetaCode = entity.DataViewMetaCode;
+            if (MetaType == MetaTypeInputInterface)
+            {
+                Title = "Input UI";
+            }
+            if (MetaType == MetaTypeListInterface)
+            {
+                Title = "List UI";
+            }
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
         }
@@ -46,20 +53,21 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
+        public string DataTableMetaCode { get; set; }
+        public DatabaseModelItem DataTableInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public int PageSize { get; set; }
-        public string DataTableMetaCode { get; set; }
-        public string DataViewMetaCode { get; set; }
+      
+  
 
         public bool IsMetaTypeInputInterface
         {
@@ -77,6 +85,18 @@ namespace Intwenty.Model
             get { return "UIMODEL"; }
         }
 
+        public string Description
+        {
+            get {
+
+                var s = DataTableDbName;
+                if (string.IsNullOrEmpty(s))
+                    return Title;
+                else
+                    return string.Format(Title + " ({0})",s);
+            
+            }
+        }
 
         public override bool HasValidMetaType
         {
@@ -123,6 +143,22 @@ namespace Intwenty.Model
                 return this.ApplicationInfo != null;
             }
 
+        }
+
+        public bool IsDataTableConnected
+        {
+            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && DataTableInfo.IsMetaTypeDataTable); }
+        }
+
+        public string DataTableDbName
+        {
+            get
+            {
+                if (IsDataTableConnected)
+                    return DataTableInfo.DbName;
+
+                return string.Empty;
+            }
         }
 
         public List<IUIControl> GetModals()
@@ -181,6 +217,8 @@ namespace Intwenty.Model
 
 
         }
+
+       
 
 
     }

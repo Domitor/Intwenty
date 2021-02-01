@@ -5,7 +5,7 @@
 
         @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN"))
         {
-            <a class="dropdown-item" asp-controller="Model" asp-action="Applications"><span class="fa fa-cogs"></span> Manage applications</a>
+            <a class="dropdown-item" asp-controller="Model" asp-action="ApplicationList"><span class="fa fa-cogs"></span> Manage applications</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="ToolConfigureDatabase"><span class="fa fa-cogs"></span> Configure database</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="EditDataviews"><span class="fa fa-database"></span> Data views</a>
             <a class="dropdown-item" asp-controller="Model" asp-action="EditValueDomains"><span class="fa fa-database"></span> Value domains</a>

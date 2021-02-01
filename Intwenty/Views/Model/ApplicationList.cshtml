@@ -33,11 +33,11 @@
             </thead>
             <tr v-for="item in datalist">
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><i class="fa fa-trash"></i></a></td>
-                <td><a v-bind:href="'/Model/Edit/' + item.id" role="button" class="btn btn-sm btn-secondary">Edit</a></td>
+                <td><a v-bind:href="'/Model/ApplicationEdit/' + item.id" role="button" class="btn btn-sm btn-secondary">Edit</a></td>
                 <td>{{item.title}}</td>
                 <td>{{item.description}}</td>
                 <td><a v-bind:href="'/Model/Database/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-database"></i> Manage DB</a></td>
-                <td><a v-bind:href="'/Model/ApplicationViews/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-align-justify"></i> Manage UI</a></td>
+                <td><a v-bind:href="'/Model/ApplicationViewList/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fas fa-align-justify"></i> Manage UI</a></td>
             </tr>
         </table>
 
