@@ -124,7 +124,7 @@
                     <div v-if="uisettings.method=='new'">
                         <div class="form-group">
                             <label class="control-label">UI Type<span style="color: red"> *</span></label>
-                            <select class="form-control form-control-sm" v-model="uisettings.uitype">
+                            <select class="form-control form-control-sm" v-model="uisettings.uiType">
                                 <option value="1">List UI</option>
                                 <option value="2">Input UI</option>
                             </select>
@@ -132,16 +132,16 @@
                         <br />
                         <div class="form-group">
                             <label class="control-label">Data Table<span style="color: red"> *</span></label>
-                            <select class="form-control form-control-sm" v-model="uisettings.datatable">
-                                <option v-for="item in datatables" v-bind:value="item">{{item.dbName}}</option>
+                            <select class="form-control form-control-sm" v-model="uisettings.dataTableMetaCode">
+                                <option v-for="item in datatables" v-bind:value="item.metaCode">{{item.dbName}}</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group" v-if="uisettings.method=='reuse'">
                         <label class="control-label">Select Current UI<span style="color: red"> *</span></label>
-                        <select class="form-control form-control-sm" v-model="uisettings.currentui">
-                            <option v-for="item in currentuilist" v-bind:value="item">{{item.description}}</option>
+                        <select class="form-control form-control-sm" v-model="uisettings.metaCode">
+                            <option v-for="item in currentuilist" v-bind:value="item.metaCode">{{item.description}}</option>
                         </select>
                     </div>
 
@@ -275,11 +275,11 @@
 
                     if (context.uisettings.method == '')
                         return false;
-                    if (context.uisettings.method == 'new' && context.uisettings.uitype=="0")
+                    if (context.uisettings.method == 'new' && context.uisettings.uiType=="0")
                         return false;
-                    if (context.uisettings.method == 'new' && !context.uisettings.datatable)
+                    if (context.uisettings.method == 'new' && context.uisettings.dataTableMetaCode=='')
                         return false;
-                    if (context.uisettings.method == 'reuse' && !context.uisettings.currentui)
+                    if (context.uisettings.method == 'reuse' && context.uisettings.metaCode=='')
                         return false;
 
                     return true;
@@ -289,13 +289,31 @@
 
                     var context = this;
 
-                    context.uisettings = {applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, method: "new",uitype:"0" };
+                    context.uisettings = { applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, method: "new", uiType: "0", dataTableMetaCode: "", metaCode:"" };
                     context.currentuilist = context.getCurrentUIList(item);
 
                     var yesfunc = function ()
                     {
                         var senddata = context.uisettings;
-                        var t = "";
+
+                       var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "CreateUserinterface";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(senddata),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
 
                     }
 
@@ -366,18 +384,54 @@
                         }
                     }
 
-                    var deleteonefunc = function () {
+                    var deleteonefunc = function ()
+                    {
 
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteUserinterface";
+                        var senddata = {  applicationId:@Model.Application.Id, method: "ONE", viewMetaCode: item.viewMetaCode, metaCode:item.metaCode };
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(senddata),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                         });
 
                     };
 
-                    var deleteallfunc = function () {
+                    var deleteallfunc = function ()
+                    {
 
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteUserinterface";
+                        var senddata = {  applicationId:@Model.Application.Id, method: "ALL", viewMetaCode: item.viewMetaCode, metaCode: item.metaCode };
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(senddata),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
 
                     };
 
                     if (existsonmultiple) {
                         $('#delete_ui_modal_one').off('click', deleteonefunc);
+                        $('#delete_ui_modal_one').off().on('click', deleteonefunc);
+                        $('#delete_ui_modal_all').off('click', deleteallfunc);
                         $('#delete_ui_modal_all').off().on('click', deleteallfunc);
                         $("#delete_ui_modal").modal();
                     } else {

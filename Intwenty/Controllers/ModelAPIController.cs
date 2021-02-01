@@ -468,6 +468,159 @@ namespace Intwenty.Controllers
 
         }
 
+
+        /// <summary>
+        /// Create a userinterface
+        /// </summary>
+        [HttpPost("/Model/API/CreateUserinterface")]
+        public IActionResult CreateUserinterface([FromBody] UserinterfaceCreateVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel  = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var client = DataRepository.GetDataClient();
+                
+
+                var entity = new UserInterfaceItem();
+                if (!string.IsNullOrEmpty(model.MetaCode) && model.Method == "reuse")
+                {
+                    UserInterfaceModelItem current = null;
+                    foreach (var t in appmodel.Views)
+                    {
+                        foreach (var s in t.UserInterface)
+                        {
+                            if (s.MetaCode == model.MetaCode)
+                                current = s;
+
+                        }
+
+                    }
+
+                    if (current == null)
+                        return BadRequest();
+
+                    entity.SystemMetaCode = appmodel.System.MetaCode;
+                    entity.AppMetaCode = appmodel.Application.MetaCode;
+                    entity.MetaType = current.MetaType;
+                    entity.MetaCode = current.MetaCode;
+                    entity.DataTableMetaCode = current.DataTableMetaCode;
+                    entity.ViewMetaCode = model.ViewMetaCode;
+
+                    client.Open();
+                    client.InsertEntity(entity);
+                    client.Close();
+
+                    ModelRepository.ClearCache();
+                    
+
+                }
+                else
+                {
+                    entity.SystemMetaCode = appmodel.System.MetaCode;
+                    entity.AppMetaCode = appmodel.Application.MetaCode;
+                    if (model.UIType == "1")
+                        entity.MetaType = UserInterfaceModelItem.MetaTypeListInterface;
+                    else
+                        entity.MetaType = UserInterfaceModelItem.MetaTypeInputInterface;
+
+                    entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    entity.DataTableMetaCode = model.DataTableMetaCode;
+                    entity.ViewMetaCode = model.ViewMetaCode;
+
+                    client.Open();
+                    client.InsertEntity(entity);
+                    client.Close();
+
+                    ModelRepository.ClearCache();
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating a userinterface.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+        /// <summary>
+        /// Delete userinterface
+        /// </summary>
+        [HttpPost("/Model/API/DeleteUserinterface")]
+        public IActionResult DeleteUserinterface([FromBody] UserinterfaceDeleteVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var t in appmodel.Views)
+                {
+                    foreach (var s in t.UserInterface)
+                    {
+                      
+                            if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
+                            {
+                                //Delete
+                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+                                
+                            }
+
+                            if (model.MetaCode == s.MetaCode && model.Method == "ALL")
+                            {
+                                //Delete
+                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+
+                            }
+                        
+
+                    }
+
+                }
+
+                client.Close();
+                ModelRepository.ClearCache();
+
+              
+
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating a userinterface.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+
         /// <summary>
         /// Get UI view model for application with id and the viewtype
         /// </summary>
