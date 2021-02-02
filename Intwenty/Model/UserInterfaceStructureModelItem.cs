@@ -373,100 +373,20 @@ namespace Intwenty.Model
             }
         }
 
-        public string DataTableDbName
-        {
-            get 
-            { 
-                if (IsDataTableConnected)
-                    return DataTableInfo.DbName;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataColumnDbName => DataColumn1DbName;
-        public string DataColumn1DbName
-        {
-            get
-            {
-                if (IsDataColumn1Connected)
-                    return DataColumn1Info.DbName;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataColumn2DbName
-        {
-            get
-            {
-                if (IsDataColumn2Connected)
-                    return DataColumn2Info.DbName;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataViewTitle
-        {
-            get
-            {
-                if (IsDataViewConnected)
-                    return DataViewInfo.Title;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataViewColumnDbName => DataViewColumn1DbName;
-        public string DataViewColumn1DbName
-        {
-            get
-            {
-                if (IsDataViewColumn1Connected)
-                    return DataViewColumn1Info.SQLQueryFieldName;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataViewColumn2DbName
-        {
-            get
-            {
-                if (IsDataViewColumn2Connected)
-                    return DataViewColumn2Info.SQLQueryFieldName;
-
-                return string.Empty;
-            }
-        }
-
-        public string DataViewColumnTitle => DataViewColumn1Title;
-        public string DataViewColumn1Title
-        {
-            get
-            {
-                if (IsDataViewColumn1Connected)
-                    return DataViewColumn1Info.Title;
-
-                return string.Empty;
-            }
-        }
-
+        public string DataTableDbName { get; set; }
        
+        public string DataColumnDbName => DataColumn1DbName;
+        public string DataColumn1DbName { get; set; }
+        public string DataColumn2DbName { get; set; }
+        public string DataViewTitle { get; set; }
+        public string DataViewColumnDbName => DataViewColumn1DbName;
+        public string DataViewColumn1DbName { get; set; }
+        public string DataViewColumn2DbName { get; set; }
+        public string DataViewColumnTitle => DataViewColumn1Title;
+        public string DataViewColumn1Title { get; set; }
 
+        public string DataViewColumn2Title { get; set; }
 
-
-        public string DataViewColumn2Title
-        {
-            get
-            {
-                if (IsDataViewColumn2Connected)
-                    return DataViewColumn2Info.Title;
-
-                return string.Empty;
-            }
-        }
 
         public bool HasSystemInfo
         {

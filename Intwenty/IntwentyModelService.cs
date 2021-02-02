@@ -1055,13 +1055,16 @@ namespace Intwenty
                             item.SystemInfo = app.SystemInfo;
                             item.DataTableInfo = userinterface.DataTableInfo;
                             item.DataTableMetaCode = userinterface.DataTableMetaCode;
-
+                            item.DataTableDbName = userinterface.DataTableInfo.DbName;
 
                             if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
                             {
                                 var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
                                 if (dinf != null)
+                                {
                                     item.DataColumn1Info = dinf;
+                                    item.DataColumn1DbName = dinf.DbName;
+                                }
 
                                 if (item.DataColumn1Info != null && item.DataTableInfo == null)
                                 {
@@ -1086,30 +1089,109 @@ namespace Intwenty
                             {
                                 var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn2MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
                                 if (dinf != null)
+                                {
                                     item.DataColumn2Info = dinf;
+                                    item.DataColumn2DbName = dinf.DbName;
+                                }
                             }
 
                             if (!string.IsNullOrEmpty(item.DataViewMetaCode))
                             {
                                 var vinf = dataviews.Find(p => p.MetaCode == item.DataViewMetaCode && p.IsRoot);
                                 if (vinf != null)
+                                {
                                     item.DataViewInfo = vinf;
+                                    item.DataViewTitle = vinf.Title;
+
+                                }
 
                                 if (!string.IsNullOrEmpty(item.DataViewColumn1MetaCode))
                                 {
                                     vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn1MetaCode && !p.IsRoot);
                                     if (vinf != null)
+                                    {
                                         item.DataViewColumn1Info = vinf;
+                                        item.DataViewColumn1DbName = vinf.SQLQueryFieldName;
+                                        item.DataViewColumn1Title = vinf.Title;
+                                    }
                                 }
                                 if (!string.IsNullOrEmpty(item.DataViewColumn2MetaCode))
                                 {
                                     vinf = dataviews.Find(p => p.MetaCode == item.DataViewColumn2MetaCode && !p.IsRoot);
                                     if (vinf != null)
+                                    {
                                         item.DataViewColumn2Info = vinf;
+                                        item.DataViewColumn2DbName = vinf.SQLQueryFieldName;
+                                        item.DataViewColumn2Title = vinf.Title;
+                                    }
                                 }
                             }
                             
                         }
+
+
+                        //BUILD UI STRUCTURE
+
+
+                        foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                        {
+                            if (uic.IsMetaTypeSection)
+                            {
+                                var sect = new UISection() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
+                                sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE", "TRUE");
+                                sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
+                                userinterface.Sections.Add(sect);
+                            }
+                        }
+
+                        foreach (var section in userinterface.Sections)
+                        {
+
+                            foreach (var uicomp in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                            {
+                                if (uicomp.ParentMetaCode == section.MetaCode || section.Id == 0)
+                                {
+
+                                    if (uicomp.IsMetaTypePanel)
+                                    {
+                                        var pnl = new UIPanel() { Id = uicomp.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, Title = uicomp.Title, ParentMetaCode = section.MetaCode, Properties = uicomp.Properties };
+                                        pnl.BuildPropertyList();
+                                        section.LayoutPanels.Add(pnl);
+                                        foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                                        {
+
+                                            if (uic.ParentMetaCode != pnl.MetaCode)
+                                                continue;
+
+
+                                            pnl.Controls.Add(uic);
+
+                                            LayoutRow lr = section.LayoutRows.Find(p => p.RowOrder == uic.RowOrder);
+                                            if (lr == null)
+                                            {
+                                                lr = new LayoutRow() { RowOrder = uic.RowOrder };
+                                                section.LayoutRows.Add(lr);
+
+                                            }
+
+                                            uic.BuildPropertyList();
+                                            lr.UserInputs.Add(uic);
+
+
+                                        }
+                                    }
+                                }
+                            }
+
+                            section.LayoutPanelCount = userinterface.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
+                        }
+
+
+
+
+
+                        //--------------------------------------------------
+
                     }
                 }
                    

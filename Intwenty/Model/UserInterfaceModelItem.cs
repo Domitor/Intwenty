@@ -21,6 +21,7 @@ namespace Intwenty.Model
         {
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
+            Sections = new List<UISection>();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -43,6 +44,7 @@ namespace Intwenty.Model
             }
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
+            Sections = new List<UISection>();
         }
 
         private void SetEmptyStrings()
@@ -56,16 +58,18 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
+        public bool ShowComponents { get; set; }
+        public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
+        public List<UISection> Sections { get; set; }
+        public List<IntwentyProperty> PropertyCollection { get; set; }
+        public List<IntwentyMetaType> UIControls { get; set; }
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string DataTableMetaCode { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
-
         public string ViewMetaCode { get; set; }
-
-        public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public int PageSize { get; set; }
       
   
@@ -173,6 +177,7 @@ namespace Intwenty.Model
             return res;
         }
 
+        /*
         public List<UISection> GetSections()
         {
 
@@ -218,7 +223,7 @@ namespace Intwenty.Model
 
 
         }
-
+        */
        
 
 
@@ -227,31 +232,66 @@ namespace Intwenty.Model
 
     public class UISection : HashTagPropertyObject, ILocalizableTitle
     {
+        public int Id { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string Title { get; set; }
         public string LocalizedTitle { get; set; }
-        public List<UIPanel> Panels { get; set; }
+        public int RowOrder { get; set; }
+        public int ColumnOrder { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
+        public int LayoutPanelCount { get; set; }
+        public bool Collapsible { get; set; }
+        public bool StartExpanded { get; set; }
+        public bool IsRemoved { get; set; }
+        public List<UIPanel> LayoutPanels { get; set; }
+        public List<LayoutRow> LayoutRows { get; set; }
 
         public UISection()
         {
-            Panels = new List<UIPanel>();
+            Title = "";
+            ParentMetaCode = "";
+            MetaCode = "";
+            LayoutPanels = new List<UIPanel>();
+            LayoutRows = new List<LayoutRow>();
+
         }
+       
     }
 
     public class UIPanel : HashTagPropertyObject, ILocalizableTitle
     {
+        public int Id { get; set; }
+        public int ColumnOrder { get; set; }
+        public int RowOrder { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string Title { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
         public string LocalizedTitle { get; set; }
 
         public bool UseFieldSet { get; set; }
 
-        public List<IUIControl> Controls { get; set; }
+        public List<UserInterfaceStructureModelItem> Controls { get; set; }
 
         public UIPanel()
         {
-            Controls = new List<IUIControl>();
+            Controls = new List<UserInterfaceStructureModelItem>();
         }
     }
+
+    public class LayoutRow
+    {
+        public int RowOrder { get; set; }
+
+        public List<UserInterfaceStructureModelItem> UserInputs { get; set; }
+
+        public LayoutRow()
+        {
+            UserInputs = new List<UserInterfaceStructureModelItem>();
+        }
+    }
+
+   
 
 }
