@@ -197,11 +197,11 @@
                                                             </div>
 
                                                             <div v-if="input.metaType==='LABEL'">
-                                                                <p>Label for: {{input.columnName}}</p>
+                                                                <p>Label for: {{input.dataColumn1DbName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='TEXTBLOCK'">
-                                                                <p>Text block for: {{input.columnName}}</p>
+                                                                <p>Text block for: {{input.dataColumn1DbName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='STATICHTML'">
@@ -308,7 +308,7 @@
 
                                 <div class="form-group" v-if="showSettingDbTable">
                                     <label class="control-label">Set database table</label>
-                                    <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
+                                    <select v-model="active_setting_input.dataTableDbName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
                                         <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
                                     </select>
                                 </div>
@@ -329,26 +329,26 @@
 
                                 <div class="form-group" v-if="showSettingDbColumn">
                                     <label class="control-label">Set database column</label>
-                                    <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    <select v-model="active_setting_input.dataColumn1DbName" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="model.control-label">Set view column (Key)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName" class="form-control form-control-sm">
+                                    <select v-model="active_setting_input.dataViewColumn1DbName" class="form-control form-control-sm">
                                         <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                                     </select>
                                 </div>
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="control-label">Set database column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="control-label">Set view column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName2" class="form-control form-control-sm">
+                                    <select v-model="active_setting_input.dataViewColumn2DbName" class="form-control form-control-sm">
                                         <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                                     </select>
                                 </div>
@@ -453,16 +453,13 @@
                 setUserInput: function (input, metatype)
                 {
                     input.metaType = metatype;
-                    if (!input.metaType.includes("EDITGRID"))
-                        input.tableName = this.defaultTable.dbName;
-
+                    input.dataTableDbName = this.defaultTable.dbName;
                     this.openSettingsDlg(input);
                 },
                 openSettingsDlg(input)
                 {
                     this.active_setting_input = input;
-                    if (!this.active_setting_input.metaType.includes("EDITGRID"))
-                        this.active_setting_input.tableName = this.defaultTable.dbName;
+                    this.active_setting_input.dataTableDbName = this.defaultTable.dbName;
                     this.initializePropertyUI(this.active_setting_input);
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
@@ -508,13 +505,6 @@
                     this.model.sections.push(sect);
                     this.layoutClassChanged(sect);
                     this.addLayoutRow(sect);
-                },
-                addListViewField: function () {
-                    this.model.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "EDITLISTVIEWCOLUMN" });
-                },
-                addEditGridColumn: function (metatype)
-                {
-                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: metatype, metaCode: "", parentMetaCode:"", tableName:this.active_setting_input.tableName });
                 },
                 dbColumns: function (tablename) {
                     for (var i = 0; i < this.dbtables.length; i++)

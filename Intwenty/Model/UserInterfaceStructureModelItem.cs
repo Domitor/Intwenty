@@ -115,9 +115,7 @@ namespace Intwenty.Model
         public string DataColumn2MetaCode { get; set; }
         public string DataViewColumn1MetaCode { get; set; }
         public string DataViewColumn2MetaCode { get; set; }
-        public string TableName => DataTableDbName;
         public string DataTableDbName { get; set; }
-        public string ColumnName => DataColumn1DbName;
         public string DataColumnDbName => DataColumn1DbName;
         public string DataColumn1DbName { get; set; }
         public string DataColumn2DbName { get; set; }
@@ -141,7 +139,7 @@ namespace Intwenty.Model
         public List<IUIControl> Children { get; set; }
         public string UserInterfaceMetaCode { get; set; }
         public string JavaScriptObjectName { get; set; }
-
+        public bool IsRemoved { get; set; }
 
         public override string ModelCode
         {

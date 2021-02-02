@@ -270,6 +270,7 @@ namespace Intwenty.Model
         public string ParentMetaCode { get; set; }
         public string LocalizedTitle { get; set; }
         public bool UseFieldSet { get; set; }
+        public bool IsRemoved { get; set; }
 
         public List<UserInterfaceStructureModelItem> Controls { get; set; }
 

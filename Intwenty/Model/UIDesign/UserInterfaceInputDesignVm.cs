@@ -17,15 +17,13 @@ namespace Intwenty.Model.UIDesign
         public List<IntwentyProperty> PropertyCollection { get; set; }
         public List<IntwentyMetaType> UIControls { get; set; }
 
-        public UserInterfaceInputDesignVm(string metacode)
+        public UserInterfaceInputDesignVm()
         {
-            Sections = new List<UISection>();
-            MetaType = UserInterfaceModelItem.MetaTypeInputInterface;
-            MetaCode = metacode;
-            Properties = "";
-
             PropertyCollection = IntwentyRegistry.IntwentyProperties;
             UIControls = new List<IntwentyMetaType>();
+            Sections = new List<UISection>();
+            MetaType = UserInterfaceModelItem.MetaTypeInputInterface;
+            Properties = "";
 
             var temp = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.ModelCode == "UISTRUCTUREMODEL").ToList();
 
