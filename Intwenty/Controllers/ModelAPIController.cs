@@ -847,12 +847,15 @@ namespace Intwenty.Controllers
             if (uimodel == null)
                 return BadRequest();
 
-            var model = InputUIDesignerModelCreator.GetDesignerModel(appmodel, uimodel);
+            var model = new UserInterfaceInputDesignVm(uimodel.MetaCode);
+            model.ApplicationId = appmodel.Application.Id;
+            model.Sections = uimodel.Sections;
 
             return new JsonResult(model);
 
         }
 
+        /*
       
         [HttpPost("/Model/API/SaveApplicationInputUI")]
         public IActionResult SaveApplicationInputUI([FromBody] UserInterfaceInputDesignVm model)
@@ -981,6 +984,7 @@ namespace Intwenty.Controllers
             }
 
         }
+        */
 
         /*
       [HttpPost("/Model/API/SaveListViewModel")]

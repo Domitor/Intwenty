@@ -93,6 +93,14 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(UserInterfaceMetaCode)) SystemMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(DataTableDbName)) DataTableDbName = string.Empty;
+            if (string.IsNullOrEmpty(DataColumn1DbName)) DataColumn1DbName = string.Empty;
+            if (string.IsNullOrEmpty(DataColumn2DbName)) DataColumn2DbName = string.Empty;
+            if (string.IsNullOrEmpty(DataViewTitle)) DataViewTitle = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn1DbName)) DataViewColumn1DbName = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn2DbName)) DataViewColumn2DbName = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn1Title)) DataViewColumn1Title = string.Empty;
+            if (string.IsNullOrEmpty(DataViewColumn2Title)) DataViewColumn2Title = string.Empty;
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -107,6 +115,19 @@ namespace Intwenty.Model
         public string DataColumn2MetaCode { get; set; }
         public string DataViewColumn1MetaCode { get; set; }
         public string DataViewColumn2MetaCode { get; set; }
+        public string TableName => DataTableDbName;
+        public string DataTableDbName { get; set; }
+        public string ColumnName => DataColumn1DbName;
+        public string DataColumnDbName => DataColumn1DbName;
+        public string DataColumn1DbName { get; set; }
+        public string DataColumn2DbName { get; set; }
+        public string DataViewTitle { get; set; }
+        public string DataViewColumnDbName => DataViewColumn1DbName;
+        public string DataViewColumn1DbName { get; set; }
+        public string DataViewColumn2DbName { get; set; }
+        public string DataViewColumnTitle => DataViewColumn1Title;
+        public string DataViewColumn1Title { get; set; }
+        public string DataViewColumn2Title { get; set; }
         public int ColumnOrder { get; set; }
         public int RowOrder { get; set; }
         public string Domain { get; set; }
@@ -120,6 +141,7 @@ namespace Intwenty.Model
         public List<IUIControl> Children { get; set; }
         public string UserInterfaceMetaCode { get; set; }
         public string JavaScriptObjectName { get; set; }
+
 
         public override string ModelCode
         {
@@ -373,19 +395,7 @@ namespace Intwenty.Model
             }
         }
 
-        public string DataTableDbName { get; set; }
-       
-        public string DataColumnDbName => DataColumn1DbName;
-        public string DataColumn1DbName { get; set; }
-        public string DataColumn2DbName { get; set; }
-        public string DataViewTitle { get; set; }
-        public string DataViewColumnDbName => DataViewColumn1DbName;
-        public string DataViewColumn1DbName { get; set; }
-        public string DataViewColumn2DbName { get; set; }
-        public string DataViewColumnTitle => DataViewColumn1Title;
-        public string DataViewColumn1Title { get; set; }
-
-        public string DataViewColumn2Title { get; set; }
+      
 
 
         public bool HasSystemInfo

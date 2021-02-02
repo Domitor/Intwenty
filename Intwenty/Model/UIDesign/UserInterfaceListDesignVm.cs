@@ -545,7 +545,7 @@ namespace Intwenty.Model.UIDesign
         public string MetaType { get; set; }
         public string MetaCode { get; set; }
         public bool ShowComponents { get; set; }
-        public List<Section> Sections { get; set; }
+        public List<UISection> Sections { get; set; }
         public List<IntwentyProperty> PropertyCollection { get; set; }
         public List<ListViewFieldVm> Fields { get; set; }
         public List<IntwentyMetaType> UIControls { get; set; }
@@ -554,7 +554,7 @@ namespace Intwenty.Model.UIDesign
         public UserInterfaceListDesignVm()
         {
             ApplicationTitle = "";
-            Sections = new List<Section>();
+            Sections = new List<UISection>();
             ViewType = "";
             DesignerTitle = "";
             Title = "";

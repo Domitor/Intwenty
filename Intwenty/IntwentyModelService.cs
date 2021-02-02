@@ -1004,9 +1004,6 @@ namespace Intwenty
             Client.Close();
 
            
-
-        
-
             foreach (var app in apps)
             {
                 foreach (var appview in application_views.Where(p=> p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode)) 
@@ -1155,6 +1152,8 @@ namespace Intwenty
                                     if (uicomp.IsMetaTypePanel)
                                     {
                                         var pnl = new UIPanel() { Id = uicomp.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, Title = uicomp.Title, ParentMetaCode = section.MetaCode, Properties = uicomp.Properties };
+                                        if (!string.IsNullOrEmpty(pnl.Title))
+                                            pnl.UseFieldSet = true;
                                         pnl.BuildPropertyList();
                                         section.LayoutPanels.Add(pnl);
                                         foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
@@ -1163,6 +1162,12 @@ namespace Intwenty
                                             if (uic.ParentMetaCode != pnl.MetaCode)
                                                 continue;
 
+                                            if (userinterface.IsMetaTypeInputInterface)
+                                                uic.JavaScriptObjectName = "model";
+                                            if (userinterface.IsMetaTypeListInterface)
+                                                uic.JavaScriptObjectName = "item";
+
+                                            uic.ColumnOrder = pnl.ColumnOrder;
 
                                             pnl.Controls.Add(uic);
 

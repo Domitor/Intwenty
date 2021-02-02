@@ -58,7 +58,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
-        public bool ShowComponents { get; set; }
+
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public List<UISection> Sections { get; set; }
         public List<IntwentyProperty> PropertyCollection { get; set; }
@@ -269,7 +269,6 @@ namespace Intwenty.Model
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string LocalizedTitle { get; set; }
-
         public bool UseFieldSet { get; set; }
 
         public List<UserInterfaceStructureModelItem> Controls { get; set; }

@@ -59,15 +59,15 @@
     {
         if (iface.IsMetaTypeInputInterface)
         {
-            @foreach (var sect in iface.GetSections())
+            @foreach (var sect in iface.Sections)
             {
 
                 <div class="row">
 
-                    @foreach (var pl in sect.Panels)
+                    @foreach (var pl in sect.LayoutPanels)
                     {
 
-                        <div class="col-md-@(12/sect.Panels.Count)">
+                        <div class="col-md-@(12/sect.LayoutPanels.Count)">
 
                             @if (pl.UseFieldSet)
                             {
