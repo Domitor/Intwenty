@@ -3,27 +3,6 @@
 
 @{
     var title = "";
-    //var view = Model.UIViews.Find(p => p.IsMetaTypeEditView);
-    Intwenty.Model.UIRendering.UIView view = null;
-    if (view != null)
-    {
-        title = view.LocalizedTitle;
-        if (string.IsNullOrEmpty(title))
-        {
-            title = "Edit";
-        }
-    }
-    else
-    {
-        //view = Model.UIViews.Find(p => p.IsMetaTypeCreateView);
-        view = null;
-        if (view != null)
-        {
-            title = "Edit";
-        }
-
-    }
-
     ViewData["Title"] = title;
 
 }
@@ -51,16 +30,19 @@
 
     <br />
 
+    <div class="form-group">
+        <label class="control-label">
+            Column 1 <span style="color: red"> *</span>
+        </label>
+        <input id="col1_id" type="text" class="form-control form-control-sm" v-model="model.tableName.Column1" />
+    </div>
 
-    @if (view != null)
-    {
-        @await Html.PartialAsync("_DefaultAppUI", view);
-    }
-    else
-    {
-        <h3>There's no 'edit' view model defined for this application yet.</h3>
-    }
-
+    <div class="form-group">
+        <label class="control-label">
+            Column 2 <span style="color: red"> *</span>
+        </label>
+        <input id="col2_id" type="text" class="form-control form-control-sm" v-model="model.tableName.Column2" />
+    </div>
 
 </div>
 
