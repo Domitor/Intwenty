@@ -40,6 +40,7 @@ namespace Intwenty.Model
             TitleLocalizationKey = entity.TitleLocalizationKey;
             SystemMetaCode = entity.SystemMetaCode;
             AppMetaCode = entity.AppMetaCode;
+            MetaCode = entity.MetaCode;
             ParentMetaCode = "ROOT";
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;

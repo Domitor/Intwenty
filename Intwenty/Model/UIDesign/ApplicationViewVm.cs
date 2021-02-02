@@ -10,5 +10,9 @@ namespace Intwenty.Model.UIDesign
         public string Title { get; set; }
 
         public string Path { get; set; }
+
+        public bool IsPrimary { get; set; }
+
+        public bool IsPublic { get; set; }
     }
 }

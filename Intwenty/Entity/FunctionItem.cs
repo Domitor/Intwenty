@@ -23,8 +23,11 @@ namespace Intwenty.Entity
         public string MetaCode { get; set; }
         [NotNull]
         public string MetaType { get; set; }
+        [NotNull]
         public string ViewMetaCode{ get; set; }
+        [NotNull]
         public string DataTableMetaCode { get; set; }
+        [NotNull]
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
         public int RequiredAuthorization { get; set; }

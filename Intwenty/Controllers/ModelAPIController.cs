@@ -436,8 +436,78 @@ namespace Intwenty.Controllers
 
             try
             {
-                var t = ModelRepository.GetApplicationModel(model.ApplicationId);
-                ModelRepository.SaveApplicationView(new ViewModel() { Path = model.Path, Title = model.Title, AppMetaCode = t.Application.MetaCode, SystemMetaCode=t.System.MetaCode });
+               
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var entity = new ViewItem();
+                entity.SystemMetaCode = appmodel.System.MetaCode;
+                entity.AppMetaCode = appmodel.Application.MetaCode;
+                entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                entity.MetaType = ViewModel.MetaTypeUIView;
+                entity.Path = model.Path;
+                entity.Title = model.Title;
+                entity.IsPrimary = model.IsPrimary;
+                entity.IsPublic = model.IsPublic;
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                client.InsertEntity(entity);
+                client.Close();
+
+                ModelRepository.ClearCache();
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating an application view.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+
+        /// <summary>
+        /// Create an application view
+        /// </summary>
+        [HttpPost("/Model/API/EditApplicationView")]
+        public IActionResult EditApplicationView([FromBody] ApplicationViewVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                var entities = client.GetEntities<ViewItem>();
+                client.Close();
+
+                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.Id == model.Id);
+                if (entity == null)
+                    return BadRequest();
+
+                entity.Path = model.Path;
+                entity.Title = model.Title;
+                entity.IsPrimary = model.IsPrimary;
+                entity.IsPublic = model.IsPublic;
+
+                client.Open();
+                client.UpdateEntity(entity);
+                client.Close();
+
+                ModelRepository.ClearCache();
 
             }
             catch (Exception ex)
@@ -499,9 +569,7 @@ namespace Intwenty.Controllers
                         {
                             if (s.MetaCode == model.MetaCode)
                                 current = s;
-
                         }
-
                     }
 
                     if (current == null)
@@ -605,6 +673,146 @@ namespace Intwenty.Controllers
                 ModelRepository.ClearCache();
 
               
+
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating a userinterface.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+        /// <summary>
+        /// Create a userinterface
+        /// </summary>
+        [HttpPost("/Model/API/CreateFunction")]
+        public IActionResult CreateFunction([FromBody] FunctionVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var entity = new FunctionItem();
+                entity.SystemMetaCode = appmodel.System.MetaCode;
+                entity.AppMetaCode = appmodel.Application.MetaCode;
+                entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                entity.MetaType = model.FunctionType;
+                entity.Path = model.Path;
+                entity.Title = model.Title;
+                entity.ViewMetaCode = model.ViewMetaCode;
+                entity.DataTableMetaCode = model.DataTableMetaCode;
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                client.InsertEntity(entity);
+                client.Close();
+
+                ModelRepository.ClearCache();
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating a function.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+        /// <summary>
+        /// Create a userinterface
+        /// </summary>
+        [HttpPost("/Model/API/EditFunction")]
+        public IActionResult EditFunction([FromBody] FunctionVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                var entities = client.GetEntities<FunctionItem>();
+                client.Close();
+
+                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.ViewMetaCode == model.ViewMetaCode && p.MetaCode == model.MetaCode);
+                if (entity == null)
+                    return BadRequest();
+
+                entity.Title = model.Title;
+                entity.Path = model.Path;
+
+                client.Open();
+                client.UpdateEntity(entity);
+                client.Close();
+
+                ModelRepository.ClearCache();
+
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when creating a function.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+        /// <summary>
+        /// Delete userinterface
+        /// </summary>
+        [HttpPost("/Model/API/DeleteFunction")]
+        public IActionResult DeleteFunction([FromBody] FunctionVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+               
+                var client = DataRepository.GetDataClient();
+                client.Open();
+                var entities = client.GetEntities<FunctionItem>();
+                client.Close();
+
+                var entity = entities.Find(p => p.Id == model.Id);
+                if (entity == null)
+                    return BadRequest();
+
+              
+                client.Open();
+                client.DeleteEntity(entity);
+                client.Close();
+
+                ModelRepository.ClearCache();
 
 
             }

@@ -985,42 +985,7 @@ namespace Intwenty
 
         #region UI
 
-        public ModifyResult SaveApplicationView(ViewModel model)
-        {
-            ViewItem entity;
-
-            Client.Open();
-
-            if (model.Id > 0)
-            {
-                entity = Client.GetEntity<ViewItem>(model.Id);
-            }
-            else
-            {
-                entity = new ViewItem();
-                entity.MetaType = ViewModel.MetaTypeUIView;
-                entity.SystemMetaCode = model.SystemMetaCode;
-                entity.AppMetaCode = model.AppMetaCode;
-                entity.Description = model.Description;
-                entity.MetaCode = ViewModel.GetQuiteUniqueString();
-                
-                entity.Title = model.Title;
-                entity.Path = model.Path;
-                entity.IsPublic = model.IsPublic;
-                entity.IsPrimary = model.IsPrimary;
-
-                Client.InsertEntity(entity);
-
-            }
-
-            Client.Close();
-
-            ModelCache.Remove(AppModelCacheKey);
-            ModelCache.Remove(AppModelItemsCacheKey);
-
-            return new ModifyResult(true, MessageCode.RESULT, "A new application view was saved");
-
-        }
+      
 
 
 

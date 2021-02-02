@@ -12,7 +12,7 @@
             <div class="card-body">
                 Create and manage views for application <b>@Model.Application.Title</b>
                 <br />
-                First you define one or more views and then you create and connect user interfaces to the views. Views can share userinterfaces among them.
+                First you define one or more views and then you create and connect user interfaces to the views. Views can share user interfaces among them. For example a view used to create entities may share a user interface with a view to edit an entity.
             </div>
         </div>
 
@@ -37,7 +37,7 @@
             </thead>
             <tr v-for="item in datalist">
                 <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a></td>
-                <td><a v-bind:href="'/Model/EditApplicationView/' + item.id" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a></td>
+                <td><a href="#" role="button" class="btn btn-sm btn-secondary" v-on:click="openEditViewDlg(item)"><i class="fa fa-edit"></i></a></td>
                 <td>
                     <b>Title</b>
                     <br />
@@ -97,9 +97,13 @@
                         <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path" />
                     </div>
 
+                    <input type="checkbox" v-model="model.isPrimary" /> Is Primary
+                    <br />
+                    <input type="checkbox"  v-model="model.isPublic" /> Is Public
+
                 </div>
                 <div class="modal-footer">
-                    <button id="create_app_view_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Save</button>
+                    <button id="create_app_view_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal" :disabled="(model.title=='' || model.path=='')">Save</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -165,23 +169,35 @@
                 </div>
                 <div class="modal-body">
 
+                    <div class="alert alert-primary" v-if="functionsettings.functionType!=''">{{getFunctionDescription()}}</div>
                     <div class="form-group">
                         <label class="control-label">Function Type<span style="color: red"> *</span></label>
-                        <select class="form-control form-control-sm" v-model="functionsettings.functionType">
+                        <select class="form-control form-control-sm" v-model="functionsettings.functionType" :disabled="functionsettings.id>0">
                             <option v-for="item in functions" v-bind:value="item.metaCode">{{item.title}}</option>
                         </select>
                     </div>
+
+
                     <div class="form-group">
                         <label class="control-label">Data Table<span style="color: red"> *</span></label>
-                        <select class="form-control form-control-sm" v-model="functionsettings.datatable">
-                            <option v-for="item in datatables" v-bind:value="item">{{item.dbName}}</option>
+                        <select class="form-control form-control-sm" v-model="functionsettings.dataTableMetaCode" :disabled="functionsettings.id>0">
+                            <option v-for="item in datatables" v-bind:value="item.metaCode">{{item.dbName}}</option>
                         </select>
                     </div>
+
                     <div class="form-group">
+                        <label class="control-label">Button Text<span style="color: red"> *</span></label>
+                        <input id="functitle" type="text" class="form-control form-control-sm" v-model="functionsettings.title" />
+                    </div>
+
+
+                    <div class="form-group" v-if="functionHasPath()">
                         <label class="control-label">Path</label>
                         <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.path" />
                     </div>
+
                 </div>
+
                 <div class="modal-footer">
                     <button id="create_edit_function_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
@@ -230,16 +246,64 @@
             },
             methods:
             {
+                getFunctionDescription: function () {
+                    var context = this;
 
+                    if (context.functionsettings.functionType == 'CREATE')
+                        return "Adds a button to the view that navigates the user to the application's create view. Be sure to set the [path] to point at the view used to create entities";
+                    if (context.functionsettings.functionType == 'EDIT')
+                        return "Adds a button to the view that navigates the user to the application's edit view. Be sure to set the [path] to point at the view used to edit entities";
+                    if (context.functionsettings.functionType == 'NAVIGATE')
+                        return "Adds a button to the view that navigates the user to the [path]";
+                    if (context.functionsettings.functionType == 'EXPORT')
+                        return "Adds a button to the view that exports data to ms excel";
+                    if (context.functionsettings.functionType == 'SAVE')
+                        return "Adds a button to the view that triggers the save operation in the function table";
+                    if (context.functionsettings.functionType == 'DELETE')
+                        return "Adds a button to the view that triggers a delete operation in the function table";
+
+
+                    return "";
+                },
+                functionHasPath: function () {
+                    var context = this;
+
+                    if (context.functionsettings.functionType == 'CREATE')
+                        return true;
+                    if (context.functionsettings.functionType == 'EDIT')
+                        return true;
+                    if (context.functionsettings.functionType == 'NAVIGATE')
+                        return true;
+
+
+                    return false;
+                },
                 openAddFunctionDlg: function (item)
                 {
                     var context = this;
 
-                    context.functionsettings = { id:0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", functionType: "", path: ""};
+                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", functionType: "", path: "", title: "", dataTableMetaCode:"", metaCode:"" };
 
                     var yesfunc = function ()
                     {
+                       var baseurl = '@Url.Content("~/Model/API/")';
+                       var endpointurl = baseurl + "CreateFunction";
 
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.functionsettings),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
 
                     }
 
@@ -254,11 +318,28 @@
                 {
                     var context = this;
 
-                     context.functionsettings = { id:item.id, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Edit Function", functionType: item.metaCode, path: item.path};
+                    context.functionsettings = { id: item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, dlgHeader: "Edit Function", functionType: item.metaType, path: item.path, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode };
 
                     var yesfunc = function ()
                     {
+                         var baseurl = '@Url.Content("~/Model/API/")';
+                       var endpointurl = baseurl + "EditFunction";
 
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.functionsettings),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
 
                     }
 
@@ -266,6 +347,35 @@
                     $('#create_edit_function_modal_yesbtn').off('click', yesfunc);
                     $('#create_edit_function_modal_yesbtn').off().on('click', yesfunc);
                     $("#create_edit_function_modal").modal();
+
+
+                },
+                deleteFunction: function (item)
+                {
+                    var context = this;
+
+                    var yesfunc = function ()
+                    {
+                         var senddata = { id:item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, metaCode: item.metaCode };
+                        var baseurl = '@Url.Content("~/Model/API/")';
+                        var endpointurl = baseurl + "DeleteFunction";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(senddata),
+                            success: function (response) {
+                                context.datalist = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                         });
+                    }
+
+                    raiseYesNoModal("Delete function ?", "The function will be removed from the view, continue ?", yesfunc);
 
 
                 },
@@ -327,13 +437,49 @@
                 {
                     var context = this;
 
-                    context.model = {applicationId:@Model.Application.Id};
+                    context.model = { id:0, applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false};
 
                     var yesfunc = function ()
                     {
 
                        var baseurl = '@Url.Content("~/Model/API/")';
                        var endpointurl = baseurl + "CreateApplicationView";
+
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            success: function (response)
+                            {
+                                context.datalist = response;
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response.responseJSON);
+                            }
+                        });
+                    }
+
+
+                    $('#create_app_view_modal_yesbtn').off('click', yesfunc);
+                    $('#create_app_view_modal_yesbtn').off().on('click', yesfunc);
+                    $("#create_app_view_modal").modal();
+
+
+                },
+                openEditViewDlg: function (item)
+                {
+                    var context = this;
+
+                    context.model = { id: item.id, applicationId:@Model.Application.Id, metaCode: item.metaCode, path: item.path, title: item.title, isPublic: item.isPublic, isPrimary: item.isPrimary };
+
+                    var yesfunc = function ()
+                    {
+
+                       var baseurl = '@Url.Content("~/Model/API/")';
+                       var endpointurl = baseurl + "EditApplicationView";
 
 
                         $.ajax({
@@ -384,7 +530,7 @@
                         }
                     }
 
-                    var deleteonefunc = function ()
+                    var deleteone = function ()
                     {
 
                         var baseurl = '@Url.Content("~/Model/API/")';
@@ -406,7 +552,7 @@
 
                     };
 
-                    var deleteallfunc = function ()
+                    var deleteall = function ()
                     {
 
                         var baseurl = '@Url.Content("~/Model/API/")';
@@ -429,14 +575,14 @@
                     };
 
                     if (existsonmultiple) {
-                        $('#delete_ui_modal_one').off('click', deleteonefunc);
-                        $('#delete_ui_modal_one').off().on('click', deleteonefunc);
-                        $('#delete_ui_modal_all').off('click', deleteallfunc);
-                        $('#delete_ui_modal_all').off().on('click', deleteallfunc);
+                        $('#delete_ui_modal_one').off('click', deleteone);
+                        $('#delete_ui_modal_one').off().on('click', deleteone);
+                        $('#delete_ui_modal_all').off('click', deleteall);
+                        $('#delete_ui_modal_all').off().on('click', deleteall);
                         $("#delete_ui_modal").modal();
                     } else {
 
-                        raiseYesNoModal("Delete UI ?", "This will delete the userinterface and can not be undone, continue ?", deleteonefunc);
+                        raiseYesNoModal("Delete UI ?", "This will delete the userinterface and can not be undone, continue ?", deleteone);
                     }
 
                 },
@@ -446,6 +592,7 @@
 
                     var yesfunc = function ()
                     {
+
 
                         var baseurl = '@Url.Content("~/Model/API/")';
                         var endpointurl = baseurl + "DeleteApplicationView";
@@ -466,20 +613,6 @@
                     }
 
                     raiseYesNoModal("Delete application view ?", "This will delete the view and can not be undone, continue ?", yesfunc);
-
-
-                },
-                deleteFunction: function (item)
-                {
-                    var context = this;
-
-                    var yesfunc = function ()
-                    {
-
-
-                    }
-
-                    raiseYesNoModal("Delete function ?", "The function will be deleted, continue ?", yesfunc);
 
 
                 },
