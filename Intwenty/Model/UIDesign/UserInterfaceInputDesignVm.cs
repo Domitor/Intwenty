@@ -6,28 +6,13 @@ using System.Linq;
 namespace Intwenty.Model.UIDesign
 {
 
-    public static class InputUIModelCreator
+    public static class InputUIDesignerModelCreator
     {
 
-        public static List<UserInterfaceStructureModelItem> GetUIModel(UserInterfaceInputDesignVm model, ApplicationModel app, List<DataViewModelItem> views)
+        public static List<UserInterfaceStructureModelItem> ConvertDesignerModel(UserInterfaceInputDesignVm model, ApplicationModel app, List<DataViewModelItem> views)
         {
             var res = new List<UserInterfaceStructureModelItem>();
 
-            /*
-            var viewitem = app.UIStructure.Find(p => p.MetaType == model.MetaType);
-            if (viewitem == null)
-            {
-                viewitem = new UserInterfaceStructureModelItem(model.MetaType) { Id = -1, AppMetaCode = app.Application.MetaCode, MetaCode = "", ColumnOrder = 1, RowOrder = 1, Title = "", ParentMetaCode = BaseModelItem.MetaTypeRoot };
-                viewitem.MetaCode = BaseModelItem.GenerateNewMetaCode(viewitem);
-            }
-
-            if (viewitem == null)
-                return res;
-
-            viewitem.Properties = model.CompilePropertyString();
-            viewitem.Title = model.Title;
-
-            res.Add(viewitem);
 
             foreach (var section in model.Sections)
             {
@@ -35,7 +20,7 @@ namespace Intwenty.Model.UIDesign
                 if (section.Id == 0 && section.IsRemoved)
                     continue;
 
-                var sect = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = viewitem.MetaCode };
+                var sect = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = app.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = "ROOT" };
                 res.Add(sect);
                 if (sect.Id == 0)
                     sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
@@ -144,98 +129,14 @@ namespace Intwenty.Model.UIDesign
 
                             }
 
-                            if (dto.IsMetaTypeEditGrid)
-                            {
-                                DatabaseModelItem dt = null;
-                                if (!string.IsNullOrEmpty(input.TableName))
-                                {
-                                    dt = app.DataStructure.Find(p => p.DbName == input.TableName && p.IsMetaTypeDataTable);
-                                    if (dt != null)
-                                    {
-                                        dto.DataTableMetaCode = dt.MetaCode;
-                                    }
-                                }
-
-                                foreach (var tcol in input.Children)
-                                {
-                                    if (tcol.Id == 0 && tcol.IsRemoved)
-                                        continue;
-
-                                    var column = new UserInterfaceStructureModelItem(tcol.MetaType) { Id = tcol.Id, AppMetaCode = app.Application.MetaCode, MetaCode = tcol.MetaCode, ColumnOrder = tcol.ColumnOrder, RowOrder = tcol.RowOrder, Title = tcol.Title, ParentMetaCode = dto.MetaCode, Properties = tcol.CompilePropertyString() };
-                                    res.Add(column);
-
-                                    if (column.Id == 0)
-                                        column.MetaCode = BaseModelItem.GenerateNewMetaCode(column);
-
-                                    if (tcol.IsRemoved || input.IsRemoved)
-                                        column.AddUpdateProperty("REMOVED", "TRUE");
-
-                                    if (column.IsEditGridUIBindingType || column.IsEditGridUIComplexBindingType)
-                                    {
-                                        if (dt != null)
-                                        {
-                                            if (!string.IsNullOrEmpty(tcol.ColumnName))
-                                            {
-                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName && p.ParentMetaCode == dt.MetaCode && p.IsMetaTypeDataColumn);
-                                                if (dmc != null)
-                                                    column.DataColumn1MetaCode = dmc.MetaCode;
-                                            }
-                                        }
-
-                                        if (column.IsMetaTypeEditGridComboBox)
-                                        {
-                                            if (!string.IsNullOrEmpty(tcol.Domain))
-                                            {
-                                                column.Domain = "VALUEDOMAIN." + tcol.Domain;
-                                            }
-                                        }
-
-
-                                        if (column.IsMetaTypeEditGridLookUp)
-                                        {
-                                            if (!string.IsNullOrEmpty(tcol.ColumnName2) && dt != null)
-                                            {
-                                                var dmc = app.DataStructure.Find(p => p.DbName == tcol.ColumnName2 && p.ParentMetaCode == dt.MetaCode);
-                                                if (dmc != null)
-                                                    column.DataColumn2MetaCode = dmc.MetaCode;
-                                            }
-
-                                            if (!string.IsNullOrEmpty(tcol.DataViewMetaCode))
-                                            {
-                                                column.DataViewMetaCode = tcol.DataViewMetaCode;
-                                            }
-
-                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName) && !string.IsNullOrEmpty(tcol.DataViewMetaCode))
-                                            {
-                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.DataViewColumnName && p.ParentMetaCode == tcol.DataViewMetaCode);
-                                                if (dmc != null)
-                                                    column.DataViewColumn1MetaCode = dmc.MetaCode;
-                                            }
-
-                                            if (!string.IsNullOrEmpty(tcol.DataViewColumnName2) && !string.IsNullOrEmpty(tcol.DataViewMetaCode))
-                                            {
-                                                var dmc = views.Find(p => p.SQLQueryFieldName == tcol.DataViewColumnName2 && p.ParentMetaCode == tcol.DataViewMetaCode);
-                                                if (dmc != null)
-                                                    column.DataViewColumn2MetaCode = dmc.MetaCode;
-                                            }
-                                        }
-                                    }
-                                    else if (column.IsMetaTypeEditGridStaticHTML)
-                                    {
-                                        column.RawHTML = tcol.RawHTML;
-                                    }
-                                }
-
-
-                                
-                            }
+                         
                         }
 
                     } 
                 }
             }
 
-            */
+            
 
             return res;
 
@@ -243,14 +144,14 @@ namespace Intwenty.Model.UIDesign
 
       
 
-        public static UserInterfaceInputDesignVm GetUIVm(ApplicationModel app, List<UserInterfaceStructureModelItem> uistructure, string uimetacode)
+        public static UserInterfaceInputDesignVm GetDesignerModel(ApplicationModel app, UserInterfaceModelItem userinterface)
         {
-            var res = new UserInterfaceInputDesignVm(uimetacode);
+            var res = new UserInterfaceInputDesignVm(userinterface.MetaCode);
             res.ApplicationId = app.Application.Id;
             SetCollections(res);
             res.BuildPropertyList();
 
-           foreach (var uic in uistructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+           foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
            {
                if (uic.IsMetaTypeSection)
                {
@@ -264,7 +165,7 @@ namespace Intwenty.Model.UIDesign
            foreach (var section in res.Sections)
            {
 
-               foreach (var uicomp in uistructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+               foreach (var uicomp in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                {
                    if (uicomp.ParentMetaCode == section.MetaCode || section.Id == 0)
                    {
@@ -274,7 +175,7 @@ namespace Intwenty.Model.UIDesign
                            var pnl = new UserInput() { Id = uicomp.Id, ApplicationId = app.Application.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, MetaType = uicomp.MetaType, Title = uicomp.Title, ParentMetaCode = "ROOT", Properties = uicomp.Properties };
                            pnl.BuildPropertyList();
                            section.LayoutPanels.Add(pnl);
-                           foreach (var uic in uistructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                           foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                            {
 
                                if (uic.ParentMetaCode != pnl.MetaCode)
@@ -351,7 +252,7 @@ namespace Intwenty.Model.UIDesign
                    }
                }
 
-               section.LayoutPanelCount = uistructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
+               section.LayoutPanelCount = userinterface.UIStructure.Count(p => p.IsMetaTypePanel && p.ParentMetaCode == section.MetaCode);
            }
            
 

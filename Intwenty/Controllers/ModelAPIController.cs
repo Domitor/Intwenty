@@ -106,7 +106,7 @@ namespace Intwenty.Controllers
 
         #endregion
 
-        #region Applicaion models
+        #region Application models
 
         /// <summary>
         /// Get full model data for application with id
@@ -832,7 +832,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get UI view model for application with id and the viewtype
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationUI/{applicationid}/{uimetacode}")]
+        [HttpGet("/Model/API/GetApplicationInputUI/{applicationid}/{uimetacode}")]
         public IActionResult GetApplicationUI(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
@@ -841,15 +841,21 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
             var uimodel = appmodel.GetUserInterface(uimetacode);
-            var model = InputUIModelCreator.GetUIVm(appmodel, uimodel.UIStructure, uimetacode);
+            if (uimodel == null)
+                return BadRequest();
+
+            var model = InputUIDesignerModelCreator.GetDesignerModel(appmodel, uimodel);
+
             return new JsonResult(model);
 
         }
 
-        /*
-        [HttpPost("/Model/API/SaveUserInterfaceModel")]
-        public IActionResult SaveUserInterfaceModel([FromBody] UserInterfaceInputDesignVm model)
+      
+        [HttpPost("/Model/API/SaveApplicationInputUI")]
+        public IActionResult SaveApplicationInputUI([FromBody] UserInterfaceInputDesignVm model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -858,22 +864,111 @@ namespace Intwenty.Controllers
 
             try
             {
-                if (model.ApplicationId < 1)
-                    throw new InvalidOperationException("ApplicationId missing in model");
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+                var uimodel = appmodel.GetUserInterface(model.MetaCode);
+                if (uimodel == null)
+                    return BadRequest();
 
 
                 var views = ModelRepository.GetDataViewModels();
-                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-                if (app == null)
-                    throw new InvalidOperationException("Could not find application");
+                var uistructure = InputUIDesignerModelCreator.ConvertDesignerModel(model, appmodel, views);
 
-                var dtolist = UIModelCreator.GetUIModel(model, app, views);
+                var client = DataRepository.GetDataClient();
+                client.Open();
 
-                ModelRepository.SaveUserInterfaceModels(dtolist);
+                foreach (var t in uistructure)
+                {
+                    if (t.Id > 0 && t.HasProperty("REMOVED"))
+                    {
+                        var existing = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == t.Id);
+                        if (existing != null)
+                        {
+                            client.DeleteEntity(existing);
+                        }
+                    }
+                }
 
-                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-                var vm = UIModelCreator.GetUIVm(t, model.ViewType);
-                return new JsonResult(vm);
+                foreach (var uic in uistructure)
+                {
+                    if (uic.HasProperty("REMOVED"))
+                        continue;
+
+                    if (uic.Id < 1)
+                    {
+                        if (string.IsNullOrEmpty(uic.MetaType))
+                            throw new InvalidOperationException("Can't save an ui model item without a MetaType");
+
+                        if (string.IsNullOrEmpty(uic.ParentMetaCode))
+                            throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a ParentMetaCode");
+
+                        if (string.IsNullOrEmpty(uic.MetaCode))
+                            throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
+
+                       
+
+                        var entity = new UserInterfaceStructureItem()
+                        {
+                            SystemMetaCode = appmodel.System.MetaCode,
+                            AppMetaCode = uic.AppMetaCode,
+                            ColumnOrder = uic.ColumnOrder,
+                            DataTableMetaCode = uic.DataTableMetaCode,
+                            DataColumn1MetaCode = uic.DataColumn1MetaCode,
+                            DataColumn2MetaCode = uic.DataColumn2MetaCode,
+                            DataViewMetaCode = uic.DataViewMetaCode,
+                            DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode,
+                            DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode,
+                            Description = uic.Description,
+                            Domain = uic.Domain,
+                            MetaCode = uic.MetaCode,
+                            MetaType = uic.MetaType,
+                            ParentMetaCode = uic.ParentMetaCode,
+                            RowOrder = uic.RowOrder,
+                            Title = uic.Title,
+                            Properties = uic.Properties
+
+                        };
+
+                        client.InsertEntity(entity);
+
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == uic.Id);
+                        if (existing != null)
+                        {
+                            existing.Title = uic.Title;
+                            existing.RowOrder = uic.RowOrder;
+                            existing.ColumnOrder = uic.ColumnOrder;
+                            existing.DataColumn1MetaCode = uic.DataColumn1MetaCode;
+                            existing.DataColumn2MetaCode = uic.DataColumn2MetaCode;
+                            existing.DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode;
+                            existing.DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode;
+                            existing.Domain = uic.Domain;
+                            existing.DataTableMetaCode = uic.DataTableMetaCode;
+                            existing.DataViewMetaCode = uic.DataViewMetaCode;
+                            existing.Description = uic.Description;
+                            existing.Properties = uic.Properties;
+                            client.UpdateEntity(existing);
+                        }
+
+                    }
+
+                }
+
+                client.Close();
+
+                ModelRepository.ClearCache();
+
+                appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+                uimodel = appmodel.GetUserInterface(model.MetaCode);
+                if (uimodel == null)
+                    return BadRequest();
+                model = InputUIDesignerModelCreator.GetDesignerModel(appmodel, uimodel);
+                return new JsonResult(model);
 
             }
             catch (Exception ex)
@@ -887,44 +982,45 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost("/Model/API/SaveListViewModel")]
-        public IActionResult SaveListViewModel([FromBody] UserInterfaceInputDesignVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
+        /*
+      [HttpPost("/Model/API/SaveListViewModel")]
+      public IActionResult SaveListViewModel([FromBody] UserInterfaceInputDesignVm model)
+      {
+          if (!User.Identity.IsAuthenticated)
+              return Forbid();
+          if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+              return Forbid();
 
-            try
-            {
+          try
+          {
 
-                if (model.ApplicationId < 1)
-                    throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
+              if (model.ApplicationId < 1)
+                  throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
 
-                var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-                if (app == null)
-                    throw new InvalidOperationException("Could not find application");
+              var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+              if (app == null)
+                  throw new InvalidOperationException("Could not find application");
 
-                var dtolist = UIModelCreator.GetListViewUIModel(model, app);
-                ModelRepository.SaveUserInterfaceModels(dtolist);
+              var dtolist = UIModelCreator.GetListViewUIModel(model, app);
+              ModelRepository.SaveUserInterfaceModels(dtolist);
 
-                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-                var vm = UIModelCreator.GetUIVm(t, model.ViewType);
-                return new JsonResult(vm);
+              var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
+              var vm = UIModelCreator.GetUIVm(t, model.ViewType);
+              return new JsonResult(vm);
 
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
+          }
+          catch (Exception ex)
+          {
+              var r = new OperationResult();
+              r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
+              var jres = new JsonResult(r);
+              jres.StatusCode = 500;
+              return jres;
+          }
 
-            
-        }
-        */
+
+      }
+      */
         #endregion
 
         #region Value Domains
