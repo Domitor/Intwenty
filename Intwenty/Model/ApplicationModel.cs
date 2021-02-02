@@ -118,6 +118,23 @@ namespace Intwenty.Model
             return res;
         }
 
+        public UserInterfaceModelItem GetUserInterface(string metacode)
+        {
+           
+            foreach (var v in Views)
+            {
+                foreach (var ui in v.UserInterface)
+                {
+                    if (ui.MetaCode == metacode)
+                        return ui;
+
+                }
+
+            }
+
+            return null;
+        }
+
 
         /*
         /// <summary>

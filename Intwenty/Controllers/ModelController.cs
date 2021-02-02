@@ -92,28 +92,47 @@ namespace Intwenty.Controllers
         }
 
 
-        public IActionResult EditMainMenu()
+
+
+        [HttpGet("/Model/UserInterfaceInputDesign/{applicationid}/{uimetacode}")]
+        public IActionResult UserInterfaceInputDesign(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            return View();
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+
+            var model = appmodel.GetUserInterface(uimetacode);
+            if (model == null)
+                return BadRequest();
+
+
+
+            return View(model);
         }
 
-
-        [HttpGet("/Model/EditUI/{applicationid}/{viewtype}")]
-        public IActionResult EditUI(int applicationid, string viewtype)
+        [HttpGet("/Model/UserInterfaceListDesign/{applicationid}/{uimetacode}")]
+        public IActionResult UserInterfaceListDesign(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            ViewBag.SystemId = Convert.ToString(applicationid);
-            ViewBag.ViewType = viewtype;
-            return View();
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+
+            var model = appmodel.GetUserInterface(uimetacode);
+            if (model == null)
+                return BadRequest();
+
+
+            return View(model);
         }
 
         public IActionResult EditModelTranslations()

@@ -832,22 +832,24 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get UI view model for application with id and the viewtype
         /// </summary>
-        [HttpGet("/Model/API/GetApplicationUI/{applicationid}/{viewtype}")]
-        public IActionResult GetApplicationUI(int applicationid, string viewtype)
+        [HttpGet("/Model/API/GetApplicationUI/{applicationid}/{uimetacode}")]
+        public IActionResult GetApplicationUI(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            var model = UIModelCreator.GetUIVm(t, viewtype);
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            var uimodel = appmodel.GetUserInterface(uimetacode);
+            var model = InputUIModelCreator.GetUIVm(appmodel, uimodel.UIStructure, uimetacode);
             return new JsonResult(model);
 
         }
 
+        /*
         [HttpPost("/Model/API/SaveUserInterfaceModel")]
-        public IActionResult SaveUserInterfaceModel([FromBody] ViewVm model)
+        public IActionResult SaveUserInterfaceModel([FromBody] UserInterfaceInputDesignVm model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -886,7 +888,7 @@ namespace Intwenty.Controllers
         }
 
         [HttpPost("/Model/API/SaveListViewModel")]
-        public IActionResult SaveListViewModel([FromBody] ViewVm model)
+        public IActionResult SaveListViewModel([FromBody] UserInterfaceInputDesignVm model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -922,7 +924,7 @@ namespace Intwenty.Controllers
 
             
         }
-
+        */
         #endregion
 
         #region Value Domains

@@ -55,7 +55,8 @@
                     <table class="table table-borderless">
                         <tr v-for="ui in item.userInterface">
                             <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteUI(ui)"><i class="fa fa-trash"></i></a></td>
-                            <td style="width:30%"><a href="#" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
+                            <td style="width:30%" v-if="ui.isMetaTypeInputInterface"><a v-bind:href="'/Model/UserInterfaceInputDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
+                            <td style="width:30%" v-if="ui.isMetaTypeListInterface"><a v-bind:href="'/Model/UserInterfaceListDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
                             <td style="width:60%">{{ui.description}}</td>
                         </tr>
                     </table>

@@ -62,6 +62,7 @@ namespace Intwenty.Model
         public DatabaseModelItem DataTableInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
+
         public string ViewMetaCode { get; set; }
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
