@@ -262,8 +262,8 @@ namespace Intwenty.Model.UIDesign
         private static void SetCollections(UserInterfaceInputDesignVm res)
         {
             res.PropertyCollection = IntwentyRegistry.IntwentyProperties;
-            res.UIControls = new List<IntwentyMetaType>();
 
+            res.UIControls = new List<IntwentyMetaType>();
 
             var temp = IntwentyRegistry.IntwentyMetaTypes.Where(p => p.ModelCode == "UISTRUCTUREMODEL").ToList();
 
@@ -281,8 +281,6 @@ namespace Intwenty.Model.UIDesign
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextArea));
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBlock));
             res.UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBox));
-          
-
 
         }
 
