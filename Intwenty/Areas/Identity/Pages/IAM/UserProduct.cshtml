@@ -81,18 +81,15 @@
             <tr>
                 <th style="width:5%"></th>
                 <th style="width:30%">Name</th>
-                <th style="width:10%">Read</th>
-                <th style="width:10%">Modify</th>
-                <th style="width:10%">Delete</th>
+                <th style="width:30%">Status</th>
             </tr>
         </thead>
         <tbody v-for="item in model.systemAuthorizations">
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationName}}</td>
-                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
-                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
-                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
+                <td><span v-if="item.denyAuthorization">Denied</span><span v-if="!item.denyAuthorization">Authorized</span></td>
+
             </tr>
         </tbody>
     </table>
@@ -117,18 +114,14 @@
             <tr>
                 <th style="width:5%"></th>
                 <th style="width:30%">Name</th>
-                <th style="width:10%">Read</th>
-                <th style="width:10%">Modify</th>
-                <th style="width:10%">Delete</th>
+                <th style="width:30%">Status</th>
             </tr>
         </thead>
         <tbody v-for="item in model.applicationAuthorizations">
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationName}}</td>
-                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
-                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
-                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
+                <td><span v-if="item.denyAuthorization">Denied</span><span v-if="!item.denyAuthorization">Authorized</span></td>
             </tr>
         </tbody>
     </table>
@@ -155,18 +148,14 @@
             <tr>
                 <th style="width:5%"></th>
                 <th style="width:30%">Name</th>
-                <th style="width:10%">Read</th>
-                <th style="width:10%">Modify</th>
-                <th style="width:10%">Delete</th>
+                <th style="width:30%">Status</th>
             </tr>
         </thead>
         <tbody v-for="item in model.viewAuthorizations">
             <tr>
                 <td><div class="btn btn-sm btn-danger" v-on:click="removeAuthorizationItem(item)" title="Remove"><i class="fa fa-trash"></i></div></td>
                 <td>{{item.authorizationName}}</td>
-                <td><span v-if="item.read">Yes</span><span v-if="!item.read">No</span></td>
-                <td><span v-if="item.modify">Yes</span><span v-if="!item.modify">No</span></td>
-                <td><span v-if="item.delete">Yes</span><span v-if="!item.delete">No</span></td>
+                <td><span v-if="item.denyAuthorization">Denied</span><span v-if="!item.denyAuthorization">Authorized</span></td>
             </tr>
         </tbody>
     </table>
@@ -194,27 +183,22 @@
                         <select v-model="authorization.authorizationId" class="form-control form-control-sm">
                             <option v-for="item in authitem.systemItems" v-bind:value="item.id">{{item.name}}</option>
                         </select>
-                        <input type="checkbox" v-model="authorization.read" /> Read
-                        <input type="checkbox" v-model="authorization.modify" /> Modify
-                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                        <input type="checkbox" v-model="authorization.denyAuthorization" /> Deny
+
                     </div>
                     <div class="form-group" v-if="authorization.authorizationType=='APPLICATION'">
                         <label class="control-label">Select Application<span style="color: red"> *</span></label>
                         <select v-model="authorization.authorizationId" class="form-control form-control-sm">
                             <option v-for="item in authitem.applicationItems" v-bind:value="item.id">{{item.name}}</option>
                         </select>
-                        <input type="checkbox" v-model="authorization.read" /> Read
-                        <input type="checkbox" v-model="authorization.modify" /> Modify
-                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                        <input type="checkbox" v-model="authorization.denyAuthorization" /> Deny
                     </div>
-                    <div class="form-group" v-if="authorization.authorizationType=='VIEW'">
+                    <div class="form-group" v-if="authorization.authorizationType=='UIVIEW'">
                         <label class="control-label">Select View<span style="color: red"> *</span></label>
                         <select v-model="authorization.authorizationId" class="form-control form-control-sm">
                             <option v-for="item in authitem.viewItems" v-bind:value="item.id">{{item.name}}</option>
                         </select>
-                        <input type="checkbox" v-model="authorization.read" /> Read
-                        <input type="checkbox" v-model="authorization.modify" /> Modify
-                        <input type="checkbox" v-model="authorization.delete" /> Delete
+                        <input type="checkbox" v-model="authorization.denyAuthorization" /> Deny
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -320,7 +304,7 @@
                 addSystemAuth: function ()
                 {
                     var context = this;
-                    context.authorization = { authorizationType: "SYSTEM", authorizationId: 0, authorizationItemTypeName: "System", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
+                    context.authorization = { authorizationType: "SYSTEM", authorizationId: 0, authorizationItemTypeName: "System", userId: "", organizationId: 0, productId: "", denyAuthorization:false  }
 
                     var okfunc = function ()
                     {
@@ -356,7 +340,7 @@
                 },
                 addApplicationAuth: function () {
                      var context = this;
-                    context.authorization = { authorizationType: "APPLICATION", authorizationId: 0, authorizationItemTypeName: "Application", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
+                    context.authorization = { authorizationType: "APPLICATION", authorizationId: 0, authorizationItemTypeName: "Application", userId: "", organizationId: 0, productId: "", denyAuthorization:false }
 
                     var okfunc = function ()
                     {
@@ -394,7 +378,7 @@
                 addViewAuth: function ()
                 {
                      var context = this;
-                    context.authorization = { authorizationType: "VIEW", authorizationId: 0, authorizationItemTypeName: "View", userId:"", organizationId:0, productId:"", read:false, modify:false, delete:false }
+                    context.authorization = { authorizationType: "UIVIEW", authorizationId: 0, authorizationItemTypeName: "View", userId: "", organizationId: 0, productId: "", denyAuthorization:false }
 
                     var okfunc = function ()
                     {

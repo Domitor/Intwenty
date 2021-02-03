@@ -16,6 +16,8 @@ namespace Intwenty.Model.Dto
 
         public string UserId { get; set; }
 
+        public string OrganizationId { get; set; }
+
         public int ApplicationId { get; set; }
 
         public ApplicationData Data { get; set; }

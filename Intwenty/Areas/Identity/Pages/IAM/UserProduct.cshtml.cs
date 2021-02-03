@@ -50,7 +50,7 @@ namespace Intwenty.Areas.Identity.Pages
             var authorizations = await UserManager.GetExplicitUserAuthorizationsAsync(user, productid);
 
             result.RoleAuthorizations = authorizations.Where(p => p.AuthorizationType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
-            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "UIVIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
 
@@ -65,7 +65,7 @@ namespace Intwenty.Areas.Identity.Pages
                  roleItems= t.Where(p => p.AuthorizationType == "ROLE")
                 ,systemItems = t.Where(p => p.AuthorizationType == "SYSTEM")
                 ,applicationItems = t.Where(p => p.AuthorizationType == "APPLICATION")
-                ,viewItems = t.Where(p => p.AuthorizationType == "VIEW")
+                ,viewItems = t.Where(p => p.AuthorizationType == "UIVIEW")
             };
 
             return new JsonResult(authitems);
@@ -84,7 +84,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await UserManager.AddUpdateUserSystemAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await UserManager.AddUpdateUserSystemAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.UserId, model.OrganizationId, model.ProductId);
 
         }
@@ -93,7 +93,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await UserManager.AddUpdateUserApplicationAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await UserManager.AddUpdateUserApplicationAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.UserId, model.OrganizationId, model.ProductId);
 
         }
@@ -102,7 +102,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await UserManager.AddUpdateUserViewAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await UserManager.AddUpdateUserViewAuthorizationAsync(authitem.NormalizedName, model.UserId, model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.UserId, model.OrganizationId, model.ProductId);
 
         }

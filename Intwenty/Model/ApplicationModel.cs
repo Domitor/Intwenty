@@ -40,61 +40,8 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseCreateViewAuthorization
-        {
-            get
-            {
-                if (Application.CreateViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseEditViewAuthorization
-        {
-            get
-            {
-                if (Application.EditViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-
-        public bool UseEditListViewAuthorization
-        {
-            get
-            {
-                if (Application.EditListViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseDetailViewAuthorization
-        {
-            get
-            {
-                if (Application.DetailViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
-
-        public bool UseListViewAuthorization
-        {
-            get
-            {
-                if (Application.ListViewRequirement != "PUB")
-                    return true;
-
-                return false;
-            }
-        }
+     
+      
 
         public List<string> GetDomainReferences()
         {

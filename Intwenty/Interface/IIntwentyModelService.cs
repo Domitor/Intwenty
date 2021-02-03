@@ -55,12 +55,8 @@ namespace Intwenty.Interface
         public List<ApplicationModel> GetLocalizedApplicationModels();
         public ApplicationModel GetLocalizedApplicationModel(int applicationid);
         public List<ApplicationModelItem> GetAppModels();
-
-        public ModifyResult SaveAppModel(ApplicationModelItem model);
-
         public void SetAppModelLocalizationKey(int id, string key);
 
-        public void DeleteAppModel(ApplicationModelItem model);
 
 
         //DATABASE

@@ -17,14 +17,14 @@ namespace Intwenty.Model
         public static readonly string MetaTypeSave = "SAVE";
         public static readonly string MetaTypeDelete = "DELETE";
         public static readonly string MetaTypeExport = "EXPORT";
-
+        public static readonly string MetaTypeFilter = "FILTER";
+        public static readonly string MetaTypePaging = "PAGING";
 
 
         public FunctionModelItem()
         {
             SetEmptyStrings();
         }
-
 
         public FunctionModelItem(FunctionItem entity)
         {
@@ -47,7 +47,6 @@ namespace Intwenty.Model
             }
             ViewMetaCode = entity.ViewMetaCode;
             DataTableMetaCode = entity.DataTableMetaCode;
-            RequiredAuthorization = (IntwentyPermission)entity.RequiredAuthorization;
             SetEmptyStrings();
         }
 
@@ -74,8 +73,6 @@ namespace Intwenty.Model
         public string ViewMetaCode { get; set; }
         public string DataTableMetaCode { get; set; }
 
-
-        public IntwentyPermission RequiredAuthorization { get; set; }
         public string Path { get; set; }
 
         public override string ModelCode
@@ -113,6 +110,14 @@ namespace Intwenty.Model
             }
         }
 
+        public bool IsMetaTypePaging
+        {
+            get { return MetaType == MetaTypePaging; }
+        }
+        public bool IsMetaTypeFilter
+        {
+            get { return MetaType == MetaTypeFilter; }
+        }
         public bool IsMetaTypeCreate
         {
             get { return MetaType == MetaTypeCreate; }

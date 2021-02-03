@@ -26,12 +26,6 @@ namespace Intwenty.Entity
         public string DbName { get; set; }
         public bool IsHierarchicalApplication { get; set; }
         public bool UseVersioning { get; set; }
-        public string CreateViewRequirement { get; set; }
-        public string EditViewRequirement { get; set; }
-        public string EditListViewRequirement { get; set; }
-        public string DetailViewRequirement { get; set; }
-        public string ListViewRequirement { get; set; }
-        public string ApplicationPath { get; set; }
         public int TenantIsolationLevel { get; set; }
         public int TenantIsolationMethod { get; set; }
 

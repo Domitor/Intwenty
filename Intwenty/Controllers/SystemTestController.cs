@@ -116,7 +116,7 @@ namespace Intwenty.Controllers
             db.Close();
 
             if (model != null)
-                _modelservice.DeleteAppModel(model);
+                db.DeleteEntity(new ApplicationModelItem() { Id=model.Id });
 
             if (dvmodels != null && dvmodels.Count > 0)
             {

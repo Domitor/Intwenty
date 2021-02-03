@@ -29,9 +29,8 @@ namespace Intwenty.Areas.Identity.Entity
         public string AuthorizationNormalizedName { get; set; }
         [NotNull]
         public string AuthorizationType { get; set; }
-        public bool ReadAuth { get; set; }
-        public bool ModifyAuth { get; set; }
-        public bool DeleteAuth { get; set; }
+        public bool DenyAuthorization { get; set; }
+      
 
     }
 }

@@ -68,6 +68,8 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeSave, Title = "Save", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeDelete, Title = "Delete", ModelCode = "FUNCTIONMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeExport, Title = "Export", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypeFilter, Title = "Filtering", ModelCode = "FUNCTIONMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = FunctionModelItem.MetaTypePaging, Title = "Paging", ModelCode = "FUNCTIONMODEL" });
 
 
 

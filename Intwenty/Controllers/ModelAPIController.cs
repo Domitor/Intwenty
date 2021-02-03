@@ -16,6 +16,7 @@ using Intwenty.Interface;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
+using Microsoft.Extensions.Options;
 
 namespace Intwenty.Controllers
 {
@@ -27,12 +28,16 @@ namespace Intwenty.Controllers
         public IIntwentyDataService DataRepository { get; }
         public IIntwentyModelService ModelRepository { get; }
         private IntwentyUserManager UserManager { get; }
+        private IIntwentyProductManager ProductManager { get; }
+        private IntwentySettings Settings { get; }
 
-        public ModelAPIController(IIntwentyDataService ms, IIntwentyModelService sr, IntwentyUserManager usermanager)
+        public ModelAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager, IIntwentyProductManager prodmanager, IOptions<IntwentySettings> settings)
         {
-            DataRepository = ms;
-            ModelRepository = sr;
+            DataRepository = dataservice;
+            ModelRepository = modelservice;
             UserManager = usermanager;
+            ProductManager = prodmanager;
+            Settings = settings.Value;
         }
 
         #region Systems
@@ -119,7 +124,7 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            var t = ModelRepository.GetApplicationModel(applicationid);
             return new JsonResult(t.Application);
 
         }
@@ -149,15 +154,122 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var res = ModelRepository.SaveAppModel(model);
-            if (res.IsSuccess)
+
+            try
             {
-                //var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == res.Id);
-                //if (t!=null)
-                //     UserManager.AddUpdateUserPermissionAsync(User, new IntwentyUserPermissionItem() { Read = true, MetaCode = t.Application.MetaCode, PermissionType = ApplicationModelItem.MetaTypeApplication, Title = t.Application.Title  });
+
+                if (model == null)
+                    throw new InvalidOperationException("Model cannot be null");
+                if (string.IsNullOrEmpty(model.SystemMetaCode))
+                    throw new InvalidOperationException("Cannot save an application model without a SystemMetaCode");
+                if (string.IsNullOrEmpty(model.DbName))
+                    throw new InvalidOperationException("Cannot save an application model without a DbName");
+
+
+                ModelRepository.ClearCache();
+
+                var authitems = ProductManager.GetAthorizationItemsAsync(Settings.ProductId).Result;
+
+                var client = DataRepository.GetDataClient();
+
+                client.Open();
+                var apps = client.GetEntities<ApplicationItem>();
+                client.Close();
+
+                var system = ModelRepository.GetSystemModels();
+                var currentsystem = system.Find(p => p.MetaCode == model.SystemMetaCode);
+                if (currentsystem == null)
+                    return new JsonResult(new ModifyResult(false, MessageCode.USERERROR, "Please select a system"));
+
+
+                if (model.Id < 1)
+                {
+                    var max = 10;
+                    if (apps.Count > 0)
+                    {
+                        max = apps.Max(p => p.Id);
+                        max += 10;
+                    }
+
+                    if (string.IsNullOrEmpty(model.MetaCode))
+                    {
+                        model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                    }
+                    else
+                    {
+                        if (apps.Exists(p => p.MetaCode == model.MetaCode))
+                            model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                    }
+
+
+                    if (!model.DbName.ToUpper().StartsWith(currentsystem.DbPrefix.ToUpper() + "_"))
+                    {
+                        var dbname = currentsystem.DbPrefix + "_" + model.DbName;
+                        if (apps.Exists(p => p.DbName.ToUpper() == dbname.ToUpper()))
+                        {
+                            return new JsonResult(new ModifyResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another."));
+                        }
+                        model.DbName = dbname;
+                    }
+                    else
+                    {
+                        if (apps.Exists(p => p.DbName.ToUpper() == model.DbName.ToUpper()))
+                        {
+                            return new JsonResult(new ModifyResult(false, MessageCode.USERERROR, "The table name is invalid (occupied), please type another."));
+                        }
+
+                    }
+
+                    var entity = new ApplicationItem();
+                    entity.Id = max;
+                    entity.MetaCode = model.MetaCode;
+                    entity.Title = model.Title;
+                    entity.DbName = model.DbName;
+                    entity.Description = model.Description;
+                    entity.SystemMetaCode = model.SystemMetaCode;
+                    entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
+                    entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
+                    entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
+                    client.Open();
+                    client.InsertEntity(entity);
+                    client.Close();
+
+
+                    return new JsonResult(new ModifyResult(true, MessageCode.RESULT, "A new application model was inserted.", entity.Id));
+
+                }
+                else
+                {
+
+                    var entity = apps.FirstOrDefault(p => p.Id == model.Id);
+                    if (entity == null)
+                        return new JsonResult(new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("Failure updating application model, no such id {0}", model.Id)));
+
+                    entity.Title = model.Title;
+                    entity.DbName = model.DbName;
+                    entity.Description = model.Description;
+                    entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
+                    entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
+                    entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
+
+                    client.Open();
+                    client.UpdateEntity(entity);
+                    client.Close();
+
+                    return new JsonResult(new ModifyResult(true, MessageCode.RESULT, "Application model updated.", entity.Id));
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting application model data.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
             }
 
-            return new JsonResult(res);
         }
 
         /// <summary>
@@ -174,7 +286,35 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.DeleteAppModel(model);
+                if (model == null)
+                    throw new InvalidOperationException("Missing required information when deleting application model.");
+
+                if (model.Id < 1)
+                    throw new InvalidOperationException("Missing required information when deleting application model.");
+
+                var client = DataRepository.GetDataClient();
+
+                client.Open();
+
+                var existing = client.GetEntities<ApplicationItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing == null)
+                    return await GetApplications();
+
+                var dbitems = client.GetEntities<DatabaseItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+                if (dbitems != null && dbitems.Count() > 0)
+                    client.DeleteEntities(dbitems);
+
+                var uiitems = client.GetEntities<UserInterfaceStructureItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+                if (uiitems != null && uiitems.Count() > 0)
+                    client.DeleteEntities(uiitems);
+
+                client.DeleteEntity(existing);
+
+
+                client.Close();
+
+                ModelRepository.ClearCache();
+
             }
             catch (Exception ex)
             {

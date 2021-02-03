@@ -11,7 +11,11 @@ namespace Intwenty.Model.Dto
 
         public int ApplicationId { get; set; }
 
+        public int ApplicationViewId { get; set; }
+
         public string OwnerUserId { get; set; }
+
+        public string OwnerOrganizationId { get; set; }
 
         public string DataViewMetaCode { get; set; }
 

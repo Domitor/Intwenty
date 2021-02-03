@@ -272,8 +272,8 @@
                 ,appId: @Model.ApplicationInfo.Id
                 ,instanceId: @instanceid
                 ,datalist: []
-                ,model: { "showFilter": false,  ['@Model.ApplicationInfo.DbName']: {} }
-                ,pageInfo: { "applicationId": @Model.ApplicationInfo.Id, "maxCount": 0, "pageSize": 20, "pageNumber": 0, "filterValues": [] }
+                ,model: { showFilter: false,  ['@Model.ApplicationInfo.DbName']: {} }
+                ,pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
                 ,dataview: []
@@ -282,6 +282,7 @@
                 ,current_edit_line: {}
                 ,dlgFilterColumnName: ""
                 ,dlgFilterValue: ""
+                ,applicationViewId: @Model.Id
 
             },
             methods:
@@ -292,6 +293,7 @@
                     var endpointurl = context.baseurl + "Save";
 
                     this.model[context.appMainTable].ApplicationId = context.appId;
+                    this.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
 
                     if (!context.canSave())
                         return;
@@ -315,10 +317,12 @@
                 {
                     this.uploadImage(event);
                 },
-                getPage: function () {
+                getPage: function ()
+                {
                     var context = this;
-                    var endpointurl = context.baseurl + "GetEditListData";
+                    var endpointurl = context.baseurl + "GetPagedList";
 
+                    this.pageInfo.applicationViewId = context.applicationViewId;
 
                     $.ajax({
                         url: endpointurl,
@@ -418,7 +422,7 @@
                 else if(Model.IsInputView() && instanceid > 0)
                 {
                     <text>
-                        var endpointurl = context.baseurl + "GetEditData/" + context.appId + "/" + context.instanceId;
+                        var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId +"/" + context.instanceId;
                         $.get(endpointurl, function (response) {
                             context.model = JSON.parse(response.data);
                             endpointurl = context.baseurl + "GetValueDomains/@Model.ApplicationInfo.Id";

@@ -6,14 +6,10 @@ using System.Text;
 
 namespace Intwenty.Areas.Identity.Models
 {
-    public enum IntwentyPermission
-    {
-        Read, Modify, Delete
-    }
+  
     public class IntwentyAuthorizationVm
     {
      
-
         public IntwentyAuthorizationVm(IntwentyAuthorization entity)
         {
             Id = entity.Id;
@@ -26,9 +22,8 @@ namespace Intwenty.Areas.Identity.Models
             ProductId = entity.ProductId;
             OrganizationId = entity.OrganizationId;
             OrganizationName = entity.OrganizationName;
-            Read = entity.ReadAuth;
-            Modify = entity.ModifyAuth;
-            Delete = entity.DeleteAuth;
+            DenyAuthorization = entity.DenyAuthorization;
+
         }
 
         public IntwentyAuthorizationVm()
@@ -48,9 +43,8 @@ namespace Intwenty.Areas.Identity.Models
         public string AuthorizationName { get; set; }
         public string AuthorizationNormalizedName { get; set; }
         public string AuthorizationType { get; set; }
-        public bool Read { get; set; }
-        public bool Modify { get; set; }
-        public bool Delete { get; set; }
+        public bool DenyAuthorization { get; set; }
+
 
         public bool IsSystemAuthorization
         {
@@ -69,7 +63,7 @@ namespace Intwenty.Areas.Identity.Models
 
         public bool IsViewAuthorization
         {
-            get { return AuthorizationType == "VIEW"; }
+            get { return AuthorizationType == ViewModel.MetaTypeUIView; }
         }
 
 
