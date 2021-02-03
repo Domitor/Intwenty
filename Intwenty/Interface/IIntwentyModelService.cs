@@ -27,21 +27,11 @@ namespace Intwenty.Interface
         /// Returns application models that the current user has permission to use
         /// </summary>
         public Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
-
-        /// <summary>
-        /// Returns system models that the current user has permission to use
-        /// </summary>
         public Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal);
-
-        /// <summary>
-        /// Get a complete system model, used for export model
-        /// </summary>
         public ExportModel GetExportModel();
-
-        /// <summary>
-        /// Insert a complete system model, used for import model
-        /// </summary>
         public OperationResult ImportModel(ExportModel model);
+        public List<OperationResult> ConfigureDatabase();
+        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null);
 
 
         /// <summary>
@@ -55,22 +45,15 @@ namespace Intwenty.Interface
 
 
 
-        public List<OperationResult> ConfigureDatabase();
-
-        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null);
+       
 
 
-        /// <summary>
-        /// Get all application models
-        /// </summary>
+
+        //APPLICATION
         public List<ApplicationModel> GetApplicationModels();
-
         public ApplicationModel GetApplicationModel(int applicationid);
-
         public List<ApplicationModel> GetLocalizedApplicationModels();
         public ApplicationModel GetLocalizedApplicationModel(int applicationid);
-        public ViewModel GetLocalizedViewModelByPath(string path);
-
         public List<ApplicationModelItem> GetAppModels();
 
         public ModifyResult SaveAppModel(ApplicationModelItem model);
@@ -80,7 +63,7 @@ namespace Intwenty.Interface
         public void DeleteAppModel(ApplicationModelItem model);
 
 
-
+        //DATABASE
         public List<DatabaseModelItem> GetDatabaseModels();
 
         public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid);
@@ -89,28 +72,27 @@ namespace Intwenty.Interface
 
 
 
-
+        //UI
         public List<ViewModel> GetViewModels();
-
-        public void SaveUserInterfaceModels(List<UserInterfaceStructureModelItem> model);
-
+        public ViewModel GetLocalizedViewModelByPath(string path);
         public void SetUserInterfaceModelLocalizationKey(int id, string key);
 
+
+        //DATAVIEWS
         public List<DataViewModelItem> GetLocalizedDataViewModels();
         public List<DataViewModelItem> GetDataViewModels();
-
         public void SaveDataViewModels(List<DataViewModelItem> model);
-
         public void DeleteDataViewModel(int id);
 
 
-
+        //VALUE DOMAINS
         public List<ValueDomainModelItem> GetValueDomains();
         public void SaveValueDomains(List<ValueDomainModelItem> model);
 
         public void DeleteValueDomain(int id);
 
 
+        //TRANSLATIONS
         public List<TranslationModelItem> GetTranslations();
 
         public void SaveTranslations(List<TranslationModelItem> model);
@@ -118,11 +100,13 @@ namespace Intwenty.Interface
         public void DeleteTranslation(int id);
 
 
+        //ENDPOINTS
         public List<EndpointModelItem> GetEndpointModels();
 
         public void SaveEndpointModels(List<EndpointModelItem> model);
 
         public void DeleteEndpointModel(int id);
+
 
 
         public OperationResult ValidateModel();

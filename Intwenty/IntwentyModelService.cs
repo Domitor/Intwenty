@@ -177,9 +177,15 @@ namespace Intwenty
             var viewitems = Client.GetEntities<DataViewItem>();
             foreach (var a in viewitems)
                 t.DataViewItems.Add(a);
-            var uiitems = Client.GetEntities<UserInterfaceStructureItem>();
+            var uiviewitems = Client.GetEntities<ViewItem>();
+            foreach (var a in uiviewitems)
+                t.ViewItems.Add(a);
+            var uiitems = Client.GetEntities<UserInterfaceItem>();
             foreach (var a in uiitems)
                 t.UserInterfaceItems.Add(a);
+            var uistructitems = Client.GetEntities<UserInterfaceStructureItem>();
+            foreach (var a in uistructitems)
+                t.UserInterfaceStructureItems.Add(a);
             var valuedomainitems = Client.GetEntities<ValueDomainItem>();
             foreach (var a in valuedomainitems)
                 t.ValueDomains.Add(a);
@@ -221,6 +227,8 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<DatabaseItem>());
                     Client.DeleteEntities(Client.GetEntities<DataViewItem>());
                     Client.DeleteEntities(Client.GetEntities<TranslationItem>());
+                    Client.DeleteEntities(Client.GetEntities<ViewItem>());
+                    Client.DeleteEntities(Client.GetEntities<UserInterfaceItem>());
                     Client.DeleteEntities(Client.GetEntities<UserInterfaceStructureItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
@@ -242,7 +250,13 @@ namespace Intwenty
                 foreach (var a in model.Translations)
                     Client.InsertEntity(a);
 
+                foreach (var a in model.ViewItems)
+                    Client.InsertEntity(a);
+
                 foreach (var a in model.UserInterfaceItems)
+                    Client.InsertEntity(a);
+
+                foreach (var a in model.UserInterfaceStructureItems)
                     Client.InsertEntity(a);
 
                 foreach (var a in model.ValueDomains)
@@ -1206,98 +1220,7 @@ namespace Intwenty
             return application_views;
         }
 
-        public void SaveUserInterfaceModels(List<UserInterfaceStructureModelItem> model)
-        {
-            var apps = GetAppModels();
-
-            ModelCache.Remove(AppModelCacheKey);
-
-            foreach (var t in model)
-            {
-                if (t.Id > 0 && t.HasProperty("REMOVED"))
-                {
-                    var existing = Client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == t.Id);
-                    if (existing != null)
-                    {
-                        Client.DeleteEntity(existing);
-                        Client.Close();
-                    }
-                }
-            }
-
-            foreach (var uic in model)
-            {
-                if (uic.HasProperty("REMOVED"))
-                    continue;
-
-                if (uic.Id < 1)
-                {
-                    if (string.IsNullOrEmpty(uic.MetaType))
-                        throw new InvalidOperationException("Can't save an ui model item without a MetaType");
-
-                    if (string.IsNullOrEmpty(uic.ParentMetaCode))
-                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a ParentMetaCode");
-
-                    if (string.IsNullOrEmpty(uic.MetaCode))
-                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
-
-                    var app = apps.Find(p => p.MetaCode == uic.AppMetaCode);
-                    if (app==null)
-                        throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a valid AppMetaCode");
-
-                    var entity = new UserInterfaceStructureItem()
-                    {
-                        AppMetaCode = uic.AppMetaCode,
-                        ColumnOrder = uic.ColumnOrder,
-                        DataTableMetaCode = uic.DataTableMetaCode,
-                        DataColumn1MetaCode = uic.DataColumn1MetaCode,
-                        DataColumn2MetaCode = uic.DataColumn2MetaCode,
-                        DataViewMetaCode = uic.DataViewMetaCode,
-                        DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode,
-                        DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode,
-                        Description = uic.Description,
-                        Domain = uic.Domain,
-                        MetaCode = uic.MetaCode,
-                        MetaType = uic.MetaType,
-                        ParentMetaCode = uic.ParentMetaCode,
-                        RowOrder = uic.RowOrder,
-                        Title = uic.Title,
-                        Properties = uic.Properties,
-                        SystemMetaCode = app.SystemMetaCode
-
-                    };
-
-                    Client.InsertEntity(entity);
-
-                }
-                else
-                {
-                    var existing = Client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == uic.Id);
-                    if (existing != null)
-                    {
-                        existing.Title = uic.Title;
-                        existing.RowOrder = uic.RowOrder;
-                        existing.ColumnOrder = uic.ColumnOrder;
-                        existing.DataColumn1MetaCode = uic.DataColumn1MetaCode;
-                        existing.DataColumn2MetaCode = uic.DataColumn2MetaCode;
-                        existing.DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode;
-                        existing.DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode;
-                        existing.Domain = uic.Domain;
-                        existing.DataTableMetaCode = uic.DataTableMetaCode;
-                        existing.DataViewMetaCode = uic.DataViewMetaCode;
-                        existing.Description = uic.Description;
-                        existing.Properties = uic.Properties;
-                        Client.UpdateEntity(existing);
-                    }
-
-                }
-
-            }
-
-            Client.Close();
-
-
-        }
+      
 
 
         public void SetUserInterfaceModelLocalizationKey(int id, string key)

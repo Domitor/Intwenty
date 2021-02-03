@@ -77,6 +77,18 @@
 
                             @foreach (var t in pl.Controls)
                             {
+                                if (t.IsUIContainerType)
+                                {
+                                    continue;
+                                }
+                                if ((t.IsUIBindingType || t.IsUIComplexBindingType) && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
+                                {
+                                    continue;
+                                }
+                                if (t.IsUIComplexBindingType && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
+                                {
+                                    continue;
+                                }
                                 if (t.IsMetaTypeTextBox)
                                 {
                                     @await Html.PartialAsync("UIControls/_TextBox", t)
