@@ -882,8 +882,34 @@ namespace Intwenty.Controllers
 
         }
 
+        /// <summary>
+        /// Get UI view model for application with id and the viewtype
+        /// </summary>
+        [HttpGet("/Model/API/GetApplicationListUI/{applicationid}/{uimetacode}")]
+        public IActionResult GetApplicationListUI(int applicationid, string uimetacode)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
 
-      
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+            var uimodel = appmodel.GetUserInterface(uimetacode);
+            if (uimodel == null)
+                return BadRequest();
+
+            var model = new UserInterfaceListDesignVm();
+            model.Id = uimodel.Id;
+            model.MetaCode = uimodel.MetaCode;
+            model.ApplicationId = appmodel.Application.Id;
+            model.Table = uimodel.Table;
+
+            return new JsonResult(model);
+
+        }
+
         [HttpPost("/Model/API/SaveApplicationInputUI")]
         public IActionResult SaveApplicationInputUI([FromBody] UserInterfaceInputDesignVm model)
         {

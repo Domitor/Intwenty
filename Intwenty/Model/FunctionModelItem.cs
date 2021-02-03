@@ -25,11 +25,6 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public FunctionModelItem(string metatype)
-        {
-            MetaType = metatype;
-            SetEmptyStrings();
-        }
 
         public FunctionModelItem(FunctionItem entity)
         {

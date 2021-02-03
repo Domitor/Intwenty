@@ -41,7 +41,7 @@
         <div class="card-body">
 
             Design list user interface for views in application <b>@Model.ApplicationInfo.Title</b>.
-            
+
             <br />
 
             <ul class="nav">
@@ -49,11 +49,16 @@
                     <a asp-action="ApplicationViewList" asp-controller="Model" asp-route-id="@Model.ApplicationInfo.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back</a>
                 </li>
                 <li class="nav-item">
-                  
+
                 </li>
                 <li class="nav-item">
-                    <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI" style="margin:10px">
+                    <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI()" style="margin:10px">
                         <i class="fa fa-save"></i> Save changes
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div class="btn btn-sm btn-secondary" v-on:click="openSettings()"  style="margin:10px">
+                        <i class="fa fa-cog"></i> View Settings
                     </div>
                 </li>
             </ul>
@@ -61,219 +66,49 @@
     </div>
 
     <br />
-    
-   
 
 
 
-        <div class="row">
-            <div class="col-lg-3" v-if="model.showComponents">
+    <hr />
 
-            </div>
-            <div v-bind:class="componentDesignerClass()">
-                <div class="btn btn-secondary btn-sm" v-on:click="model.showComponents=!model.showComponents">
-                    <i class="fas fa-align-justify"></i>
-                    <span v-if="!model.showComponents">Show UI Controls</span>
-                    <span v-if="model.showComponents">Hide UI Controls</span>
-                </div>
-                <div class="btn btn-sm btn-secondary" v-on:click="addSection()">
-                    <i class="fa fa-plus"></i> Add section
-                </div>
-                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings()" style="float:right">
-                    <i class="fa fa-cog"></i> Settings
-                </div>
-
-                <hr />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-3" v-if="model.showComponents">
-
-                <nav class="navbar bg-dark" id="selectcontrolnav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item" v-for="comp in model.uiControls">
-                            <div class="text-light" v-bind:id="comp.code" draggable="true" v-on:dragstart="dragUI(event)"><i class="fas fa-dragon"></i> {{comp.title}}</div>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-
-            <div v-bind:class="componentDesignerClass()">
-
+    <div class="row">
+        <div class="col-lg-12" style="margin: 5px">
+            <b>Columns: </b>
+            <br />
+            <br />
+            <div>
                 <div>
-
-                    <div class="row" v-for="sect in model.sections" v-if="!sect.isRemoved">
-
-                        <div class="col-lg-12">
-
-                            <div class="accordion" v-bind:id="'accordion_'+sect.rowOrder">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <div class="form-inline">
-                                            <span class="fa fa-trash" v-on:click="removeSection(sect)" style="margin:10px; cursor:pointer" title="Delete"></span>
-                                            <input type="text" class="form-control form-control-sm" v-model="sect.title" style="width:200px; margin:5px" />
-                                            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder" style="margin:5px"><span class="fa fa-expand-alt"></span></button>
-                                            <span v-if="sect.collapsible" style="margin:10px">Start expanded <input type="checkbox" v-model="sect.startExpanded" /></span>
-                                            <span style="margin:10px">Collapsible <input type="checkbox" v-model="sect.collapsible" /> </span>
-
-                                        </div>
-                                    </div>
-
-                                    <div v-bind:id="'colapse'+sect.rowOrder" class="collapse show" v-bind:data-parent="'#accordion_'+sect.rowOrder">
-                                        <div class="card-body">
-
-                                            <label><b>Choose Layout </b></label>
-                                            <input v-bind:id="'pnlcnt_1_'+sect.rowOrder" type="radio" v-bind:name="'panelcntname_'+sect.rowOrder" v-model.number="sect.layoutPanelCount" value="1" v-on:change="layoutClassChanged(sect)" /> 1 Panel
-                                            <input v-bind:id="'pnlcnt_2_'+sect.rowOrder" type="radio" v-bind:name="'panelcntname_'+sect.rowOrder" v-model.number="sect.layoutPanelCount" value="2" v-on:change="layoutClassChanged(sect)" /> 2 Panel
-                                            <input v-bind:id="'pnlcnt_3_'+sect.rowOrder" type="radio" v-bind:name="'panelcntname_'+sect.rowOrder" v-model.number="sect.layoutPanelCount" value="3" v-on:change="layoutClassChanged(sect)" /> 3 Panel
-
-
-
-                                            <div class="row">
-                                                <div v-bind:class="layoutClass(sect)" v-for="pnl in sect.layoutPanels" v-if="!pnl.isRemoved">
-                                                    <div class="form-group">
-                                                        <label class="control-label">Panel Title (Optional)</label>
-                                                        <input type="text" class="form-control form-control-sm" v-model="pnl.title" />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-
-
-                                            <div class="row" v-for="lrow in sect.layoutRows">
-
-                                                <div v-bind:class="layoutClass(sect)" v-for="pnl in sect.layoutPanels" v-if="!pnl.isRemoved">
-
-                                                    <div class="formpanel" v-for="input in lrow.userInputs" v-if="input.parentMetaCode===pnl.metaCode && !pnl.isRemoved && !input.isRemoved">
-
-                                                        <div v-if="input.metaType==''" style="text-align:center; margin-top:40px">
-
-                                                          
-                                                            <div class="p-12 bg-gray-30 border border-gray-90" v-on:drop="dropUI(event, input)" v-on:dragover="allowDropUI(event)">
-                                                                <label class="block cursor-pointer">
-                                                                    <i>Drop component here.</i>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-
-
-
-                                                        <div v-bind:id="'uipnl_' + input.id" class="uipnl" v-if="input.metaType!=''">
-
-                                                            <span class="fa fa-trash" v-on:click="removeUserInput(input)" style="margin:5px; cursor:pointer" title="Remove"></span>
-                                                            <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
-                                                            <label class="control-label"><i>{{input.title}}</i></label>
-
-                                                            <div v-if="input.metaType==='TEXTBOX'">
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control form-control-sm" placeholder="Input control for text..." disabled />
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='NUMBOX'">
-                                                                <div class="form-group">
-                                                                    <input type="number" class="form-control form-control-sm" placeholder="Input control for numbers..." disabled />
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='EMAILBOX'">
-                                                                <div class="form-group">
-                                                                    <input type="email" class="form-control form-control-sm" placeholder="Input control for emails.." disabled />
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='CHECKBOX'">
-                                                                <div class="form-group">
-                                                                    <br />
-                                                                    <input type="checkbox" disabled />
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='TEXTAREA'">
-                                                                <div class="form-group">
-                                                                    <textarea class="form-control form-control-sm" rows="5" cols="50" disabled></textarea>
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='LABEL'">
-                                                                <p>Label for: {{input.columnName}}</p>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='TEXTBLOCK'">
-                                                                <p>Text block for: {{input.columnName}}</p>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='STATICHTML'">
-                                                                <p>Static HTML</p>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='DATEPICKER'">
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control form-control-sm" placeholder="Inpu control for date, example: 1973-04-17" disabled />
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='IMAGE'">
-                                                                <i class="fas fa-image"></i> An image where the url is stored in a database column
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='IMAGEBOX'">
-
-                                                                <div class="file btn btn-sm btn-primary">
-                                                                    <span class="fas fa-cloud-upload-alt"></span> Upload
-                                                                    <input type="file" class="uploadInput" />
-                                                                </div>
-                                                                <i class="fas fa-image"></i>
-
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='COMBOBOX'">
-                                                                <div class="form-group">
-                                                                    <select class="form-control form-control-sm" disabled>
-                                                                        <option>Items from a value domain..</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-
-                                                            <div v-if="input.metaType==='LOOKUP'">
-                                                                <div>
-                                                                    <div class="form form-inline">
-                                                                        <button style="margin-left:5px" class="btn btn-sm btn-secondary"><span class="fa fa-plus"></span></button>
-                                                                        <input style="margin-left:5px" type="text" class="form-control form-control-sm" disabled />
-                                                                        <input style="margin-left:5px" type="text" class="form-control form-control-sm" disabled />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                              
-                                                          </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <br />
-                                            <div class="btn btn-sm btn-secondary" v-on:click="addLayoutRow(sect)">
-                                                <span class="fa fa-plus"></span> Add layout row
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
+                    <div class="btn btn-sm btn-secondary" v-on:click="addColumn()">
+                        <span class="fa fa-plus"></span> Add Column
                     </div>
                 </div>
+                <br />
+                <table class="table table">
+                    <thead>
+                        <tr>
+
+                            <th style="width:30%">Title <span style="color: red"> *</span></th>
+                            <th style="width:65%">Column name <span style="color: red"> *</span></th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="field in model.table.columns">
+                        <tr>
+
+                            <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
+                            <td>
+                                <select v-model="field.dataColumnDbName" class="form-control form-control-sm">
+                                    <option v-for="col in userInterfaceTable.columns" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                </select>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-
-  
-
-
-
-
-
+   
     <!-- SETTING MODAL-->
     <div class="modal" id="ui_setting_modal" role="dialog">
         <div class="modal-dialog">
@@ -285,124 +120,10 @@
                     </button>
                 </div>
                 <div class="modal-body" id="ui_setting_modal_body">
-
                     <div class="settingpnl">
-                        <nav>
-                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-bindings" role="tab" aria-controls="nav-bindings" aria-selected="true">Bindings</a>
-                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-properties" role="tab" aria-controls="nav-properties" aria-selected="false">Properties</a>
-                            </div>
-                        </nav>
-                        <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade show active" id="nav-bindings" role="tabpanel" aria-labelledby="nav-bindings-tab">
-                                <br />
-                                <div class="form-group" v-if="showSettingTitle">
-                                    <label class="control-label">Title</label>
-                                    <input type="text" class="form-control form-control-sm" v-model="active_setting_input.title" />
-                                </div>
-
-                                <div class="form-group" v-if="showSettingRawHTML">
-                                    <label class="control-label">HTML</label>
-                                    <textarea type="text" class="form-control form-control-sm" rows="10" cols="200" v-model="active_setting_input.rawHTML"></textarea>
-                                </div>
-
-                                <div class="form-group" v-if="showSettingDbTable">
-                                    <label class="control-label">Set database table</label>
-                                    <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
-                                        <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="control-label">Set data view</label>
-                                    <select v-model="active_setting_input.dataViewMetaCode" class="form-control form-control-sm">
-                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="showSettingValueDomain">
-                                    <label class="control-label">Set value domain</label>
-                                    <select v-model="active_setting_input.domain" class="form-control form-control-sm">
-                                        <option v-for="vd in valuedomains" v-bind:value="vd">{{vd}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="showSettingDbColumn">
-                                    <label class="control-label">Set database column</label>
-                                    <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="model.control-label">Set view column (Key)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName" class="form-control form-control-sm">
-                                        <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="control-label">Set database column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="control-label">Set view column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName2" class="form-control form-control-sm">
-                                        <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
-                                    <label class="control-label">Columns</label>
-                                    <br />
-
-
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
-                                        <div class="dropdown-menu dropdown-menu-lg-right" style="z-index:20000">
-                                            <span v-for="gridcoltype in model.gridUIControls">
-                                                <a class="dropdown-item" href="#" v-on:click="addEditGridColumn(gridcoltype.code)">{{gridcoltype.title}}</a>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <br />
-                                    <br />
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Title</th>
-                                                <th>Order</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="tcol in active_setting_input.children">
-                                                <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-                            <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
-                                @await Html.PartialAsync("_PropertyUI", "active_setting_input")
-                            </div>
+                        <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
+                            @await Html.PartialAsync("_PropertyUI", "active_setting_input")
                         </div>
-
-
-
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -424,15 +145,7 @@
 
     <script>
 
-        $(window).scroll(function () {
-            var scrollTop = $(window).scrollTop();
-            //console.log("scrollTop>>>" + scrollTop);
-            if (scrollTop == 0) {
-                $("#selectcontrolnav").css({ "margin-top": "0px" });
-            } else {
-                $("#selectcontrolnav").css({ "margin-top": ($(window).scrollTop()-200) + "px" });
-            }
-        });
+       
 
         var app = new Vue({
             el: '#app',
@@ -441,256 +154,28 @@
 
                 },
                 dbtables: [],
-                valuedomains: [],
-                dataviews: [],
-                listviewtable: {},
                 active_setting_input: {},
                 metaproperties: [],
                 idgenerator: 0
             },
             methods:
             {
-                setUserInput: function (input, metatype)
-                {
-                    input.metaType = metatype;
-                    if (!input.metaType.includes("EDITGRID"))
-                        input.tableName = this.defaultTable.dbName;
-
-                    this.openSettingsDlg(input);
-                },
-                openSettingsDlg(input)
-                {
-                    this.active_setting_input = input;
-                    if (!this.active_setting_input.metaType.includes("EDITGRID"))
-                        this.active_setting_input.tableName = this.defaultTable.dbName;
-                    this.initializePropertyUI(this.active_setting_input);
-                    this.$forceUpdate();
-                    $("#ui_setting_modal").modal();
-                },
-                openViewSettings() {
+              
+                openSettings() {
                     this.active_setting_input = this.model;
                     this.initializePropertyUI(this.active_setting_input);
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
                 },
-                addLayoutRow: function (sect)
+                addColumn: function ()
                 {
-                    var new_row_order = 0;
-                    if (sect.layoutRows.length > 0)
-                        new_row_order = sect.layoutRows[(sect.layoutRows.length-1)].rowOrder + 1;
-                    else
-                        new_row_order = 1;
-
-                    var row = { rowOrder: new_row_order, userInputs: [] };
-                    for (var i = 0; i < sect.layoutPanels.length; i++) {
-                        row.userInputs.push({
-                            id: 0,
-                            metaType: "",
-                            metaCode: "",
-                            parentMetaCode: sect.layoutPanels[i].metaCode,
-                            rowOrder: new_row_order,
-                            columnOrder: sect.layoutPanels[i].columnOrder,
-                            children:[]
-                        });
-                    }
-                    sect.layoutRows.push(row);
-
+                    this.model.table.columns.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "TEXTLISTCOLUMN" });
                 },
-                addSection: function ()
-                {
-                    var new_section_order = 0;
-                    if (this.model.sections.length > 0)
-                        new_section_order = this.model.sections[(this.model.sections.length-1)].rowOrder + 1;
-                    else
-                        new_section_order = 1;
-
-                    var sect = { id:0, rowOrder: new_section_order, columnOrder: 1, title: "-- Your title --", layoutPanelCount:2,  layoutPanels: [], layoutRows: [], collapsible:true,startExpanded:true };
-                    this.model.sections.push(sect);
-                    this.layoutClassChanged(sect);
-                    this.addLayoutRow(sect);
-                },
-                addListViewField: function () {
-                    this.model.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "EDITLISTVIEWCOLUMN" });
-                },
-                addEditGridColumn: function (metatype)
-                {
-                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: metatype, metaCode: "", parentMetaCode:"", tableName:this.active_setting_input.tableName });
-                },
-                dbColumns: function (tablename) {
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (this.dbtables[i].dbName == tablename)
-                            return this.dbtables[i].columns;
-
-                    return [];
-                },
-                viewColumns: function (viewname) {
-                    for (var i = 0; i < this.dataviews.length; i++)
-                        if (this.dataviews[i].metaCode == viewname)
-                            return this.dataviews[i].fields;
-
-                    return [];
-                },
-                layoutClass: function (sect) {
-                    return {
-                        'col-lg-12': sect.layoutPanelCount === 1,
-                        'col-lg-6': sect.layoutPanelCount === 2,
-                        'col-lg-4': sect.layoutPanelCount === 3,
-                    }
-                },
-                componentDesignerClass: function ()
-                {
-                    return {
-                        'col-lg-9': this.model.showComponents,
-                        'col-lg-12': !this.model.showComponents,
-                    }
-                },
-                layoutClassChanged: function (sect)
-                {
-
-                    while (sect.layoutPanels.length < sect.layoutPanelCount)
-                    {
-                         this.idgenerator += 1;
-                         sect.layoutPanels.push({ id: 0, tempid: this.idgenerator, metaType: "PANEL", metaCode: "PNL_" + this.idgenerator, parentMetaCode: "", title: "", rowOrder: 1, columnOrder: sect.layoutPanels.length+1, isRemoved:false });
-                    }
-
-                    for (var i = 0; i < sect.layoutPanels.length; i++)
-                    {
-                        var pnlnumber = i + 1;
-                        if (pnlnumber <= sect.layoutPanelCount)
-                            sect.layoutPanels[i].isRemoved = false;
-                         if (pnlnumber > sect.layoutPanelCount)
-                            sect.layoutPanels[i].isRemoved = true;
-                    }
-
-                    for (var r = 0; r < sect.layoutRows.length; r++) {
-                        for (var u = 0; u < sect.layoutRows[r].userInputs.length; u++) {
-                            if (sect.layoutRows[r].userInputs[u].columnOrder > sect.layoutPanelCount) {
-                                sect.layoutRows[r].userInputs[u].isRemoved = true;
-                            }
-                        }
-                    }
-
-                    this.addUserInputSelects();
-
-
-                },
-                addUserInputSelects() {
-
-
-                    for (var s = 0; s < this.model.sections.length; s++) {
-                        var sect = this.model.sections[s];
-                        for (var r = 0; r < sect.layoutRows.length; r++)
-                        {
-
-                            for (var c = 0; c < sect.layoutPanels.length; c++)
-                            {
-
-                                var non_removed_input_exist = false;
-                                for (var u = 0; u < sect.layoutRows[r].userInputs.length; u++) {
-                                    if (sect.layoutRows[r].userInputs[u].columnOrder === sect.layoutPanels[c].columnOrder && sect.layoutRows[r].userInputs[u].metaType != "" && !sect.layoutRows[r].userInputs[u].isRemoved) {
-                                        sect.layoutRows[r].userInputs[u].parentMetaCode = sect.layoutPanels[c].metaCode;
-                                        non_removed_input_exist = true;
-                                    }
-                                }
-
-                                if (!non_removed_input_exist) {
-                                    var create_new_selector = true;
-                                    for (var u = 0; u < sect.layoutRows[r].userInputs.length; u++) {
-                                        if (sect.layoutRows[r].userInputs[u].columnOrder === sect.layoutPanels[c].columnOrder && sect.layoutRows[r].userInputs[u].metaType === "") {
-                                            sect.layoutRows[r].userInputs[u].isRemoved = false;
-                                            sect.layoutRows[r].userInputs[u].parentMetaCode = sect.layoutPanels[c].metaCode;
-                                            create_new_selector = false;
-                                            break;
-                                        }
-                                    }
-                                    if (create_new_selector) {
-
-                                        this.idgenerator += 1;
-                                        sect.layoutRows[r].userInputs.push({
-                                            id: 0,
-                                            tempid: this.idgenerator,
-                                            metaType: "",
-                                            metaCode: "",
-                                            parentMetaCode: sect.layoutPanels[c].metaCode,
-                                            rowOrder: sect.layoutRows[r].rowOrder,
-                                            columnOrder: sect.layoutPanels[c].columnOrder,
-                                            children: [],
-                                            isRemoved: false
-                                        });
-                                    }
-
-
-                                }
-                            }
-                        }
-                    }
-
-
-
-                },
-                SaveApplicationUI: function ()
-                {
-
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveUserInterfaceModel";
-
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(context.model),
-                        success: function (response) {
-                            context.model = response;
-                            context.addUserInputSelects();
-                            raiseInformationModal("Success", "The UI model was successfully saved.");
-                        },
-                        error: function (response)
-                        {
-                            raiseErrorModal(response.responseJSON);
-                        }
-                    });
-                },
-                removeEditGridColumn: function (column)
-                {
-
-                    $("#setting_modal_close_btn").click();
-                    var context = this;
-                    raiseYesNoModal("Delete ?", "Delete column ?", function ()
-                    {
-                        column.isRemoved = true;
-                    });
-                },
-                removeSection: function (section)
-                {
-                    raiseYesNoModal("Delete ?", "Delete the entire section ?", function () {
-                        section.isRemoved = true;
-                        for (var p = 0; p < section.layoutPanels.length; p++) {
-                            section.layoutPanels[p].isRemoved = true;
-                        }
-
-                        for (var r = 0; r < section.layoutRows.length; r++)
-                        {
-                            for (var u = 0; u < section.layoutRows[r].userInputs.length; u++) {
-                                section.layoutRows[r].userInputs[u].isRemoved = true;
-                            }
-                        }
-                    });
-                },
-                removeUserInput: function (input)
-                {
-                     var context = this;
-                    raiseYesNoModal("Delete ?", "Delete user interface ?", function ()
-                    {
-                        input.isRemoved = true;
-                        context.addUserInputSelects();
-                    });
-                },
-                saveListView: function ()
+                saveApplicationUI: function ()
                 {
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveListViewModel";
+                    var endpointurl = baseurl + "SaveApplicationListUI";
 
                     $.ajax({
                         url: endpointurl,
@@ -700,96 +185,25 @@
                         success: function (response)
                         {
                             context.model = response;
-                            raiseInformationModal("Success", "The Listview UI model was successfully saved.");
+                            raiseInformationModal("Success", "The UI model was successfully saved.");
                         },
                         error: function (response) {
                              raiseErrorModal(response.responseJSON);
                         }
                     });
-                },
-                allowDropUI: function(ev)
-                {
-                    ev.preventDefault();
-                },
-                dragUI: function(ev) 
-                {
-                    ev.dataTransfer.setData("METATYPE", ev.target.id);
-                },
-                dropUI: function(ev, input) 
-                {
-                    ev.preventDefault();
-                    this.model.showComponents = false;
-                    var data = ev.dataTransfer.getData("METATYPE");
-                    this.setUserInput(input, data);
                 }
+               
 
             },
             computed:
             {
-                showSettingTitle: function ()
+                
+                userInterfaceTable: function ()
                 {
-                    if (this.active_setting_input.metaType == "EDITGRID_STATICHTML" ||
-                        this.active_setting_input.metaType == "STATICHTML" ||
-                        this.active_setting_input.metaType == "IMAGE" ||
-                        this.active_setting_input.metaType == "TEXTBLOCK" ||
-                        this.active_setting_input.metaType == "INPUTINTERFACE" ||
-                        this.active_setting_input.metaType == "LABEL")
-                        return false;
-
-                    return true;
-                },
-                showSettingRawHTML: function () {
-                    if (this.active_setting_input.metaType == "STATICHTML")
-                        return true;
-
-                    return false;
-                },
-                showSettingDbColumn: function ()
-                {
-                    if (this.active_setting_input.metaType == "STATICHTML")
-                        return false;
-                    if (this.active_setting_input.metaType == "INPUTINTERFACE")
-                        return false;
-
-                    return true;
-                },
-                showSettingDbTable: function ()
-                {
-                    return false;
-                },
-                showSettingValueDomain: function ()
-                {
-                    if (this.active_setting_input.metaType === "COMBOBOX")
-                        return true;
-
-                   
-
-                    return false;
-                },
-                showSettingLookUp: function ()
-                {
-                    if (this.active_setting_input.metaType === "LOOKUP")
-                        return true;
-
-                   
-
-                    return false;
-                },
-                defaultTable: function () {
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (this.dbtables[i].isDefaultTable)
-                            return this.dbtables[i];
+                    if (this.dbtables.length > 0)
+                        return this.dbtables[0];
 
                     return {};
-                },
-                nonDefaultTables: function ()
-                {
-                    var list = [];
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (!this.dbtables[i].isDefaultTable)
-                            list.push(this.dbtables[i]);
-
-                    return list;
                 }
 
             },
@@ -797,33 +211,17 @@
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
-                var endpointurl = baseurl + "GetApplicationUI/@Model.ApplicationInfo.Id/@Model.MetaCode";
+                var endpointurl = baseurl + "GetApplicationListUI/@Model.ApplicationInfo.Id/@Model.MetaCode";
 
                 //Application
                 $.get(endpointurl, function (response) {
                     context.model = response;
-                    context.addUserInputSelects();
                 }).done(function () {
 
                     //Tables
-                    endpointurl = baseurl + "GetDatabaseTables/@Model.ApplicationInfo.Id";
+                    endpointurl = baseurl + "GetUserInterfaceDatabaseTable/@Model.ApplicationInfo.Id/@Model.MetaCode";
                     $.get(endpointurl, function (response) {
                         context.dbtables = response;
-                    }).done(function () {
-
-                        //DataViews
-                        endpointurl = baseurl + "GetDataViewModels";
-                        $.get(endpointurl, function (response) {
-                            context.dataviews = response.views;
-                        }).done(function () {
-
-                            //Valuedomains
-                            endpointurl = baseurl + "GetValueDomainNames";
-                            $.get(endpointurl, function (response) {
-                                context.valuedomains = response;
-                            });
-                        });
-
                     });
                 });
             }

@@ -1153,6 +1153,20 @@ namespace Intwenty
                                 sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
                                 userinterface.Sections.Add(sect);
                             }
+                            if (uic.IsMetaTypeTable)
+                            {
+                                var table = new UITable() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT" };
+                                userinterface.Table = table;
+                                foreach (var column in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
+                                {
+                                    if (column.ParentMetaCode != table.MetaCode)
+                                        continue;
+                                    if (!column.IsMetaTypeTextListColumn)
+                                        continue;
+
+                                    table.Columns.Add(column);
+                                }
+                            }
                         }
 
                         foreach (var section in userinterface.Sections)
@@ -1199,6 +1213,8 @@ namespace Intwenty
 
                                         }
                                     }
+
+
                                 }
                             }
 

@@ -31,6 +31,8 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = ApplicationModelItem.MetaTypeApplication, Title = "Application", ModelCode = "APPMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeInputInterface, Title = "Input interface", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeListInterface, Title = "List interface", ModelCode = "UIMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTable, Title = "Table", ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextListColumn, Title = "Text List Column", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeDatePicker, Title = "Datepicker" , ModelCode = "UISTRUCTUREMODEL" });
@@ -38,7 +40,6 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImage, Title = "Image" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImageBox, Title = "Image Upload" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeLabel, Title = "Label" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextListColumn, Title = "Text List Column" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeLookUp, Title = "Look Up" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeNumBox, Title = "Numbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypePanel, Title = "Panel" , ModelCode = "UISTRUCTUREMODEL" });
@@ -136,15 +137,15 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
 
-            prop = new IntwentyProperty("EDITMODE", "Edit Mode", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeListView);
+            prop = new IntwentyProperty("TABLEEDITMODE", "Edit Mode", "LIST");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CELL", DisplayValue = "Line" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("GRIDLAYOUT", "Layout", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeListView);
+            prop = new IntwentyProperty("TABLELAYOUT", "Layout", "LIST");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GRID", DisplayValue = "Grid" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
             _properties.Add(prop);

@@ -22,6 +22,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
+            Table = new UITable();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -45,6 +46,7 @@ namespace Intwenty.Model
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
+            Table = new UITable();
         }
 
         private void SetEmptyStrings()
@@ -61,6 +63,7 @@ namespace Intwenty.Model
 
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public List<UISection> Sections { get; set; }
+        public UITable Table { get; set; }
         public List<IntwentyProperty> PropertyCollection { get; set; }
         public List<IntwentyMetaType> UIControls { get; set; }
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -243,6 +246,24 @@ namespace Intwenty.Model
         }
     }
 
-   
+    public class UITable : HashTagPropertyObject, ILocalizableTitle
+    {
+        public int Id { get; set; }
+        public string TitleLocalizationKey { get; set; }
+        public string Title { get; set; }
+        public string MetaCode { get; set; }
+        public string ParentMetaCode { get; set; }
+        public string LocalizedTitle { get; set; }
+
+
+        public List<UserInterfaceStructureModelItem> Columns { get; set; }
+
+        public UITable()
+        {
+            Columns = new List<UserInterfaceStructureModelItem>();
+        }
+    }
+
+
 
 }

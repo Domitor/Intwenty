@@ -10,7 +10,7 @@ namespace Intwenty.Model
     public class UserInterfaceStructureModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
-        public static readonly string MetaTypeListView = "LISTVIEW";
+        public static readonly string MetaTypeTable = "TABLE";
         public static readonly string MetaTypeTextListColumn = "TEXTLISTCOLUMN";
         public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
@@ -361,7 +361,10 @@ namespace Intwenty.Model
         {
             get { return MetaType == MetaTypeSection; }
         }
-
+        public bool IsMetaTypeTable
+        {
+            get { return MetaType == MetaTypeTable; }
+        }
 
         public string UIId
         {

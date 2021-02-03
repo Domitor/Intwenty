@@ -45,20 +45,7 @@ namespace Intwenty.Model.UIDesign
 
     }
 
-    public class UIDeleteVm
-    {
-        public int Id { get; set; }
-
-        public List<UserInterfaceStructureModelItem> Components { get; set; }
-
-
-        public UIDeleteVm()
-        {
-            Components = new List<UserInterfaceStructureModelItem>();
-        }
-
-    }
-
+   
 
    
 
