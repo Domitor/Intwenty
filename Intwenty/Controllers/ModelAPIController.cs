@@ -1235,7 +1235,7 @@ namespace Intwenty.Controllers
                     else
                     {
                         column.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypePanel, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeTextListColumn, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
                         entity.Title = column.Title;
                         entity.Properties = column.CompilePropertyString();
                         entity.DataTableMetaCode = uimodel.DataTableMetaCode;
@@ -1620,12 +1620,41 @@ namespace Intwenty.Controllers
 
                 foreach (var view in a.Views)
                 {
+
+                    var title = "Application: " + a.Application.Title + ", " + view.Title + " (VIEW)";
+                    if (string.IsNullOrEmpty(view.TitleLocalizationKey))
+                    {
+                        var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
+                        foreach (var l in langs)
+                        {
+                            res.Add(new TranslationVm() { UserInterfaceModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
+                        }
+                    }
+                    else
+                    {
+                        var trans = translations.FindAll(p => p.Key == view.TitleLocalizationKey);
+                        foreach (var l in langs)
+                        {
+                            var ct = trans.Find(p => p.Culture == l.Culture);
+                            if (ct != null)
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                            else
+                                res.Add(new TranslationVm() { Culture = l.Culture, Key = view.TitleLocalizationKey, ModelTitle = title, Text = "" });
+                        }
+
+                        foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                        {
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                        }
+
+                    }
+
                     foreach (var iface in view.UserInterface)
                     {
                         foreach (var ui in iface.UIStructure)
                         {
-                            var title = "";
-                            var type = metatypes.Find(p => p.ModelCode == "UIMODEL" && p.Code == ui.MetaType);
+                            title = "";
+                            var type = metatypes.Find(p => p.ModelCode == "UISTRUCTUREMODEL" && p.Code == ui.MetaType);
                             title = "Application: " + a.Application.Title;
                             title += ", " + ui.Title;
                             if (type != null)

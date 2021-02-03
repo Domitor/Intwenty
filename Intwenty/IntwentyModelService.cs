@@ -1005,7 +1005,7 @@ namespace Intwenty
 
         public List<ViewModel> GetViewModels()
         {
-
+      
             var dbmodelitems = GetDatabaseModels();
             var apps = GetAppModels();
             var dataviews = GetDataViewModels();
@@ -1232,6 +1232,8 @@ namespace Intwenty
                    
 
             }
+
+           
                
             return application_views;
         }

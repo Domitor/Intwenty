@@ -52,7 +52,7 @@
 
                 </li>
                 <li class="nav-item">
-                    <div class="btn btn-sm btn-primary" v-on:click="SaveApplicationUI()" style="margin:10px">
+                    <div class="btn btn-sm btn-primary" v-on:click="saveApplicationUI()" style="margin:10px">
                         <i class="fa fa-save"></i> Save changes
                     </div>
                 </li>
@@ -96,7 +96,7 @@
                             <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteColumn(field)"><span class="fas fa-trash" title="Remove"></span></button></td>
                             <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
                             <td>
-                                <select v-model="field.dataColumnDbName" class="form-control form-control-sm">
+                                <select v-model="field.dataColumn1DbName" class="form-control form-control-sm">
                                     <option v-for="col in userInterfaceTable.columns" v-bind:value="col.dbName">{{col.dbName}}</option>
                                 </select>
 
@@ -151,7 +151,7 @@
             el: '#app',
             data: {
                 model: {
-
+                    table: { columns:[] }
                 },
                 dbtables: [],
                 active_setting_input: {},
@@ -211,7 +211,7 @@
                     if (this.dbtables.length > 0)
                         return this.dbtables[0];
 
-                    return {};
+                    return { columns: [] };
                 }
 
             },

@@ -100,7 +100,8 @@ namespace Intwenty.Middleware
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyProductAuthorizationStore>()
              .AddUserManager<IntwentyUserManager>()
-             .AddSignInManager<IntwentySignInManager>();
+             .AddSignInManager<IntwentySignInManager>()
+             .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>();
             
 
 
