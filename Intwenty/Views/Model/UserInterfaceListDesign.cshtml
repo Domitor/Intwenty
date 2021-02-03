@@ -86,14 +86,14 @@
                 <table class="table table">
                     <thead>
                         <tr>
-
+                            <th style="width:5%"></th>
                             <th style="width:30%">Title <span style="color: red"> *</span></th>
                             <th style="width:65%">Column name <span style="color: red"> *</span></th>
                         </tr>
                     </thead>
                     <tbody v-for="field in model.table.columns">
-                        <tr>
-
+                        <tr v-if="!field.isRemoved">
+                            <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteColumn(field)"><span class="fas fa-trash" title="Remove"></span></button></td>
                             <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
                             <td>
                                 <select v-model="field.dataColumnDbName" class="form-control form-control-sm">
@@ -145,7 +145,7 @@
 
     <script>
 
-       
+
 
         var app = new Vue({
             el: '#app',
@@ -160,7 +160,7 @@
             },
             methods:
             {
-              
+
                 openSettings() {
                     this.active_setting_input = this.model;
                     this.initializePropertyUI(this.active_setting_input);
@@ -191,13 +191,21 @@
                              raiseErrorModal(response.responseJSON);
                         }
                     });
+                },
+                deleteColumn: function (item)
+                {
+                    var context = this;
+                    raiseYesNoModal("Delete ?", "Delete table column ?", function ()
+                    {
+                        item.isRemoved = true;
+                    });
                 }
-               
+
 
             },
             computed:
             {
-                
+
                 userInterfaceTable: function ()
                 {
                     if (this.dbtables.length > 0)

@@ -1154,47 +1154,130 @@ namespace Intwenty.Controllers
             }
 
         }
-        
-
-        /*
-      [HttpPost("/Model/API/SaveListViewModel")]
-      public IActionResult SaveListViewModel([FromBody] UserInterfaceInputDesignVm model)
-      {
-          if (!User.Identity.IsAuthenticated)
-              return Forbid();
-          if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-              return Forbid();
-
-          try
-          {
-
-              if (model.ApplicationId < 1)
-                  throw new InvalidOperationException("ApplicationId is missing in model when saving listview");
-
-              var app = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-              if (app == null)
-                  throw new InvalidOperationException("Could not find application");
-
-              var dtolist = UIModelCreator.GetListViewUIModel(model, app);
-              ModelRepository.SaveUserInterfaceModels(dtolist);
-
-              var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == app.Application.Id);
-              var vm = UIModelCreator.GetUIVm(t, model.ViewType);
-              return new JsonResult(vm);
-
-          }
-          catch (Exception ex)
-          {
-              var r = new OperationResult();
-              r.SetError(ex.Message, "An error occured when saving application dataview meta data.");
-              var jres = new JsonResult(r);
-              jres.StatusCode = 500;
-              return jres;
-          }
 
 
-      }
-      */
+        [HttpPost("/Model/API/SaveApplicationListUI")]
+        public IActionResult SaveApplicationListUI([FromBody] UserInterfaceListDesignVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+                var uimodel = appmodel.GetUserInterface(model.MetaCode);
+                if (uimodel == null)
+                    return BadRequest();
+
+                var views = ModelRepository.GetDataViewModels();
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                UserInterfaceStructureItem entity = null;
+
+                if (model.Table.Id > 0)
+                {
+                    entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == model.Table.Id);
+                    entity.Title = model.Table.Title;
+                    entity.Properties = model.Table.CompilePropertyString();
+                    client.UpdateEntity(entity);
+                }
+                else
+                {
+                    model.Table.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeTable, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = model.Table.MetaCode, ColumnOrder = 1, RowOrder = 1, ParentMetaCode = "ROOT", UserInterfaceMetaCode = uimodel.MetaCode };
+                    entity.Title = model.Table.Title;
+                    entity.Properties = model.Table.CompilePropertyString();
+                    entity.MetaCode = model.Table.MetaCode;
+                    client.InsertEntity(entity);
+                }
+
+                var order = 0;
+                foreach (var column in model.Table.Columns)
+                {
+
+                    //PANEL CREATED IN UI BUT THEN REMOVED BEFORE SAVE
+                    if (column.Id == 0 && column.IsRemoved)
+                        continue;
+
+                    if (column.IsRemoved)
+                    {
+                        if (column.Id > 0)
+                        {
+                            var removeentity = client.GetEntity<UserInterfaceStructureItem>(column.Id);
+                            if (removeentity != null)
+                                client.DeleteEntity(removeentity);
+                        }
+                        continue;
+                    }
+
+                    order++;
+                    if (!string.IsNullOrEmpty(column.DataColumn1DbName))
+                    {
+                        var dmc = appmodel.DataStructure.Find(p => p.DbName == column.DataColumn1DbName && p.IsRoot);
+                        if (dmc != null)
+                            column.DataColumn1MetaCode = dmc.MetaCode;
+                    }
+
+                    if (column.Id > 0)
+                    {
+                        entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == column.Id);
+                        entity.Title = column.Title;
+                        entity.Properties = column.CompilePropertyString();
+                        entity.DataTableMetaCode = uimodel.DataTableMetaCode;
+                        entity.DataColumn1MetaCode = column.DataColumn1MetaCode;
+                        client.UpdateEntity(entity);
+                    }
+                    else
+                    {
+                        column.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypePanel, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                        entity.Title = column.Title;
+                        entity.Properties = column.CompilePropertyString();
+                        entity.DataTableMetaCode = uimodel.DataTableMetaCode;
+                        entity.DataColumn1MetaCode = column.DataColumn1MetaCode;
+                        client.InsertEntity(entity);
+                    }
+
+                }
+         
+
+                client.Close();
+
+                ModelRepository.ClearCache();
+
+
+                appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+                uimodel = appmodel.GetUserInterface(model.MetaCode);
+                if (uimodel == null)
+                    return BadRequest();
+
+                model = new UserInterfaceListDesignVm();
+                model.Id = uimodel.Id;
+                model.MetaCode = uimodel.MetaCode;
+                model.ApplicationId = appmodel.Application.Id;
+                model.Table = uimodel.Table;
+                return new JsonResult(model);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving user interface model.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
+    
         #endregion
 
         #region Value Domains
