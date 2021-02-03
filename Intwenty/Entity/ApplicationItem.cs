@@ -18,9 +18,11 @@ namespace Intwenty.Entity
         [NotNull]
         public string MetaCode { get; set; }
         public int Id { get; set; }
+        [NotNull]
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string Description { get; set; }
+        [NotNull]
         public string DbName { get; set; }
         public bool IsHierarchicalApplication { get; set; }
         public bool UseVersioning { get; set; }

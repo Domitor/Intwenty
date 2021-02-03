@@ -306,12 +306,6 @@
                                     <textarea type="text" class="form-control form-control-sm" rows="10" cols="200" v-model="active_setting_input.rawHTML"></textarea>
                                 </div>
 
-                                <div class="form-group" v-if="showSettingDbTable">
-                                    <label class="control-label">Set database table</label>
-                                    <select v-model="active_setting_input.dataTableDbName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
-                                        <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                                    </select>
-                                </div>
 
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="control-label">Set data view</label>
@@ -453,13 +447,13 @@
                 setUserInput: function (input, metatype)
                 {
                     input.metaType = metatype;
-                    input.dataTableDbName = this.defaultTable.dbName;
+                    input.dataTableDbName = this.userInterfaceTable.dbName;
                     this.openSettingsDlg(input);
                 },
                 openSettingsDlg(input)
                 {
                     this.active_setting_input = input;
-                    this.active_setting_input.dataTableDbName = this.defaultTable.dbName;
+                    this.active_setting_input.dataTableDbName = this.userInterfaceTable.dbName;
                     this.initializePropertyUI(this.active_setting_input);
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
@@ -641,16 +635,6 @@
                         }
                     });
                 },
-                removeEditGridColumn: function (column)
-                {
-
-                    $("#setting_modal_close_btn").click();
-                    var context = this;
-                    raiseYesNoModal("Delete ?", "Delete column ?", function ()
-                    {
-                        column.isRemoved = true;
-                    });
-                },
                 removeSection: function (section)
                 {
                     raiseYesNoModal("Delete ?", "Delete the entire section ?", function () {
@@ -722,10 +706,6 @@
 
                     return true;
                 },
-                showSettingDbTable: function ()
-                {
-                    return false;
-                },
                 showSettingValueDomain: function ()
                 {
                     if (this.active_setting_input.metaType === "COMBOBOX")
@@ -744,22 +724,14 @@
 
                     return false;
                 },
-                defaultTable: function () {
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (this.dbtables[i].isDefaultTable)
-                            return this.dbtables[i];
+                userInterfaceTable: function ()
+                {
+                    if (this.dbtables.length > 0)
+                        return this.dbtables[0];
 
                     return {};
-                },
-                nonDefaultTables: function ()
-                {
-                    var list = [];
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (!this.dbtables[i].isDefaultTable)
-                            list.push(this.dbtables[i]);
-
-                    return list;
                 }
+               
 
             },
             mounted: function () {
@@ -775,7 +747,7 @@
                 }).done(function () {
 
                     //Tables
-                    endpointurl = baseurl + "GetDatabaseTables/@Model.ApplicationInfo.Id";
+                    endpointurl = baseurl + "GetUserInterfaceDatabaseTable/@Model.ApplicationInfo.Id/@Model.MetaCode";
                     $.get(endpointurl, function (response) {
                         context.dbtables = response;
                     }).done(function () {

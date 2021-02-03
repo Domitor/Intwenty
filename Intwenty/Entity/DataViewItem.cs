@@ -17,6 +17,7 @@ namespace Intwenty.Entity
         public string MetaCode { get; set; }
         [NotNull]
         public string MetaType { get; set; }
+        [NotNull]
         public string ParentMetaCode { get; set; }
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }

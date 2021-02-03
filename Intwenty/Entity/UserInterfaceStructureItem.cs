@@ -22,7 +22,9 @@ namespace Intwenty.Entity
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string Description { get; set; }
+        [NotNull]
         public string UserInterfaceMetaCode { get; set; }
+        [NotNull]
         public string ParentMetaCode { get; set; }
 
 

@@ -81,6 +81,8 @@ namespace Intwenty.Model.UIDesign
             return res;
         }
 
+       
+
         public static DatabaseTableVm GetListViewTableVm(ApplicationModel app)
         {
             var table = new DatabaseTableVm() { Id = 0, DbName = app.Application.DbName, ApplicationId = app.Application.Id, MetaCode = "VIRTUAL", ParentMetaCode = "ROOT", MetaType = "DATATABLE", Description = "Main table for " + app.Application.Title, IsDefaultTable = true };

@@ -22,7 +22,7 @@ namespace Intwenty.Model
 
         public string ParentMetaCode { get; set; }
 
-        public string MetaType { protected set;  get; }
+        public string MetaType { set;  get; }
 
         public abstract bool HasValidMetaType { get; }
 

@@ -326,6 +326,31 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get model data for application tables for application with id
         /// </summary>
+        [HttpGet("/Model/API/GetUserInterfaceDatabaseTable/{applicationid}/{uimetacode}")]
+        public IActionResult GetUserInterfaceDatabaseTable(int applicationid, string uimetacode)
+        {
+            if (!User.Identity.IsAuthenticated)
+                if (!User.Identity.IsAuthenticated)
+                    return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+            var uimodel = appmodel.GetUserInterface(uimetacode);
+            if (uimodel == null)
+                return BadRequest();
+
+            var apptables = DatabaseModelCreator.GetDatabaseTableVm(appmodel);
+            var model = apptables.Where(p => p.DbName == uimodel.DataTableDbName);
+            return new JsonResult(model);
+
+        }
+
+        /// <summary>
+        /// Get model data for application tables for application with id
+        /// </summary>
         [HttpGet("/Model/API/GetListviewTable/{applicationid}")]
         public IActionResult GetListviewTable(int applicationid)
         {
@@ -877,8 +902,10 @@ namespace Intwenty.Controllers
                     return BadRequest();
 
                 var views = ModelRepository.GetDataViewModels();
+                var client = DataRepository.GetDataClient();
+                client.Open();
 
-                var savelist = new List<UserInterfaceStructureModelItem>();
+                UserInterfaceStructureItem entity = null;
 
                 foreach (var section in model.Sections)
                 {
@@ -886,17 +913,37 @@ namespace Intwenty.Controllers
                     if (section.Id == 0 && section.IsRemoved)
                         continue;
 
-                    var sect = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypeSection) { Id = section.Id, AppMetaCode = appmodel.Application.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, Title = section.Title, ParentMetaCode = "ROOT" };
-                    savelist.Add(sect);
-                    if (sect.Id == 0)
-                        sect.MetaCode = BaseModelItem.GenerateNewMetaCode(sect);
-
                     if (section.Collapsible)
-                        sect.AddUpdateProperty("COLLAPSIBLE", "TRUE");
+                        section.AddUpdateProperty("COLLAPSIBLE", "TRUE");
                     if (section.StartExpanded)
-                        sect.AddUpdateProperty("STARTEXPANDED", "TRUE");
+                        section.AddUpdateProperty("STARTEXPANDED", "TRUE");
                     if (section.IsRemoved)
-                        sect.AddUpdateProperty("REMOVED", "TRUE");
+                    {
+                        if (section.Id > 0)
+                        {
+                            var removeentity = client.GetEntity<UserInterfaceStructureItem>(section.Id);
+                            if (removeentity != null)
+                                client.DeleteEntity(removeentity);
+                        }
+                        continue;
+                    }
+
+                    if (section.Id > 0)
+                    {
+                        entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == section.Id);
+                        entity.Title = section.Title;
+                        entity.Properties = section.CompilePropertyString();
+                        client.UpdateEntity(entity);
+                    }
+                    else
+                    {
+                        section.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeSection, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, ParentMetaCode = "ROOT", UserInterfaceMetaCode = uimodel.MetaCode };
+                        entity.Title = section.Title;
+                        entity.Properties = section.CompilePropertyString();
+                        entity.MetaCode = section.MetaCode;
+                        client.InsertEntity(entity);
+                    }
 
                     foreach (var panel in section.LayoutPanels)
                     {
@@ -904,80 +951,102 @@ namespace Intwenty.Controllers
                         if (panel.Id == 0 && panel.IsRemoved)
                             continue;
 
-                        var pnl = new UserInterfaceStructureModelItem(UserInterfaceStructureModelItem.MetaTypePanel) { Id = panel.Id, AppMetaCode = appmodel.Application.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = sect.MetaCode };
-                        savelist.Add(pnl);
-                        if (pnl.Id == 0)
-                            pnl.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
                         if (panel.IsRemoved)
-                            pnl.AddUpdateProperty("REMOVED", "TRUE");
+                        {
+                            if (panel.Id > 0)
+                            {
+                                var removeentity = client.GetEntity<UserInterfaceStructureItem>(panel.Id);
+                                if (removeentity != null)
+                                    client.DeleteEntity(removeentity);
+                            }
+                            continue;
+                        }
+
+                        if (panel.Id > 0)
+                        {
+                            entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == panel.Id);
+                            entity.Title = panel.Title;
+                            entity.Properties = panel.CompilePropertyString();
+                            client.UpdateEntity(entity);
+                        }
+                        else
+                        {
+                            panel.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                            entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypePanel, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = panel.MetaCode, ColumnOrder = panel.ColumnOrder, RowOrder = panel.RowOrder, Title = panel.Title, ParentMetaCode = section.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                            entity.Title = panel.Title;
+                            entity.Properties = panel.CompilePropertyString();
+                            entity.MetaCode = panel.MetaCode;
+                            client.InsertEntity(entity);
+                        }
 
                         foreach (var lr in section.LayoutRows)
                         {
                             foreach (var input in lr.UserInputs)
                             {
-                                if (input.ColumnOrder != pnl.ColumnOrder || string.IsNullOrEmpty(input.MetaType) || (input.Id == 0 && input.IsRemoved))
+                                if (input.ColumnOrder != panel.ColumnOrder || string.IsNullOrEmpty(input.MetaType) || (input.Id == 0 && input.IsRemoved))
                                     continue;
 
-                                var uicontrol = new UserInterfaceStructureModelItem(input.MetaType) { Id = input.Id, AppMetaCode = appmodel.Application.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = pnl.MetaCode, Properties = input.CompilePropertyString() };
-                                savelist.Add(uicontrol);
-
-                                if (uicontrol.Id == 0)
-                                    uicontrol.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
                                 if (input.IsRemoved)
-                                    uicontrol.AddUpdateProperty("REMOVED", "TRUE");
+                                {
+                                    if (input.Id > 0)
+                                    {
+                                        var removeentity = client.GetEntity<UserInterfaceStructureItem>(input.Id);
+                                        if (removeentity != null)
+                                            client.DeleteEntity(removeentity);
+                                    }
+                                    continue;
+                                }
 
                                 if (!string.IsNullOrEmpty(input.DataTableDbName))
                                 {
                                     var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataTableDbName && p.IsMetaTypeDataTable);
                                     if (dmc != null)
-                                        uicontrol.DataTableMetaCode = dmc.MetaCode;
+                                        input.DataTableMetaCode = dmc.MetaCode;
                                 }
 
-                                if (uicontrol.IsUIBindingType)
+                                if (input.IsUIBindingType)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn1DbName))
                                     {
                                         var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.IsRoot);
                                         if (dmc != null)
-                                            uicontrol.DataColumn1MetaCode = dmc.MetaCode;
+                                            input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-                                    if (uicontrol.IsMetaTypeComboBox)
+                                    if (input.IsMetaTypeComboBox)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
-                                            uicontrol.Domain = "VALUEDOMAIN." + input.Domain;
+                                            input.Domain = "VALUEDOMAIN." + input.Domain;
                                         }
                                     }
                                 }
 
-                                if (uicontrol.IsUIComplexBindingType)
+                                if (input.IsUIComplexBindingType)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataViewMetaCode))
                                     {
-                                        uicontrol.DataViewMetaCode = input.DataViewMetaCode;
+                                        input.DataViewMetaCode = input.DataViewMetaCode;
                                     }
 
                                     if (!string.IsNullOrEmpty(input.DataColumn1DbName))
                                     {
                                         var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.IsRoot);
                                         if (dmc != null)
-                                            uicontrol.DataColumn1MetaCode = dmc.MetaCode;
+                                            input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
 
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {
                                         var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.IsRoot);
                                         if (dmc != null)
-                                            uicontrol.DataColumn2MetaCode = dmc.MetaCode;
+                                            input.DataColumn2MetaCode = dmc.MetaCode;
                                     }
 
                                     if (!string.IsNullOrEmpty(input.DataViewColumn1DbName))
                                     {
                                         var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn1DbName && p.ParentMetaCode == input.DataViewMetaCode);
                                         if (dmc != null)
-                                            uicontrol.DataViewColumn1MetaCode = dmc.MetaCode;
+                                            input.DataViewColumn1MetaCode = dmc.MetaCode;
                                     }
 
 
@@ -985,102 +1054,49 @@ namespace Intwenty.Controllers
                                     {
                                         var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn2DbName && p.ParentMetaCode == input.DataViewMetaCode);
                                         if (dmc != null)
-                                            uicontrol.DataViewColumn2MetaCode = dmc.MetaCode;
+                                            input.DataViewColumn2MetaCode = dmc.MetaCode;
                                     }
                                 }
 
-                                if (uicontrol.IsMetaTypeStaticHTML)
+                                if (input.Id > 0)
                                 {
-                                    uicontrol.RawHTML = input.RawHTML;
-
+                                    entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == input.Id);
+                                    entity.Title = input.Title;
+                                    entity.Properties = input.CompilePropertyString();
+                                    entity.RawHTML = input.RawHTML;
+                                    entity.DataTableMetaCode = uimodel.DataTableMetaCode;
+                                    entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
+                                    entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
+                                    entity.Domain = input.Domain;
+                                    entity.DataViewMetaCode = input.DataViewMetaCode;
+                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
+                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
+                                    client.UpdateEntity(entity);
                                 }
+                                else
+                                {
+                                    input.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                                    entity = new UserInterfaceStructureItem() { MetaType=input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode= appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                                    entity.Title = input.Title;
+                                    entity.Properties = input.CompilePropertyString();
+                                    entity.MetaCode = input.MetaCode;
+                                    entity.RawHTML = input.RawHTML;
+                                    entity.DataTableMetaCode = uimodel.DataTableMetaCode;
+                                    entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
+                                    entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
+                                    entity.Domain = input.Domain;
+                                    entity.DataViewMetaCode = input.DataViewMetaCode;
+                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
+                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
+                                    client.InsertEntity(entity);
+                                }
+
                             }
                         }
                     }
-                }
 
 
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                foreach (var t in savelist)
-                {
-                    if (t.Id > 0 && t.HasProperty("REMOVED"))
-                    {
-                        var existing = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == t.Id);
-                        if (existing != null)
-                        {
-                            client.DeleteEntity(existing);
-                        }
-                    }
-                }
-
-                foreach (var uic in savelist)
-                {
-                    if (uic.HasProperty("REMOVED"))
-                        continue;
-
-                    if (uic.Id < 1)
-                    {
-                        if (string.IsNullOrEmpty(uic.MetaType))
-                            throw new InvalidOperationException("Can't save an ui model item without a MetaType");
-
-                        if (string.IsNullOrEmpty(uic.ParentMetaCode))
-                            throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a ParentMetaCode");
-
-                        if (string.IsNullOrEmpty(uic.MetaCode))
-                            throw new InvalidOperationException("Can't save an ui model item of type " + uic.MetaType + " without a MetaCode");
-
-
-
-                        var entity = new UserInterfaceStructureItem()
-                        {
-                            SystemMetaCode = appmodel.System.MetaCode,
-                            AppMetaCode = uic.AppMetaCode,
-                            ColumnOrder = uic.ColumnOrder,
-                            DataTableMetaCode = uic.DataTableMetaCode,
-                            DataColumn1MetaCode = uic.DataColumn1MetaCode,
-                            DataColumn2MetaCode = uic.DataColumn2MetaCode,
-                            DataViewMetaCode = uic.DataViewMetaCode,
-                            DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode,
-                            DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode,
-                            Description = uic.Description,
-                            Domain = uic.Domain,
-                            MetaCode = uic.MetaCode,
-                            MetaType = uic.MetaType,
-                            ParentMetaCode = uic.ParentMetaCode,
-                            RowOrder = uic.RowOrder,
-                            Title = uic.Title,
-                            Properties = uic.Properties
-
-                        };
-
-                        client.InsertEntity(entity);
-
-                    }
-                    else
-                    {
-                        var existing = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == uic.Id);
-                        if (existing != null)
-                        {
-                            existing.Title = uic.Title;
-                            existing.RowOrder = uic.RowOrder;
-                            existing.ColumnOrder = uic.ColumnOrder;
-                            existing.DataColumn1MetaCode = uic.DataColumn1MetaCode;
-                            existing.DataColumn2MetaCode = uic.DataColumn2MetaCode;
-                            existing.DataViewColumn1MetaCode = uic.DataViewColumn1MetaCode;
-                            existing.DataViewColumn2MetaCode = uic.DataViewColumn2MetaCode;
-                            existing.Domain = uic.Domain;
-                            existing.DataTableMetaCode = uic.DataTableMetaCode;
-                            existing.DataViewMetaCode = uic.DataViewMetaCode;
-                            existing.Description = uic.Description;
-                            existing.Properties = uic.Properties;
-                            client.UpdateEntity(existing);
-                        }
-
-                    }
-
-                }
+                 }
 
                 client.Close();
 

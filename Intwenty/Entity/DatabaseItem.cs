@@ -25,6 +25,7 @@ namespace Intwenty.Entity
         [NotNull]
         public string MetaType { get; set; }
         public string Description { get; set; }
+        [NotNull]
         public string ParentMetaCode { get; set; }
         public string DbName { get; set; }
         public string DataType { get; set; }

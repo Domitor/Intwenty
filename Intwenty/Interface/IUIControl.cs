@@ -30,7 +30,7 @@ namespace Intwenty.Interface
         bool IsDataColumn2Connected { get; }
         bool IsDataViewColumn2Connected { get; }
 
-        List<IUIControl> Children { get; set; }
+        //List<IUIControl> Children { get; set; }
     }
 
     public interface IEditListViewColumn : IUIBinding

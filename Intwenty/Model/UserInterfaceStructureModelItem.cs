@@ -34,16 +34,10 @@ namespace Intwenty.Model
         public UserInterfaceStructureModelItem()
         {
             SetEmptyStrings();
-            Children = new List<IUIControl>();
+            //Children = new List<IUIControl>();
         }
 
-        public UserInterfaceStructureModelItem(string metatype)
-        {
-            MetaType = metatype;
-            SetEmptyStrings();
-            Children = new List<IUIControl>();
-        }
-
+    
         public UserInterfaceStructureModelItem(UserInterfaceStructureItem entity)
         {
             Id = entity.Id;
@@ -69,7 +63,7 @@ namespace Intwenty.Model
             RawHTML = entity.RawHTML;
             SystemMetaCode = entity.SystemMetaCode;
             SetEmptyStrings();
-            Children = new List<IUIControl>();
+            //Children = new List<IUIControl>();
         }
 
         private void SetEmptyStrings()
@@ -136,7 +130,7 @@ namespace Intwenty.Model
         public DataViewModelItem DataViewInfo { get; set; }
         public DataViewModelItem DataViewColumn1Info { get; set; }
         public DataViewModelItem DataViewColumn2Info { get; set; }
-        public List<IUIControl> Children { get; set; }
+        //public List<IUIControl> Children { get; set; }
         public string UserInterfaceMetaCode { get; set; }
         public string JavaScriptObjectName { get; set; }
         public bool IsRemoved { get; set; }

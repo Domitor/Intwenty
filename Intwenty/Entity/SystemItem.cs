@@ -17,15 +17,15 @@ namespace Intwenty.Entity
 
         [AutoIncrement]
         public int Id { get; set; }
-
+        [NotNull]
         public string Title { get; set; }
 
         public string TitleLocalizationKey { get; set; }
 
         public string Description { get; set; }
-
+        [NotNull]
         public string MetaCode { get; set; }
-
+        [NotNull]
         public string DbPrefix { get; set; }
 
     }
