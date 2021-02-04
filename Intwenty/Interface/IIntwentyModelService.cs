@@ -7,6 +7,7 @@ using System.Text;
 using System.Security.Claims;
 using Intwenty.Areas.Identity.Models;
 using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Entity;
 
 namespace Intwenty.Interface
 {
@@ -20,18 +21,13 @@ namespace Intwenty.Interface
         /// <summary>
         /// Returns localized application models that the current user has permission to use
         /// </summary>
-        public Task<List<ApplicationModelItem>> GetLocalizedAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
+        public Task<List<ViewModel>> GetApplicationMenuAsync(ClaimsPrincipal claimprincipal);
 
 
-        /// <summary>
-        /// Returns application models that the current user has permission to use
-        /// </summary>
+        public Task<List<ViewModel>> GetAuthorizedViewModelsAsync(ClaimsPrincipal claimprincipal);
         public Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
         public Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal);
-        public ExportModel GetExportModel();
-        public OperationResult ImportModel(ExportModel model);
-        public List<OperationResult> ConfigureDatabase();
-        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null);
+       
 
 
         /// <summary>
@@ -52,8 +48,6 @@ namespace Intwenty.Interface
         //APPLICATION
         public List<ApplicationModel> GetApplicationModels();
         public ApplicationModel GetApplicationModel(int applicationid);
-        public List<ApplicationModel> GetLocalizedApplicationModels();
-        public ApplicationModel GetLocalizedApplicationModel(int applicationid);
         public List<ApplicationModelItem> GetAppModels();
         public void SetAppModelLocalizationKey(int id, string key);
 
@@ -61,15 +55,15 @@ namespace Intwenty.Interface
 
         //DATABASE
         public List<DatabaseModelItem> GetDatabaseModels();
-
         public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid);
-
         public void DeleteDatabaseModel(int id);
 
 
 
         //UI
         public List<ViewModel> GetViewModels();
+        public ViewModel GetLocalizedViewModelById(int id);
+        public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
         public ViewModel GetLocalizedViewModelByPath(string path);
         public void SetUserInterfaceModelLocalizationKey(int id, string key);
 
@@ -105,13 +99,15 @@ namespace Intwenty.Interface
 
 
 
+        public Task<List<OperationResult>> CreateTenantIsolatedTables(IntwentyUser user);
         public OperationResult ValidateModel();
-
         public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
-
         public void ClearCache(string key="ALL");
-
         public List<CachedObjectDescription> GetCachedObjectDescriptions();
+        public ExportModel GetExportModel();
+        public OperationResult ImportModel(ExportModel model);
+        public Task<List<OperationResult>> ConfigureDatabase(string tableprefix = "");
+        public Task<OperationResult> ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null, string tableprefix = "");
 
 
     }

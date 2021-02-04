@@ -1761,7 +1761,7 @@ namespace Intwenty.Controllers
                 foreach (var view in a.Views)
                 {
 
-                    var title = "Application: " + a.Application.Title + ", " + view.Title + " (VIEW)";
+                    var title = "Application: " + a.Application.Title + ", " + view.Title + " (View.Title)";
                     if (string.IsNullOrEmpty(view.TitleLocalizationKey))
                     {
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
@@ -1785,6 +1785,34 @@ namespace Intwenty.Controllers
                         foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
                         {
                             res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                        }
+
+                    }
+
+                    var description = "Application: " + a.Application.Title + ", " + view.Title + " (View.Description)";
+                    if (string.IsNullOrEmpty(view.DescriptionLocalizationKey))
+                    {
+                        var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
+                        foreach (var l in langs)
+                        {
+                            res.Add(new TranslationVm() { UserInterfaceModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "" });
+                        }
+                    }
+                    else
+                    {
+                        var trans = translations.FindAll(p => p.Key == view.DescriptionLocalizationKey);
+                        foreach (var l in langs)
+                        {
+                            var ct = trans.Find(p => p.Culture == l.Culture);
+                            if (ct != null)
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id });
+                            else
+                                res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "" });
+                        }
+
+                        foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                        {
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = description, Text = ct.Text, Id = ct.Id });
                         }
 
                     }
@@ -2138,15 +2166,42 @@ namespace Intwenty.Controllers
         /// Configure the database according to the model
         /// </summary>
         [HttpPost("/Model/API/RunDatabaseConfiguration")]
-        public IActionResult RunDatabaseConfiguration()
+        public async Task<IActionResult> RunDatabaseConfiguration()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var res = ModelRepository.ConfigureDatabase();
+            var res = await ModelRepository.ConfigureDatabase();
             return new JsonResult(res);
+        }
+
+        /// <summary>
+        /// Configure the database according to the model
+        /// </summary>
+        [HttpPost("/Model/API/RunTenantIsolatedDatabaseConfiguration")]
+        public async Task<IActionResult> RunTenantIsolatedDatabaseConfiguration()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var client = DataRepository.GetDataClient();
+            client.Open();
+            var entities = client.GetEntities<IntwentyUser>();
+            client.Close();
+
+            var result = new List<OperationResult>();
+
+            foreach (var u in entities)
+            {
+                var t = await ModelRepository.CreateTenantIsolatedTables(u);
+                result.AddRange(t);
+
+            }
+            return new JsonResult(result);
         }
 
         #endregion

@@ -350,19 +350,32 @@ namespace Intwenty.Areas.Identity.Data
             var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
             var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
 
-            var explicit_exists = false;
+            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
 
-            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode))
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode && !p.DenyAuthorization))
             {
                 return true;
             }
 
-            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode))
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode && !p.DenyAuthorization))
             {
                 return true;
             }
 
-            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode))
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode && !p.DenyAuthorization))
             {
                 return true;
             }

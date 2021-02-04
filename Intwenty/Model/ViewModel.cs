@@ -7,7 +7,7 @@ namespace Intwenty.Model
 {
 
 
-    public class ViewModel : BaseModelItem, ILocalizableTitle
+    public class ViewModel : BaseModelItem, ILocalizableTitle, ILocalizableDescription
     {
         public static readonly string MetaTypeUIView = "UIVIEW";
 
@@ -34,6 +34,7 @@ namespace Intwenty.Model
             LocalizedTitle = entity.Title;
             TitleLocalizationKey = entity.TitleLocalizationKey;
             Description = entity.Description;
+            LocalizedDescription = entity.Description;
             DescriptionLocalizationKey = entity.DescriptionLocalizationKey;
             SystemMetaCode = entity.SystemMetaCode;
             AppMetaCode = entity.AppMetaCode;
@@ -70,6 +71,7 @@ namespace Intwenty.Model
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string TitleLocalizationKey { get; set; }
+        public string LocalizedDescription { get; set; }
         public string Description { get; set; }
         public string DescriptionLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }

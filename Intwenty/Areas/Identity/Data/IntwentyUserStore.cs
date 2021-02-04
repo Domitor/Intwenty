@@ -54,6 +54,16 @@ namespace Intwenty.Areas.Identity.Data
 
 
             await client.OpenAsync();
+
+            //TABLE PREFIX
+            var number = 100;
+            if (allusers.Count > 0)
+                number = allusers.Count * 100;
+
+            user.TablePrefix = string.Format("{0}_{1}", new object[] { "USER",  number });
+            //
+
+
             await client.InsertEntityAsync(user);
             await client.CloseAsync();
             return IdentityResult.Success;

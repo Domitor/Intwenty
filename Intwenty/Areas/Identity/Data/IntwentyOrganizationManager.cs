@@ -58,6 +58,21 @@ namespace Intwenty.Areas.Identity.Data
             organization.NormalizedName = organization.Name.ToUpper();
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
+
+            //TABLE PREFIX
+            var all = await client.GetEntitiesAsync<IntwentyOrganization>();
+            var number = 100;
+            if (all.Count > 0)
+                number = all.Count * 100;
+            var name = "";
+            if (organization.NormalizedName.Length < 4)
+                name = organization.NormalizedName;
+            else
+                name = organization.NormalizedName.Substring(0, 4);
+
+            organization.TablePrefix = string.Format("{0}_{1}_{2}", new object[] { "ORG", name, number });
+            //
+
             var t = await client.InsertEntityAsync(organization);
             await client.CloseAsync();
             return IdentityResult.Success;
@@ -217,7 +232,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public async Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid)
         {
-            var sql = "SELECT t1.*, t2.Name as OrganizationName FROM security_OrganizationProducts t1 ";
+            var sql = "SELECT t1.*, t2.Name as OrganizationName, t2.TablePrefix as OrganizationTablePrefix FROM security_OrganizationProducts t1 ";
             sql += "JOIN security_Organization t2 ON t1.OrganizationId = t2.Id ";
             sql += "WHERE EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t2.Id)";
             var parameters = new List<IntwentySqlParameter>();
@@ -256,6 +271,7 @@ namespace Intwenty.Areas.Identity.Data
             result.OrganizationName = org.Name;
             result.ProductId = product.Id;
             result.ProductName = product.ProductName;
+            result.OrganizationTablePrefix = org.TablePrefix;
       
 
             return result;

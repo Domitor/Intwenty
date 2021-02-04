@@ -412,7 +412,7 @@ namespace Intwenty.Controllers
 
                 var configres = _modelservice.ConfigureDatabase(model);
                 
-                if (!configres.IsSuccess)
+                if (!configres.Result.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();

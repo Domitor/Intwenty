@@ -31,6 +31,8 @@ namespace Intwenty.Areas.Identity.Entity
 
         public bool CreatedWithExternalProvider { get; set; }
 
+        public string TablePrefix { get; set; }
+
         [Ignore]
         public string FullName
         {

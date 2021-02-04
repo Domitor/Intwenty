@@ -31,7 +31,6 @@ namespace Intwenty.Controllers
 
         public virtual async Task<IActionResult> View(int? id)
         {
-            var t = User.Identity.GetOrganizationName();
 
             ViewBag.Id = 0;
             if (id.HasValue && id.Value > 0)

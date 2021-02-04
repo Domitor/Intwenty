@@ -2,6 +2,9 @@
 
 @{
 
+    var mainDbName = Model.ApplicationInfo.DbName;
+    var applicationId = Model.ApplicationInfo.Id;
+    var applicationViewId = Model.Id;
     var instanceid = ViewBag.Id;
     var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
 }
@@ -268,12 +271,12 @@
             el: '#app',
             data: {
                 baseurl: '@Url.Content("~/Application/API/")'
-                ,appMainTable: '@Model.ApplicationInfo.DbName'
-                ,appId: @Model.ApplicationInfo.Id
+                ,appMainTable: '@mainDbName'
+                ,appId: @applicationId
                 ,instanceId: @instanceid
                 ,datalist: []
-                ,model: { showFilter: false,  ['@Model.ApplicationInfo.DbName']: {} }
-                ,pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
+                ,model: { showFilter: false,  ['@mainDbName']: {} }
+                ,pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
                 ,dataview: []
@@ -282,7 +285,7 @@
                 ,current_edit_line: {}
                 ,dlgFilterColumnName: ""
                 ,dlgFilterValue: ""
-                ,applicationViewId: @Model.Id
+                ,applicationViewId: @applicationViewId
 
             },
             methods:

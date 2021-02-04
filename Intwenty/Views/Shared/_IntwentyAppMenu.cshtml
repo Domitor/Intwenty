@@ -3,12 +3,12 @@
 @{
 
     var systems = new List<SystemModelItem>();
-    var apps = await ModelRepository.GetLocalizedAuthorizedApplicationModelsAsync(User);
-    foreach (var a in apps)
+    var views = await ModelRepository.GetApplicationMenuAsync(User);
+    foreach (var a in views)
     {
         if (!systems.Exists(p => p.MetaCode == a.SystemMetaCode))
         {
-            if (a.SystemInfo != null && apps.Exists(p=> p.SystemMetaCode == a.SystemMetaCode))
+            if (a.SystemInfo != null && views.Exists(p=> p.SystemMetaCode == a.SystemMetaCode))
             {
                 systems.Add(a.SystemInfo);
             }
@@ -38,9 +38,9 @@
                 <div class="dropdown-item"><strong>@sys.Title</strong></div>
                 <div class="dropdown-divider"></div>
 
-                foreach (var app in apps.Where(p => p.SystemMetaCode == sys.MetaCode))
+                foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode))
                 {
-                    <a class="dropdown-item" asp-controller="Application" asp-action="EditList" asp-route-id="@app.Id">@app.LocalizedTitle</a>
+                    <a class="dropdown-item" href="@Url.Content("~/"+view.Path)">@view.LocalizedTitle</a>
                 }
 
                 cnt++;

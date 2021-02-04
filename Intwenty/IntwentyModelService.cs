@@ -34,6 +34,8 @@ namespace Intwenty
 
         private IntwentyUserManager UserManager { get; }
 
+        private IIntwentyOrganizationManager OrganizationManager { get; }
+
         private string CurrentCulture { get; }
 
         private List<TypeMapItem> DataTypes { get; set; }
@@ -55,8 +57,9 @@ namespace Intwenty
         private static readonly string SystemModelItemCacheKey = "INTWENTYSYSTEMS";
 
 
-        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IntwentyUserManager usermanager)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IntwentyUserManager usermanager, IIntwentyOrganizationManager orgmanager)
         {
+            OrganizationManager = orgmanager;
             UserManager = usermanager;
             ModelCache = cache;
             Settings = settings.Value;
@@ -321,20 +324,7 @@ namespace Intwenty
             return res;
         }
 
-        public async Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal)
-        {
-            var res = new List<SystemModelItem>();
-            var systems = GetSystemModels();
-            var auth_apps = await GetAuthorizedApplicationModelsAsync(claimprincipal);
-
-            foreach (var s in systems)
-            {
-                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
-                    res.Add(s);
-            }
-
-            return res;
-        }
+     
 
         public void SaveSystemModel(SystemModelItem model)
         {
@@ -415,31 +405,70 @@ namespace Intwenty
 
         #region Localization
 
-        public ApplicationModel GetLocalizedApplicationModel(int applicationid)
+        public ViewModel GetLocalizedViewModelById(int id)
         {
 
-            var res = GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            if (res == null)
-                return null;
+          if (id < 1)
+              return null;
 
-            LocalizeTitle(res.Application);
-            foreach (var v in res.Views)
+            var appmodels = GetApplicationModels();
+            foreach (var app in appmodels)
             {
-                LocalizeTitle(v);
-                foreach (var ui in v.UserInterface)
+                foreach (var view in app.Views)
                 {
-                    //LocalizeTitle(ui);
-                    foreach (var uiitem in ui.UIStructure)
+                    if (view.Id == id)
                     {
-                       LocalizeTitle(uiitem);
+
+                        LocalizeTitle(view);
+                        LocalizeDescription(view);
+                        foreach (var ui in view.UserInterface)
+                        {
+                            foreach (var uiitem in ui.UIStructure)
+                            {
+                                LocalizeTitle(uiitem);
+                            }
+                        }
+
+                        return view;
 
                     }
                 }
-
             }
 
-            
-            return res;
+            return null;
+        }
+
+        public ViewModel GetLocalizedViewModelByMetaCode(string metacode)
+        {
+
+            if (string.IsNullOrEmpty(metacode))
+                return null;
+
+            var appmodels = GetApplicationModels();
+            foreach (var app in appmodels)
+            {
+                foreach (var view in app.Views)
+                {
+                    if (view.MetaCode == metacode)
+                    {
+
+                        LocalizeTitle(view);
+                        LocalizeDescription(view);
+                        foreach (var ui in view.UserInterface)
+                        {
+                            foreach (var uiitem in ui.UIStructure)
+                            {
+                                LocalizeTitle(uiitem);
+                            }
+                        }
+
+                        return view;
+
+                    }
+                }
+            }
+
+            return null;
         }
 
         public ViewModel GetLocalizedViewModelByPath(string path)
@@ -456,15 +485,14 @@ namespace Intwenty
                     {
 
                         LocalizeTitle(view);
+                        LocalizeDescription(view);
                         foreach (var ui in view.UserInterface)
                         {
-                            //LocalizeTitle(ui);
                             foreach (var uiitem in ui.UIStructure)
                             {
                                 LocalizeTitle(uiitem);
                             }
                         }
-
 
                         return view;
 
@@ -479,30 +507,7 @@ namespace Intwenty
 
         }
 
-        public List<ApplicationModel> GetLocalizedApplicationModels()
-        {
-
-            var res = GetApplicationModels();
-            foreach (var a in res)
-            {
-                LocalizeTitle(a.Application);
-                foreach (var v in a.Views)
-                {
-                    LocalizeTitle(v);
-                    foreach (var ui in v.UserInterface)
-                    {
-                        //LocalizeTitle(ui);
-                        foreach (var uiitem in ui.UIStructure)
-                        {
-                            LocalizeTitle(uiitem);
-
-                        }
-                    }
-
-                }
-            }
-            return res;
-        }
+       
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
         {
@@ -547,6 +552,30 @@ namespace Intwenty
             else
             {
                 item.LocalizedTitle = item.Title;
+            }
+
+
+        }
+
+        private void LocalizeDescription(ILocalizableDescription item)
+        {
+            if (item == null)
+                return;
+            if (string.IsNullOrEmpty(item.DescriptionLocalizationKey))
+                return;
+
+            //Localization
+            var translations = GetTranslations();
+            var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == item.DescriptionLocalizationKey);
+            if (trans != null)
+            {
+                item.LocalizedDescription = trans.Text;
+                if (string.IsNullOrEmpty(trans.Text))
+                    item.LocalizedDescription = item.Description;
+            }
+            else
+            {
+                item.LocalizedDescription = item.Description;
             }
 
 
@@ -597,16 +626,32 @@ namespace Intwenty
 
         }
 
-     
 
-        public async Task<List<ApplicationModelItem>> GetLocalizedAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal)
+
+        public async Task<List<ViewModel>> GetApplicationMenuAsync(ClaimsPrincipal claimprincipal)
         {
-            var t = await GetAuthorizedApplicationModelsAsync(claimprincipal);
-            LocalizeTitles(t.ToList<ILocalizableTitle>());
-            return t;
+
+            var all_auth_views = await GetAuthorizedViewModelsAsync(claimprincipal);
+            var all_auth_primary_views = all_auth_views.Where(p => p.IsPrimary).ToList();
+            LocalizeTitles(all_auth_primary_views.ToList<ILocalizableTitle>());
+            return all_auth_primary_views;
         }
 
-      
+        public async Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal)
+        {
+            var res = new List<SystemModelItem>();
+            var systems = GetSystemModels();
+            var auth_apps = await GetAuthorizedApplicationModelsAsync(claimprincipal);
+
+            foreach (var s in systems)
+            {
+                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
+                    res.Add(s);
+            }
+
+            return res;
+        }
+
         public async Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal)
         {
             var res = new List<ApplicationModelItem>();
@@ -624,29 +669,27 @@ namespace Intwenty
             var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
             var list = authorizations.Select(p => new IntwentyAuthorizationVm(p));
 
+            var denied = list.Where(p => p.DenyAuthorization).ToList();
+
 
             foreach (var a in apps)
             {
-                var exist_explicit = false;
+
+                if (denied.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.MetaCode))
+                    continue;
+                if (denied.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode))
+                    continue;
+
                 foreach (var p in list)
                 {
 
-                    //There is an explicit permission set
-                    if (p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.MetaCode)
+                    if (p.IsViewAuthorization && p.AuthorizationNormalizedName == a.MetaCode && !p.DenyAuthorization)
                     {
-                        exist_explicit = true;
                         res.Add(a);
                     }
-                }
-
-                if (!res.Exists(p => p.MetaCode == a.MetaCode) && !exist_explicit)
-                {
-                    foreach (var p in list)
+                    else if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode && !p.DenyAuthorization)
                     {
-                        if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode)
-                        {
-                            res.Add(a);
-                        }
+                        res.Add(a);
                     }
                 }
 
@@ -658,7 +701,71 @@ namespace Intwenty
 
         }
 
-     
+        public async Task<List<ViewModel>> GetAuthorizedViewModelsAsync(ClaimsPrincipal claimprincipal)
+        {
+            var res = new List<ViewModel>();
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return res;
+
+            var user = await UserManager.GetUserAsync(claimprincipal);
+            if (user == null)
+                return res;
+
+
+            var appmodels = GetApplicationModels();
+            var viewmodels = new List<ViewModel>();
+            foreach (var a in appmodels)
+            {
+                viewmodels.AddRange(a.Views);
+            }
+
+            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
+                return viewmodels;
+
+            var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p));
+
+            var denied = list.Where(p => p.DenyAuthorization).ToList();
+
+
+            foreach (var a in viewmodels)
+            {
+
+                if (denied.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == a.MetaCode))
+                    continue;
+                if (denied.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.AppMetaCode))
+                    continue;
+                if (denied.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode))
+                    continue;
+
+                foreach (var p in list)
+                {
+
+                    if (p.IsViewAuthorization && p.AuthorizationNormalizedName == a.MetaCode && !p.DenyAuthorization)
+                    {
+                        res.Add(a);
+                    }
+                    else if (p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.AppMetaCode && !p.DenyAuthorization)
+                    {
+                        res.Add(a);
+                    }
+                    else if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == a.SystemMetaCode && !p.DenyAuthorization)
+                    {
+                        res.Add(a);
+                    }
+                }
+
+              
+
+            }
+
+
+            return res;
+
+
+        }
+
+
 
         public List<ApplicationModelItem> GetAppModels()
         {
@@ -1141,6 +1248,8 @@ namespace Intwenty
                 res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "CreatedBy", DatabaseModelItem.DataTypeString));
                 res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedBy", DatabaseModelItem.DataTypeString));
                 res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
                 res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime));
 
                 foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.IsRoot))
@@ -1167,6 +1276,8 @@ namespace Intwenty
                     res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "CreatedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
                     res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
                     res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
                     res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime, table.MetaCode));
                     res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ParentId", DatabaseModelItem.DataTypeInt, table.MetaCode));
 
@@ -1573,87 +1684,154 @@ namespace Intwenty
 
         #region Configuration
 
+        public async Task<List<OperationResult>> CreateTenantIsolatedTables(IntwentyUser user)
+        {
+            var result = new List<OperationResult>();
 
-       
+            try
+            {
+                var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+                await client.OpenAsync();
+                var apps = await client.GetEntitiesAsync<ApplicationItem>();
+                await client.CloseAsync();
 
-        public List<OperationResult> ConfigureDatabase()
+                var isolatedapps = apps.Select(p => new ApplicationModelItem(p)).Where(p => p.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables);
+                if (isolatedapps.Count() == 0)
+                {
+                    result.Add(new OperationResult(true, MessageCode.RESULT, "No apps with tenant isolation by table were found"));
+                    return result;
+                }
+
+                var usertableprefix = "";
+                var orgtableprefix = "";
+
+                var productorgs = await OrganizationManager.GetUserOrganizationProductsInfoAsync(user.Id, Settings.ProductId);
+                if (productorgs.Count > 0)
+                    orgtableprefix = productorgs[0].OrganizationTablePrefix;
+
+                usertableprefix = user.TablePrefix;
+
+                var dbmodels = GetDatabaseModels();
+
+                foreach (var app in isolatedapps)
+                {
+                    //USER
+                    if (app.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User && !string.IsNullOrEmpty(usertableprefix))
+                    {
+                        var t = await ConfigureDatabase(app, dbmodels, usertableprefix);
+                        result.Add(t);
+                    }
+                    //ORGANIZATION
+                    if (app.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization && !string.IsNullOrEmpty(orgtableprefix))
+                    {
+                        var t = await ConfigureDatabase(app, dbmodels, orgtableprefix);
+                        result.Add(t);
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                //DataRepository.LogError("Error creating tenant isolated tables for user." + ex.Message, username: user.UserName);
+            }
+
+            return result;
+        }
+
+
+        public async Task<List<OperationResult>> ConfigureDatabase(string tableprefix="")
         {
             var databasemodel = GetDatabaseModels();
             var res = new List<OperationResult>();
             var l = GetAppModels();
             foreach (var model in l)
             {
-                res.Add(ConfigureDatabase(model, databasemodel));
+                res.Add(await ConfigureDatabase(model, databasemodel, tableprefix));
             }
 
             return res;
         }
 
-        public OperationResult ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null)
+        public async Task<OperationResult> ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null, string tableprefix = "")
         {
-            var res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0}", model.Title));
 
-            try
-            {
-              
-                if (databasemodel == null) 
-                    databasemodel = GetDatabaseModels();
-                
+                OperationResult res = null;
+                if (string.IsNullOrEmpty(tableprefix))
+                    res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0}", model.Title));
+                else
+                   res = new OperationResult(true, MessageCode.RESULT, string.Format("Database configured for application {0} with table prefix {1}", model.Title, tableprefix));
 
-                var maintable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem && p.AppMetaCode == model.MetaCode).ToList();
-                if (maintable_default_cols == null)
-                    throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
-                if (maintable_default_cols.Count == 0)
-                    throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
+            await Task.Run(() =>  {
 
 
-                CreateMainTable(model, maintable_default_cols, res);
-                if (model.UseVersioning)
-                    CreateApplicationVersioningTable(model, res);
-
-                foreach (var t in databasemodel)
+                try
                 {
-                    if (t.AppMetaCode != model.MetaCode)
-                        continue;
 
-                    if (t.IsMetaTypeDataColumn && t.IsRoot && !t.IsFrameworkItem)
+                    if (databasemodel == null)
+                        databasemodel = GetDatabaseModels();
+
+
+                    var maintable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && p.IsRoot && p.IsFrameworkItem && p.AppMetaCode == model.MetaCode).ToList();
+                    if (maintable_default_cols == null)
+                        throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
+                    if (maintable_default_cols.Count == 0)
+                        throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
+
+                    CreateMainTable(model, maintable_default_cols, res, tableprefix);
+                    if (model.UseVersioning)
+                        CreateApplicationVersioningTable(model, res, tableprefix);
+
+                    foreach (var t in databasemodel)
                     {
-                        CreateDBColumn(t, model.DbName, res);
-                    }
+                        if (t.AppMetaCode != model.MetaCode)
+                            continue;
 
-                    if (t.IsMetaTypeDataTable)
-                    {
-                        var subtable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && t.AppMetaCode == model.MetaCode && p.ParentMetaCode == t.MetaCode).ToList();
-                        if (subtable_default_cols == null)
-                            throw new InvalidOperationException("Found application subtable without default columns");
-                        if (subtable_default_cols.Count == 0)
-                            throw new InvalidOperationException("Found application subtable without default columns");
-
-                        CreateDBTable(model, t, subtable_default_cols, res);
-                        foreach (var col in databasemodel)
+                        if (t.IsMetaTypeDataColumn && t.IsRoot && !t.IsFrameworkItem)
                         {
-                            if (col.IsFrameworkItem || col.AppMetaCode != model.MetaCode || col.IsRoot || col.ParentMetaCode != t.MetaCode)
-                                continue;
-
-                            CreateDBColumn(col, t.DbName, res);
+                            CreateDBColumn(t, model, res, tableprefix);
                         }
 
-                        CreateSubtableIndexes(t, res);
+                        if (t.IsMetaTypeDataTable)
+                        {
+                            var subtable_default_cols = databasemodel.Where(p => p.IsMetaTypeDataColumn && !p.IsRoot && p.IsFrameworkItem && t.AppMetaCode == model.MetaCode && p.ParentMetaCode == t.MetaCode).ToList();
+                            if (subtable_default_cols == null)
+                                throw new InvalidOperationException("Found application subtable without default columns");
+                            if (subtable_default_cols.Count == 0)
+                                throw new InvalidOperationException("Found application subtable without default columns");
 
 
+                            CreateDBTable(model, t, subtable_default_cols, res, tableprefix);
+                            foreach (var col in databasemodel)
+                            {
+                                if (col.IsFrameworkItem || col.AppMetaCode != model.MetaCode || col.IsRoot || col.ParentMetaCode != t.MetaCode)
+                                    continue;
+
+                                CreateDBColumn(col, t, res, tableprefix);
+                            }
+
+                            CreateSubtableIndexes(t, res, tableprefix);
+
+
+                        }
                     }
+
+                    CreateMainTableIndexes(model, res, tableprefix);
+
+                }
+                catch (Exception ex)
+                {
+                    if (string.IsNullOrEmpty(tableprefix))
+                        res = new OperationResult(false, MessageCode.SYSTEMERROR, "Error creating database objects: " + ex.Message);
+                    else
+                        res = new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Error creating database objects with tableprefix {0} " + ex.Message, tableprefix));
                 }
 
-                CreateMainTableIndexes(model, res);
+            });
 
-            }
-            catch (Exception ex)
-            {
-                res = new OperationResult(false, MessageCode.SYSTEMERROR, ex.Message);
-            }
-           
 
             return res;
+
+          
         }
 
 
@@ -2028,28 +2206,34 @@ namespace Intwenty
 
 
 
-        private void CreateMainTable(ApplicationModelItem model, List<DatabaseModelItem> columns, OperationResult result)
+        private void CreateMainTable(ApplicationModelItem model, List<DatabaseModelItem> columns, OperationResult result, string tableprefix="")
         {
 
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, model.DbName);
+            else
+                tablename = model.DbName;
+
             var table_exist = false;
-            table_exist = Client.TableExists(model.DbName);
+            table_exist = Client.TableExists(tablename);
             if (table_exist)
             {
-                result.AddMessage(MessageCode.INFO , "Main table " + model.DbName + " for application: " + model.Title + " is already present");
+                result.AddMessage(MessageCode.INFO , "Main table " + tablename + " for application: " + model.Title + " is already present");
             }
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, model.DbName, model.UseVersioning, false);
+                string create_sql = GetCreateTableStmt(columns, tablename, model.UseVersioning, false);
                 Client.RunCommand(create_sql);
-                result.AddMessage(MessageCode.INFO, "Main table: " + model.DbName + " for application: " + model.Title + "  was created successfully");
+                result.AddMessage(MessageCode.INFO, "Main table: " + tablename + " for application: " + model.Title + "  was created successfully");
 
             }
 
             Client.Close();
         }
 
-        private void CreateDBTable(ApplicationModelItem model, DatabaseModelItem table, List<DatabaseModelItem> columns, OperationResult result)
+        private void CreateDBTable(ApplicationModelItem model, DatabaseModelItem table, List<DatabaseModelItem> columns, OperationResult result, string tableprefix = "")
         {
 
             if (!table.IsMetaTypeDataTable)
@@ -2058,19 +2242,25 @@ namespace Intwenty
                 return;
             }
 
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, table.DbName);
+            else
+                tablename = table.DbName;
+
 
             var table_exist = false;
             table_exist = Client.TableExists(table.DbName);
             if (table_exist)
             {
-                result.AddMessage(MessageCode.INFO, "Table: " + table.DbName + " in application: " + model.Title + " is already present.");
+                result.AddMessage(MessageCode.INFO, "Table: " + tablename + " in application: " + model.Title + " is already present.");
             }
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, table.DbName, model.UseVersioning, true);
+                string create_sql = GetCreateTableStmt(columns, tablename, model.UseVersioning, true);
                 Client.RunCommand(create_sql);
-                result.AddMessage(MessageCode.INFO, "Subtable: " + table.DbName + " in application: " + model.Title + "  was created successfully");
+                result.AddMessage(MessageCode.INFO, "Subtable: " + tablename + " in application: " + model.Title + "  was created successfully");
 
             }
 
@@ -2078,21 +2268,27 @@ namespace Intwenty
 
         }
 
-        private void CreateApplicationVersioningTable(ApplicationModelItem model, OperationResult result)
+        private void CreateApplicationVersioningTable(ApplicationModelItem model, OperationResult result, string tableprefix = "")
         {
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, model.VersioningTableName);
+            else
+                tablename = model.VersioningTableName;
+
             var table_exist = false;
-            table_exist = Client.TableExists(model.VersioningTableName);
+            table_exist = Client.TableExists(tablename);
             if (!table_exist)
             {
 
-                string create_sql = GetCreateVersioningTableStmt(GetDefaultVersioningTableColumns(), model.VersioningTableName);
+                string create_sql = GetCreateVersioningTableStmt(GetDefaultVersioningTableColumns(), tablename);
                 Client.RunCommand(create_sql);
             }
 
             Client.Close();
         }
 
-        private void CreateDBColumn(DatabaseModelItem column, string tablename, OperationResult result)
+        private void CreateDBColumn(DatabaseModelItem column, DatabaseModelItem table, OperationResult result, string tableprefix = "")
         {
             
             if (!column.IsMetaTypeDataColumn)
@@ -2101,10 +2297,14 @@ namespace Intwenty
                 return;
             }
 
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, table.DbName);
+            else
+                tablename = table.DbName;
 
-            var colexist = false;
-            colexist = Client.ColumnExists(tablename, column.DbName);
 
+            var colexist = Client.ColumnExists(tablename, column.DbName);
             if (colexist)
             {
                 result.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " in table: " + tablename + " is already present.");
@@ -2122,17 +2322,56 @@ namespace Intwenty
 
         }
 
-      
-
-        private void CreateMainTableIndexes(ApplicationModelItem model, OperationResult result)
+        private void CreateDBColumn(DatabaseModelItem column, ApplicationModelItem table, OperationResult result, string tableprefix = "")
         {
-            string sql = string.Empty;
 
+            if (!column.IsMetaTypeDataColumn)
+            {
+                result.AddMessage(MessageCode.SYSTEMERROR, "Invalid MetaType when configuring column");
+                return;
+            }
+
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, table.DbName);
+            else
+                tablename = table.DbName;
+
+
+            var colexist = Client.ColumnExists(tablename, column.DbName);
+            if (colexist)
+            {
+                result.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " in table: " + tablename + " is already present.");
+            }
+            else
+            {
+                var coldt = DataTypes.Find(p => p.IntwentyType == column.DataType && p.DbEngine == Client.Database);
+                string create_sql = "ALTER TABLE " + tablename + " ADD " + column.DbName + " " + coldt.DBMSDataType;
+                Client.RunCommand(create_sql);
+                result.AddMessage(MessageCode.INFO, "Column: " + column.DbName + " (" + coldt.DBMSDataType + ") was created successfully in table: " + tablename);
+
+            }
+
+            Client.Close();
+
+        }
+
+
+
+        private void CreateMainTableIndexes(ApplicationModelItem model, OperationResult result, string tableprefix = "")
+        {
+
+
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, model.DbName);
+            else
+                tablename = model.DbName;
 
             try
             {
                 //Create index on main application table
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.DbName);
+                var sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", tablename);
                 Client.RunCommand(sql);
             }
             catch { }
@@ -2142,30 +2381,40 @@ namespace Intwenty
             {
                 if (model.UseVersioning)
                 {
+                    var versiontablename = "";
+                    if (!string.IsNullOrEmpty(tableprefix))
+                        versiontablename = string.Format("{0}_{1}", tableprefix, model.VersioningTableName);
+                    else
+                        versiontablename = model.VersioningTableName;
+
                     //Create index on versioning table
-                    sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", model.VersioningTableName);
+                    var sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version, MetaCode, MetaType)", versiontablename);
                     Client.RunCommand(sql);
                 }
             }
             catch { }
             finally { Client.Close(); }
 
-            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
+            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + tablename);
 
         }
 
-        private void CreateSubtableIndexes(DatabaseModelItem model, OperationResult result)
+        private void CreateSubtableIndexes(DatabaseModelItem model, OperationResult result, string tableprefix = "")
         {
-            string sql = string.Empty;
-
-
+           
             if (!model.IsMetaTypeDataTable)
                 return;
-         
-             
+
+            var tablename = "";
+            if (!string.IsNullOrEmpty(tableprefix))
+                tablename = string.Format("{0}_{1}", tableprefix, model.DbName);
+            else
+                tablename = model.DbName;
+
+
             try
             {
-                sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", model.DbName);
+                var sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", tablename);
                 Client.RunCommand(sql);
             }
             catch { }
@@ -2173,14 +2422,14 @@ namespace Intwenty
 
             try
             {
-                sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", model.DbName);
+                var sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (ParentId)", tablename);
                 Client.RunCommand(sql);
             }
             catch { }
             finally { Client.Close(); }
 
 
-            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + model.DbName);
+            result.AddMessage(MessageCode.INFO, "Database Indexes was created successfully for " + tablename);
 
 
 

@@ -47,7 +47,12 @@ namespace Intwenty.Controllers
 
             if (viewmodel.IsPublic)
             {
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
+                ClientStateInfo state = null;
+                if (!User.Identity.IsAuthenticated)
+                    state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid };
+                else
+                    state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
+
                 var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
             } 
@@ -59,7 +64,7 @@ namespace Intwenty.Controllers
                 if (!await UserManager.HasAuthorization(User, viewmodel))
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
+                var state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid };
 
                 if (model.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User && 
                     model.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
@@ -75,36 +80,6 @@ namespace Intwenty.Controllers
 
         }
 
-       
-
-        /// <summary>
-        /// Get the latest version of the latest application owned by the logged in user 
-        /// </summary>
-        /// <param name="applicationid">The ID of the application in the model</param>
-        [HttpGet]
-        public virtual async Task<IActionResult> GetLatestByLoggedInUser(int applicationid)
-        {
-
-            if (applicationid < 1)
-                return BadRequest();
-
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-
-            if (model == null)
-                return BadRequest();
-
-            if (!User.Identity.IsAuthenticated)
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-            //if (!await UserManager.HasAuthorization(User, model, IntwentyPermission.Read))
-            //    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
-
-          
-            var state = new ClientStateInfo() { ApplicationId = applicationid };
-            state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-            var data = DataRepository.GetLatestByOwnerUser(state);
-            return new JsonResult(data);
-
-        }
 
         /// <summary>
         /// Loads data for a listview for the application with supplied Id
@@ -129,6 +104,26 @@ namespace Intwenty.Controllers
 
             if (viewmodel.IsPublic)
             {
+                if (User.Identity.IsAuthenticated)
+                {
+
+                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
+                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                        model.OwnerUserId = User.Identity.Name;
+
+                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
+                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                        model.OwnerUserTablePrefix = User.Identity.GetUserTablePrefix();
+
+                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
+                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                        model.OwnerOrganizationId = User.Identity.GetOrganizationId();
+
+                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
+                       appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                        model.OwnerOrganizationTablePrefix = User.Identity.GetOrganizationTablePrefix();
+                }
+
                 var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
                 return new JsonResult(listdata);
             }
@@ -143,9 +138,17 @@ namespace Intwenty.Controllers
                     appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
                     model.OwnerUserId = User.Identity.Name;
 
+                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
+                    appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                    model.OwnerUserTablePrefix = User.Identity.GetUserTablePrefix();
+
                 if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
                     appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
                     model.OwnerOrganizationId = User.Identity.GetOrganizationId();
+
+                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
+                   appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                    model.OwnerOrganizationTablePrefix = User.Identity.GetOrganizationTablePrefix();
 
 
                 var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
@@ -213,19 +216,26 @@ namespace Intwenty.Controllers
                 return BadRequest();
             if (state.ApplicationId < 1)
                 return BadRequest();
-
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (state.ApplicationViewId < 1)
+                return BadRequest();
+            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
             if (appmodel == null)
                 return BadRequest();
 
-            var viewid = state.Data.GetAsInt("ApplicationViewId");
-            var viewmodel = appmodel.Views.Find(p => p.Id == viewid);
+            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
             if (viewmodel == null)
                 return BadRequest();
 
 
             if (viewmodel.IsPublic)
             {
+                if (User.Identity.IsAuthenticated)
+                {
+                    state.UserId = User.Identity.Name;
+                    state.OrganizationId = User.Identity.GetOrganizationId();
+                    state.OrganizationName = User.Identity.GetOrganizationName();
+                }
+
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);
             }
@@ -238,6 +248,7 @@ namespace Intwenty.Controllers
 
                 state.UserId = User.Identity.Name;
                 state.OrganizationId = User.Identity.GetOrganizationId();
+                state.OrganizationName = User.Identity.GetOrganizationName();
 
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);
@@ -257,15 +268,24 @@ namespace Intwenty.Controllers
                 return BadRequest();
             if (state.ApplicationId < 1)
                 return BadRequest();
-
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (state.ApplicationViewId < 1)
+                return BadRequest();
+            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
             if (appmodel == null)
+                return BadRequest();
+
+            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+            if (viewmodel == null)
                 return BadRequest();
 
             if (!User.Identity.IsAuthenticated)
                 return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
-            //if (!await UserManager.HasAuthorization(User, appmodel, IntwentyPermission.Delete))
-            //    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in this application, apply for delete permission in application {0}", appmodel.Application.Title)));
+            if (!await UserManager.HasAuthorization(User, viewmodel))
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
+
+            state.UserId = User.Identity.Name;
+            state.OrganizationId = User.Identity.GetOrganizationId();
+            state.OrganizationName = User.Identity.GetOrganizationName();
 
             var res = DataRepository.Delete(state, appmodel);
             return new JsonResult(res);

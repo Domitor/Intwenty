@@ -5,6 +5,7 @@ namespace Intwenty.Entity
 {
     [DbTableIndex("VIEW_IDX1", true, "Path")]
     [DbTableIndex("VIEW_IDX2", true, "SystemMetaCode,AppMetaCode,MetaCode")]
+    [DbTableIndex("VIEW_IDX3", true, "MetaCode")]
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_ViewItem")]
    public class ViewItem

@@ -39,11 +39,14 @@ namespace Intwenty.Areas.Identity.Data
 
             if (!string.IsNullOrWhiteSpace(user.LastName))
                ((ClaimsIdentity)principal.Identity).AddClaims(new[] { new Claim("LastName", user.LastName)});
-            
+
+            ((ClaimsIdentity)principal.Identity).AddClaims(new[] { new Claim("UserTablePrefix", user.TablePrefix)});
+
             if (orgproducts.Count > 0)
             {
                 ((ClaimsIdentity)principal.Identity).AddClaims(new[] { new Claim("OrganizationId", Convert.ToString(orgproducts[0].OrganizationId)) });
                 ((ClaimsIdentity)principal.Identity).AddClaims(new[] { new Claim("OrganizationName", orgproducts[0].OrganizationName) });
+                ((ClaimsIdentity)principal.Identity).AddClaims(new[] { new Claim("OrganizationTablePrefix", orgproducts[0].OrganizationTablePrefix) });
 
             }
             

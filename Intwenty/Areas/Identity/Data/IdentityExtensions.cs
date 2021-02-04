@@ -21,15 +21,28 @@ namespace Intwenty.Areas.Identity.Data
             return (claim != null) ? claim.Value : string.Empty;
         }
 
-        public static string GetFirstName(this IIdentity identity)
+        public static string GetOrganizationTablePrefix(this IIdentity identity)
+        {
+            var claim = ((ClaimsIdentity)identity).FindFirst("OrganizationTablePrefix");
+            return (claim != null) ? claim.Value : string.Empty;
+        }
+
+
+        public static string GetUserFirstName(this IIdentity identity)
         {
             var claim = ((ClaimsIdentity)identity).FindFirst("FirstName");
             return (claim != null) ? claim.Value : string.Empty;
         }
 
-        public static string GetLastName(this IIdentity identity)
+        public static string GetUserLastName(this IIdentity identity)
         {
             var claim = ((ClaimsIdentity)identity).FindFirst("LastName");
+            return (claim != null) ? claim.Value : string.Empty;
+        }
+
+        public static string GetUserTablePrefix(this IIdentity identity)
+        {
+            var claim = ((ClaimsIdentity)identity).FindFirst("UserTablePrefix");
             return (claim != null) ? claim.Value : string.Empty;
         }
     }

@@ -15,7 +15,11 @@ namespace Intwenty.Model.Dto
 
         public string OwnerUserId { get; set; }
 
+        public string OwnerUserTablePrefix { get; set; }
+
         public string OwnerOrganizationId { get; set; }
+
+        public string OwnerOrganizationTablePrefix { get; set; }
 
         public string DataViewMetaCode { get; set; }
 
@@ -40,6 +44,11 @@ namespace Intwenty.Model.Dto
         public bool HasOwnerUserId
         {
             get { return !string.IsNullOrEmpty(OwnerUserId) && OwnerUserId != DEFAULT_OWNERUSERID; }
+        }
+
+        public bool HasOwnerOrganizationId
+        {
+            get { return !string.IsNullOrEmpty(OwnerOrganizationId);  }
         }
 
         public ListFilter()
