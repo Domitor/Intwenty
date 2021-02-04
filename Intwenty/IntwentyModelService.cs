@@ -1242,15 +1242,15 @@ namespace Intwenty
 
             foreach (var app in apps)
             {
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "Id", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "Version", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "CreatedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedBy", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
-                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, app.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "Id", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "Version", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "CreatedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "ChangedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "OwnedBy", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
+                res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, app.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime));
 
                 foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.IsRoot))
                 {
@@ -1260,6 +1260,7 @@ namespace Intwenty
                                         p.IsMetaTypeDataColumn))
                         continue;
 
+                    column.ApplicationInfo = app;
                     column.SystemInfo = app.SystemInfo;
                     column.TableName = app.DbName;
                     res.Add(column);
@@ -1267,19 +1268,20 @@ namespace Intwenty
 
                 foreach (var table in dbitems.Where(p => p.IsMetaTypeDataTable && p.AppMetaCode == app.MetaCode))
                 {
+                    table.ApplicationInfo = app;
                     table.SystemInfo = app.SystemInfo;
 
                     res.Add(table);
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "Id", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "Version", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "CreatedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime, table.MetaCode));
-                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app.MetaCode, app.SystemInfo, table.DbName, "ParentId", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "Id", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "Version", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "ApplicationId", DatabaseModelItem.DataTypeInt, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "CreatedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "ChangedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "OwnedBy", DatabaseModelItem.DataTypeString, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "OwnedByOrganizationId", DatabaseModelItem.DataTypeString));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "OwnedByOrganizationName", DatabaseModelItem.DataTypeString));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "ChangedDate", DatabaseModelItem.DataTypeDateTime, table.MetaCode));
+                    res.Add(DatabaseModelItem.CreateFrameworkColumn(idgen++, app, table.DbName, "ParentId", DatabaseModelItem.DataTypeInt, table.MetaCode));
 
                     foreach (var column in dbitems.Where(p => p.IsMetaTypeDataColumn && p.AppMetaCode == app.MetaCode && p.ParentMetaCode == table.MetaCode && !p.IsRoot))
                     {
@@ -1289,6 +1291,7 @@ namespace Intwenty
                                             p.IsMetaTypeDataColumn))
                             continue;
 
+                        column.ApplicationInfo = app;
                         column.TableName = table.DbName;
                         column.SystemInfo = app.SystemInfo;
                         res.Add(column);

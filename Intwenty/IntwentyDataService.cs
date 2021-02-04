@@ -371,7 +371,7 @@ namespace Intwenty
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + model.Application.DbName + " (");
+            sql_insert.Append("INSERT INTO " + GetTenantTableName(model.Application, state) + " (");
             sql_insert_value.Append(" VALUES (");
             char sep = ' ';
           
@@ -415,6 +415,8 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(valuelist, parameters);
 
@@ -489,7 +491,7 @@ namespace Intwenty
             var paramlist = new List<ApplicationValue>();
 
             StringBuilder sql_update = new StringBuilder();
-            sql_update.Append("UPDATE " + model.Application.DbName);
+            sql_update.Append("UPDATE " + GetTenantTableName(model.Application, state));
             sql_update.Append(" set ChangedDate=@ChangedDate");
             sql_update.Append(",ChangedBy=@ChangedBy");
 
@@ -536,7 +538,7 @@ namespace Intwenty
          
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + row.Table.DbName + " (");
+            sql_insert.Append("INSERT INTO " + GetTenantTableName(model.Application,row.Table.DbName,state) + " (");
             sql_insert_value.Append(" VALUES (");
             char sep = ' ';
 
@@ -582,6 +584,8 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
@@ -601,7 +605,7 @@ namespace Intwenty
 
             var sql_insert = new StringBuilder();
             var sql_insert_value = new StringBuilder();
-            sql_insert.Append("INSERT INTO " + row.Table.DbName + " (");
+            sql_insert.Append("INSERT INTO " + GetTenantTableName(model.Application, row.Table.DbName, state) + " (");
             sql_insert_value.Append(" VALUES (");
             char sep = ' ';
 
@@ -646,6 +650,8 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
             parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
@@ -661,7 +667,7 @@ namespace Intwenty
 
             int rowid = 0;
             StringBuilder sql_update = new StringBuilder();
-            sql_update.Append("UPDATE " + row.Table.DbName);
+            sql_update.Append("UPDATE " + GetTenantTableName(row.Table.Model.ApplicationInfo, row.Table.DbName, state));
             sql_update.Append(" set ChangedDate='" + this.ApplicationSaveTimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "'");
             sql_update.Append(",ChangedBy=@ChangedBy");
 
@@ -709,7 +715,7 @@ namespace Intwenty
            
             int newversion = 0;
             string sql = String.Empty;
-            sql = "select max(version) from " + model.Application.VersioningTableName;
+            sql = "select max(version) from " + GetTenantTableName(model.Application, model.Application.VersioningTableName, state);
             sql += " where ID=" + Convert.ToString(state.Id);
             sql += " and MetaCode='" + model.Application.MetaCode + "' and MetaType='APPLICATION'";
 
@@ -727,7 +733,7 @@ namespace Intwenty
             var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
 
             //DefaultVersioningTableColumns
-            sql = "insert into " + model.Application.VersioningTableName;
+            sql = "insert into " + GetTenantTableName(model.Application,model.Application.VersioningTableName,state);
             sql += " (ID, Version, ApplicationId, MetaCode, MetaType, ChangedDate, ParentId)";
             sql += " VALUES (@P1, @P2, @P3, @P4, @P5, {0}, @P6)";
             sql = string.Format(sql, getdatecmd.Command);
@@ -772,6 +778,8 @@ namespace Intwenty
                 CreatedBy = state.UserId,
                 MetaCode = model.Application.MetaCode,
                 OwnedBy = state.UserId,
+                OwnedByOrganizationId = state.OrganizationId,
+                OwnedByOrganizationName = state.OrganizationName,
                 PerformDate = DateTime.Now,
                 Version = state.Version,
                 EndDate = DateTime.Now,
@@ -892,15 +900,15 @@ namespace Intwenty
                 client.Open();
 
 
-                client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                client.RunCommand("DELETE FROM " + GetTenantTableName(model.Application, state) + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                 if (model.Application.UseVersioning)
-                    client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                    client.RunCommand("DELETE FROM " + GetTenantTableName(model.Application, model.Application.VersioningTableName, state) + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
 
                 foreach (var table in model.DataStructure)
                 {
                     if (table.IsMetaTypeDataTable)
                     {
-                        client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
+                        client.RunCommand("DELETE FROM " + GetTenantTableName(table, state) + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                         client.RunCommand("DELETE FROM sysdata_InstanceId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = state.Id } });
                     }
                 }
@@ -928,6 +936,7 @@ namespace Intwenty
 
         }
 
+        
         public ModifyResult Delete(int applicationid, int id, string dbname)
         {
             ModifyResult result = null;
@@ -1025,6 +1034,7 @@ namespace Intwenty
 
             return result;
         }
+        
         #endregion
 
         #region Lists
@@ -1072,7 +1082,7 @@ namespace Intwenty
 
                 sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
 
                
                 sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
@@ -1083,6 +1093,12 @@ namespace Intwenty
                 {
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
                     parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                }
+
+                if (args.HasOwnerOrganizationId)
+                {
+                    sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.OwnerOrganizationId });
                 }
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
@@ -1227,7 +1243,7 @@ namespace Intwenty
                
 
                 sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                 sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
                 parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 
@@ -1236,6 +1252,12 @@ namespace Intwenty
                 {
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
                     parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                }
+
+                if (args.HasOwnerOrganizationId)
+                {
+                    sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.OwnerOrganizationId });
                 }
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
@@ -1295,6 +1317,7 @@ namespace Intwenty
 
         }
 
+        
         public virtual DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new()
         {
             DataListResult<T> result = null;
@@ -1362,7 +1385,7 @@ namespace Intwenty
             return result;
 
         }
-
+        
        
 
         
@@ -1524,7 +1547,7 @@ namespace Intwenty
                 var sql_stmt = new StringBuilder();
                 sql_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application,state)));
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
@@ -1683,7 +1706,7 @@ namespace Intwenty
                 }
               
                 sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", model.Application.DbName));
+                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, state)));
                 sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                 sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
@@ -1719,7 +1742,7 @@ namespace Intwenty
                             }
                         }
                         sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                        sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ", t.DbName));
+                        sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ", GetTenantTableName(t,state)));
                         sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                         sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
 
@@ -1977,32 +2000,41 @@ namespace Intwenty
 
         protected virtual ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
         {
-            /*
-            foreach (var t in model.UIStructure)
+            
+            foreach (var v in model.Views)
             {
-                if (t.IsDataColumn1Connected && t.DataColumn1Info.Mandatory)
+                if (v.Id != state.ApplicationViewId)
+                    continue;
+
+                foreach (var ui in v.UserInterface)
                 {
-                    var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumn1Info.DbName);
-                    if (dv != null && !dv.HasValue)
+                    foreach (var t in ui.UIStructure)
                     {
-                        return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
-                    }
-                    foreach (var table in state.Data.SubTables)
-                    {
-                        foreach (var row in table.Rows)
+                        if (t.IsDataColumn1Connected && t.DataColumn1Info.Mandatory)
                         {
-                            dv = row.Values.Find(p => p.DbName == t.DataColumn1Info.DbName);
+                            var dv = state.Data.Values.FirstOrDefault(p => p.DbName == t.DataColumn1Info.DbName);
                             if (dv != null && !dv.HasValue)
                             {
                                 return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
                             }
+                            foreach (var table in state.Data.SubTables)
+                            {
+                                foreach (var row in table.Rows)
+                                {
+                                    dv = row.Values.Find(p => p.DbName == t.DataColumn1Info.DbName);
+                                    if (dv != null && !dv.HasValue)
+                                    {
+                                        return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
+                                    }
+                                }
+
+                            }
+
                         }
-
                     }
-
                 }
             }
-            */
+            
             return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
         }
 
@@ -2305,6 +2337,105 @@ namespace Intwenty
                     descriptions.Remove(t);
                 }
 
+            }
+
+        }
+
+        protected string GetTenantTableName(ApplicationModelItem model, ClientStateInfo state)
+        {
+            if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
+            {
+                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
+
+                return string.Format("{0}_{1}", state.UserTablePrefix, model.DbName);
+            }
+            else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
+            {
+                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
+
+                return string.Format("{0}_{1}", state.OrganizationTablePrefix, model.DbName);
+            }
+            else
+            {
+                return model.DbName;
+            }
+
+        }
+
+        protected string GetTenantTableName(ApplicationModelItem model, ListFilter state)
+        {
+            if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
+            {
+                if (string.IsNullOrEmpty(state.OwnerUserTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
+
+                return string.Format("{0}_{1}", state.OwnerUserTablePrefix, model.DbName);
+            }
+            else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
+            {
+                if (string.IsNullOrEmpty(state.OwnerOrganizationTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
+
+                return string.Format("{0}_{1}", state.OwnerOrganizationTablePrefix, model.DbName);
+            }
+            else
+            {
+                return model.DbName;
+            }
+
+        }
+
+        protected string GetTenantTableName(DatabaseModelItem model, ClientStateInfo state)
+        {
+            if (!model.IsMetaTypeDataTable)
+                throw new InvalidOperationException("GetTenantTableName() - model is not a table model");
+            if (model.ApplicationInfo == null)
+                throw new InvalidOperationException("GetTenantTableName() - model has no application info");
+
+            if (model.ApplicationInfo.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.ApplicationInfo.TenantIsolationLevel == TenantIsolationOptions.User)
+            {
+                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
+
+                return string.Format("{0}_{1}", state.UserTablePrefix, model.DbName);
+            }
+            else if (model.ApplicationInfo.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.ApplicationInfo.TenantIsolationLevel == TenantIsolationOptions.Organization)
+            {
+                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
+
+                return string.Format("{0}_{1}", state.OrganizationTablePrefix, model.DbName);
+            }
+            else
+            {
+                return model.DbName;
+            }
+
+        }
+
+        protected string GetTenantTableName(ApplicationModelItem model, string tablename, ClientStateInfo state)
+        {
+          
+
+            if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
+            {
+                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
+
+                return string.Format("{0}_{1}", state.UserTablePrefix, tablename);
+            }
+            else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
+            {
+                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                    throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
+
+                return string.Format("{0}_{1}", state.OrganizationTablePrefix, tablename);
+            }
+            else
+            {
+                return tablename;
             }
 
         }
