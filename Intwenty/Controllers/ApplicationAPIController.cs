@@ -66,11 +66,11 @@ namespace Intwenty.Controllers
 
                 var state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid };
 
-                if (model.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User && 
-                    model.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                if (model.Application.TenantIsolationLevel == TenantIsolationOptions.User && 
+                    model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                     state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-                if (model.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
-                    model.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                if (model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization &&
+                    model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                     state.FilterValues.Add(new FilterValue() { Name = "OwnedByOrganization", Value = User.Identity.GetOrganizationId() });
 
                 var data = DataRepository.Get(state, model);
@@ -107,20 +107,20 @@ namespace Intwenty.Controllers
                 if (User.Identity.IsAuthenticated)
                 {
 
-                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
-                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                    if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.User &&
+                        appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                         model.OwnerUserId = User.Identity.Name;
 
-                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
-                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                    if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.User &&
+                        appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables)
                         model.OwnerUserTablePrefix = User.Identity.GetUserTablePrefix();
 
-                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
-                        appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                    if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.Organization &&
+                        appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                         model.OwnerOrganizationId = User.Identity.GetOrganizationId();
 
-                    if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
-                       appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                    if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.Organization &&
+                       appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables)
                         model.OwnerOrganizationTablePrefix = User.Identity.GetOrganizationTablePrefix();
                 }
 
@@ -134,20 +134,20 @@ namespace Intwenty.Controllers
                 if (!await UserManager.HasAuthorization(User, viewmodel))
                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
-                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
-                    appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.User &&
+                    appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                     model.OwnerUserId = User.Identity.Name;
 
-                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User &&
-                    appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.User &&
+                    appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables)
                     model.OwnerUserTablePrefix = User.Identity.GetUserTablePrefix();
 
-                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
-                    appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByRows)
+                if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.Organization &&
+                    appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows)
                     model.OwnerOrganizationId = User.Identity.GetOrganizationId();
 
-                if (appmodel.Application.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization &&
-                   appmodel.Application.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables)
+                if (appmodel.Application.TenantIsolationLevel == TenantIsolationOptions.Organization &&
+                   appmodel.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables)
                     model.OwnerOrganizationTablePrefix = User.Identity.GetOrganizationTablePrefix();
 
 

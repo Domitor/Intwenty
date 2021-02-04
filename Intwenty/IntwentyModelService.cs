@@ -1695,7 +1695,7 @@ namespace Intwenty
                 var apps = await client.GetEntitiesAsync<ApplicationItem>();
                 await client.CloseAsync();
 
-                var isolatedapps = apps.Select(p => new ApplicationModelItem(p)).Where(p => p.TenantIsolationMethod == ApplicationModelItem.TenantIsolationMethodOptions.ByTables);
+                var isolatedapps = apps.Select(p => new ApplicationModelItem(p)).Where(p => p.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables);
                 if (isolatedapps.Count() == 0)
                 {
                     result.Add(new OperationResult(true, MessageCode.RESULT, "No apps with tenant isolation by table were found"));
@@ -1716,13 +1716,13 @@ namespace Intwenty
                 foreach (var app in isolatedapps)
                 {
                     //USER
-                    if (app.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.User && !string.IsNullOrEmpty(usertableprefix))
+                    if (app.TenantIsolationLevel == TenantIsolationOptions.User && !string.IsNullOrEmpty(usertableprefix))
                     {
                         var t = await ConfigureDatabase(app, dbmodels, usertableprefix);
                         result.Add(t);
                     }
                     //ORGANIZATION
-                    if (app.TenantIsolationLevel == ApplicationModelItem.TenantIsolationOptions.Organization && !string.IsNullOrEmpty(orgtableprefix))
+                    if (app.TenantIsolationLevel == TenantIsolationOptions.Organization && !string.IsNullOrEmpty(orgtableprefix))
                     {
                         var t = await ConfigureDatabase(app, dbmodels, orgtableprefix);
                         result.Add(t);
@@ -1780,6 +1780,12 @@ namespace Intwenty
                     CreateMainTable(model, maintable_default_cols, res, tableprefix);
                     if (model.UseVersioning)
                         CreateApplicationVersioningTable(model, res, tableprefix);
+
+                    if (string.IsNullOrEmpty(model.DbName) || !databasemodel.Exists(p => p.IsMetaTypeDataColumn && p.IsRoot && !p.IsFrameworkItem && p.AppMetaCode == model.MetaCode))
+                    {
+                        res = new OperationResult(true, MessageCode.RESULT, string.Format("No datamodel found for application {0}", model.Title));
+                        return;
+                    }
 
                     foreach (var t in databasemodel)
                     {

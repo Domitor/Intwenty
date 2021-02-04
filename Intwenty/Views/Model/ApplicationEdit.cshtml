@@ -13,7 +13,7 @@
     <div class="card">
         <div class="card-header"><h2>Edit {{model.title}}</h2></div>
         <div class="card-body">
-            Edit basic model data for application {{model.title}}
+            Edit the model for application {{model.title}}
             <br />
             <ul class="nav">
                 <li class="nav-item">
@@ -62,7 +62,8 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(context.model),
-                        success: function (response) {
+                        success: function (response)
+                        {
                             window.location.reload(true);
                         }
                     });

@@ -7,23 +7,24 @@ using System.Runtime.Serialization;
 
 namespace Intwenty.Model
 {
+    public enum TenantIsolationOptions
+    {
+        None = 0  //All users can access the same data
+        , User = 1  //A user can only access owned data
+        , Organization = 2 //An organization can only access owned data
+    }
 
-   public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
+    public enum TenantIsolationMethodOptions
+    {
+        None = 0
+       , ByRows = 1
+       , ByTables = 2
+       , ByDatabase = 3
+    }
+
+    public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
    {
-        public enum TenantIsolationOptions
-        {
-           None=0  //All users can access the same data
-          ,User=1  //A user can only access owned data
-          ,Organization=2 //An organization can only access owned data
-        }
-
-        public enum TenantIsolationMethodOptions
-        {
-            None = 0
-           ,ByRows = 1
-           ,ByTables = 2
-           ,ByDatabase = 3
-        }
+      
 
         public static readonly string MetaTypeApplication = "APPLICATION";
 
@@ -63,6 +64,7 @@ namespace Intwenty.Model
 
         }
 
+       
         public TenantIsolationOptions TenantIsolationLevel { get; set; }
 
         public TenantIsolationMethodOptions TenantIsolationMethod { get; set; }
