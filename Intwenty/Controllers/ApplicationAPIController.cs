@@ -209,8 +209,12 @@ namespace Intwenty.Controllers
         [HttpPost]
         public virtual async Task<IActionResult> Save([FromBody] System.Text.Json.JsonElement model)
         {
-      
-            var state = ClientStateInfo.CreateFromJSON(model);
+
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = ClientStateInfo.CreateFromJSON(model, User);
+            else
+                state = ClientStateInfo.CreateFromJSON(model);
 
             if (state == null)
                 return BadRequest();
@@ -229,13 +233,6 @@ namespace Intwenty.Controllers
 
             if (viewmodel.IsPublic)
             {
-                if (User.Identity.IsAuthenticated)
-                {
-                    state.UserId = User.Identity.Name;
-                    state.OrganizationId = User.Identity.GetOrganizationId();
-                    state.OrganizationName = User.Identity.GetOrganizationName();
-                }
-
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);
             }
@@ -246,9 +243,6 @@ namespace Intwenty.Controllers
                 if (!await UserManager.HasAuthorization(User, viewmodel))
                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to modify data in this view or application")));
 
-                state.UserId = User.Identity.Name;
-                state.OrganizationId = User.Identity.GetOrganizationId();
-                state.OrganizationName = User.Identity.GetOrganizationName();
 
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);

@@ -227,7 +227,7 @@ namespace Intwenty.Controllers
                     entity.DbName = model.DbName;
                     entity.Description = model.Description;
                     entity.SystemMetaCode = model.SystemMetaCode;
-                    entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
+                    entity.DataMode = (int)model.DataMode;
                     entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
                     entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
                     client.Open();
@@ -250,7 +250,7 @@ namespace Intwenty.Controllers
                     entity.Description = model.Description;
                     entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
                     entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
-                    entity.IsHierarchicalApplication = model.IsHierarchicalApplication;
+                    entity.DataMode = (int)model.DataMode;
 
                     client.Open();
                     client.UpdateEntity(entity);

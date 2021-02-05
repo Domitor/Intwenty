@@ -983,6 +983,7 @@ namespace Intwenty
             var functions = Client.GetEntities<FunctionItem>().Select(p => new FunctionModelItem(p)).ToList();
             Client.Close();
 
+
            
             foreach (var app in apps)
             {
@@ -990,6 +991,10 @@ namespace Intwenty
                 {
                     appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
+
+                    //If there is a create function in the app that points on this view, then this view is used to create entities
+                    //(The CREATE function is used to navigates to the create view)
+                    appview.CanCreateEntities = functions.Exists(p => p.AppMetaCode == app.MetaCode && !string.IsNullOrEmpty(p.Path) && p.IsMetaTypeCreate && appview.IsOnPath(p.Path)); 
 
                     foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
                     {
@@ -2233,7 +2238,7 @@ namespace Intwenty
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, tablename, model.UseVersioning, false);
+                string create_sql = GetCreateTableStmt(model, columns, tablename, false);
                 Client.RunCommand(create_sql);
                 result.AddMessage(MessageCode.INFO, "Main table: " + tablename + " for application: " + model.Title + "  was created successfully");
 
@@ -2267,7 +2272,7 @@ namespace Intwenty
             else
             {
 
-                string create_sql = GetCreateTableStmt(columns, tablename, model.UseVersioning, true);
+                string create_sql = GetCreateTableStmt(model, columns, tablename, true);
                 Client.RunCommand(create_sql);
                 result.AddMessage(MessageCode.INFO, "Subtable: " + tablename + " in application: " + model.Title + "  was created successfully");
 
@@ -2444,7 +2449,7 @@ namespace Intwenty
 
         }
 
-        private string GetCreateTableStmt(List<DatabaseModelItem> columns, string tablename, bool useversioning, bool issubtable)
+        private string GetCreateTableStmt(ApplicationModelItem model, List<DatabaseModelItem> columns, string tablename, bool issubtable)
         {
             var res = string.Format("CREATE TABLE {0}", tablename) + " (";
             var sep = "";
@@ -2460,12 +2465,42 @@ namespace Intwenty
 
                 if (!issubtable)
                 {
-                    res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                    if (c.DbName.ToUpper() == "ID" && model.DataMode == DataModeOptions.Simple)
+                    {
+                        if (Client.Database == DBMS.MSSqlServer)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MSSqlServer && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, autoinccmd.Command, "NOT NULL" });
+                        }
+                        else if (Client.Database == DBMS.MariaDB || Client.Database == DBMS.MySql)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MariaDB && p.Key == "AUTOINC");
+                            res += string.Format("`{0}` {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
+                        }
+                        else if (Client.Database == DBMS.SQLite)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.SQLite && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
+                        }
+                        else if (Client.Database == DBMS.PostgreSQL)
+                        {
+                            var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.PostgreSQL && p.Key == "AUTOINC");
+                            res += string.Format("{0} {1} {2}", new object[] { c.Name, autoinccmd.Command, "NOT NULL" });
+                        }
+                        else
+                        {
+                            res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                        }
+                    }
+                    else
+                    {
+                        res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                    }
                 }
                 else
                 {
 
-                    if (c.DbName.ToUpper() == "ID" && !useversioning)
+                    if (c.DbName.ToUpper() == "ID" && !model.UseVersioning)
                     {
                         if (Client.Database == DBMS.MSSqlServer)
                         {

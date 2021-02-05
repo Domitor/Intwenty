@@ -35,10 +35,22 @@
     </div>
     <div class="col-lg-6">
 
-
+        <div class="form-group">
+            <label class="control-label">Data Mode</label>
+            <select id="cbTenantIsolvl" v-model="model.dataMode" class="form-control form-control-sm">
+                <option value="0">Standard</option>
+                <option value="1">Simple</option>
+            </select>
+        </div>
 
         <div class="form-group">
-            <label class="control-label">Tenant Isolation Level<span style="color: red"> *</span></label>
+            <input id="useversioning" type="checkbox" v-model="model.useVersioning" :disabled="model.id > 0" /> Use Versioning
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            <label class="control-label">Tenant Isolation Level</label>
             <select id="cbTenantIsolvl" v-model="model.tenantIsolationLevel" class="form-control form-control-sm">
                 <option value="0">None</option>
                 <option value="1">User</option>
@@ -47,7 +59,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Tenant Isolation Method<span style="color: red"> *</span></label>
+            <label class="control-label">Tenant Isolation Method</label>
             <select id="cbTenantIsoMet" v-model="model.tenantIsolationMethod" class="form-control form-control-sm">
                 <option value="0">None</option>
                 <option value="1">ByRows</option>

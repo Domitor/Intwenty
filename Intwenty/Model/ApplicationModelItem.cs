@@ -22,6 +22,11 @@ namespace Intwenty.Model
        , ByDatabase = 3
     }
 
+    public enum DataModeOptions
+    {
+       Standard = 0
+      ,Simple = 1
+    }
     public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
    {
       
@@ -43,10 +48,10 @@ namespace Intwenty.Model
             MetaCode = entity.MetaCode;
             DbName = entity.DbName;
             UseVersioning = entity.UseVersioning;
-            IsHierarchicalApplication = entity.IsHierarchicalApplication;
             SystemMetaCode = entity.SystemMetaCode;
             MetaType = MetaTypeApplication;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
+            DataMode = (DataModeOptions)entity.DataMode;
             TenantIsolationLevel = (TenantIsolationOptions)entity.TenantIsolationLevel;
             TenantIsolationMethod = (TenantIsolationMethodOptions)entity.TenantIsolationMethod;
             SetEmptyStrings();
@@ -69,6 +74,8 @@ namespace Intwenty.Model
 
         public TenantIsolationMethodOptions TenantIsolationMethod { get; set; }
 
+        public DataModeOptions DataMode { get; set; }
+
         public SystemModelItem SystemInfo { get; set; }
 
         public string SystemMetaCode { get; set; }
@@ -79,7 +86,7 @@ namespace Intwenty.Model
 
         public string DbName { get; set; }
 
-        public bool IsHierarchicalApplication { get; set; }
+       
 
         public bool UseVersioning { get; set; }
 

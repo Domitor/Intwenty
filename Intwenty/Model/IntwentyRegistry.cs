@@ -146,10 +146,22 @@ namespace Intwenty.Model
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
             _properties.Add(prop);
 
+
+
             prop = new IntwentyProperty("TABLELAYOUT", "Layout", "LIST");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GRID", DisplayValue = "Grid" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
+            prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOLISTVIEW", DisplayValue = "Go to list view" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Refresh saved data" });
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("GOTOLISTVIEWPATH", "List view path", "STRING");
+            prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");

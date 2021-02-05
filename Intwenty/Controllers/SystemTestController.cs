@@ -382,7 +382,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The default system could not be found");
 
                 dbstore.Open();
-                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", IsHierarchicalApplication = false, UseVersioning = true });
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });

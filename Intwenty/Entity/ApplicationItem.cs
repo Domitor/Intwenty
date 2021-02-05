@@ -24,7 +24,7 @@ namespace Intwenty.Entity
         public string Description { get; set; }
         [NotNull]
         public string DbName { get; set; }
-        public bool IsHierarchicalApplication { get; set; }
+        public int DataMode { get; set; }
         public bool UseVersioning { get; set; }
         public int TenantIsolationLevel { get; set; }
         public int TenantIsolationMethod { get; set; }

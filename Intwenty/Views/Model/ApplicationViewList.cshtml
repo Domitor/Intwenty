@@ -186,7 +186,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" v-if="functionHasButtonText()">
                         <label class="control-label">Button Text<span style="color: red"> *</span></label>
                         <input id="functitle" type="text" class="form-control form-control-sm" v-model="functionsettings.title" />
                     </div>
@@ -262,6 +262,10 @@
                         return "Adds a button to the view that triggers the save operation in the function table";
                     if (context.functionsettings.functionType == 'DELETE')
                         return "Adds a button to the view that triggers a delete operation in the function table";
+                    if (context.functionsettings.functionType == 'FILTER')
+                        return "Adds the posibility to filter data in a listview";
+                    if (context.functionsettings.functionType == 'PAGING')
+                        return "Adds the posibility to page data in a listview";
 
 
                     return "";
@@ -278,6 +282,16 @@
 
 
                     return false;
+                },
+                functionHasButtonText: function () {
+                    var context = this;
+
+                    if (context.functionsettings.functionType == 'FILTER')
+                        return false;
+                    if (context.functionsettings.functionType == 'PAGING')
+                        return false;
+                 
+                    return true;
                 },
                 openAddFunctionDlg: function (item)
                 {
@@ -670,6 +684,8 @@
                     res.push({ title: "Navigate", metaCode: "NAVIGATE" });
                     res.push({ title: "Save", metaCode: "SAVE" });
                     res.push({ title: "Export", metaCode: "EXPORT" });
+                    res.push({ title: "Filter", metaCode: "FILTER" });
+                    res.push({ title: "Paging", metaCode: "PAGING" });
                     return res;
                 }
 

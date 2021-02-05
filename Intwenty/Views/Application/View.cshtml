@@ -7,6 +7,8 @@
     var applicationViewId = Model.Id;
     var instanceid = ViewBag.Id;
     var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
+    var aftersaveaction = string.Empty;
+    var aftersaveactionpath = string.Empty;
 }
 
 
@@ -52,6 +54,12 @@
                         <li class="nav-item">
                             <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
                         </li>
+
+                        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+                        if (aftersaveaction == "GOTOLISTVIEW")
+                        {
+                            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("LISTVIEWPATH");
+                        }
                     }
                 </ul>
             }
@@ -195,6 +203,8 @@
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
 
+            <br />
+
             @if (!iface.HasPropertyWithValue("HIDEFILTER", "TRUE"))
             {
 
@@ -204,8 +214,8 @@
 
                         <button v-on:click="model.showFilter=!model.showFilter">
                             <i class="fas fa-search"></i>
-                            <span v-if="model.showFilter">Show Filter</span>
-                            <span v-if="!model.showFilter">Hide Filter</span>
+                            <span v-if="model.showFilter">Hide Filter</span>
+                            <span v-if="!model.showFilter">Show Filter</span>
                         </button>
 
                         <br />
@@ -354,7 +364,8 @@
                 ,dlgFilterColumnName: ""
                 ,dlgFilterValue: ""
                 ,applicationViewId: @applicationViewId
-
+                ,aftersaveaction:'@aftersaveaction'
+                ,aftersaveactionpath:'@aftersaveactionpath'
             },
             methods:
             {
@@ -375,8 +386,18 @@
                         contentType: "application/json",
                         data: JSON.stringify(this.model),
                         success: function (response) {
-                            if (response.isSuccess) {
-                                //window.location.reload(true);
+                            if (response.isSuccess)
+                            {
+                                if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '')
+                                {
+                                   endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                   window.location.href = endpointurl;
+                                }
+                                else if (context.aftersaveaction == 'REFRESH')
+                                {
+                                    window.location.reload(true);
+                                }
+
                             }
                             else {
                                 raiseErrorModal(response);
@@ -483,26 +504,40 @@
                     return ((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount;
                 }
             },
-            mounted: function ()
-            {
+            mounted: function () {
                 var context = this;
-                @if(Model.IsListView())
+                @if (Model.IsListView())
                 {
                     <text>context.getPage();</text>
                 }
-                else if(Model.IsInputView() && instanceid > 0)
+                else if (Model.IsInputView() && instanceid > 0)
                 {
                     <text>
-                        var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId +"/" + context.instanceId;
+                    var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    $.get(endpointurl, function (response) {
+                        context.model = JSON.parse(response.data);
+                        endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
                         $.get(endpointurl, function (response) {
-                            context.model = JSON.parse(response.data);
-                            endpointurl = context.baseurl + "GetValueDomains/@Model.ApplicationInfo.Id";
-                            $.get(endpointurl, function (response) {
-                                context.valuedomains = JSON.parse(response.data);
-                            });
+                            context.valuedomains = JSON.parse(response.data);
                         });
+                    });
                     </text>
-                }
+              }
+              else if (Model.IsInputView() && instanceid == 0 && Model.CanCreateEntities)
+              {
+                    <text>
+                    var endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
+                    $.get(endpointurl, function (response) {
+                        context.valuedomains = JSON.parse(response.data);
+                        endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                        $.get(endpointurl, function (response)
+                        {
+                            context.model = JSON.parse(response.data);
+                        });
+                     });
+                    </text>
+
+              }
 
             }
         });
