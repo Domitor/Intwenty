@@ -45,22 +45,25 @@ namespace Intwenty.Areas.Identity.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
+
+            IAMCache.Remove(UsersCacheKey);
+
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var allusers = await GetUsersAsync();
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            IAMCache.Remove(UsersCacheKey);
-
-
             await client.OpenAsync();
 
             //TABLE PREFIX
             var number = 100;
-            if (allusers.Count > 0)
+            if (allusers.Count == 1)
+                number = 101;
+            if (allusers.Count > 1)
                 number = allusers.Count * 100;
+           
 
-            user.TablePrefix = string.Format("{0}_{1}", new object[] { "USER",  number });
+                user.TablePrefix = string.Format("{0}_{1}", new object[] { "USER",  number });
             //
 
 

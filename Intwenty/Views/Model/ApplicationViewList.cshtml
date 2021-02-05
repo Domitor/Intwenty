@@ -304,6 +304,10 @@
                        var baseurl = '@Url.Content("~/Model/API/")';
                        var endpointurl = baseurl + "CreateFunction";
 
+                        if (context.functionsettings.functionType == "PAGING")
+                            context.functionsettings.title = "Paging";
+                        if (context.functionsettings.functionType == "FILTER")
+                            context.functionsettings.title = "Filter";
 
                         $.ajax({
                             url: endpointurl,

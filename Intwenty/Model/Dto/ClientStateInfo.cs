@@ -74,7 +74,6 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId").Value;
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
-            state.UserId = state.Data.OwnerUserId;
             return state;
         }
 
@@ -86,7 +85,6 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId").Value;
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
-            state.UserId = state.Data.OwnerUserId;
             return state;
         }
 

@@ -34,6 +34,7 @@ namespace Intwenty.Model
             ViewMetaCode = entity.ViewMetaCode;
             MetaCode = entity.MetaCode;
             MetaType = entity.MetaType;
+            ParentMetaCode = "ROOT";
             DataTableMetaCode = entity.DataTableMetaCode;
             if (MetaType == MetaTypeInputInterface)
             {
@@ -51,7 +52,7 @@ namespace Intwenty.Model
 
         private void SetEmptyStrings()
         {
-
+            if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;

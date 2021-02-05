@@ -256,7 +256,11 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> Delete([FromBody] System.Text.Json.JsonElement model)
         {
 
-            var state = ClientStateInfo.CreateFromJSON(model);
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = ClientStateInfo.CreateFromJSON(model, User);
+            else
+                state = ClientStateInfo.CreateFromJSON(model);
 
             if (state == null)
                 return BadRequest();
@@ -276,10 +280,6 @@ namespace Intwenty.Controllers
                 return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
             if (!await UserManager.HasAuthorization(User, viewmodel))
                 return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
-
-            state.UserId = User.Identity.Name;
-            state.OrganizationId = User.Identity.GetOrganizationId();
-            state.OrganizationName = User.Identity.GetOrganizationName();
 
             var res = DataRepository.Delete(state, appmodel);
             return new JsonResult(res);

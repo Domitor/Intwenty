@@ -287,6 +287,46 @@ namespace Intwenty.Model
             }
         }
 
+        public bool HasPagingFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypePaging))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem PagingFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypePaging);
+            }
+        }
+
+        public bool HasFilterFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeFilter))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem FilterFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeFilter);
+            }
+        }
+
         public bool IsListView()
         {
             if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface))

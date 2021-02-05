@@ -115,6 +115,14 @@ namespace Intwenty.Model.Dto
                             var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
                             if (rowownedby != null)
                                 tablerow.OwnerUserId = rowownedby.GetAsString();
+
+                            var rowownedbyorgid = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationId");
+                            if (rowownedbyorgid != null)
+                                tablerow.OwnerOrganizationId = rowownedbyorgid.GetAsString();
+
+                            var rowownedbyorgname = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationName");
+                            if (rowownedbyorgname != null)
+                                tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
                         }
 
                     }
@@ -136,6 +144,14 @@ namespace Intwenty.Model.Dto
                 var ownedby = res.Values.Find(p => p.DbName == "OwnedBy");
                 if (ownedby != null)
                     res.OwnerUserId = ownedby.GetAsString();
+
+                var ownedbyorgid = res.Values.Find(p => p.DbName == "OwnedByOrganizationId");
+                if (ownedbyorgid != null)
+                    res.OwnerOrganizationId = ownedbyorgid.GetAsString();
+
+                var ownedbyorgname = res.Values.Find(p => p.DbName == "OwnedByOrganizationName");
+                if (ownedbyorgname != null)
+                    res.OwnerOrganizationName = ownedbyorgname.GetAsString();
 
 
 
@@ -174,6 +190,14 @@ namespace Intwenty.Model.Dto
                     var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
                     if (rowownedby != null)
                         tablerow.OwnerUserId = rowownedby.GetAsString();
+
+                    var rowownedbyorgid = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationId");
+                    if (rowownedbyorgid != null)
+                        tablerow.OwnerOrganizationId = rowownedbyorgid.GetAsString();
+
+                    var rowownedbyorgname = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationName");
+                    if (rowownedbyorgname != null)
+                        tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
                 }
             }
 
@@ -483,11 +507,17 @@ namespace Intwenty.Model.Dto
 
         public string OwnerUserId { get; set; }
 
+        public string OwnerOrganizationId { get; set; }
+
+        public string OwnerOrganizationName { get; set; }
+
         public List<ApplicationValue> Values { get; set; }
 
         public ValueCollectionBase()
         {
-            OwnerUserId = "SYSTEM";
+            OwnerUserId = string.Empty;
+            OwnerOrganizationId = string.Empty;
+            OwnerOrganizationName = string.Empty;
         }
 
         public int? GetAsInt(string dbname)

@@ -30,11 +30,6 @@
             <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
-      
-
-    </div>
-    <div class="col-lg-6">
-
         <div class="form-group">
             <label class="control-label">Data Mode</label>
             <select id="cbTenantIsolvl" v-model="model.dataMode" class="form-control form-control-sm">
@@ -46,8 +41,6 @@
         <div class="form-group">
             <input id="useversioning" type="checkbox" v-model="model.useVersioning" :disabled="model.id > 0" /> Use Versioning
         </div>
-
-        <hr />
 
         <div class="form-group">
             <label class="control-label">Tenant Isolation Level</label>
@@ -67,8 +60,24 @@
             </select>
         </div>
 
+    </div>
+    <div class="col-lg-6">
+
+       
+
         <div class="alert alert-primary" role="alert">
-            <i class="far fa-question-circle"></i> Specify what tenant isolation to use with this application. Tenant isolation regulates how data is isolated when users or organizations only is allowed to access their data.
+            <i class="far fa-question-circle"></i>
+            <br />
+            <br />
+            <strong>Data Mode</strong><br />
+            <hr />
+            <strong>Standard</strong><br />Use all standard features including instance catalog and subtables  <br /><br />
+            <strong>Simple</strong><br />Use this mode for performance. Only one table per application is allowed and it is not possible to use versioning or other features <br /><br />
+            <br />
+            <br />
+            <strong>Versioning</strong><br />
+            <hr />
+            If versioning is applied, database updates will generate new versions (inserts) of rows rather than updating them.
             <br />
             <br />
             <strong>Tenant Isolation</strong><br />

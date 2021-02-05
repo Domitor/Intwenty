@@ -62,7 +62,9 @@ namespace Intwenty.Areas.Identity.Data
             //TABLE PREFIX
             var all = await client.GetEntitiesAsync<IntwentyOrganization>();
             var number = 100;
-            if (all.Count > 0)
+            if (all.Count == 1)
+                number = 101;
+            if (all.Count > 1)
                 number = all.Count * 100;
             var name = "";
             if (organization.NormalizedName.Length < 4)

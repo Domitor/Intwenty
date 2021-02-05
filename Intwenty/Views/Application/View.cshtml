@@ -5,7 +5,7 @@
     var mainDbName = Model.ApplicationInfo.DbName;
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
-    var instanceid = ViewBag.Id;
+    int instanceid = (int)ViewBag.Id;
     var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
@@ -182,18 +182,20 @@
 
 
 
-                            }  <!--FOR-->
+                            }  <!--FOR CONTROL -->
+
+
                             @if (pl.UseFieldSet)
                             {
                             @: </fieldset>
                         }
 
-                        </div> <!--COL-->
+                        </div> <!--COL PANEL -->
 
 
                     }
 
-                </div>
+                </div> <!--ROW SECTION-->
 
             }
 
@@ -205,7 +207,7 @@
 
             <br />
 
-            @if (!iface.HasPropertyWithValue("HIDEFILTER", "TRUE"))
+            @if (Model.HasFilterFunction)
             {
 
                 <div class="row">
@@ -325,12 +327,15 @@
 
             </table>
 
-            <nav>
-                <ul class="pagination">
-                    <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{pageInfo.pageSize}}</a></li>
-                    <li class="page-item" v-bind:class="{ disabled: isLastPage }"><a class="page-link" href="#" v-on:click="nextpage()">Next {{pageInfo.pageSize}}</a></li>
-                </ul>
-            </nav>
+            @if (Model.HasPagingFunction)
+            {
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{pageInfo.pageSize}}</a></li>
+                        <li class="page-item" v-bind:class="{ disabled: isLastPage }"><a class="page-link" href="#" v-on:click="nextpage()">Next {{pageInfo.pageSize}}</a></li>
+                    </ul>
+                </nav>
+            }
         }
 
     }
@@ -371,11 +376,10 @@
             {
                 saveApplication: function () {
                     var context = this;
-
                     var endpointurl = context.baseurl + "Save";
 
-                    this.model[context.appMainTable].ApplicationId = context.appId;
-                    this.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
+                    context.model[context.appMainTable].ApplicationId = context.appId;
+                    context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
 
                     if (!context.canSave())
                         return;
@@ -465,7 +469,11 @@
                     var context = this;
                     var endpointurl = context.baseurl + "Delete";
 
-                    var deleteapp = function () {
+                    var deleteapp = function ()
+                    {
+                        item.ApplicationId = context.appId;
+                        item.ApplicationViewId = context.applicationViewId;
+
                         $.ajax({
                             url: endpointurl,
                             type: "POST",

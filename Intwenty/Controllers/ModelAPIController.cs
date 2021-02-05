@@ -193,12 +193,12 @@ namespace Intwenty.Controllers
 
                     if (string.IsNullOrEmpty(model.MetaCode))
                     {
-                        model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                        model.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     }
                     else
                     {
                         if (apps.Exists(p => p.MetaCode == model.MetaCode))
-                            model.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                            model.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     }
 
 

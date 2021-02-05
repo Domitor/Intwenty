@@ -356,7 +356,7 @@ namespace Intwenty
 
                 var entity = new SystemItem();
                 if (string.IsNullOrEmpty(model.MetaCode))
-                    entity.MetaCode = BaseModelItem.GenerateNewMetaCode(model);
+                    entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
                 entity.Title = model.Title;
                 entity.Description = model.Description;
@@ -922,7 +922,7 @@ namespace Intwenty
                     };
 
                     if (string.IsNullOrEmpty(t.MetaCode))
-                        t.MetaCode = BaseModelItem.GenerateNewMetaCode(ep);
+                        t.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
                     Client.InsertEntity(t);
                 }
@@ -1363,7 +1363,7 @@ namespace Intwenty
                 if (dbi.Id < 1)
                 {
                     if (string.IsNullOrEmpty(dbi.MetaCode))
-                        dbi.MetaCode = BaseModelItem.GenerateNewMetaCode(dbi);
+                        dbi.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
                     var t = new DatabaseItem()
                     {
@@ -1492,7 +1492,7 @@ namespace Intwenty
                     dv.ParentMetaCode = "ROOT";
 
                 if (string.IsNullOrEmpty(dv.MetaCode))
-                    dv.MetaCode = BaseModelItem.GenerateNewMetaCode(dv);
+                    dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
             }
 
