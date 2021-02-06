@@ -1950,6 +1950,12 @@ namespace Intwenty
                 //Create index on main application table
                 var sql = string.Format("CREATE UNIQUE INDEX {0}_Idx1 ON {0} (Id, Version)", tablename);
                 Client.RunCommand(sql);
+
+                sql = string.Format("CREATE INDEX {0}_Idx2 ON {0} (OwnedBy)", tablename);
+                Client.RunCommand(sql);
+
+                sql = string.Format("CREATE INDEX {0}_Idx3 ON {0} (OwnedByOrganizationId)", tablename);
+                Client.RunCommand(sql);
             }
             catch { }
             finally { Client.Close(); }
