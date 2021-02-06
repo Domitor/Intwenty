@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
     public class EndpointManagementVm
     {

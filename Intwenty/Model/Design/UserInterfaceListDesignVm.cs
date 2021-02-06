@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
 
     public class UserInterfaceListDesignVm : BaseModelVm

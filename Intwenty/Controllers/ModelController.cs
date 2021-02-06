@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Model.UIDesign;
+using Intwenty.Model.Design;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model.Dto;

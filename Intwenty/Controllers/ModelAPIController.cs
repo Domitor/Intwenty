@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Model.UIDesign;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model.Dto;
@@ -17,6 +16,7 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
+using Intwenty.Model.Design;
 
 namespace Intwenty.Controllers
 {
@@ -174,7 +174,7 @@ namespace Intwenty.Controllers
 
 
         [HttpPost("/Model/API/Save")]
-        public IActionResult Save([FromBody] ApplicationModelItem model)
+        public IActionResult Save([FromBody] ApplicationVm model)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -254,9 +254,9 @@ namespace Intwenty.Controllers
                     entity.DbName = model.DbName;
                     entity.Description = model.Description;
                     entity.SystemMetaCode = model.SystemMetaCode;
-                    entity.DataMode = (int)model.DataMode;
-                    entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
-                    entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
+                    entity.DataMode = model.DataMode;
+                    entity.TenantIsolationLevel = model.TenantIsolationLevel;
+                    entity.TenantIsolationMethod = model.TenantIsolationMethod;
                     client.Open();
                     client.InsertEntity(entity);
                     client.Close();
@@ -275,9 +275,9 @@ namespace Intwenty.Controllers
                     entity.Title = model.Title;
                     entity.DbName = model.DbName;
                     entity.Description = model.Description;
-                    entity.TenantIsolationLevel = (int)model.TenantIsolationLevel;
-                    entity.TenantIsolationMethod = (int)model.TenantIsolationMethod;
-                    entity.DataMode = (int)model.DataMode;
+                    entity.TenantIsolationLevel = model.TenantIsolationLevel;
+                    entity.TenantIsolationMethod = model.TenantIsolationMethod;
+                    entity.DataMode = model.DataMode;
 
                     client.Open();
                     client.UpdateEntity(entity);
@@ -303,7 +303,7 @@ namespace Intwenty.Controllers
         /// Delete model data for application
         /// </summary>
         [HttpPost("/Model/API/DeleteApplicationModel")]
-        public async Task<IActionResult> DeleteApplicationModel([FromBody] ApplicationModelItem model)
+        public async Task<IActionResult> DeleteApplicationModel([FromBody] ApplicationVm model)
         {
 
             if (!User.Identity.IsAuthenticated)
@@ -331,9 +331,17 @@ namespace Intwenty.Controllers
                 if (dbitems != null && dbitems.Count() > 0)
                     client.DeleteEntities(dbitems);
 
-                var uiitems = client.GetEntities<UserInterfaceStructureItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+                var viewitems = client.GetEntities<ViewItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+                if (viewitems != null && viewitems.Count() > 0)
+                    client.DeleteEntities(viewitems);
+
+                var uiitems = client.GetEntities<UserInterfaceItem>().Where(p => p.AppMetaCode == existing.MetaCode);
                 if (uiitems != null && uiitems.Count() > 0)
                     client.DeleteEntities(uiitems);
+
+                var uistructitems = client.GetEntities<UserInterfaceStructureItem>().Where(p => p.AppMetaCode == existing.MetaCode);
+                if (uistructitems != null && uistructitems.Count() > 0)
+                    client.DeleteEntities(uistructitems);
 
                 client.DeleteEntity(existing);
 
