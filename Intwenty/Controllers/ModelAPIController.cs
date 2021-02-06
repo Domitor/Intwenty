@@ -193,9 +193,6 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Cannot save an application model without a DbName");
 
 
-                ModelRepository.ClearCache();
-
-                var authitems = ProductManager.GetAthorizationItemsAsync(Settings.ProductId).Result;
 
                 var client = DataRepository.GetDataClient();
 
@@ -218,15 +215,7 @@ namespace Intwenty.Controllers
                         max += 10;
                     }
 
-                    if (string.IsNullOrEmpty(model.MetaCode))
-                    {
-                        model.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                    }
-                    else
-                    {
-                        if (apps.Exists(p => p.MetaCode == model.MetaCode))
-                            model.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                    }
+                    model.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
 
                     if (!model.DbName.ToUpper().StartsWith(currentsystem.DbPrefix.ToUpper() + "_"))
@@ -261,6 +250,7 @@ namespace Intwenty.Controllers
                     client.InsertEntity(entity);
                     client.Close();
 
+                    ModelRepository.ClearCache();
 
                     return new JsonResult(new ModifyResult(true, MessageCode.RESULT, "A new application model was inserted.", entity.Id));
 
@@ -282,6 +272,8 @@ namespace Intwenty.Controllers
                     client.Open();
                     client.UpdateEntity(entity);
                     client.Close();
+
+                    ModelRepository.ClearCache();
 
                     return new JsonResult(new ModifyResult(true, MessageCode.RESULT, "Application model updated.", entity.Id));
 

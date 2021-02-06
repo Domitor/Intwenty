@@ -32,7 +32,7 @@
 
         <div class="form-group">
             <label class="control-label">Data Mode</label>
-            <select id="cbTenantIsolvl" v-model="model.dataMode" class="form-control form-control-sm">
+            <select id="cbTenantIsolvl" v-model.number="model.dataMode" class="form-control form-control-sm">
                 <option value="0">Standard</option>
                 <option value="1">Simple</option>
             </select>
@@ -44,7 +44,7 @@
 
         <div class="form-group">
             <label class="control-label">Tenant Isolation Level</label>
-            <select id="cbTenantIsolvl" v-model="model.tenantIsolationLevel" class="form-control form-control-sm">
+            <select id="cbTenantIsolvl" v-model.number="model.tenantIsolationLevel" class="form-control form-control-sm">
                 <option value="0">None</option>
                 <option value="1">User</option>
                 <option value="2">Organization</option>
@@ -53,7 +53,7 @@
 
         <div class="form-group">
             <label class="control-label">Tenant Isolation Method</label>
-            <select id="cbTenantIsoMet" v-model="model.tenantIsolationMethod" class="form-control form-control-sm">
+            <select id="cbTenantIsoMet" v-model.number="model.tenantIsolationMethod" class="form-control form-control-sm">
                 <option value="0">None</option>
                 <option value="1">ByRows</option>
                 <option value="2">ByTables</option>
