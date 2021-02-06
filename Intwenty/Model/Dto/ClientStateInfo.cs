@@ -11,20 +11,11 @@ namespace Intwenty.Model.Dto
 
     public class ClientStateInfo : HashTagPropertyObject
     {
+        public UserInfo User { get; set; }
 
         public int Id { get; set; }
 
         public int Version { get; set; }
-
-        public string UserId { get; set; }
-
-        public string UserTablePrefix { get; set; }
-
-        public string OrganizationId { get; set; }
-
-        public string OrganizationName { get; set; }
-
-        public string OrganizationTablePrefix { get; set; }
 
         public int ApplicationId { get; set; }
 
@@ -32,27 +23,21 @@ namespace Intwenty.Model.Dto
 
         public ApplicationData Data { get; set; }
 
-        public List<FilterValue> FilterValues { get; set; }
 
 
         public ClientStateInfo()
         {
-            FilterValues = new List<FilterValue>();
             Data = new ApplicationData();
-            UserId = ListFilter.DEFAULT_OWNERUSERID;
+            User = new UserInfo();
             Properties = "";
         }
 
         public ClientStateInfo(ClaimsPrincipal user)
         {
             Properties = "";
-            FilterValues = new List<FilterValue>();
             Data = new ApplicationData();
-            UserId = user.Identity.Name;
-            UserTablePrefix = user.Identity.GetUserTablePrefix();
-            OrganizationId = user.Identity.GetOrganizationId();
-            OrganizationName = user.Identity.GetOrganizationName();
-            OrganizationTablePrefix = user.Identity.GetOrganizationTablePrefix();
+            User = new UserInfo(user);
+          
         }
 
 

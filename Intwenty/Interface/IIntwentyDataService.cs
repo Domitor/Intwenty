@@ -80,7 +80,7 @@ namespace Intwenty.Interface
         /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult GetLatestByOwnerUser(ClientStateInfo state);
+        //DataResult GetLatestByOwnerUser(ClientStateInfo state);
 
 
 
@@ -93,7 +93,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetPagedJsonArray(ListFilter args);
+        DataListResult GetJsonArray(ListFilter args);
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -102,7 +102,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model);
+        DataListResult GetJsonArray(ListFilter args, ApplicationModel model);
 
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A result object that inhertits DataListResult including a string json array</returns>
-        TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
+        TDataListResult GetJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
 
 
 
@@ -123,7 +123,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a list of T and the current paging rownum</returns>
-        DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
+        DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
 
 
 
@@ -132,7 +132,7 @@ namespace Intwenty.Interface
         /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An DataListResult including a list of T</returns>
-        DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
+        //DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
 
 
 
@@ -141,7 +141,7 @@ namespace Intwenty.Interface
         /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetJsonArray(int applicationid);
+        //DataListResult GetJsonArray(int applicationid);
 
 
         /// <summary>

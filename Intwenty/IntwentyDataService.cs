@@ -443,11 +443,11 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@Id", state.Id));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
-            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.User.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.User.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(valuelist, parameters);
 
@@ -491,7 +491,7 @@ namespace Intwenty
             var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter("@ID", state.Id));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(paramlist, parameters);
 
@@ -544,11 +544,11 @@ namespace Intwenty
             var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
-            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.User.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.User.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             SetParameters(valuelist, parameters);
 
@@ -694,11 +694,11 @@ namespace Intwenty
             parameters.Add(new IntwentySqlParameter("@Id", row.Id));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
-            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.User.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.User.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
@@ -760,11 +760,11 @@ namespace Intwenty
             var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
             parameters.Add(new IntwentySqlParameter("@ApplicationId", model.Application.Id));
-            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.UserId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.OrganizationId));
-            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.OrganizationName));
+            parameters.Add(new IntwentySqlParameter("@CreatedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedBy", state.User.UserName));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationId", state.User.OrganizationId));
+            parameters.Add(new IntwentySqlParameter("@OwnedByOrganizationName", state.User.OrganizationName));
             parameters.Add(new IntwentySqlParameter("@ChangedDate", GetApplicationTimeStamp()));
             parameters.Add(new IntwentySqlParameter("@ParentId", state.Id));
             SetParameters(paramlist, parameters);
@@ -816,7 +816,7 @@ namespace Intwenty
             var parameters = new List<IIntwentySqlParameter>();
             parameters.Add(new IntwentySqlParameter("@ID", rowid));
             parameters.Add(new IntwentySqlParameter("@Version", state.Version));
-            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.UserId));
+            parameters.Add(new IntwentySqlParameter("@ChangedBy", state.User.UserName));
             SetParameters(paramlist, parameters);
 
             client.RunCommand(sql_update.ToString(), parameters: parameters.ToArray());
@@ -886,13 +886,13 @@ namespace Intwenty
             {
                 Id = state.Id,
                 ApplicationId = model.Application.Id,
-                ChangedBy = state.UserId,
+                ChangedBy = state.User.UserName,
                 ChangedDate = DateTime.Now,
-                CreatedBy = state.UserId,
+                CreatedBy = state.User.UserName,
                 MetaCode = model.Application.MetaCode,
-                OwnedBy = state.UserId,
-                OwnedByOrganizationId = state.OrganizationId,
-                OwnedByOrganizationName = state.OrganizationName,
+                OwnedBy = state.User.UserName,
+                OwnedByOrganizationId = state.User.OrganizationId,
+                OwnedByOrganizationName = state.User.OrganizationName,
                 PerformDate = DateTime.Now,
                 Version = state.Version,
                 EndDate = DateTime.Now,
@@ -909,7 +909,7 @@ namespace Intwenty
             var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
 
             var parameters = new List<IIntwentySqlParameter>();
-            parameters.Add(new IntwentySqlParameter() { Name = "@ChangedBy", Value = state.UserId });
+            parameters.Add(new IntwentySqlParameter() { Name = "@ChangedBy", Value = state.User.UserName });
             parameters.Add(new IntwentySqlParameter() { Name = "@Version", Value = state.Version });
             parameters.Add(new IntwentySqlParameter() { Name = "@ID", Value = state.Id });
 
@@ -1154,7 +1154,7 @@ namespace Intwenty
 
         #region Lists
 
-        public virtual DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public virtual DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (args == null)
                 return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
@@ -1178,7 +1178,7 @@ namespace Intwenty
 
                 result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
 
-                if (args.MaxCount == 0)
+                if (args.MaxCount == 0 && !args.SkipPaging)
                 {
                     object max=null;
                     if (model.Application.DataMode == DataModeOptions.Simple)
@@ -1214,16 +1214,22 @@ namespace Intwenty
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
 
-                if (args.HasOwnerUserId)
+                if ((model.Application.TenantIsolationLevel== TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
                 {
+                    if (!args.User.HasValidUserId)
+                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
                 }
 
-                if (args.HasOwnerOrganizationId)
+                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
                 {
+                    if (!args.User.HasValidOrganizationId)
+                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+
                     sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.OwnerOrganizationId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
                 }
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
@@ -1246,17 +1252,21 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
+
+                if (!args.SkipPaging)
                 {
-                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
-                }
-                else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
-                {
-                    sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
-                }
-                else
-                {
-                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
+                    {
+                        sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                    }
+                    else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                    {
+                        sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
+                    }
+                    else
+                    {
+                        sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    }
                 }
 
                 var sql = sql_list_stmt.ToString();
@@ -1284,23 +1294,23 @@ namespace Intwenty
 
      
 
-        public virtual DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model)
+        public virtual DataListResult GetJsonArray(ListFilter args, ApplicationModel model)
         {
-            return GetPagedListInternal<DataListResult>(args, model);
+            return GetJsonArrayInternal<DataListResult>(args, model);
         }
 
-        public virtual DataListResult GetPagedJsonArray(ListFilter args)
+        public virtual DataListResult GetJsonArray(ListFilter args)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
-            return GetPagedListInternal<DataListResult>(args, model);
+            return GetJsonArrayInternal<DataListResult>(args, model);
         }
 
-        public virtual TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
+        public virtual TDataListResult GetJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
         {
-            return GetPagedListInternal<TDataListResult>(args, model);
+            return GetJsonArrayInternal<TDataListResult>(args, model);
         }
 
-        private TDataListResult GetPagedListInternal<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
+        private TDataListResult GetJsonArrayInternal<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
         {
 
             if (args == null)
@@ -1341,7 +1351,7 @@ namespace Intwenty
                 var result = new TDataListResult();
                 result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
 
-                if (args.MaxCount == 0)
+                if (args.MaxCount == 0 && !args.SkipPaging)
                 {
 
                     object max = null;
@@ -1389,20 +1399,26 @@ namespace Intwenty
 
                 }
 
-              
-                
 
-                if (args.HasOwnerUserId)
+                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
                 {
+                    if (!args.User.HasValidUserId)
+                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+
                     sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.OwnerUserId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
                 }
 
-                if (args.HasOwnerOrganizationId)
+                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
                 {
+                    if (!args.User.HasValidOrganizationId)
+                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+
                     sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.OwnerOrganizationId });
+                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
                 }
+
+
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
                 {
@@ -1424,17 +1440,21 @@ namespace Intwenty
                 }
 
                 sql_list_stmt.Append("ORDER BY t1.Id ");
-                if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
+
+                if (!args.SkipPaging)
                 {
-                    sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
-                }
-                else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
-                {
-                    sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
-                }
-                else
-                {
-                    sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    if (Settings.DefaultConnectionDBMS == DBMS.MSSqlServer)
+                    {
+                        sql_list_stmt.Append(string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (args.PageNumber * args.PageSize), args.PageSize));
+                    }
+                    else if (Settings.DefaultConnectionDBMS == DBMS.PostgreSQL)
+                    {
+                        sql_list_stmt.Append(string.Format("LIMIT {0} OFFSET {1}", args.PageSize, (args.PageNumber * args.PageSize)));
+                    }
+                    else
+                    {
+                        sql_list_stmt.Append(string.Format("LIMIT {0},{1}", (args.PageNumber * args.PageSize), args.PageSize));
+                    }
                 }
 
                 var queryresult = client.GetJsonArray(sql_list_stmt.ToString(), false, parameters.ToArray());
@@ -1461,7 +1481,7 @@ namespace Intwenty
 
         }
 
-        
+        /*
         public virtual DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new()
         {
             DataListResult<T> result = null;
@@ -1663,6 +1683,8 @@ namespace Intwenty
 
         }
 
+        */
+
         #endregion
 
         #region GetApplication
@@ -1749,6 +1771,7 @@ namespace Intwenty
             return GetLatestVersionByIdInternal(state, model);
         }
 
+        /*
         public virtual DataResult GetLatestByOwnerUser(ClientStateInfo state)
         {
             ApplicationModel model = null;
@@ -1821,6 +1844,8 @@ namespace Intwenty
 
         }
 
+        */
+
         private DataResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
         {
             if (state == null)
@@ -1830,7 +1855,7 @@ namespace Intwenty
             if (state.ApplicationId < 0)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "ApplicationId is required when executing DefaultDbManager.GetLatestVersionById.");
             if (model == null)
-                return new DataResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+                return new DataResult(false, MessageCode.SYSTEMERROR, "Could not find the requested application model");
             if (model.Application.Id != state.ApplicationId)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
@@ -2528,17 +2553,17 @@ namespace Intwenty
         {
             if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
             {
-                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.UserTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
             }
             else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
-                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.OrganizationTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
             }
             else
             {
@@ -2551,17 +2576,17 @@ namespace Intwenty
         {
             if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
             {
-                if (string.IsNullOrEmpty(state.OwnerUserTablePrefix))
+                if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.OwnerUserTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
             }
             else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
-                if (string.IsNullOrEmpty(state.OwnerOrganizationTablePrefix))
+                if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.OwnerOrganizationTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
             }
             else
             {
@@ -2579,17 +2604,17 @@ namespace Intwenty
 
             if (model.ApplicationInfo.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.ApplicationInfo.TenantIsolationLevel == TenantIsolationOptions.User)
             {
-                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.UserTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
             }
             else if (model.ApplicationInfo.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.ApplicationInfo.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
-                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.OrganizationTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
             }
             else
             {
@@ -2604,17 +2629,17 @@ namespace Intwenty
 
             if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
             {
-                if (string.IsNullOrEmpty(state.UserTablePrefix))
+                if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.UserTablePrefix, tablename);
+                return string.Format("{0}_{1}", state.User.UserTablePrefix, tablename);
             }
             else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
-                if (string.IsNullOrEmpty(state.OrganizationTablePrefix))
+                if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.OrganizationTablePrefix, tablename);
+                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, tablename);
             }
             else
             {

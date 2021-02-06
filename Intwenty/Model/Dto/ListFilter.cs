@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 
 namespace Intwenty.Model.Dto
@@ -7,21 +8,20 @@ namespace Intwenty.Model.Dto
 
     public class ListFilter
     {
-        public static readonly string DEFAULT_OWNERUSERID = "INTWENTY_USER";
+       
+        public UserInfo User { get; set; }
 
         public int ApplicationId { get; set; }
 
         public int ApplicationViewId { get; set; }
 
-        public string OwnerUserId { get; set; }
-
-        public string OwnerUserTablePrefix { get; set; }
-
-        public string OwnerOrganizationId { get; set; }
-
-        public string OwnerOrganizationTablePrefix { get; set; }
-
         public string DataViewMetaCode { get; set; }
+
+        public bool SkipPaging { get; set; }
+
+        public bool ForceCurrentUserFilter { get; set; }
+
+        public bool ForceCurrentOrganizationFilter { get; set; }
 
         public int MaxCount { get; set; }
 
@@ -41,21 +41,25 @@ namespace Intwenty.Model.Dto
             }
         }
 
-        public bool HasOwnerUserId
-        {
-            get { return !string.IsNullOrEmpty(OwnerUserId) && OwnerUserId != DEFAULT_OWNERUSERID; }
-        }
-
-        public bool HasOwnerOrganizationId
-        {
-            get { return !string.IsNullOrEmpty(OwnerOrganizationId);  }
-        }
+       
 
         public ListFilter()
         {
             PageSize = 20;
-            OwnerUserId = DEFAULT_OWNERUSERID;
+            User = new UserInfo();
             FilterValues = new List<FilterValue>();
+        }
+
+        public ListFilter(ClaimsPrincipal user)
+        {
+            PageSize = 20;
+            User = new UserInfo(user);
+            FilterValues = new List<FilterValue>();
+        }
+
+        public void SetUser(ClaimsPrincipal user)
+        {
+            User = new UserInfo(user);
         }
 
     }
