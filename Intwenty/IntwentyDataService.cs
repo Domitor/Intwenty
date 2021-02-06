@@ -1051,22 +1051,25 @@ namespace Intwenty
 
         }
 
-        
-        public ModifyResult Delete(int applicationid, int id, string dbname)
+
+        public ModifyResult DeleteRow(ClientStateInfo state, int id, string modeltablename)
         {
             ModifyResult result = null;
 
-            if (applicationid < 1)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must contain a valid ApplicationId.");
+            if (state == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting row.");
 
-            if (id < 1)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter id can not be zero.");
+            if (state.ApplicationId < 1)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+            if (state.Id < 1)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No state.Id found when deleting row.");
+
+            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             if (model == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", applicationid));
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
 
-            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == modeltablename.ToLower());
             if (modelitem == null)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
 
@@ -1082,38 +1085,29 @@ namespace Intwenty
                     
                     var sysid = client.GetEntity<InstanceId>(id);
                     if (sysid == null)
-                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
+                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", modeltablename));
                     if (sysid.ParentId < 1)
-                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", dbname));
+                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", modeltablename));
 
-                    RemoveFromApplicationCache(applicationid, sysid.ParentId);
-                    RemoveFromApplicationListCache(applicationid);
+                    RemoveFromApplicationCache(state.ApplicationId, sysid.ParentId);
+                    RemoveFromApplicationListCache(state.ApplicationId);
                 }
                 else
                 {
-                    RemoveFromApplicationCache(applicationid, id);
-                    RemoveFromApplicationListCache(applicationid);
+                    RemoveFromApplicationCache(state.ApplicationId, id);
+                    RemoveFromApplicationListCache(state.ApplicationId);
                 }
 
 
-                if (dbname.ToLower() == model.Application.DbName.ToLower())
+                if (modeltablename.ToLower() == model.Application.DbName.ToLower())
                 {
                    
-                    client.RunCommand("DELETE FROM " + model.Application.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                    client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(model.Application, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     if (model.Application.UseVersioning && model.Application.DataMode !=  DataModeOptions.Simple)
-                        client.RunCommand("DELETE FROM " + model.Application.VersioningTableName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                        client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(model.Application, model.Application.VersioningTableName, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
 
                     if (model.Application.DataMode != DataModeOptions.Simple)
                     {
-                        foreach (var table in model.DataStructure)
-                        {
-                            if (table.IsMetaTypeDataTable)
-                            {
-                                client.RunCommand("DELETE FROM " + table.DbName + " WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                                client.RunCommand("DELETE FROM sysdata_InstanceId WHERE ParentId=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                            }
-                        }
-
                         client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                         client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                     }
@@ -1126,9 +1120,9 @@ namespace Intwenty
                     {
                         foreach (var table in model.DataStructure)
                         {
-                            if (table.IsMetaTypeDataTable && table.DbName.ToLower() == dbname.ToLower())
+                            if (table.IsMetaTypeDataTable && table.DbName.ToLower() == modeltablename.ToLower())
                             {
-                                client.RunCommand("DELETE FROM " + table.DbName + " WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
+                                client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(table, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                                 client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                                 result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
                             }
@@ -1601,47 +1595,7 @@ namespace Intwenty
 
         }
 
-        public virtual DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid)
-        {
-
-            var client = GetDataClient();
-
-
-            try
-            {
-
-                if (applicationid < 1)
-                    throw new InvalidOperationException("Parameter applicationid must be a valid ApplicationId");
-
-                if (string.IsNullOrEmpty(owneruserid))
-                    throw new InvalidOperationException("Parameter owneruserid must not be empty");
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-                client.Open();
-
-                return GetListInternal<DataListResult>(model, owneruserid, client);
-                
-            }
-            catch (Exception ex)
-            {
-                var result = new DataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetListByOwnerUser(applicationid, owneruserid) of Intwenty applications failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetListbyOwnerUser: " + ex.Message);
-                return result;
-            }
-            finally
-            {
-                client.Close();
-            }
-
-          
-
-        }
+     
 
         private TDataListResult GetListInternal<TDataListResult>(ApplicationModel model, string owneruserid, IDataClient client) where TDataListResult : DataListResult, new()
         {

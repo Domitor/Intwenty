@@ -69,7 +69,57 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.SaveSystemModel(model);
+                
+                ModelRepository.ClearCache();
+
+                model.ParentMetaCode = BaseModelItem.MetaTypeRoot;
+
+                if (!string.IsNullOrEmpty(model.DbPrefix))
+                    throw new InvalidOperationException("Cant save a system withot a dbprefix");
+
+                if (!string.IsNullOrEmpty(model.Title))
+                    throw new InvalidOperationException("Cant save a system withot a title");
+
+                var client = DataRepository.GetDataClient();
+   
+                var current_systems = ModelRepository.GetSystemModels();
+ 
+
+                if (model.Id < 1)
+                {
+
+                    if (current_systems.Exists(p => p.DbPrefix == model.DbPrefix))
+                        throw new InvalidOperationException(string.Format("There is already a system with DbPrefix {0}", model.DbPrefix));
+
+                    if (current_systems.Exists(p => p.Title == model.Title))
+                        throw new InvalidOperationException(string.Format("There is already a system with the title {0}", model.Title));
+
+                    var entity = new SystemItem();
+                    if (string.IsNullOrEmpty(model.MetaCode))
+                        entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+
+                    entity.Title = model.Title;
+                    entity.Description = model.Description;
+                    entity.DbPrefix = model.DbPrefix;
+
+                    client.Open();
+                    client.InsertEntity(entity);
+                    client.Close();
+                }
+                else
+                {
+                    client.Open();
+                    var existing = client.GetEntity<SystemItem>(model.Id);
+                    if (existing != null)
+                    {
+
+                        existing.Title = model.Title;
+                        existing.Description = model.Description;
+                        client.UpdateEntity(existing);
+
+                    }
+                    client.Close();
+                }
             }
             catch (Exception ex)
             {
@@ -84,30 +134,7 @@ namespace Intwenty.Controllers
         }
 
 
-        [HttpPost("/Model/API/DeleteSystem")]
-        public async Task<IActionResult> DeleteSystem([FromBody] SystemModelItem model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-               
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting a system.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return await GetSystems();
-        }
+      
 
         #endregion
 
@@ -347,9 +374,130 @@ namespace Intwenty.Controllers
                 if (model.Id < 1)
                     throw new InvalidOperationException("ApplicationId missing in model");
 
-                var list = DatabaseModelCreator.GetDatabaseModel(model);
 
-                ModelRepository.SaveDatabaseModels(list, model.Id);
+
+                ModelRepository.ClearCache();
+
+                var app = ModelRepository.GetApplicationModel(model.Id);
+                if (app == null)
+                    throw new InvalidOperationException("Could not find application when saving application database model.");
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var dbi in model.Tables)
+                {
+                    if (app.DataStructure.Exists(p => p.IsFrameworkItem && p.DbName.ToUpper() == dbi.DbName.ToUpper()))
+                        continue;
+
+                    if (dbi.DbName == app.Application.DbName)
+                        continue;
+
+                    if (!string.IsNullOrEmpty(dbi.DbName))
+                        dbi.DbName = dbi.DbName.Replace(" ", "");
+
+                    if (dbi.Id < 1)
+                    {
+
+                        var t = new DatabaseItem()
+                        {
+                            AppMetaCode = app.Application.MetaCode,
+                            Description = dbi.Description,
+                            MetaCode = BaseModelItem.GetQuiteUniqueString(),
+                            MetaType = DatabaseModelItem.MetaTypeDataTable,
+                            ParentMetaCode = BaseModelItem.MetaTypeRoot,
+                            DbName = dbi.DbName,
+                            DataType = "",
+                            Properties = dbi.Properties,
+                            SystemMetaCode = app.System.MetaCode
+                        };
+
+                        client.InsertEntity(t);
+
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
+                        if (existing != null)
+                        {
+                            existing.DataType = "";
+                            existing.MetaType = DatabaseModelItem.MetaTypeDataTable;
+                            existing.Description = dbi.Description;
+                            existing.ParentMetaCode = BaseModelItem.MetaTypeRoot;
+                            existing.DbName = dbi.DbName;
+                            existing.Properties = dbi.Properties;
+                            client.UpdateEntity(existing);
+                        }
+
+
+                    }
+
+                  
+
+                }
+
+                foreach (var dbi in model.Columns)
+                {
+                    if (dbi.IsFrameworkItem)
+                        continue;
+
+                    if (app.DataStructure.Exists(p => p.IsFrameworkItem && p.DbName.ToUpper() == dbi.DbName.ToUpper()))
+                        continue;
+
+              
+
+                    if (dbi.Id < 1)
+                    {
+                        
+
+                        var t = new DatabaseItem()
+                        {
+                            AppMetaCode = app.Application.MetaCode,
+                            Description = dbi.Description,
+                            MetaCode = BaseModelItem.GetQuiteUniqueString(),
+                            MetaType = DatabaseModelItem.MetaTypeDataColumn,
+                            ParentMetaCode = BaseModelItem.MetaTypeRoot,
+                            DbName = dbi.DbName,
+                            DataType = dbi.DataType,
+                            Properties = dbi.Properties,
+                            SystemMetaCode = app.Application.SystemMetaCode
+                        };
+
+
+                        //SET PARENT META CODE
+                        if (dbi.TableName != app.Application.DbName)
+                        {
+                            var tbl = app.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName == dbi.TableName);
+                            if (tbl != null)
+                                t.ParentMetaCode = tbl.MetaCode;
+                        }
+
+                        
+
+                        client.InsertEntity(t);
+
+                    }
+                    else
+                    {
+
+
+                        var existing = client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
+                        if (existing != null)
+                        {
+                            existing.DataType = dbi.DataType;
+                            existing.MetaType = DatabaseModelItem.MetaTypeDataColumn;
+                            existing.Description = dbi.Description;
+                            existing.DbName = dbi.DbName;
+                            existing.Properties = dbi.Properties;
+                            client.UpdateEntity(existing);
+                        }
+
+                    }
+
+                }
+
+                client.Close();
+
 
             }
             catch (Exception ex)
@@ -384,7 +532,38 @@ namespace Intwenty.Controllers
                 if (model.ApplicationId < 1)
                     throw new InvalidOperationException("ApplicationId is missing when removing db model");
 
-                ModelRepository.DeleteDatabaseModel(model.Id);
+
+                ModelRepository.ClearCache();
+
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                var existing = client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing != null)
+                {
+                    var dto = new DatabaseModelItem(existing);
+                    var app = ModelRepository.GetApplicationModels().Find(p => p.Application.MetaCode == dto.AppMetaCode);
+                    if (app == null)
+                        return BadRequest();
+
+                    if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
+                    {
+                        var childlist = client.GetEntities<DatabaseItem>().Where(p => (p.MetaType == DatabaseModelItem.MetaTypeDataColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
+                        client.DeleteEntity(existing);
+                        client.DeleteEntities(childlist);
+                        client.Close();
+                    }
+                    else
+                    {
+           
+                        client.DeleteEntity(existing);
+                    }
+
+
+                }
+
+                client.Close();
 
             }
             catch (Exception ex)
@@ -412,13 +591,31 @@ namespace Intwenty.Controllers
 
             try
             {
-                var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (t == null)
+                var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
+                if (appmodel == null)
                     throw new InvalidOperationException("ApplicationId missing when fetching application db meta");
 
-                var dbvm = DatabaseModelCreator.GetDatabaseVm(t);
-                dbvm.PropertyCollection = IntwentyRegistry.IntwentyProperties;
-                return new JsonResult(dbvm);
+
+                var res = new DBVm();
+                res.Id = appmodel.Application.Id;
+                res.Title = appmodel.Application.Title;
+                res.Tables = DatabaseModelCreator.GetDatabaseTableVm(appmodel);
+                foreach (var t in res.Tables)
+                {
+                    foreach (var c in t.Columns)
+                    {
+                        res.Columns.Add(c);
+                    }
+                }
+
+                foreach (var t in res.Tables)
+                {
+                    t.Columns.Clear();
+                }
+
+                res.PropertyCollection = IntwentyRegistry.IntwentyProperties;
+
+                return new JsonResult(res);
             }
             catch (Exception ex)
             {
@@ -540,9 +737,59 @@ namespace Intwenty.Controllers
 
             try
             {
+                ModelRepository.ClearCache();
 
-                var dtolist = DataViewModelCreator.GetDataViewModel(model);
-                ModelRepository.SaveDataViewModels(dtolist);
+                var list = DataViewModelCreator.GetDataViewModel(model);
+
+                foreach (var dv in list)
+                {
+
+                    if (dv.IsMetaTypeDataView)
+                        dv.ParentMetaCode = "ROOT";
+
+                    if (string.IsNullOrEmpty(dv.MetaCode))
+                        dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
+
+                }
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var dv in list)
+                {
+                    if (dv.Id < 1)
+                    {
+                        var t = new DataViewItem()
+                        {
+
+                            MetaCode = dv.MetaCode,
+                            MetaType = dv.MetaType,
+                            ParentMetaCode = dv.ParentMetaCode,
+                            Title = dv.Title,
+                            SQLQuery = dv.SQLQuery,
+                            SQLQueryFieldName = dv.SQLQueryFieldName,
+                            SystemMetaCode = dv.SystemMetaCode
+                        };
+                        client.InsertEntity(t);
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
+                        if (existing != null)
+                        {
+                            existing.SQLQuery = dv.SQLQuery;
+                            existing.SQLQueryFieldName = dv.SQLQueryFieldName;
+                            existing.Title = dv.Title;
+                            client.UpdateEntity(existing);
+                        }
+
+                    }
+
+                }
+
+                client.Close();
+
+
 
             }
             catch (Exception ex)
@@ -569,7 +816,28 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.DeleteDataViewModel(model.Id);
+                
+                ModelRepository.ClearCache();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing != null)
+                {
+                    var dto = new DataViewModelItem(existing);
+                    if (dto.IsMetaTypeDataView)
+                    {
+                        var childlist = client.GetEntities<DataViewItem>().Where(p => (p.MetaType == DataViewModelItem.MetaTypeDataViewColumn || p.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
+                        client.DeleteEntity(existing);
+                        client.DeleteEntities(childlist);
+                    }
+                    else
+                    {
+                        client.DeleteEntity(existing);
+                    }
+                }
+                client.Close();
 
             }
             catch (Exception ex)
@@ -1767,7 +2035,7 @@ namespace Intwenty.Controllers
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
                         foreach (var l in langs)
                         {
-                            res.Add(new TranslationVm() { UserInterfaceModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
+                            res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
                         }
                     }
                     else
@@ -1795,7 +2063,7 @@ namespace Intwenty.Controllers
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
                         foreach (var l in langs)
                         {
-                            res.Add(new TranslationVm() { UserInterfaceModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "" });
+                            res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "" });
                         }
                     }
                     else
@@ -1913,7 +2181,6 @@ namespace Intwenty.Controllers
                     res.Add(new TranslationVm() { Culture = t.Culture, Key = t.Key, ModelTitle = t.Key, Text = t.Text, Id = t.Id });
 
 
-
             }
 
 
@@ -1935,19 +2202,69 @@ namespace Intwenty.Controllers
 
             try
             {
+
+                ModelRepository.ClearCache();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
                 foreach (var t in model.Translations)
                 {
                     if (t.ApplicationModelId > 0 && !string.IsNullOrEmpty(t.Text))
                     {
-                        ModelRepository.SetAppModelLocalizationKey(t.ApplicationModelId, t.Key);
+                        var m = client.GetEntity<ApplicationItem>(t.ApplicationModelId);
+                        if (m != null)
+                        {
+                            m.TitleLocalizationKey = t.Key;
+                            client.UpdateEntity(m);
+                        }
+
                     }
                     else if (t.UserInterfaceModelId > 0 && !string.IsNullOrEmpty(t.Text))
                     {
-                        ModelRepository.SetUserInterfaceModelLocalizationKey(t.UserInterfaceModelId, t.Key);
+                        var m = client.GetEntity<UserInterfaceStructureItem>(t.UserInterfaceModelId);
+                        if (m != null)
+                        {
+                            m.TitleLocalizationKey = t.Key;
+                            client.UpdateEntity(m);
+                        }
+                    }
+                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text))
+                    {
+                        var m = client.GetEntity<ViewItem>(t.ViewModelId);
+                        if (m != null)
+                        {
+                            m.TitleLocalizationKey = t.Key;
+                            client.UpdateEntity(m);
+                        }
                     }
                 }
-                
-                ModelRepository.SaveTranslations(model.Translations.Where(p=> p.Changed).Select(p=> TranslationVm.CreateTranslationModelItem(p)).ToList());
+
+
+                foreach (var trans in model.Translations.Where(p => p.Changed))
+                {
+
+                    if (trans.Id < 1)
+                    {
+                        client.InsertEntity(new TranslationItem() { Culture = trans.Culture, TransKey = trans.Key, Text = trans.Text });
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
+                        if (existing != null)
+                        {
+                            existing.Culture = trans.Culture;
+                            existing.TransKey = trans.Key;
+                            existing.Text = trans.Text;
+                            client.UpdateEntity(existing);
+                        }
+                    }
+
+                }
+
+                client.Close();
+
+
             }
             catch (Exception ex)
             {
@@ -1972,8 +2289,35 @@ namespace Intwenty.Controllers
 
             try
             {
+                ModelRepository.ClearCache();
 
-                ModelRepository.SaveTranslations(model.Translations.Where(p => p.Changed).Select(p => TranslationVm.CreateTranslationModelItem(p)).ToList());
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var trans in model.Translations)
+                {
+
+                    if (trans.Id < 1)
+                    {
+                        client.InsertEntity(new TranslationItem() { Culture = trans.Culture, TransKey = trans.Key, Text = trans.Text });
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
+                        if (existing != null)
+                        {
+                            existing.Culture = trans.Culture;
+                            existing.TransKey = trans.Key;
+                            existing.Text = trans.Text;
+                            client.UpdateEntity(existing);
+                        }
+                    }
+
+                }
+
+                client.Close();
+
+
             }
             catch (Exception ex)
             {
@@ -1999,7 +2343,20 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.DeleteTranslation(model.Id);
+                ModelRepository.ClearCache();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                var existing = client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing != null)
+                {
+                    client.Open();
+                    client.DeleteEntity(existing);
+                   
+                }
+
+                client.Close();
 
             }
             catch (Exception ex)
@@ -2025,7 +2382,20 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.DeleteTranslation(model.Id);
+                ModelRepository.ClearCache();
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                var existing = client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing != null)
+                {
+                    client.Open();
+                    client.DeleteEntity(existing);
+
+                }
+
+                client.Close();
 
             }
             catch (Exception ex)
@@ -2109,7 +2479,57 @@ namespace Intwenty.Controllers
                 foreach (var m in model)
                     list.Add(EndpointVm.CreateEndpointModelItem(m));
 
-                ModelRepository.SaveEndpointModels(list);
+                ModelRepository.ClearCache();
+
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var ep in list)
+                {
+                    if (ep.Id < 1)
+                    {
+                        var t = new EndpointItem()
+                        {
+                            MetaType = ep.MetaType,
+                            ParentMetaCode = ep.ParentMetaCode,
+                            Title = ep.Title,
+                            AppMetaCode = ep.AppMetaCode,
+                            SystemMetaCode = ep.SystemMetaCode,
+                            DataMetaCode = ep.DataMetaCode,
+                            Description = ep.Description,
+                            OrderNo = ep.OrderNo,
+                            Path = ep.Path,
+                            Properties = ep.Properties
+
+                        };
+
+                        if (string.IsNullOrEmpty(t.MetaCode))
+                            t.MetaCode = BaseModelItem.GetQuiteUniqueString();
+
+                        client.InsertEntity(t);
+                    }
+                    else
+                    {
+                        var existing = client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == ep.Id);
+                        if (existing != null)
+                        {
+                            existing.AppMetaCode = ep.AppMetaCode;
+                            existing.SystemMetaCode = ep.SystemMetaCode;
+                            existing.OrderNo = ep.OrderNo;
+                            existing.Path = ep.Path;
+                            existing.Properties = ep.Properties;
+                            existing.Title = ep.Title;
+                            existing.DataMetaCode = ep.DataMetaCode;
+                            existing.Description = ep.Description;
+
+                            client.UpdateEntity(existing);
+                        }
+
+                    }
+
+                }
+                client.Close();
             }
             catch (Exception ex)
             {
@@ -2135,7 +2555,18 @@ namespace Intwenty.Controllers
 
             try
             {
-                ModelRepository.DeleteEndpointModel(model.Id);
+
+                ModelRepository.ClearCache();
+
+                var client = DataRepository.GetDataClient();
+
+                client.Open();
+                var existing = client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == model.Id);
+                if (existing != null)
+                {
+                    client.DeleteEntity(existing);
+                }
+                client.Close();
 
             }
             catch (Exception ex)

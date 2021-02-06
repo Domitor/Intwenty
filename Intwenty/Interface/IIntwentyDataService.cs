@@ -50,15 +50,11 @@ namespace Intwenty.Interface
         ModifyResult Delete(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
-        /// Deletes data by Id
-        /// Parameter Id can be an Id of an application subtable row, or an application maintable Id
-        /// Parameter dbname can be an application  subtable name or main tablename
-        /// If the dbname represents a main application table, all application data (maintable and subtables) is deleted.
-        /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
+        /// Deletes data by row Id
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult Delete(int applicationid, int id, string dbname);
+        ModifyResult DeleteRow(ClientStateInfo state, int id, string tablename);
 
 
         /// <summary>
@@ -131,9 +127,6 @@ namespace Intwenty.Interface
 
 
 
-
-
-
         /// <summary>
         /// Get a list of (latest version) application data. 
         /// All columns and rows from the application's main table is returned.
@@ -149,15 +142,6 @@ namespace Intwenty.Interface
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
         DataListResult GetJsonArray(int applicationid);
-
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data based on OwnedBy. 
-        /// All columns from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid);
 
 
         /// <summary>

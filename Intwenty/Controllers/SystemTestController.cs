@@ -121,7 +121,7 @@ namespace Intwenty.Controllers
             if (dvmodels != null && dvmodels.Count > 0)
             {
                 foreach (var dv in dvmodels)
-                    _modelservice.DeleteDataViewModel(dv.Id);
+                    db.DeleteEntity(new DataViewItem() { Id = dv.Id });
             }
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
@@ -539,7 +539,8 @@ namespace Intwenty.Controllers
 
             try
             {
-                var getlistresult = _dataservice.GetJsonArrayByOwnerUser(10000, "OTHERUSER");
+                var f = new ListFilter() { ApplicationId = 10000, OwnerUserId = "OTHERUSER" };
+                var getlistresult = _dataservice.GetPagedJsonArray(f);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetListByOwnerUser(1000, OTHERUSER) failed: " + getlistresult.SystemError);
 
@@ -725,7 +726,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var state = new ClientStateInfo();
+                var state = new ClientStateInfo(User);
                 state.ApplicationId = 10000;
                 state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = "OTHERUSER" });
                 var getresult = _dataservice.GetLatestByOwnerUser(state);
@@ -736,7 +737,7 @@ namespace Intwenty.Controllers
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
                 var rowid = appdata.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.Delete(appdata.ApplicationId, rowid, appdata.SubTables[0].DbName);
+                var deleterowresult = _dataservice.DeleteRow(state, rowid, appdata.SubTables[0].DbName);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 

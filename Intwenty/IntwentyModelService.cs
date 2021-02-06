@@ -324,82 +324,6 @@ namespace Intwenty
             return res;
         }
 
-     
-
-        public void SaveSystemModel(SystemModelItem model)
-        {
-            if (model == null)
-                return;
-
-            ModelCache.Remove(SystemModelItemCacheKey);
-
-            model.ParentMetaCode = BaseModelItem.MetaTypeRoot;
-
-            if (!string.IsNullOrEmpty(model.DbPrefix))
-                throw new InvalidOperationException("Cant save a system withot a dbprefix");
-
-            if (!string.IsNullOrEmpty(model.Title))
-                throw new InvalidOperationException("Cant save a system withot a title");
-
-            Client.Open();
-            var current_systems = GetSystemModels();
-            Client.Close();
-
-            if (model.Id < 1)
-            {
-
-                if (current_systems.Exists(p => p.DbPrefix == model.DbPrefix))
-                    throw new InvalidOperationException(string.Format("There is already a system with DbPrefix {0}", model.DbPrefix));
-
-                if (current_systems.Exists(p => p.Title == model.Title))
-                    throw new InvalidOperationException(string.Format("There is already a system with the title {0}", model.Title));
-
-                var entity = new SystemItem();
-                if (string.IsNullOrEmpty(model.MetaCode))
-                    entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                entity.Title = model.Title;
-                entity.Description = model.Description;
-                entity.DbPrefix = model.DbPrefix;
-
-                Client.Open();
-                Client.InsertEntity(entity);
-                Client.Close();
-            }
-            else
-            {
-                Client.Open();
-                var existing = Client.GetEntity<SystemItem>(model.Id);
-                if (existing != null)
-                {
-
-                    existing.Title = model.Title;
-                    existing.Description = model.Description;
-                    Client.UpdateEntity(existing);
-
-                }
-                Client.Close();
-            }
-
-
-        }
-
-        public void DeleteSystemModel(SystemModelItem model)
-        {
-            if (model == null)
-                return;
-
-            ModelCache.Remove(SystemModelItemCacheKey);
-
-            Client.Open();
-            var existing = Client.GetEntity<SystemItem>(model.Id);
-            if (existing != null)
-            {
-                Client.DeleteEntity(existing);
-            }
-            Client.Close();
-        }
-
 
         #endregion
 
@@ -589,7 +513,6 @@ namespace Intwenty
         {
             var t = GetApplicationModels();
             return t.Find(p => p.Application.Id == applicationid);
-
         }
 
         public List<ApplicationModel> GetApplicationModels()
@@ -754,14 +677,9 @@ namespace Intwenty
                         res.Add(a);
                     }
                 }
-
-              
-
             }
 
-
             return res;
-
 
         }
 
@@ -802,21 +720,6 @@ namespace Intwenty
 
       
 
-        public void SetAppModelLocalizationKey(int id, string key)
-        {
-            ModelCache.Remove(AppModelCacheKey);
-            ModelCache.Remove(AppModelItemsCacheKey);
-
-            Client.Open();
-            var model = Client.GetEntity<ApplicationItem>(id);
-            if (model != null)
-            {
-                model.TitleLocalizationKey = key;
-                Client.UpdateEntity(model);
-            }
-            Client.Close();
-
-        }
 
 
         #endregion
@@ -890,77 +793,7 @@ namespace Intwenty
             return res;
         }
 
-        public void SaveEndpointModels(List<EndpointModelItem> model)
-        {
-            ModelCache.Remove(EndpointsCacheKey);
-
-            foreach (var ep in model)
-            {
-                 ep.ParentMetaCode = "ROOT";
-
-               
-            }
-
-            Client.Open();
-            foreach (var ep in model)
-            {
-                if (ep.Id < 1)
-                {
-                    var t = new EndpointItem()
-                    {
-                        MetaType = ep.MetaType,
-                        ParentMetaCode = ep.ParentMetaCode,
-                        Title = ep.Title,
-                        AppMetaCode = ep.AppMetaCode,
-                        SystemMetaCode = ep.SystemMetaCode,
-                        DataMetaCode = ep.DataMetaCode,
-                        Description = ep.Description,
-                        OrderNo = ep.OrderNo,
-                        Path = ep.Path,
-                        Properties = ep.Properties
-
-                    };
-
-                    if (string.IsNullOrEmpty(t.MetaCode))
-                        t.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                    Client.InsertEntity(t);
-                }
-                else
-                {
-                    var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == ep.Id);
-                    if (existing != null)
-                    {
-                        existing.AppMetaCode = ep.AppMetaCode;
-                        existing.SystemMetaCode = ep.SystemMetaCode;
-                        existing.OrderNo = ep.OrderNo;
-                        existing.Path = ep.Path;
-                        existing.Properties = ep.Properties;
-                        existing.Title = ep.Title;
-                        existing.DataMetaCode = ep.DataMetaCode;
-                        existing.Description = ep.Description;
-                        
-                        Client.UpdateEntity(existing);
-                    }
-
-                }
-
-            }
-            Client.Close();
-        }
-
-        public void DeleteEndpointModel(int id)
-        {
-            ModelCache.Remove(EndpointsCacheKey);
-
-            Client.Open();
-            var existing = Client.GetEntities<EndpointItem>().FirstOrDefault(p => p.Id == id);
-            if (existing != null)
-            {
-               Client.DeleteEntity(existing);
-            }
-            Client.Close();
-        }
+     
         #endregion
 
         #region UI
@@ -1212,22 +1045,7 @@ namespace Intwenty
       
 
 
-        public void SetUserInterfaceModelLocalizationKey(int id, string key)
-        {
-            ModelCache.Remove(AppModelCacheKey);
-
-
-            Client.Open();
-            var model = Client.GetEntity<UserInterfaceStructureItem>(id);
-            if (model != null)
-            {
-                model.TitleLocalizationKey = key;
-                Client.UpdateEntity(model);
-            }
-            Client.Close();
-
-        }
-
+       
 
 
 
@@ -1312,145 +1130,6 @@ namespace Intwenty
             return res;
         }
 
-        public void SaveDatabaseModels(List<DatabaseModelItem> model, int applicationid)
-        {
-            ModelCache.Remove(AppModelCacheKey);
-
-            var app = GetApplicationModels().Find(p => p.Application.Id == applicationid);
-            if (app == null)
-                throw new InvalidOperationException("Could not find application when saving application database model.");
-
-            foreach (var dbi in model)
-            {
-                if (dbi.IsFrameworkItem)
-                    continue;
-
-                dbi.AppMetaCode = app.Application.MetaCode;
-
-                //ASSUME ALL IS ROOT, CORRECT LATER
-                dbi.ParentMetaCode = "ROOT";
-
-                if (dbi.IsMetaTypeDataColumn && string.IsNullOrEmpty(dbi.TableName))
-                    throw new InvalidOperationException("Could not identify parent table when saving application database model.");
-
-                if (dbi.IsMetaTypeDataColumn && dbi.TableName == app.Application.DbName)
-                {
-                    dbi.ParentMetaCode = "ROOT";
-                }
-
-                if (!string.IsNullOrEmpty(dbi.DbName))
-                    dbi.DbName = dbi.DbName.Replace(" ", "");
-
-                if (!dbi.HasValidMetaType)
-                    throw new InvalidOperationException("Invalid meta type when saving application database model.");
-
-                if (dbi.IsMetaTypeDataColumn && !dbi.HasValidDataType)
-                    throw new InvalidOperationException("Invalid datatype type when saving application database model.");
-
-                dbi.SystemMetaCode = app.Application.SystemMetaCode;
-
-
-            }
-
-            foreach (var dbi in model)
-            {
-                if (dbi.IsFrameworkItem)
-                    continue;
-
-                if (app.DataStructure.Exists(p => p.IsFrameworkItem && p.DbName.ToUpper() == dbi.DbName.ToUpper()))
-                    continue;
-
-                if (dbi.Id < 1)
-                {
-                    if (string.IsNullOrEmpty(dbi.MetaCode))
-                        dbi.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                    var t = new DatabaseItem()
-                    {
-                        AppMetaCode = dbi.AppMetaCode,
-                        Description = dbi.Description,
-                        MetaCode = dbi.MetaCode,
-                        MetaType = dbi.MetaType,
-                        ParentMetaCode = dbi.ParentMetaCode,
-                        DbName = dbi.DbName,
-                        DataType = dbi.DataType,
-                        Properties = dbi.Properties,
-                        SystemMetaCode = dbi.SystemMetaCode
-                    };
-
-
-                    //SET PARENT META CODE
-                    if (dbi.IsMetaTypeDataColumn && dbi.TableName != app.Application.DbName)
-                    {
-                        var tbl = model.Find(p => p.IsMetaTypeDataTable && p.DbName == dbi.TableName);
-                        if (tbl != null)
-                            t.ParentMetaCode = tbl.MetaCode;
-                    }
-
-                    //Don't save main table, it's implicit for application
-                    if (dbi.IsMetaTypeDataTable && dbi.DbName == app.Application.DbName)
-                        continue;
-
-                    Client.InsertEntity(t);
-
-                }
-                else
-                {
-                  
-
-                    var existing = Client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == dbi.Id);
-                    if (existing != null)
-                    {
-                        existing.DataType = dbi.DataType;
-                        existing.MetaType = dbi.MetaType;
-                        existing.Description = dbi.Description;
-                        existing.ParentMetaCode = dbi.ParentMetaCode;
-                        existing.DbName = dbi.DbName;
-                        existing.Properties = dbi.Properties;
-                        Client.UpdateEntity(existing);
-                    }
-
-                }
-
-            }
-
-            Client.Close();
-
-
-        
-
-        }
-
-        public void DeleteDatabaseModel(int id)
-        {
-            ModelCache.Remove(AppModelCacheKey);
-
-            var existing = Client.GetEntities<DatabaseItem>().FirstOrDefault(p => p.Id == id);
-            if (existing != null)
-            {
-                var dto = new DatabaseModelItem(existing);
-                var app = GetApplicationModels().Find(p => p.Application.MetaCode == dto.AppMetaCode);
-                if (app == null)
-                    return;
-
-                if (dto.IsMetaTypeDataTable && dto.DbName != app.Application.DbName)
-                {
-                    Client.Open();
-                    var childlist = Client.GetEntities<DatabaseItem>().Where(p => (p.MetaType == DatabaseModelItem.MetaTypeDataColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
-                    Client.DeleteEntity(existing);
-                    Client.DeleteEntities(childlist);
-                    Client.Close();
-                }
-                else
-                {
-                    Client.Open();
-                    Client.DeleteEntity(existing);
-                    Client.Close();
-                }
-
-              
-            }
-        }
 
      
         #endregion
@@ -1481,84 +1160,6 @@ namespace Intwenty
             return res;
         }
 
-        public void SaveDataViewModels(List<DataViewModelItem> model)
-        {
-            ModelCache.Remove(DataViewCacheKey);
-
-            foreach (var dv in model)
-            {
-
-                if (dv.IsMetaTypeDataView)
-                    dv.ParentMetaCode = "ROOT";
-
-                if (string.IsNullOrEmpty(dv.MetaCode))
-                    dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-            }
-
-            Client.Open();
-            foreach (var dv in model)
-            {
-                if (dv.Id < 1)
-                {
-                    var t = new DataViewItem()
-                    {
-
-                        MetaCode = dv.MetaCode,
-                        MetaType = dv.MetaType,
-                        ParentMetaCode = dv.ParentMetaCode,
-                        Title = dv.Title,
-                        SQLQuery = dv.SQLQuery,
-                        SQLQueryFieldName = dv.SQLQueryFieldName,
-                        SystemMetaCode = dv.SystemMetaCode
-                    };
-                    Client.InsertEntity(t);
-                }
-                else
-                {
-                    var existing = Client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
-                    if (existing != null)
-                    {
-                        existing.SQLQuery = dv.SQLQuery;
-                        existing.SQLQueryFieldName = dv.SQLQueryFieldName;
-                        existing.Title = dv.Title;
-                        Client.UpdateEntity(existing);
-                    }
-
-                }
-
-            }
-            Client.Close();
-
-        }
-
-
-
-      
-
-        public void DeleteDataViewModel(int id)
-        {
-
-            ModelCache.Remove(DataViewCacheKey);
-
-            Client.Open();
-            var existing = Client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == id);
-            if (existing != null)
-            {
-                var dto = new DataViewModelItem(existing);
-                if (dto.IsMetaTypeDataView)
-                {
-                    var childlist = Client.GetEntities<DataViewItem>().Where(p => (p.MetaType == "DATAVIEWFIELD" || p.MetaType == "DATAVIEWKEYFIELD") && p.ParentMetaCode == existing.MetaCode).ToList();
-                    Client.DeleteEntity(existing);
-                    Client.DeleteEntities(childlist);
-                }
-                else
-                {
-                    Client.DeleteEntity(existing);
-                }
-            }
-            Client.Close();
-        }
         #endregion
 
         #region Value Domains
@@ -1647,47 +1248,9 @@ namespace Intwenty
             return t;
         }
 
-        public void SaveTranslations(List<TranslationModelItem> model)
-        {
-            ModelCache.Remove(TranslationsCacheKey);
+      
 
-            Client.Open();
-            foreach (var trans in model)
-            {
-
-                if (trans.Id < 1)
-                {
-                    Client.InsertEntity(new TranslationItem() { Culture = trans.Culture, TransKey = trans.Key, Text = trans.Text });
-                }
-                else
-                {
-                    var existing = Client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == trans.Id);
-                    if (existing != null)
-                    {
-                        existing.Culture = trans.Culture;
-                        existing.TransKey = trans.Key;
-                        existing.Text = trans.Text;
-                        Client.UpdateEntity(existing);
-                    }
-                }
-
-            }
-            Client.Close();
-
-        }
-
-        public void DeleteTranslation(int id)
-        {
-            ModelCache.Remove(TranslationsCacheKey);
-
-            var existing = Client.GetEntities<TranslationItem>().FirstOrDefault(p => p.Id == id);
-            if (existing != null)
-            {
-                Client.Open();
-                Client.DeleteEntity(existing);
-                Client.Close();
-            }
-        }
+       
         #endregion
 
         #region Configuration
