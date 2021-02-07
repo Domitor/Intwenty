@@ -308,8 +308,7 @@ namespace IntwentyDemo.Seed
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_LISTVIEW", MetaCode = "BLOG_LISTUI", MetaType = "LISTINTERFACE", DataTableMetaCode = "BLOGAPP" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_CREATE_VIEW", MetaCode = "BLOG_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "BLOGAPP" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_EDIT_VIEW", MetaCode = "BLOG_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "BLOGAPP" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_PUBLIC_VIEW", MetaCode = "BLOG_PUBUI", MetaType = "LISTINTERFACE", DataTableMetaCode = "BLOGAPP" });
-
+         
 
             //UI
             //INPUT
@@ -321,16 +320,6 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_INPUTUI", MetaType = "PANEL", MetaCode = "PNL2", Title = "", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_INPUTUI", MetaType = "IMAGEBOX", MetaCode = "IMGBOX_ARTIMAGE", DataColumn1MetaCode = "POSTIMAGE", Title = "Image", ParentMetaCode = "PNL2", RowOrder = 1, ColumnOrder = 1, Properties = "" });
 
-            //LIST (Presentation)
-            /*
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "LISTVIEW", MetaCode = "ARTLISTVIEW", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "SECTION", MetaCode = "LVSECTION", Title = "", ParentMetaCode = "ARTLISTVIEW", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "PANEL", MetaCode = "LVPANEL", Title = "", ParentMetaCode = "LVSECTION", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "IMAGE", MetaCode = "LV_POSTIMAGE", DataColumn1MetaCode = "POSTIMAGE", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 1, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "LABEL", MetaCode = "LV_POSTLABEL", DataColumn1MetaCode = "POSTHEADER", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 2, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "TEXTBLOCK", MetaCode = "LV_POSTTEXT", DataColumn1MetaCode = "POSTTEXT", Title = "", ParentMetaCode = "LVPANEL", RowOrder = 3, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", UserInterfaceMetaCode = "BLOG_PUBUI", MetaType = "PANEL", MetaCode = "LVRIGHTPANEL", Title = "", ParentMetaCode = "LVSECTION", RowOrder = 1, ColumnOrder = 2 });
-            */
 
 
             //LIST
