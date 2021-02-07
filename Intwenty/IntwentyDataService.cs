@@ -1673,8 +1673,6 @@ namespace Intwenty
                     sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                     sql_stmt.Append(string.Format("AND t1.Id = {0} ", state.Id));
 
-                    sql_stmt.Append(string.Format("FROM {0} t1 WHERE t1.Id={1} ", GetTenantTableName(model.Application, state), state.Id));
-
                     if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
                     {
                         if (!state.User.HasValidUserId)

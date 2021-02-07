@@ -45,7 +45,7 @@ namespace Intwenty.Controllers
                 return BadRequest();
 
             ClientStateInfo state = null;
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated)
                 state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
             else
                 state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
