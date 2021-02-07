@@ -36,11 +36,21 @@ namespace Intwenty.Model
                     var definition = IntwentyRegistry.IntwentyProperties.Find(p => p.CodeName == keyval[0].ToUpper());
                     if (definition == null)
                     {
-                        PropertyList.Add(new PropertyValue() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1].ToUpper() });
+                        PropertyList.Add(new PropertyValue() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1], DisplayValue = keyval[1] });
                     }
                     else
                     {
-                        PropertyList.Add(PropertyValue.CreateNew(keyval[0].ToUpper(), keyval[1].ToUpper(), definition));
+                        if (definition.IsListType)
+                        {
+                            var listvalue = definition.ValidValues.Find(p => p.CodeValue == keyval[1].ToUpper());
+                            if (listvalue != null)
+                            {
+                                PropertyList.Add(new PropertyValue() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1], DisplayValue = listvalue.DisplayValue });
+                                continue;
+                            }
+                        }
+
+                        PropertyList.Add( new PropertyValue() { CodeName = keyval[0].ToUpper(), CodeValue = keyval[1], DisplayValue = keyval[1] });
                     }
                    
                 }

@@ -833,6 +833,7 @@ namespace Intwenty
                     {
                         function.ApplicationInfo = app;
                         function.SystemInfo = app.SystemInfo;
+                        function.BuildPropertyList();
                         appview.Functions.Add(function);
                     }
 
@@ -966,7 +967,7 @@ namespace Intwenty
                                 {
                                     if (column.ParentMetaCode != table.MetaCode)
                                         continue;
-                                    if (!column.IsMetaTypeTextListColumn)
+                                    if (!column.IsMetaTypeTableTextColumn)
                                         continue;
 
                                     table.Columns.Add(column);

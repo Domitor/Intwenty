@@ -48,6 +48,7 @@ namespace Intwenty.Model
             ViewMetaCode = entity.ViewMetaCode;
             DataTableMetaCode = entity.DataTableMetaCode;
             SetEmptyStrings();
+           
         }
 
         private void SetEmptyStrings()

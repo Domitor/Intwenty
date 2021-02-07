@@ -32,7 +32,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeInputInterface, Title = "Input interface", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceModelItem.MetaTypeListInterface, Title = "List interface", ModelCode = "UIMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTable, Title = "Table", ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextListColumn, Title = "Text List Column", ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTableTextColumn, Title = "Text Table Column", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckBox, Title = "Checkbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeComboBox, Title = "Combobox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeDatePicker, Title = "Datepicker" , ModelCode = "UISTRUCTUREMODEL" });

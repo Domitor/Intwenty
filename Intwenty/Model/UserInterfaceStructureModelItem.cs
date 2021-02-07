@@ -11,7 +11,7 @@ namespace Intwenty.Model
     {
         //META TYPES
         public static readonly string MetaTypeTable = "TABLE";
-        public static readonly string MetaTypeTextListColumn = "TEXTLISTCOLUMN";
+        public static readonly string MetaTypeTableTextColumn = "TABLETEXTCOLUMN";
         public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
         public static readonly string MetaTypeLabel = "LABEL";
@@ -251,9 +251,9 @@ namespace Intwenty.Model
         }
 
       
-        public bool IsMetaTypeTextListColumn
+        public bool IsMetaTypeTableTextColumn
         {
-            get { return MetaType == MetaTypeTextListColumn; }
+            get { return MetaType == MetaTypeTableTextColumn; }
         }
 
        

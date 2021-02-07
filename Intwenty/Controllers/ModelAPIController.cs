@@ -856,6 +856,19 @@ namespace Intwenty.Controllers
 
         #region UI Model
 
+
+        [HttpGet("/Model/API/GetAllProperties")]
+        public IActionResult GetAllProperties()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            return new JsonResult(IntwentyRegistry.IntwentyProperties);
+
+        }
+
         /// <summary>
         /// Create an application view
         /// </summary>
@@ -1142,11 +1155,12 @@ namespace Intwenty.Controllers
                 entity.SystemMetaCode = appmodel.System.MetaCode;
                 entity.AppMetaCode = appmodel.Application.MetaCode;
                 entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                entity.MetaType = model.FunctionType;
+                entity.MetaType = model.MetaType;
                 entity.Path = model.Path;
                 entity.Title = model.Title;
                 entity.ViewMetaCode = model.ViewMetaCode;
                 entity.DataTableMetaCode = model.DataTableMetaCode;
+                entity.Properties = model.CompilePropertyString();
 
                 var client = DataRepository.GetDataClient();
                 client.Open();
@@ -1196,6 +1210,7 @@ namespace Intwenty.Controllers
 
                 entity.Title = model.Title;
                 entity.Path = model.Path;
+                entity.Properties = model.CompilePropertyString();
 
                 client.Open();
                 client.UpdateEntity(entity);
@@ -1653,7 +1668,7 @@ namespace Intwenty.Controllers
                     else
                     {
                         column.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeTextListColumn, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeTableTextColumn, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
                         entity.Title = column.Title;
                         entity.Properties = column.CompilePropertyString();
                         entity.DataTableMetaCode = uimodel.DataTableMetaCode;

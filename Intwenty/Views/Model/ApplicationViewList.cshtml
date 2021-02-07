@@ -169,43 +169,62 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <div class="settingpnl">
 
-                    <div class="alert alert-primary" v-if="functionsettings.functionType!=''">{{getFunctionDescription()}}</div>
-                    <div class="form-group">
-                        <label class="control-label">Function Type<span style="color: red"> *</span></label>
-                        <select class="form-control form-control-sm" v-model="functionsettings.functionType" :disabled="functionsettings.id>0">
-                            <option v-for="item in functions" v-bind:value="item.metaCode">{{item.title}}</option>
-                        </select>
-                    </div>
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-functions" role="tab" aria-controls="nav-functions" aria-selected="true">Function</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-properties" role="tab" aria-controls="nav-properties" aria-selected="false">Properties</a>
+                            </div>
+                        </nav>
 
-
-                    <div class="form-group">
-                        <label class="control-label">Data Table<span style="color: red"> *</span></label>
-                        <select class="form-control form-control-sm" v-model="functionsettings.dataTableMetaCode" :disabled="functionsettings.id>0">
-                            <option v-for="item in datatables" v-bind:value="item.metaCode">{{item.dbName}}</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" v-if="functionHasButtonText()">
-                        <label class="control-label">Button Text<span style="color: red"> *</span></label>
-                        <input id="functitle" type="text" class="form-control form-control-sm" v-model="functionsettings.title" />
-                    </div>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-functions" role="tabpanel" aria-labelledby="nav-functions-tab">
+                                <br />
+                                <div class="alert alert-primary" v-if="functionsettings.metaType!=''">{{getFunctionDescription()}}</div>
+                                <div class="form-group">
+                                    <label class="control-label">Function Type<span style="color: red"> *</span></label>
+                                    <select class="form-control form-control-sm" v-model="functionsettings.metaType" :disabled="functionsettings.id>0">
+                                        <option v-for="item in functions" v-bind:value="item.metaCode">{{item.title}}</option>
+                                    </select>
+                                </div>
 
 
-                    <div class="form-group" v-if="functionHasPath()">
-                        <label class="control-label">Path</label>
-                        <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.path" />
+                                <div class="form-group">
+                                    <label class="control-label">Data Table<span style="color: red"> *</span></label>
+                                    <select class="form-control form-control-sm" v-model="functionsettings.dataTableMetaCode" :disabled="functionsettings.id>0">
+                                        <option v-for="item in datatables" v-bind:value="item.metaCode">{{item.dbName}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" v-if="functionHasButtonText()">
+                                    <label class="control-label">Button Text<span style="color: red"> *</span></label>
+                                    <input id="functitle" type="text" class="form-control form-control-sm" v-model="functionsettings.title" />
+                                </div>
+
+
+                                <div class="form-group" v-if="functionHasPath()">
+                                    <label class="control-label">Path</label>
+                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.path" />
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
+                                @await Html.PartialAsync("_PropertyUI", "functionsettings")
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
-
                 <div class="modal-footer">
                     <button id="create_edit_function_modal_yesbtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Ok</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
-        </div>
-    </div>
+                    </div>
+                </div>
 
     <div class="modal" id="delete_ui_modal" role="dialog">
         <div class="modal-dialog">
@@ -240,7 +259,7 @@
             el: '#app',
             data: {
                 datalist: []
-                ,model: {}
+                ,model: { propertyCollection : [] }
                 ,uisettings: {}
                 ,currentuilist: []
                 ,functionsettings: {}
@@ -250,21 +269,21 @@
                 getFunctionDescription: function () {
                     var context = this;
 
-                    if (context.functionsettings.functionType == 'CREATE')
+                    if (context.functionsettings.metaType == 'CREATE')
                         return "Adds a button to the view that navigates the user to the application's create view. Be sure to set the [path] to point at the view used to create entities";
-                    if (context.functionsettings.functionType == 'EDIT')
+                    if (context.functionsettings.metaType == 'EDIT')
                         return "Adds a button to the view that navigates the user to the application's edit view. Be sure to set the [path] to point at the view used to edit entities";
-                    if (context.functionsettings.functionType == 'NAVIGATE')
+                    if (context.functionsettings.metaType == 'NAVIGATE')
                         return "Adds a button to the view that navigates the user to the [path]";
-                    if (context.functionsettings.functionType == 'EXPORT')
+                    if (context.functionsettings.metaType == 'EXPORT')
                         return "Adds a button to the view that exports data to ms excel";
-                    if (context.functionsettings.functionType == 'SAVE')
+                    if (context.functionsettings.metaType == 'SAVE')
                         return "Adds a button to the view that triggers the save operation in the function table";
-                    if (context.functionsettings.functionType == 'DELETE')
+                    if (context.functionsettings.metaType == 'DELETE')
                         return "Adds a button to the view that triggers a delete operation in the function table";
-                    if (context.functionsettings.functionType == 'FILTER')
+                    if (context.functionsettings.metaType == 'FILTER')
                         return "Adds the posibility to filter data in a listview";
-                    if (context.functionsettings.functionType == 'PAGING')
+                    if (context.functionsettings.metaType == 'PAGING')
                         return "Adds the posibility to page data in a listview";
 
 
@@ -273,11 +292,11 @@
                 functionHasPath: function () {
                     var context = this;
 
-                    if (context.functionsettings.functionType == 'CREATE')
+                    if (context.functionsettings.metaType == 'CREATE')
                         return true;
-                    if (context.functionsettings.functionType == 'EDIT')
+                    if (context.functionsettings.metaType == 'EDIT')
                         return true;
-                    if (context.functionsettings.functionType == 'NAVIGATE')
+                    if (context.functionsettings.metaType == 'NAVIGATE')
                         return true;
 
 
@@ -286,27 +305,28 @@
                 functionHasButtonText: function () {
                     var context = this;
 
-                    if (context.functionsettings.functionType == 'FILTER')
+                    if (context.functionsettings.metaType == 'FILTER')
                         return false;
-                    if (context.functionsettings.functionType == 'PAGING')
+                    if (context.functionsettings.metaType == 'PAGING')
                         return false;
-                 
+
                     return true;
                 },
                 openAddFunctionDlg: function (item)
                 {
                     var context = this;
 
-                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", functionType: "", path: "", title: "", dataTableMetaCode:"", metaCode:"" };
+                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", metaType: "", path: "", title: "", dataTableMetaCode: "", metaCode: "", propertyList: item.propertyList, currentProperty: {} };
+
 
                     var yesfunc = function ()
                     {
                        var baseurl = '@Url.Content("~/Model/API/")';
                        var endpointurl = baseurl + "CreateFunction";
 
-                        if (context.functionsettings.functionType == "PAGING")
+                        if (context.functionsettings.metaType == "PAGING")
                             context.functionsettings.title = "Paging";
-                        if (context.functionsettings.functionType == "FILTER")
+                        if (context.functionsettings.metaType == "FILTER")
                             context.functionsettings.title = "Filter";
 
                         $.ajax({
@@ -326,7 +346,7 @@
 
                     }
 
-
+                    context.initializePropertyUI(context.functionsettings);
                     $('#create_edit_function_modal_yesbtn').off('click', yesfunc);
                     $('#create_edit_function_modal_yesbtn').off().on('click', yesfunc);
                     $("#create_edit_function_modal").modal();
@@ -337,7 +357,8 @@
                 {
                     var context = this;
 
-                    context.functionsettings = { id: item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, dlgHeader: "Edit Function", functionType: item.metaType, path: item.path, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode };
+                    context.functionsettings = {
+                        id: item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, dlgHeader: "Edit Function", metaType: item.metaType, path: item.path, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode, propertyList: item.propertyList, currentProperty: {} };
 
                     var yesfunc = function ()
                     {
@@ -362,7 +383,7 @@
 
                     }
 
-
+                    context.initializePropertyUI(context.functionsettings);
                     $('#create_edit_function_modal_yesbtn').off('click', yesfunc);
                     $('#create_edit_function_modal_yesbtn').off().on('click', yesfunc);
                     $("#create_edit_function_modal").modal();
@@ -532,6 +553,11 @@
                     $.get(endpointurl, function (response)
                     {
                         context.datalist = response;
+                         var endpointurl = baseurl + "GetAllProperties";
+                         $.get(endpointurl, function (response)
+                         {
+                             context.model.propertyCollection = response;
+                         });
                     });
                 },
                 deleteUI: function (item)

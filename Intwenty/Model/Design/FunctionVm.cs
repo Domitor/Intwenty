@@ -13,7 +13,7 @@ namespace Intwenty.Model.Design
 
         public string MetaCode { get; set; }
 
-        public string FunctionType { get; set; }
+        public string MetaType { get; set; }
 
         public string DataTableMetaCode { get; set; }
 
