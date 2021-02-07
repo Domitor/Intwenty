@@ -872,6 +872,7 @@ namespace Intwenty
                             item.DataTableMetaCode = userinterface.DataTableMetaCode;
                             item.DataTableDbName = userinterface.DataTableInfo.DbName;
 
+
                             if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
                             {
                                 var dinf = dbmodelitems.Find(p => p.MetaCode == item.DataColumn1MetaCode && p.AppMetaCode == app.MetaCode && p.IsMetaTypeDataColumn);
@@ -1229,7 +1230,7 @@ namespace Intwenty
 
         #endregion
 
-        #region translations
+        #region Translations
       
 
         public List<TranslationModelItem> GetTranslations()

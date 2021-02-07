@@ -92,11 +92,11 @@
                                 {
                                     continue;
                                 }
-                                if ((t.IsUIBindingType || t.IsUIComplexBindingType) && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
+                                if (t.IsUIBindingType && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
                                 {
                                     continue;
                                 }
-                                if (t.IsUIComplexBindingType && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
+                                if (t.IsMetaTypeLookUp && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
                                 {
                                     continue;
                                 }

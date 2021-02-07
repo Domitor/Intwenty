@@ -170,6 +170,11 @@ namespace Intwenty.Model
             }
         }
 
+        public bool IsSubTableUserInterface
+        {
+            get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && !DataTableInfo.IsFrameworkItem); }
+        }
+
         public List<IUIControl> GetModals()
         {
             var res = new List<IUIControl>();

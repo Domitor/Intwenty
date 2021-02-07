@@ -2,6 +2,16 @@
 @{
     var validationfield = Model.UIId + "_validationmsg";
 
+    var DataColumn2 = "";
+    @if (!string.IsNullOrEmpty(Model.DataColumn2DbName))
+    {
+        DataColumn2 = Model.DataColumn2DbName;
+    }
+    else
+    {
+        DataColumn2 = Model.DataColumnDbName;
+    }
+
 }
 <div class="form-group">
     <label class="control-label">
@@ -10,17 +20,17 @@
     </label>
 
     <intwentyselect id="@Model.UIId"
-                 name="@Model.UIId"
-                 class="form-control form-control-lg" 
-                 v-bind:idfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName" 
-                 v-bind:textfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumn2DbName"
-                 data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeMultiSelect"
-                 data-title="@Model.LocalizedTitle"
-                 data-validationfield="@validationfield"
-                 data-dbtable="@Model.DataTableDbName"
-                 data-dbfield="@Model.DataColumnDbName"
-                 data-required="@Model.Mandatory" 
-                 multiple="multiple">
+                    name="@Model.UIId"
+                    class="form-control form-control-lg"
+                    v-bind:idfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
+                    v-bind:textfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@DataColumn2" 
+                    data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeMultiSelect"
+                    data-title="@Model.LocalizedTitle"
+                    data-validationfield="@validationfield"
+                    data-dbtable="@Model.DataTableDbName"
+                    data-dbfield="@Model.DataColumnDbName"
+                    data-required="@Model.Mandatory"
+                    multiple="multiple">
         <option v-for="item in valuedomains.VALUEDOMAIN_@Model.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
     </intwentyselect>
 

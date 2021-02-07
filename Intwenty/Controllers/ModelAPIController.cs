@@ -375,9 +375,6 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId missing in model");
 
 
-
-                ModelRepository.ClearCache();
-
                 var app = ModelRepository.GetApplicationModel(model.Id);
                 if (app == null)
                     throw new InvalidOperationException("Could not find application when saving application database model.");
@@ -498,6 +495,7 @@ namespace Intwenty.Controllers
 
                 client.Close();
 
+                ModelRepository.ClearCache();
 
             }
             catch (Exception ex)
@@ -533,7 +531,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId is missing when removing db model");
 
 
-                ModelRepository.ClearCache();
+             
 
 
                 var client = DataRepository.GetDataClient();
@@ -564,6 +562,8 @@ namespace Intwenty.Controllers
                 }
 
                 client.Close();
+
+                ModelRepository.ClearCache();
 
             }
             catch (Exception ex)
@@ -1442,20 +1442,30 @@ namespace Intwenty.Controllers
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn1DbName))
                                     {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.IsRoot);
+                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-                                    if (input.IsMetaTypeComboBox)
+                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
-                                            input.Domain = "VALUEDOMAIN." + input.Domain;
+                                            input.Domain = input.Domain;
                                         }
                                     }
                                 }
 
-                                if (input.IsUIComplexBindingType)
+                                if (input.IsMetaTypeMultiSelect)
+                                {
+                                    if (!string.IsNullOrEmpty(input.DataColumn2DbName))
+                                    {
+                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
+                                        if (dmc != null)
+                                            input.DataColumn2MetaCode = dmc.MetaCode;
+                                    }
+                                }
+
+                                if (input.IsMetaTypeLookUp)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataViewMetaCode))
                                     {
@@ -1464,14 +1474,14 @@ namespace Intwenty.Controllers
 
                                     if (!string.IsNullOrEmpty(input.DataColumn1DbName))
                                     {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.IsRoot);
+                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
 
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.IsRoot);
+                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
                                         if (dmc != null)
                                             input.DataColumn2MetaCode = dmc.MetaCode;
                                     }
@@ -1719,7 +1729,7 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var t = ModelRepository.GetValueDomains();
-            return new JsonResult(t.Select(p => p.DomainName).Distinct());
+            return new JsonResult(t.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct());
 
         }
 

@@ -340,7 +340,7 @@
                                         <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                                     </select>
                                 </div>
-                                <div class="form-group" v-if="showSettingLookUp">
+                                <div class="form-group" v-if="showSettingDbColumn2">
                                     <label class="control-label">Set database column 2 (opt.)</label>
                                     <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm">
                                         <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
@@ -353,47 +353,7 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
-                                    <label class="control-label">Columns</label>
-                                    <br />
-
-
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
-                                        <div class="dropdown-menu dropdown-menu-lg-right" style="z-index:20000">
-                                            <span v-for="gridcoltype in model.gridUIControls">
-                                                <a class="dropdown-item" href="#" v-on:click="addEditGridColumn(gridcoltype.code)">{{gridcoltype.title}}</a>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <br />
-                                    <br />
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Title</th>
-                                                <th>Order</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="tcol in active_setting_input.children">
-                                                <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+         
 
                             </div>
                             <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
@@ -711,6 +671,17 @@
                         return false;
 
                     return true;
+                },
+                showSettingDbColumn2: function ()
+                {
+
+                    if (this.active_setting_input.metaType === "LOOKUP")
+                        return true;
+
+                    if (this.active_setting_input.metaType === "MULTISELECT")
+                        return true;
+
+                    return false;
                 },
                 showSettingValueDomain: function ()
                 {

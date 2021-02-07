@@ -183,19 +183,6 @@ namespace Intwenty.Model
 
         }
 
-        public bool IsUIComplexBindingType
-        {
-            get
-            {
-                return IsMetaTypeLookUp;
-
-            }
-
-        }
-
-       
-
-
         public bool IsUIContainerType
         {
             get

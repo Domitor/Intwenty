@@ -1794,9 +1794,10 @@ namespace Intwenty
                 var rowindex = 0;
                 var valuedomains = new List<string>();
                 var domains = new List<IResultSet>();
+                var appdomainnames = model.GetDomainReferences();
 
                 //COLLECT DOMAINS AND VIEWS USED BY UI
-                foreach (var t in model.GetDomainReferences())
+                foreach (var t in appdomainnames)
                 {
                     var domainparts = t.Split(".".ToCharArray()).ToList();
                     if (domainparts.Count >= 2)
