@@ -205,7 +205,7 @@ Vue.prototype.addProperty = function (modelitem) {
         modelitem.currentProperty.displayValue = "True";
     }
 
-    if (modelitem.currentProperty.isStringType || modelitem.currentProperty.isNumericType)
+    if (modelitem.currentProperty.isStringType || modelitem.currentProperty.isNumericType || modelitem.currentProperty.isListType)
         modelitem.currentProperty.displayValue = modelitem.currentProperty.codeValue;
 
 

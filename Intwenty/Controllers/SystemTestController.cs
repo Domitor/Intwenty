@@ -77,8 +77,6 @@ namespace Intwenty.Controllers
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-          
-
             var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
            
 
@@ -113,16 +111,24 @@ namespace Intwenty.Controllers
                 db.RunCommand("DROP TABLE tests_TestData2AutoInc");
             }
 
-            db.Close();
-
-            if (model != null)
-                db.DeleteEntity(new ApplicationModelItem() { Id=model.Id });
+          
 
             if (dvmodels != null && dvmodels.Count > 0)
             {
                 foreach (var dv in dvmodels)
                     db.DeleteEntity(new DataViewItem() { Id = dv.Id });
             }
+
+            if (model != null)
+            {
+                var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == model.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == model.SystemMetaCode);
+                foreach (var dbitem in dbmodels)
+                    db.DeleteEntity(new DatabaseItem() { Id = dbitem.Id });
+
+                db.DeleteEntity(new ApplicationItem() { Id = model.Id });
+            }
+
+            db.Close();
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test2ORMInsert());
@@ -396,10 +402,10 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
 
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode= system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog", ParentMetaCode = "ROOT" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
                 dbstore.Close();
 
                 _modelservice.ClearCache();
@@ -583,27 +589,23 @@ namespace Intwenty.Controllers
                 var id = getresult.GetAsApplicationData().SubTables[0].Rows[lastindex].Id;
 
 
-                var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
-                if (!newstate.Data.HasData)
-                    throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
-
-                var getbyidresult = _dataservice.Get(newstate);
+                var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                var getbyidresult = _dataservice.Get(state);
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Get(state) 1 failed: " + getresult.SystemError);
 
-                newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
-                newstate.Data = getbyidresult.GetAsApplicationData();
-                newstate.User.UserName = "OTHERUSER2";
-                newstate.Data.SetValue("Description", "Updated test application");
-                newstate.Data.SetValue("DecValue", 333.777M);
-                newstate.Data.SetValue("DecValue2", 444.55);
-
-   
-                var saveresult = _dataservice.Save(newstate);
+                state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                state.Data = getbyidresult.GetAsApplicationData();
+                state.User.UserName = "OTHERUSER2";
+                state.Data.SetValue("Description", "Updated test application");
+                state.Data.SetValue("DecValue", 333.777M);
+                state.Data.SetValue("DecValue2", 444.55);
+                var saveresult = _dataservice.Save(state);
                 if (!saveresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
-                newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                
+                var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
                 getbyidresult = _dataservice.Get(newstate);
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetById(state) 2 failed: " + getresult.SystemError);
@@ -626,7 +628,7 @@ namespace Intwenty.Controllers
 
                 if (_modelservice.GetApplicationModels().Exists(p => p.Application.Id == 10000 && p.Application.UseVersioning))
                 {
-                    if (newstate.Version < 2)
+                    if (saveresult.Version < 2)
                         throw new InvalidOperationException("Updated application did not recieve a new version id");
                 }
 
