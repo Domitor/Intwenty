@@ -71,8 +71,8 @@ namespace IntwentyDemo.Seed
 
             //APPLICATION - VIEWS
             views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "LV_CUSTOMER1", MetaType = "UIVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", Path = "Customers/List", IsPrimary = true, IsPublic=false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER1", MetaType = "UIVIEW", Title = "Create Customer", TitleLocalizationKey = "VIEW_CUST_ADDEDITVIEW", Path = "Customers/Create", IsPrimary = false, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER2", MetaType = "UIVIEW", Title = "Edit Customer", TitleLocalizationKey = "", Path = "Customers/Edit/{id}", IsPrimary= false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER1", MetaType = "UIVIEW", Title = "Create Customer", TitleLocalizationKey = "CUST_ADD", Path = "Customers/Create", IsPrimary = false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER2", MetaType = "UIVIEW", Title = "Edit Customer", TitleLocalizationKey = "CUST_EDIT", Path = "Customers/Edit/{id}", IsPrimary= false, IsPublic = false });
 
             //UI
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaCode = "CUST_LISTVIEW", MetaType = "LISTINTERFACE", DataTableMetaCode = "CUSTOMER" });
@@ -248,8 +248,8 @@ namespace IntwentyDemo.Seed
 
             //ITEM - VIEWS
             views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaCode = "VEND_LISTVIEW", MetaType = "UIVIEW", Title = "Vendor List", TitleLocalizationKey = "VENDORLIST", Path = "Vendors/List", IsPrimary = true, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaCode = "VEND_CREATE_VIEW", MetaType = "UIVIEW", Title = "Create Sales Order", TitleLocalizationKey = "", Path = "Vendors/Create", IsPrimary = false, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaCode = "VEND_EDIT_VIEW", MetaType = "UIVIEW", Title = "Edit Sales Order", TitleLocalizationKey = "", Path = "Vendors/Edit/{id}", IsPrimary = false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaCode = "VEND_CREATE_VIEW", MetaType = "UIVIEW", Title = "Create Vendor", TitleLocalizationKey = "", Path = "Vendors/Create", IsPrimary = false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", MetaCode = "VEND_EDIT_VIEW", MetaType = "UIVIEW", Title = "Edit Vendor", TitleLocalizationKey = "", Path = "Vendors/Edit/{id}", IsPrimary = false, IsPublic = false });
 
             //UI
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", ViewMetaCode = "VEND_LISTVIEW", MetaCode = "VEND_LISTUI", MetaType = "LISTINTERFACE", DataTableMetaCode = "VENDOR" });
@@ -347,7 +347,7 @@ namespace IntwentyDemo.Seed
             functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_LISTVIEW", MetaType = "PAGING", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_PAGING", Path = "", RequiredAuthorization = 0, Title = "Paging" });
 
             functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_CREATE_VIEW", MetaType = "SAVE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_SAVE", Path = "Blog/API/Save", RequiredAuthorization = 0, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Blog/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "VENBLOGAPPDOR", ViewMetaCode = "BLOG_CREATE_VIEW", MetaType = "NAVIGATE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_BACK", Path = "Blog/List", RequiredAuthorization = 0, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_CREATE_VIEW", MetaType = "NAVIGATE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_BACK", Path = "Blog/List", RequiredAuthorization = 0, Title = "Back to list" });
 
             functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_EDIT_VIEW", MetaType = "SAVE", MetaCode = "BLOG_FUNC_SAVE1", DataTableMetaCode = "BLOGAPP", Path = "Blog/API/Save", RequiredAuthorization = 0, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
             functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_EDIT_VIEW", MetaType = "NAVIGATE", MetaCode = "BLOG_FUNC_BACK1", DataTableMetaCode = "BLOGAPP", Path = "Blog/List", RequiredAuthorization = 0, Title = "Back to list" });
@@ -486,8 +486,10 @@ namespace IntwentyDemo.Seed
 
             var translations = new List<TranslationItem>();
 
-            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VIEW_CUST_ADDEDITVIEW", Text = "New Customer" });
-            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VIEW_CUST_ADDEDITVIEW", Text = "Ny Kund" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_ADD", Text = "New Customer" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_ADD", Text = "Ny Kund" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_EDIT", Text = "Edit Customer" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_EDIT", Text = "Ändra Kund" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
