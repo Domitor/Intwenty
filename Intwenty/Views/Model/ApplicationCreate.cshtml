@@ -15,7 +15,7 @@
     <div class="card">
         <div class="card-header"><h2>Create new application</h2></div>
         <div class="card-body">
-            Create basic meta data for a new application.
+            Create a new application model.
             <br />
             <ul class="nav">
                 <li class="nav-item">
@@ -85,13 +85,16 @@
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
+                        contentType: "application/json",
                         data: JSON.stringify(context.model),
                         success: function (response)
                         {
-                            if (!response.isSuccess) {
+                            if (!response.isSuccess)
+                            {
                                 raiseErrorModal(response);
-                            } else {
-                                window.location.href = '@Url.Content("~/Model/")' + "GetList";
+                            } else
+                            {
+                                window.location.href = '@Url.Content("~/Model/")' + "ApplicationList";
                             }
                         }
                     });

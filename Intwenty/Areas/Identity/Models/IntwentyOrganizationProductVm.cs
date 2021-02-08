@@ -36,6 +36,7 @@ namespace Intwenty.Areas.Identity.Models
         public string ProductName { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
+        public string OrganizationTablePrefix { get; set; }
         public string ProductURI { get; set; }
         public string APIPath { get; set; }
         public string MobileClientVersion { get; set; }

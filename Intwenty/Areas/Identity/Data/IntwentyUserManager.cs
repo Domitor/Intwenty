@@ -130,7 +130,7 @@ namespace Intwenty.Areas.Identity.Data
             return await AddUpdateUserAuthorizationAsync(user, auth);
         }
 
-        public async Task<IdentityResult> AddUpdateUserSystemAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateUserSystemAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool denyauthorization)
         {
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
@@ -146,14 +146,12 @@ namespace Intwenty.Areas.Identity.Data
                                                      UserId = user.Id, 
                                                      UserName = user.UserName, 
                                                      ProductId = productid,
-                                                     ReadAuth=read,
-                                                     ModifyAuth=modify,
-                                                     DeleteAuth=delete };
+                                                     DenyAuthorization= denyauthorization };
 
             return await AddUpdateUserAuthorizationAsync(user, auth);
         }
 
-        public async Task<IdentityResult> AddUpdateUserApplicationAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateUserApplicationAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool denyauthorization)
         {
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
@@ -171,15 +169,13 @@ namespace Intwenty.Areas.Identity.Data
                 UserId = user.Id,
                 UserName = user.UserName,
                 ProductId = productid,
-                ReadAuth = read,
-                ModifyAuth = modify,
-                DeleteAuth = delete
+                DenyAuthorization = denyauthorization
             };
 
             return await AddUpdateUserAuthorizationAsync(user, auth);
         }
 
-        public async Task<IdentityResult> AddUpdateUserViewAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateUserViewAuthorizationAsync(string normalizedAuthName, string userid, int organizationid, string productid, bool denyauthorization)
         {
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
@@ -191,15 +187,14 @@ namespace Intwenty.Areas.Identity.Data
             var auth = new IntwentyAuthorization()
             {
                 AuthorizationNormalizedName = normalizedAuthName,
-                AuthorizationType = "APPLICATION",
+                AuthorizationType = "UIVIEW",
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 UserId = user.Id,
                 UserName = user.UserName,
                 ProductId = productid,
-                ReadAuth = read,
-                ModifyAuth = modify,
-                DeleteAuth = delete
+                DenyAuthorization = denyauthorization
+
             };
 
             return await AddUpdateUserAuthorizationAsync(user, auth);
@@ -239,18 +234,8 @@ namespace Intwenty.Areas.Identity.Data
 
             if (existing_auth != null)
             {
-                existing_auth.ReadAuth = authorization.ReadAuth;
-                existing_auth.ModifyAuth = authorization.ModifyAuth;
-                existing_auth.DeleteAuth = authorization.DeleteAuth;
-                if (existing_auth.DeleteAuth)
-                {
-                    existing_auth.ModifyAuth = true;
-                    existing_auth.ReadAuth = true;
-                }
-                if (existing_auth.ModifyAuth)
-                {
-                    existing_auth.ReadAuth = true;
-                }
+                existing_auth.DenyAuthorization = authorization.DenyAuthorization;
+
                 await client.OpenAsync();
                 await client.UpdateEntityAsync(existing_auth);
                 await client.CloseAsync();
@@ -269,19 +254,9 @@ namespace Intwenty.Areas.Identity.Data
                 AuthorizationName = productauth.Name,
                 AuthorizationType = productauth.AuthorizationType,
                 AuthorizationNormalizedName = productauth.NormalizedName,
-                ReadAuth = authorization.ReadAuth,
-                ModifyAuth = authorization.ModifyAuth,
-                DeleteAuth = authorization.DeleteAuth,
+                DenyAuthorization = authorization.DenyAuthorization
             };
-            if (auth.DeleteAuth)
-            {
-                auth.ModifyAuth = true;
-                auth.ReadAuth = true;
-            }
-            if (auth.ModifyAuth)
-            {
-                auth.ReadAuth = true;
-            }
+
             await client.OpenAsync();
             await client.InsertEntityAsync(auth);
             await client.CloseAsync();
@@ -352,65 +327,60 @@ namespace Intwenty.Areas.Identity.Data
 
 
 
-       
 
-
-        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel requested_app, IntwentyPermission requested_action)
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ViewModel requestedview)
         {
-            return await HasAuthorizationInternal(claimprincipal, requested_app.Application, requested_action);
+            return await HasViewAuthorizationInternal(claimprincipal,requestedview);
         }
 
-        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
-        {
-            return await HasAuthorizationInternal(claimprincipal, requested_app, requested_action);
-        }
 
-        private async Task<bool> HasAuthorizationInternal(ClaimsPrincipal claimprincipal, ApplicationModelItem requested_app, IntwentyPermission requested_action)
+        private async Task<bool> HasViewAuthorizationInternal(ClaimsPrincipal claimprincipal, ViewModel requestedview)
         {
             if (!claimprincipal.Identity.IsAuthenticated)
                 return false;
 
             var user = await GetUserAsync(claimprincipal);
-            if (user == null || requested_app == null)
-                throw new InvalidOperationException("Error when checking for a permission.");
+            if (user == null || requestedview == null)
+                throw new InvalidOperationException("Error authorizing view usage.");
 
             if (await this.IsInRoleAsync(user, "SUPERADMIN"))
                 return true;
 
-       
+
             var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
             var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
 
-            var explicit_exists=false;
-
-            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requested_app.MetaCode))            
+            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode && p.DenyAuthorization))
             {
-                explicit_exists = true;
+                return false;
             }
 
-            if (list.Exists(p => p.IsApplicationAuthorization &&
-                                 p.AuthorizationNormalizedName == requested_app.MetaCode &&
-                                (
-                                (requested_action == IntwentyPermission.Read && (p.Read|| p.Delete|| p.Modify)) ||
-                                (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
-                                (requested_action == IntwentyPermission.Delete && (p.Delete))
-                                )))
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode && p.DenyAuthorization))
             {
+                return false;
+            }
 
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+            if (list.Exists(p => p.IsViewAuthorization && p.AuthorizationNormalizedName == requestedview.MetaCode && !p.DenyAuthorization))
+            {
                 return true;
             }
 
-            if (list.Exists(p => p.IsSystemAuthorization &&
-                                 p.AuthorizationNormalizedName == requested_app.SystemMetaCode &&
-                                 (
-                                 (requested_action == IntwentyPermission.Read && (p.Read || p.Delete || p.Modify)) ||
-                                 (requested_action == IntwentyPermission.Modify && (p.Modify)) ||
-                                 (requested_action == IntwentyPermission.Delete && (p.Delete))
-                                 )) && !explicit_exists)
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == requestedview.AppMetaCode && !p.DenyAuthorization))
             {
-
                 return true;
             }
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == requestedview.SystemMetaCode && !p.DenyAuthorization))
+            {
+                return true;
+            }
+
+           
 
             return false;
         }

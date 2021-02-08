@@ -1,4 +1,7 @@
 ﻿using Intwenty.Areas.Identity.Entity;
+using Intwenty.DataClient;
+using Intwenty.Entity;
+using Intwenty.Interface;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +27,9 @@ namespace Intwenty.Areas.Identity.Data
 
         private IntwentySettings Settings { get; }
 
+        private IIntwentyModelService ModelRepository { get; }
+
+
         public IntwentySignInManager(
             IntwentyUserManager userManager,
             IHttpContextAccessor contextAccessor,
@@ -32,11 +39,13 @@ namespace Intwenty.Areas.Identity.Data
             IAuthenticationSchemeProvider schemes,
             IUserConfirmation<IntwentyUser> confirmation,
             IIntwentyOrganizationManager orgmanager,
-            IOptions<IntwentySettings> settings)
+            IOptions<IntwentySettings> settings,
+            IIntwentyModelService modelservice)
             : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
         {
             OrganizationManager = orgmanager;
             Settings = settings.Value;
+            ModelRepository = modelservice;
         }
 
         
@@ -56,7 +65,12 @@ namespace Intwenty.Areas.Identity.Data
             {
                 return error;
             }
-            return await SignInOrTwoFactorAsync(user, isPersistent, loginProvider, bypassTwoFactor);
+
+            var result = await SignInOrTwoFactorAsync(user, isPersistent, loginProvider, bypassTwoFactor);
+            if (result.Succeeded)
+                ModelRepository.CreateTenantIsolatedTables(user);
+
+            return result;
         }
 
       
@@ -67,7 +81,11 @@ namespace Intwenty.Areas.Identity.Data
             if (!await OrganizationManager.IsProductUser(Settings.ProductId, user))
                 return SignInResult.NotAllowed;
 
-            return await base.PasswordSignInAsync(user, password, isPersistent, lockoutOnFailure);
+            var result = await base.PasswordSignInAsync(user, password, isPersistent, lockoutOnFailure);
+            if (result.Succeeded)
+                ModelRepository.CreateTenantIsolatedTables(user);
+
+            return result;
         }
 
         public override async Task<bool> CanSignInAsync(IntwentyUser user)
@@ -99,7 +117,8 @@ namespace Intwenty.Areas.Identity.Data
             return base.IsSignedIn(principal);
         }
 
-     
+
+      
 
       
     }

@@ -1,7 +1,7 @@
-﻿
+﻿@model UserInterfaceModelItem
 
 @{
-    ViewData["Title"] = "Edit application";
+    ViewData["Title"] = "UI Design";
 }
 
 @await Html.PartialAsync("_Modals")
@@ -37,15 +37,16 @@
     <br />
 
     <div class="card">
-        <div class="card-header"><h2>View designer </h2></div>
+        <div class="card-header"><h2>Input UI designer</h2></div>
         <div class="card-body">
-            Design the <b>'{{model.designerTitle}}'</b> for application <b>{{model.applicationTitle}}</b> and connect it to the database model.
+
+            Design input user interface for views in application <b>@Model.ApplicationInfo.Title</b>.
             
             <br />
 
             <ul class="nav">
                 <li class="nav-item">
-                    <a asp-action="GetList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+                    <a asp-action="ApplicationViewList" asp-controller="Model" asp-route-id="@Model.ApplicationInfo.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back</a>
                 </li>
                 <li class="nav-item">
                   
@@ -62,7 +63,7 @@
     <br />
     
    
-    <div id="uidesigner" v-if="model.viewType!='EDLIVIEW'">
+
 
 
         <div class="row">
@@ -75,10 +76,10 @@
                     <span v-if="!model.showComponents">Show UI Controls</span>
                     <span v-if="model.showComponents">Hide UI Controls</span>
                 </div>
-                <div class="btn btn-sm btn-secondary" v-on:click="addSection">
+                <div class="btn btn-sm btn-secondary" v-on:click="addSection()">
                     <i class="fa fa-plus"></i> Add section
                 </div>
-                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings" style="float:right">
+                <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings()" style="float:right">
                     <i class="fa fa-cog"></i> Settings
                 </div>
 
@@ -164,6 +165,12 @@
                                                             <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
                                                             <label class="control-label"><i>{{input.title}}</i></label>
 
+                                                            <div v-if="input.metaType==='MULTISELECT'">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control form-control-sm" placeholder="Input control for multiselection" disabled />
+                                                                </div>
+                                                            </div>
+
                                                             <div v-if="input.metaType==='TEXTBOX'">
                                                                 <div class="form-group">
                                                                     <input type="text" class="form-control form-control-sm" placeholder="Input control for text..." disabled />
@@ -196,11 +203,11 @@
                                                             </div>
 
                                                             <div v-if="input.metaType==='LABEL'">
-                                                                <p>Label for: {{input.columnName}}</p>
+                                                                <p>Label for: {{input.dataColumn1DbName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='TEXTBLOCK'">
-                                                                <p>Text block for: {{input.columnName}}</p>
+                                                                <p>Text block for: {{input.dataColumn1DbName}}</p>
                                                             </div>
 
                                                             <div v-if="input.metaType==='STATICHTML'">
@@ -245,63 +252,8 @@
                                                                 </div>
                                                             </div>
 
-                                                                <div v-if="input.metaType==='EDITGRID'">
-                                                                    <table class="table table-bordered">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
-                                                                                    <span class="fa fa-cog" v-on:click="openSettingsDlg(tcol)" style="margin:5px; float:right; cursor:pointer" title="Column settings"></span> {{tcol.title}}
-                                                                                </td>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td v-for="tcol in input.children" v-if="!tcol.isRemoved">
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_TEXTBOX'">
-                                                                                        <div class="form-group">
-                                                                                            <input type="text" class="form-control form-control-sm" disabled />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_NUMBOX'">
-                                                                                        <div class="form-group">
-                                                                                            <input type="number" class="form-control form-control-sm" disabled />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_COMBOBOX'">
-                                                                                        <div class="form-group">
-                                                                                            <select class="form-control form-control-sm" disabled>
-                                                                                                <option>Example 1</option>
-                                                                                            </select>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_CHECKBOX'">
-                                                                                        <div class="form-group">
-                                                                                            <br />
-                                                                                            <input type="checkbox" disabled />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_DATEPICKER'">
-                                                                                        <div class="form-group">
-                                                                                            <input type="date" class="form-control form-control-sm" />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_LOOKUP'">
-                                                                                        <div class="form form-inline">
-                                                                                            <button style="margin:5px" class="btn btn-sm btn-primary"><span class="fa fa-plus"></span></button>
-                                                                                            <input type="text" class="form-control form-control-sm" disabled />
-                                                                                            <input v-if="tcol.columnName2 != ''" type="text" class="form-control form-control-sm" disabled />
-                                                                                        </div>
 
-                                                                                    </div>
-                                                                                    <div v-if="tcol.metaType==='EDITGRID_STATICHTML'">
-                                                                                        {{tcol.rawHTML}}
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -320,77 +272,9 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="listview" v-if="model.viewType=='EDLIVIEW'">
-
-        <div class="btn btn-sm btn-secondary" v-on:click="openViewSettings">
-            <i class="fa fa-cog"></i> View Settings
-        </div>
-        <div class="btn btn-sm btn-primary" v-on:click="saveListView" style="float:right">
-            <span class="fa fa-save"></span> Save changes
-        </div>
-        <br />
-        <hr />
-
-        <div class="card">
-            <div class="card-header">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label class="control-label">Title <span style="color: red"> *</span></label>
-                            <input type="text" class="form-control form-control-sm" v-model="model.title" />
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-12" style="margin: 5px">
-                        <b>Fields: </b>
-                        <br />
-                        <br />
-                        <div>
-                            <div>
-                                <div class="btn btn-sm btn-secondary" v-on:click="addListViewField">
-                                    <span class="fa fa-plus"></span> Add Column
-                                </div>
-                            </div>
-                            <br />
-                            <table class="table table">
-                                <thead>
-                                    <tr>
-
-                                        <th style="width:30%">Title <span style="color: red"> *</span></th>
-                                        <th style="width:65%">Column name <span style="color: red"> *</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody v-for="field in model.fields">
-                                    <tr>
-
-                                        <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
-                                        <td>
-                                            <select v-model="field.dbName" class="form-control form-control-sm">
-                                                <option v-for="col in listviewtable.columns" v-bind:value="col.dbName">{{col.dbName}}</option>
-                                            </select>
-
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
-    </div>
-
-
+  
 
 
 
@@ -428,12 +312,6 @@
                                     <textarea type="text" class="form-control form-control-sm" rows="10" cols="200" v-model="active_setting_input.rawHTML"></textarea>
                                 </div>
 
-                                <div class="form-group" v-if="showSettingDbTable">
-                                    <label class="control-label">Set database table</label>
-                                    <select v-model="active_setting_input.tableName" class="form-control form-control-sm" :disabled="active_setting_input.children.length>0">
-                                        <option v-for="tbl in nonDefaultTables" v-bind:value="tbl.dbName">{{tbl.dbName}}</option>
-                                    </select>
-                                </div>
 
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="control-label">Set data view</label>
@@ -451,71 +329,31 @@
 
                                 <div class="form-group" v-if="showSettingDbColumn">
                                     <label class="control-label">Set database column</label>
-                                    <select v-model="active_setting_input.columnName" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    <select v-model="active_setting_input.dataColumn1DbName" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="model.control-label">Set view column (Key)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName" class="form-control form-control-sm">
+                                    <select v-model="active_setting_input.dataViewColumn1DbName" class="form-control form-control-sm">
                                         <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                                     </select>
                                 </div>
-                                <div class="form-group" v-if="showSettingLookUp">
+                                <div class="form-group" v-if="showSettingDbColumn2">
                                     <label class="control-label">Set database column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.columnName2" class="form-control form-control-sm">
-                                        <option v-for="col in dbColumns(active_setting_input.tableName)" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                    <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm">
+                                        <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
                                 <div class="form-group" v-if="showSettingLookUp">
                                     <label class="control-label">Set view column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.dataViewColumnName2" class="form-control form-control-sm">
+                                    <select v-model="active_setting_input.dataViewColumn2DbName" class="form-control form-control-sm">
                                         <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
                                     </select>
                                 </div>
 
-                                <div class="form-group" v-if="active_setting_input.metaType=='EDITGRID'">
-                                    <label class="control-label">Columns</label>
-                                    <br />
-
-
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Add <span class="fa fa-plus"></span></button>
-                                        <div class="dropdown-menu dropdown-menu-lg-right" style="z-index:20000">
-                                            <span v-for="gridcoltype in model.gridUIControls">
-                                                <a class="dropdown-item" href="#" v-on:click="addEditGridColumn(gridcoltype.code)">{{gridcoltype.title}}</a>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <br />
-                                    <br />
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Title</th>
-                                                <th>Order</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="tcol in active_setting_input.children">
-                                                <td><span class="fa fa-trash" v-on:click="removeEditGridColumn(tcol)" style="cursor:pointer"></span></td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control form-control-sm" v-model="tcol.title" />
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="form-group">
-                                                        <input type="number" class="form-control form-control-sm" v-model.number="tcol.columnOrder" />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+         
 
                             </div>
                             <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
@@ -575,16 +413,13 @@
                 setUserInput: function (input, metatype)
                 {
                     input.metaType = metatype;
-                    if (!input.metaType.includes("EDITGRID"))
-                        input.tableName = this.defaultTable.dbName;
-
+                    input.dataTableDbName = this.userInterfaceTable.dbName;
                     this.openSettingsDlg(input);
                 },
                 openSettingsDlg(input)
                 {
                     this.active_setting_input = input;
-                    if (!this.active_setting_input.metaType.includes("EDITGRID"))
-                        this.active_setting_input.tableName = this.defaultTable.dbName;
+                    this.active_setting_input.dataTableDbName = this.userInterfaceTable.dbName;
                     this.initializePropertyUI(this.active_setting_input);
                     this.$forceUpdate();
                     $("#ui_setting_modal").modal();
@@ -630,13 +465,6 @@
                     this.model.sections.push(sect);
                     this.layoutClassChanged(sect);
                     this.addLayoutRow(sect);
-                },
-                addListViewField: function () {
-                    this.model.fields.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "EDITLISTVIEWCOLUMN" });
-                },
-                addEditGridColumn: function (metatype)
-                {
-                    this.active_setting_input.children.push({ id: 0, rowOrder: 1, metaType: metatype, metaCode: "", parentMetaCode:"", tableName:this.active_setting_input.tableName });
                 },
                 dbColumns: function (tablename) {
                     for (var i = 0; i < this.dbtables.length; i++)
@@ -755,7 +583,7 @@
 
                     var context = this;
                     var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveUserInterfaceModel";
+                    var endpointurl = baseurl + "SaveApplicationInputUI";
 
                     $.ajax({
                         url: endpointurl,
@@ -771,16 +599,6 @@
                         {
                             raiseErrorModal(response.responseJSON);
                         }
-                    });
-                },
-                removeEditGridColumn: function (column)
-                {
-
-                    $("#setting_modal_close_btn").click();
-                    var context = this;
-                    raiseYesNoModal("Delete ?", "Delete column ?", function ()
-                    {
-                        column.isRemoved = true;
                     });
                 },
                 removeSection: function (section)
@@ -808,36 +626,15 @@
                         context.addUserInputSelects();
                     });
                 },
-                saveListView: function ()
-                {
-                    var context = this;
-                    var baseurl = '@Url.Content("~/Model/API/")';
-                    var endpointurl = baseurl + "SaveListViewModel";
-
-                    $.ajax({
-                        url: endpointurl,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify(context.model),
-                        success: function (response)
-                        {
-                            context.model = response;
-                            raiseInformationModal("Success", "The Listview UI model was successfully saved.");
-                        },
-                        error: function (response) {
-                             raiseErrorModal(response.responseJSON);
-                        }
-                    });
-                },
                 allowDropUI: function(ev)
                 {
                     ev.preventDefault();
                 },
-                dragUI: function(ev) 
+                dragUI: function(ev)
                 {
                     ev.dataTransfer.setData("METATYPE", ev.target.id);
                 },
-                dropUI: function(ev, input) 
+                dropUI: function(ev, input)
                 {
                     ev.preventDefault();
                     this.model.showComponents = false;
@@ -850,39 +647,38 @@
             {
                 showSettingTitle: function ()
                 {
-                    if (this.active_setting_input.metaType == "EDITGRID_STATICHTML" ||
+                    if (this.active_setting_input.metaType == "LISTINTERFACE" ||
                         this.active_setting_input.metaType == "STATICHTML" ||
                         this.active_setting_input.metaType == "IMAGE" ||
                         this.active_setting_input.metaType == "TEXTBLOCK" ||
+                        this.active_setting_input.metaType == "INPUTINTERFACE" ||
                         this.active_setting_input.metaType == "LABEL")
                         return false;
 
                     return true;
                 },
                 showSettingRawHTML: function () {
-                    if (this.active_setting_input.metaType == "EDITGRID_STATICHTML" ||
-                        this.active_setting_input.metaType == "STATICHTML")
+                    if (this.active_setting_input.metaType == "STATICHTML")
                         return true;
 
                     return false;
                 },
                 showSettingDbColumn: function ()
                 {
-                    if (this.active_setting_input.metaType == "EDITGRID" || 
-                        this.active_setting_input.metaType == "STATICHTML" ||
-                        this.active_setting_input.metaType == "CREATEVIEW" ||
-                        this.active_setting_input.metaType == "EDITVIEW" ||
-                        this.active_setting_input.metaType == "LISTVIEW" ||
-                        this.active_setting_input.metaType == "EDITLISTVIEW" ||
-                        this.active_setting_input.metaType == "DETAILVIEW" ||
-                        this.active_setting_input.metaType == "EDITGRID_STATICHTML")
+                    if (this.active_setting_input.metaType == "STATICHTML")
+                        return false;
+                    if (this.active_setting_input.metaType == "INPUTINTERFACE")
                         return false;
 
                     return true;
                 },
-                showSettingDbTable: function ()
+                showSettingDbColumn2: function ()
                 {
-                     if (this.active_setting_input.metaType == "EDITGRID")
+
+                    if (this.active_setting_input.metaType === "LOOKUP")
+                        return true;
+
+                    if (this.active_setting_input.metaType === "MULTISELECT")
                         return true;
 
                     return false;
@@ -891,9 +687,9 @@
                 {
                     if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
-
-                      if (this.active_setting_input.metaType == "EDITGRID_COMBOBOX")
+                    if (this.active_setting_input.metaType === "MULTISELECT")
                         return true;
+
 
                     return false;
                 },
@@ -902,34 +698,25 @@
                     if (this.active_setting_input.metaType === "LOOKUP")
                         return true;
 
-                      if (this.active_setting_input.metaType == "EDITGRID_LOOKUP")
-                        return true;
+
 
                     return false;
                 },
-                defaultTable: function () {
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (this.dbtables[i].isDefaultTable)
-                            return this.dbtables[i];
+                userInterfaceTable: function ()
+                {
+                    if (this.dbtables.length > 0)
+                        return this.dbtables[0];
 
                     return {};
-                },
-                nonDefaultTables: function ()
-                {
-                    var list = [];
-                    for (var i = 0; i < this.dbtables.length; i++)
-                        if (!this.dbtables[i].isDefaultTable)
-                            list.push(this.dbtables[i]);
-
-                    return list;
                 }
+               
 
             },
             mounted: function () {
 
                 var context = this;
                 var baseurl = '@Url.Content("~/Model/API/")';
-                var endpointurl = baseurl + "GetApplicationUI/@ViewBag.SystemId/@ViewBag.ViewType";
+                var endpointurl = baseurl + "GetApplicationInputUI/@Model.ApplicationInfo.Id/@Model.MetaCode";
 
                 //Application
                 $.get(endpointurl, function (response) {
@@ -938,7 +725,7 @@
                 }).done(function () {
 
                     //Tables
-                    endpointurl = baseurl + "GetDatabaseTables/@ViewBag.SystemId";
+                    endpointurl = baseurl + "GetUserInterfaceDatabaseTable/@Model.ApplicationInfo.Id/@Model.MetaCode";
                     $.get(endpointurl, function (response) {
                         context.dbtables = response;
                     }).done(function () {
@@ -953,14 +740,6 @@
                             endpointurl = baseurl + "GetValueDomainNames";
                             $.get(endpointurl, function (response) {
                                 context.valuedomains = response;
-                            }).done(function () {
-
-                                    //Selectable listview columns
-                                    endpointurl = baseurl + "GetListviewTable/@ViewBag.SystemId";
-                                    $.get(endpointurl, function (response) {
-                                        context.listviewtable = response;
-                                    });
-
                             });
                         });
 

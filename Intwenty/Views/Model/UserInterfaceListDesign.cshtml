@@ -1,0 +1,239 @@
+﻿@model UserInterfaceModelItem
+
+@{
+    ViewData["Title"] = "UI Design";
+}
+
+@await Html.PartialAsync("_Modals")
+
+<style>
+    .formpanel {
+        border: 1px dotted black;
+        margin: 5px;
+        padding: 5px;
+        min-height: 120px;
+    }
+
+    .settingpnl {
+        border: 1px dotted black;
+        margin-left: 5px;
+        margin-top: 10px;
+        margin-right: 30px;
+        padding: 15px;
+    }
+
+    .uipnl {
+        margin-top: 10px;
+    }
+
+    
+}
+</style>
+
+
+<div id="app" class="uidesigner">
+
+    <br />
+    <br />
+
+    <div class="card">
+        <div class="card-header"><h2>List UI designer</h2></div>
+        <div class="card-body">
+
+            Design list user interface for views in application <b>@Model.ApplicationInfo.Title</b>.
+
+            <br />
+
+            <ul class="nav">
+                <li class="nav-item">
+                    <a asp-action="ApplicationViewList" asp-controller="Model" asp-route-id="@Model.ApplicationInfo.Id" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back</a>
+                </li>
+                <li class="nav-item">
+
+                </li>
+                <li class="nav-item">
+                    <div class="btn btn-sm btn-primary" v-on:click="saveApplicationUI()" style="margin:10px">
+                        <i class="fa fa-save"></i> Save changes
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div class="btn btn-sm btn-secondary" v-on:click="openSettings()"  style="margin:10px">
+                        <i class="fa fa-cog"></i> View Settings
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <br />
+
+
+
+    <hr />
+
+    <div class="row">
+        <div class="col-lg-12" style="margin: 5px">
+            <b>Columns: </b>
+            <br />
+            <br />
+            <div>
+                <div>
+                    <div class="btn btn-sm btn-secondary" v-on:click="addColumn()">
+                        <span class="fa fa-plus"></span> Add Column
+                    </div>
+                </div>
+                <br />
+                <table class="table table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%"></th>
+                            <th style="width:30%">Title <span style="color: red"> *</span></th>
+                            <th style="width:65%">Column name <span style="color: red"> *</span></th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="field in model.table.columns">
+                        <tr v-if="!field.isRemoved">
+                            <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteColumn(field)"><span class="fas fa-trash" title="Remove"></span></button></td>
+                            <td><input type="text" class="form-control form-control-sm" v-model="field.title" /></td>
+                            <td>
+                                <select v-model="field.dataColumn1DbName" class="form-control form-control-sm">
+                                    <option v-for="col in userInterfaceTable.columns" v-bind:value="col.dbName">{{col.dbName}}</option>
+                                </select>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+   
+    <!-- SETTING MODAL-->
+    <div class="modal" id="ui_setting_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">UI Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="ui_setting_modal_body">
+                    <div class="settingpnl">
+                        <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
+                            @await Html.PartialAsync("_PropertyUI", "active_setting_input")
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="setting_modal_close_btn" type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@section Scripts
+        {
+
+
+
+
+
+    <script>
+
+
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: {
+                    table: { columns:[] }
+                },
+                dbtables: [],
+                active_setting_input: {},
+                metaproperties: [],
+                idgenerator: 0
+            },
+            methods:
+            {
+
+                openSettings() {
+                    this.active_setting_input = this.model;
+                    this.initializePropertyUI(this.active_setting_input);
+                    this.$forceUpdate();
+                    $("#ui_setting_modal").modal();
+                },
+                addColumn: function ()
+                {
+                    this.model.table.columns.push({ title: "", parentMetaCode: "", metaCode: "", metaType: "TEXTLISTCOLUMN" });
+                },
+                saveApplicationUI: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "SaveApplicationListUI";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        success: function (response)
+                        {
+                            context.model = response;
+                            raiseInformationModal("Success", "The UI model was successfully saved.");
+                        },
+                        error: function (response) {
+                             raiseErrorModal(response.responseJSON);
+                        }
+                    });
+                },
+                deleteColumn: function (item)
+                {
+                    var context = this;
+                    raiseYesNoModal("Delete ?", "Delete table column ?", function ()
+                    {
+                        item.isRemoved = true;
+                    });
+                }
+
+
+            },
+            computed:
+            {
+
+                userInterfaceTable: function ()
+                {
+                    if (this.dbtables.length > 0)
+                        return this.dbtables[0];
+
+                    return { columns: [] };
+                }
+
+            },
+            mounted: function () {
+
+                var context = this;
+                var baseurl = '@Url.Content("~/Model/API/")';
+                var endpointurl = baseurl + "GetApplicationListUI/@Model.ApplicationInfo.Id/@Model.MetaCode";
+
+                //Application
+                $.get(endpointurl, function (response) {
+                    context.model = response;
+                }).done(function () {
+
+                    //Tables
+                    endpointurl = baseurl + "GetUserInterfaceDatabaseTable/@Model.ApplicationInfo.Id/@Model.MetaCode";
+                    $.get(endpointurl, function (response) {
+                        context.dbtables = response;
+                    });
+                });
+            }
+        });
+
+    </script>
+}

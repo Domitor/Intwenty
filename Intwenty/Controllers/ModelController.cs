@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Intwenty.Model.UIDesign;
+using Intwenty.Model.Design;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model.Dto;
@@ -29,9 +29,9 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
-      
-
-        public IActionResult GetList()
+        
+        [HttpGet("/Model/ApplicationList")]
+        public IActionResult ApplicationList()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -41,8 +41,8 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/Create")]
-        public IActionResult Create()
+        [HttpGet("/Model/ApplicationCreate")]
+        public IActionResult ApplicationCreate()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -53,8 +53,8 @@ namespace Intwenty.Controllers
         }
 
 
-        [HttpGet("/Model/Edit/{applicationid}")]
-        public IActionResult Edit(int applicationid)
+        [HttpGet("/Model/ApplicationEdit/{applicationid}")]
+        public IActionResult ApplicationEdit(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -65,8 +65,22 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        [HttpGet("/Model/EditDB/{applicationid}")]
-        public IActionResult EditDB(int applicationid)
+        [HttpGet("/Model/ApplicationViewList/{applicationid}")]
+        public IActionResult ApplicationViewList(int applicationid)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var model = ModelRepository.GetApplicationModel(applicationid);
+
+
+            return View(model);
+        }
+
+        [HttpGet("/Model/Database/{applicationid}")]
+        public IActionResult Database(int applicationid)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -78,28 +92,47 @@ namespace Intwenty.Controllers
         }
 
 
-        public IActionResult EditMainMenu()
+
+
+        [HttpGet("/Model/UserInterfaceInputDesign/{applicationid}/{uimetacode}")]
+        public IActionResult UserInterfaceInputDesign(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            return View();
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+
+            var model = appmodel.GetUserInterface(uimetacode);
+            if (model == null)
+                return BadRequest();
+
+
+
+            return View(model);
         }
 
-
-        [HttpGet("/Model/EditUI/{applicationid}/{viewtype}")]
-        public IActionResult EditUI(int applicationid, string viewtype)
+        [HttpGet("/Model/UserInterfaceListDesign/{applicationid}/{uimetacode}")]
+        public IActionResult UserInterfaceListDesign(int applicationid, string uimetacode)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            ViewBag.SystemId = Convert.ToString(applicationid);
-            ViewBag.ViewType = viewtype;
-            return View();
+            var appmodel = ModelRepository.GetApplicationModel(applicationid);
+            if (appmodel == null)
+                return BadRequest();
+
+            var model = appmodel.GetUserInterface(uimetacode);
+            if (model == null)
+                return BadRequest();
+
+
+            return View(model);
         }
 
         public IActionResult EditModelTranslations()

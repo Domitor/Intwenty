@@ -100,7 +100,8 @@ namespace Intwenty.Middleware
              .AddUserStore<IntwentyUserStore>()
              .AddRoleStore<IntwentyProductAuthorizationStore>()
              .AddUserManager<IntwentyUserManager>()
-             .AddSignInManager<IntwentySignInManager>();
+             .AddSignInManager<IntwentySignInManager>()
+             .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>();
             
 
 
@@ -222,10 +223,10 @@ namespace Intwenty.Middleware
                 endpoints.MapDefaultControllerRoute();
 
                 //INTWENTY ROUTING
-                endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
-                endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
+                //endpoints.MapControllerRoute("approute_1", "{controller=Application}/{action=All}/{id}");
+                //endpoints.MapControllerRoute("approute_2", "{controller=Application}/{action=Edit}/{applicationid}/{id}");
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 
                 var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
 
@@ -249,27 +250,26 @@ namespace Intwenty.Middleware
                 var appmodels = modelservice.GetApplicationModels();
                 foreach (var a in appmodels)
                 {
-                    if (a.Application == null)
-                        continue;
+                    
+                    foreach (var view in a.Views)
+                    {
+                        if (string.IsNullOrEmpty(view.Path))
+                            continue;
 
-                    if (string.IsNullOrEmpty(a.Application.ApplicationPath))
-                        continue;
+                        var path = view.Path;
+                        path.Trim();
+                        if (path[0] != '/')
+                            path = "/" + path;
+                        if (path[path.Length - 1] != '/')
+                            path = path + "/";
 
-                    if (a.Application.ApplicationPath.Length < 2)
-                        continue;
+                        endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action= "View" });
+                        //endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_edit", path + "{action=Edit}/{id}", defaults: new { controller = "Application" });
+                        //endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_editlist", path + "{action=EditList}", defaults: new { controller = "Application" });
+                        //endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_detail", path + "{action=Detail}/{id}", defaults: new { controller = "Application" });
+                        //endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_create", path + "{action=List}", defaults: new { controller = "Application" });
 
-                    var path = a.Application.ApplicationPath;
-                    path.Trim();
-                    if (path[0] != '/')
-                        path = "/" + path;
-                    if (path[path.Length - 1] != '/')
-                        path = path + "/";
-
-                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_create", path + "{action=Create}", defaults: new { controller = "Application" });
-                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_edit", path + "{action=Edit}/{id}", defaults: new { controller = "Application" });
-                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_editlist", path + "{action=EditList}", defaults: new { controller = "Application" });
-                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_detail", path + "{action=Detail}/{id}", defaults: new { controller = "Application" });
-                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_create", path + "{action=List}", defaults: new { controller = "Application" });
+                    }
                 }
 
 
@@ -320,7 +320,10 @@ namespace Intwenty.Middleware
                 client.CreateTable<EventLog>();
                 client.CreateTable<InformationStatus>();
                 client.CreateTable<InstanceId>();
+                client.CreateTable<ViewItem>();
+                client.CreateTable<UserInterfaceStructureItem>();
                 client.CreateTable<UserInterfaceItem>();
+                client.CreateTable<FunctionItem>();
                 client.CreateTable<ValueDomainItem>();
                 client.CreateTable<DefaultValue>();
                 client.CreateTable<TranslationItem>();

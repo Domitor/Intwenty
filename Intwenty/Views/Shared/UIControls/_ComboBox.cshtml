@@ -15,7 +15,7 @@
                 v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
                 class="form-control form-control-sm"
                 v-on:change="onUserInput(event)"
-                data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeComboBox
+                data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
                 data-validationfield="@validationfield"
                 data-title="@Model.Title"
                 data-dbtable="@Model.DataTableDbName"
@@ -23,5 +23,5 @@
                 data-required="@Model.Mandatory">
             <option v-for="item in valuedomains.VALUEDOMAIN_@Model.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
         </select>
-        <span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span>
+          <!--   span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span  -->
     </div>

@@ -59,6 +59,7 @@ namespace Intwenty.Seed
             await client.OpenAsync();
             var current_apps = await client.GetEntitiesAsync<ApplicationItem>();
             var current_systems = await client.GetEntitiesAsync<SystemItem>();
+            var current_views = await client.GetEntitiesAsync<ViewItem>();
             await client.CloseAsync();
 
             var iamclient = new Connection(Settings.Value.IAMConnectionDBMS, Settings.Value.IAMConnection);
@@ -81,6 +82,18 @@ namespace Intwenty.Seed
                 {
                     var appauth = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = ApplicationModelItem.MetaTypeApplication, ProductId = Settings.Value.ProductId };
                     await iamclient.InsertEntityAsync(appauth);
+                }
+
+                foreach (var v in current_views)
+                {
+                    if (v.AppMetaCode == t.MetaCode)
+                    {
+                        if (!current_permissions.Exists(p => p.MetaCode == v.MetaCode && p.ProductId == Settings.Value.ProductId && p.AuthorizationType == ViewModel.MetaTypeUIView))
+                        {
+                            var appauth = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title + " - " + v.Title, NormalizedName = v.MetaCode.ToUpper(), AuthorizationType = ViewModel.MetaTypeUIView, ProductId = Settings.Value.ProductId };
+                            await iamclient.InsertEntityAsync(appauth);
+                        }
+                    }
                 }
             }
 

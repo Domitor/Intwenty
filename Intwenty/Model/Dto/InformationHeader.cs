@@ -21,6 +21,8 @@ namespace Intwenty.Model.Dto
             ChangedDate = entity.ChangedDate;
             CreatedBy = entity.CreatedBy;
             OwnedBy = entity.OwnedBy;
+            OwnedByOrganizationId = entity.OwnedByOrganizationId;
+            OwnedByOrganizationName = entity.OwnedByOrganizationName;
             PerformDate = entity.PerformDate;
             StartDate = entity.StartDate;
             EndDate = entity.EndDate;
@@ -39,6 +41,10 @@ namespace Intwenty.Model.Dto
         public string CreatedBy { get; set; }
 
         public string OwnedBy { get; set; }
+
+        public string OwnedByOrganizationId { get; set; }
+
+        public string OwnedByOrganizationName { get; set; }
 
         public DateTime ChangedDate { get; set; }
 

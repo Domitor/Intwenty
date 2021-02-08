@@ -34,9 +34,9 @@ namespace Intwenty.Areas.Identity.Data
         Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid, string productid);
         Task<IntwentyOrganizationProductVm> GetOrganizationProductAsync(int organizationid, string productid);
         Task<IdentityResult> AddUpdateRoleAuthorizationAsync(string normalizedAuthName, int organizationid, string productid);
-        Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
-        Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
-        Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete);
+        Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization);
+        Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization);
+        Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization);
         Task<IdentityResult> RemoveAuthorizationAsync(int organizationid, int authorizationId);
     }
 
@@ -58,6 +58,23 @@ namespace Intwenty.Areas.Identity.Data
             organization.NormalizedName = organization.Name.ToUpper();
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
+
+            //TABLE PREFIX
+            var all = await client.GetEntitiesAsync<IntwentyOrganization>();
+            var number = 100;
+            if (all.Count == 1)
+                number = 101;
+            if (all.Count > 1)
+                number = all.Count * 100;
+            var name = "";
+            if (organization.NormalizedName.Length < 4)
+                name = organization.NormalizedName;
+            else
+                name = organization.NormalizedName.Substring(0, 4);
+
+            organization.TablePrefix = string.Format("{0}_{1}_{2}", new object[] { "ORG", name, number });
+            //
+
             var t = await client.InsertEntityAsync(organization);
             await client.CloseAsync();
             return IdentityResult.Success;
@@ -217,7 +234,7 @@ namespace Intwenty.Areas.Identity.Data
 
         public async Task<List<IntwentyOrganizationProductInfoVm>> GetUserOrganizationProductsInfoAsync(string userid)
         {
-            var sql = "SELECT t1.*, t2.Name as OrganizationName FROM security_OrganizationProducts t1 ";
+            var sql = "SELECT t1.*, t2.Name as OrganizationName, t2.TablePrefix as OrganizationTablePrefix FROM security_OrganizationProducts t1 ";
             sql += "JOIN security_Organization t2 ON t1.OrganizationId = t2.Id ";
             sql += "WHERE EXISTS (SELECT 1 FROM security_OrganizationMembers WHERE UserId = @UserId AND OrganizationId = t2.Id)";
             var parameters = new List<IntwentySqlParameter>();
@@ -248,7 +265,7 @@ namespace Intwenty.Areas.Identity.Data
 
             var result = new IntwentyOrganizationProductVm(orgproduct);
             result.RoleAuthorizations = authorizations.Where(p=> p.AuthorizationType == "ROLE").Select(p => new IntwentyAuthorizationVm(p)).ToList();
-            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "VIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
+            result.ViewAuthorizations = authorizations.Where(p => p.AuthorizationType == "UIVIEW").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.ApplicationAuthorizations = authorizations.Where(p => p.AuthorizationType == "APPLICATION").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.SystemAuthorizations = authorizations.Where(p => p.AuthorizationType == "SYSTEM").Select(p => new IntwentyAuthorizationVm(p)).ToList();
             result.Id = orgproduct.Id;
@@ -256,6 +273,7 @@ namespace Intwenty.Areas.Identity.Data
             result.OrganizationName = org.Name;
             result.ProductId = product.Id;
             result.ProductName = product.ProductName;
+            result.OrganizationTablePrefix = org.TablePrefix;
       
 
             return result;
@@ -274,7 +292,7 @@ namespace Intwenty.Areas.Identity.Data
             return await AddUpdateAuthorizationAsync(auth);
         }
 
-        public async Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateSystemAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -288,15 +306,13 @@ namespace Intwenty.Areas.Identity.Data
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 ProductId = productid,
-                ReadAuth = read,
-                ModifyAuth = modify,
-                DeleteAuth = delete
+                DenyAuthorization = denyauthorization
             };
 
             return await AddUpdateAuthorizationAsync(auth);
         }
 
-        public async Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateApplicationAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -310,15 +326,13 @@ namespace Intwenty.Areas.Identity.Data
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 ProductId = productid,
-                ReadAuth = read,
-                ModifyAuth = modify,
-                DeleteAuth = delete
+                DenyAuthorization = denyauthorization
             };
 
             return await AddUpdateAuthorizationAsync(auth);
         }
 
-        public async Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool read, bool modify, bool delete)
+        public async Task<IdentityResult> AddUpdateViewAuthorizationAsync(string normalizedAuthName, int organizationid, string productid, bool denyauthorization)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             await client.OpenAsync();
@@ -328,13 +342,11 @@ namespace Intwenty.Areas.Identity.Data
             var auth = new IntwentyAuthorization()
             {
                 AuthorizationNormalizedName = normalizedAuthName,
-                AuthorizationType = "APPLICATION",
+                AuthorizationType = "UIVIEW",
                 OrganizationId = org.Id,
                 OrganizationName = org.Name,
                 ProductId = productid,
-                ReadAuth = read,
-                ModifyAuth = modify,
-                DeleteAuth = delete
+                DenyAuthorization = denyauthorization
             };
 
             return await AddUpdateAuthorizationAsync(auth);
@@ -398,18 +410,8 @@ namespace Intwenty.Areas.Identity.Data
 
             if (existing_auth != null)
             {
-                existing_auth.ReadAuth = authorization.ReadAuth;
-                existing_auth.ModifyAuth = authorization.ModifyAuth;
-                existing_auth.DeleteAuth = authorization.DeleteAuth;
-                if (existing_auth.DeleteAuth)
-                {
-                    existing_auth.ModifyAuth = true;
-                    existing_auth.ReadAuth = true;
-                }
-                if (existing_auth.ModifyAuth)
-                {
-                    existing_auth.ReadAuth = true;
-                }
+                existing_auth.DenyAuthorization = authorization.DenyAuthorization;
+               
                 await client.OpenAsync();
                 await client.UpdateEntityAsync(existing_auth);
                 await client.CloseAsync();
@@ -426,19 +428,9 @@ namespace Intwenty.Areas.Identity.Data
                 AuthorizationName = productauth.Name,
                 AuthorizationType = productauth.AuthorizationType,
                 AuthorizationNormalizedName = productauth.NormalizedName,
-                ReadAuth = authorization.ReadAuth,
-                ModifyAuth = authorization.ModifyAuth,
-                DeleteAuth = authorization.DeleteAuth,
+                DenyAuthorization = authorization.DenyAuthorization
             };
-            if (auth.DeleteAuth)
-            {
-                auth.ModifyAuth = true;
-                auth.ReadAuth = true;
-            }
-            if (auth.ModifyAuth)
-            {
-                auth.ReadAuth = true;
-            }
+            
             await client.OpenAsync();
             await client.InsertEntityAsync(auth);
             await client.CloseAsync();

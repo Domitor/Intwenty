@@ -22,6 +22,12 @@ namespace Intwenty.Interface
         /// <returns>An Result including a json object</returns>
         DataResult New(ApplicationModel model);
 
+        /// <summary>
+        /// Saves application data
+        /// </summary>
+        /// <returns>A result describing the state of the saved application</returns>
+        //ModifyResult Save<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
+        //ModifyResult SaveSubTable<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
 
         /// <summary>
         /// Saves application data
@@ -50,15 +56,11 @@ namespace Intwenty.Interface
         ModifyResult Delete(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
-        /// Deletes data by Id
-        /// Parameter Id can be an Id of an application subtable row, or an application maintable Id
-        /// Parameter dbname can be an application  subtable name or main tablename
-        /// If the dbname represents a main application table, all application data (maintable and subtables) is deleted.
-        /// If the dbname represents an application subtable, only the subtable row that matches the id parameter is deleted.
+        /// Deletes data by row Id
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult Delete(int applicationid, int id, string dbname);
+        ModifyResult DeleteRow(ClientStateInfo state, int id, string tablename);
 
 
         /// <summary>
@@ -84,7 +86,7 @@ namespace Intwenty.Interface
         /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult GetLatestByOwnerUser(ClientStateInfo state);
+        //DataResult GetLatestByOwnerUser(ClientStateInfo state);
 
 
 
@@ -97,7 +99,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetPagedJsonArray(ListFilter args);
+        DataListResult GetJsonArray(ListFilter args);
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -106,7 +108,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetPagedJsonArray(ListFilter args, ApplicationModel model);
+        DataListResult GetJsonArray(ListFilter args, ApplicationModel model);
 
 
         /// <summary>
@@ -116,7 +118,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A result object that inhertits DataListResult including a string json array</returns>
-        TDataListResult GetPagedJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
+        TDataListResult GetJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
 
 
 
@@ -127,10 +129,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a list of T and the current paging rownum</returns>
-        DataListResult<T> GetPagedList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
-
-
-
+        DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
 
 
 
@@ -139,7 +138,7 @@ namespace Intwenty.Interface
         /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An DataListResult including a list of T</returns>
-        DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
+        //DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
 
 
 
@@ -148,16 +147,7 @@ namespace Intwenty.Interface
         /// All columns and rows from the application's main table is returned.
         /// </summary>
         /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetJsonArray(int applicationid);
-
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data based on OwnedBy. 
-        /// All columns from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetJsonArrayByOwnerUser(int applicationid, string owneruserid);
+        //DataListResult GetJsonArray(int applicationid);
 
 
         /// <summary>

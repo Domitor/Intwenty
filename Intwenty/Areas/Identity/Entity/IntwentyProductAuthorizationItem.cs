@@ -8,17 +8,18 @@ namespace Intwenty.Areas.Identity.Entity
     [DbTablePrimaryKey("Id")]
     public class IntwentyProductAuthorizationItem : IdentityRole
     {
-
+        [NotNull]
         public string ProductId { get; set; }
 
 
+        [NotNull]
         //ROLE, SYSTEM, APP, VIEW
         public string AuthorizationType { get; set; }
 
         /// <summary>
         /// Reference to an Intwenty.Model.SystemModelItem or Intwenty.Model.ApplicationModelItem  
         /// </summary>
-        
+
         [Ignore]
         public string MetaCode 
         {

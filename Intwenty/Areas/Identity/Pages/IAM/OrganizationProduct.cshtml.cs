@@ -54,7 +54,7 @@ namespace Intwenty.Areas.Identity.Pages
                 roleItems = t.Where(p => p.AuthorizationType == "ROLE")
                 ,systemItems = t.Where(p => p.AuthorizationType == "SYSTEM")
                 ,applicationItems = t.Where(p => p.AuthorizationType == "APPLICATION")
-                ,viewItems = t.Where(p => p.AuthorizationType == "VIEW")
+                ,viewItems = t.Where(p => p.AuthorizationType == "UIVIEW")
             };
 
             return new JsonResult(authitems);
@@ -96,7 +96,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await OrganizationManager.AddUpdateSystemAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await OrganizationManager.AddUpdateSystemAuthorizationAsync(authitem.NormalizedName,  model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
@@ -105,7 +105,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await OrganizationManager.AddUpdateApplicationAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await OrganizationManager.AddUpdateApplicationAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }
@@ -114,7 +114,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
             var allauths = await ProductManager.GetAthorizationItemsAsync(model.ProductId);
             var authitem = allauths.Find(p => p.Id == model.AuthorizationId);
-            await OrganizationManager.AddUpdateViewAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.Read, model.Modify, model.Delete);
+            await OrganizationManager.AddUpdateViewAuthorizationAsync(authitem.NormalizedName, model.OrganizationId, model.ProductId, model.DenyAuthorization);
             return await OnGetLoad(model.OrganizationId, model.ProductId);
 
         }

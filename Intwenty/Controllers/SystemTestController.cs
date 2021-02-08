@@ -77,8 +77,6 @@ namespace Intwenty.Controllers
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-          
-
             var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
            
 
@@ -113,16 +111,24 @@ namespace Intwenty.Controllers
                 db.RunCommand("DROP TABLE tests_TestData2AutoInc");
             }
 
-            db.Close();
-
-            if (model != null)
-                _modelservice.DeleteAppModel(model);
+          
 
             if (dvmodels != null && dvmodels.Count > 0)
             {
                 foreach (var dv in dvmodels)
-                    _modelservice.DeleteDataViewModel(dv.Id);
+                    db.DeleteEntity(new DataViewItem() { Id = dv.Id });
             }
+
+            if (model != null)
+            {
+                var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == model.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == model.SystemMetaCode);
+                foreach (var dbitem in dbmodels)
+                    db.DeleteEntity(new DatabaseItem() { Id = dbitem.Id });
+
+                db.DeleteEntity(new ApplicationItem() { Id = model.Id });
+            }
+
+            db.Close();
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test2ORMInsert());
@@ -133,14 +139,12 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test7CreateIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test8GetListOfIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test9GetListOfIntwentyApplicationByOwnerUser());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test10GetLatestVersionByOwnerUser());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test11UpdateIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test111GetTypedApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test12DeleteIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test13GetAllValueDomains());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test14GetDataSet());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test15Transactions());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test16CachePerformance());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test500GetDataView());
@@ -382,7 +386,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The default system could not be found");
 
                 dbstore.Open();
-                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", IsHierarchicalApplication = false, UseVersioning = true });
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
@@ -398,10 +402,10 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
 
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
-                dbstore.InsertEntity(new DataViewItem() { MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode= system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog", ParentMetaCode = "ROOT" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
+                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
                 dbstore.Close();
 
                 _modelservice.ClearCache();
@@ -412,7 +416,7 @@ namespace Intwenty.Controllers
 
                 var configres = _modelservice.ConfigureDatabase(model);
                 
-                if (!configres.IsSuccess)
+                if (!configres.Result.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
@@ -438,14 +442,14 @@ namespace Intwenty.Controllers
                 {
                     var state = new ClientStateInfo();
                     state.ApplicationId = 10000;
-                    state.UserId = "TESTUSER";
+                    state.User.UserName = "TESTUSER";
 
                     if (i > 25)
-                        state.UserId = "OTHERUSER";
+                        state.User.UserName = "OTHERUSER";
                     if (i > 50)
-                        state.UserId = "OTHERUSER1";
+                        state.User.UserName = "OTHERUSER1";
                     if (i > 75)
-                        state.UserId = "OTHERUSER2";
+                        state.User.UserName = "OTHERUSER2";
 
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
@@ -492,7 +496,8 @@ namespace Intwenty.Controllers
 
             try
             {
-                var getlistresult = _dataservice.GetJsonArray(10000);
+                var filter = new ListFilter() { ApplicationId = 10000, SkipPaging = true };
+                var getlistresult = _dataservice.GetJsonArray(filter);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(1000) failed: " + getlistresult.SystemError);
 
@@ -504,11 +509,11 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
 
-                var filter = new ListFilter() { ApplicationId = 10000, PageSize = 10 };
+                filter = new ListFilter() { ApplicationId = 10000, PageSize = 10 };
                 for (int i = 1; i < 4; i++)
                 {
                     filter.PageNumber = i;
-                    var pageresult = _dataservice.GetPagedJsonArray(filter);
+                    var pageresult = _dataservice.GetJsonArray(filter);
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
@@ -539,7 +544,9 @@ namespace Intwenty.Controllers
 
             try
             {
-                var getlistresult = _dataservice.GetJsonArrayByOwnerUser(10000, "OTHERUSER");
+                var f = new ListFilter() { ApplicationId = 10000 };
+                f.User.UserName = "OTHERUSER";
+                var getlistresult = _dataservice.GetJsonArray(f);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetListByOwnerUser(1000, OTHERUSER) failed: " + getlistresult.SystemError);
 
@@ -562,35 +569,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test10GetLatestVersionByOwnerUser()
-        {
-            TestResult result = new TestResult(true, MessageCode.RESULT, "Get the latest version of an intwenty application by owner user");
-
-            try
-            {
-                var state = new ClientStateInfo();
-                state.ApplicationId = 10000;
-                state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = "TESTUSER" });
-                var getresult = _dataservice.GetLatestByOwnerUser(state);
-                if (!getresult.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetLatestByOwnerUser(state) failed: " + getresult.SystemError);
-
-                var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
-                if (newstate.Data.Values.Count < 1)
-                    throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
-
-                result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test10GetLatestVersionByOwnerUser lasted  {0} ms", result.Duration));
-
-
-            }
-            catch (Exception ex)
-            {
-                result.SetError(ex.Message, "Test failed");
-            }
-
-            return result;
-        }
+      
 
         private TestResult Test11UpdateIntwentyApplication()
         {
@@ -599,31 +578,37 @@ namespace Intwenty.Controllers
 
             try
             {
-                var state = new ClientStateInfo();
-                state.ApplicationId = 10000;
-                state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = "OTHERUSER" });
-                var getresult = _dataservice.GetLatestByOwnerUser(state);
+                var filter = new ListFilter();
+                filter.ApplicationId = 10000;
+
+                var getresult = _dataservice.GetJsonArray(filter);
                 if (!getresult.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetLatestByOwnerUser(state) failed: " + getresult.SystemError);
+                    throw new InvalidOperationException("IntwentyDataService.GetJsonArray(filter) failed: " + getresult.SystemError);
 
-                var newstate = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getresult.Data).RootElement);
-                if (!newstate.Data.HasData)
-                    throw new InvalidOperationException("Could not create ClientStateInfo from application json string");
+                var lastindex = getresult.GetAsApplicationData().SubTables[0].Rows.Count - 1;
+                var id = getresult.GetAsApplicationData().SubTables[0].Rows[lastindex].Id;
 
-                newstate.UserId = "OTHERUSER2";
-                newstate.Data.SetValue("Description", "Updated test application");
-                newstate.Data.SetValue("DecValue", 333.777M);
-                newstate.Data.SetValue("DecValue2", 444.55);
 
-   
+                var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                var getbyidresult = _dataservice.Get(state);
+                if (!getbyidresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.Get(state) 1 failed: " + getresult.SystemError);
 
-                var saveresult = _dataservice.Save(newstate);
+                state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                state.Data = getbyidresult.GetAsApplicationData();
+                state.User.UserName = "OTHERUSER2";
+                state.Data.SetValue("Description", "Updated test application");
+                state.Data.SetValue("DecValue", 333.777M);
+                state.Data.SetValue("DecValue2", 444.55);
+                var saveresult = _dataservice.Save(state);
                 if (!saveresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
-                var getbyidresult = _dataservice.Get(state);
+                
+                var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                getbyidresult = _dataservice.Get(newstate);
                 if (!getbyidresult.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetById(state) failed: " + getresult.SystemError);
+                    throw new InvalidOperationException("IntwentyDataService.GetById(state) 2 failed: " + getresult.SystemError);
 
                 var appdata = getbyidresult.GetAsApplicationData();
                 if (!appdata.HasData)
@@ -643,7 +628,7 @@ namespace Intwenty.Controllers
 
                 if (_modelservice.GetApplicationModels().Exists(p => p.Application.Id == 10000 && p.Application.UseVersioning))
                 {
-                    if (newstate.Version < 2)
+                    if (saveresult.Version < 2)
                         throw new InvalidOperationException("Updated application did not recieve a new version id");
                 }
 
@@ -681,19 +666,13 @@ namespace Intwenty.Controllers
                 if (model == null)
                     throw new InvalidOperationException("Model not found");
 
-                var data = _dataservice.GetPagedList<def_TestApp>(args, model);
+                var data = _dataservice.GetEntityList<def_TestApp>(args, model);
                 if (!data.IsSuccess)
                     throw new InvalidOperationException(data.SystemError);
 
                 if (data.Data.Count < 1)
                     throw new InvalidOperationException("No data found when using GetPagedList<def_TestApp>()");
 
-                data = _dataservice.GetList<def_TestApp>(10000);
-                if (!data.IsSuccess)
-                    throw new InvalidOperationException(data.SystemError);
-
-                if (data.Data.Count < 1)
-                    throw new InvalidOperationException("No data found when using GetList<def_TestApp>()");
 
                 var state = new ClientStateInfo() { ApplicationId = 10000, Id = data.Data[0].Id };
                 var data2 = _dataservice.Get<def_TestApp>(state, model);
@@ -725,10 +704,21 @@ namespace Intwenty.Controllers
 
             try
             {
-                var state = new ClientStateInfo();
-                state.ApplicationId = 10000;
-                state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = "OTHERUSER" });
-                var getresult = _dataservice.GetLatestByOwnerUser(state);
+                var filter = new ListFilter();
+                filter.ApplicationId = 10000;
+
+                var listresult = _dataservice.GetJsonArray(filter);
+                if (!listresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetJsonArray(filter) failed: " + listresult.SystemError);
+
+                var lastindex = listresult.GetAsApplicationData().SubTables[0].Rows.Count - 1;
+                var id = listresult.GetAsApplicationData().SubTables[0].Rows[lastindex].Id;
+
+
+                var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+
+    
+                var getresult = _dataservice.Get(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
 
@@ -736,7 +726,7 @@ namespace Intwenty.Controllers
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
                 var rowid = appdata.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.Delete(appdata.ApplicationId, rowid, appdata.SubTables[0].DbName);
+                var deleterowresult = _dataservice.DeleteRow(state, rowid, appdata.SubTables[0].DbName);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 
@@ -893,43 +883,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test16CachePerformance()
-        {
-            TestResult result = new TestResult(true, MessageCode.RESULT, "Test logging and Intwenty application cache.");
-
-            try
-            {
-
-                var state = new ClientStateInfo();
-                state.ApplicationId = 10000;
-                state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = "TESTUSER" });
-                var getresult = _dataservice.GetLatestByOwnerUser(state);
-                if (!getresult.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetLatestByOwnerUser(state) failed: " + getresult.SystemError);
-
-                var newstate = new ClientStateInfo();
-                newstate.Id = getresult.Id;
-                newstate.ApplicationId = 10000;
-
-                for (var i = 0; i < 10; i++)
-                {
-                    getresult = _dataservice.Get(newstate);
-                    if (!getresult.IsSuccess)
-                        throw new InvalidOperationException("IntwentyDataService.Get(state) failed: " + getresult.SystemError);
-
-                }
-
-                result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test16CachePerformance, Get(state) 10 times lasted  {0} ms", result.Duration));
-
-            }
-            catch (Exception ex)
-            {
-                result.SetError(ex.Message, "Test failed");
-            }
-
-            return result;
-        }
+      
 
         private TestResult Test17GetLists()
         {
@@ -943,7 +897,7 @@ namespace Intwenty.Controllers
                 args.PageSize = 20;
                 args.PageNumber = 0;
 
-                var getlistresult = _dataservice.GetPagedJsonArray(args);
+                var getlistresult = _dataservice.GetJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
@@ -959,7 +913,7 @@ namespace Intwenty.Controllers
                 args = getlistresult.ListFilter;
                 args.PageNumber = 1;
 
-                getlistresult = _dataservice.GetPagedJsonArray(args);
+                getlistresult = _dataservice.GetJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
@@ -974,7 +928,8 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count != args.PageSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
-                getlistresult = _dataservice.GetJsonArray(10000);
+                args = new ListFilter() { ApplicationId = 10000, SkipPaging = true };
+                getlistresult = _dataservice.GetJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(applicationid) failed: " + getlistresult.SystemError);
 

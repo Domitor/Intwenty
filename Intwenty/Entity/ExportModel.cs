@@ -17,7 +17,11 @@ namespace Intwenty.Entity
 
         public List<DatabaseItem> DatabaseItems { get; set; }
 
+        public List<ViewItem> ViewItems { get; set; }
+
         public List<UserInterfaceItem> UserInterfaceItems { get; set; }
+
+        public List<UserInterfaceStructureItem> UserInterfaceStructureItems { get; set; }
 
         public List<DataViewItem> DataViewItems { get; set; }
 
@@ -33,7 +37,9 @@ namespace Intwenty.Entity
             ModelDate = DateTime.Now;
             Applications = new List<ApplicationItem>();
             DatabaseItems = new List<DatabaseItem>();
+            ViewItems = new List<ViewItem>();
             UserInterfaceItems = new List<UserInterfaceItem>();
+            UserInterfaceStructureItems = new List<UserInterfaceStructureItem>();
             DataViewItems = new List<DataViewItem>();
             Translations = new List<TranslationItem>();
             ValueDomains = new List<ValueDomainItem>();

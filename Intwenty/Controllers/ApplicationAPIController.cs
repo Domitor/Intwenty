@@ -9,6 +9,7 @@ using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
 using Microsoft.AspNetCore.Razor.Language;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.Model;
 
 namespace Intwenty.Controllers
 {
@@ -28,21 +29,29 @@ namespace Intwenty.Controllers
 
         /// <summary>
         /// Get the latest version data by id for an application with applicationid
-        /// Used by the EditView
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
         /// <param name="id">The data id</param>
         [HttpGet]
-        public virtual async Task<IActionResult> GetEditData(int applicationid, int id)
+        public virtual async Task<IActionResult> GetApplication(int applicationid, int viewid, int id)
         {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
 
+            var model = ModelRepository.GetApplicationModel(applicationid);
             if (model == null || id < 1)
                 return BadRequest();
 
-            if (!model.UseEditViewAuthorization)
+            var viewmodel = model.Views.Find(p => p.Id == viewid);
+            if (viewmodel==null)
+                return BadRequest();
+
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
+            else
+                state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
+
+            if (viewmodel.IsPublic)
             {
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
                 var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
             } 
@@ -51,14 +60,9 @@ namespace Intwenty.Controllers
 
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, model, IntwentyPermission.Read))
+                if (!await UserManager.HasAuthorization(User, viewmodel))
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-
-                if (model.Application.EditViewRequirement == "OWNER")
-                    state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-              
                 var data = DataRepository.Get(state, model);
                 return new JsonResult(data);
                 
@@ -66,79 +70,12 @@ namespace Intwenty.Controllers
 
         }
 
-        /// <summary>
-        /// Get the latest version data by id for an application with applicationid
-        /// Used by the DetailView
-        /// </summary>
-        /// <param name="applicationid">The ID of the application in the meta model</param>
-        /// <param name="id">The data id</param>
-        [HttpGet]
-        public virtual async Task<IActionResult> GetDetailData(int applicationid, int id)
-        {
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-
-            if (model == null || id < 1)
-                return BadRequest();
-
-            if (!model.UseDetailViewAuthorization)
-            {
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-                var data = DataRepository.Get(state, model);
-                return new JsonResult(data);
-            }
-            else
-            {
-                if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, model, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
-
-                var state = new ClientStateInfo() { Id = id, ApplicationId = applicationid };
-
-                if (model.Application.DetailViewRequirement == "OWNER")
-                    state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-
-                var data = DataRepository.Get(state, model);
-                return new JsonResult(data);
-
-            }
-
-        }
-
-        /// <summary>
-        /// Get the latest version of the latest application owned by the logged in user 
-        /// </summary>
-        /// <param name="applicationid">The ID of the application in the model</param>
-        [HttpGet]
-        public virtual async Task<IActionResult> GetLatestByLoggedInUser(int applicationid)
-        {
-
-            if (applicationid < 1)
-                return BadRequest();
-
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-
-            if (model == null)
-                return BadRequest();
-
-            if (!User.Identity.IsAuthenticated)
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-            if (!await UserManager.HasAuthorization(User, model, IntwentyPermission.Read))
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
-
-          
-            var state = new ClientStateInfo() { ApplicationId = applicationid };
-            state.FilterValues.Add(new FilterValue() { Name = "OwnedBy", Value = User.Identity.Name });
-            var data = DataRepository.GetLatestByOwnerUser(state);
-            return new JsonResult(data);
-
-        }
 
         /// <summary>
         /// Loads data for a listview for the application with supplied Id
         /// </summary>
         [HttpPost]
-        public virtual async Task<IActionResult> GetEditListData([FromBody] ListFilter model)
+        public virtual async Task<IActionResult> GetPagedList([FromBody] ListFilter model)
         {
            
 
@@ -147,68 +84,37 @@ namespace Intwenty.Controllers
             if (model.ApplicationId < 1)
                 return BadRequest();
 
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
+            var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
             if (appmodel == null)
                 return BadRequest();
 
-            if (!appmodel.UseEditListViewAuthorization)
+            var viewmodel = appmodel.Views.Find(p => p.Id == model.ApplicationViewId);
+            if (viewmodel == null)
+                return BadRequest();
+
+            if (User.Identity.IsAuthenticated)
+                model.SetUser(User);
+         
+
+            if (viewmodel.IsPublic)
             {
-                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
+                var listdata = DataRepository.GetJsonArray(model, appmodel);
                 return new JsonResult(listdata);
             }
             else
             {
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, appmodel, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
+                if (!await UserManager.HasAuthorization(User, viewmodel))
+                   return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
-                if (appmodel.Application.EditListViewRequirement == "OWNER")
-                    model.OwnerUserId = User.Identity.Name;
-                  
 
-                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
+                var listdata = DataRepository.GetJsonArray(model, appmodel);
                 return new JsonResult(listdata);
 
             }
 
            
-        }
-
-        /// <summary>
-        /// Loads data for a listview for the application with supplied Id
-        /// </summary>
-        [HttpPost]
-        public virtual async Task<IActionResult> GetListData([FromBody] ListFilter model)
-        {
-            if (model == null)
-                return BadRequest();
-            if (model.ApplicationId < 1)
-                return BadRequest();
-
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == model.ApplicationId);
-            if (appmodel == null)
-                return BadRequest();
-
-            if (!appmodel.UseListViewAuthorization)
-            {
-                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
-                return new JsonResult(listdata);
-            }
-            else
-            {
-                if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, appmodel, IntwentyPermission.Read))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
-
-                if (appmodel.Application.EditListViewRequirement == "OWNER")
-                    model.OwnerUserId = User.Identity.Name;
-
-                var listdata = DataRepository.GetPagedJsonArray(model, appmodel);
-                return new JsonResult(listdata);
-
-            }
         }
 
         /// <summary>
@@ -261,24 +167,29 @@ namespace Intwenty.Controllers
         [HttpPost]
         public virtual async Task<IActionResult> Save([FromBody] System.Text.Json.JsonElement model)
         {
-      
-            var state = ClientStateInfo.CreateFromJSON(model);
+
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = ClientStateInfo.CreateFromJSON(model, User);
+            else
+                state = ClientStateInfo.CreateFromJSON(model);
 
             if (state == null)
                 return BadRequest();
             if (state.ApplicationId < 1)
                 return BadRequest();
-
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (state.ApplicationViewId < 1)
+                return BadRequest();
+            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
             if (appmodel == null)
                 return BadRequest();
 
-            if (!appmodel.UseCreateViewAuthorization && state.Id < 1)
-            {
-                var res = DataRepository.Save(state, appmodel);
-                return new JsonResult(res);
-            }
-            else if (!appmodel.UseEditViewAuthorization && state.Id > 0)
+            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+            if (viewmodel == null)
+                return BadRequest();
+
+
+            if (viewmodel.IsPublic)
             {
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);
@@ -287,13 +198,9 @@ namespace Intwenty.Controllers
             {
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must login to use this function"));
-                if (!await UserManager.HasAuthorization(User, appmodel, IntwentyPermission.Modify))
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to modify data in this application, apply for modify permission in application {0}", appmodel.Application.Title)));
+                if (!await UserManager.HasAuthorization(User, viewmodel))
+                   return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to modify data in this view or application")));
 
-                //if (appmodel.Application.EditViewRequirement == "OWNER")
-                //    TODO: IF UPDATE, CHECK THAT THE UPDATER OWNS THE DATA
-
-                state.UserId = User.Identity.Name;
 
                 var res = DataRepository.Save(state, appmodel);
                 return new JsonResult(res);
@@ -307,21 +214,30 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> Delete([FromBody] System.Text.Json.JsonElement model)
         {
 
-            var state = ClientStateInfo.CreateFromJSON(model);
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = ClientStateInfo.CreateFromJSON(model, User);
+            else
+                state = ClientStateInfo.CreateFromJSON(model);
 
             if (state == null)
                 return BadRequest();
             if (state.ApplicationId < 1)
                 return BadRequest();
-
-            var appmodel = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
+            if (state.ApplicationViewId < 1)
+                return BadRequest();
+            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
             if (appmodel == null)
+                return BadRequest();
+
+            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+            if (viewmodel == null)
                 return BadRequest();
 
             if (!User.Identity.IsAuthenticated)
                 return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
-            if (!await UserManager.HasAuthorization(User, appmodel, IntwentyPermission.Delete))
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in this application, apply for delete permission in application {0}", appmodel.Application.Title)));
+            if (!await UserManager.HasAuthorization(User, viewmodel))
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
 
             var res = DataRepository.Delete(state, appmodel);
             return new JsonResult(res);

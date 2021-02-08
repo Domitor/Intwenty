@@ -18,6 +18,8 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string NormalizedName { get; set; }
 
+        public string TablePrefix { get; set; }
+
 
     }
 }

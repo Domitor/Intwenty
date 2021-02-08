@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
 
     public class TranslationManagementVm
@@ -12,11 +12,14 @@ namespace Intwenty.Model.UIDesign
 
         public List<TranslationVm> Translations { get; set; }
     }
+
     public class TranslationVm : TranslationModelItem
     {
         public int ApplicationModelId { get; set; }
 
         public int UserInterfaceModelId { get; set; }
+
+        public int ViewModelId { get; set; }
 
         public string ModelTitle { get; set; }
 

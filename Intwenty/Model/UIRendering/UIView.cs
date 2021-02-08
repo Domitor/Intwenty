@@ -18,6 +18,7 @@ namespace Intwenty.Model.UIRendering
         public List<IUIControl> Modals { get; set; }
         public int PageSize { get; set; }
 
+        /*
         public bool IsMetaTypeCreateView
         {
             get { return MetaType == UserInterfaceModelItem.MetaTypeCreateView; }
@@ -42,6 +43,7 @@ namespace Intwenty.Model.UIRendering
         {
             get { return MetaType == UserInterfaceModelItem.MetaTypeEditListView; }
         }
+        */
         public UIView()
         {
             Sections = new List<UISection>();

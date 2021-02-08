@@ -1,4 +1,4 @@
-﻿<h4>Basics</h4>
+﻿<h4>Configuration</h4>
 
 <div class="row">
     <div class="col-lg-6">
@@ -30,174 +30,69 @@
             <input id="appmetacode" type="text" class="form-control form-control-sm" v-model="model.metaCode" :disabled="model.id > 0" />
         </div>
 
-      
+        <div class="form-group">
+            <label class="control-label">Data Mode</label>
+            <select id="cbTenantIsolvl" v-model.number="model.dataMode" class="form-control form-control-sm">
+                <option value="0">Standard</option>
+                <option value="1">Simple</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <input id="useversioning" type="checkbox" v-model="model.useVersioning" :disabled="model.id > 0" /> Use Versioning
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Tenant Isolation Level</label>
+            <select id="cbTenantIsolvl" v-model.number="model.tenantIsolationLevel" class="form-control form-control-sm">
+                <option value="0">None</option>
+                <option value="1">User</option>
+                <option value="2">Organization</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Tenant Isolation Method</label>
+            <select id="cbTenantIsoMet" v-model.number="model.tenantIsolationMethod" class="form-control form-control-sm">
+                <option value="0">None</option>
+                <option value="1">ByRows</option>
+                <option value="2">ByTables</option>
+            </select>
+        </div>
 
     </div>
     <div class="col-lg-6">
 
-        <div class="form-group">
-            <label class="control-label">Application Path<span style="color: red"> *</span></label>
-            <input id="apppath" type="text" class="form-control form-control-sm" v-model="model.applicationPath" placeholder="Example: MyApp" />
-        </div>
-
-        <strong>Valid application paths</strong>
-        <p><i>Intwenty must be restarted for your new or changed URL (Application Path) to take effect</i></p>
-        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Create</p>
-        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Edit/{id}</p>
-        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/Detail/{id}</p>
-        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/EditList</p>
-        <p v-if="model.applicationPath!=''">/{{model.applicationPath}}/List</p>
-        <p>/Application/Create/{applicationid}</p>
-        <p>/Application/Edit/{applicationid}/{id}</p>
-        <p>/Application/Detail/{applicationid}/{id}</p>
-        <p>/Application/EditList/{applicationid}</p>
-        <p>/Application/List/{applicationid}</p>
-
-    </div>
-</div>
-
-<h4>Default View Access Requirements</h4>
-<hr />
-<div class="row">
-    <div class="col-lg-5">
-
-        <strong>The Create View</strong><br />
-        <div class="form-check">
-            <label class="radio">
-                <input type="radio" name="createaccess" value="PUB" v-model="model.createViewRequirement" />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio">
-                <input type="radio" name="createaccess" checked value="AUTH" v-model="model.createViewRequirement" />Authorized (Modify Permission)
-            </label>
-        </div>
-
-
-
-        <br />
-
-        <strong>The Edit View</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editaccess" value="PUB" v-model="model.editViewRequirement" />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editaccess" checked value="AUTH" v-model="model.editViewRequirement" />Authorized (Read Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editaccess" value="OWNER" v-model="model.editViewRequirement" />Authorized (Read Permission) and Data Owner
-            </label>
-        </div>
-
-
-
-
-        <br />
-        <div class="form-check">
-
-        </div>
-
-        <strong>The Editlist View</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" value="PUB" v-model="model.editListViewRequirement" />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" checked value="AUTH" v-model="model.editListViewRequirement" />Authorized (Read Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="editlistviewaccess" value="OWNER" v-model="model.editListViewRequirement" />Authorized (Read Permission) and Data Owner
-            </label>
-        </div>
-
-        <br />
-
-        <strong>The Detail View (Presentation)</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="PUB" v-model="model.detailViewRequirement" />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="AUTH" checked v-model="model.detailViewRequirement" />Authorized (Read Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="detailaccess" value="OWNER" v-model="model.detailViewRequirement" />Authorized (Read Permission) and Data Owner
-            </label>
-        </div>
-
-        <br />
-
-
-        <strong>The List View (Presentation)</strong><br />
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="PUB" v-model="model.listViewRequirement" />None (Public)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="AUTH" checked v-model="model.listViewRequirement" />Authorized (Read Permission)
-            </label>
-        </div>
-        <div class="form-check">
-            <label class="radio-inline">
-                <input type="radio" name="listviewaccess" value="OWNER" v-model="model.listViewRequirement" />Authorized (Read Permission) and Data Owner
-            </label>
-        </div>
-
-        <br />
-        <h4>Function Requirements</h4>
-        <hr />
-
-        <strong>Save New Information (Inherits the 'Create View')</strong><br />
-        <p v-if="model.createViewRequirement=='PUB'">None (Public)</p>
-        <p v-if="model.createViewRequirement=='AUTH'">Authorized (Modify Permission)</p>
-
-        <br />
-
-        <strong>Update Information (Inherits the 'Edit View')</strong><br />
-        <p v-if="model.editViewRequirement=='PUB'">None (Public)</p>
-        <p v-if="model.editViewRequirement=='AUTH'">Authorized (Modify Permission)</p>
-        <p v-if="model.editViewRequirement=='OWNER'">Authorized (Modify Permission) and Data Owner</p>
-
-
-        <strong>Delete Information</strong><br />
-        <p>Authorized (Delete Permission)</p>
        
 
-
-    </div>
-    <div class="col-lg-7">
         <div class="alert alert-primary" role="alert">
-            <i class="far fa-question-circle"></i> Specify what permission that is required to access the standard views in this application.
+            <i class="far fa-question-circle"></i>
             <br />
             <br />
-            <strong>Intwenty Default Views</strong><br />
+            <strong>Data Mode</strong><br />
             <hr />
-            <strong>The Create View</strong><br />Used to create new application records <br /><br />
-            <strong>The Edit View</strong><br />Used to edit or export an application record <br /><br />
-            <strong>The Edit List View</strong><br />Used to list application records, this view also allows for deleting records. <br /><br />
-            <strong>The Detail View</strong><br />A readonly presentation view, to present an application record <br /><br />
-            <strong>The List View</strong><br />A readonly presentation view, to present multiple application records <br /><br />
+            <strong>Standard</strong><br />Use all standard features including instance catalog and subtables  <br /><br />
+            <strong>Simple</strong><br />Use this mode for performance. Only one table per application is allowed and it is not possible to use versioning or other features <br /><br />
             <br />
-            <strong>View access Modes</strong><br />
+            <br />
+            <strong>Versioning</strong><br />
             <hr />
-            <strong style="width:100px">Public: </strong> Anyone <br />
-            <strong style="width:100px">Authorized (Permission): </strong> Authorized user <br />
-            <strong style="width:100px">Authorized (Permission) and Data Owner: </strong> Authorized user who created the data
+            If versioning is applied, database updates will generate new versions (inserts) of rows rather than updating them.
+            <br />
+            <br />
+            <strong>Tenant Isolation</strong><br />
+            <hr />
+            <strong>None</strong><br />All data is accessible to all authorized users <br /><br />
+            <strong>User</strong><br />Authorized users are limited to access their own data <br /><br />
+            <strong>Organization</strong><br />Authorized users can access all data that is owned by the user's organization<br /><br />
+            <br />
+            <strong>Tenant Isolation Method</strong><br />
+            <hr />
+            <strong style="width:100px">None: </strong> None <br />
+            <strong style="width:100px">ByRows: </strong> Tenants use the same tables <br />
+            <strong style="width:100px">ByTables: </strong> Tenants store the data in their own tables
         </div>
     </div>
 </div>
+
+

@@ -17,13 +17,13 @@
                class="form-control form-control-sm"
                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
                v-on:input="onUserInput(event)"
-               data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextBox
+               data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeTextBox"
                data-title="@Model.LocalizedTitle"
                data-validationfield="@validationfield"
                data-dbtable="@Model.DataTableDbName"
                data-dbfield="@Model.DataColumnDbName"
                data-required="@Model.Mandatory" />
-        <span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span>
+        <!--   span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span  -->
     }
     else
     {
@@ -33,7 +33,7 @@
                type="text"
                class="form-control form-control-sm"
                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
-               data-metatype=@Intwenty.Model.UserInterfaceModelItem.MetaTypeTextBox
+               data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeTextBox"
                data-title="@Model.LocalizedTitle"
                disabled />
 

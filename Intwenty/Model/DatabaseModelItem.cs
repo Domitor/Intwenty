@@ -57,12 +57,13 @@ namespace Intwenty.Model
             SetEmptyStrings();
         }
 
-        public static DatabaseModelItem CreateFrameworkColumn(int id, string appmetacode, SystemModelItem system, string tablename, string dbname, string datatype, string parentmetacode="ROOT")
+        public static DatabaseModelItem CreateFrameworkColumn(int id, ApplicationModelItem app, string tablename, string dbname, string datatype, string parentmetacode="ROOT")
         {
             var res = new DatabaseModelItem();
+            res.ApplicationInfo = app;
             res.Id = id;
             res.MetaType = MetaTypeDataColumn;
-            res.AppMetaCode = appmetacode;
+            res.AppMetaCode = app.MetaCode;
             res.ColumnName = dbname;
             res.DbName = dbname;
             res.TableName = tablename;
@@ -72,9 +73,9 @@ namespace Intwenty.Model
             res.ParentMetaCode = parentmetacode;
             res.Properties = string.Empty;
             res.IsFrameworkItem = true;
-            if (system!=null)
-                res.SystemMetaCode = system.MetaCode;
-            res.SystemInfo = system;
+            if (app.SystemInfo != null)
+                res.SystemMetaCode = app.SystemInfo.MetaCode;
+            res.SystemInfo = app.SystemInfo;
             res.Description = "Required by Intwenty";
 
             return res;
@@ -96,7 +97,7 @@ namespace Intwenty.Model
         }
 
         public SystemModelItem SystemInfo { get; set; }
-
+        public ApplicationModelItem ApplicationInfo { get; set; }
         public string SystemMetaCode { get; set; }
 
         public string Description { get; set; }

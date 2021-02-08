@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
     public static class DataViewModelCreator
     {
@@ -11,7 +11,7 @@ namespace Intwenty.Model.UIDesign
             var res = new List<DataViewModelItem>();
             var t = new DataViewModelItem(DataViewModelItem.MetaTypeDataView) { Id = model.Id, SQLQuery = model.SQLQuery, Title = model.Title, MetaCode = model.MetaCode, ParentMetaCode = "ROOT"  };
             if (string.IsNullOrEmpty(model.MetaCode))
-                t.MetaCode = BaseModelItem.GenerateNewMetaCode(t);
+                t.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
             res.Add(t);
 
@@ -23,7 +23,7 @@ namespace Intwenty.Model.UIDesign
                 {
                     var kf = new DataViewModelItem(DataViewModelItem.MetaTypeDataViewKeyColumn) { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode};
                     if (string.IsNullOrEmpty(kf.MetaCode))
-                        kf.MetaCode = BaseModelItem.GenerateNewMetaCode(kf);
+                        kf.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
                     res.Add(kf);
                 }
@@ -31,7 +31,7 @@ namespace Intwenty.Model.UIDesign
                 {
                     var lf = new DataViewModelItem(DataViewModelItem.MetaTypeDataViewColumn) { Id = f.Id, SQLQueryFieldName = f.SQLQueryFieldName, Title = f.Title, MetaCode = "", ParentMetaCode = t.MetaCode };
                     if (string.IsNullOrEmpty(lf.MetaCode))
-                        lf.MetaCode = BaseModelItem.GenerateNewMetaCode(lf);
+                        lf.MetaCode = BaseModelItem.GetQuiteUniqueString();
 
                     res.Add(lf);
                 }

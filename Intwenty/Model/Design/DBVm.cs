@@ -4,46 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
 
     public static class DatabaseModelCreator
     {
 
-        public static List<DatabaseModelItem> GetDatabaseModel(DBVm model)
-        {
-            var res = new List<DatabaseModelItem>();
-            res.AddRange(model.Tables.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, Properties = p.CompilePropertyString(), DataType = "", MetaCode = p.MetaCode,ParentMetaCode = "ROOT" }));
-            res.AddRange(model.Columns.Select(p => new DatabaseModelItem(p.MetaType) { Id = p.Id, DbName = p.DbName, Description = p.Description, DataType = p.DataType, Properties = p.CompilePropertyString(), TableName = p.TableName, MetaCode=p.MetaCode }));
-
-
-            return res;
-        }
-
-        public static DBVm GetDatabaseVm(ApplicationModel app)
-        {
-            var res = new DBVm();
-            res.Id = app.Application.Id;
-            res.Title = app.Application.Title;
-
-            var tables = GetDatabaseTableVm(app);
-            res.Tables = tables;
-            foreach (var t in tables)
-            {
-                foreach (var c in t.Columns)
-                {
-                    res.Columns.Add(c);
-                }
-            }
-
-            foreach (var t in tables)
-            {
-                t.Columns.Clear();
-            }
-
-            return res;
-
-        }
 
         public static List<DatabaseTableVm> GetDatabaseTableVm(ApplicationModel app)
         {
@@ -80,6 +46,8 @@ namespace Intwenty.Model.UIDesign
 
             return res;
         }
+
+       
 
         public static DatabaseTableVm GetListViewTableVm(ApplicationModel app)
         {

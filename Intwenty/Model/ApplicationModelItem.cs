@@ -7,9 +7,30 @@ using System.Runtime.Serialization;
 
 namespace Intwenty.Model
 {
+    public enum TenantIsolationOptions
+    {
+        None = 0  //All users can access the same data
+        , User = 1  //A user can only access owned data
+        , Organization = 2 //An organization can only access owned data
+    }
 
-   public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
+    public enum TenantIsolationMethodOptions
+    {
+        None = 0
+       , ByRows = 1
+       , ByTables = 2
+       , ByDatabase = 3
+    }
+
+    public enum DataModeOptions
+    {
+       Standard = 0
+      ,Simple = 1
+    }
+    public class ApplicationModelItem : BaseModelItem, ILocalizableTitle
    {
+      
+
         public static readonly string MetaTypeApplication = "APPLICATION";
 
         public ApplicationModelItem()
@@ -27,16 +48,12 @@ namespace Intwenty.Model
             MetaCode = entity.MetaCode;
             DbName = entity.DbName;
             UseVersioning = entity.UseVersioning;
-            IsHierarchicalApplication = entity.IsHierarchicalApplication;
             SystemMetaCode = entity.SystemMetaCode;
             MetaType = MetaTypeApplication;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
-            CreateViewRequirement = entity.CreateViewRequirement;
-            EditViewRequirement = entity.EditViewRequirement;
-            EditListViewRequirement = entity.EditListViewRequirement;
-            DetailViewRequirement = entity.DetailViewRequirement;
-            ListViewRequirement = entity.ListViewRequirement;
-            ApplicationPath = entity.ApplicationPath;
+            DataMode = (DataModeOptions)entity.DataMode;
+            TenantIsolationLevel = (TenantIsolationOptions)entity.TenantIsolationLevel;
+            TenantIsolationMethod = (TenantIsolationMethodOptions)entity.TenantIsolationMethod;
             SetEmptyStrings();
         }
 
@@ -49,29 +66,19 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) TitleLocalizationKey = string.Empty;
-            if (string.IsNullOrEmpty(CreateViewRequirement)) CreateViewRequirement = string.Empty;
-            if (string.IsNullOrEmpty(EditViewRequirement)) EditViewRequirement = string.Empty;
-            if (string.IsNullOrEmpty(EditListViewRequirement)) EditListViewRequirement = string.Empty;
-            if (string.IsNullOrEmpty(DetailViewRequirement)) DetailViewRequirement = string.Empty;
-            if (string.IsNullOrEmpty(ListViewRequirement)) ListViewRequirement = string.Empty;
-            if (string.IsNullOrEmpty(ApplicationPath)) ApplicationPath = string.Empty;
+
         }
+
+       
+        public TenantIsolationOptions TenantIsolationLevel { get; set; }
+
+        public TenantIsolationMethodOptions TenantIsolationMethod { get; set; }
+
+        public DataModeOptions DataMode { get; set; }
 
         public SystemModelItem SystemInfo { get; set; }
 
         public string SystemMetaCode { get; set; }
-
-        public string CreateViewRequirement { get; set; }
-
-        public string EditViewRequirement { get; set; }
-
-        public string EditListViewRequirement { get; set; }
-
-        public string DetailViewRequirement { get; set; }
-
-        public string ListViewRequirement { get; set; }
-
-        public string ApplicationPath { get; set; }
 
         public string TitleLocalizationKey { get; set; }
 
@@ -79,7 +86,7 @@ namespace Intwenty.Model
 
         public string DbName { get; set; }
 
-        public bool IsHierarchicalApplication { get; set; }
+       
 
         public bool UseVersioning { get; set; }
 

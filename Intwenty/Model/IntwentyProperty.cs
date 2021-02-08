@@ -97,25 +97,6 @@ namespace Intwenty.Model
         public string DisplayValue { get; set; }
 
 
-        public static PropertyValue CreateNew(string name, string value, IntwentyProperty instance = null)
-        {
-            if (instance == null)
-                return new PropertyValue() { CodeName = name, CodeValue = value };
-            else
-            {
-                var t = new PropertyValue();
-                t.CodeName = instance.CodeName;
-                t.CodeValue = value;
-                t.DisplayValue = value;
-                return t;
-
-            }
-
-
-
-        }
-
-
     }
 
 

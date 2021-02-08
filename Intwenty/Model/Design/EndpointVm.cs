@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
     public class EndpointManagementVm
     {
@@ -88,7 +88,7 @@ namespace Intwenty.Model.UIDesign
 
         public static EndpointModelItem CreateEndpointModelItem(EndpointVm model)
         {
-            var t = new EndpointModelItem(model.EndpointType.id);
+            var t = new EndpointModelItem(model.EndpointType.id) { ParentMetaCode = "ROOT" };
             if (t.IsMetaTypeCustomPost ||
                 t.IsMetaTypeCustomGet)
             {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Intwenty.Model.UIDesign
+namespace Intwenty.Model.Design
 {
     public class BaseModelVm : HashTagPropertyObject
     {
