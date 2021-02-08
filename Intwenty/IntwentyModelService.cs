@@ -563,16 +563,43 @@ namespace Intwenty
         public async Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal)
         {
             var res = new List<SystemModelItem>();
-            var systems = GetSystemModels();
-            var auth_apps = await GetAuthorizedApplicationModelsAsync(claimprincipal);
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return res;
 
-            foreach (var s in systems)
+            var user = await UserManager.GetUserAsync(claimprincipal);
+            if (user == null)
+                return res;
+
+            var systems = GetSystemModels();
+            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
+                return systems;
+
+            var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p));
+
+            var denied = list.Where(p => p.DenyAuthorization).ToList();
+
+
+            foreach (var sys in systems)
             {
-                if (auth_apps.Exists(p => p.SystemMetaCode == s.MetaCode))
-                    res.Add(s);
+
+                if (denied.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == sys.MetaCode))
+                    continue;
+
+                foreach (var p in list)
+                {
+
+                    if (p.IsSystemAuthorization && p.AuthorizationNormalizedName == sys.MetaCode && !p.DenyAuthorization)
+                    {
+                        res.Add(sys);
+                    }
+                }
+
             }
 
+
             return res;
+
         }
 
         public async Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal)
@@ -606,7 +633,7 @@ namespace Intwenty
                 foreach (var p in list)
                 {
 
-                    if (p.IsViewAuthorization && p.AuthorizationNormalizedName == a.MetaCode && !p.DenyAuthorization)
+                    if (p.IsApplicationAuthorization && p.AuthorizationNormalizedName == a.MetaCode && !p.DenyAuthorization)
                     {
                         res.Add(a);
                     }

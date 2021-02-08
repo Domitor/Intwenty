@@ -14,14 +14,23 @@
     <br />
     <div class="card">
         <div class="card-header"><h2>Database model designer</h2></div>
-        <div class="card-body">Define the datastructure for the {{model.title}} application</div>
+        <div class="card-body">
+            Define the datastructure for the {{model.title}} application
+            <br />
+            <a asp-action="ApplicationList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
+            <br />
+        </div>
+
     </div>
 
-    <br />
-
-    <a asp-action="ApplicationList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
 
     <br />
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="modelSaved">
+        <strong>Changes have been saved !</strong><br />
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <br />
 
     <h4>Database tables</h4>
@@ -122,7 +131,8 @@
             data: {
                 model: { tables: [], columns: [] },
                 datatypes: [],
-                idgen:-1
+                idgen: -1
+                ,modelSaved:false
             },
             methods:
             {
@@ -149,6 +159,8 @@
                         success: function (response)
                         {
                             context.model = response;
+                            context.modelSaved = true;
+                            setTimeout(function () { context.modelSaved = false; }, 3000);
                         },
                         error: function (response)
                         {

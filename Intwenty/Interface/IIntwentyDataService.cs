@@ -22,6 +22,12 @@ namespace Intwenty.Interface
         /// <returns>An Result including a json object</returns>
         DataResult New(ApplicationModel model);
 
+        /// <summary>
+        /// Saves application data
+        /// </summary>
+        /// <returns>A result describing the state of the saved application</returns>
+        //ModifyResult Save<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
+        //ModifyResult SaveSubTable<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
 
         /// <summary>
         /// Saves application data

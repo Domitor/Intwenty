@@ -27,9 +27,9 @@ namespace Intwenty.Model.Dto
 
         public ClientStateInfo()
         {
+            Properties = "";
             Data = new ApplicationData();
             User = new UserInfo();
-            Properties = "";
         }
 
         public ClientStateInfo(ClaimsPrincipal user)
@@ -76,7 +76,47 @@ namespace Intwenty.Model.Dto
 
     }
 
-   
+    public class ClientStateInfo<TData> : HashTagPropertyObject 
+    {
+        public UserInfo User { get; set; }
+
+        public int Id { get; set; }
+
+        public int Version { get; set; }
+
+        public int ApplicationId { get; set; }
+
+        public int ApplicationViewId { get; set; }
+
+        public TData Data { get; set; }
+
+
+        public ClientStateInfo()
+        {
+            Properties = "";
+            Data = default(TData);
+            User = new UserInfo();
+        }
+
+        public ClientStateInfo(TData applicationdata)
+        {
+            Data = applicationdata;
+            User = new UserInfo();
+            Properties = "";
+        }
+
+        public ClientStateInfo(ClaimsPrincipal user)
+        {
+            Properties = "";
+            Data = default(TData);
+            User = new UserInfo(user);
+
+        }
+
+
+    }
+
+
 
 
 
