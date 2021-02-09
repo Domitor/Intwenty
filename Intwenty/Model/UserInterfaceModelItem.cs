@@ -203,6 +203,7 @@ namespace Intwenty.Model
         public int LayoutPanelCount { get; set; }
         public bool Collapsible { get; set; }
         public bool StartExpanded { get; set; }
+        public bool ExcludeOnRender { get; set; }
         public bool IsRemoved { get; set; }
         public List<UIPanel> LayoutPanels { get; set; }
         public List<LayoutRow> LayoutRows { get; set; }
@@ -229,7 +230,6 @@ namespace Intwenty.Model
         public string MetaCode { get; set; }
         public string ParentMetaCode { get; set; }
         public string LocalizedTitle { get; set; }
-        public bool UseFieldSet { get; set; }
         public bool IsRemoved { get; set; }
 
         public List<UserInterfaceStructureModelItem> Controls { get; set; }

@@ -176,8 +176,7 @@ namespace IntwentyDemo.Seed
 
             #endregion
 
-
-            #region sales order
+            #region Sales Order
      
             //APPLICATION SALESORDER
             //--------------------
@@ -196,7 +195,7 @@ namespace IntwentyDemo.Seed
 
 
             //VIEWS
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaCode = "SO_LISTVIEW", MetaType = "UIVIEW", Title = "Item List", TitleLocalizationKey = "SALESORDERLIST", Path = "SalesOrders/List", IsPrimary = true, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaCode = "SO_LISTVIEW", MetaType = "UIVIEW", Title = "Sales Orders", TitleLocalizationKey = "SALESORDERLIST", Path = "SalesOrders/List", IsPrimary = true, IsPublic = false });
             views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaCode = "SO_CREATE_VIEW", MetaType = "UIVIEW", Title = "Create Sales Order", TitleLocalizationKey = "", Path = "SalesOrders/Create", IsPrimary = false, IsPublic = false });
             views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaCode = "SO_EDIT_VIEW", MetaType = "UIVIEW", Title = "Edit Sales Order", TitleLocalizationKey = "", Path = "SalesOrders/Edit/{id}", IsPrimary = false, IsPublic = false });
 
@@ -237,8 +236,6 @@ namespace IntwentyDemo.Seed
 
 
             #endregion
-
-
 
             #region Vendor
 

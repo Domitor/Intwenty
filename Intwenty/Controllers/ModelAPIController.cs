@@ -1366,6 +1366,8 @@ namespace Intwenty.Controllers
                         section.AddUpdateProperty("COLLAPSIBLE", "TRUE");
                     if (section.StartExpanded)
                         section.AddUpdateProperty("STARTEXPANDED", "TRUE");
+                    if (section.ExcludeOnRender)
+                        section.AddUpdateProperty("EXCLUDEONRENDER", "TRUE");
                     if (section.IsRemoved)
                     {
                         if (section.Id > 0)
@@ -1381,7 +1383,7 @@ namespace Intwenty.Controllers
                     {
                         entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == section.Id);
                         entity.Title = section.Title;
-                        entity.Properties = section.CompilePropertyString();
+                        entity.Properties = section.Properties;
                         client.UpdateEntity(entity);
                     }
                     else
@@ -1389,7 +1391,7 @@ namespace Intwenty.Controllers
                         section.MetaCode = BaseModelItem.GetQuiteUniqueString();
                         entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeSection, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, ParentMetaCode = "ROOT", UserInterfaceMetaCode = uimodel.MetaCode };
                         entity.Title = section.Title;
-                        entity.Properties = section.CompilePropertyString();
+                        entity.Properties = section.Properties;
                         entity.MetaCode = section.MetaCode;
                         client.InsertEntity(entity);
                     }
@@ -2027,7 +2029,7 @@ namespace Intwenty.Controllers
                     var key = "APP_LOC_" + BaseModelItem.GetQuiteUniqueString();
                     foreach (var l in langs)
                     {
-                        res.Add(new TranslationVm() { ApplicationModelId = a.Application.Id, Culture = l.Culture, Key = key, ModelTitle = "Application: " + a.Application.Title, Text = "" });
+                        res.Add(new TranslationVm() { ApplicationModelId = a.Application.Id, Culture = l.Culture, Key = key, ModelTitle = a.Application.Title + " (App), Title", Text = "" });
                     }
                 }
                 else
@@ -2037,14 +2039,14 @@ namespace Intwenty.Controllers
                     {
                         var ct = trans.Find(p => p.Culture == l.Culture);
                         if (ct != null)
-                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = a.Application.Title + " (App), Title", Text = ct.Text, Id = ct.Id });
                         else
-                            res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = "Application: " + a.Application.Title, Text = "" });
+                            res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = a.Application.Title + " (App), Title", Text = "" });
                     }
 
                     foreach (var ct in trans.Where(p=> !langs.Exists(x=> x.Culture == p.Culture)))
                     {
-                        res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = "Application: " + a.Application.Title, Text = ct.Text, Id = ct.Id });
+                        res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = a.Application.Title + " (App), Title", Text = ct.Text, Id = ct.Id });
                     }
 
                 }
@@ -2052,7 +2054,7 @@ namespace Intwenty.Controllers
                 foreach (var view in a.Views)
                 {
 
-                    var title = "Application: " + a.Application.Title + ", " + view.Title + " (View.Title)";
+                    var title = view.Title + " (View), Title";
                     if (string.IsNullOrEmpty(view.TitleLocalizationKey))
                     {
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
@@ -2080,13 +2082,13 @@ namespace Intwenty.Controllers
 
                     }
 
-                    var description = "Application: " + a.Application.Title + ", " + view.Title + " (View.Description)";
+                    var description = view.Title + " (View), Description" + view.Description;
                     if (string.IsNullOrEmpty(view.DescriptionLocalizationKey))
                     {
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
                         foreach (var l in langs)
                         {
-                            res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "" });
+                            res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "", TranslationType = 2 });
                         }
                     }
                     else
@@ -2096,16 +2098,46 @@ namespace Intwenty.Controllers
                         {
                             var ct = trans.Find(p => p.Culture == l.Culture);
                             if (ct != null)
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id });
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType=2 });
                             else
-                                res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "" });
+                                res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "", TranslationType = 2 });
                         }
 
                         foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
                         {
-                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = description, Text = ct.Text, Id = ct.Id });
+                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType = 2 });
                         }
 
+                    }
+                    foreach (var func in view.Functions)
+                    {
+                        title = view.Title + " (" + func.MetaType + " Function), Title";
+                        if (string.IsNullOrEmpty(func.TitleLocalizationKey))
+                        {
+                            var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
+                            foreach (var l in langs)
+                            {
+                                res.Add(new TranslationVm() { FunctionModelId = func.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
+                            }
+                        }
+                        else
+                        {
+                            var trans = translations.FindAll(p => p.Key == func.TitleLocalizationKey);
+                            foreach (var l in langs)
+                            {
+                                var ct = trans.Find(p => p.Culture == l.Culture);
+                                if (ct != null)
+                                    res.Add(new TranslationVm() { Culture = ct.Culture, Key = func.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                else
+                                    res.Add(new TranslationVm() { Culture = l.Culture, Key = func.TitleLocalizationKey, ModelTitle = title, Text = "" });
+                            }
+
+                            foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                            {
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                            }
+
+                        }
                     }
 
                     foreach (var iface in view.UserInterface)
@@ -2114,11 +2146,7 @@ namespace Intwenty.Controllers
                         {
                             title = "";
                             var type = metatypes.Find(p => p.ModelCode == "UISTRUCTUREMODEL" && p.Code == ui.MetaType);
-                            title = "Application: " + a.Application.Title;
-                            title += ", " + ui.Title;
-                            if (type != null)
-                                title += " (" + type.Title + ")";
-
+                            title = view.Title + " - " + ui.Title + " (" + ui.MetaType + "), Title";
                             if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
                             {
                                 var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
@@ -2252,9 +2280,27 @@ namespace Intwenty.Controllers
                             client.UpdateEntity(m);
                         }
                     }
-                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text))
+                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType==1)
                     {
                         var m = client.GetEntity<ViewItem>(t.ViewModelId);
+                        if (m != null)
+                        {
+                            m.TitleLocalizationKey = t.Key;
+                            client.UpdateEntity(m);
+                        }
+                    }
+                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType == 2)
+                    {
+                        var m = client.GetEntity<ViewItem>(t.ViewModelId);
+                        if (m != null)
+                        {
+                            m.DescriptionLocalizationKey = t.Key;
+                            client.UpdateEntity(m);
+                        }
+                    }
+                    else if (t.FunctionModelId > 0 && !string.IsNullOrEmpty(t.Text))
+                    {
+                        var m = client.GetEntity<FunctionItem>(t.FunctionModelId);
                         if (m != null)
                         {
                             m.TitleLocalizationKey = t.Key;

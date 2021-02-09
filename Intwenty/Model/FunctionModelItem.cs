@@ -8,7 +8,7 @@ namespace Intwenty.Model
 {
 
 
-    public class FunctionModelItem : BaseModelItem
+    public class FunctionModelItem : BaseModelItem, ILocalizableTitle
     {
         //META TYPES
         public static readonly string MetaTypeCreate = "CREATE";

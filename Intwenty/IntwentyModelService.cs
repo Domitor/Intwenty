@@ -342,17 +342,7 @@ namespace Intwenty
                 {
                     if (view.Id == id)
                     {
-
-                        LocalizeTitle(view);
-                        LocalizeDescription(view);
-                        foreach (var ui in view.UserInterface)
-                        {
-                            foreach (var uiitem in ui.UIStructure)
-                            {
-                                LocalizeTitle(uiitem);
-                            }
-                        }
-
+                        LocalizeViewModel(view);
                         return view;
 
                     }
@@ -375,19 +365,8 @@ namespace Intwenty
                 {
                     if (view.MetaCode == metacode)
                     {
-
-                        LocalizeTitle(view);
-                        LocalizeDescription(view);
-                        foreach (var ui in view.UserInterface)
-                        {
-                            foreach (var uiitem in ui.UIStructure)
-                            {
-                                LocalizeTitle(uiitem);
-                            }
-                        }
-
+                        LocalizeViewModel(view);
                         return view;
-
                     }
                 }
             }
@@ -407,17 +386,7 @@ namespace Intwenty
                 {
                     if (view.IsOnPath(path))
                     {
-
-                        LocalizeTitle(view);
-                        LocalizeDescription(view);
-                        foreach (var ui in view.UserInterface)
-                        {
-                            foreach (var uiitem in ui.UIStructure)
-                            {
-                                LocalizeTitle(uiitem);
-                            }
-                        }
-
+                        LocalizeViewModel(view);
                         return view;
 
                     }
@@ -431,6 +400,32 @@ namespace Intwenty
 
         }
 
+        private void LocalizeViewModel(ViewModel model)
+        {
+            LocalizeTitle(model.ApplicationInfo);
+            LocalizeTitle(model);
+            LocalizeDescription(model);
+            foreach (var func in model.Functions)
+            {
+                LocalizeTitle(func);
+            }
+            foreach (var ui in model.UserInterface)
+            {
+                foreach (var sect in ui.Sections)
+                {
+                    LocalizeTitle(sect);
+                    foreach (var pnl in sect.LayoutPanels)
+                    {
+                        LocalizeTitle(pnl);
+                        foreach (var uiitem in pnl.Controls)
+                        {
+                            LocalizeTitle(uiitem);
+                        }
+                    }
+                }
+            }
+
+        }
        
 
         private void LocalizeTitles(List<ILocalizableTitle> list)
@@ -981,14 +976,15 @@ namespace Intwenty
                         {
                             if (uic.IsMetaTypeSection)
                             {
-                                var sect = new UISection() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1 };
+                                var sect = new UISection() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1, TitleLocalizationKey = uic.TitleLocalizationKey };
                                 sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE", "TRUE");
                                 sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
+                                sect.ExcludeOnRender = uic.HasPropertyWithValue("EXCLUDEONRENDER", "TRUE");
                                 userinterface.Sections.Add(sect);
                             }
                             if (uic.IsMetaTypeTable)
                             {
-                                var table = new UITable() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT" };
+                                var table = new UITable() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", TitleLocalizationKey = uic.TitleLocalizationKey };
                                 userinterface.Table = table;
                                 foreach (var column in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                                 {
@@ -1012,9 +1008,7 @@ namespace Intwenty
 
                                     if (uicomp.IsMetaTypePanel)
                                     {
-                                        var pnl = new UIPanel() { Id = uicomp.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, Title = uicomp.Title, ParentMetaCode = section.MetaCode, Properties = uicomp.Properties };
-                                        if (!string.IsNullOrEmpty(pnl.Title))
-                                            pnl.UseFieldSet = true;
+                                        var pnl = new UIPanel() { Id = uicomp.Id, ColumnOrder = uicomp.ColumnOrder, RowOrder = 1, MetaCode = uicomp.MetaCode, Title = uicomp.Title, ParentMetaCode = section.MetaCode, Properties = uicomp.Properties, TitleLocalizationKey = uicomp.TitleLocalizationKey };
                                         pnl.BuildPropertyList();
                                         section.LayoutPanels.Add(pnl);
                                         foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
