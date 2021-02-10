@@ -17,6 +17,7 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Design;
+using Intwenty.DataClient;
 
 namespace Intwenty.Controllers
 {
@@ -1156,11 +1157,14 @@ namespace Intwenty.Controllers
                 entity.AppMetaCode = appmodel.Application.MetaCode;
                 entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                 entity.MetaType = model.MetaType;
-                entity.Path = model.Path;
+                entity.ActionPath = model.ActionPath;
+                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
                 entity.Title = model.Title;
-                entity.ViewMetaCode = model.ViewMetaCode;
+                entity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                entity.OwnerMetaCode = model.OwnerMetaCode;
                 entity.DataTableMetaCode = model.DataTableMetaCode;
                 entity.Properties = model.CompilePropertyString();
+                entity.IsModalAction = model.IsModalAction;
 
                 var client = DataRepository.GetDataClient();
                 client.Open();
@@ -1204,13 +1208,15 @@ namespace Intwenty.Controllers
                 var entities = client.GetEntities<FunctionItem>();
                 client.Close();
 
-                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.ViewMetaCode == model.ViewMetaCode && p.MetaCode == model.MetaCode);
+                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.OwnerMetaCode == model.OwnerMetaCode && p.MetaCode == model.MetaCode);
                 if (entity == null)
                     return BadRequest();
 
                 entity.Title = model.Title;
-                entity.Path = model.Path;
+                entity.ActionPath = model.ActionPath;
+                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
                 entity.Properties = model.CompilePropertyString();
+                entity.IsModalAction = model.IsModalAction;
 
                 client.Open();
                 client.UpdateEntity(entity);
@@ -1276,9 +1282,10 @@ namespace Intwenty.Controllers
             return GetApplicationViews(model.ApplicationId);
         }
 
+      
 
         /// <summary>
-        /// Get UI view model for application with id and the viewtype
+        /// Get input UI model for application with id and the ui metacode
         /// </summary>
         [HttpGet("/Model/API/GetApplicationInputUI/{applicationid}/{uimetacode}")]
         public IActionResult GetApplicationUI(int applicationid, string uimetacode)
@@ -1306,7 +1313,7 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
-        /// Get UI view model for application with id and the viewtype
+        /// Get list UI model for application with id and the ui metacode
         /// </summary>
         [HttpGet("/Model/API/GetApplicationListUI/{applicationid}/{uimetacode}")]
         public IActionResult GetApplicationListUI(int applicationid, string uimetacode)
@@ -1323,13 +1330,34 @@ namespace Intwenty.Controllers
             if (uimodel == null)
                 return BadRequest();
 
+            var model = GetListUIModel(appmodel, uimodel);
+
+            return new JsonResult(model);
+
+        }
+
+        private UserInterfaceListDesignVm GetListUIModel(ApplicationModel appmodel, UserInterfaceModelItem uimodel)
+        {
             var model = new UserInterfaceListDesignVm();
             model.Id = uimodel.Id;
             model.MetaCode = uimodel.MetaCode;
             model.ApplicationId = appmodel.Application.Id;
             model.Table = uimodel.Table;
+            model.IsSubTableUserInterface = uimodel.IsSubTableUserInterface;
+            model.DataTable = DatabaseModelCreator.GetTableVm(appmodel, uimodel.DataTableMetaCode);
+            model.Functions = uimodel.Functions.Select(p=> new FunctionVm(p)).ToList();
 
-            return new JsonResult(model);
+           
+            foreach (var v in appmodel.Views)
+            {
+                foreach (var ui in v.UserInterface)
+                {
+                    if (ui.IsDataTableConnected && ui.IsMetaTypeInputInterface && uimodel.DataTableMetaCode == ui.DataTableMetaCode)
+                        model.ActionUserInterfaces.Add(ActionUserInterface.Create(ui));
+                }
+            }
+
+            return model;
 
         }
 
@@ -1636,7 +1664,7 @@ namespace Intwenty.Controllers
                 {
 
                     //PANEL CREATED IN UI BUT THEN REMOVED BEFORE SAVE
-                    if (column.Id == 0 && column.IsRemoved)
+                    if (column.Id <= 0 && column.IsRemoved)
                         continue;
 
                     if (column.IsRemoved)
@@ -1660,7 +1688,7 @@ namespace Intwenty.Controllers
 
                     if (column.Id > 0)
                     {
-                        entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == column.Id);
+                        entity = client.GetEntity<UserInterfaceStructureItem>(column.Id);
                         entity.Title = column.Title;
                         entity.Properties = column.CompilePropertyString();
                         entity.DataTableMetaCode = uimodel.DataTableMetaCode;
@@ -1679,7 +1707,21 @@ namespace Intwenty.Controllers
                     }
 
                 }
-         
+
+                foreach (var f in model.Functions)
+                {
+                    if (f.IsRemoved && f.Id < 1)
+                        continue;
+                    if (f.IsRemoved && f.Id > 1)
+                    {
+                        DeleteListUIFunction(client, f);
+                    }
+                    else
+                    {
+                        SaveListUIFunction(client, appmodel, uimodel, f);
+
+                    }
+                }
 
                 client.Close();
 
@@ -1693,11 +1735,7 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                model = new UserInterfaceListDesignVm();
-                model.Id = uimodel.Id;
-                model.MetaCode = uimodel.MetaCode;
-                model.ApplicationId = appmodel.Application.Id;
-                model.Table = uimodel.Table;
+                model = GetListUIModel(appmodel, uimodel);
                 return new JsonResult(model);
 
             }
@@ -1711,6 +1749,53 @@ namespace Intwenty.Controllers
             }
 
         }
+
+        private void SaveListUIFunction(IDataClient client, ApplicationModel appmodel, UserInterfaceModelItem uimodel, FunctionVm function)
+        {
+            FunctionItem functionentity = null;
+            if (function != null)
+            {
+                if (function.Id > 0)
+                {
+                    functionentity = client.GetEntity<FunctionItem>(function.Id);
+                    functionentity.Title = function.Title;
+                    functionentity.Properties = function.CompilePropertyString();
+                    functionentity.IsModalAction = function.IsModalAction;
+                    functionentity.ActionPath = function.ActionPath;
+                    functionentity.ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode;
+                    client.UpdateEntity(functionentity);
+                }
+                else
+                {
+                    function.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    functionentity = new FunctionItem()
+                    {
+                        MetaType = function.MetaType,
+                        AppMetaCode = appmodel.Application.MetaCode,
+                        SystemMetaCode = appmodel.System.MetaCode,
+                        MetaCode = function.MetaCode,
+                        IsModalAction = function.IsModalAction,
+                        ActionPath = function.ActionPath,
+                        ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode,
+                        DataTableMetaCode = uimodel.DataTableMetaCode,
+                        OwnerMetaCode = uimodel.MetaCode,
+                        OwnerMetaType = UserInterfaceModelItem.MetaTypeListInterface,
+                        Properties = function.CompilePropertyString(),
+                        Title = function.Title
+                    };
+
+                    client.InsertEntity(functionentity);
+                }
+            }
+
+        }
+
+        private void DeleteListUIFunction(IDataClient client, FunctionVm function)
+        {
+            var functionentity = client.GetEntity<FunctionItem>(function.Id);
+            client.DeleteEntity(functionentity);
+        }
+
 
     
         #endregion

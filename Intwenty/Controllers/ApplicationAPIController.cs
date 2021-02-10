@@ -26,6 +26,26 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
+        [HttpGet("/Application/API/GetApplicationInputUI/{applicationid}/{uimetacode}/{id}")]
+        public IActionResult GetApplicationInputUI(int applicationid, string uimetacode, int? id)
+        {
+
+            ViewBag.Id = 0;
+            if (id.HasValue && id.Value > 0)
+                ViewBag.Id = id;
+
+            var model = ModelRepository.GetApplicationModel(applicationid);
+            if (model == null)
+                return BadRequest();
+
+            var uimodel = model.GetUserInterface(uimetacode);
+            if (uimodel == null)
+                return BadRequest();
+
+            return View("~/Views/Application/InputUI.cshtml", uimodel);
+
+
+        }
 
         /// <summary>
         /// Get the latest version data by id for an application with applicationid

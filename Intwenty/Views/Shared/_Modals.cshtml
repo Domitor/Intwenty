@@ -39,31 +39,23 @@
 </div>
 
 
-<div class="modal" id="tech_modal" role="dialog">
+<div class="modal" id="addEditModal" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">About Intwenty</h5>
+                <h5 class="modal-title"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <h5>Technologies</h5>
-                <ul>
-                    <li>asp.net core 3.1</li>
-                    <li>bootstrap 4.3.7</li>
-                    <li>vue.js 2.6.11</li>
-                    <li>jquery 3.3.1</li>
-                    <li>alasql 0.5.5</li>
-                </ul>
-                <h5>Licence</h5>
-                <p>Massachusetts Institute of Technology</p>
-                <h5>Author</h5>
-                <p>Johan Filipsson</p>
+                <div id="addEditModal_body">
+                    <!-- component :is="modalHtml" v-if="modalHtml" v-bind="currentEditItem"></component -->
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                <button id="addEditModal_savebtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

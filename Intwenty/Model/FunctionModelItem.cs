@@ -39,14 +39,17 @@ namespace Intwenty.Model
             ParentMetaCode = "ROOT";
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
-            Path = entity.Path;
-            if (!string.IsNullOrEmpty(Path))
+            ActionPath = entity.ActionPath;
+            if (!string.IsNullOrEmpty(ActionPath))
             {
-                if (!Path.StartsWith("/"))
-                    Path = "/" + Path;
+                if (!ActionPath.StartsWith("/"))
+                    ActionPath = "/" + ActionPath;
             }
-            ViewMetaCode = entity.ViewMetaCode;
+            ActionUserInterfaceMetaCode = entity.ActionUserInterfaceMetaCode;
+            OwnerMetaType = entity.OwnerMetaType;
+            OwnerMetaCode = entity.OwnerMetaCode;
             DataTableMetaCode = entity.DataTableMetaCode;
+            IsModalAction = entity.IsModalAction;
             SetEmptyStrings();
            
         }
@@ -61,20 +64,25 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(Path)) Path = string.Empty;
-            if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ActionPath)) ActionPath = string.Empty;
+            if (string.IsNullOrEmpty(ActionUserInterfaceMetaCode)) ActionUserInterfaceMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
+        public UserInterfaceModelItem ActionUserInterface { get; set; }
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }
         public string TitleLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }
-        public string ViewMetaCode { get; set; }
+        public string OwnerMetaType { get; set; }
+        public string OwnerMetaCode { get; set; }
         public string DataTableMetaCode { get; set; }
+        public string ActionUserInterfaceMetaCode { get; set; }
 
-        public string Path { get; set; }
+        public string ActionPath { get; set; }
+        public bool IsModalAction { get; set; }
 
         public override string ModelCode
         {
@@ -150,7 +158,7 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeExport; }
         }
 
-
+       
 
         public bool HasSystemInfo
         {

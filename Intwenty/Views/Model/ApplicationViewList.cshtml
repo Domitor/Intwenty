@@ -208,7 +208,7 @@
 
                                 <div class="form-group" v-if="functionHasPath()">
                                     <label class="control-label">Path</label>
-                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.path" />
+                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" />
                                 </div>
 
                             </div>
@@ -272,22 +272,13 @@
                 getFunctionDescription: function () {
                     var context = this;
 
-                    if (context.functionsettings.metaType == 'CREATE')
-                        return "Adds a button to the view that navigates the user to the application's create view. Be sure to set the [path] to point at the view used to create entities";
-                    if (context.functionsettings.metaType == 'EDIT')
-                        return "Adds a button to the view that navigates the user to the application's edit view. Be sure to set the [path] to point at the view used to edit entities";
+                   
                     if (context.functionsettings.metaType == 'NAVIGATE')
                         return "Adds a button to the view that navigates the user to the [path]";
-                    if (context.functionsettings.metaType == 'EXPORT')
-                        return "Adds a button to the view that exports data to ms excel";
+                   
                     if (context.functionsettings.metaType == 'SAVE')
-                        return "Adds a button to the view that triggers the save operation in the function table";
-                    if (context.functionsettings.metaType == 'DELETE')
-                        return "Adds a button to the view that triggers a delete operation in the function table";
-                    if (context.functionsettings.metaType == 'FILTER')
-                        return "Adds the posibility to filter data in a listview";
-                    if (context.functionsettings.metaType == 'PAGING')
-                        return "Adds the posibility to page data in a listview";
+                        return "Adds a button to the view that triggers the application save operation";
+                 
 
 
                     return "";
@@ -319,7 +310,7 @@
                 {
                     var context = this;
 
-                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, viewMetaCode: item.metaCode, dlgHeader: "Add Function", metaType: "", path: "", title: "", dataTableMetaCode: "", metaCode: "", propertyList: item.propertyList, currentProperty: {} };
+                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, ownerMetaCode: item.metaCode, dlgHeader: "Add Function", metaType: "", actionPath: "", title: "", dataTableMetaCode: "", metaCode: "", propertyList: item.propertyList, currentProperty: {} };
 
 
                     var yesfunc = function ()
@@ -361,7 +352,7 @@
                     var context = this;
 
                     context.functionsettings = {
-                        id: item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, dlgHeader: "Edit Function", metaType: item.metaType, path: item.path, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode, propertyList: item.propertyList, currentProperty: {} };
+                        id: item.id, applicationId:@Model.Application.Id, ownerMetaCode: item.viewMetaCode, dlgHeader: "Edit Function", metaType: item.metaType, actionPath: item.actionPath, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode, propertyList: item.propertyList, currentProperty: {} };
 
                     var yesfunc = function ()
                     {
@@ -399,7 +390,7 @@
 
                     var yesfunc = function ()
                     {
-                         var senddata = { id:item.id, applicationId:@Model.Application.Id, viewMetaCode: item.viewMetaCode, metaCode: item.metaCode };
+                         var senddata = { id:item.id, applicationId:@Model.Application.Id, ownerMetaCode: item.viewMetaCode, metaCode: item.metaCode };
                         var baseurl = '@Url.Content("~/Model/API/")';
                         var endpointurl = baseurl + "DeleteFunction";
 
@@ -711,14 +702,8 @@
                 functions: function ()
                 {
                     var res = [];
-                    res.push({ title: "Create", metaCode: "CREATE" });
-                    res.push({ title: "Edit", metaCode: "EDIT" });
-                    res.push({ title: "Delete", metaCode: "DELETE" });
                     res.push({ title: "Navigate", metaCode: "NAVIGATE" });
                     res.push({ title: "Save", metaCode: "SAVE" });
-                    res.push({ title: "Export", metaCode: "EXPORT" });
-                    res.push({ title: "Filter", metaCode: "FILTER" });
-                    res.push({ title: "Paging", metaCode: "PAGING" });
                     return res;
                 }
 

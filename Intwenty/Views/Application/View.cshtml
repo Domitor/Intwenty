@@ -12,12 +12,16 @@
 }
 
 
+
+
+<br />
+<br />
+
 @await Html.PartialAsync("_Modals")
 
-<br />
-<br />
-
 <div id="app">
+
+
 
     <div class="card">
         <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
@@ -25,44 +29,51 @@
 
             <p>@Model.LocalizedDescription</p>
 
-            @if (Model.Functions.Count > 0)
-            {
-                <ul class="nav">
-                    @if (Model.HasCreateFunction)
-                    {
-                        <li class="nav-item">
-                            <a href="@Model.CreateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
-                        </li>
-                    }
-
-                    @if (Model.HasNavigateFunction)
-                    {
-                        <li class="nav-item">
-                            <a href="@Model.NavigateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
-                        </li>
-                    }
-
-                    @if (Model.HasExportFunction)
-                    {
-                        <li class="nav-item">
-                            <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
-                        </li>
-                    }
-
-                    @if (Model.HasSaveFunction)
-                    {
-                        <li class="nav-item">
-                            <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
-                        </li>
-
-                        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
-                        if (aftersaveaction == "GOTOLISTVIEW")
+            <ul class="nav">
+                @if (Model.HasCreateFunction)
+                {
+                    <li class="nav-item">
+                        @if (Model.CreateFunction.IsModalAction)
                         {
-                            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+                            <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openModalCreate('@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
                         }
+                        else
+                        {
+                            <a href="@Model.CreateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
+
+                        }
+
+                    </li>
+                }
+
+                @if (Model.HasNavigateFunction)
+                {
+                    <li class="nav-item">
+                        <a href="@Model.NavigateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                    </li>
+                }
+
+                @if (Model.HasExportFunction)
+                {
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
+                    </li>
+                }
+
+                @if (Model.HasSaveFunction)
+                {
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
+                    </li>
+
+                    aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+                    if (aftersaveaction == "GOTOLISTVIEW")
+                    {
+                        aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
                     }
-                </ul>
-            }
+                }
+            </ul>
+
         </div>
     </div>
 
@@ -195,21 +206,29 @@
                     accordion = "";
 
                 }
-                <div  @Html.Raw(accordion) id="accordion_@sect.MetaCode">
+                <div @Html.Raw(accordion) id="accordion_@sect.MetaCode">
                     <div @Html.Raw(card) id="cardheader_@sect.MetaCode">
                         @if (!sect.ExcludeOnRender)
                         {
                             <div class="card-header">
-                                <h5>@sect.LocalizedTitle</h5>
-                                @if (sect.Collapsible)
-                                {
-                                    <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#colapse_@sect.MetaCode" style="margin:5px"><span class="fa fa-expand-alt"></span></button>
-                                }
+                                <ul class="nav">
+                                    <li class="nav-item">
+                                        @if (sect.Collapsible)
+                                        {
+                                            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#colapse_@sect.MetaCode" style="margin-right:20px;margin-bottom:5px"><span class="fa fa-expand-alt"></span></button>
+                                        }
+                                    </li>
+                                    <li class="nav-item">
+                                        <h4>@sect.LocalizedTitle</h4>
+                                    </li>
+                                </ul>
+
+
                             </div>
                         }
 
-                        <div id="colapse_@sect.MetaCode"  @Html.Raw(colapse) data-parent="#accordion_@sect.MetaCode">
-                            <div  @Html.Raw(cardbody) id="cardbody_@sect.MetaCode">
+                        <div id="colapse_@sect.MetaCode" @Html.Raw(colapse) data-parent="#accordion_@sect.MetaCode">
+                            <div @Html.Raw(cardbody) id="cardbody_@sect.MetaCode">
                                 <br />
                                 <div class="row">
                                     @foreach (var pl in sect.LayoutPanels)
@@ -344,7 +363,7 @@
 
             <br />
 
-            @if (Model.HasFilterFunction)
+            @if (iface.HasFilterFunction)
             {
 
                 <div class="row">
@@ -414,11 +433,11 @@
             <table class="table table-responsive-sm">
                 <thead>
                     <tr>
-                        @if (Model.HasDeleteFunction)
+                        @if (iface.HasDeleteFunction)
                         {
                             <th style="width:5%"></th>
                         }
-                        @if (Model.HasEditFunction)
+                        @if (iface.HasEditFunction)
                         {
                             <th style="width:5%"></th>
                         }
@@ -433,13 +452,21 @@
                     </tr>
                 </thead>
                 <tr v-for="item in sortedResults">
-                    @if (Model.HasDeleteFunction)
+                    @if (iface.HasDeleteFunction)
                     {
                         <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
                     }
-                    @if (Model.HasEditFunction)
+                    @if (iface.HasEditFunction)
                     {
-                        <td style="vertical-align:middle"><a v-bind:href="'@Model.EditFunction.Path/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                        @if (iface.EditFunction.IsModalAction)
+                        {
+                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openModalEdit(item, '@iface.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
+                        }
+                        else
+                        {
+                            <td style="vertical-align:middle"><a v-bind:href="'@iface.EditFunction.ActionPath/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                        }
+
                     }
 
                     @{
@@ -464,7 +491,7 @@
 
             </table>
 
-            @if (Model.HasPagingFunction)
+            @if (iface.HasPagingFunction)
             {
                 <nav>
                     <ul class="pagination">
@@ -488,7 +515,8 @@
 @section Scripts
 {
 
-                                    <script>
+    <script>
+
 
 
         var app = new Vue({
@@ -512,10 +540,68 @@
                 ,applicationViewId: @applicationViewId
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
-                ,showDataViewFilter:false
+                ,showDataViewFilter: false
+                ,modalapp:null
+
             },
             methods:
             {
+                openModalEdit: function (item, uimetacode)
+                {
+                    var context = this;
+                    var endpointurl = context.baseurl + "GetApplicationInputUI/" + context.appId + "/" + uimetacode + "/" + context.instanceId;
+
+
+                    var savefunc = function ()
+                    {
+
+                        //context.saveApplication();
+                    };
+
+                    if (context.modalapp == null)
+                    {
+                         //NEW MODAL APP CONFIG
+                         var appconfig = {
+                                template: '',
+                                el: "#addEditModal_body"
+                                ,data: { model: {  ['@mainDbName']: item }
+                                ,dataview: []
+                                ,valuedomains: {}
+                                ,validation: {}
+                                ,dlgFilterColumnName: ""
+                                ,dlgFilterValue: ""
+                            }
+                        };
+
+                        $.get(endpointurl, function (response)
+                        {
+                            //TEMPLATE
+                            appconfig.template = response;
+
+                            //NEW APP
+                            context.modalapp = new Vue(appconfig);
+
+
+                        }).done(function () {
+
+                           
+                            $('#addEditModal_savebtn').off('click', savefunc);
+                            $('#addEditModal_savebtn').off().on('click', savefunc);
+                            $("#addEditModal").modal();
+
+                        });
+                    }
+                    else
+                    {
+                        context.modalapp.model.@mainDbName = item;
+                        $('#addEditModal_savebtn').off('click', savefunc);
+                        $('#addEditModal_savebtn').off().on('click', savefunc);
+                        $("#addEditModal").modal();
+                    }
+                },
+                openModalCreate: function (uimetacode) {
+                    raiseInformationModal('Not implemented yet', uimetacode);
+                },
                 saveApplication: function () {
                     var context = this;
                     var endpointurl = context.baseurl + "Save";
@@ -656,11 +742,11 @@
             },
             mounted: function () {
                 var context = this;
-                @if (Model.IsListView())
+                @if (Model.IsApplicationListView())
                 {
                     <text>context.getPage();</text>
                 }
-                else if (Model.IsInputView() && instanceid > 0)
+                else if (Model.IsApplicationInputView() && instanceid > 0)
                 {
                     <text>
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
@@ -673,7 +759,7 @@
                     });
                     </text>
               }
-              else if (Model.IsInputView() && instanceid == 0 && Model.CanCreateEntities)
+              else if (Model.IsApplicationInputView() && instanceid == 0)
               {
                     <text>
                     var endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
@@ -693,6 +779,6 @@
         });
 
 
-                                    </script>
+    </script>
 
-                                }
+}

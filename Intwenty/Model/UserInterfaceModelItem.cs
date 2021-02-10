@@ -23,6 +23,7 @@ namespace Intwenty.Model
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
             Table = new UITable();
+            Functions = new List<FunctionModelItem>();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -48,6 +49,7 @@ namespace Intwenty.Model
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
             Table = new UITable();
+            Functions = new List<FunctionModelItem>();
         }
 
         private void SetEmptyStrings()
@@ -61,7 +63,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
-
+        public List<FunctionModelItem> Functions { get; set; }
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public List<UISection> Sections { get; set; }
         public UITable Table { get; set; }
@@ -88,6 +90,126 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeListInterface; }
         }
 
+        public bool HasExportFunction
+        {
+            get
+            {
+              
+                if (Functions.Exists(p => p.IsMetaTypeExport))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem ExportFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeExport);
+            }
+        }
+
+        public bool HasDeleteFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem DeleteFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode);
+            }
+        }
+
+        public bool HasCreateFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeCreate))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem CreateFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
+            }
+        }
+
+        public bool HasEditFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeEdit))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem EditFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeEdit);
+            }
+        }
+
+        public bool HasPagingFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypePaging))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem PagingFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypePaging);
+            }
+        }
+
+        public bool HasFilterFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeFilter))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem FilterFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeFilter);
+            }
+        }
 
         public override string ModelCode
         {

@@ -94,6 +94,8 @@ namespace Intwenty.Controllers
 
 
 
+    
+
         [HttpGet("/Model/UserInterfaceInputDesign/{applicationid}/{uimetacode}")]
         public IActionResult UserInterfaceInputDesign(int applicationid, string uimetacode)
         {

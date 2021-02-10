@@ -847,11 +847,8 @@ namespace Intwenty
                     appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
 
-                    //If there is a create function in the app that points on this view, then this view is used to create entities
-                    //(The CREATE function is used to navigates to the create view)
-                    appview.CanCreateEntities = functions.Exists(p => p.AppMetaCode == app.MetaCode && !string.IsNullOrEmpty(p.Path) && p.IsMetaTypeCreate && appview.IsOnPath(p.Path)); 
 
-                    foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
+                    foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == appview.MetaCode && p.OwnerMetaType == appview.MetaType))
                     {
                         function.ApplicationInfo = app;
                         function.SystemInfo = app.SystemInfo;
@@ -861,6 +858,15 @@ namespace Intwenty
 
                     foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
                     {
+
+                        foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == userinterface.MetaCode && p.OwnerMetaType == userinterface.MetaType))
+                        {
+                            function.ApplicationInfo = app;
+                            function.SystemInfo = app.SystemInfo;
+                            function.BuildPropertyList();
+                            userinterface.Functions.Add(function);
+                        }
+
                         userinterface.ApplicationInfo = app;
                         userinterface.SystemInfo = app.SystemInfo;
 
