@@ -429,6 +429,12 @@ namespace Intwenty
                         }
                     }
                 }
+
+                LocalizeTitle(ui.Table);
+                foreach (var col in ui.Table.Columns)
+                {
+                    LocalizeTitle(col);
+                }
             }
 
         }
