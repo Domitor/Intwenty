@@ -8,9 +8,9 @@ Is a meta data driven Template that simplifies developing CMS, Blog Engines and 
 - Models are stored as data instead of strongly typed objects.
 - It uses the model to build the database, SQL statements, UI and integration endpoints.
 - Models can be defined either programaticly or visually.
-- Implements and extends Asp.Net Core Identity.
-- Does not use entity framework.
-- Uses Intwenty.DataClient a small but fast Db connection library with ORM functions and JSON support
+- Implements and extends Asp.Net Core Identity. Intwenty adds organization and product management.
+- Has built in support for tenant isolation
+- Uses Intwenty.DataClient (Instead of entity framework) a small but fast Db connection library with ORM functions and JSON support
 - The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
 
  
