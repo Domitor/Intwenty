@@ -297,6 +297,26 @@ namespace Intwenty.Model
 
         }
 
+        public List<FunctionModelItem> GetModalFunctions()
+        {
+            var list = new List<FunctionModelItem>();
+            foreach (var ui in UserInterface)
+            {
+                foreach (var func in ui.Functions)
+                {
+                    if ((func.IsMetaTypeCreate || func.IsMetaTypeEdit) && func.IsModalAction)
+                    {
+                        list.Add(func);
+                    }
+
+                }
+
+            }
+
+            return list;
+
+        }
+
         public bool IsOnPath(string path)
         {
             if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(this.Path))

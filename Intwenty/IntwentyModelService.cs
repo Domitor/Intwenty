@@ -409,8 +409,14 @@ namespace Intwenty
             {
                 LocalizeTitle(func);
             }
+
             foreach (var ui in model.UserInterface)
             {
+                foreach (var func in ui.Functions)
+                {
+                    LocalizeTitle(func);
+                }
+
                 foreach (var sect in ui.Sections)
                 {
                     LocalizeTitle(sect);

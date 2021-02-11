@@ -2227,6 +2227,37 @@ namespace Intwenty.Controllers
 
                     foreach (var iface in view.UserInterface)
                     {
+                        foreach (var func in iface.Functions)
+                        {
+                            title = iface.DataTableDbName + " (" + func.MetaType + " Function), Title";
+                            if (string.IsNullOrEmpty(func.TitleLocalizationKey))
+                            {
+                                var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
+                                foreach (var l in langs)
+                                {
+                                    res.Add(new TranslationVm() { FunctionModelId = func.Id, Culture = l.Culture, Key = uikey, ModelTitle = title, Text = "" });
+                                }
+                            }
+                            else
+                            {
+                                var trans = translations.FindAll(p => p.Key == func.TitleLocalizationKey);
+                                foreach (var l in langs)
+                                {
+                                    var ct = trans.Find(p => p.Culture == l.Culture);
+                                    if (ct != null)
+                                        res.Add(new TranslationVm() { Culture = ct.Culture, Key = func.TitleLocalizationKey, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                    else
+                                        res.Add(new TranslationVm() { Culture = l.Culture, Key = func.TitleLocalizationKey, ModelTitle = title, Text = "" });
+                                }
+
+                                foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
+                                {
+                                    res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
+                                }
+
+                            }
+                        }
+
                         foreach (var ui in iface.UIStructure)
                         {
                             title = "";

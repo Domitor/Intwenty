@@ -70,7 +70,6 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
-        public UserInterfaceModelItem ActionUserInterface { get; set; }
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }

@@ -26,8 +26,8 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
-        [HttpGet("/Application/API/GetApplicationInputUI/{applicationid}/{uimetacode}/{id}")]
-        public IActionResult GetApplicationInputUI(int applicationid, string uimetacode, int? id)
+        [HttpGet("/Application/API/GetModalInput/{applicationid}/{uimetacode}/{id}")]
+        public IActionResult GetModalInput(int applicationid, string uimetacode, int? id)
         {
 
             ViewBag.Id = 0;
@@ -42,7 +42,7 @@ namespace Intwenty.Controllers
             if (uimodel == null)
                 return BadRequest();
 
-            return View("~/Views/Application/InputUI.cshtml", uimodel);
+            return View("~/Views/Application/ModalInput.cshtml", uimodel);
 
 
         }
