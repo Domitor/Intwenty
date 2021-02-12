@@ -1389,15 +1389,18 @@ namespace Intwenty
                     if (maintable_default_cols.Count == 0)
                         throw new InvalidOperationException("Found application without main table default columns " + model.DbName);
 
-                    CreateMainTable(model, maintable_default_cols, res, tableprefix);
-                    if (model.UseVersioning)
-                        CreateApplicationVersioningTable(model, res, tableprefix);
 
                     if (string.IsNullOrEmpty(model.DbName) || !databasemodel.Exists(p => p.IsMetaTypeDataColumn && p.IsRoot && !p.IsFrameworkItem && p.AppMetaCode == model.MetaCode))
                     {
                         res = new OperationResult(true, MessageCode.RESULT, string.Format("No datamodel found for application {0}", model.Title));
                         return;
                     }
+
+                    CreateMainTable(model, maintable_default_cols, res, tableprefix);
+                    if (model.UseVersioning)
+                        CreateApplicationVersioningTable(model, res, tableprefix);
+
+                   
 
                     foreach (var t in databasemodel)
                     {
@@ -1868,7 +1871,7 @@ namespace Intwenty
 
 
             var table_exist = false;
-            table_exist = Client.TableExists(table.DbName);
+            table_exist = Client.TableExists(tablename);
             if (table_exist)
             {
                 result.AddMessage(MessageCode.INFO, "Table: " + tablename + " in application: " + model.Title + " is already present.");
