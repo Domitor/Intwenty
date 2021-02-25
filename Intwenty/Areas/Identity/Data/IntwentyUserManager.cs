@@ -42,6 +42,7 @@ namespace Intwenty.Areas.Identity.Data
             IAMCache = cache;
         }
 
+        /*
         public async Task<IdentityResult> CreateAsync(IntwentyUser user, int organizationid)
         {
 
@@ -88,7 +89,7 @@ namespace Intwenty.Areas.Identity.Data
             await client.CloseAsync();
             return IdentityResult.Success;
         }
-
+        */
 
         /// <summary>
         /// Gets products that the user has access to (via organization membership)
@@ -331,6 +332,84 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ViewModel requestedview)
         {
             return await HasViewAuthorizationInternal(claimprincipal,requestedview);
+        }
+
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModel application)
+        {
+            return await HasAuthorization(claimprincipal, application.Application);
+        }
+
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, ApplicationModelItem application)
+        {
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return false;
+
+            var user = await GetUserAsync(claimprincipal);
+            if (user == null || application == null)
+                throw new InvalidOperationException("Error authorizing application usage.");
+
+            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+                return true;
+
+
+            var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
+
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == application.MetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == application.SystemMetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+            if (list.Exists(p => p.IsApplicationAuthorization && p.AuthorizationNormalizedName == application.MetaCode && !p.DenyAuthorization))
+            {
+                return true;
+            }
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == application.SystemMetaCode && !p.DenyAuthorization))
+            {
+                return true;
+            }
+
+
+            return false;
+        }
+
+        public async Task<bool> HasAuthorization(ClaimsPrincipal claimprincipal, SystemModelItem system)
+        {
+            if (!claimprincipal.Identity.IsAuthenticated)
+                return false;
+
+            var user = await GetUserAsync(claimprincipal);
+            if (user == null || system == null)
+                throw new InvalidOperationException("Error authorizing system usage.");
+
+            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+                return true;
+
+
+            var authorizations = await GetUserAuthorizationsAsync(user, Settings.ProductId);
+            var list = authorizations.Select(p => new IntwentyAuthorizationVm(p)).ToList();
+
+          
+
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == system.MetaCode && p.DenyAuthorization))
+            {
+                return false;
+            }
+
+         
+            if (list.Exists(p => p.IsSystemAuthorization && p.AuthorizationNormalizedName == system.MetaCode && !p.DenyAuthorization))
+            {
+                return true;
+            }
+
+
+            return false;
         }
 
 

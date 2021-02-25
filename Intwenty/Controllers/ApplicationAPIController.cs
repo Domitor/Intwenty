@@ -26,6 +26,7 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
+<<<<<<< HEAD
 
         /// <summary>
         /// Get the latest version data by id for an application with applicationid
@@ -70,6 +71,72 @@ namespace Intwenty.Controllers
 
         }
 
+=======
+        [HttpGet("/Application/API/GetModalInput/{applicationid}/{uimetacode}/{id}")]
+        public IActionResult GetModalInput(int applicationid, string uimetacode, int? id)
+        {
+
+            ViewBag.Id = 0;
+            if (id.HasValue && id.Value > 0)
+                ViewBag.Id = id;
+
+            var model = ModelRepository.GetApplicationModel(applicationid);
+            if (model == null)
+                return BadRequest();
+
+            var uimodel = model.GetUserInterface(uimetacode);
+            if (uimodel == null)
+                return BadRequest();
+
+            return View("~/Views/Application/ModalInput.cshtml", uimodel);
+
+
+        }
+
+        /// <summary>
+        /// Get the latest version data by id for an application with applicationid
+        /// </summary>
+        /// <param name="applicationid">The ID of the application in the meta model</param>
+        /// <param name="id">The data id</param>
+        [HttpGet]
+        public virtual async Task<IActionResult> GetApplication(int applicationid, int viewid, int id)
+        {
+
+            var model = ModelRepository.GetApplicationModel(applicationid);
+            if (model == null || id < 1)
+                return BadRequest();
+
+            var viewmodel = model.Views.Find(p => p.Id == viewid);
+            if (viewmodel==null)
+                return BadRequest();
+
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
+            else
+                state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
+
+            if (viewmodel.IsPublic)
+            {
+                var data = DataRepository.Get(state, model);
+                return new JsonResult(data);
+            } 
+            else 
+            {
+
+                if (!User.Identity.IsAuthenticated)
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
+                if (!await UserManager.HasAuthorization(User, viewmodel))
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
+
+                var data = DataRepository.Get(state, model);
+                return new JsonResult(data);
+                
+            }
+
+        }
+
+>>>>>>> master
 
         /// <summary>
         /// Loads data for a listview for the application with supplied Id

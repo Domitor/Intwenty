@@ -115,6 +115,7 @@
                                             <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" v-bind:data-target="'#colapse'+sect.rowOrder" style="margin:5px"><span class="fa fa-expand-alt"></span></button>
                                             <span v-if="sect.collapsible" style="margin:10px">Start expanded <input type="checkbox" v-model="sect.startExpanded" /></span>
                                             <span style="margin:10px">Collapsible <input type="checkbox" v-model="sect.collapsible" /> </span>
+                                            <span style="margin:10px">Don't render this <input type="checkbox" v-model="sect.excludeOnRender" /> </span>
 
                                         </div>
                                     </div>
