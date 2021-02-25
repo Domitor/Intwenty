@@ -27,18 +27,11 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
-      
-<<<<<<< HEAD
+
 
         public virtual async Task<IActionResult> View(int? id)
         {
 
-=======
-
-        public virtual async Task<IActionResult> View(int? id)
-        {
-
->>>>>>> master
             ViewBag.Id = 0;
             if (id.HasValue && id.Value > 0)
                 ViewBag.Id = id;
@@ -57,11 +50,8 @@ namespace Intwenty.Controllers
 
 
         }
-<<<<<<< HEAD
-=======
 
-      
->>>>>>> master
+
 
 
 

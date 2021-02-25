@@ -297,16 +297,7 @@ namespace Intwenty.Model
             get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && !DataTableInfo.IsFrameworkItem); }
         }
 
-        public List<IUIControl> GetModals()
-        {
-            var res = new List<IUIControl>();
-            foreach (var ctrl in UIStructure)
-            {
-                if (ctrl.IsMetaTypeLookUp)
-                    res.Add(ctrl);
-            }
-            return res;
-        }
+       
 
 
     }

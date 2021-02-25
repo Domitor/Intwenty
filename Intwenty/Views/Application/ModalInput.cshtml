@@ -7,7 +7,6 @@
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = 0;
     int instanceid = (int)ViewBag.Id;
-    var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
 }
@@ -69,10 +68,7 @@
                                                 {
                                                     continue;
                                                 }
-                                                if (t.IsMetaTypeLookUp && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
-                                                {
-                                                    continue;
-                                                }
+                                               
                                                 if (t.IsMetaTypeTextBox)
                                                 {
                                                     @await Html.PartialAsync("UIControls/_TextBox", t)
@@ -127,9 +123,9 @@
                                                 }
 
                                                 //LOOKUP bound to DATAVIEW
-                                                if (t.IsMetaTypeLookUp)
+                                                if (t.IsMetaTypeSearchBox)
                                                 {
-                                                    @await Html.PartialAsync("UIControls/_LookUp", t)
+                                                    @await Html.PartialAsync("UIControls/_SearchBox", t)
 
                                                     <br />
                                                     <br />

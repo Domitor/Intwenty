@@ -17,10 +17,7 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Design;
-<<<<<<< HEAD
-=======
 using Intwenty.DataClient;
->>>>>>> master
 
 namespace Intwenty.Controllers
 {
@@ -73,7 +70,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                
+
                 ModelRepository.ClearCache();
 
                 model.ParentMetaCode = BaseModelItem.MetaTypeRoot;
@@ -85,9 +82,9 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Cant save a system withot a title");
 
                 var client = DataRepository.GetDataClient();
-   
+
                 var current_systems = ModelRepository.GetSystemModels();
- 
+
 
                 if (model.Id < 1)
                 {
@@ -101,7 +98,6 @@ namespace Intwenty.Controllers
                     var entity = new SystemItem();
                     if (string.IsNullOrEmpty(model.MetaCode))
                         entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-<<<<<<< HEAD
 
                     entity.Title = model.Title;
                     entity.Description = model.Description;
@@ -122,28 +118,6 @@ namespace Intwenty.Controllers
                         existing.Description = model.Description;
                         client.UpdateEntity(existing);
 
-=======
-
-                    entity.Title = model.Title;
-                    entity.Description = model.Description;
-                    entity.DbPrefix = model.DbPrefix;
-
-                    client.Open();
-                    client.InsertEntity(entity);
-                    client.Close();
-                }
-                else
-                {
-                    client.Open();
-                    var existing = client.GetEntity<SystemItem>(model.Id);
-                    if (existing != null)
-                    {
-
-                        existing.Title = model.Title;
-                        existing.Description = model.Description;
-                        client.UpdateEntity(existing);
-
->>>>>>> master
                     }
                     client.Close();
                 }
@@ -161,7 +135,7 @@ namespace Intwenty.Controllers
         }
 
 
-      
+
 
         #endregion
 
@@ -456,7 +430,7 @@ namespace Intwenty.Controllers
 
                     }
 
-                  
+
 
                 }
 
@@ -468,11 +442,11 @@ namespace Intwenty.Controllers
                     if (app.DataStructure.Exists(p => p.IsFrameworkItem && p.DbName.ToUpper() == dbi.DbName.ToUpper()))
                         continue;
 
-              
+
 
                     if (dbi.Id < 1)
                     {
-                        
+
 
                         var t = new DatabaseItem()
                         {
@@ -496,7 +470,7 @@ namespace Intwenty.Controllers
                                 t.ParentMetaCode = tbl.MetaCode;
                         }
 
-                        
+
 
                         client.InsertEntity(t);
 
@@ -558,7 +532,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId is missing when removing db model");
 
 
-             
+
 
 
                 var client = DataRepository.GetDataClient();
@@ -581,7 +555,7 @@ namespace Intwenty.Controllers
                     }
                     else
                     {
-           
+
                         client.DeleteEntity(existing);
                     }
 
@@ -731,7 +705,7 @@ namespace Intwenty.Controllers
 
         #endregion
 
-     
+      
 
         #region UI Model
 
@@ -761,7 +735,7 @@ namespace Intwenty.Controllers
 
             try
             {
-               
+
                 var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
@@ -877,12 +851,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                var appmodel  = ModelRepository.GetApplicationModel(model.ApplicationId);
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
 
                 var client = DataRepository.GetDataClient();
-                
+
 
                 var entity = new UserInterfaceItem();
                 if (!string.IsNullOrEmpty(model.MetaCode) && model.Method == "reuse")
@@ -912,573 +886,7 @@ namespace Intwenty.Controllers
                     client.Close();
 
                     ModelRepository.ClearCache();
-                    
 
-                }
-                else
-                {
-                    entity.SystemMetaCode = appmodel.System.MetaCode;
-                    entity.AppMetaCode = appmodel.Application.MetaCode;
-                    if (model.UIType == "1")
-                        entity.MetaType = UserInterfaceModelItem.MetaTypeListInterface;
-                    else
-                        entity.MetaType = UserInterfaceModelItem.MetaTypeInputInterface;
-
-                    entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                    entity.DataTableMetaCode = model.DataTableMetaCode;
-                    entity.ViewMetaCode = model.ViewMetaCode;
-
-                    client.Open();
-                    client.InsertEntity(entity);
-                    client.Close();
-
-                    ModelRepository.ClearCache();
-
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating a userinterface.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-        /// <summary>
-        /// Delete userinterface
-        /// </summary>
-        [HttpPost("/Model/API/DeleteUserinterface")]
-        public IActionResult DeleteUserinterface([FromBody] UserinterfaceDeleteVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-<<<<<<< HEAD
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-=======
-                ModelRepository.ClearCache();
-
-                var list = DataViewModelCreator.GetDataViewModel(model);
-
-                foreach (var dv in list)
-                {
-
-                    if (dv.IsMetaTypeDataView)
-                        dv.ParentMetaCode = "ROOT";
-
-                    if (string.IsNullOrEmpty(dv.MetaCode))
-                        dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                }
->>>>>>> master
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-<<<<<<< HEAD
-                foreach (var t in appmodel.Views)
-                {
-                    foreach (var s in t.UserInterface)
-                    {
-                      
-                            if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
-                                
-                            }
-
-                            if (model.MetaCode == s.MetaCode && model.Method == "ALL")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
-
-                            }
-                        
-=======
-                foreach (var dv in list)
-                {
-                    if (dv.Id < 1)
-                    {
-                        var t = new DataViewItem()
-                        {
-
-                            MetaCode = dv.MetaCode,
-                            MetaType = dv.MetaType,
-                            ParentMetaCode = dv.ParentMetaCode,
-                            Title = dv.Title,
-                            SQLQuery = dv.SQLQuery,
-                            SQLQueryFieldName = dv.SQLQueryFieldName,
-                            SystemMetaCode = dv.SystemMetaCode
-                        };
-                        client.InsertEntity(t);
-                    }
-                    else
-                    {
-                        var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
-                        if (existing != null)
-                        {
-                            existing.SQLQuery = dv.SQLQuery;
-                            existing.SQLQueryFieldName = dv.SQLQueryFieldName;
-                            existing.Title = dv.Title;
-                            client.UpdateEntity(existing);
-                        }
->>>>>>> master
-
-                    }
-
-                }
-
-                client.Close();
-<<<<<<< HEAD
-                ModelRepository.ClearCache();
-
-              
-=======
-
->>>>>>> master
-
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating a userinterface.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-        /// <summary>
-        /// Create a userinterface
-        /// </summary>
-        [HttpPost("/Model/API/CreateFunction")]
-        public IActionResult CreateFunction([FromBody] FunctionVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-
-                var entity = new FunctionItem();
-                entity.SystemMetaCode = appmodel.System.MetaCode;
-                entity.AppMetaCode = appmodel.Application.MetaCode;
-                entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                entity.MetaType = model.MetaType;
-                entity.Path = model.Path;
-                entity.Title = model.Title;
-                entity.ViewMetaCode = model.ViewMetaCode;
-                entity.DataTableMetaCode = model.DataTableMetaCode;
-                entity.Properties = model.CompilePropertyString();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-                client.InsertEntity(entity);
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating a function.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-        /// <summary>
-        /// Create a userinterface
-        /// </summary>
-        [HttpPost("/Model/API/EditFunction")]
-        public IActionResult EditFunction([FromBody] FunctionVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-                var entities = client.GetEntities<FunctionItem>();
-                client.Close();
-
-                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.ViewMetaCode == model.ViewMetaCode && p.MetaCode == model.MetaCode);
-                if (entity == null)
-                    return BadRequest();
-
-                entity.Title = model.Title;
-                entity.Path = model.Path;
-                entity.Properties = model.CompilePropertyString();
-
-                client.Open();
-                client.UpdateEntity(entity);
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating a function.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-        /// <summary>
-        /// Delete userinterface
-        /// </summary>
-        [HttpPost("/Model/API/DeleteFunction")]
-        public IActionResult DeleteFunction([FromBody] FunctionVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-<<<<<<< HEAD
-               
-                var client = DataRepository.GetDataClient();
-                client.Open();
-                var entities = client.GetEntities<FunctionItem>();
-                client.Close();
-
-                var entity = entities.Find(p => p.Id == model.Id);
-                if (entity == null)
-                    return BadRequest();
-
-              
-                client.Open();
-                client.DeleteEntity(entity);
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-=======
-                
-                ModelRepository.ClearCache();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == model.Id);
-                if (existing != null)
-                {
-                    var dto = new DataViewModelItem(existing);
-                    if (dto.IsMetaTypeDataView)
-                    {
-                        var childlist = client.GetEntities<DataViewItem>().Where(p => (p.MetaType == DataViewModelItem.MetaTypeDataViewColumn || p.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
-                        client.DeleteEntity(existing);
-                        client.DeleteEntities(childlist);
-                    }
-                    else
-                    {
-                        client.DeleteEntity(existing);
-                    }
-                }
-                client.Close();
->>>>>>> master
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating a userinterface.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-
-        /// <summary>
-        /// Get UI view model for application with id and the viewtype
-        /// </summary>
-        [HttpGet("/Model/API/GetApplicationInputUI/{applicationid}/{uimetacode}")]
-        public IActionResult GetApplicationUI(int applicationid, string uimetacode)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            var appmodel = ModelRepository.GetApplicationModel(applicationid);
-            if (appmodel == null)
-                return BadRequest();
-            var uimodel = appmodel.GetUserInterface(uimetacode);
-            if (uimodel == null)
-                return BadRequest();
-
-            var model = new UserInterfaceInputDesignVm();
-            model.Id = uimodel.Id;
-            model.MetaCode = uimodel.MetaCode;
-            model.ApplicationId = appmodel.Application.Id;
-            model.Sections = uimodel.Sections;
-
-            return new JsonResult(model);
-
-        }
-
-<<<<<<< HEAD
-        /// <summary>
-        /// Get UI view model for application with id and the viewtype
-        /// </summary>
-        [HttpGet("/Model/API/GetApplicationListUI/{applicationid}/{uimetacode}")]
-        public IActionResult GetApplicationListUI(int applicationid, string uimetacode)
-=======
-        [HttpGet("/Model/API/GetAllProperties")]
-        public IActionResult GetAllProperties()
->>>>>>> master
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-<<<<<<< HEAD
-            var appmodel = ModelRepository.GetApplicationModel(applicationid);
-            if (appmodel == null)
-                return BadRequest();
-            var uimodel = appmodel.GetUserInterface(uimetacode);
-            if (uimodel == null)
-                return BadRequest();
-
-            var model = new UserInterfaceListDesignVm();
-            model.Id = uimodel.Id;
-            model.MetaCode = uimodel.MetaCode;
-            model.ApplicationId = appmodel.Application.Id;
-            model.Table = uimodel.Table;
-
-            return new JsonResult(model);
-
-        }
-
-        [HttpPost("/Model/API/SaveApplicationInputUI")]
-        public IActionResult SaveApplicationInputUI([FromBody] UserInterfaceInputDesignVm model)
-=======
-            return new JsonResult(IntwentyRegistry.IntwentyProperties);
-
-        }
-
-        /// <summary>
-        /// Create an application view
-        /// </summary>
-        [HttpPost("/Model/API/CreateApplicationView")]
-        public IActionResult CreateApplicationView([FromBody] ApplicationViewVm model)
->>>>>>> master
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-<<<<<<< HEAD
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-                var uimodel = appmodel.GetUserInterface(model.MetaCode);
-                if (uimodel == null)
-                    return BadRequest();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-=======
-               
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-
-                var entity = new ViewItem();
-                entity.SystemMetaCode = appmodel.System.MetaCode;
-                entity.AppMetaCode = appmodel.Application.MetaCode;
-                entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                entity.MetaType = ViewModel.MetaTypeUIView;
-                entity.Path = model.Path;
-                entity.Title = model.Title;
-                entity.IsPrimary = model.IsPrimary;
-                entity.IsPublic = model.IsPublic;
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-                client.InsertEntity(entity);
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating an application view.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-
-        /// <summary>
-        /// Create an application view
-        /// </summary>
-        [HttpPost("/Model/API/EditApplicationView")]
-        public IActionResult EditApplicationView([FromBody] ApplicationViewVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-                var entities = client.GetEntities<ViewItem>();
-                client.Close();
-
-                var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.Id == model.Id);
-                if (entity == null)
-                    return BadRequest();
-
-                entity.Path = model.Path;
-                entity.Title = model.Title;
-                entity.IsPrimary = model.IsPrimary;
-                entity.IsPublic = model.IsPublic;
-
-                client.Open();
-                client.UpdateEntity(entity);
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when creating an application view.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetApplicationViews(model.ApplicationId);
-        }
-
-        /// <summary>
-        /// Get application views for an application
-        /// </summary>
-        [HttpGet("/Model/API/GetApplicationViews/{applicationid}")]
-        public IActionResult GetApplicationViews(int applicationid)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            var t = ModelRepository.GetApplicationModel(applicationid);
-            return new JsonResult(t.Views);
-
-        }
-
-
-        /// <summary>
-        /// Create a userinterface
-        /// </summary>
-        [HttpPost("/Model/API/CreateUserinterface")]
-        public IActionResult CreateUserinterface([FromBody] UserinterfaceCreateVm model)
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                var appmodel  = ModelRepository.GetApplicationModel(model.ApplicationId);
-                if (appmodel == null)
-                    return BadRequest();
-
-                var client = DataRepository.GetDataClient();
-                
-
-                var entity = new UserInterfaceItem();
-                if (!string.IsNullOrEmpty(model.MetaCode) && model.Method == "reuse")
-                {
-                    UserInterfaceModelItem current = null;
-                    foreach (var t in appmodel.Views)
-                    {
-                        foreach (var s in t.UserInterface)
-                        {
-                            if (s.MetaCode == model.MetaCode)
-                                current = s;
-                        }
-                    }
-
-                    if (current == null)
-                        return BadRequest();
-
-                    entity.SystemMetaCode = appmodel.System.MetaCode;
-                    entity.AppMetaCode = appmodel.Application.MetaCode;
-                    entity.MetaType = current.MetaType;
-                    entity.MetaCode = current.MetaCode;
-                    entity.DataTableMetaCode = current.DataTableMetaCode;
-                    entity.ViewMetaCode = model.ViewMetaCode;
-
-                    client.Open();
-                    client.InsertEntity(entity);
-                    client.Close();
-
-                    ModelRepository.ClearCache();
-                    
 
                 }
                 else
@@ -1540,21 +948,21 @@ namespace Intwenty.Controllers
                 {
                     foreach (var s in t.UserInterface)
                     {
-                      
-                            if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
-                                
-                            }
 
-                            if (model.MetaCode == s.MetaCode && model.Method == "ALL")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+                        if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
+                        {
+                            //Delete
+                            client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
 
-                            }
-                        
+                        }
+
+                        if (model.MetaCode == s.MetaCode && model.Method == "ALL")
+                        {
+                            //Delete
+                            client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+
+                        }
+
 
                     }
 
@@ -1563,7 +971,7 @@ namespace Intwenty.Controllers
                 client.Close();
                 ModelRepository.ClearCache();
 
-              
+
 
 
             }
@@ -1695,7 +1103,7 @@ namespace Intwenty.Controllers
 
             try
             {
-               
+
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var entities = client.GetEntities<FunctionItem>();
@@ -1705,7 +1113,7 @@ namespace Intwenty.Controllers
                 if (entity == null)
                     return BadRequest();
 
-              
+
                 client.Open();
                 client.DeleteEntity(entity);
                 client.Close();
@@ -1726,7 +1134,7 @@ namespace Intwenty.Controllers
             return GetApplicationViews(model.ApplicationId);
         }
 
-      
+
 
         /// <summary>
         /// Get input UI model for application with id and the ui metacode
@@ -1789,9 +1197,9 @@ namespace Intwenty.Controllers
             model.Table = uimodel.Table;
             model.IsSubTableUserInterface = uimodel.IsSubTableUserInterface;
             model.DataTable = DatabaseModelCreator.GetTableVm(appmodel, uimodel.DataTableMetaCode);
-            model.Functions = uimodel.Functions.Select(p=> new FunctionVm(p)).ToList();
+            model.Functions = uimodel.Functions.Select(p => new FunctionVm(p)).ToList();
 
-           
+
             foreach (var v in appmodel.Views)
             {
                 foreach (var ui in v.UserInterface)
@@ -1822,11 +1230,9 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                var views = ModelRepository.GetDataViewModels();
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
->>>>>>> master
                 UserInterfaceStructureItem entity = null;
 
                 foreach (var section in model.Sections)
@@ -1839,11 +1245,8 @@ namespace Intwenty.Controllers
                         section.AddUpdateProperty("COLLAPSIBLE", "TRUE");
                     if (section.StartExpanded)
                         section.AddUpdateProperty("STARTEXPANDED", "TRUE");
-<<<<<<< HEAD
-=======
                     if (section.ExcludeOnRender)
                         section.AddUpdateProperty("EXCLUDEONRENDER", "TRUE");
->>>>>>> master
                     if (section.IsRemoved)
                     {
                         if (section.Id > 0)
@@ -1859,11 +1262,7 @@ namespace Intwenty.Controllers
                     {
                         entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == section.Id);
                         entity.Title = section.Title;
-<<<<<<< HEAD
-                        entity.Properties = section.CompilePropertyString();
-=======
                         entity.Properties = section.Properties;
->>>>>>> master
                         client.UpdateEntity(entity);
                     }
                     else
@@ -1871,11 +1270,7 @@ namespace Intwenty.Controllers
                         section.MetaCode = BaseModelItem.GetQuiteUniqueString();
                         entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeSection, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = section.MetaCode, ColumnOrder = 1, RowOrder = section.RowOrder, ParentMetaCode = "ROOT", UserInterfaceMetaCode = uimodel.MetaCode };
                         entity.Title = section.Title;
-<<<<<<< HEAD
-                        entity.Properties = section.CompilePropertyString();
-=======
                         entity.Properties = section.Properties;
->>>>>>> master
                         entity.MetaCode = section.MetaCode;
                         client.InsertEntity(entity);
                     }
@@ -1947,11 +1342,7 @@ namespace Intwenty.Controllers
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-<<<<<<< HEAD
                                     if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
-=======
-                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect)
->>>>>>> master
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
@@ -1960,11 +1351,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-<<<<<<< HEAD
                                 if (input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
-=======
-                                if (input.IsMetaTypeMultiSelect)
->>>>>>> master
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {
@@ -1973,9 +1360,7 @@ namespace Intwenty.Controllers
                                             input.DataColumn2MetaCode = dmc.MetaCode;
                                     }
                                 }
-<<<<<<< HEAD
 
-                               
 
                                 if (input.Id > 0)
                                 {
@@ -1992,7 +1377,7 @@ namespace Intwenty.Controllers
                                 else
                                 {
                                     input.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                                    entity = new UserInterfaceStructureItem() { MetaType=input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode= appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                                    entity = new UserInterfaceStructureItem() { MetaType = input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
                                     entity.Title = input.Title;
                                     entity.Properties = input.CompilePropertyString();
                                     entity.MetaCode = input.MetaCode;
@@ -2009,98 +1394,13 @@ namespace Intwenty.Controllers
                     }
 
 
-                 }
+                }
 
                 client.Close();
 
                 ModelRepository.ClearCache();
 
 
-=======
-
-                                if (input.IsMetaTypeLookUp)
-                                {
-                                    if (!string.IsNullOrEmpty(input.DataViewMetaCode))
-                                    {
-                                        input.DataViewMetaCode = input.DataViewMetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn1DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn2DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn2MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn1DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn1DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn2DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn2DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn2MetaCode = dmc.MetaCode;
-                                    }
-                                }
-
-                                if (input.Id > 0)
-                                {
-                                    entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == input.Id);
-                                    entity.Title = input.Title;
-                                    entity.Properties = input.CompilePropertyString();
-                                    entity.RawHTML = input.RawHTML;
-                                    entity.DataTableMetaCode = uimodel.DataTableMetaCode;
-                                    entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
-                                    entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
-                                    entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
-                                    client.UpdateEntity(entity);
-                                }
-                                else
-                                {
-                                    input.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                                    entity = new UserInterfaceStructureItem() { MetaType=input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode= appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
-                                    entity.Title = input.Title;
-                                    entity.Properties = input.CompilePropertyString();
-                                    entity.MetaCode = input.MetaCode;
-                                    entity.RawHTML = input.RawHTML;
-                                    entity.DataTableMetaCode = uimodel.DataTableMetaCode;
-                                    entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
-                                    entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
-                                    entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
-                                    client.InsertEntity(entity);
-                                }
-
-                            }
-                        }
-                    }
-
-
-                 }
-
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-
->>>>>>> master
                 appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
@@ -2145,10 +1445,6 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-<<<<<<< HEAD
-=======
-                var views = ModelRepository.GetDataViewModels();
->>>>>>> master
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
@@ -2176,11 +1472,7 @@ namespace Intwenty.Controllers
                 {
 
                     //PANEL CREATED IN UI BUT THEN REMOVED BEFORE SAVE
-<<<<<<< HEAD
-                    if (column.Id == 0 && column.IsRemoved)
-=======
                     if (column.Id <= 0 && column.IsRemoved)
->>>>>>> master
                         continue;
 
                     if (column.IsRemoved)
@@ -2193,45 +1485,6 @@ namespace Intwenty.Controllers
                         }
                         continue;
                     }
-<<<<<<< HEAD
-
-                    order++;
-                    if (!string.IsNullOrEmpty(column.DataColumn1DbName))
-                    {
-                        var dmc = appmodel.DataStructure.Find(p => p.DbName == column.DataColumn1DbName && p.IsRoot);
-                        if (dmc != null)
-                            column.DataColumn1MetaCode = dmc.MetaCode;
-                    }
-
-                    if (column.Id > 0)
-                    {
-                        entity = client.GetEntities<UserInterfaceStructureItem>().FirstOrDefault(p => p.Id == column.Id);
-                        entity.Title = column.Title;
-                        entity.Properties = column.CompilePropertyString();
-                        entity.DataTableMetaCode = uimodel.DataTableMetaCode;
-                        entity.DataColumn1MetaCode = column.DataColumn1MetaCode;
-                        client.UpdateEntity(entity);
-                    }
-                    else
-                    {
-                        column.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                        entity = new UserInterfaceStructureItem() { MetaType = UserInterfaceStructureModelItem.MetaTypeTableTextColumn, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = column.MetaCode, ColumnOrder = order, RowOrder = 1, ParentMetaCode = model.Table.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
-                        entity.Title = column.Title;
-                        entity.Properties = column.CompilePropertyString();
-                        entity.DataTableMetaCode = uimodel.DataTableMetaCode;
-                        entity.DataColumn1MetaCode = column.DataColumn1MetaCode;
-                        client.InsertEntity(entity);
-                    }
-
-                }
-         
-
-                client.Close();
-
-                ModelRepository.ClearCache();
-
-
-=======
 
                     order++;
                     if (!string.IsNullOrEmpty(column.DataColumn1DbName))
@@ -2283,7 +1536,6 @@ namespace Intwenty.Controllers
                 ModelRepository.ClearCache();
 
 
->>>>>>> master
                 appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
@@ -2291,15 +1543,7 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-<<<<<<< HEAD
-                model = new UserInterfaceListDesignVm();
-                model.Id = uimodel.Id;
-                model.MetaCode = uimodel.MetaCode;
-                model.ApplicationId = appmodel.Application.Id;
-                model.Table = uimodel.Table;
-=======
                 model = GetListUIModel(appmodel, uimodel);
->>>>>>> master
                 return new JsonResult(model);
 
             }
@@ -2314,8 +1558,6 @@ namespace Intwenty.Controllers
 
         }
 
-<<<<<<< HEAD
-=======
         private void SaveListUIFunction(IDataClient client, ApplicationModel appmodel, UserInterfaceModelItem uimodel, FunctionVm function)
         {
             FunctionItem functionentity = null;
@@ -2363,8 +1605,7 @@ namespace Intwenty.Controllers
         }
 
 
->>>>>>> master
-    
+
         #endregion
 
         #region Value Domains
@@ -2499,7 +1740,7 @@ namespace Intwenty.Controllers
                 model.DeleteCurrentModel = delete;
                 result = ModelRepository.ImportModel(model);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 result.SetError(ex.Message, "An error occured when uploading a new model file.");
                 var jres = new JsonResult(result);
@@ -2530,7 +1771,7 @@ namespace Intwenty.Controllers
                 var sep = "";
                 foreach (var app in apps)
                 {
-                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging=true });
+                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging = true });
                     var appdata = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(appdatalist.Data).RootElement);
                     foreach (var istat in appdata.SubTables[0].Rows)
                     {
@@ -2562,13 +1803,13 @@ namespace Intwenty.Controllers
             {
                 DataRepository.LogError("Error exporting data: " + ex.Message, username: User.Identity.Name);
             }
-            finally 
+            finally
             {
                 client.Close();
             }
 
             return new JsonResult("");
-            
+
         }
 
 
@@ -2587,7 +1828,7 @@ namespace Intwenty.Controllers
             {
                 var authapps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
                 int savefail = 0;
-                int savesuccess= 0;
+                int savesuccess = 0;
                 string fileContents;
                 using (var stream = file.OpenReadStream())
                 using (var reader = new StreamReader(stream))
@@ -2601,7 +1842,7 @@ namespace Intwenty.Controllers
                 {
                     if (attr.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
                     {
-                       
+
                         var jsonarr = attr.Value.EnumerateArray();
                         foreach (var rec in jsonarr)
                         {
@@ -2612,7 +1853,7 @@ namespace Intwenty.Controllers
                                 if (istat.Name == "ApplicationId")
                                     app = authapps.Find(p => p.Id == istat.Value.GetInt32());
 
-                                if (istat.Name == "ApplicationData" && app!=null)
+                                if (istat.Name == "ApplicationData" && app != null)
                                 {
                                     var state = ClientStateInfo.CreateFromJSON(istat.Value, User);
                                     state.Id = 0;
@@ -2635,7 +1876,7 @@ namespace Intwenty.Controllers
                     }
                 }
 
-                if (savefail== 0)
+                if (savefail == 0)
                     result.SetSuccess(string.Format("Successfully imported {0} applications.", savesuccess));
                 else
                     result.SetSuccess(string.Format("Successfully imported {0} applications. Failed to import {1} applications.", savesuccess, savefail));
@@ -2696,7 +1937,7 @@ namespace Intwenty.Controllers
                             res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = a.Application.Title + " (App), Title", Text = "" });
                     }
 
-                    foreach (var ct in trans.Where(p=> !langs.Exists(x=> x.Culture == p.Culture)))
+                    foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
                     {
                         res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = a.Application.Title + " (App), Title", Text = ct.Text, Id = ct.Id });
                     }
@@ -2706,11 +1947,7 @@ namespace Intwenty.Controllers
                 foreach (var view in a.Views)
                 {
 
-<<<<<<< HEAD
-                    var title = "Application: " + a.Application.Title + ", " + view.Title + " (View.Title)";
-=======
                     var title = view.Title + " (View), Title";
->>>>>>> master
                     if (string.IsNullOrEmpty(view.TitleLocalizationKey))
                     {
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
@@ -2738,21 +1975,13 @@ namespace Intwenty.Controllers
 
                     }
 
-<<<<<<< HEAD
-                    var description = "Application: " + a.Application.Title + ", " + view.Title + " (View.Description)";
-=======
                     var description = view.Title + " (View), Description" + view.Description;
->>>>>>> master
                     if (string.IsNullOrEmpty(view.DescriptionLocalizationKey))
                     {
                         var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
                         foreach (var l in langs)
                         {
-<<<<<<< HEAD
-                            res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "" });
-=======
                             res.Add(new TranslationVm() { ViewModelId = view.Id, Culture = l.Culture, Key = uikey, ModelTitle = description, Text = "", TranslationType = 2 });
->>>>>>> master
                         }
                     }
                     else
@@ -2762,28 +1991,13 @@ namespace Intwenty.Controllers
                         {
                             var ct = trans.Find(p => p.Culture == l.Culture);
                             if (ct != null)
-<<<<<<< HEAD
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id });
-                            else
-                                res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "" });
-=======
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType=2 });
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType = 2 });
                             else
                                 res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "", TranslationType = 2 });
->>>>>>> master
                         }
 
                         foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
                         {
-<<<<<<< HEAD
-                            res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = description, Text = ct.Text, Id = ct.Id });
-                        }
-
-                    }
-
-                    foreach (var iface in view.UserInterface)
-                    {
-=======
                             res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType = 2 });
                         }
 
@@ -2852,20 +2066,11 @@ namespace Intwenty.Controllers
                             }
                         }
 
->>>>>>> master
                         foreach (var ui in iface.UIStructure)
                         {
                             title = "";
                             var type = metatypes.Find(p => p.ModelCode == "UISTRUCTUREMODEL" && p.Code == ui.MetaType);
-<<<<<<< HEAD
-                            title = "Application: " + a.Application.Title;
-                            title += ", " + ui.Title;
-                            if (type != null)
-                                title += " (" + type.Title + ")";
-
-=======
                             title = view.Title + " - " + ui.Title + " (" + ui.MetaType + "), Title";
->>>>>>> master
                             if (string.IsNullOrEmpty(ui.TitleLocalizationKey))
                             {
                                 var uikey = "UI_LOC_" + BaseModelItem.GetQuiteUniqueString();
@@ -2890,19 +2095,11 @@ namespace Intwenty.Controllers
                                 {
                                     res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = title, Text = ct.Text, Id = ct.Id });
                                 }
-<<<<<<< HEAD
 
                             }
 
                         }
 
-=======
-
-                            }
-
-                        }
-
->>>>>>> master
                     }
                 }
             }
@@ -2914,10 +2111,10 @@ namespace Intwenty.Controllers
 
         }
 
-            /// <summary>
-            /// Get translations, that is not used by a model
-            /// </summary>
-            [HttpGet("/Model/API/GetNonModelTranslations")]
+        /// <summary>
+        /// Get translations, that is not used by a model
+        /// </summary>
+        [HttpGet("/Model/API/GetNonModelTranslations")]
         public IActionResult GetNonModelTranslations()
         {
 
@@ -3007,11 +2204,7 @@ namespace Intwenty.Controllers
                             client.UpdateEntity(m);
                         }
                     }
-<<<<<<< HEAD
-                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text))
-=======
-                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType==1)
->>>>>>> master
+                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType == 1)
                     {
                         var m = client.GetEntity<ViewItem>(t.ViewModelId);
                         if (m != null)
@@ -3019,8 +2212,6 @@ namespace Intwenty.Controllers
                             m.TitleLocalizationKey = t.Key;
                             client.UpdateEntity(m);
                         }
-<<<<<<< HEAD
-=======
                     }
                     else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType == 2)
                     {
@@ -3039,7 +2230,6 @@ namespace Intwenty.Controllers
                             m.TitleLocalizationKey = t.Key;
                             client.UpdateEntity(m);
                         }
->>>>>>> master
                     }
                 }
 
@@ -3156,7 +2346,7 @@ namespace Intwenty.Controllers
                 {
                     client.Open();
                     client.DeleteEntity(existing);
-                   
+
                 }
 
                 client.Close();
@@ -3239,27 +2429,27 @@ namespace Intwenty.Controllers
                 res.Endpoints.Add(EndpointVm.CreateEndpointVm(ep));
             }
 
-           
+
 
             res.EndpointDataSources = new List<EndpointDataSource>();
             var apps = ModelRepository.GetApplicationModels();
             foreach (var a in apps)
             {
                 res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode + "|" + a.Application.MetaCode, title = a.Application.DbName, type = "TABLE" });
-                foreach (var subtable in a.DataStructure.Where(p=> p.IsMetaTypeDataTable))
+                foreach (var subtable in a.DataStructure.Where(p => p.IsMetaTypeDataTable))
                 {
                     res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.AppMetaCode + "|" + subtable.MetaCode, title = subtable.DbName, type = "TABLE" });
 
                 }
             }
            
-            
+
 
             return new JsonResult(res);
 
         }
 
-      
+
 
 
         [HttpPost("/Model/API/SaveEndpoints")]

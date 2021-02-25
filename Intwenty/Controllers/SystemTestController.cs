@@ -77,11 +77,7 @@ namespace Intwenty.Controllers
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-<<<<<<< HEAD
-=======
-            var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
->>>>>>> master
-           
+
 
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
             db.Open();
@@ -114,22 +110,12 @@ namespace Intwenty.Controllers
                 db.RunCommand("DROP TABLE tests_TestData2AutoInc");
             }
 
-          
 
-<<<<<<< HEAD
-          
-            if (model != null)
-            {
-=======
-            if (dvmodels != null && dvmodels.Count > 0)
-            {
-                foreach (var dv in dvmodels)
-                    db.DeleteEntity(new DataViewItem() { Id = dv.Id });
-            }
+
+         
 
             if (model != null)
             {
->>>>>>> master
                 var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == model.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == model.SystemMetaCode);
                 foreach (var dbitem in dbmodels)
                     db.DeleteEntity(new DatabaseItem() { Id = dbitem.Id });
@@ -157,7 +143,7 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test500GetDataView());
-           
+
 
 
             //TEST ALL SUPPORTED DB
@@ -193,7 +179,7 @@ namespace Intwenty.Controllers
                 int expected = 5000;
                 for (int i = 0; i < 5; i++)
                 {
-                    if (i==0)
+                    if (i == 0)
                         _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(true));
                     else
                         _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(false));
@@ -279,7 +265,7 @@ namespace Intwenty.Controllers
             try
             {
 
-               
+
                 dbstore.Open();
                 var check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count < 100)
@@ -395,7 +381,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The default system could not be found");
 
                 dbstore.Open();
-                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode = system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
@@ -410,31 +396,23 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
-<<<<<<< HEAD
-               
-=======
 
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode= system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog", ParentMetaCode = "ROOT" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
->>>>>>> master
                 dbstore.Close();
 
                 _modelservice.ClearCache();
 
                 var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-                if (model==null)
+                if (model == null)
                     throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
                 var configres = _modelservice.ConfigureDatabase(model);
-                
+
                 if (!configres.Result.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
-              
+
             }
             catch (Exception ex)
             {
@@ -530,7 +508,7 @@ namespace Intwenty.Controllers
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
-                  
+
                     if (pageresult.ListFilter.MaxCount == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
 
@@ -541,7 +519,7 @@ namespace Intwenty.Controllers
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
 
-                
+
             }
             catch (Exception ex)
             {
@@ -582,7 +560,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-      
+
 
         private TestResult Test11UpdateIntwentyApplication()
         {
@@ -617,7 +595,7 @@ namespace Intwenty.Controllers
                 if (!saveresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
-                
+
                 var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
                 getbyidresult = _dataservice.Get(newstate);
                 if (!getbyidresult.IsSuccess)
@@ -674,7 +652,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var args = new ListFilter() { ApplicationId = 10000,  PageSize = 500 };
+                var args = new ListFilter() { ApplicationId = 10000, PageSize = 500 };
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
                 if (model == null)
                     throw new InvalidOperationException("Model not found");
@@ -730,7 +708,7 @@ namespace Intwenty.Controllers
 
                 var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
 
-    
+
                 var getresult = _dataservice.Get(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
@@ -820,7 +798,7 @@ namespace Intwenty.Controllers
                 dbstore.Open();
                 var tbl = dbstore.GetResultSet("select * from sysdata_EventLog");
                 dbstore.Close();
-             
+
 
                 if (tbl == null)
                     throw new InvalidOperationException("GetDataSet based sysdata_EventLog returned null");
@@ -896,7 +874,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-      
+
 
         private TestResult Test17GetLists()
         {
@@ -1686,7 +1664,8 @@ namespace Intwenty.Controllers
             try
             {
 
-             
+               
+
 
                 result.Finish();
 
@@ -1714,7 +1693,7 @@ namespace Intwenty.Controllers
 
 
 
-   
+
     public class def_TestApp : InformationHeader
     {
         public string Header { get; set; }
@@ -1733,7 +1712,8 @@ namespace Intwenty.Controllers
 
     [DbTablePrimaryKey("Id")]
     [DbTableName("tests_TestDataAutoInc")]
-    public class TestDataAutoInc {
+    public class TestDataAutoInc
+    {
 
         [AutoIncrement]
         public int Id { get; set; }

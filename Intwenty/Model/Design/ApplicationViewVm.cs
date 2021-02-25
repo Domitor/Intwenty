@@ -14,10 +14,6 @@ namespace Intwenty.Model.Design
         public bool IsPrimary { get; set; }
 
         public bool IsPublic { get; set; }
-<<<<<<< HEAD
-=======
 
-
->>>>>>> master
     }
 }
