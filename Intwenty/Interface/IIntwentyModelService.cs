@@ -35,7 +35,6 @@ namespace Intwenty.Interface
         //DATABASE
         public List<DatabaseModelItem> GetDatabaseModels();
 
-<<<<<<< HEAD
 
 
         //UI
@@ -44,22 +43,6 @@ namespace Intwenty.Interface
         public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
         public ViewModel GetLocalizedViewModelByPath(string path);
 
-=======
-
-
-        //UI
-        public List<ViewModel> GetViewModels();
-        public ViewModel GetLocalizedViewModelById(int id);
-        public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
-        public ViewModel GetLocalizedViewModelByPath(string path);
-
-
-
-        //DATAVIEWS
-        public List<DataViewModelItem> GetLocalizedDataViewModels();
-        public List<DataViewModelItem> GetDataViewModels();
-
->>>>>>> master
 
 
         //VALUE DOMAINS

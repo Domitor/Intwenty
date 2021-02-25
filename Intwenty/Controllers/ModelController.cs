@@ -94,11 +94,6 @@ namespace Intwenty.Controllers
 
 
 
-<<<<<<< HEAD
-=======
-    
-
->>>>>>> master
         [HttpGet("/Model/UserInterfaceInputDesign/{applicationid}/{uimetacode}")]
         public IActionResult UserInterfaceInputDesign(int applicationid, string uimetacode)
         {
@@ -110,7 +105,6 @@ namespace Intwenty.Controllers
             var appmodel = ModelRepository.GetApplicationModel(applicationid);
             if (appmodel == null)
                 return BadRequest();
-<<<<<<< HEAD
 
             var model = appmodel.GetUserInterface(uimetacode);
             if (model == null)
@@ -121,18 +115,6 @@ namespace Intwenty.Controllers
             return View(model);
         }
 
-=======
-
-            var model = appmodel.GetUserInterface(uimetacode);
-            if (model == null)
-                return BadRequest();
-
-
-
-            return View(model);
-        }
-
->>>>>>> master
         [HttpGet("/Model/UserInterfaceListDesign/{applicationid}/{uimetacode}")]
         public IActionResult UserInterfaceListDesign(int applicationid, string uimetacode)
         {

@@ -15,24 +15,13 @@ namespace Intwenty.Model.Design
 
     public class TranslationVm : TranslationModelItem
     {
-
-        public TranslationVm()
-        {
-            TranslationType = 1;
-        }
-
         public int ApplicationModelId { get; set; }
 
         public int UserInterfaceModelId { get; set; }
 
         public int ViewModelId { get; set; }
 
-        public int FunctionModelId { get; set; }
-
         public string ModelTitle { get; set; }
-
-        //1 Title, 2 Description
-        public int TranslationType { get; set; }
 
         public bool Changed { get; set; }
 

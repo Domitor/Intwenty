@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "Manage Testdata";
+}
+
+@await Html.PartialAsync("_Modals")
+
+<div id="app">
+
+    <br />
+    <br />
+
+    <div class="card">
+        <div class="card-header"><h2>Manage testdata</h2></div>
+        <div class="card-body">
+            Use this tool carefully and only for dev/test scenarios. It will create a testdata batch including 100 records of testdata for every applications defined in the model. Please make sure that you have run 'Validate Model' and 'Configure Database' before using this tool.
+        </div>
+    </div>
+
+    <br />
+    <br />
+
+
+    <button class="btn btn-sm btn-primary" type="button" v-on:click="generateTestData()">
+        <span class="fa fa-cog"></span> Generate testdata
+        <div class="spinner-grow spinner-grow-sm text-light" v-if="model.isRunning"></div>
+    </button>
+
+    <br />
+    <br />
+
+    <div>
+        <h5>Old batches</h5>
+        <div v-for="item in batches" class="row">
+            <div class="col-lg-4"><br /><p>{{item}}</p></div>
+            <div class="col-lg-2"><br /><button class="btn btn-sm btn-danger" v-on:click="deleteTestDataBatch(item)">Delete</button></div>
+            <div class="col-lg-6"></div>
+        </div>
+    </div>
+
+    <p v-if="opresult.isSuccess" class="text-info">{{opresult.result}}</p>
+    <p v-if="!opresult.isSuccess" class="text-danger">{{opresult.userError}}</p>
+
+
+
+</div>
+
+
+@section Scripts
+    {
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                model: {isRunning: false},
+                opresult: {},
+                batches: []
+            },
+            methods:
+            {
+                generateTestData: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "GenerateTestData";
+
+                    if (context.model.isRunning)
+                        return;
+
+                    var yesfunc = function () {
+
+                        context.model.isRunning = true;
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            success: function (response)
+                            {
+                                context.model.isRunning = false;
+                                context.opresult = response;
+                                endpointurl = baseurl + "GetTestDataBatches";
+                                $.get(endpointurl, function (response) {
+                                    context.batches = response;
+                                });
+                            }
+                        });
+                    };
+
+                    raiseYesNoModal("Generate testdata ?", "This will create application test data for all applications in the meta model. Continue ?", yesfunc);
+
+
+                },
+                deleteTestDataBatch: function (item)
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Model/API/")';
+                    var endpointurl = baseurl + "DeleteTestDataBatch";
+
+                    if (context.model.isRunning)
+                        return;
+
+                    var yesfunc = function () {
+
+                        context.model.isRunning = true;
+
+                        $.ajax({
+                            url: endpointurl,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(item),
+                            success: function (response) {
+                                context.model.isRunning = false;
+                                context.batches = response;
+                            },
+                            error: function (response) {
+                                raiseErrorModal(response.responseJSON);
+                            }
+
+                        });
+                    };
+
+                    raiseYesNoModal("Delete testdata ?", "This will delete application test data for all applications included in the batch " + item + ". Continue ?", yesfunc);
+
+
+                }
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/Model/API/")';
+                var endpointurl = baseurl + "GetTestDataBatches";
+                $.get(endpointurl, function (response) {
+                    context.batches = response;
+                });
+            }
+        })
+
+    </script>
+}

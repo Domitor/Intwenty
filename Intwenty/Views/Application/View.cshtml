@@ -6,392 +6,202 @@
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
     int instanceid = (int)ViewBag.Id;
-    var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
-    var modalinputs = Model.GetModalFunctions();
 }
 
-
-
-
-<br />
-<br />
 
 @await Html.PartialAsync("_Modals")
 
-@foreach (var mip in modalinputs)
-{
-    <div class="modal" id="addEditModal_@mip.ActionUserInterfaceMetaCode" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@mip.LocalizedTitle</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="addEditModalBody_@mip.ActionUserInterfaceMetaCode">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="addEditModalSaveBtn_@mip.ActionUserInterfaceMetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-}
+<br />
+<br />
 
 <div id="app">
-
-
 
     <div class="card">
         <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
         <div class="card-body">
 
-            <p>@Model.LocalizedDescription</p>
+            <p>@Model.Description</p>
 
-            <ul class="nav">
-                @if (Model.HasCreateFunction)
-                {
-                    <li class="nav-item">
-                        @if (Model.CreateFunction.IsModalAction)
-                        {
-                            <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
-                        }
-                        else
-                        {
-                            <a href="@Model.CreateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
-
-                        }
-
-                    </li>
-                }
-
-                @if (Model.HasNavigateFunction)
-                {
-                    <li class="nav-item">
-                        <a href="@Model.NavigateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
-                    </li>
-                }
-
-                @if (Model.HasExportFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
-                    </li>
-                }
-
-                @if (Model.HasSaveFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
-                    </li>
-
-                    aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
-                    if (aftersaveaction == "GOTOLISTVIEW")
+            @if (Model.Functions.Count > 0)
+            {
+                <ul class="nav">
+                    @if (Model.HasCreateFunction)
                     {
-                        aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+                        <li class="nav-item">
+                            <a href="@Model.CreateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
+                        </li>
                     }
-                }
-            </ul>
 
+                    @if (Model.HasNavigateFunction)
+                    {
+                        <li class="nav-item">
+                            <a href="@Model.NavigateFunction.Path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                        </li>
+                    }
+
+                    @if (Model.HasExportFunction)
+                    {
+                        <li class="nav-item">
+                            <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
+                        </li>
+                    }
+
+                    @if (Model.HasSaveFunction)
+                    {
+                        <li class="nav-item">
+                            <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
+                        </li>
+
+                        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+                        if (aftersaveaction == "GOTOLISTVIEW")
+                        {
+                            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+                        }
+                    }
+                </ul>
+            }
         </div>
     </div>
 
-    <br />
-
     @foreach (var iface in Model.UserInterface)
     {
-
-        var modals = iface.GetModals();
-        if (modals.Count > 0)
-        {
-            @foreach (var mod in modals)
-            {
-                <!-- Modal -->
-                <div class="modal fade" id="@mod.DataViewMetaCode" role="dialog">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">@mod.DataViewTitle</h5>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-
-                                <div class="row">
-
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <button v-on:click="showDataViewFilter=!showDataViewFilter">
-                                                <i class="fas fa-search"></i>
-                                                <span v-if="showDataViewFilter">Hide</span>
-                                                <span v-if="!showDataViewFilter">Show</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-4">
-                                        <div class="form-group" v-if="showDataViewFilter">
-                                            <select v-model="dlgFilterColumnName" class="form-control form-control-sm">
-                                                @{
-                                                    <option value="@mod.DataViewColumnDbName">@mod.DataViewColumnTitle</option>
-                                                    if (mod.IsDataViewColumn2Connected)
-                                                    {
-                                                        <option value="@mod.DataViewColumn2DbName">@mod.DataViewColumn2Title</option>
-                                                    }
-
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="col-lg-4" v-if="showDataViewFilter">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control form-control-sm" v-model="dlgFilterValue" v-on:blur="runDataViewFilter()" />
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-
-                                                    @foreach (var viewcol in dataviewmodels)
-                                                    {
-                                                        if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == mod.DataViewMetaCode)
-                                                        {
-                                                            <th>@viewcol.LocalizedTitle</th>
-                                                        }
-
-                                                    }
-                                                </tr>
-                                            </thead>
-
-                                            <tr v-for="item in dataview">
-
-                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@mod.UIId')" data-dismiss="modal">{{item.@mod.DataViewColumnDbName}}</a></td>
-                                                @foreach (var viewcol in dataviewmodels)
-                                                {
-                                                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == mod.DataViewMetaCode && viewcol.SQLQueryFieldName.ToUpper() != mod.DataViewColumnDbName.ToUpper())
-                                                    {
-                                                        <td>{{item.@viewcol.SQLQueryFieldName}}</td>
-                                                    }
-
-                                                }
-
-
-                                            </tr>
-                                        </table>
-                                        <nav>
-                                            <ul class="pagination">
-                                                <li class="page-item" v-bind:class="{ disabled: isFirstDataViewPage() }"><a class="page-link" href="#" v-on:click="prevDataViewLookUpPage()">Previous {{pageInfo.pageSize}}</a></li>
-                                                <li class="page-item" v-bind:class="{ disabled: isLastDataViewPage() }"><a class="page-link" href="#" v-on:click="nextDataViewLookUpPage()">Next {{pageInfo.pageSize}}</a></li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-
-
 
         if (iface.IsMetaTypeInputInterface)
         {
             @foreach (var sect in iface.Sections)
             {
 
-                var colapse = "class=\"collapse\"";
-                var card = "class=\"card\"";
-                var cardbody = "class=\"card-body\"";
-                var accordion = "class=\"accordion\"";
-                if (sect.StartExpanded || !sect.Collapsible)
-                {
-                    colapse = "class=\"collapse show\"";
-                }
-                @if (sect.ExcludeOnRender)
-                {
-                    colapse = "";
-                    card = "";
-                    cardbody = "";
-                    accordion = "";
+                <div class="row">
 
-                }
-                <div @Html.Raw(accordion) id="accordion_@sect.MetaCode">
-                    <div @Html.Raw(card) id="cardheader_@sect.MetaCode">
-                        @if (!sect.ExcludeOnRender)
-                        {
-                            <div class="card-header">
-                                <ul class="nav">
-                                    <li class="nav-item">
-                                        @if (sect.Collapsible)
-                                        {
-                                            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#colapse_@sect.MetaCode" style="margin-right:20px;margin-bottom:5px"><span class="fa fa-expand-alt"></span></button>
-                                        }
-                                    </li>
-                                    <li class="nav-item">
-                                        <h4>@sect.LocalizedTitle</h4>
-                                    </li>
-                                </ul>
+                    @foreach (var pl in sect.LayoutPanels)
+                    {
+
+                        <div class="col-md-@(12/sect.LayoutPanels.Count)">
+
+                            @if (pl.UseFieldSet)
+                            {
+                                @:<fieldset class="intwentypanel">
+                                    @:<legend>@pl.LocalizedTitle</legend>
+                                }
+
+                            @foreach (var t in pl.Controls)
+                            {
+                                if (t.IsUIContainerType)
+                                {
+                                    continue;
+                                }
+                                if (t.IsUIBindingType && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
+                                {
+                                    continue;
+                                }
+                              
+                                if (t.IsMetaTypeTextBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextBox", t)
+                                }
+
+                                if (t.IsMetaTypeNumBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_NumBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeDatePicker)
+                                {
+                                    @await Html.PartialAsync("UIControls/_DatePicker", t)
+
+                                }
+
+                                if (t.IsMetaTypeCheckBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_CheckBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeTextArea)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextArea", t)
+
+                                }
+
+                                if (t.IsMetaTypeComboBox && t.HasValueDomain)
+                                {
+                                    @await Html.PartialAsync("UIControls/_ComboBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeImageBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_ImageBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeImage)
+                                {
+                                    @await Html.PartialAsync("UIControls/_Image", t)
+
+                                }
+
+                                if (t.IsMetaTypeEmailBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_EmailBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeSearchBox)
+                                {
+                                    @await Html.PartialAsync("UIControls/_SearchBox", t)
+
+                                }
+
+                                if (t.IsMetaTypeLabel)
+                                {
+                                    @await Html.PartialAsync("UIControls/_Label", t)
+
+                                }
+
+                                if (t.IsMetaTypeTextBlock)
+                                {
+                                    @await Html.PartialAsync("UIControls/_TextBlock", t)
+
+                                }
+
+                                if (t.IsMetaTypeMultiSelect)
+                                {
+                                    @await Html.PartialAsync("UIControls/_MultiSelect", t)
+
+                                }
 
 
-                            </div>
+
+                            }  <!--FOR CONTROL -->
+
+
+                            @if (pl.UseFieldSet)
+                            {
+                            @: </fieldset>
                         }
 
-                        <div id="colapse_@sect.MetaCode" @Html.Raw(colapse) data-parent="#accordion_@sect.MetaCode">
-                            <div @Html.Raw(cardbody) id="cardbody_@sect.MetaCode">
-                                <br />
-                                <div class="row">
-                                    @foreach (var pl in sect.LayoutPanels)
-                                    {
-                                        <div class="col-md-@(12/sect.LayoutPanels.Count)">
-
-                                            @if (!string.IsNullOrEmpty(pl.LocalizedTitle))
-                                            {
-                                                @:<fieldset class="intwentypanel">
-                                                    @:<legend>@pl.LocalizedTitle</legend>
-                                                }
-
-                                            @foreach (var t in pl.Controls)
-                                            {
-                                                if (t.IsUIContainerType)
-                                                {
-                                                    continue;
-                                                }
-                                                if (t.IsUIBindingType && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
-                                                {
-                                                    continue;
-                                                }
-                                                if (t.IsMetaTypeLookUp && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
-                                                {
-                                                    continue;
-                                                }
-                                                if (t.IsMetaTypeTextBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextBox", t)
-                                                }
-
-                                                if (t.IsMetaTypeNumBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_NumBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeDatePicker)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_DatePicker", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeCheckBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_CheckBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeTextArea)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextArea", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeComboBox && t.HasValueDomain)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_ComboBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeImageBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_ImageBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeImage)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_Image", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeEmailBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_EmailBox", t)
-
-                                                }
-
-                                                //LOOKUP bound to DATAVIEW
-                                                if (t.IsMetaTypeLookUp)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_LookUp", t)
-
-                                                    <br />
-                                                    <br />
-                                                }
-
-                                                if (t.IsMetaTypeLabel)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_Label", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeTextBlock)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextBlock", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeMultiSelect)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_MultiSelect", t)
-
-                                                }
-
-                                            }  <!--FOR CONTROL -->
+                        </div> <!--COL PANEL -->
 
 
-                                            @if (!string.IsNullOrEmpty(pl.LocalizedTitle))
-                                            {
-                                            @: </fieldset>
-                                        }
+                    }
 
-                                        </div> <!--COL PANEL -->
+                </div> <!--ROW SECTION-->
 
-                                    }
-
-                                </div> <!--ROW SECTION-->
-                            </div> <!--CARD-BODY -->
-                        </div><!--COLAPSE -->
-                    </div>  <!--CARD -->
-                </div><!--ACCORDION -->
+            }
 
 
-            } <!--SECTION-->
-
-        } <!--INTERFACE-->
+        }
 
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
 
             <br />
 
-            @if (iface.HasFilterFunction)
+            @if (Model.HasFilterFunction)
             {
 
                 <div class="row">
@@ -458,22 +268,14 @@
 
             }
 
-            @if (iface.HasCreateFunction && Model.IsApplicationInputView())
-            {
-                @if (iface.CreateFunction.IsModalAction)
-                {
-                    <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@iface.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus"></span> @iface.CreateFunction.LocalizedTitle</button>
-                }
-            }
-
             <table class="table table-responsive-sm">
                 <thead>
                     <tr>
-                        @if (iface.HasDeleteFunction)
+                        @if (Model.HasDeleteFunction)
                         {
                             <th style="width:5%"></th>
                         }
-                        @if (iface.HasEditFunction)
+                        @if (Model.HasEditFunction)
                         {
                             <th style="width:5%"></th>
                         }
@@ -488,25 +290,13 @@
                     </tr>
                 </thead>
                 <tr v-for="item in sortedResults">
-                    @if (iface.HasDeleteFunction)
+                    @if (Model.HasDeleteFunction)
                     {
                         <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
                     }
-                    @if (iface.HasEditFunction)
+                    @if (Model.HasEditFunction)
                     {
-                        @if (iface.EditFunction.IsModalAction && Model.IsApplicationListView())
-                        {
-                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
-                        }
-                        else if (iface.EditFunction.IsModalAction && Model.IsApplicationInputView())
-                        {
-                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
-                        }
-                        else
-                        {
-                            <td style="vertical-align:middle"><a v-bind:href="'@iface.EditFunction.ActionPath/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
-                        }
-
+                        <td style="vertical-align:middle"><a v-bind:href="'@Model.EditFunction.Path/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
                     }
 
                     @{
@@ -531,7 +321,7 @@
 
             </table>
 
-            @if (iface.HasPagingFunction)
+            @if (Model.HasPagingFunction)
             {
                 <nav>
                     <ul class="pagination">
@@ -557,7 +347,6 @@
 
     <script>
 
-        var modalapps = [];
 
         var app = new Vue({
             el: '#app',
@@ -580,149 +369,10 @@
                 ,applicationViewId: @applicationViewId
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
-                ,showDataViewFilter: false
-
-
+                ,showDataViewFilter:false
             },
             methods:
             {
-
-                openApplicationModal: function (item, uimetacode)
-                {
-                    var context = this;
-                    var endpointurl = context.baseurl + "GetModalInput/" + context.appId + "/" + uimetacode + "/" + context.instanceId;
-
-                    var modalapp = null;
-                    for (var i = 0; i < modalapps.length; i++) {
-                        if (modalapps[i].name == uimetacode) {
-                            modalapp = modalapps[i].app;
-                            break;
-                        }
-                    }
-
-                    var savefunc = function ()
-                    {
-                           var saveendpoint = context.baseurl + "Save";
-                            modalapp.model[context.appMainTable].ApplicationId = context.appId;
-                            modalapp.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
-
-                            $.ajax({
-                                url: saveendpoint,
-                                type: "POST",
-                                contentType: "application/json",
-                                data: JSON.stringify(modalapp.model),
-                                success: function (response) {
-
-                                }
-                            });
-                    };
-
-                    if (modalapp == null)
-                    {
-                         //NEW MODAL APP CONFIG
-                         var appconfig = {
-                             template: '',
-                             el: "#addEditModalBody_" + uimetacode
-                             , data: {
-                                 model: {
-                                     ['@mainDbName']: {} }
-                                ,dataview: []
-                                ,valuedomains: {}
-                                ,validation: {}
-                                ,dlgFilterColumnName: ""
-                                ,dlgFilterValue: ""
-                            }
-                        };
-
-                        $.get(endpointurl, function (response)
-                        {
-                            //TEMPLATE
-                            appconfig.template = response;
-
-                            //NEW APP
-                            modalapp = new Vue(appconfig);
-
-                            modalapps.push({ name: uimetacode, app: modalapp });
-
-                        }).done(function () {
-
-                            if (item)
-                            {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function ()
-                                {
-                                     modalapp.model.@mainDbName = item;
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                            }
-                            else
-                            {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function () {
-
-                                    endpointurl = context.baseurl + "CreateNew/" + context.appId;
-                                    $.get(endpointurl, function (response) {
-                                        modalapp.model = JSON.parse(response.data);
-                                    });
-                                }).done(function ()
-                                {
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                            }
-
-
-                        });
-                    }
-                    else
-                    {
-                        if (item)
-                         {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function ()
-                                {
-                                     modalapp.model.@mainDbName = item;
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                         }
-                         else
-                         {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function () {
-
-                                    endpointurl = context.baseurl + "CreateNew/" + context.appId;
-                                    $.get(endpointurl, function (response) {
-                                        modalapp.model = JSON.parse(response.data);
-                                    });
-                                }).done(function ()
-                                {
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                        }
-                    }
-                },
-                openSubTableModal: function (item, uimetacode) {
-                    raiseInformationModal('Not implemented yet', uimetacode);
-                },
                 saveApplication: function () {
                     var context = this;
                     var endpointurl = context.baseurl + "Save";
@@ -795,8 +445,8 @@
                 exportToExcel: function ()
                 {
                     var context = this;
-                    var args =  { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
-                    var endpointurl = context.baseurl + "GetPagedList";
+                    var args = { "applicationId": context.appId, "maxCount": 0, "pageSize": 2000, "pageNumber": 0, "filterValues": [] }
+                    var endpointurl = context.baseurl + "GetEditListData";
 
                     $.ajax({
                         url: endpointurl,
@@ -863,11 +513,11 @@
             },
             mounted: function () {
                 var context = this;
-                @if (Model.IsApplicationListView())
+                @if (Model.IsListView())
                 {
                     <text>context.getPage();</text>
                 }
-                else if (Model.IsApplicationInputView() && instanceid > 0)
+                else if (Model.IsInputView() && instanceid > 0)
                 {
                     <text>
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
@@ -880,7 +530,7 @@
                     });
                     </text>
               }
-              else if (Model.IsApplicationInputView() && instanceid == 0)
+              else if (Model.IsInputView() && instanceid == 0 && Model.CanCreateEntities)
               {
                     <text>
                     var endpointurl = context.baseurl + "GetValueDomains/" + context.appId;

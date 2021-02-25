@@ -36,11 +36,6 @@ namespace IntwentyDemo.Controllers
 
      
 
-        public IActionResult Test()
-        {
-
-            return View();
-        }
 
     }
 

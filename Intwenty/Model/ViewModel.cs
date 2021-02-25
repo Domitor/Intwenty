@@ -79,8 +79,8 @@ namespace Intwenty.Model
         public string Path { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
+        public bool CanCreateEntities { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
-        public DataViewModelItem DataViewInfo { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }
@@ -186,7 +186,26 @@ namespace Intwenty.Model
             }
         }
 
-      
+        public bool HasExportFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeExport))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem ExportFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeExport);
+            }
+        }
+
         public bool HasSaveFunction
         {
             get
@@ -207,54 +226,33 @@ namespace Intwenty.Model
             }
         }
 
-        public bool HasExportFunction
+        public bool HasDeleteFunction
         {
             get
             {
-                if (!IsApplicationListView())
-                    return false;
+                if (Functions.Exists(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode))
+                    return true;
 
-                foreach (var ui in UserInterface)
-                {
-                    if (ui.Functions.Exists(p => p.IsMetaTypeExport))
-                        return true;
-
-                }
 
                 return false;
             }
         }
 
-        public FunctionModelItem ExportFunction
+        public FunctionModelItem DeleteFunction
         {
             get
             {
-                if (!IsApplicationListView())
-                    return null;
-
-                foreach (var ui in UserInterface)
-                {
-                    return ui.Functions.FirstOrDefault(p => p.IsMetaTypeExport);
-
-                }
-
-                return null;
-              
+                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode);
             }
         }
+
         public bool HasCreateFunction
         {
             get
             {
-                if (!IsApplicationListView())
-                    return false;
+                if (Functions.Exists(p => p.IsMetaTypeCreate))
+                    return true;
 
-                foreach (var ui in UserInterface)
-                {
-                    if (ui.Functions.Exists(p => p.IsMetaTypeCreate))
-                        return true;
-
-                }
 
                 return false;
             }
@@ -264,56 +262,87 @@ namespace Intwenty.Model
         {
             get
             {
-                if (!IsApplicationListView())
-                    return null;
-
-                foreach (var ui in UserInterface)
-                {
-                    return ui.Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
-
-                }
-
-                return null;
+                return Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
             }
         }
 
-        public bool IsApplicationListView()
+        public bool HasEditFunction
         {
-            if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface && p.DataTableMetaCode == AppMetaCode))
-                return true;
-
-
-            return false;
-
-        }
-     
-        public bool IsApplicationInputView()
-        {
-            if (UserInterface.Exists(p => p.IsMetaTypeInputInterface && p.DataTableMetaCode == AppMetaCode))
-                return true;
-
-
-            return false;
-
-        }
-
-        public List<FunctionModelItem> GetModalFunctions()
-        {
-            var list = new List<FunctionModelItem>();
-            foreach (var ui in UserInterface)
+            get
             {
-                foreach (var func in ui.Functions)
-                {
-                    if ((func.IsMetaTypeCreate || func.IsMetaTypeEdit) && func.IsModalAction)
-                    {
-                        list.Add(func);
-                    }
+                if (Functions.Exists(p => p.IsMetaTypeEdit))
+                    return true;
 
-                }
 
+                return false;
             }
+        }
 
-            return list;
+        public FunctionModelItem EditFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeEdit);
+            }
+        }
+
+        public bool HasPagingFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypePaging))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem PagingFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypePaging);
+            }
+        }
+
+        public bool HasFilterFunction
+        {
+            get
+            {
+                if (Functions.Exists(p => p.IsMetaTypeFilter))
+                    return true;
+
+
+                return false;
+            }
+        }
+
+        public FunctionModelItem FilterFunction
+        {
+            get
+            {
+                return Functions.FirstOrDefault(p => p.IsMetaTypeFilter);
+            }
+        }
+
+        public bool IsListView()
+        {
+            if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface))
+                return true;
+
+
+            return false;
+
+        }
+
+        public bool IsInputView()
+        {
+            if (UserInterface.Exists(p => p.IsMetaTypeInputInterface))
+                return true;
+
+
+            return false;
 
         }
 

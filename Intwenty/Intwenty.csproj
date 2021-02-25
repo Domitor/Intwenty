@@ -5,7 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.6.4</Version>
+    <Version>1.5.3</Version>
     <Authors>Johan Filipsson</Authors>
     <Company>Domitor Consulting AB</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -18,14 +18,9 @@
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
     <Description>Create metadata driven applications with vue.js and ASP.NET Core. Use this package with visual studio 2019 or later. See https://github.com/Domitor/Intwenty for instructions about using this package.</Description>
     <EnableDefaultContentItems>true</EnableDefaultContentItems>
-    <PackageReleaseNotes>- Fix: Tenant isolated subtables were not created
-- Fix: Edit function.actionpath did not work
-- Add UserManager.HasAuthorization(ClaimsPrincipal, ApplicationModel)
-- Add UserManager.HasAuthorization(ClaimsPrincipal, ApplicationModelItem)
-- Add UserManager.HasAuthorization(ClaimsPrincipal, SystemModelItem)
-</PackageReleaseNotes>
-    <AssemblyVersion>1.6.4.0</AssemblyVersion>
-    <FileVersion>1.6.4.0</FileVersion>
+    <PackageReleaseNotes>- Minor Changes</PackageReleaseNotes>
+    <AssemblyVersion>1.5.3.0</AssemblyVersion>
+    <FileVersion>1.5.3.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
