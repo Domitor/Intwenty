@@ -27,7 +27,15 @@ namespace Intwenty.Interface
         bool HasValueDomain { get; }
         bool HasAppDomain { get; }
 
+<<<<<<< HEAD
        
+=======
+        //Optionals
+        bool IsDataColumn2Connected { get; }
+        bool IsDataViewColumn2Connected { get; }
+
+        //List<IUIControl> Children { get; set; }
+>>>>>>> master
     }
 
     public interface IEditListViewColumn : IUIBinding

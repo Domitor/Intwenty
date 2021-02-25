@@ -69,6 +69,14 @@ namespace Intwenty.Model.Design
             return table;
         }
 
+        public static DatabaseTableVm GetTableVm(ApplicationModel app, string datatable_metacode)
+        {
+            var tables = GetDatabaseTableVm(app);
+            if (datatable_metacode == app.Application.MetaCode)
+                return tables.Find(p => p.IsDefaultTable);
+            else
+                return tables.Find(p => p.MetaCode == datatable_metacode);
+        }
     }
 
    

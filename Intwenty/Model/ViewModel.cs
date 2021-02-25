@@ -79,8 +79,8 @@ namespace Intwenty.Model
         public string Path { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
-        public bool CanCreateEntities { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
+        public DataViewModelItem DataViewInfo { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }
@@ -186,26 +186,7 @@ namespace Intwenty.Model
             }
         }
 
-        public bool HasExportFunction
-        {
-            get
-            {
-                if (Functions.Exists(p => p.IsMetaTypeExport))
-                    return true;
-
-
-                return false;
-            }
-        }
-
-        public FunctionModelItem ExportFunction
-        {
-            get
-            {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeExport);
-            }
-        }
-
+      
         public bool HasSaveFunction
         {
             get
@@ -226,33 +207,54 @@ namespace Intwenty.Model
             }
         }
 
-        public bool HasDeleteFunction
+        public bool HasExportFunction
         {
             get
             {
-                if (Functions.Exists(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode))
-                    return true;
+                if (!IsApplicationListView())
+                    return false;
 
+                foreach (var ui in UserInterface)
+                {
+                    if (ui.Functions.Exists(p => p.IsMetaTypeExport))
+                        return true;
+
+                }
 
                 return false;
             }
         }
 
-        public FunctionModelItem DeleteFunction
+        public FunctionModelItem ExportFunction
         {
             get
             {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode);
+                if (!IsApplicationListView())
+                    return null;
+
+                foreach (var ui in UserInterface)
+                {
+                    return ui.Functions.FirstOrDefault(p => p.IsMetaTypeExport);
+
+                }
+
+                return null;
+              
             }
         }
-
         public bool HasCreateFunction
         {
             get
             {
-                if (Functions.Exists(p => p.IsMetaTypeCreate))
-                    return true;
+                if (!IsApplicationListView())
+                    return false;
 
+                foreach (var ui in UserInterface)
+                {
+                    if (ui.Functions.Exists(p => p.IsMetaTypeCreate))
+                        return true;
+
+                }
 
                 return false;
             }
@@ -262,73 +264,32 @@ namespace Intwenty.Model
         {
             get
             {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
+                if (!IsApplicationListView())
+                    return null;
+
+                foreach (var ui in UserInterface)
+                {
+                    return ui.Functions.FirstOrDefault(p => p.IsMetaTypeCreate);
+
+                }
+
+                return null;
             }
         }
 
-        public bool HasEditFunction
+        public bool IsApplicationListView()
         {
-            get
-            {
-                if (Functions.Exists(p => p.IsMetaTypeEdit))
-                    return true;
+            if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface && p.DataTableMetaCode == AppMetaCode))
+                return true;
 
 
-                return false;
-            }
+            return false;
+
         }
-
-        public FunctionModelItem EditFunction
+     
+        public bool IsApplicationInputView()
         {
-            get
-            {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeEdit);
-            }
-        }
-
-        public bool HasPagingFunction
-        {
-            get
-            {
-                if (Functions.Exists(p => p.IsMetaTypePaging))
-                    return true;
-
-
-                return false;
-            }
-        }
-
-        public FunctionModelItem PagingFunction
-        {
-            get
-            {
-                return Functions.FirstOrDefault(p => p.IsMetaTypePaging);
-            }
-        }
-
-        public bool HasFilterFunction
-        {
-            get
-            {
-                if (Functions.Exists(p => p.IsMetaTypeFilter))
-                    return true;
-
-
-                return false;
-            }
-        }
-
-        public FunctionModelItem FilterFunction
-        {
-            get
-            {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeFilter);
-            }
-        }
-
-        public bool IsListView()
-        {
-            if (UserInterface.Count == 1 && UserInterface.Exists(p => p.IsMetaTypeListInterface))
+            if (UserInterface.Exists(p => p.IsMetaTypeInputInterface && p.DataTableMetaCode == AppMetaCode))
                 return true;
 
 
@@ -336,13 +297,23 @@ namespace Intwenty.Model
 
         }
 
-        public bool IsInputView()
+        public List<FunctionModelItem> GetModalFunctions()
         {
-            if (UserInterface.Exists(p => p.IsMetaTypeInputInterface))
-                return true;
+            var list = new List<FunctionModelItem>();
+            foreach (var ui in UserInterface)
+            {
+                foreach (var func in ui.Functions)
+                {
+                    if ((func.IsMetaTypeCreate || func.IsMetaTypeEdit) && func.IsModalAction)
+                    {
+                        list.Add(func);
+                    }
 
+                }
 
-            return false;
+            }
+
+            return list;
 
         }
 

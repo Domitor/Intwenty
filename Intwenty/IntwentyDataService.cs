@@ -1676,6 +1676,7 @@ namespace Intwenty
                     sql_stmt.Append(string.Format("AND t1.Id = {0} ", state.Id));
 
                     if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+<<<<<<< HEAD
                     {
                         if (!state.User.HasValidUserId)
                             throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
@@ -1708,6 +1709,40 @@ namespace Intwenty
                     //SUBTABLES
                     foreach (var t in model.DataStructure)
                     {
+=======
+                    {
+                        if (!state.User.HasValidUserId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+
+                        sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
+                    }
+
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                    {
+                        if (!state.User.HasValidOrganizationId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+
+                        sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                    }
+
+                    var appjson = client.GetJsonObject(sql_stmt.ToString()).GetJsonString();
+                    if (appjson.Length < 5)
+                    {
+                        jsonresult.Append("}");
+                        result.Messages.Clear();
+                        result.Data = jsonresult.ToString();
+                        result.IsSuccess = false;
+                        result.AddMessage(MessageCode.USERERROR, string.Format("Get application {0} returned no data", model.Application.Title));
+                        result.AddMessage(MessageCode.SYSTEMERROR, string.Format("Get application {0} returned no data", model.Application.Title));
+                        return result;
+                    }
+
+                    jsonresult.Append("\"" + model.Application.DbName + "\":" + appjson.ToString());
+
+                    //SUBTABLES
+                    foreach (var t in model.DataStructure)
+                    {
+>>>>>>> master
                         if (t.IsMetaTypeDataTable && t.IsRoot)
                         {
                             char sep = ' ';
@@ -2008,6 +2043,56 @@ namespace Intwenty
                                         return new ModifyResult(false, MessageCode.USERERROR, string.Format("The field {0} is mandatory", t.Title), state.Id, state.Version);
                                     }
                                 }
+<<<<<<< HEAD
+=======
+
+                            }
+
+                        }
+                    }
+                }
+            }
+            
+            return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version) { EndTime = DateTime.Now };
+        }
+
+        #endregion
+
+        #region Dataview
+
+        public virtual DataListResult GetDataView(ListFilter args)
+        {
+            DataListResult result = new DataListResult();
+
+            var client = GetDataClient();
+
+            try
+            {
+                var viewinfo = ModelRepository.GetDataViewModels();
+
+                if (args == null)
+                    throw new InvalidOperationException("Call to GetDataView without ListFilter argument");
+
+                result.IsSuccess = true;
+                result.ListFilter = args;
+
+
+                var dv = viewinfo.Find(p => p.MetaCode == args.DataViewMetaCode && p.IsMetaTypeDataView);
+                if (dv == null)
+                    throw new InvalidOperationException("Could not find dataview to fetch");
+                if (dv.HasNonSelectSql)
+                    throw new InvalidOperationException(string.Format("The sql query defined for dataview {0} has invalid statements.", dv.Title + " (" + dv.MetaCode + ")"));
+
+
+                if (result.ListFilter.MaxCount == 0 && !string.IsNullOrEmpty(dv.QueryTableDbName))
+                {
+
+                    var max = client.GetScalarValue("select count(*) from " + dv.QueryTableDbName);
+                    if (max == DBNull.Value)
+                        result.ListFilter.MaxCount = 0;
+                    else
+                        result.ListFilter.MaxCount = Convert.ToInt32(max);
+>>>>>>> master
 
                             }
 
