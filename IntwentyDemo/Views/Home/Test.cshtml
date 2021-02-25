@@ -2,8 +2,17 @@
 
 <div id="app">
 
-    
-    
+    {{appobject}}
+
+    <br />
+    <br />
+
+    <div class="form-group">
+        <label class="control-label">Test</label>
+        <input type="text" id="multiselect" class="form-control" />
+    </div>
+
+
 </div>
 
 
@@ -12,8 +21,86 @@
 
 @section Scripts
 {
+    <script>
 
-   
+          var app = new Vue({
+            el: '#app',
+              data: {
 
+                  appobject: { Code: "2,Goof,1", Value: ""}
+
+              },
+            methods:
+            {
+              
+
+                initMultiSelect: function (appobject, codecolname, valcolname, name, options)
+                {
+                    var context = this;
+
+                    var t = $(name).selectize({
+                        plugins: ['remove_button']
+                        ,delimiter: ','
+                        ,persist: true
+                        ,maxItems: null
+                        ,valueField: 'Code'
+                        ,labelField: 'Value'
+                        ,searchField: 'Value'
+                        ,options: options
+                        ,create: true
+
+                    });
+
+                    if (appobject[codecolname])
+                    {
+                        var persisteditems = appobject[codecolname].split(",");
+                        for (var i = 0; i < persisteditems.length; i++)
+                        {
+                            //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
+                            t[0].selectize.addItem(persisteditems[i]);
+
+                        }
+                    }
+
+                    t.on('change',
+                        function ()
+                        {
+                            var selected_objects = $.map(t[0].selectize.items, function (value) {
+                                return t[0].selectize.options[value];
+                            });
+
+                            var codestr = "";
+                            var valstr = "";
+                            var delim = "";
+                            for (var i = 0; i < selected_objects.length; i++)
+                            {
+                                var code = selected_objects[i].Code;
+                                var val = selected_objects[i].Value;
+                                codestr += delim + code;
+                                valstr += delim + val;
+                                delim = ",";
+                              
+                            }
+                            appobject[codecolname] = codestr;
+                            appobject[valcolname] = valstr;
+                        });
+                }
+            },
+            computed: {
+
+            },
+            mounted: function ()
+            {
+                options = [{ Code: "1", Value: "Val 1" }, { Code: "2", Value: "Val 2" }];
+                this.initMultiSelect(this.appobject, "Code", "Value", "#multiselect",options);
+            }
+        });
+
+
+    </script>
 
 }
+
+
+
+
