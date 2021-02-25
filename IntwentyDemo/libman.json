@@ -31,12 +31,8 @@
       ]
     },
     {
-      "library": "select2@4.0.13",
-      "destination": "wwwroot/lib/select2/"
-    },
-    {
-      "library": "select2-bootstrap-theme@0.1.0-beta.10",
-      "destination": "wwwroot/lib/select2-bootstrap-theme/"
+      "library": "selectize.js@0.13.3",
+      "destination": "wwwroot/lib/selectize.js/"
     }
   ]
 }
