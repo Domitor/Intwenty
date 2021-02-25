@@ -90,7 +90,8 @@ Vue.component("intwentyselect", {
         var vm = this;
         var element = $(this.$el);
 
-        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function ()
+        {
             var selectionstring = "";
             var selectiontextstring = "";
             var selections = element.select2('data');
@@ -260,11 +261,13 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 };
 
 
-Vue.prototype.onFileUpload = function () {
-
+Vue.prototype.onFileUpload = function ()
+{
+   
 };
 
-Vue.prototype.uploadImage = function (event) {
+Vue.prototype.uploadImage = function (event)
+{
     var context = this;
     var endpoint = context.baseurl + 'UploadImage';
     var formData = new FormData();
@@ -273,7 +276,8 @@ Vue.prototype.uploadImage = function (event) {
     formData.append('FileSize', event.srcElement.files[0].size);
 
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function ()
+    {
         if (xhr.readyState === 4) {
             var dbtable = event.srcElement.dataset.dbtable;
             var dbfield = event.srcElement.dataset.dbfield;
@@ -290,7 +294,8 @@ Vue.prototype.uploadImage = function (event) {
 Vue.prototype.canSave = function () {
     var context = this;
     var result = true;
-    $("[data-required]").each(function () {
+    $("[data-required]").each(function ()
+    {
         var required = $(this).data('required');
         if (required === "True") {
             var validationfield = $(this).data('validationfield');
@@ -340,7 +345,8 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text) {
+Vue.prototype.setValidationText = function (validationfield, text)
+{
     if (!this.validation)
         return;
     if (!validationfield)
@@ -364,7 +370,8 @@ Vue.prototype.clearValidationText = function (validationfield) {
     this.$forceUpdate();
 };
 
-Vue.prototype.onUserInput = function (event) {
+Vue.prototype.onUserInput = function (event)
+{
     if (!event)
         return;
 
@@ -386,139 +393,10 @@ Vue.prototype.onUserInput = function (event) {
     });
 };
 
-Vue.prototype.setSelectedDataViewValue = function (item, lookupid) {
-    var context = this;
-
-    $("input[data-lookupid]").each(function () {
-        var id = $(this).data('lookupid');
-        if (id === lookupid) {
-            var dbfield = $(this).data('dbfield');
-            var viewfield = $(this).data('viewfield');
-            context.current_edit_line[dbfield] = item[viewfield];
-        }
-    });
-
-    context.$forceUpdate();
-};
-
-Vue.prototype.getDataViewValue = function (viewname, keyfield, lookupid) {
-
-    var context = this;
-
-    context.pageInfo.filterValues = [];
-
-    context.pageInfo.dataViewMetaCode = viewname;
-
-    $("input[data-lookupid]").each(function () {
-        var id = $(this).data('lookupid');
-        if (id === lookupid) {
-            var dbfield = $(this).data('dbfield');
-            var viewfield = $(this).data('viewfield');
-            if (dbfield === keyfield) {
-                if (viewfield != '' && context.model[context.appMainTable][dbfield]) {
-                    context.pageInfo.filterValues.push({ "name": viewfield, "value": context.model[context.appMainTable][dbfield] });
-                }
-            }
-        }
-    });
 
 
-    var endpointurl = context.baseurl + "GetDataViewValue";
-
-    $.ajax({
-        url: endpointurl,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(context.pageInfo),
-        success: function (response) {
-            var dataviewitem = JSON.parse(response.data);
-            $("input[data-lookupid]").each(function () {
-                var id = $(this).data('lookupid');
-                if (id === lookupid) {
-                    var dbfield = $(this).data('dbfield');
-                    var viewfield = $(this).data('viewfield');
-                    if (dbfield != keyfield) {
-                        context.model[context.appMainTable][dbfield] = dataviewitem[viewfield];
-                        context.$forceUpdate();
-                    }
-
-                }
-            });
-
-
-        }
-    });
-};
-
-Vue.prototype.openDataViewLookUp = function (viewname, line) {
-    if (!viewname)
-        return;
-
-    this.showFilter = false;
-    this.dlgFilterColumnName = "";
-    this.dlgFilterValue = "";
-    this.pageInfo.maxCount = 0;
-    this.pageInfo.pageNumber = 0;
-    this.pageInfo.dataViewMetaCode = viewname;
-    this.getDataViewLookUpPage();
-    this.current_edit_line = line;
-    $("#" + viewname).modal();
-};
-
-Vue.prototype.nextDataViewLookUpPage = function () {
-    var context = this;
-    context.pageInfo.pageNumber++;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.prevDataViewLookUpPage = function () {
-    var context = this;
-    context.pageInfo.pageNumber--;
-    if (context.pageInfo.pageNumber < 0)
-        context.pageInfo.pageNumber = 0;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.getDataViewLookUpPage = function () {
-    var context = this;
-
-    context.pageInfo.filterValues = [];
-    if (context.dlgFilterColumnName != '' && context.dlgFilterValue != '') {
-        context.pageInfo.filterValues.push({ "name": context.dlgFilterColumnName, "value": context.dlgFilterValue });
-    }
-
-    var endpointurl = context.baseurl + "GetDataView";
-
-    $.ajax({
-        url: endpointurl,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(context.pageInfo),
-        success: function (response) {
-            //DATA
-            context.dataview = JSON.parse(response.data);
-
-            //UPDATE CURRENT PAGE INFO
-            context.pageInfo = response.listFilter;
-        }
-    });
-};
-
-Vue.prototype.isFirstDataViewPage = function () {
-    return (this.pageInfo.pageNumber <= 0);
-};
-
-Vue.prototype.isLastDataViewPage = function () {
-    return (((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount);
-};
-
-Vue.prototype.runDataViewFilter = function () {
-    var context = this;
-    context.pageInfo.pageNumber = 0;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.addSubTableLine = function (tablename) {
+Vue.prototype.addSubTableLine = function (tablename)
+{
     var context = this;
     context.model[tablename].push({ Id: 0, ParentId: 0 });
     context.$forceUpdate();
@@ -528,7 +406,8 @@ Vue.prototype.downloadExcel = function () {
 
 };
 
-Vue.prototype.nextpage = function () {
+Vue.prototype.nextpage = function ()
+{
     var context = this;
     context.pageInfo.pageNumber++;
     context.getPage();
@@ -556,8 +435,10 @@ Vue.prototype.addFilterValue = function () {
 
 Vue.prototype.deleteFilterValue = function (item) {
     var context = this;
-    for (var i = 0; i < context.pageInfo.filterValues.length; i++) {
-        if (context.pageInfo.filterValues[i].name === item.name) {
+    for (var i = 0; i < context.pageInfo.filterValues.length; i++)
+    {
+        if (context.pageInfo.filterValues[i].name === item.name)
+        {
             context.pageInfo.filterValues.splice(i, 1);
             context.getPage();
             break;
