@@ -45,12 +45,6 @@ namespace Intwenty.Interface
 
 
 
-        //DATAVIEWS
-        public List<DataViewModelItem> GetLocalizedDataViewModels();
-        public List<DataViewModelItem> GetDataViewModels();
-
-
-
         //VALUE DOMAINS
         public List<ValueDomainModelItem> GetValueDomains();
         public void SaveValueDomains(List<ValueDomainModelItem> model);

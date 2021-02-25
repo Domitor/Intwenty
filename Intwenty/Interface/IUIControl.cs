@@ -18,19 +18,16 @@ namespace Intwenty.Interface
         bool IsMetaTypePasswordBox { get; }
         bool IsMetaTypeTextBox { get; }
         bool IsMetaTypeTextArea { get; }
-        bool IsMetaTypeLookUp { get; }
+        bool IsMetaTypeSearchBox { get; }
         bool IsMetaTypeNumBox { get; }
         bool IsMetaTypeCheckBox { get; }
         bool IsMetaTypeComboBox { get; }
         bool IsMetaTypeImageBox { get; }
         bool IsMetaTypeDatePicker { get; }
         bool HasValueDomain { get; }
+        bool HasAppDomain { get; }
 
-        //Optionals
-        bool IsDataColumn2Connected { get; }
-        bool IsDataViewColumn2Connected { get; }
-
-        //List<IUIControl> Children { get; set; }
+       
     }
 
     public interface IEditListViewColumn : IUIBinding

@@ -704,155 +704,7 @@ namespace Intwenty.Controllers
 
         #endregion
 
-        #region Dataview Model
-
-        /// <summary>
-        /// Get meta data for data views
-        /// </summary>
-        [HttpGet("/Model/API/GetDataViewModels")]
-        public IActionResult GetDataViewModels()
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            var t = ModelRepository.GetDataViewModels();
-            var model = DataViewModelCreator.GetDataViewModelVm(t);
-            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
-            var res = new JsonResult(model);
-            return res;
-
-        }
-
-
-        [HttpPost("/Model/API/SaveDataViewModels")]
-        public IActionResult SaveDataViewModels([FromBody] DataViewVm model)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                ModelRepository.ClearCache();
-
-                var list = DataViewModelCreator.GetDataViewModel(model);
-
-                foreach (var dv in list)
-                {
-
-                    if (dv.IsMetaTypeDataView)
-                        dv.ParentMetaCode = "ROOT";
-
-                    if (string.IsNullOrEmpty(dv.MetaCode))
-                        dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                }
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                foreach (var dv in list)
-                {
-                    if (dv.Id < 1)
-                    {
-                        var t = new DataViewItem()
-                        {
-
-                            MetaCode = dv.MetaCode,
-                            MetaType = dv.MetaType,
-                            ParentMetaCode = dv.ParentMetaCode,
-                            Title = dv.Title,
-                            SQLQuery = dv.SQLQuery,
-                            SQLQueryFieldName = dv.SQLQueryFieldName,
-                            SystemMetaCode = dv.SystemMetaCode
-                        };
-                        client.InsertEntity(t);
-                    }
-                    else
-                    {
-                        var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
-                        if (existing != null)
-                        {
-                            existing.SQLQuery = dv.SQLQuery;
-                            existing.SQLQueryFieldName = dv.SQLQueryFieldName;
-                            existing.Title = dv.Title;
-                            client.UpdateEntity(existing);
-                        }
-
-                    }
-
-                }
-
-                client.Close();
-
-
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving dataview model.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetDataViewModels();
-        }
-
-
-        [HttpPost("/Model/API/DeleteDataViewModel")]
-        public IActionResult DeleteDataViewModel([FromBody] DataViewVm model)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                
-                ModelRepository.ClearCache();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == model.Id);
-                if (existing != null)
-                {
-                    var dto = new DataViewModelItem(existing);
-                    if (dto.IsMetaTypeDataView)
-                    {
-                        var childlist = client.GetEntities<DataViewItem>().Where(p => (p.MetaType == DataViewModelItem.MetaTypeDataViewColumn || p.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
-                        client.DeleteEntity(existing);
-                        client.DeleteEntities(childlist);
-                    }
-                    else
-                    {
-                        client.DeleteEntity(existing);
-                    }
-                }
-                client.Close();
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting application dataview model.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetDataViewModels();
-        }
-
-        #endregion
+     
 
         #region UI Model
 
@@ -1350,7 +1202,6 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                var views = ModelRepository.GetDataViewModels();
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
@@ -1461,7 +1312,7 @@ namespace Intwenty.Controllers
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect)
+                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
@@ -1470,7 +1321,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeMultiSelect)
+                                if (input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {
@@ -1480,42 +1331,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeLookUp)
-                                {
-                                    if (!string.IsNullOrEmpty(input.DataViewMetaCode))
-                                    {
-                                        input.DataViewMetaCode = input.DataViewMetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn1DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn2DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn2MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn1DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn1DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn2DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn2DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn2MetaCode = dmc.MetaCode;
-                                    }
-                                }
+                               
 
                                 if (input.Id > 0)
                                 {
@@ -1527,9 +1343,6 @@ namespace Intwenty.Controllers
                                     entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
                                     entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
                                     entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
                                     client.UpdateEntity(entity);
                                 }
                                 else
@@ -1544,9 +1357,6 @@ namespace Intwenty.Controllers
                                     entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
                                     entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
                                     entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
                                     client.InsertEntity(entity);
                                 }
 
@@ -1606,7 +1416,6 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                var views = ModelRepository.GetDataViewModels();
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
@@ -2472,12 +2281,7 @@ namespace Intwenty.Controllers
 
                 }
             }
-            var dataviews = ModelRepository.GetDataViewModels();
-            foreach (var dv in dataviews.Where(p=> p.IsMetaTypeDataView))
-            {
-                res.EndpointDataSources.Add(new EndpointDataSource() { id = dv.MetaCode, title = dv.Title, type = "DATAVIEW" });
-            }
-
+           
             
 
             return new JsonResult(res);

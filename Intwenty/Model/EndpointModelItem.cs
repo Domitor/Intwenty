@@ -13,7 +13,6 @@ namespace Intwenty.Model
         public static readonly string MetaTypeTableGet = "TABLEGET";
         public static readonly string MetaTypeTableList = "TABLELIST";
         public static readonly string MetaTypeTableSave = "TABLESAVE";
-        public static readonly string MetaTypeDataViewList = "DATAVIEWLIST";
         public static readonly string MetaTypeCustomPost = "CUSTOMPOST";
         public static readonly string MetaTypeCustomGet = "CUSTOMGET";
 
@@ -75,14 +74,11 @@ namespace Intwenty.Model
 
         public DatabaseModelItem DataTableInfo { get; set; }
 
-        public DataViewModelItem DataViewInfo { get; set; }
 
         public string Action 
         {
             get {
 
-                if (IsMetaTypeDataViewList)
-                    return "View";
                 if (IsMetaTypeTableList)
                     return "List";
                 if (IsMetaTypeTableGet)
@@ -137,11 +133,7 @@ namespace Intwenty.Model
 
      
 
-        public bool IsDataViewConnected
-        {
-            get { return (DataViewInfo != null && !string.IsNullOrEmpty(DataMetaCode) && DataViewInfo.IsMetaTypeDataView); }
-        }
-
+      
 
         public bool IsMetaTypeTableGet
         {
@@ -156,11 +148,6 @@ namespace Intwenty.Model
         public bool IsMetaTypeTableSave
         {
             get { return MetaType == MetaTypeTableSave; }
-        }
-
-        public bool IsMetaTypeDataViewList
-        {
-            get { return MetaType == MetaTypeDataViewList; }
         }
 
         public bool IsMetaTypeCustomPost

@@ -129,27 +129,7 @@ namespace Intwenty.Controllers
 
         }
 
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost]
-        public virtual JsonResult GetDataViewValue([FromBody] ListFilter model)
-        {
-            var viewitem = DataRepository.GetDataViewRecord(model);
-            return new JsonResult(viewitem);
-        }
-
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost]
-        public virtual JsonResult GetDataView([FromBody] ListFilter model)
-        {
-            var dv = DataRepository.GetDataView(model);
-            return new JsonResult(dv);
-        }
+      
 
         /// <summary>
         /// Get a json structure for a new application, including defaultvalues

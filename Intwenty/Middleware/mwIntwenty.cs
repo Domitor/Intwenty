@@ -316,7 +316,6 @@ namespace Intwenty.Middleware
                 client.CreateTable<SystemItem>();
                 client.CreateTable<ApplicationItem>();
                 client.CreateTable<DatabaseItem>();
-                client.CreateTable<DataViewItem>();
                 client.CreateTable<EventLog>();
                 client.CreateTable<InformationStatus>();
                 client.CreateTable<InstanceId>();

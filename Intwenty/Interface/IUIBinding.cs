@@ -35,23 +35,10 @@ namespace Intwenty.Interface
 
     public interface IUIComplexBinding : IUIBinding
     {
-       
-
-        string DataViewMetaCode { get; }
-
-        string DataViewTitle { get; }
 
         string DomainName { get; }
 
         string DataColumn2DbName { get; }
-
-        string DataViewColumnDbName { get; }
-
-        string DataViewColumnTitle{ get; }
-
-        string DataViewColumn2DbName { get; }
-
-        string DataViewColumn2Title { get; }
 
 
     }

@@ -6,7 +6,6 @@
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
     int instanceid = (int)ViewBag.Id;
-    var dataviewmodels = ModelRepository.GetLocalizedDataViewModels();
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
 }
@@ -69,109 +68,6 @@
     @foreach (var iface in Model.UserInterface)
     {
 
-        var modals = iface.GetModals();
-        if (modals.Count > 0)
-        {
-            @foreach (var mod in modals)
-            {
-                <!-- Modal -->
-                <div class="modal fade" id="@mod.DataViewMetaCode" role="dialog">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">@mod.DataViewTitle</h5>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-
-                                <div class="row">
-
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <button v-on:click="showDataViewFilter=!showDataViewFilter">
-                                                <i class="fas fa-search"></i>
-                                                <span v-if="showDataViewFilter">Hide</span>
-                                                <span v-if="!showDataViewFilter">Show</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-4">
-                                        <div class="form-group" v-if="showDataViewFilter">
-                                            <select v-model="dlgFilterColumnName" class="form-control form-control-sm">
-                                                @{
-                                                    <option value="@mod.DataViewColumnDbName">@mod.DataViewColumnTitle</option>
-                                                    if (mod.IsDataViewColumn2Connected)
-                                                    {
-                                                        <option value="@mod.DataViewColumn2DbName">@mod.DataViewColumn2Title</option>
-                                                    }
-
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="col-lg-4" v-if="showDataViewFilter">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control form-control-sm" v-model="dlgFilterValue" v-on:blur="runDataViewFilter()" />
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-
-                                                    @foreach (var viewcol in dataviewmodels)
-                                                    {
-                                                        if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == mod.DataViewMetaCode)
-                                                        {
-                                                            <th>@viewcol.LocalizedTitle</th>
-                                                        }
-
-                                                    }
-                                                </tr>
-                                            </thead>
-
-                                            <tr v-for="item in dataview">
-
-                                                <td><a href="#" v-on:click="setSelectedDataViewValue(item, '@mod.UIId')" data-dismiss="modal">{{item.@mod.DataViewColumnDbName}}</a></td>
-                                                @foreach (var viewcol in dataviewmodels)
-                                                {
-                                                    if ((viewcol.IsMetaTypeDataViewColumn || viewcol.IsMetaTypeDataViewKeyColumn) && viewcol.ParentMetaCode == mod.DataViewMetaCode && viewcol.SQLQueryFieldName.ToUpper() != mod.DataViewColumnDbName.ToUpper())
-                                                    {
-                                                        <td>{{item.@viewcol.SQLQueryFieldName}}</td>
-                                                    }
-
-                                                }
-
-
-                                            </tr>
-                                        </table>
-                                        <nav>
-                                            <ul class="pagination">
-                                                <li class="page-item" v-bind:class="{ disabled: isFirstDataViewPage() }"><a class="page-link" href="#" v-on:click="prevDataViewLookUpPage()">Previous {{pageInfo.pageSize}}</a></li>
-                                                <li class="page-item" v-bind:class="{ disabled: isLastDataViewPage() }"><a class="page-link" href="#" v-on:click="nextDataViewLookUpPage()">Next {{pageInfo.pageSize}}</a></li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-
         if (iface.IsMetaTypeInputInterface)
         {
             @foreach (var sect in iface.Sections)
@@ -200,10 +96,7 @@
                                 {
                                     continue;
                                 }
-                                if (t.IsMetaTypeLookUp && (!t.IsDataViewColumn1Connected || !t.IsDataViewConnected))
-                                {
-                                    continue;
-                                }
+                              
                                 if (t.IsMetaTypeTextBox)
                                 {
                                     @await Html.PartialAsync("UIControls/_TextBox", t)
@@ -257,13 +150,10 @@
 
                                 }
 
-                                //LOOKUP bound to DATAVIEW
-                                if (t.IsMetaTypeLookUp)
+                                if (t.IsMetaTypeSearchBox)
                                 {
-                                    @await Html.PartialAsync("UIControls/_LookUp", t)
+                                    @await Html.PartialAsync("UIControls/_SearchBox", t)
 
-                                    <br />
-                                    <br />
                                 }
 
                                 if (t.IsMetaTypeLabel)

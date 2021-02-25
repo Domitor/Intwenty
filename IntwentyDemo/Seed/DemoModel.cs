@@ -31,7 +31,6 @@ namespace IntwentyDemo.Seed
             var userinterface = new List<UserInterfaceItem>();
             var functions = new List<FunctionItem>();
             var dbitems = new List<DatabaseItem>();
-            var dataviews = new List<DataViewItem>();
             var endpoints = new List<EndpointItem>();
 
             //SYSTEMS
@@ -152,7 +151,7 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "COMBOBOX", MetaCode = "CB_CATEGORY", DataColumn1MetaCode = "CATCODE", Title = "Category", ParentMetaCode = "ITMPNL_B", RowOrder = 1, ColumnOrder = 2, Domain = "VALUEDOMAIN.ITEMCATEGORY" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "NUMBOX", MetaCode = "NUMBOX_PURCHPRICE", DataColumn1MetaCode = "PURCHASEPRICE", Title = "Purchase Price", ParentMetaCode = "ITMPNL_B", RowOrder = 2, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "NUMBOX", MetaCode = "NUMBOX_SALESPRICE", DataColumn1MetaCode = "SALESPRICE", Title = "Sales Pricee", ParentMetaCode = "ITMPNL_B", RowOrder = 3, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "LOOKUP", MetaCode = "LOOKUPVEND", DataColumn1MetaCode = "VENDORCODE", DataColumn2MetaCode = "VENDORTXT", DataViewMetaCode = "VENDORVIEW", DataViewColumn1MetaCode = "VF_VENDID", DataViewColumn2MetaCode = "VF_VENDNAME", Title = "Vendor", ParentMetaCode = "ITMPNL_B", RowOrder = 4, ColumnOrder = 2 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "SEARCHBOX", MetaCode = "LOOKUPVEND", DataColumn1MetaCode = "VENDORCODE", DataColumn2MetaCode = "VENDORTXT", Domain="APPDOMAIN.VENDOR" , Title = "Vendor", ParentMetaCode = "ITMPNL_B", RowOrder = 4, ColumnOrder = 2 });
 
 
             //UI LIST STRUCTURE
@@ -212,7 +211,7 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "PANEL", MetaCode = "PANEL1", Title = "", ParentMetaCode = "SECT_HDR", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "TEXTBOX", MetaCode = "TB_ORDERNO", DataColumn1MetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "PANEL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "DATEPICKER", MetaCode = "DP_ORDERDATE", DataColumn1MetaCode = "ORDERDATE", Title = "Order Date", ParentMetaCode = "PANEL1", RowOrder = 2, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "LOOKUP", MetaCode = "LOOKUP_CUSTOMER", DataColumn1MetaCode = "CUSTID", DataColumn2MetaCode = "CUSTNAME", DataViewMetaCode = "CUSTOMERVIEW", DataViewColumn1MetaCode = "VCUSTID", DataViewColumn2MetaCode = "VCUSTNAME", Title = "Customer", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "LOOKUP", MetaCode = "LOOKUP_CUSTOMER", DataColumn1MetaCode = "CUSTID", DataColumn2MetaCode = "CUSTNAME", Domain="APPDOMAIN.CUSTOMER", Title = "Customer", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1 });
 
 
             //TABLE UI
@@ -343,30 +342,9 @@ namespace IntwentyDemo.Seed
 
 
 
-
             #endregion
 
-            #region Dataviews
-
-            //DATAVIEWS
-            //---------
-            //CUSTOMER
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "CUSTOMERVIEW", ParentMetaCode = "ROOT", SQLQuery = "select CustomerId, CustomerName from wms_Customer order by CustomerId asc", Title = "Customers", TitleLocalizationKey = "CUSTOMERS", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "VCUSTID", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Id", TitleLocalizationKey = "", SQLQueryFieldName = "CustomerId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "VCUSTNAME", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Name", TitleLocalizationKey = "NAME", SQLQueryFieldName = "CustomerName", SQLQueryFieldDataType = "STRING" });
-
-
-            //VENDOR
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "VENDORVIEW", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName from wms_Vendor order by VendorId asc", Title = "Vendors", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "VF_VENDID", ParentMetaCode = "VENDORVIEW", SQLQuery = "", Title = "Id", SQLQueryFieldName = "VendorId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "VF_VENDNAME", ParentMetaCode = "VENDORVIEW", SQLQuery = "", Title = "Name", SQLQueryFieldName = "VendorName", SQLQueryFieldDataType = "STRING" });
-
-            //ITEM
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName from wms_Item order by ItemId asc", Title = "Items", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName", SQLQueryFieldDataType = "STRING" });
-
-            #endregion
+          
         
             #region endpoints
 
@@ -449,12 +427,7 @@ namespace IntwentyDemo.Seed
 
           
 
-            var current_dataview = client.GetEntities<DataViewItem>();
-            foreach (var t in dataviews)
-            {
-                if (!current_dataview.Exists(p => p.MetaCode == t.MetaCode && p.MetaType == t.MetaType))
-                    client.InsertEntity(t);
-            }
+        
 
             var current_endpoints = client.GetEntities<EndpointItem>();
             foreach (var t in endpoints)

@@ -155,33 +155,6 @@ namespace Intwenty.Middleware
                 }
 
 
-                if (ep.IsMetaTypeDataViewList && ep.IsDataViewConnected)
-                {
-                    var path = new OpenApiPathItem();
-                    var op = new OpenApiOperation() { Description = ep.Description };
-                    if (string.IsNullOrEmpty(ep.Title))
-                        op.Summary = string.Format("Retrieve data from the '{0}' data view", ep.DataViewInfo.Title);
-                    else
-                        op.Summary = ep.Title;
-
-                    op.RequestBody = new OpenApiRequestBody();
-                    var content = new KeyValuePair<string, OpenApiMediaType>("application/json", new OpenApiMediaType());
-                    content.Value.Schema = new OpenApiSchema();
-                    content.Value.Schema.Example = GetListSchema(ep);
-                    op.RequestBody.Content.Add(content);
-                    op.RequestBody.Required = true;
-
-                    op.Tags.Add(endpoinggroup);
-                    var resp = new OpenApiResponse() { Description = "SUCCESS" };
-                    resp.Content.Add("application/json", new OpenApiMediaType());
-                    op.Responses.Add("200", resp);
-                    resp = new OpenApiResponse() { Description = "ERROR" };
-                    op.Responses.Add("400", resp);
-                    resp = new OpenApiResponse() { Description = "UNAUTHORIZED" };
-                    op.Responses.Add("401", resp);
-                    path.AddOperation(OperationType.Post, op);
-                    swaggerDoc.Paths.Add(ep.Path + ep.Action, path);
-                }
 
 
             }
@@ -211,7 +184,7 @@ namespace Intwenty.Middleware
             try
             {
 
-                if (epitem.IsDataViewConnected || string.IsNullOrEmpty(epitem.AppMetaCode))
+                if (string.IsNullOrEmpty(epitem.AppMetaCode))
                     return new OpenApiString("");
 
                 var models = _modelservice.GetApplicationModels();

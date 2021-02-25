@@ -172,17 +172,6 @@ namespace Intwenty.Interface
         /// <returns>A list of ValueDomainModelItem</returns>
         List<ValueDomainModelItem> GetValueDomainItems(string domainname);
 
-        /// <summary>
-        /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetDataView(ListFilter args);
-
-        /// <summary>
-        /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        DataListResult GetDataViewRecord(ListFilter args);
 
         /// <summary>
         /// Validates an application according to validation rules in the model

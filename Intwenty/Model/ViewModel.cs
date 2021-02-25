@@ -81,7 +81,6 @@ namespace Intwenty.Model
         public bool IsPublic { get; set; }
         public bool CanCreateEntities { get; set; }
         public DatabaseModelItem DataTableInfo { get; set; }
-        public DataViewModelItem DataViewInfo { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }

@@ -77,7 +77,6 @@ namespace Intwenty.Controllers
 
             //CLEAN UP PREV TEST
             var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-            var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
            
 
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
@@ -113,12 +112,7 @@ namespace Intwenty.Controllers
 
           
 
-            if (dvmodels != null && dvmodels.Count > 0)
-            {
-                foreach (var dv in dvmodels)
-                    db.DeleteEntity(new DataViewItem() { Id = dv.Id });
-            }
-
+          
             if (model != null)
             {
                 var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == model.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == model.SystemMetaCode);
@@ -401,11 +395,7 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "2" });
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
-
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode= system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog", ParentMetaCode = "ROOT" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
+               
                 dbstore.Close();
 
                 _modelservice.ClearCache();
@@ -1673,10 +1663,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var res = _dataservice.GetDataView(new ListFilter() { PageSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
-                if (!res.IsSuccess)
-                    throw new InvalidOperationException("DataView could not execute");
-
+             
 
                 result.Finish();
 
