@@ -2038,6 +2038,38 @@ namespace Intwenty
             Task.Run(() => LogEvent("WARNING", message, applicationid, appmetacode, username));
         }
 
+        public async Task LogIdentityActivity(string verbosity, string message, string username = "")
+        {
+            if (Settings.LogVerbosity == LogVerbosityTypes.Error && (verbosity == "WARNING" || verbosity == "INFO"))
+                return;
+            if (Settings.LogVerbosity == LogVerbosityTypes.Warning && verbosity == "INFO")
+                return;
+
+            var client = GetIAMDataClient();
+            await client.OpenAsync();
+
+            try
+            {
+
+                var parameters = new List<IIntwentySqlParameter>();
+                parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
+                parameters.Add(new IntwentySqlParameter("@Message", message));
+                parameters.Add(new IntwentySqlParameter("@AppMetaCode", "NONE"));
+                parameters.Add(new IntwentySqlParameter("@ApplicationId", 0));
+                parameters.Add(new IntwentySqlParameter("@UserName", username));
+
+                var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.IAMConnectionDBMS);
+
+                await client.RunCommandAsync("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (" + getdatecmd.Command + ", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)", parameters: parameters.ToArray());
+
+            }
+            catch { }
+            finally
+            {
+                await client.CloseAsync();
+            }
+        }
+
         public virtual async Task<List<EventLog>> GetEventLog(string verbosity)
         {
 

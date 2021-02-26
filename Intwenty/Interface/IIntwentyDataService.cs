@@ -185,6 +185,10 @@ namespace Intwenty.Interface
 
         void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 
+        Task LogIdentityActivity(string verbosity, string message, string username = "");
+
+       
+
         /// <summary>
         /// Get eventlog items
         /// </summary>
