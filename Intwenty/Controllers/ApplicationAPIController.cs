@@ -10,6 +10,7 @@ using Intwenty.Areas.Identity.Data;
 using Microsoft.AspNetCore.Razor.Language;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
+using System.Collections.Generic;
 
 namespace Intwenty.Controllers
 {
@@ -138,6 +139,18 @@ namespace Intwenty.Controllers
             }
 
            
+        }
+
+        [HttpGet("/Application/API/GetValueDomain/{domainname}/{query}")]
+        public virtual List<ValueDomainVm> GetValueDomain(string domainname, string query)
+        {
+
+            var result = new List<ValueDomainVm>();
+            result.Add(new ValueDomainVm() { Id = 1, Code = "1", Value = "Val 1" });
+            result.Add(new ValueDomainVm() { Id = 2, Code = "2", Value = "Val 2" });
+            result.Add(new ValueDomainVm() { Id = 3, Code = "3", Value = "Val 3" });
+
+            return result;
         }
 
         /// <summary>

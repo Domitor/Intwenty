@@ -8,10 +8,14 @@
     <br />
 
     <div class="form-group">
-        <label class="control-label">Test</label>
-        <input type="text" id="multiselect" class="form-control" />
+        <label class="control-label">Test Selectize</label>
+        <input type="text" id="multiselect" class="form-control form-control-lg" />
     </div>
 
+    <div class="form-group">
+        <label class="control-label">Test Combobox</label>
+        <select id="combobox" class="form-control"></select>
+    </div>
 
 </div>
 
@@ -23,76 +27,109 @@
 {
     <script>
 
+        Vue.prototype.initSelectize = function (appobject,codecolname,valcolname,uiid,domainname,allowcreate,usesearch)
+        {
+            var iscombobox = false;
+            var plugs = null;
+            if (!iscombobox)
+                plugs = ['remove_button'];
+
+            if (!uiid) return;
+
+            var element = $(uiid);
+            if (element.nodeName == 'SELECT')
+            {
+                iscombobox = true;
+                usesearch = false;
+                allowcreate = false;
+            }
+
+            var t = $(uiid).selectize({
+                plugins: plugs
+                , delimiter: ','
+                , valueField: 'code'
+                , labelField: 'value'
+                , searchField: 'value'
+                , options: []
+                , create: allowcreate
+                , preload :true
+                , load: function (query, callback)
+                {
+                    if (!query || !usesearch || iscombobox)
+                        query = 'ALL';
+                    if (usesearch && !iscombobox && query == 'ALL')
+                        query = 'PRELOAD';
+
+                    if (!domainname) return callback();
+
+                    $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                        callback(response);
+                        if (appobject[codecolname]) {
+                            var persisteditems = appobject[codecolname].split(",");
+                            for (var i = 0; i < persisteditems.length; i++) {
+                                //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
+                                //ADD ITEM BUT DONT TRIGGER CHANGE
+                                t[0].selectize.addItem(persisteditems[i],true);
+
+                            }
+                        }
+                    });
+                }
+               
+            });
+
+           
+
+            t.on('change',
+                function ()
+                {
+                    var selected_objects = $.map(t[0].selectize.items, function (value) {
+                        return t[0].selectize.options[value];
+                    });
+
+                    var codestr = "";
+                    var valstr = "";
+                    var delim = "";
+                    for (var i = 0; i < selected_objects.length; i++)
+                    {
+                        var code = selected_objects[i].code;
+                        var val = selected_objects[i].value;
+                        codestr += delim + code;
+                        valstr += delim + val;
+                        delim = ",";
+
+                    }
+                    if (appobject && codecolname)
+                        appobject[codecolname] = codestr;
+
+                    if (appobject && valcolname)
+                         appobject[valcolname] = valstr;
+                });
+        };
+
           var app = new Vue({
             el: '#app',
               data: {
 
-                  appobject: { Code: "2,Goof,1", Value: ""}
+                  appobject: { Code: "2,Goof,1", Value: "", CbValue: "3", CbText: ""}
 
               },
             methods:
             {
-              
 
-                initMultiSelect: function (appobject, codecolname, valcolname, name, options)
-                {
-                    var context = this;
 
-                    var t = $(name).selectize({
-                        plugins: ['remove_button']
-                        ,delimiter: ','
-                        ,persist: true
-                        ,maxItems: null
-                        ,valueField: 'Code'
-                        ,labelField: 'Value'
-                        ,searchField: 'Value'
-                        ,options: options
-                        ,create: true
 
-                    });
-
-                    if (appobject[codecolname])
-                    {
-                        var persisteditems = appobject[codecolname].split(",");
-                        for (var i = 0; i < persisteditems.length; i++)
-                        {
-                            //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
-                            t[0].selectize.addItem(persisteditems[i]);
-
-                        }
-                    }
-
-                    t.on('change',
-                        function ()
-                        {
-                            var selected_objects = $.map(t[0].selectize.items, function (value) {
-                                return t[0].selectize.options[value];
-                            });
-
-                            var codestr = "";
-                            var valstr = "";
-                            var delim = "";
-                            for (var i = 0; i < selected_objects.length; i++)
-                            {
-                                var code = selected_objects[i].Code;
-                                var val = selected_objects[i].Value;
-                                codestr += delim + code;
-                                valstr += delim + val;
-                                delim = ",";
-                              
-                            }
-                            appobject[codecolname] = codestr;
-                            appobject[valcolname] = valstr;
-                        });
-                }
             },
             computed: {
 
             },
             mounted: function ()
             {
-                options = [{ Code: "1", Value: "Val 1" }, { Code: "2", Value: "Val 2" }];
-                this.initMultiSelect(this.appobject, "Code", "Value", "#multiselect",options);
+                //TAGS, SEARCHBOX, MULTISELECT ETC
+                this.initSelectize(this.appobject, "Code", "Value", "#multiselect", "APPDOMAIN.VENDOR", true, true);
+
+                //COMBOBOX
+                this.initSelectize(this.appobject, "CbValue", "CbText", "#combobox", "APPDOMAIN.VENDOR", false, false);
             }
         });
 
