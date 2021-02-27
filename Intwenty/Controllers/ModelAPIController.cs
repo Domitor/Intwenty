@@ -1342,7 +1342,7 @@ namespace Intwenty.Controllers
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
+                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
@@ -1351,7 +1351,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeMultiSelect || input.IsMetaTypeSearchBox)
+                                if (input.IsMetaTypeSearchBox)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {

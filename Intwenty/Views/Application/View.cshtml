@@ -248,11 +248,7 @@
 
                                                 }
 
-                                                if (t.IsMetaTypeMultiSelect)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_MultiSelect", t)
-
-                                                }
+                                             
 
                                             }  <!--FOR CONTROL -->
 
@@ -732,6 +728,13 @@
                     };
 
                     raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
+                },
+                initSelectizeControls: function ()
+                {
+                    var context = this;
+
+                   
+                  
                 }
             },
             computed: {
@@ -764,25 +767,19 @@
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
-                        endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                        $.get(endpointurl, function (response) {
-                            context.valuedomains = JSON.parse(response.data);
-                        });
                     });
                     </text>
               }
               else if (Model.IsApplicationInputView() && instanceid == 0)
               {
                     <text>
-                    var endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                    $.get(endpointurl, function (response) {
-                        context.valuedomains = JSON.parse(response.data);
-                        endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                   
+                        var endpointurl = context.baseurl + "CreateNew/" + context.appId;
                         $.get(endpointurl, function (response)
                         {
                             context.model = JSON.parse(response.data);
                         });
-                     });
+               
                     </text>
 
               }

@@ -122,13 +122,10 @@
 
                                                 }
 
-                                                //LOOKUP bound to DATAVIEW
                                                 if (t.IsMetaTypeSearchBox)
                                                 {
                                                     @await Html.PartialAsync("UIControls/_SearchBox", t)
 
-                                                    <br />
-                                                    <br />
                                                 }
 
                                                 if (t.IsMetaTypeLabel)
@@ -143,11 +140,7 @@
 
                                                 }
 
-                                                if (t.IsMetaTypeMultiSelect)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_MultiSelect", t)
-
-                                                }
+                                          
 
                                             }  <!--FOR CONTROL -->
 

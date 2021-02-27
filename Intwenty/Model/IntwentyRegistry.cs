@@ -49,7 +49,6 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextArea, Title = "Text Area" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBlock, Title = "Text Block" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeMultiSelect, Title = "Multi Select", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get (GET)", ModelCode = "ENDPOINTMODEL" });
@@ -120,6 +119,7 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("READONLY", "Read Only", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeCheckBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeComboBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeDatePicker);
@@ -176,6 +176,18 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("MULTISELECT", "Multi Select", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("USESEARCH", "Use Search", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("ALLOWCREATE", "Allow Create", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
             _properties.Add(prop);
 
             return _properties;

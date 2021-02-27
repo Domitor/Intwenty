@@ -10,18 +10,16 @@
             @Model.LocalizedTitle  @{ if (Model.Mandatory)
                 { <span style="color: red"> *</span> }}
         </label>
+
         <select id="@Model.UIId"
                 name="@Model.UIId"
-                v-model="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
                 class="form-control form-control-sm"
-                v-on:change="onUserInput(event)"
                 data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
                 data-validationfield="@validationfield"
                 data-title="@Model.Title"
                 data-dbtable="@Model.DataTableDbName"
                 data-dbfield="@Model.DataColumnDbName"
                 data-required="@Model.Mandatory">
-            <option v-for="item in valuedomains.VALUEDOMAIN_@Model.DomainName" v-bind:value="item.Code">{{item.Value}}</option>
         </select>
-          <!--   span class="invalidInput">@Html.Raw("{{validation." + validationfield + "}}")</span  -->
+
     </div>

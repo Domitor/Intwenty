@@ -9,7 +9,6 @@ namespace Intwenty.Interface
     {
         int ColumnOrder { get; }
         int RowOrder { get;  }
-        bool IsMetaTypeMultiSelect { get; }
         bool IsMetaTypeStaticHTML { get; }
         bool IsMetaTypeImage { get; }
         bool IsMetaTypeTextBlock { get; }

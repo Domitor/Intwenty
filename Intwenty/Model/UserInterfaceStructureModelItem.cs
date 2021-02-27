@@ -26,9 +26,7 @@ namespace Intwenty.Model
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeSection = "SECTION";
         public static readonly string MetaTypeImageBox = "IMAGEBOX";
-
         public static readonly string MetaTypeComboBox = "COMBOBOX";
-        public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeSearchBox = "SEARCHBOX";
 
 
@@ -153,7 +151,7 @@ namespace Intwenty.Model
                 return IsMetaTypeCheckBox || IsMetaTypeComboBox || IsMetaTypeDatePicker ||
                        IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
                        IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
-                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeMultiSelect;
+                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeSearchBox;
 
             }
 
@@ -213,12 +211,7 @@ namespace Intwenty.Model
             }
         }
 
-        public bool IsMetaTypeMultiSelect
-        {
-            get { return MetaType == MetaTypeMultiSelect; }
-        }
 
-      
         public bool IsMetaTypeTableTextColumn
         {
             get { return MetaType == MetaTypeTableTextColumn; }
