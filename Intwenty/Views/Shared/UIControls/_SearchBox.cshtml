@@ -4,6 +4,22 @@
 @{
     var validationfield = Model.UIId + "_validationmsg";
 
+    var usesearch = "FALSE";
+    var multiselect = "FALSE";
+    var allowcreate = "FALSE";
+    if (Model.HasPropertyWithValue("USESEARCH", "TRUE"))
+    {
+        usesearch = "TRUE";
+    }
+    if (Model.HasPropertyWithValue("MULTISELECT", "TRUE"))
+    {
+        multiselect = "TRUE";
+    }
+    if (Model.HasPropertyWithValue("ALLOWCREATE", "TRUE"))
+    {
+        allowcreate = "TRUE";
+    }
+
 }
 
 <div class="form-group">
@@ -16,12 +32,19 @@
             name="@Model.UIId"
             type="text"
             class="form-control form-control-sm"
-            data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
+            data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
             data-validationfield="@validationfield"
             data-title="@Model.Title"
             data-dbtable="@Model.DataTableDbName"
             data-dbfield="@Model.DataColumnDbName"
-            data-required="@Model.Mandatory" />
+            data-dbfield2="@Model.DataColumn2DbName"
+            data-required="@Model.Mandatory"
+            data-domain="@Model.DomainName"
+            data-usesearch="@usesearch"
+            data-multiselect="@multiselect"
+            data-allowcreate="@allowcreate"
+           
+           />
 
 
 </div>

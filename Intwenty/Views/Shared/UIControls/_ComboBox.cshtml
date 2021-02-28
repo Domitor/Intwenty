@@ -2,7 +2,9 @@
 
 @{
     var validationfield = Model.UIId + "_validationmsg";
-
+    var usesearch = "FALSE";
+    var multiselect = "FALSE";
+    var allowcreate = "FALSE";
 }
 
     <div class="form-group">
@@ -19,7 +21,11 @@
                 data-title="@Model.Title"
                 data-dbtable="@Model.DataTableDbName"
                 data-dbfield="@Model.DataColumnDbName"
-                data-required="@Model.Mandatory">
+                data-required="@Model.Mandatory"
+                data-domain="@Model.DomainName"
+                data-usesearch="@usesearch"
+                data-multiselect="@multiselect"
+                data-allowcreate="@allowcreate">
         </select>
 
     </div>

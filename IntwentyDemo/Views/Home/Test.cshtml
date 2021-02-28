@@ -9,12 +9,28 @@
 
     <div class="form-group">
         <label class="control-label">Test Selectize</label>
-        <input type="text" id="multiselect" class="form-control form-control-lg" />
+        <input type="text" id="multiselect" class="form-control form-control-lg" 
+                data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
+                data-dbfield="Code"
+                data-dbfield2="Value"
+                data-usesearch="TRUE"
+                data-multiselect="TRUE"
+                data-allowcreate="TRUE"
+                data-domain="APPDOMAIN.VENDOR"
+               />
     </div>
 
     <div class="form-group">
         <label class="control-label">Test Combobox</label>
-        <select id="combobox" class="form-control"></select>
+        <select id="combobox" class="form-control"
+                data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
+                data-dbfield="CbValue"
+                data-dbfield2="CbText"
+                data-usesearch="FALSE"
+                data-multiselect="FALSE"
+                data-allowcreate="FALSE"
+                data-domain="APPDOMAIN.VENDOR"
+                ></select>
     </div>
 
 </div>
@@ -27,26 +43,39 @@
 {
     <script>
 
-        Vue.prototype.initSelectize = function (appobject,codecolname,valcolname,uiid,domainname,allowcreate,usesearch)
+        Vue.prototype.initSelectize = function (appobject,codecolname,valcolname,uiid,domainname,allowcreate,usesearch,usemultiselect)
         {
-            var iscombobox = false;
-            var plugs = null;
-            if (!iscombobox)
-                plugs = ['remove_button'];
-
-            if (!uiid) return;
+            if (!uiid)
+                return;
 
             var element = $(uiid);
-            if (element.nodeName == 'SELECT')
-            {
+
+            if (!element)
+                return;
+
+            var plugs = null;
+            var iscombobox = false;
+            if (element[0].nodeName == 'SELECT') {
                 iscombobox = true;
                 usesearch = false;
                 allowcreate = false;
+                maxitems = 1;
             }
+            else
+            {
+                plugs = ['remove_button'];
+            }
+
+
+
+            var maxitems = 1;
+            if (usemultiselect)
+                maxitems = 10;
 
             var t = $(uiid).selectize({
                 plugins: plugs
                 , delimiter: ','
+                , maxItems: maxitems
                 , valueField: 'code'
                 , labelField: 'value'
                 , searchField: 'value'
@@ -116,7 +145,33 @@
               },
             methods:
             {
+                initNoneVueControls: function (bindingcontext)
+                {
+                    var context = this;
 
+                    $("input[data-metatype],select[data-metatype]").each(function ()
+                    {
+                        var metatype = $(this).data('metatype');
+                        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX" )
+                        {
+                            var uid = "#" + this.id;
+                            var dbfield = $(this).data('dbfield');
+                            var dbfield2 = $(this).data('dbfield2');
+                            var domain = $(this).data('domain');
+                            var usesearch = $(this).data('usesearch');
+                            var multiselect = $(this).data('multiselect');
+                            var allowcreate = $(this).data('allowcreate');
+
+                            var b_allowcreate = (allowcreate == "TRUE");
+                            var b_usesearch = (usesearch == "TRUE");
+                            var b_multiselect = (multiselect == "TRUE");
+
+                            context.initSelectize(bindingcontext, dbfield, dbfield2, uid, domain, b_allowcreate, b_usesearch, b_multiselect);
+                        }
+                    });
+
+
+                }
 
 
             },
@@ -125,11 +180,7 @@
             },
             mounted: function ()
             {
-                //TAGS, SEARCHBOX, MULTISELECT ETC
-                this.initSelectize(this.appobject, "Code", "Value", "#multiselect", "APPDOMAIN.VENDOR", true, true);
-
-                //COMBOBOX
-                this.initSelectize(this.appobject, "CbValue", "CbText", "#combobox", "APPDOMAIN.VENDOR", false, false);
+                this.initNoneVueControls(this.appobject);
             }
         });
 
