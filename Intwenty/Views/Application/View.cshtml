@@ -13,49 +13,54 @@
 
 
 
-
 <br />
 <br />
 
 @await Html.PartialAsync("_Modals")
 
-@foreach (var mip in modalinputs)
+@foreach (var iface in Model.UserInterface)
 {
-    <div class="modal" id="addEditModal_@mip.ActionUserInterfaceMetaCode" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@mip.LocalizedTitle</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="addEditModalBody_@mip.ActionUserInterfaceMetaCode">
-                        @foreach (var iface in Model.UserInterface)
-                        {
-                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode && iface.DataTableDbName == Model.DataTableInfo.DbName)
-                            {
-                                iface.CurrentUsage = CurrentUsageOption.ModalView;
-                                @await Html.PartialAsync("UISections/_InputInterface", iface);
-                            }
-                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode && iface.DataTableDbName == Model.DataTableInfo.DbName)
-                            {
-                                iface.CurrentUsage = CurrentUsageOption.ModalView;
-                                @await Html.PartialAsync("UISections/_InputInterface", iface);
-                            }
-                        }
+    @foreach (var mip in iface.ModalInterfaces)
+    {
+
+        <div class="modal" id="addEditModal_@mip.MetaCode" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@mip.LocalizedTitle</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="addEditModalSaveBtn_@mip.ActionUserInterfaceMetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <div class="modal-body">
+                        <div id="addEditModalBody_@mip.MetaCode">
+                           
+                                @if (iface.IsMetaTypeListInterface && mip.IsMetaTypeInputInterface && mip.DataTableDbName == Model.ApplicationInfo.DbName)
+                                {
+                                    mip.CurrentRenderContext = CurrentRenderContextOptions.ModalView;
+                                    @await Html.PartialAsync("UISections/_InputInterface", mip);
+                                }
+                                @if (iface.IsMetaTypeInputInterface && mip.IsMetaTypeInputInterface && iface.DataTableDbName != Model.ApplicationInfo.DbName)
+                                {
+                                    mip.CurrentRenderContext = CurrentRenderContextOptions.ModalSubTable;
+                                    @await Html.PartialAsync("UISections/_InputInterface", mip);
+                                }
+                            
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="addEditModalSaveBtn_@mip.MetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
+    }
 }
+
+
+
+
 
 <div id="app">
 
@@ -119,7 +124,7 @@
 
     @foreach (var iface in Model.UserInterface)
     {
-        iface.CurrentUsage = CurrentUsageOption.View;
+        iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
         if (iface.IsMetaTypeInputInterface)
         {
@@ -128,7 +133,7 @@
 
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
-          
+
             <br />
 
             @if (iface.HasFilterFunction)
@@ -366,6 +371,7 @@
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
+                       
                     }
                     else
                     {
@@ -379,9 +385,10 @@
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                             $('#addEditModal_' + uimetacode).modal();
+                           
                         });
                     }
-                   
+
                 },
                 openSubTableModal: function (item, uimetacode) {
                     raiseInformationModal('Not implemented yet', uimetacode);
@@ -511,6 +518,7 @@
                     $("input[data-metatype],select[data-metatype]").each(function () {
                         var metatype = $(this).data('metatype');
                         if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
+                          
                             context.initSelectizeControl(this);
                         }
                     });
@@ -544,7 +552,7 @@
                         context.getPage();
                         context.setUpControls();
                     </text>
-                   
+
                 }
                 else if (Model.IsApplicationInputView() && instanceid > 0)
                 {

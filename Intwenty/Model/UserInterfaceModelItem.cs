@@ -24,7 +24,8 @@ namespace Intwenty.Model
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
-            CurrentUsage = CurrentUsageOption.View;
+            CurrentRenderContext = CurrentRenderContextOptions.View;
+            ModalInterfaces = new List<UserInterfaceModelItem>();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -51,7 +52,8 @@ namespace Intwenty.Model
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
-            CurrentUsage = CurrentUsageOption.View;
+            CurrentRenderContext = CurrentRenderContextOptions.View;
+            ModalInterfaces = new List<UserInterfaceModelItem>();
         }
 
         private void SetEmptyStrings()
@@ -65,6 +67,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
+        public List<UserInterfaceModelItem> ModalInterfaces { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public List<UISection> Sections { get; set; }
@@ -79,7 +82,7 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
         public int PageSize { get; set; }
-        public CurrentUsageOption CurrentUsage { get; set; }
+        public CurrentRenderContextOptions CurrentRenderContext { get; set; }
         public bool IsMetaTypeInputInterface
         {
             get { return MetaType == MetaTypeInputInterface; }

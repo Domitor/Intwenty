@@ -7,7 +7,7 @@ using System.Linq;
 namespace Intwenty.Model
 {
 
-    public enum CurrentUsageOption
+    public enum CurrentRenderContextOptions
     {
         View = 0  
        ,ModalView = 1  
@@ -40,7 +40,7 @@ namespace Intwenty.Model
 
         public UserInterfaceStructureModelItem()
         {
-            CurrentUsage = CurrentUsageOption.View;
+            CurrentRenderContext = CurrentRenderContextOptions.View;
             SetEmptyStrings();
         }
 
@@ -66,7 +66,7 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
             SystemMetaCode = entity.SystemMetaCode;
-            CurrentUsage = CurrentUsageOption.View;
+            CurrentRenderContext = CurrentRenderContextOptions.View;
             SetEmptyStrings();
 
         }
@@ -114,7 +114,7 @@ namespace Intwenty.Model
         public DatabaseModelItem DataColumn1Info { get; set; }
         public DatabaseModelItem DataColumn2Info { get; set; }
         public string UserInterfaceMetaCode { get; set; }
-        public CurrentUsageOption CurrentUsage { get; set; }
+        public CurrentRenderContextOptions CurrentRenderContext { get; set; }
         public bool IsRemoved { get; set; }
 
         public override string ModelCode
@@ -333,13 +333,13 @@ namespace Intwenty.Model
             {
                 //return "model";
                 
-                if (CurrentUsage == CurrentUsageOption.View)
+                if (CurrentRenderContext == CurrentRenderContextOptions.View)
                     return "model";
-                if (CurrentUsage == CurrentUsageOption.ModalView)
+                if (CurrentRenderContext == CurrentRenderContextOptions.ModalView)
                     return "model";
-                if (CurrentUsage == CurrentUsageOption.SubTable)
+                if (CurrentRenderContext == CurrentRenderContextOptions.SubTable)
                     return "currentline";
-                if (CurrentUsage == CurrentUsageOption.ModalSubTable)
+                if (CurrentRenderContext == CurrentRenderContextOptions.ModalSubTable)
                     return "currentline";
 
                 return "model";

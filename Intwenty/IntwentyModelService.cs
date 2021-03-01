@@ -851,6 +851,8 @@ namespace Intwenty
 
                     foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
                     {
+                        userinterface.ApplicationInfo = app;
+                        userinterface.SystemInfo = app.SystemInfo;
 
                         foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == userinterface.MetaCode && p.OwnerMetaType == userinterface.MetaType))
                         {
@@ -859,10 +861,16 @@ namespace Intwenty
                             function.BuildPropertyList();
                             userinterface.Functions.Add(function);
 
+                            if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionUserInterfaceMetaCode))
+                            {
+                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionUserInterfaceMetaCode);
+                                if (modalactionui!=null)
+                                    userinterface.ModalInterfaces.Add(modalactionui);
+                            }
+
                         }
 
-                        userinterface.ApplicationInfo = app;
-                        userinterface.SystemInfo = app.SystemInfo;
+                      
 
                         if (!string.IsNullOrEmpty(userinterface.DataTableMetaCode))
                         {
@@ -882,8 +890,8 @@ namespace Intwenty
                             }
                         }
 
+                        //ADD UI CONNECTED TO THE VIEW
                         appview.UserInterface.Add(userinterface);
-
 
                         foreach (var item in userinterfacestructures.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.UserInterfaceMetaCode == userinterface.MetaCode).OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                         {
@@ -891,7 +899,6 @@ namespace Intwenty
 
                             item.ApplicationInfo = app;
                             item.SystemInfo = app.SystemInfo;
-                            //item.UserInterfaceInfo = userinterface;
                             item.DataTableInfo = userinterface.DataTableInfo;
                             item.DataTableMetaCode = userinterface.DataTableMetaCode;
                             item.DataTableDbName = userinterface.DataTableInfo.DbName;
@@ -942,8 +949,6 @@ namespace Intwenty
 
 
                         //BUILD UI STRUCTURE
-
-
                         foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                         {
                             if (uic.IsMetaTypeSection)

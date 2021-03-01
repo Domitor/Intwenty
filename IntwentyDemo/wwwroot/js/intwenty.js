@@ -268,7 +268,6 @@ Vue.prototype.initSelectizeControl = function (control) {
     });
 
 
-
     t.on('change',
         function () {
             var selected_objects = $.map(t[0].selectize.items, function (value) {
