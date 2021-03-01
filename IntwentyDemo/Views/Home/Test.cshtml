@@ -1,4 +1,65 @@
 ﻿
+<div class="modal" id="addEditModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addEditModalBody">
+                    <div id="accordion_MAINSECTION">
+                        <div id="cardheader_MAINSECTION">
+
+                            <div id="colapse_MAINSECTION" data-parent="#accordion_MAINSECTION">
+                                <div id="cardbody_MAINSECTION">
+                                    <div class="form-group">
+                                        <label class="control-label">Test Selectize</label>
+                                        <input type="text" id="modalmultiselect" class="form-control form-control-lg"
+                                               data-contextobject="model"
+                                               data-dbtable="apptable"
+                                               data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
+                                               data-dbfield="Code"
+                                               data-dbfield2="Value"
+                                               data-usesearch="TRUE"
+                                               data-multiselect="TRUE"
+                                               data-allowcreate="TRUE"
+                                               data-domain="APPDOMAIN.VENDOR" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label">Test Combobox</label>
+                                        <select id="modalcombobox" class="form-control"
+                                                data-contextobject="model"
+                                                data-dbtable="apptable"
+                                                data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
+                                                data-dbfield="CbValue"
+                                                data-dbfield2="CbText"
+                                                data-usesearch="FALSE"
+                                                data-multiselect="FALSE"
+                                                data-allowcreate="FALSE"
+                                                data-domain="APPDOMAIN.VENDOR"></select>
+                                    </div>
+                                </div> <!--CARD-BODY -->
+                            </div><!--COLAPSE -->
+                        </div>  <!--CARD -->
+                    </div><!--ACCORDION -->
+                    <!--SECTION-->
+
+                </div>
+                   
+
+
+            </div>
+            <div class="modal-footer">
+                <button id="addEditModalSaveBtn" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="app">
 
@@ -9,17 +70,16 @@
 
     <div class="form-group">
         <label class="control-label">Test Selectize</label>
-        <input type="text" id="multiselect" class="form-control form-control-lg" 
-                data-contextobject="model"
-                data-dbtable="apptable"
-                data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
-                data-dbfield="Code"
-                data-dbfield2="Value"
-                data-usesearch="TRUE"
-                data-multiselect="TRUE"
-                data-allowcreate="TRUE"
-                data-domain="APPDOMAIN.VENDOR"
-               />
+        <input type="text" id="multiselect" class="form-control form-control-lg"
+               data-contextobject="model"
+               data-dbtable="apptable"
+               data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
+               data-dbfield="Code"
+               data-dbfield2="Value"
+               data-usesearch="TRUE"
+               data-multiselect="TRUE"
+               data-allowcreate="TRUE"
+               data-domain="APPDOMAIN.VENDOR" />
     </div>
 
     <div class="form-group">
@@ -33,9 +93,10 @@
                 data-usesearch="FALSE"
                 data-multiselect="FALSE"
                 data-allowcreate="FALSE"
-                data-domain="APPDOMAIN.VENDOR"
-                ></select>
+                data-domain="APPDOMAIN.VENDOR"></select>
     </div>
+
+    <button v-on:click="openModal()">Open Modal</button>
 
 </div>
 
@@ -47,8 +108,7 @@
 {
     <script>
 
-        Vue.prototype.initSelectizeControl = function (control)
-        {
+        Vue.prototype.initSelectizeControl = function (control) {
             var context = this;
 
             var uiid = "#" + control.id;
@@ -66,7 +126,7 @@
             var usemultiselect = (mselect == "TRUE");
 
             var bindingobject = null;
-            if (contextobject=="currentline")
+            if (contextobject == "currentline")
                 bindingobject = context.currentline;
             else
                 bindingobject = context.model[tablename];
@@ -88,8 +148,7 @@
                 allowcreate = false;
                 maxitems = 1;
             }
-            else
-            {
+            else {
                 plugs = ['remove_button'];
             }
 
@@ -108,9 +167,8 @@
                 , searchField: 'value'
                 , options: []
                 , create: allowcreate
-                , preload :true
-                , load: function (query, callback)
-                {
+                , preload: true
+                , load: function (query, callback) {
                     if (!query || !usesearch || iscombobox)
                         query = 'ALL';
                     if (usesearch && !iscombobox && query == 'ALL')
@@ -125,20 +183,19 @@
                             for (var i = 0; i < persisteditems.length; i++) {
                                 //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
                                 //ADD ITEM BUT DONT TRIGGER CHANGE
-                                t[0].selectize.addItem(persisteditems[i],true);
+                                t[0].selectize.addItem(persisteditems[i], true);
 
                             }
                         }
                     });
                 }
-               
+
             });
 
-           
+
 
             t.on('change',
-                function ()
-                {
+                function () {
                     var selected_objects = $.map(t[0].selectize.items, function (value) {
                         return t[0].selectize.options[value];
                     });
@@ -146,8 +203,7 @@
                     var codestr = "";
                     var valstr = "";
                     var delim = "";
-                    for (var i = 0; i < selected_objects.length; i++)
-                    {
+                    for (var i = 0; i < selected_objects.length; i++) {
                         var code = selected_objects[i].code;
                         var val = selected_objects[i].value;
                         codestr += delim + code;
@@ -163,25 +219,29 @@
                 });
         };
 
-          var app = new Vue({
+        var app = new Vue({
             el: '#app',
-              data: {
+            data: {
 
-                  model: {
-                      apptable: { Code: "2,Goof,1", Value: "", CbValue: "3", CbText: "" }}
+                model: {
+                    apptable: { Code: "2,Goof,1", Value: "", CbValue: "3", CbText: "" }
+                }
 
-              },
+            },
             methods:
             {
-                setUpControls: function ()
-                {
+                openModal: function () {
                     var context = this;
 
-                    $("input[data-metatype],select[data-metatype]").each(function ()
-                    {
+
+                    $('#addEditModal').modal();
+                },
+                setUpControls: function () {
+                    var context = this;
+
+                    $("input[data-metatype],select[data-metatype]").each(function () {
                         var metatype = $(this).data('metatype');
-                        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX" )
-                        {
+                        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
                             context.initSelectizeControl(this);
                         }
                     });
@@ -194,8 +254,7 @@
             computed: {
 
             },
-            mounted: function ()
-            {
+            mounted: function () {
                 this.setUpControls();
             }
         });
