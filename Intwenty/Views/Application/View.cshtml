@@ -34,12 +34,18 @@
                     <div id="addEditModalBody_@mip.ActionUserInterfaceMetaCode">
                         @foreach (var iface in Model.UserInterface)
                         {
-                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode)
+                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode && iface.DataTableDbName == Model.DataTableInfo.DbName)
                             {
-                                @await Html.PartialAsync("UISections/_InputInterface", iface)
+                                iface.CurrentUsage = CurrentUsageOption.ModalView;
+                                @await Html.PartialAsync("UISections/_InputInterface", iface);
+                            }
+                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode && iface.DataTableDbName == Model.DataTableInfo.DbName)
+                            {
+                                iface.CurrentUsage = CurrentUsageOption.ModalView;
+                                @await Html.PartialAsync("UISections/_InputInterface", iface);
                             }
                         }
-                     </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button id="addEditModalSaveBtn_@mip.ActionUserInterfaceMetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
@@ -113,6 +119,7 @@
 
     @foreach (var iface in Model.UserInterface)
     {
+        iface.CurrentUsage = CurrentUsageOption.View;
 
         if (iface.IsMetaTypeInputInterface)
         {
@@ -121,7 +128,7 @@
 
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
-
+          
             <br />
 
             @if (iface.HasFilterFunction)

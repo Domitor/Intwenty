@@ -56,6 +56,9 @@
 
                                 @foreach (var t in pl.Controls)
                                 {
+                                    //Current Render Context
+                                    t.CurrentUsage = Model.CurrentUsage;
+
                                     if (t.IsUIContainerType)
                                     {
                                         continue;

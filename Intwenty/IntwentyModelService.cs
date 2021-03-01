@@ -859,8 +859,6 @@ namespace Intwenty
                             function.BuildPropertyList();
                             userinterface.Functions.Add(function);
 
-                            //if (function.IsModalAction)
-                            //    userinterface.IsModalInterface = true;
                         }
 
                         userinterface.ApplicationInfo = app;

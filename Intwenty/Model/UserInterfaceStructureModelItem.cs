@@ -7,6 +7,13 @@ using System.Linq;
 namespace Intwenty.Model
 {
 
+    public enum CurrentUsageOption
+    {
+        View = 0  
+       ,ModalView = 1  
+       ,SubTable = 2
+       ,ModalSubTable = 3
+    }
 
     public class UserInterfaceStructureModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
@@ -33,8 +40,8 @@ namespace Intwenty.Model
 
         public UserInterfaceStructureModelItem()
         {
+            CurrentUsage = CurrentUsageOption.View;
             SetEmptyStrings();
-            //Children = new List<IUIControl>();
         }
 
     
@@ -59,8 +66,9 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
             SystemMetaCode = entity.SystemMetaCode;
+            CurrentUsage = CurrentUsageOption.View;
             SetEmptyStrings();
-            //Children = new List<IUIControl>();
+
         }
 
         private void SetEmptyStrings()
@@ -106,7 +114,7 @@ namespace Intwenty.Model
         public DatabaseModelItem DataColumn1Info { get; set; }
         public DatabaseModelItem DataColumn2Info { get; set; }
         public string UserInterfaceMetaCode { get; set; }
-        //public UserInterfaceModelItem UserInterfaceInfo { get; set; }
+        public CurrentUsageOption CurrentUsage { get; set; }
         public bool IsRemoved { get; set; }
 
         public override string ModelCode
@@ -323,22 +331,19 @@ namespace Intwenty.Model
         {
             get
             {
+                //return "model";
+                
+                if (CurrentUsage == CurrentUsageOption.View)
+                    return "model";
+                if (CurrentUsage == CurrentUsageOption.ModalView)
+                    return "model";
+                if (CurrentUsage == CurrentUsageOption.SubTable)
+                    return "currentline";
+                if (CurrentUsage == CurrentUsageOption.ModalSubTable)
+                    return "currentline";
+
                 return "model";
-                /*
-                if (UserInterfaceInfo.IsMetaTypeInputInterface)
-                {
-                     if (ApplicationInfo.DbName == UserInterfaceInfo.DataTableDbName)
-                        return "model";
-                     else
-                        return "currentline";
-
-                }
-                   
-                if (UserInterfaceInfo.IsMetaTypeListInterface)
-                    return "item";
-
-                throw new InvalidOperationException("Invalid user interface configuration");
-                */
+   
             }
 
         }

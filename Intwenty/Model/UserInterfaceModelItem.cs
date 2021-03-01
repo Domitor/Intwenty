@@ -24,6 +24,7 @@ namespace Intwenty.Model
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
+            CurrentUsage = CurrentUsageOption.View;
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -50,6 +51,7 @@ namespace Intwenty.Model
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
+            CurrentUsage = CurrentUsageOption.View;
         }
 
         private void SetEmptyStrings()
@@ -77,7 +79,7 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
         public int PageSize { get; set; }
-
+        public CurrentUsageOption CurrentUsage { get; set; }
         public bool IsMetaTypeInputInterface
         {
             get { return MetaType == MetaTypeInputInterface; }
