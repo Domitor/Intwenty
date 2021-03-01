@@ -367,6 +367,7 @@ namespace Intwenty.Middleware
                 client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
                 client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
                 client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                client.CreateTable<EventLog>();
                 //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
                 //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
                 client.Close();

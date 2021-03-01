@@ -893,7 +893,7 @@ namespace Intwenty
 
                             item.ApplicationInfo = app;
                             item.SystemInfo = app.SystemInfo;
-                            item.UserInterfaceInfo = userinterface;
+                            //item.UserInterfaceInfo = userinterface;
                             item.DataTableInfo = userinterface.DataTableInfo;
                             item.DataTableMetaCode = userinterface.DataTableMetaCode;
                             item.DataTableDbName = userinterface.DataTableInfo.DbName;

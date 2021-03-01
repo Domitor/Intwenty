@@ -106,7 +106,7 @@ namespace Intwenty.Model
         public DatabaseModelItem DataColumn1Info { get; set; }
         public DatabaseModelItem DataColumn2Info { get; set; }
         public string UserInterfaceMetaCode { get; set; }
-        public UserInterfaceModelItem UserInterfaceInfo { get; set; }
+        //public UserInterfaceModelItem UserInterfaceInfo { get; set; }
         public bool IsRemoved { get; set; }
 
         public override string ModelCode
@@ -323,7 +323,8 @@ namespace Intwenty.Model
         {
             get
             {
-
+                return "model";
+                /*
                 if (UserInterfaceInfo.IsMetaTypeInputInterface)
                 {
                      if (ApplicationInfo.DbName == UserInterfaceInfo.DataTableDbName)
@@ -337,6 +338,7 @@ namespace Intwenty.Model
                     return "item";
 
                 throw new InvalidOperationException("Invalid user interface configuration");
+                */
             }
 
         }

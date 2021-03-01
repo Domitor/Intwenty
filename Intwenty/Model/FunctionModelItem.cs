@@ -67,6 +67,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ActionPath)) ActionPath = string.Empty;
             if (string.IsNullOrEmpty(ActionUserInterfaceMetaCode)) ActionUserInterfaceMetaCode = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(OwnerMetaType)) OwnerMetaType = string.Empty;
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
