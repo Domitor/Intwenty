@@ -115,7 +115,7 @@ namespace Intwenty.Model
         {
             get
             {
-                if (Functions.Exists(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode))
+                if (Functions.Exists(p => p.IsMetaTypeDelete))
                     return true;
 
 
@@ -127,7 +127,7 @@ namespace Intwenty.Model
         {
             get
             {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode);
+                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete);
             }
         }
 

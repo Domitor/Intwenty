@@ -1014,7 +1014,6 @@ namespace Intwenty.Controllers
                 entity.Title = model.Title;
                 entity.OwnerMetaType = ViewModel.MetaTypeUIView;
                 entity.OwnerMetaCode = model.OwnerMetaCode;
-                entity.DataTableMetaCode = model.DataTableMetaCode;
                 entity.Properties = model.CompilePropertyString();
                 entity.IsModalAction = model.IsModalAction;
 
@@ -1585,7 +1584,6 @@ namespace Intwenty.Controllers
                         IsModalAction = function.IsModalAction,
                         ActionPath = function.ActionPath,
                         ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode,
-                        DataTableMetaCode = uimodel.DataTableMetaCode,
                         OwnerMetaCode = uimodel.MetaCode,
                         OwnerMetaType = UserInterfaceModelItem.MetaTypeListInterface,
                         Properties = function.CompilePropertyString(),

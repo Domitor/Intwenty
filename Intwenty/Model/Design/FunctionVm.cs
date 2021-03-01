@@ -16,7 +16,6 @@ namespace Intwenty.Model.Design
         {
 
             ApplicationId = model.ApplicationInfo.Id; 
-            DataTableMetaCode = model.DataTableMetaCode;
             Id = model.Id; 
             MetaCode = model.MetaCode;
             MetaType = model.MetaType;

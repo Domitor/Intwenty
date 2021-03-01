@@ -28,8 +28,6 @@ namespace Intwenty.Entity
         [NotNull]
         public string OwnerMetaCode { get; set; }
         [NotNull]
-        public string DataTableMetaCode { get; set; }
-        [NotNull]
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
         public bool IsModalAction { get; set; }
