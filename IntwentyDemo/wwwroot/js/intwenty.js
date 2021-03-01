@@ -183,6 +183,116 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
+Vue.prototype.initSelectizeControl = function (control) {
+    var context = this;
+
+    var uiid = "#" + control.id;
+    var contextobject = $(control).data('contextobject');
+    var tablename = $(control).data('dbtable');
+    var codecolname = $(control).data('dbfield');
+    var valcolname = $(control).data('dbfield2');
+    var domainname = $(control).data('domain');
+    var usearch = $(control).data('usesearch');
+    var mselect = $(control).data('multiselect');
+    var acreate = $(control).data('allowcreate');
+
+    var allowcreate = (acreate == "TRUE");
+    var usesearch = (usearch == "TRUE");
+    var usemultiselect = (mselect == "TRUE");
+
+    var bindingobject = null;
+    if (contextobject == "currentline")
+        bindingobject = context.currentline;
+    else
+        bindingobject = context.model[tablename];
+
+
+    if (!uiid || !bindingobject)
+        return;
+
+    var element = $(uiid);
+
+    if (!element)
+        return;
+
+    var plugs = null;
+    var iscombobox = false;
+    if (element[0].nodeName == 'SELECT') {
+        iscombobox = true;
+        usesearch = false;
+        allowcreate = false;
+        maxitems = 1;
+    }
+    else {
+        plugs = ['remove_button'];
+    }
+
+
+
+    var maxitems = 1;
+    if (usemultiselect)
+        maxitems = 10;
+
+    var t = $(uiid).selectize({
+        plugins: plugs
+        , delimiter: ','
+        , maxItems: maxitems
+        , valueField: 'code'
+        , labelField: 'value'
+        , searchField: 'value'
+        , options: []
+        , create: allowcreate
+        , preload: true
+        , load: function (query, callback) {
+            if (!query || !usesearch || iscombobox)
+                query = 'ALL';
+            if (usesearch && !iscombobox && query == 'ALL')
+                query = 'PRELOAD';
+
+            if (!domainname) return callback();
+
+            $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                callback(response);
+                if (bindingobject[codecolname]) {
+                    var persisteditems = bindingobject[codecolname].split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        t[0].selectize.addItem(persisteditems[i], true);
+
+                    }
+                }
+            });
+        }
+
+    });
+
+
+
+    t.on('change',
+        function () {
+            var selected_objects = $.map(t[0].selectize.items, function (value) {
+                return t[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            if (codecolname)
+                bindingobject[codecolname] = codestr;
+
+            if (valcolname)
+                bindingobject[valcolname] = valstr;
+        });
+};
 
 Vue.prototype.onFileUpload = function ()
 {

@@ -1,5 +1,6 @@
 ﻿using Intwenty.Entity;
 using Intwenty.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -76,7 +77,6 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
             if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
-            if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(UserInterfaceMetaCode)) SystemMetaCode = string.Empty;
@@ -106,7 +106,7 @@ namespace Intwenty.Model
         public DatabaseModelItem DataColumn1Info { get; set; }
         public DatabaseModelItem DataColumn2Info { get; set; }
         public string UserInterfaceMetaCode { get; set; }
-        public string JavaScriptObjectName { get; set; }
+        public UserInterfaceModelItem UserInterfaceInfo { get; set; }
         public bool IsRemoved { get; set; }
 
         public override string ModelCode
@@ -319,6 +319,28 @@ namespace Intwenty.Model
             get { return MetaCode; }
         }
 
+        public string JavaScriptObjectName
+        {
+            get
+            {
+
+                if (UserInterfaceInfo.IsMetaTypeInputInterface)
+                {
+                     if (ApplicationInfo.DbName == UserInterfaceInfo.DataTableDbName)
+                        return "model";
+                     else
+                        return "currentline";
+
+                }
+                   
+                if (UserInterfaceInfo.IsMetaTypeListInterface)
+                    return "item";
+
+                throw new InvalidOperationException("Invalid user interface configuration");
+            }
+
+        }
+
         public bool Mandatory
         {
             get 
@@ -358,6 +380,9 @@ namespace Intwenty.Model
             }
 
         }
+      
+        
+
 
     }
 

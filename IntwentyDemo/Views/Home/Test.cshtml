@@ -2,7 +2,7 @@
 
 <div id="app">
 
-    {{appobject}}
+    {{model}}
 
     <br />
     <br />
@@ -10,6 +10,8 @@
     <div class="form-group">
         <label class="control-label">Test Selectize</label>
         <input type="text" id="multiselect" class="form-control form-control-lg" 
+                data-contextobject="model"
+                data-dbtable="apptable"
                 data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeSearchBox"
                 data-dbfield="Code"
                 data-dbfield2="Value"
@@ -23,6 +25,8 @@
     <div class="form-group">
         <label class="control-label">Test Combobox</label>
         <select id="combobox" class="form-control"
+                data-contextobject="model"
+                data-dbtable="apptable"
                 data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
                 data-dbfield="CbValue"
                 data-dbfield2="CbText"
@@ -43,9 +47,32 @@
 {
     <script>
 
-        Vue.prototype.initSelectize = function (appobject,codecolname,valcolname,uiid,domainname,allowcreate,usesearch,usemultiselect)
+        Vue.prototype.initSelectizeControl = function (control)
         {
-            if (!uiid)
+            var context = this;
+
+            var uiid = "#" + control.id;
+            var contextobject = $(control).data('contextobject');
+            var tablename = $(control).data('dbtable');
+            var codecolname = $(control).data('dbfield');
+            var valcolname = $(control).data('dbfield2');
+            var domainname = $(control).data('domain');
+            var usearch = $(control).data('usesearch');
+            var mselect = $(control).data('multiselect');
+            var acreate = $(control).data('allowcreate');
+
+            var allowcreate = (acreate == "TRUE");
+            var usesearch = (usearch == "TRUE");
+            var usemultiselect = (mselect == "TRUE");
+
+            var bindingobject = null;
+            if (contextobject=="currentline")
+                bindingobject = context.currentline;
+            else
+                bindingobject = context.model[tablename];
+
+
+            if (!uiid || !bindingobject)
                 return;
 
             var element = $(uiid);
@@ -93,8 +120,8 @@
 
                     $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
                         callback(response);
-                        if (appobject[codecolname]) {
-                            var persisteditems = appobject[codecolname].split(",");
+                        if (bindingobject[codecolname]) {
+                            var persisteditems = bindingobject[codecolname].split(",");
                             for (var i = 0; i < persisteditems.length; i++) {
                                 //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
                                 //ADD ITEM BUT DONT TRIGGER CHANGE
@@ -128,11 +155,11 @@
                         delim = ",";
 
                     }
-                    if (appobject && codecolname)
-                        appobject[codecolname] = codestr;
+                    if (codecolname)
+                        bindingobject[codecolname] = codestr;
 
-                    if (appobject && valcolname)
-                         appobject[valcolname] = valstr;
+                    if (valcolname)
+                        bindingobject[valcolname] = valstr;
                 });
         };
 
@@ -140,12 +167,13 @@
             el: '#app',
               data: {
 
-                  appobject: { Code: "2,Goof,1", Value: "", CbValue: "3", CbText: ""}
+                  model: {
+                      apptable: { Code: "2,Goof,1", Value: "", CbValue: "3", CbText: "" }}
 
               },
             methods:
             {
-                initNoneVueControls: function (bindingcontext)
+                setUpControls: function ()
                 {
                     var context = this;
 
@@ -154,19 +182,7 @@
                         var metatype = $(this).data('metatype');
                         if (metatype === "COMBOBOX" || metatype === "SEARCHBOX" )
                         {
-                            var uid = "#" + this.id;
-                            var dbfield = $(this).data('dbfield');
-                            var dbfield2 = $(this).data('dbfield2');
-                            var domain = $(this).data('domain');
-                            var usesearch = $(this).data('usesearch');
-                            var multiselect = $(this).data('multiselect');
-                            var allowcreate = $(this).data('allowcreate');
-
-                            var b_allowcreate = (allowcreate == "TRUE");
-                            var b_usesearch = (usesearch == "TRUE");
-                            var b_multiselect = (multiselect == "TRUE");
-
-                            context.initSelectize(bindingcontext, dbfield, dbfield2, uid, domain, b_allowcreate, b_usesearch, b_multiselect);
+                            context.initSelectizeControl(this);
                         }
                     });
 
@@ -180,7 +196,7 @@
             },
             mounted: function ()
             {
-                this.initNoneVueControls(this.appobject);
+                this.setUpControls();
             }
         });
 

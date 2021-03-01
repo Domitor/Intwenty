@@ -29,7 +29,7 @@ namespace Intwenty.Interface
 
         string GetPropertyValue(string propertyname);
 
-        string JavaScriptObjectName { get; set; }
+        string JavaScriptObjectName { get;  }
 
     }
 

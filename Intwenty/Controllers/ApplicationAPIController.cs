@@ -30,27 +30,6 @@ namespace Intwenty.Controllers
 
 
 
-        [HttpGet("/Application/API/GetModalInput/{applicationid}/{uimetacode}/{id}")]
-        public IActionResult GetModalInput(int applicationid, string uimetacode, int? id)
-        {
-
-            ViewBag.Id = 0;
-            if (id.HasValue && id.Value > 0)
-                ViewBag.Id = id;
-
-            var model = ModelRepository.GetApplicationModel(applicationid);
-            if (model == null)
-                return BadRequest();
-
-            var uimodel = model.GetUserInterface(uimetacode);
-            if (uimodel == null)
-                return BadRequest();
-
-            return View("~/Views/Application/ModalInput.cshtml", uimodel);
-
-
-        }
-
         /// <summary>
         /// Get the latest version data by id for an application with applicationid
         /// </summary>

@@ -32,7 +32,14 @@
                 </div>
                 <div class="modal-body">
                     <div id="addEditModalBody_@mip.ActionUserInterfaceMetaCode">
-                    </div>
+                        @foreach (var iface in Model.UserInterface)
+                        {
+                            if (iface.IsMetaTypeInputInterface && iface.MetaCode == mip.ActionUserInterfaceMetaCode)
+                            {
+                                @await Html.PartialAsync("UISections/_InputInterface", iface)
+                            }
+                        }
+                     </div>
                 </div>
                 <div class="modal-footer">
                     <button id="addEditModalSaveBtn_@mip.ActionUserInterfaceMetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
@@ -109,169 +116,8 @@
 
         if (iface.IsMetaTypeInputInterface)
         {
-            @foreach (var sect in iface.Sections)
-            {
-
-                var colapse = "class=\"collapse\"";
-                var card = "class=\"card\"";
-                var cardbody = "class=\"card-body\"";
-                var accordion = "class=\"accordion\"";
-                if (sect.StartExpanded || !sect.Collapsible)
-                {
-                    colapse = "class=\"collapse show\"";
-                }
-                @if (sect.ExcludeOnRender)
-                {
-                    colapse = "";
-                    card = "";
-                    cardbody = "";
-                    accordion = "";
-
-                }
-                <div @Html.Raw(accordion) id="accordion_@sect.MetaCode">
-                    <div @Html.Raw(card) id="cardheader_@sect.MetaCode">
-                        @if (!sect.ExcludeOnRender)
-                        {
-                            <div class="card-header">
-                                <ul class="nav">
-                                    <li class="nav-item">
-                                        @if (sect.Collapsible)
-                                        {
-                                            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#colapse_@sect.MetaCode" style="margin-right:20px;margin-bottom:5px"><span class="fa fa-expand-alt"></span></button>
-                                        }
-                                    </li>
-                                    <li class="nav-item">
-                                        <h4>@sect.LocalizedTitle</h4>
-                                    </li>
-                                </ul>
-
-
-                            </div>
-                        }
-
-                        <div id="colapse_@sect.MetaCode" @Html.Raw(colapse) data-parent="#accordion_@sect.MetaCode">
-                            <div @Html.Raw(cardbody) id="cardbody_@sect.MetaCode">
-                                <br />
-                                <div class="row">
-                                    @foreach (var pl in sect.LayoutPanels)
-                                    {
-                                        <div class="col-md-@(12/sect.LayoutPanels.Count)">
-
-                                            @if (!string.IsNullOrEmpty(pl.LocalizedTitle))
-                                            {
-                                                @:<fieldset class="intwentypanel">
-                                                    @:<legend>@pl.LocalizedTitle</legend>
-                                                }
-
-                                            @foreach (var t in pl.Controls)
-                                            {
-                                                if (t.IsUIContainerType)
-                                                {
-                                                    continue;
-                                                }
-                                                if (t.IsUIBindingType && (!t.IsDataColumn1Connected || !t.IsDataTableConnected))
-                                                {
-                                                    continue;
-                                                }
-                                               
-                                                if (t.IsMetaTypeTextBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextBox", t)
-                                                }
-
-                                                if (t.IsMetaTypeNumBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_NumBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeDatePicker)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_DatePicker", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeCheckBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_CheckBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeTextArea)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextArea", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeComboBox && t.HasValueDomain)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_ComboBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeImageBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_ImageBox", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeImage)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_Image", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeEmailBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_EmailBox", t)
-
-                                                }
-
-                                                //LOOKUP bound to DATAVIEW
-                                                if (t.IsMetaTypeSearchBox)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_SearchBox", t)
-
-                                                    <br />
-                                                    <br />
-                                                }
-
-                                                if (t.IsMetaTypeLabel)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_Label", t)
-
-                                                }
-
-                                                if (t.IsMetaTypeTextBlock)
-                                                {
-                                                    @await Html.PartialAsync("UIControls/_TextBlock", t)
-
-                                                }
-
-                                             
-
-                                            }  <!--FOR CONTROL -->
-
-
-                                            @if (!string.IsNullOrEmpty(pl.LocalizedTitle))
-                                            {
-                                            @: </fieldset>
-                                        }
-
-                                        </div> <!--COL PANEL -->
-
-                                    }
-
-                                </div> <!--ROW SECTION-->
-                            </div> <!--CARD-BODY -->
-                        </div><!--COLAPSE -->
-                    </div>  <!--CARD -->
-                </div><!--ACCORDION -->
-
-
-            } <!--SECTION-->
-
-        } <!--INTERFACE-->
+            @await Html.PartialAsync("UISections/_InputInterface", iface)
+        }
 
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
@@ -454,20 +300,16 @@
                 ,appId: @applicationId
                 ,instanceId: @instanceid
                 ,datalist: []
-                ,model: { showFilter: false,  ['@mainDbName']: {} }
+                ,model: { showFilter: false, ['@mainDbName']: {} }
+                ,currentline: { }
                 ,pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
-                ,dataview: []
-                ,valuedomains: {}
                 ,validation: {}
-                ,current_edit_line: {}
-                ,dlgFilterColumnName: ""
-                ,dlgFilterValue: ""
                 ,applicationViewId: @applicationViewId
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
-                ,showDataViewFilter: false
+
 
 
             },
@@ -477,7 +319,7 @@
                 openApplicationModal: function (item, uimetacode)
                 {
                     var context = this;
-                    var endpointurl = context.baseurl + "GetModalInput/" + context.appId + "/" + uimetacode + "/" + context.instanceId;
+
 
                     var modalapp = null;
                     for (var i = 0; i < modalapps.length; i++) {
@@ -504,108 +346,35 @@
                             });
                     };
 
-                    if (modalapp == null)
+                    if (modalapp == null) {
+                        //NEW MODAL APP
+                        var appconfig = { el: "#addEditModalBody_" + uimetacode, data: { model: { ['@mainDbName']: {} } } };
+                        modalapp = new Vue(appconfig);
+                        modalapps.push({ name: uimetacode, app: modalapp });
+                    }
+
+                    if (item)
                     {
-                         //NEW MODAL APP CONFIG
-                         var appconfig = {
-                             template: '',
-                             el: "#addEditModalBody_" + uimetacode
-                             , data: {
-                                 model: {
-                                     ['@mainDbName']: {} }
-                                ,dataview: []
-                                ,valuedomains: {}
-                                ,validation: {}
-                                ,dlgFilterColumnName: ""
-                                ,dlgFilterValue: ""
-                            }
-                        };
-
-                        $.get(endpointurl, function (response)
-                        {
-                            //TEMPLATE
-                            appconfig.template = response;
-
-                            //NEW APP
-                            modalapp = new Vue(appconfig);
-
-                            modalapps.push({ name: uimetacode, app: modalapp });
-
-                        }).done(function () {
-
-                            if (item)
-                            {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function ()
-                                {
-                                     modalapp.model.@mainDbName = item;
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                            }
-                            else
-                            {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
-
-                                }).done(function () {
-
-                                    endpointurl = context.baseurl + "CreateNew/" + context.appId;
-                                    $.get(endpointurl, function (response) {
-                                        modalapp.model = JSON.parse(response.data);
-                                    });
-                                }).done(function ()
-                                {
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                            }
-
-
-                        });
+                        modalapp.model.@mainDbName = item;
+                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModal_' + uimetacode).modal();
                     }
                     else
                     {
-                        if (item)
-                         {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
 
-                                }).done(function ()
-                                {
-                                     modalapp.model.@mainDbName = item;
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                         }
-                         else
-                         {
-                                endpointurl = context.baseurl + "GetValueDomains/" + context.appId;
-                                $.get(endpointurl, function (response) {
-                                    modalapp.valuedomains = JSON.parse(response.data);
+                        var endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                        $.get(endpointurl, function (response)
+                        {
+                            modalapp.model = JSON.parse(response.data);
 
-                                }).done(function () {
-
-                                    endpointurl = context.baseurl + "CreateNew/" + context.appId;
-                                    $.get(endpointurl, function (response) {
-                                        modalapp.model = JSON.parse(response.data);
-                                    });
-                                }).done(function ()
-                                {
-                                    $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                                    $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
-                                    $('#addEditModal_' + uimetacode).modal();
-                                });
-                        }
+                        }).done(function (){
+                            $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                            $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                            $('#addEditModal_' + uimetacode).modal();
+                        });
                     }
+                   
                 },
                 openSubTableModal: function (item, uimetacode) {
                     raiseInformationModal('Not implemented yet', uimetacode);
@@ -729,12 +498,17 @@
 
                     raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
                 },
-                initSelectizeControls: function ()
-                {
+                setUpControls: function () {
                     var context = this;
 
-                   
-                  
+                    $("input[data-metatype],select[data-metatype]").each(function () {
+                        var metatype = $(this).data('metatype');
+                        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
+                            context.initSelectizeControl(this);
+                        }
+                    });
+
+
                 }
             },
             computed: {
@@ -759,7 +533,11 @@
                 var context = this;
                 @if (Model.IsApplicationListView())
                 {
-                    <text>context.getPage();</text>
+                    <text>
+                        context.getPage();
+                        context.setUpControls();
+                    </text>
+                   
                 }
                 else if (Model.IsApplicationInputView() && instanceid > 0)
                 {
@@ -767,19 +545,23 @@
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
+                    }).done(function () {
+                        context.setUpControls();
                     });
                     </text>
               }
               else if (Model.IsApplicationInputView() && instanceid == 0)
               {
                     <text>
-                   
+
                         var endpointurl = context.baseurl + "CreateNew/" + context.appId;
                         $.get(endpointurl, function (response)
                         {
                             context.model = JSON.parse(response.data);
+                        }).done(function () {
+                            context.setUpControls();
                         });
-               
+
                     </text>
 
               }

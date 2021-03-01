@@ -77,8 +77,6 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
         public int PageSize { get; set; }
-      
-  
 
         public bool IsMetaTypeInputInterface
         {

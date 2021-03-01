@@ -858,6 +858,9 @@ namespace Intwenty
                             function.SystemInfo = app.SystemInfo;
                             function.BuildPropertyList();
                             userinterface.Functions.Add(function);
+
+                            //if (function.IsModalAction)
+                            //    userinterface.IsModalInterface = true;
                         }
 
                         userinterface.ApplicationInfo = app;
@@ -890,10 +893,12 @@ namespace Intwenty
 
                             item.ApplicationInfo = app;
                             item.SystemInfo = app.SystemInfo;
+                            item.UserInterfaceInfo = userinterface;
                             item.DataTableInfo = userinterface.DataTableInfo;
                             item.DataTableMetaCode = userinterface.DataTableMetaCode;
                             item.DataTableDbName = userinterface.DataTableInfo.DbName;
 
+                          
 
                             if (!string.IsNullOrEmpty(item.DataColumn1MetaCode))
                             {
@@ -986,11 +991,7 @@ namespace Intwenty
                                             if (uic.ParentMetaCode != pnl.MetaCode)
                                                 continue;
 
-                                            if (userinterface.IsMetaTypeInputInterface)
-                                                uic.JavaScriptObjectName = "model";
-                                            if (userinterface.IsMetaTypeListInterface)
-                                                uic.JavaScriptObjectName = "item";
-
+                                           
                                             uic.ColumnOrder = pnl.ColumnOrder;
 
                                             pnl.Controls.Add(uic);
