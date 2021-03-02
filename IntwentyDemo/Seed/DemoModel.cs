@@ -80,7 +80,7 @@ namespace IntwentyDemo.Seed
 
             //INPUT UI
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", TitleLocalizationKey = "CUSTOMERBASIC", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataColumn1MetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "CUSTPNL1", RowOrder = 2, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "SEARCHBOX", MetaCode = "MS_TAGS", DataColumn1MetaCode = "CUSTOMERTAGS", DataColumn2MetaCode = "CUSTOMERTAGSTEXT", Domain = "VALUEDOMAIN.CUSTOMERTAGS", Title = "Tags", TitleLocalizationKey = "MS_TAGS", ParentMetaCode = "CUSTPNL1", RowOrder = 3, ColumnOrder = 1, Properties="MULTISELECT=TRUE#ALLOWCREATE=TRUE#USESEARCH=TRUE" });
@@ -457,6 +457,8 @@ namespace IntwentyDemo.Seed
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERNAME", Text = "Kund namn" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERCONTACT", Text = "Contact" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERCONTACT", Text = "Kontakt" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERBASIC", Text = "Basics" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERBASIC", Text = "Info" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERPHONE", Text = "Phone" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERPHONE", Text = "Telefon" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMEREMAIL", Text = "E-Mail" });

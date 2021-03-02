@@ -164,45 +164,70 @@ namespace Intwenty.Controllers
         {
 
             ClientStateInfo state = null;
-            if (User.Identity.IsAuthenticated)
-                state = ClientStateInfo.CreateFromJSON(model, User);
-            else
-                state = ClientStateInfo.CreateFromJSON(model);
 
-            if (state == null)
-                return BadRequest();
-            if (state.ApplicationId < 1)
-                return BadRequest();
-            if (state.ApplicationViewId < 1)
-                return BadRequest();
-            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
-            if (appmodel == null)
-                return BadRequest();
-
-            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
-            if (viewmodel == null)
-                return BadRequest();
-
-
-            if (viewmodel.IsPublic)
+            try
             {
-                var res = DataRepository.Save(state, appmodel);
-                return new JsonResult(res);
-            }
-            else
-            {
+
+
+                if (User.Identity.IsAuthenticated)
+                    state = ClientStateInfo.CreateFromJSON(model, User);
+                else
+                    state = ClientStateInfo.CreateFromJSON(model);
+
+                if (state == null)
+                    return BadRequest();
+                if (state.ApplicationId < 1)
+                    return BadRequest();
+
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+
+                if (state.ApplicationViewId > 0)
+                {
+                    var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                    if (viewmodel != null)
+                    {
+                        if (viewmodel.IsPublic)
+                        {
+                            var pub_save_res = DataRepository.Save(state, appmodel);
+                            if (!pub_save_res.IsSuccess)
+                                throw new InvalidOperationException(pub_save_res.UserError);
+
+                            return new JsonResult(pub_save_res);
+                        }
+                        else
+                        {
+                            if (!await UserManager.HasAuthorization(User, viewmodel))
+                                throw new InvalidOperationException(string.Format("You are not authorized to modify data in this view"));
+
+                        }
+                    }
+                }
+
+
                 if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must login to use this function"));
-                if (!await UserManager.HasAuthorization(User, viewmodel))
-                   return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to modify data in this view or application")));
+                    throw new InvalidOperationException("You must login to use this function");
 
+                if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                    throw new InvalidOperationException(string.Format("You are not authorized to modify data in this application"));
 
                 var res = DataRepository.Save(state, appmodel);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
                 return new JsonResult(res);
 
             }
-
-
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving an application.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
         }
 
         [HttpPost]
@@ -210,32 +235,48 @@ namespace Intwenty.Controllers
         {
 
             ClientStateInfo state = null;
-            if (User.Identity.IsAuthenticated)
-                state = ClientStateInfo.CreateFromJSON(model, User);
-            else
-                state = ClientStateInfo.CreateFromJSON(model);
 
-            if (state == null)
-                return BadRequest();
-            if (state.ApplicationId < 1)
-                return BadRequest();
-            if (state.ApplicationViewId < 1)
-                return BadRequest();
-            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
-            if (appmodel == null)
-                return BadRequest();
+            try
+            {
+                if (User.Identity.IsAuthenticated)
+                    state = ClientStateInfo.CreateFromJSON(model, User);
+                else
+                    state = ClientStateInfo.CreateFromJSON(model);
 
-            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
-            if (viewmodel == null)
-                return BadRequest();
+                if (state == null)
+                    return BadRequest();
+                if (state.ApplicationId < 1)
+                    return BadRequest();
+                if (state.ApplicationViewId < 1)
+                    return BadRequest();
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
 
-            if (!User.Identity.IsAuthenticated)
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
-            if (!await UserManager.HasAuthorization(User, viewmodel))
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
+                var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                if (viewmodel == null)
+                    return BadRequest();
 
-            var res = DataRepository.Delete(state, appmodel);
-            return new JsonResult(res);
+                if (!User.Identity.IsAuthenticated)
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
+                if (!await UserManager.HasAuthorization(User, viewmodel))
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
+
+                var res = DataRepository.Delete(state, appmodel);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
+                return new JsonResult(res);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting an application.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
 
         }
 

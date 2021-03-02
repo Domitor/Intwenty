@@ -172,6 +172,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+
                     <div class="settingpnl">
 
                         <nav>
@@ -189,14 +190,6 @@
                                     <label class="control-label">Function Type<span style="color: red"> *</span></label>
                                     <select class="form-control form-control-sm" v-model="functionsettings.metaType" :disabled="functionsettings.id>0">
                                         <option v-for="item in functions" v-bind:value="item.metaCode">{{item.title}}</option>
-                                    </select>
-                                </div>
-
-
-                                <div class="form-group">
-                                    <label class="control-label">Data Table<span style="color: red"> *</span></label>
-                                    <select class="form-control form-control-sm" v-model="functionsettings.dataTableMetaCode" :disabled="functionsettings.id>0">
-                                        <option v-for="item in datatables" v-bind:value="item.metaCode">{{item.dbName}}</option>
                                     </select>
                                 </div>
 
@@ -310,7 +303,7 @@
                 {
                     var context = this;
 
-                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, ownerMetaCode: item.metaCode, dlgHeader: "Add Function", metaType: "", actionPath: "", title: "", dataTableMetaCode: "", metaCode: "", propertyList: item.propertyList, currentProperty: {} };
+                    context.functionsettings = { id: 0, applicationId:@Model.Application.Id, ownerMetaCode: item.metaCode, dlgHeader: "Add Function", metaType: "", actionPath: "", title: "",  metaCode: "", propertyList: item.propertyList, currentProperty: {} };
 
 
                     var yesfunc = function ()
@@ -352,7 +345,7 @@
                     var context = this;
 
                     context.functionsettings = {
-                        id: item.id, applicationId:@Model.Application.Id, ownerMetaCode: item.ownerMetaCode, dlgHeader: "Edit Function", metaType: item.metaType, actionPath: item.actionPath, title: item.title, dataTableMetaCode: item.dataTableMetaCode, metaCode: item.metaCode, propertyList: item.propertyList, currentProperty: {} };
+                        id: item.id, applicationId:@Model.Application.Id, ownerMetaCode: item.ownerMetaCode, dlgHeader: "Edit Function", metaType: item.metaType, actionPath: item.actionPath, title: item.title, metaCode: item.metaCode, propertyList: item.propertyList, currentProperty: {} };
 
                     var yesfunc = function ()
                     {

@@ -1,4 +1,8 @@
-﻿function raiseInformationModal(headertext, bodytext, close_callback) {
+﻿var selectizecache = [];
+
+
+
+function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);
     $('#msg_dlg_modal_text').text(bodytext);
     if (close_callback) {
@@ -183,6 +187,20 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
+Vue.prototype.setUpControls = function ()
+{
+    var context = this;
+
+    $("input[data-metatype],select[data-metatype]").each(function () {
+        var metatype = $(this).data('metatype');
+        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
+
+            context.initSelectizeControl(this);
+        }
+    });
+
+}
+
 Vue.prototype.initSelectizeControl = function (control) {
     var context = this;
 
@@ -210,69 +228,83 @@ Vue.prototype.initSelectizeControl = function (control) {
     if (!uiid || !bindingobject)
         return;
 
-    var element = $(uiid);
+    var selectizecontrol = null;
+    for (var i = 0; i < selectizecache.length; i++) {
+        if (selectizecache[i].name == uiid) {
+            selectizecontrol = selectizecache[i].controlinstance;
+            break;
+        }
+    }
 
-    if (!element)
+    if (selectizecontrol != null)
         return;
 
-    var plugs = null;
-    var iscombobox = false;
-    if (element[0].nodeName == 'SELECT') {
-        iscombobox = true;
-        usesearch = false;
-        allowcreate = false;
-        maxitems = 1;
-    }
-    else {
-        plugs = ['remove_button'];
-    }
+    if (selectizecontrol == null) {
+        var element = $(uiid);
 
+        if (!element)
+            return;
 
-
-    var maxitems = 1;
-    if (usemultiselect)
-        maxitems = 10;
-
-    var t = $(uiid).selectize({
-        plugins: plugs
-        , delimiter: ','
-        , maxItems: maxitems
-        , valueField: 'code'
-        , labelField: 'value'
-        , searchField: 'value'
-        , options: []
-        , create: allowcreate
-        , preload: true
-        , load: function (query, callback) {
-            if (!query || !usesearch || iscombobox)
-                query = 'ALL';
-            if (usesearch && !iscombobox && query == 'ALL')
-                query = 'PRELOAD';
-
-            if (!domainname) return callback();
-
-            $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
-                callback(response);
-                if (bindingobject[codecolname]) {
-                    var persisteditems = bindingobject[codecolname].split(",");
-                    for (var i = 0; i < persisteditems.length; i++) {
-                        //t[0].selectize.addOption({ Code: persisteditems[i], Value: persisteditems[i] });
-                        //ADD ITEM BUT DONT TRIGGER CHANGE
-                        t[0].selectize.addItem(persisteditems[i], true);
-
-                    }
-                }
-            });
+        var plugs = null;
+        var iscombobox = false;
+        if (element[0].nodeName == 'SELECT') {
+            iscombobox = true;
+            usesearch = false;
+            allowcreate = false;
+            maxitems = 1;
+        }
+        else {
+            plugs = ['remove_button'];
         }
 
-    });
 
 
+        var maxitems = 1;
+        if (usemultiselect)
+            maxitems = 10;
 
-    t.on('change',
+        selectizecontrol = $(uiid).selectize({
+            plugins: plugs
+            , delimiter: ','
+            , maxItems: maxitems
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: allowcreate
+            , preload: true
+            , load: function (query, callback) {
+                if (!query || !usesearch || iscombobox)
+                    query = 'ALL';
+                if (usesearch && !iscombobox && query == 'ALL')
+                    query = 'PRELOAD';
+
+                if (!domainname) return callback();
+
+                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                    callback(response);
+                    if (bindingobject[codecolname]) {
+                        var persisteditems = bindingobject[codecolname].split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            //ADD ITEM BUT DONT TRIGGER CHANGE
+                            selectizecontrol[0].selectize.addItem(persisteditems[i], true);
+
+                        }
+                    }
+                });
+            }
+
+        });
+
+        selectizecache.push({ controlinstance: selectizecontrol, name: uiid });
+    }
+
+   
+
+    selectizecontrol.on('change',
         function () {
-            var selected_objects = $.map(t[0].selectize.items, function (value) {
-                return t[0].selectize.options[value];
+            var selected_objects = $.map(selectizecontrol[0].selectize.items, function (value) {
+                return selectizecontrol[0].selectize.options[value];
             });
 
             var codestr = "";
@@ -292,6 +324,11 @@ Vue.prototype.initSelectizeControl = function (control) {
             if (valcolname)
                 bindingobject[valcolname] = valstr;
         });
+
+
+
+
+
 };
 
 Vue.prototype.onFileUpload = function ()

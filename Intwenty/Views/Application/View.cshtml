@@ -122,6 +122,14 @@
 
     <br />
 
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="modelSaved">
+        <strong>@Localizer["Changes Saved"] !</strong><br />
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+
     @foreach (var iface in Model.UserInterface)
     {
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
@@ -201,7 +209,7 @@
                 </div>
 
 
-            }
+                                                }
 
             @if (iface.HasCreateFunction && Model.IsApplicationInputView())
             {
@@ -285,12 +293,12 @@
                     </ul>
                 </nav>
             }
-        }
+                            }
 
 
 
 
-    }
+                        }
 
 
 
@@ -320,10 +328,8 @@
                 ,validation: {}
                 ,applicationViewId: @applicationViewId
                 ,aftersaveaction:'@aftersaveaction'
-                ,aftersaveactionpath: '@aftersaveactionpath'
-
-
-
+                , aftersaveactionpath: '@aftersaveactionpath'
+                ,modelSaved: false
             },
             methods:
             {
@@ -352,8 +358,21 @@
                                 type: "POST",
                                 contentType: "application/json",
                                 data: JSON.stringify(modalapp.model),
-                                success: function (response) {
-
+                                success: function (response)
+                                {
+                                    @if (Model.IsApplicationListView())
+                                    {
+                                         <text>
+                                        context.instanceId = response.id;
+                                        context.modelSaved = true;
+                                        context.getApplication();
+                                        setTimeout(function () { context.modelSaved = false; }, 3000);
+                                        </text>
+                                    }
+                                },
+                                error: function (response)
+                                {
+                                    raiseErrorModal(response);
                                 }
                             });
                     };
@@ -371,7 +390,7 @@
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
-                       
+
                     }
                     else
                     {
@@ -385,7 +404,7 @@
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                             $('#addEditModal_' + uimetacode).modal();
-                           
+
                         });
                     }
 
@@ -410,23 +429,27 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(this.model),
-                        success: function (response) {
+                        success: function (response)
+                        {
                             if (response.isSuccess)
                             {
-                                if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '')
-                                {
-                                   endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                   window.location.href = endpointurl;
+                                if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
+                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                    window.location.href = endpointurl;
                                 }
                                 else if (context.aftersaveaction == 'REFRESH')
                                 {
-                                    window.location.reload(true);
+                                    context.instanceId = response.id;
+                                    context.modelSaved = true;
+                                    context.getApplication();
+                                    setTimeout(function () { context.modelSaved = false; }, 3000);
                                 }
 
                             }
-                            else {
-                                raiseErrorModal(response);
-                            }
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response);
                         }
                     });
                 },
@@ -500,33 +523,40 @@
                             type: "POST",
                             contentType: "application/json",
                             data: JSON.stringify(item),
-                            success: function (response) {
-
-                                if (response.isSuccess) {
-                                    window.location.reload(true);
-                                }
-                                else {
-                                    raiseErrorModal(response);
-                                }
+                            success: function (response)
+                            {
+                                context.getPage();
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response);
                             }
                         });
                     };
 
                     raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deleteapp);
                 },
-                setUpControls: function () {
+                getApplication: function ()
+                {
                     var context = this;
-
-                    $("input[data-metatype],select[data-metatype]").each(function () {
-                        var metatype = $(this).data('metatype');
-                        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
-                          
-                            context.initSelectizeControl(this);
-                        }
+                    var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    $.get(endpointurl, function (response) {
+                        context.model = JSON.parse(response.data);
+                    }).done(function () {
+                        context.setUpControls();
                     });
-
-
+                },
+                createNewApplication: function ()
+                {
+                    var context = this;
+                    var endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                    $.get(endpointurl, function (response) {
+                        context.model = JSON.parse(response.data);
+                    }).done(function () {
+                        context.setUpControls();
+                    });
                 }
+
             },
             computed: {
 
@@ -558,26 +588,13 @@
                 else if (Model.IsApplicationInputView() && instanceid > 0)
                 {
                     <text>
-                    var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
-                    $.get(endpointurl, function (response) {
-                        context.model = JSON.parse(response.data);
-                    }).done(function () {
-                        context.setUpControls();
-                    });
+                        context.getApplication();
                     </text>
               }
               else if (Model.IsApplicationInputView() && instanceid == 0)
               {
                     <text>
-
-                        var endpointurl = context.baseurl + "CreateNew/" + context.appId;
-                        $.get(endpointurl, function (response)
-                        {
-                            context.model = JSON.parse(response.data);
-                        }).done(function () {
-                            context.setUpControls();
-                        });
-
+                        context.createNewApplication();
                     </text>
 
               }
