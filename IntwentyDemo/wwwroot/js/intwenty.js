@@ -237,8 +237,10 @@ Vue.prototype.initSelectizeControl = function (control) {
     }
 
     if (selectizecontrol != null)
+    {
+        //selectizecontrol.trigger('change');
         return;
-
+    }
     if (selectizecontrol == null) {
         var element = $(uiid);
 

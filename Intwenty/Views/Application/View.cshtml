@@ -318,17 +318,17 @@
                 baseurl: '@Url.Content("~/Application/API/")'
                 ,appMainTable: '@mainDbName'
                 ,appId: @applicationId
+                ,applicationViewId: @applicationViewId
                 ,instanceId: @instanceid
-                ,datalist: []
+                ,applist: []
                 ,model: { showFilter: false, ['@mainDbName']: {} }
                 ,currentline: { }
                 ,pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
                 ,validation: {}
-                ,applicationViewId: @applicationViewId
                 ,aftersaveaction:'@aftersaveaction'
-                , aftersaveactionpath: '@aftersaveactionpath'
+                ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
             },
             methods:
@@ -338,7 +338,7 @@
                 {
                     var context = this;
 
-
+                    
                     var modalapp = null;
                     for (var i = 0; i < modalapps.length; i++) {
                         if (modalapps[i].name == uimetacode) {
@@ -365,7 +365,7 @@
                                          <text>
                                         context.instanceId = response.id;
                                         context.modelSaved = true;
-                                        context.getApplication();
+                                        context.getPage();
                                         setTimeout(function () { context.modelSaved = false; }, 3000);
                                         </text>
                                     }
@@ -408,7 +408,7 @@
                         });
                     }
 
-                    context.setUpControls();
+                    modalapp.setUpControls();
 
                 },
                 openSubTableModal: function (item, uimetacode) {
@@ -471,7 +471,7 @@
                         data: JSON.stringify(this.pageInfo),
                         success: function (response) {
                             //DATA
-                            context.datalist = JSON.parse(response.data);
+                            context.applist = JSON.parse(response.data);
 
                             //UPDATE CURRENT PAGE INFO
                             context.pageInfo = response.listFilter;
@@ -561,7 +561,7 @@
             computed: {
 
                 sortedResults: function () {
-                    return this.datalist.sort((a, b) => {
+                    return this.applist.sort((a, b) => {
                         let modifier = 1;
                         if (this.currentSortDir === 'desc') modifier = -1;
                         if (a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
