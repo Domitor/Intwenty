@@ -18,23 +18,26 @@
 
 @await Html.PartialAsync("_Modals")
 
-@foreach (var iface in Model.UserInterface)
-{
-    @foreach (var mip in iface.ModalInterfaces)
-    {
 
-        <div class="modal" id="addEditModal_@mip.MetaCode" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">@mip.LocalizedTitle</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="addEditModalBody_@mip.MetaCode">
-                           
+<div id="app">
+
+    @foreach (var iface in Model.UserInterface)
+    {
+        @foreach (var mip in iface.ModalInterfaces)
+        {
+
+            <div class="modal" id="addEditModal_@mip.MetaCode" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">@mip.LocalizedTitle</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="addEditModalBody_@mip.MetaCode">
+
                                 @if (iface.IsMetaTypeListInterface && mip.IsMetaTypeInputInterface && mip.DataTableDbName == Model.ApplicationInfo.DbName)
                                 {
                                     mip.CurrentRenderContext = CurrentRenderContextOptions.ModalView;
@@ -45,26 +48,18 @@
                                     mip.CurrentRenderContext = CurrentRenderContextOptions.ModalSubTable;
                                     @await Html.PartialAsync("UISections/_InputInterface", mip);
                                 }
-                            
+
+                            </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button id="addEditModalSaveBtn_@mip.MetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                        <div class="modal-footer">
+                            <button id="addEditModalSaveBtn_@mip.MetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     }
-}
-
-
-
-
-
-<div id="app">
-
-
 
     <div class="card">
         <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
@@ -209,7 +204,7 @@
                 </div>
 
 
-                                                }
+            }
 
             @if (iface.HasCreateFunction && Model.IsApplicationInputView())
             {
@@ -293,12 +288,12 @@
                     </ul>
                 </nav>
             }
-                            }
+        }
 
 
 
 
-                        }
+    }
 
 
 
@@ -334,59 +329,45 @@
             methods:
             {
 
+
                 openApplicationModal: function (item, uimetacode)
                 {
                     var context = this;
 
-                    
-                    var modalapp = null;
-                    for (var i = 0; i < modalapps.length; i++) {
-                        if (modalapps[i].name == uimetacode) {
-                            modalapp = modalapps[i].app;
-                            break;
-                        }
-                    }
-
+               
                     var savefunc = function ()
                     {
-                           var saveendpoint = context.baseurl + "Save";
-                            modalapp.model[context.appMainTable].ApplicationId = context.appId;
-                            modalapp.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
+                        var saveendpoint = context.baseurl + "Save";
+                        context.model[context.appMainTable].ApplicationId = context.appId;
+                        context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
 
-                            $.ajax({
-                                url: saveendpoint,
-                                type: "POST",
-                                contentType: "application/json",
-                                data: JSON.stringify(modalapp.model),
-                                success: function (response)
+                        $.ajax({
+                            url: saveendpoint,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify(context.model),
+                            success: function (response)
+                            {
+                                @if (Model.IsApplicationListView())
                                 {
-                                    @if (Model.IsApplicationListView())
-                                    {
-                                         <text>
-                                        context.instanceId = response.id;
-                                        context.modelSaved = true;
-                                        context.getPage();
-                                        setTimeout(function () { context.modelSaved = false; }, 3000);
-                                        </text>
-                                    }
-                                },
-                                error: function (response)
-                                {
-                                    raiseErrorModal(response);
+                                        <text>
+                                    context.modelSaved = true;
+                                    context.getPage();
+                                    setTimeout(function () { context.modelSaved = false; }, 3000);
+                                    </text>
                                 }
-                            });
+                            },
+                            error: function (response)
+                            {
+                                raiseErrorModal(response);
+                            }
+                        });
                     };
 
-                    if (modalapp == null) {
-                        //NEW MODAL APP
-                        var appconfig = { el: "#addEditModalBody_" + uimetacode, data: { model: { ['@mainDbName']: {} } } };
-                        modalapp = new Vue(appconfig);
-                        modalapps.push({ name: uimetacode, app: modalapp });
-                    }
 
                     if (item)
                     {
-                        modalapp.model.@mainDbName = item;
+                        context.model.@mainDbName = item;
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
@@ -398,7 +379,7 @@
                         var endpointurl = context.baseurl + "CreateNew/" + context.appId;
                         $.get(endpointurl, function (response)
                         {
-                            modalapp.model = JSON.parse(response.data);
+                            context.model = JSON.parse(response.data);
 
                         }).done(function (){
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
@@ -408,7 +389,7 @@
                         });
                     }
 
-                    modalapp.setUpControls();
+                    //context.setUpControls();
 
                 },
                 openSubTableModal: function (item, uimetacode) {
@@ -543,7 +524,7 @@
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
-                        context.setUpControls();
+                        context.$forceUpdate();
                     });
                 },
                 createNewApplication: function ()
@@ -553,7 +534,7 @@
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
-                        context.setUpControls();
+                        //context.setUpControls();
                     });
                 }
 

@@ -1,6 +1,4 @@
-﻿var selectizecache = [];
-
-
+﻿
 
 function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);
@@ -186,6 +184,123 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
     this.$forceUpdate();
 
 };
+
+Vue.component("combobox", {
+    template: '<select><slot></slot></select>',
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        element.selectize({
+             delimiter: ','
+            , maxItems: 1
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: false
+            , preload: true
+            , load: function (query, callback) {
+              
+                $.get('/Application/API/GetValueDomain/DOMAIN/ALL', function (response) {
+                    callback(response);
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+           
+        });
+
+        //selectizecontrol.trigger('change');
+
+        /*
+        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
+            var selectionstring = "";
+            var selectiontextstring = "";
+            var selections = element.select2('data');
+
+            //CANT BE ZERO IN THIS EVENT
+            if (selections.length == 0)
+                return;
+
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
+            }
+
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
+
+        }).on("select2:unselect", function () {
+            var selectionstring = "";
+            var selectiontextstring = "";
+            var selections = element.select2('data');
+            for (var i = 0; i < selections.length; i++) {
+                if (selectionstring == "") {
+                    selectionstring += selections[i].id;
+                    selectiontextstring += selections[i].text;
+                }
+                else {
+                    selectionstring += "," + selections[i].id;
+                    selectiontextstring += "," + selections[i].text;
+                }
+            }
+
+            vm.$emit('update:idfield', selectionstring);
+            vm.$emit('update:textfield', selectiontextstring);
+        });
+
+        */
+    },
+    updated: function ()
+    {
+        var t = "";
+        $(this.$el).val(null).trigger("change");
+
+        if (!this.$attrs.idfield)
+            return;
+
+        var arr = this.$attrs.idfield.split(",");
+        $(this.$el).val(arr);
+        $(this.$el).val(arr).trigger("change");
+        $(this.$el).trigger("change");
+
+    },
+    watch:
+    {
+        value : function (value) {
+            var x = "";
+        }
+
+    },
+    destroyed: function () {
+        $(this.$el).selectize.destroy();
+    }
+});
 
 Vue.prototype.setUpControls = function ()
 {
