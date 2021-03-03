@@ -334,7 +334,7 @@
                 {
                     var context = this;
 
-               
+
                     var savefunc = function ()
                     {
                         var saveendpoint = context.baseurl + "Save";
@@ -367,7 +367,7 @@
 
                     if (item)
                     {
-                        context.model.@mainDbName = item;
+                         context.model[context.appMainTable] = item;
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();

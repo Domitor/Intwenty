@@ -185,6 +185,119 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
+Vue.component("searchbox", {
+    template: '<input><slot></slot></input>',
+    props: ['idfield','textfield'],
+    data: function ()
+    {
+        return { selectizeinstance: null };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        var domainname = $(element).data('domain');
+        var usearch = $(element).data('usesearch');
+        var mselect = $(element).data('multiselect');
+        var acreate = $(element).data('allowcreate');
+        var allowcreate = (acreate == "TRUE");
+        var usesearch = (usearch == "TRUE");
+        var usemultiselect = (mselect == "TRUE");
+
+       
+        var maxitems = 1;
+        if (usemultiselect)
+            maxitems = 10;
+
+        element.selectize({
+            plugins: ['remove_button']
+            , delimiter: ','
+            , maxItems: maxitems
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: allowcreate
+            , preload: true
+            , load: function (query, callback) {
+
+                if (!query || !usesearch)
+                    query = 'ALL';
+                if (usesearch && query == 'ALL')
+                    query = 'PRELOAD';
+
+                if (!domainname) return callback();
+
+                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                    callback(response);
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+
+        });
+
+        vm.selectizeinstance = element[0].selectize;
+    },
+    updated: function ()
+    {
+        var t = "";
+    },
+    watch:
+    {
+        idfield: function (newval, oldval)
+        {
+            var t = "";
+
+
+            if (this.selectizeinstance)
+            {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+            
+        },
+        textfield: function (newval, oldval)
+        {
+            var t = "";
+           
+        }
+
+
+    },
+    destroyed: function () {
+        $(this.$el).selectize.destroy();
+    }
+});
+
 Vue.component("combobox", {
     template: '<select><slot></slot></select>',
     mounted: function () {
