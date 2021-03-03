@@ -20,7 +20,7 @@
 
     }
     <div @Html.Raw(accordion) id="accordion_@sect.MetaCode">
-        <div @Html.Raw(card) id="cardheader_@sect.MetaCode">
+        <div @Html.Raw(card) id="cardheader_@sect.MetaCode" style="overflow:inherit">
             @if (!sect.ExcludeOnRender)
             {
                 <div class="card-header">

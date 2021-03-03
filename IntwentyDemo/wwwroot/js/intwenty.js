@@ -197,6 +197,7 @@ Vue.component("searchbox", {
         var vm = this;
         var element = $(this.$el);
 
+
         var domainname = $(element).data('domain');
         var usearch = $(element).data('usesearch');
         var mselect = $(element).data('multiselect');
@@ -205,13 +206,16 @@ Vue.component("searchbox", {
         var usesearch = (usearch == "TRUE");
         var usemultiselect = (mselect == "TRUE");
 
-       
+        var plugs = null;
         var maxitems = 1;
         if (usemultiselect)
+        {
             maxitems = 10;
+            plugs = ['remove_button'];
+        }
 
         element.selectize({
-            plugins: ['remove_button']
+            plugins: plugs
             , delimiter: ','
             , maxItems: maxitems
             , valueField: 'code'
@@ -229,8 +233,16 @@ Vue.component("searchbox", {
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response)
+                {
                     callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++)
+                        {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
                 });
             }
 
@@ -294,12 +306,17 @@ Vue.component("searchbox", {
 
     },
     destroyed: function () {
-        $(this.$el).selectize.destroy();
+        this.selectizeinstance.destroy();
     }
 });
 
 Vue.component("combobox", {
     template: '<select><slot></slot></select>',
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { selectizeinstance: null };
+
+    },
     mounted: function () {
         var vm = this;
         var element = $(this.$el);
@@ -317,6 +334,12 @@ Vue.component("combobox", {
               
                 $.get('/Application/API/GetValueDomain/DOMAIN/ALL', function (response) {
                     callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
                 });
             }
 
@@ -342,224 +365,50 @@ Vue.component("combobox", {
            
         });
 
-        //selectizecontrol.trigger('change');
+        vm.selectizeinstance = element[0].selectize;
 
-        /*
-        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
-            var selectionstring = "";
-            var selectiontextstring = "";
-            var selections = element.select2('data');
-
-            //CANT BE ZERO IN THIS EVENT
-            if (selections.length == 0)
-                return;
-
-            for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "") {
-                    selectionstring += selections[i].id;
-                    selectiontextstring += selections[i].text;
-                }
-                else {
-                    selectionstring += "," + selections[i].id;
-                    selectiontextstring += "," + selections[i].text;
-                }
-            }
-
-            vm.$emit('update:idfield', selectionstring);
-            vm.$emit('update:textfield', selectiontextstring);
-
-        }).on("select2:unselect", function () {
-            var selectionstring = "";
-            var selectiontextstring = "";
-            var selections = element.select2('data');
-            for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "") {
-                    selectionstring += selections[i].id;
-                    selectiontextstring += selections[i].text;
-                }
-                else {
-                    selectionstring += "," + selections[i].id;
-                    selectiontextstring += "," + selections[i].text;
-                }
-            }
-
-            vm.$emit('update:idfield', selectionstring);
-            vm.$emit('update:textfield', selectiontextstring);
-        });
-
-        */
+      
     },
     updated: function ()
     {
         var t = "";
-        $(this.$el).val(null).trigger("change");
-
-        if (!this.$attrs.idfield)
-            return;
-
-        var arr = this.$attrs.idfield.split(",");
-        $(this.$el).val(arr);
-        $(this.$el).val(arr).trigger("change");
-        $(this.$el).trigger("change");
+       
 
     },
     watch:
     {
-        value : function (value) {
-            var x = "";
+
+        idfield: function (newval, oldval) {
+            var t = "";
+
+
+            if (this.selectizeinstance) {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+
+        },
+        textfield: function (newval, oldval) {
+            var t = "";
+
         }
+
 
     },
     destroyed: function () {
-        $(this.$el).selectize.destroy();
+        this.selectizeinstance.destroy();
     }
 });
 
-Vue.prototype.setUpControls = function ()
-{
-    var context = this;
-
-    $("input[data-metatype],select[data-metatype]").each(function () {
-        var metatype = $(this).data('metatype');
-        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
-
-            context.initSelectizeControl(this);
-        }
-    });
-
-}
-
-Vue.prototype.initSelectizeControl = function (control) {
-    var context = this;
-
-    var uiid = "#" + control.id;
-    var contextobject = $(control).data('contextobject');
-    var tablename = $(control).data('dbtable');
-    var codecolname = $(control).data('dbfield');
-    var valcolname = $(control).data('dbfield2');
-    var domainname = $(control).data('domain');
-    var usearch = $(control).data('usesearch');
-    var mselect = $(control).data('multiselect');
-    var acreate = $(control).data('allowcreate');
-
-    var allowcreate = (acreate == "TRUE");
-    var usesearch = (usearch == "TRUE");
-    var usemultiselect = (mselect == "TRUE");
-
-    var bindingobject = null;
-    if (contextobject == "currentline")
-        bindingobject = context.currentline;
-    else
-        bindingobject = context.model[tablename];
-
-
-    if (!uiid || !bindingobject)
-        return;
-
-    var selectizecontrol = null;
-    for (var i = 0; i < selectizecache.length; i++) {
-        if (selectizecache[i].name == uiid) {
-            selectizecontrol = selectizecache[i].controlinstance;
-            break;
-        }
-    }
-
-    if (selectizecontrol != null)
-    {
-        //selectizecontrol.trigger('change');
-        return;
-    }
-    if (selectizecontrol == null) {
-        var element = $(uiid);
-
-        if (!element)
-            return;
-
-        var plugs = null;
-        var iscombobox = false;
-        if (element[0].nodeName == 'SELECT') {
-            iscombobox = true;
-            usesearch = false;
-            allowcreate = false;
-            maxitems = 1;
-        }
-        else {
-            plugs = ['remove_button'];
-        }
-
-
-
-        var maxitems = 1;
-        if (usemultiselect)
-            maxitems = 10;
-
-        selectizecontrol = $(uiid).selectize({
-            plugins: plugs
-            , delimiter: ','
-            , maxItems: maxitems
-            , valueField: 'code'
-            , labelField: 'value'
-            , searchField: 'value'
-            , options: []
-            , create: allowcreate
-            , preload: true
-            , load: function (query, callback) {
-                if (!query || !usesearch || iscombobox)
-                    query = 'ALL';
-                if (usesearch && !iscombobox && query == 'ALL')
-                    query = 'PRELOAD';
-
-                if (!domainname) return callback();
-
-                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
-                    callback(response);
-                    if (bindingobject[codecolname]) {
-                        var persisteditems = bindingobject[codecolname].split(",");
-                        for (var i = 0; i < persisteditems.length; i++) {
-                            //ADD ITEM BUT DONT TRIGGER CHANGE
-                            selectizecontrol[0].selectize.addItem(persisteditems[i], true);
-
-                        }
-                    }
-                });
-            }
-
-        });
-
-        selectizecache.push({ controlinstance: selectizecontrol, name: uiid });
-    }
-
-   
-
-    selectizecontrol.on('change',
-        function () {
-            var selected_objects = $.map(selectizecontrol[0].selectize.items, function (value) {
-                return selectizecontrol[0].selectize.options[value];
-            });
-
-            var codestr = "";
-            var valstr = "";
-            var delim = "";
-            for (var i = 0; i < selected_objects.length; i++) {
-                var code = selected_objects[i].code;
-                var val = selected_objects[i].value;
-                codestr += delim + code;
-                valstr += delim + val;
-                delim = ",";
-
-            }
-            if (codecolname)
-                bindingobject[codecolname] = codestr;
-
-            if (valcolname)
-                bindingobject[valcolname] = valstr;
-        });
-
-
-
-
-
-};
 
 Vue.prototype.onFileUpload = function ()
 {

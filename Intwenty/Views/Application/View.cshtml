@@ -367,6 +367,7 @@
 
                     if (item)
                     {
+                         context.model[context.appMainTable] = {};
                          context.model[context.appMainTable] = item;
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
