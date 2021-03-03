@@ -92,7 +92,18 @@ namespace Intwenty.Model
         {
             get { return MetaType == MetaTypeListInterface; }
         }
+        public bool IsMainApplicationTableInterface
+        {
+            get
+            {
 
+                if (DataTableDbName == ApplicationInfo.DbName)
+                    return true;
+
+
+                return false;
+            }
+        }
         public bool HasExportFunction
         {
             get

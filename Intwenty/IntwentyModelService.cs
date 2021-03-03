@@ -863,7 +863,7 @@ namespace Intwenty
 
                             if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionUserInterfaceMetaCode))
                             {
-                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionUserInterfaceMetaCode);
+                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionUserInterfaceMetaCode && p.IsMetaTypeInputInterface);
                                 if (modalactionui!=null && !userinterface.ModalInterfaces.Exists(p=> p.Id == modalactionui.Id))
                                     userinterface.ModalInterfaces.Add(modalactionui);
                             }

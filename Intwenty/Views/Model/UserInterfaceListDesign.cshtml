@@ -254,16 +254,15 @@
                                 <br />
 
                                 <div class="form-group">
+                                    <label class="control-label">Title</label>
+                                    <input id="coltitle" type="text" class="form-control form-control-sm" v-model="columnsettings.title" />
+                                </div>
+
+                                <div class="form-group">
                                     <label class="control-label">Binding<span style="color: red"> *</span></label>
                                     <select class="form-control form-control-sm" v-model="columnsettings.dataColumn1DbName">
                                         <option v-for="item in model.dataTable.columns" v-bind:value="item.dbName">{{item.dbName}}</option>
                                     </select>
-                                </div>
-
-
-                                <div class="form-group">
-                                    <label class="control-label">Title</label>
-                                    <input id="coltitle" type="text" class="form-control form-control-sm" v-model="columnsettings.title" />
                                 </div>
 
                             </div>

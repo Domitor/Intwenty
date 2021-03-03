@@ -8,7 +8,7 @@
     int instanceid = (int)ViewBag.Id;
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
-    var modalinputs = Model.GetModalFunctions();
+    
 }
 
 
@@ -38,12 +38,12 @@
                         <div class="modal-body">
                             <div id="addEditModalBody_@mip.MetaCode">
 
-                                @if (iface.IsMetaTypeListInterface && mip.IsMetaTypeInputInterface && mip.DataTableDbName == Model.ApplicationInfo.DbName)
+                                @if (Model.IsApplicationListView() && mip.IsMetaTypeInputInterface && mip.IsMainApplicationTableInterface)
                                 {
                                     mip.CurrentRenderContext = CurrentRenderContextOptions.ModalView;
                                     @await Html.PartialAsync("UISections/_InputInterface", mip);
                                 }
-                                @if (iface.IsMetaTypeInputInterface && mip.IsMetaTypeInputInterface && iface.DataTableDbName != Model.ApplicationInfo.DbName)
+                                @if (Model.IsApplicationInputView() && mip.IsMetaTypeInputInterface && !mip.IsMainApplicationTableInterface)
                                 {
                                     mip.CurrentRenderContext = CurrentRenderContextOptions.ModalSubTable;
                                     @await Html.PartialAsync("UISections/_InputInterface", mip);
@@ -129,11 +129,14 @@
     {
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
-        if (iface.IsMetaTypeInputInterface)
+        //RENDER MAIN TABLE INPUT INTERFACES
+        if (iface.IsMetaTypeInputInterface && iface.DataTableDbName == Model.ApplicationInfo.DbName)
         {
+
             @await Html.PartialAsync("UISections/_InputInterface", iface)
         }
 
+        //RENDER APPLICATION LISTRVIEW OR SUBTABLE
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
         {
 
@@ -210,7 +213,8 @@
             {
                 @if (iface.CreateFunction.IsModalAction)
                 {
-                    <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@iface.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus"></span> @iface.CreateFunction.LocalizedTitle</button>
+                    <br />
+                    <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@iface.CreateFunction.ActionUserInterfaceMetaCode','@iface.DataTableDbName')"><span class="fa fa-plus"></span> @iface.CreateFunction.LocalizedTitle</button>
                 }
             }
 
@@ -229,13 +233,29 @@
                         @{
                             foreach (var c in iface.Table.Columns)
                             {
-                                <th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
+                                @if (iface.IsMainApplicationTableInterface)
+                                {
+                                    @:<th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
 
+                                }
+                                else
+                                {
+                                    @:<th>@c.LocalizedTitle</th>
+                        
+                                }
                             }
                         }
                     </tr>
                 </thead>
-                <tr v-for="item in sortedResults">
+                
+            @if (iface.IsMainApplicationTableInterface)
+            {
+                @:<tr v-for="item in sortedResults">                 
+            }
+            else { 
+                @:<tr v-for="item in model.@iface.DataTableDbName">   
+            }
+
                     @if (iface.HasDeleteFunction)
                     {
                         <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
@@ -248,7 +268,7 @@
                         }
                         else if (iface.EditFunction.IsModalAction && Model.IsApplicationInputView())
                         {
-                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
+                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode','@iface.DataTableDbName')"><span class="fas fa-edit" title="Edit"></span></button></td>
                         }
                         else
                         {
@@ -274,9 +294,10 @@
                         }
 
                     }
-
-                </tr>
-
+                @if (true)
+                {
+                    @:</tr>
+                }
             </table>
 
             @if (iface.HasPagingFunction)
@@ -317,7 +338,8 @@
                 ,instanceId: @instanceid
                 ,applist: []
                 ,model: { showFilter: false, ['@mainDbName']: {} }
-                ,currentline: { }
+                , currentline: {
+                    wms_SalesLine: {} }
                 ,pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
@@ -390,11 +412,36 @@
                         });
                     }
 
-                    //context.setUpControls();
+
 
                 },
-                openSubTableModal: function (item, uimetacode) {
-                    raiseInformationModal('Not implemented yet', uimetacode);
+                openSubTableModal: function (item, uimetacode, dbtablename)
+                {
+                     var context = this;
+
+                    var savefunc = function ()
+                    {
+                        context.model[dbtablename].push(context.currentline[dbtablename]);
+                    };
+
+
+                    if (item)
+                    {
+                        context.currentline = {[dbtablename]: {} };
+                        context.currentline = {[dbtablename]: item };
+
+                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModal_' + uimetacode).modal();
+
+                    }
+                    else
+                    {
+                        context.currentline = { [dbtablename]: {} };
+                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModal_' + uimetacode).modal();
+                    }
                 },
                 saveApplication: function () {
                     var context = this;
