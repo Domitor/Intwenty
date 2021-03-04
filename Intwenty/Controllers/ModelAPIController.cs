@@ -1638,8 +1638,12 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetValueDomains();
-            return new JsonResult(t.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct());
+            var vd = ModelRepository.GetValueDomains();
+            var apps = ModelRepository.GetAppModels();
+
+            var result = vd.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct().ToList();
+            result.AddRange(apps.Select(p => "APPDOMAIN." + p.MetaCode).Distinct().ToList());
+            return new JsonResult(result);
 
         }
 

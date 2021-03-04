@@ -2,7 +2,7 @@
 
 @foreach (var sect in Model.Sections)
 {
-
+    var sectiontitle = sect.LocalizedTitle;
     var colapse = "class=\"collapse\"";
     var card = "class=\"card\"";
     var cardbody = "class=\"card-body\"";
@@ -19,6 +19,13 @@
         accordion = "";
 
     }
+
+    @if (Model.CurrentRenderContext == CurrentRenderContextOptions.ModalSubTable ||
+         Model.CurrentRenderContext == CurrentRenderContextOptions.ModalView)
+    {
+        sectiontitle = string.Empty;
+    }
+
     <div @Html.Raw(accordion) id="accordion_@sect.MetaCode">
         <div @Html.Raw(card) id="cardheader_@sect.MetaCode" style="overflow:inherit">
             @if (!sect.ExcludeOnRender)
@@ -32,7 +39,7 @@
                             }
                         </li>
                         <li class="nav-item">
-                            <h4>@sect.LocalizedTitle</h4>
+                            <h4>@sectiontitle</h4>
                         </li>
                     </ul>
 

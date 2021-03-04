@@ -1,5 +1,14 @@
 ﻿@model UserInterfaceModelItem
 
+@{
+
+    var tabletitle = string.Empty;
+    var uitable = Model.UIStructure.Find(p => p.IsMetaTypeTable);
+    if (uitable != null)
+    {
+        tabletitle = uitable.LocalizedTitle;
+    }
+}
 
 @if (Model.HasFilterFunction)
 {
@@ -76,6 +85,11 @@
         <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@Model.CreateFunction.ActionUserInterfaceMetaCode','@Model.DataTableDbName')"><span class="fa fa-plus"></span> @Model.CreateFunction.LocalizedTitle</button>
         <br />
     }
+}
+
+@if (!string.IsNullOrEmpty(tabletitle))
+{
+    <h5>@tabletitle</h5>
 }
 
 <table class="table table-responsive-sm">
