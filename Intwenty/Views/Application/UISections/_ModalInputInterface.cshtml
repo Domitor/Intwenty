@@ -1,10 +1,20 @@
 ﻿@model UserInterfaceModelItem
 
+@{
+
+    var modaltitle = string.Empty;
+    var firstsection = Model.UIStructure.Find(p => p.IsMetaTypeSection);
+    if (firstsection != null) 
+    {
+        modaltitle = firstsection.LocalizedTitle;
+    }
+}
+
 <div class="modal" id="addEditModal_@Model.MetaCode" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@Model.LocalizedTitle</h5>
+                <h5 class="modal-title">@modaltitle</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

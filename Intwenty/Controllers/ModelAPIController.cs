@@ -18,6 +18,8 @@ using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Design;
 using Intwenty.DataClient;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Intwenty.Controllers
 {
@@ -1711,9 +1713,27 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var t = ModelRepository.GetExportModel();
+
+            //JSON
             var json = System.Text.Json.JsonSerializer.Serialize(t);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "intwentymodel.json");
+
+            //XML
+            /*
+            var xml = "";
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(ExportModel));
+            using (var sww = new StringWriter())
+            {
+                using (XmlWriter writer = XmlWriter.Create(sww))
+                {
+                    xsSubmit.Serialize(writer, t);
+                    xml = sww.ToString(); // Your XML
+                }
+            }
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(xml);
+            return File(bytes, "application/xml", "intwentymodel.xml");
+            */
         }
 
         [HttpPost("/Model/API/UploadModel")]
