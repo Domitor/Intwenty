@@ -15,12 +15,12 @@
                     @if (Model.IsMetaTypeInputInterface && Model.IsMainApplicationTableInterface)
                     {
                         Model.CurrentRenderContext = CurrentRenderContextOptions.ModalView;
-                        @await Html.PartialAsync("_InputInterface", Model);
+                        @await Html.PartialAsync("UISections/_InputInterface", Model);
                     }
-                    @if (Model.IsMetaTypeInputInterface && !Model.IsMainApplicationTableInterface)
+                    @if (Model.IsMetaTypeInputInterface && Model.IsSubTableUserInterface)
                     {
                         Model.CurrentRenderContext = CurrentRenderContextOptions.ModalSubTable;
-                        @await Html.PartialAsync("_InputInterface", Model);
+                        @await Html.PartialAsync("UISections/_InputInterface", Model);
                     }
 
                 </div>

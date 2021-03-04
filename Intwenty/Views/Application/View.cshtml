@@ -3,12 +3,24 @@
 @{
 
     var mainDbName = Model.ApplicationInfo.DbName;
+    var subTableDbNames = new List<string>();
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
     int instanceid = (int)ViewBag.Id;
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
     var currentline_object = string.Empty;
+
+
+    //WHAT SHOULD HAPPEN WHEN THIS VIEW IS PERSISTED
+    if (Model.HasSaveFunction)
+    {
+        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+        if (aftersaveaction == "GOTOLISTVIEW")
+        {
+            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+        }
+    }
 }
 
 
@@ -21,76 +33,34 @@
 
 <div id="app">
 
-    @{currentline_object += "{";}
+    <!-- 1. ADD MODALS AND SOME CONFIG -->
+    @{currentline_object = "{";}
     @foreach (var iface in Model.UserInterface)
     {
         if (iface.IsSubTableUserInterface)
         {
-            currentline_object += string.Format("{0}:{}", iface.DataTableDbName);
+            if (!subTableDbNames.Exists(p => p == iface.DataTableDbName))
+            {
+                if (currentline_object != "{") { currentline_object += ","; }
+                currentline_object += string.Format("{0}:", iface.DataTableDbName) + "{}";
+                subTableDbNames.Add(iface.DataTableDbName);
+            }
         }
         @foreach (var mip in iface.ModalInterfaces)
         {
-            @await Html.PartialAsync("UISections/_ModalInputInterface", iface)
+            @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
         }
     }
     @{currentline_object += "}";}
 
-    <div class="card">
-        <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
-        <div class="card-body">
 
-            <p>@Model.LocalizedDescription</p>
+    <!-- 2. RENDER THE VIEW HEADER -->
+    @await Html.PartialAsync("UISections/_ApplicationViewHeader", Model)
 
-            <ul class="nav">
-                @if (Model.HasCreateFunction)
-                {
-                    <li class="nav-item">
-                        @if (Model.CreateFunction.IsModalAction)
-                        {
-                            <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
-                        }
-                        else
-                        {
-                            <a href="@Model.CreateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
-
-                        }
-
-                    </li>
-                }
-
-                @if (Model.HasNavigateFunction)
-                {
-                    <li class="nav-item">
-                        <a href="@Model.NavigateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
-                    </li>
-                }
-
-                @if (Model.HasExportFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
-                    </li>
-                }
-
-                @if (Model.HasSaveFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
-                    </li>
-
-                    aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
-                    if (aftersaveaction == "GOTOLISTVIEW")
-                    {
-                        aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
-                    }
-                }
-            </ul>
-
-        </div>
-    </div>
 
     <br />
 
+    <!-- 3. AFTER SAVE MESSAGE -->
     <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="modelSaved">
         <strong>@Localizer["Changes Saved"] !</strong><br />
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -103,19 +73,19 @@
     {
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
-        //RENDER APPLICATION LISTVIEW
+        <!-- 4. RENDER APPLICATION LISTVIEW -->
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsMainApplicationTableInterface && Model.IsApplicationListView())
         {
-            @await Html.PartialAsync("UISections/_ApplicationListInterface", iface)
+            @await Html.PartialAsync("UISections/_MainTableListInterface", iface)
         }
 
-        //RENDER MAIN TABLE INPUT INTERFACES
+        <!-- 5. RENDER APPLICATION ONPAGE INPUT INTERFACES -->
         if (iface.IsMetaTypeInputInterface && iface.IsMainApplicationTableInterface && Model.IsApplicationInputView())
         {
             @await Html.PartialAsync("UISections/_InputInterface", iface)
         }
 
-        //RENDER SUB TABLE LIST INTERFACES
+        <!-- 6. RENDER APPLICATION ONPAGE SUBTABLE INTERFACES -->
         if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsSubTableUserInterface && Model.IsApplicationInputView())
         {
             @await Html.PartialAsync("UISections/_SubTableListInterface", iface)
@@ -124,8 +94,6 @@
 
 
     }
-
-
 
 
 </div>
