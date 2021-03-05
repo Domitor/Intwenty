@@ -1,6 +1,4 @@
-﻿var selectizecache = [];
-
-
+﻿
 
 function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);
@@ -187,83 +185,36 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
-Vue.prototype.setUpControls = function ()
-{
-    var context = this;
+Vue.component("searchbox", {
+    template: '<input><slot></slot></input>',
+    props: ['idfield','textfield'],
+    data: function ()
+    {
+        return { selectizeinstance: null };
 
-    $("input[data-metatype],select[data-metatype]").each(function () {
-        var metatype = $(this).data('metatype');
-        if (metatype === "COMBOBOX" || metatype === "SEARCHBOX") {
-
-            context.initSelectizeControl(this);
-        }
-    });
-
-}
-
-Vue.prototype.initSelectizeControl = function (control) {
-    var context = this;
-
-    var uiid = "#" + control.id;
-    var contextobject = $(control).data('contextobject');
-    var tablename = $(control).data('dbtable');
-    var codecolname = $(control).data('dbfield');
-    var valcolname = $(control).data('dbfield2');
-    var domainname = $(control).data('domain');
-    var usearch = $(control).data('usesearch');
-    var mselect = $(control).data('multiselect');
-    var acreate = $(control).data('allowcreate');
-
-    var allowcreate = (acreate == "TRUE");
-    var usesearch = (usearch == "TRUE");
-    var usemultiselect = (mselect == "TRUE");
-
-    var bindingobject = null;
-    if (contextobject == "currentline")
-        bindingobject = context.currentline;
-    else
-        bindingobject = context.model[tablename];
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
 
 
-    if (!uiid || !bindingobject)
-        return;
-
-    var selectizecontrol = null;
-    for (var i = 0; i < selectizecache.length; i++) {
-        if (selectizecache[i].name == uiid) {
-            selectizecontrol = selectizecache[i].controlinstance;
-            break;
-        }
-    }
-
-    if (selectizecontrol != null)
-        return;
-
-    if (selectizecontrol == null) {
-        var element = $(uiid);
-
-        if (!element)
-            return;
+        var domainname = $(element).data('domain');
+        var usearch = $(element).data('usesearch');
+        var mselect = $(element).data('multiselect');
+        var acreate = $(element).data('allowcreate');
+        var allowcreate = (acreate == "TRUE");
+        var usesearch = (usearch == "TRUE");
+        var usemultiselect = (mselect == "TRUE");
 
         var plugs = null;
-        var iscombobox = false;
-        if (element[0].nodeName == 'SELECT') {
-            iscombobox = true;
-            usesearch = false;
-            allowcreate = false;
-            maxitems = 1;
-        }
-        else {
+        var maxitems = 1;
+        if (usemultiselect)
+        {
+            maxitems = 10;
             plugs = ['remove_button'];
         }
 
-
-
-        var maxitems = 1;
-        if (usemultiselect)
-            maxitems = 10;
-
-        selectizecontrol = $(uiid).selectize({
+        element.selectize({
             plugins: plugs
             , delimiter: ','
             , maxItems: maxitems
@@ -274,37 +225,31 @@ Vue.prototype.initSelectizeControl = function (control) {
             , create: allowcreate
             , preload: true
             , load: function (query, callback) {
-                if (!query || !usesearch || iscombobox)
+
+                if (!query || !usesearch)
                     query = 'ALL';
-                if (usesearch && !iscombobox && query == 'ALL')
+                if (usesearch && query == 'ALL')
                     query = 'PRELOAD';
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response) {
+                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response)
+                {
                     callback(response);
-                    if (bindingobject[codecolname]) {
-                        var persisteditems = bindingobject[codecolname].split(",");
-                        for (var i = 0; i < persisteditems.length; i++) {
-                            //ADD ITEM BUT DONT TRIGGER CHANGE
-                            selectizecontrol[0].selectize.addItem(persisteditems[i], true);
-
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++)
+                        {
+                            element[0].selectize.addItem(persisteditems[i], true);
                         }
                     }
                 });
             }
 
-        });
+        }).on('change', function () {
 
-        selectizecache.push({ controlinstance: selectizecontrol, name: uiid });
-    }
-
-   
-
-    selectizecontrol.on('change',
-        function () {
-            var selected_objects = $.map(selectizecontrol[0].selectize.items, function (value) {
-                return selectizecontrol[0].selectize.options[value];
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
             });
 
             var codestr = "";
@@ -318,18 +263,152 @@ Vue.prototype.initSelectizeControl = function (control) {
                 delim = ",";
 
             }
-            if (codecolname)
-                bindingobject[codecolname] = codestr;
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
 
-            if (valcolname)
-                bindingobject[valcolname] = valstr;
         });
 
+        vm.selectizeinstance = element[0].selectize;
+    },
+    updated: function ()
+    {
+        var t = "";
+    },
+    watch:
+    {
+        idfield: function (newval, oldval)
+        {
+            var t = "";
 
 
+            if (this.selectizeinstance)
+            {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+            
+        },
+        textfield: function (newval, oldval)
+        {
+            var t = "";
+           
+        }
 
 
-};
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
+
+Vue.component("combobox", {
+    template: '<select><slot></slot></select>',
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { selectizeinstance: null };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        element.selectize({
+             delimiter: ','
+            , maxItems: 1
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: false
+            , preload: true
+            , load: function (query, callback) {
+              
+                $.get('/Application/API/GetValueDomain/DOMAIN/ALL', function (response) {
+                    callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+           
+        });
+
+        vm.selectizeinstance = element[0].selectize;
+
+      
+    },
+    updated: function ()
+    {
+        var t = "";
+       
+
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval) {
+            var t = "";
+
+
+            if (this.selectizeinstance) {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+
+        },
+        textfield: function (newval, oldval) {
+            var t = "";
+
+        }
+
+
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
+
 
 Vue.prototype.onFileUpload = function ()
 {
@@ -368,9 +447,7 @@ Vue.prototype.canSave = function () {
     {
         var required = $(this).data('required');
         if (required === "True") {
-            var validationfield = $(this).data('validationfield');
-            var id = $(this).attr('id');
-            var title = $(this).data('title');
+
             var metatype = $(this).data('metatype');
             var dbfield = $(this).data('dbfield');
             var dbtable = $(this).data('dbtable');
@@ -378,12 +455,11 @@ Vue.prototype.canSave = function () {
             if (!context.model[dbtable][dbfield]) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
+
             }
             else if (context.model[dbtable][dbfield].length == 0) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
             }
             else {
                 if (metatype == "EMAILBOX") {
@@ -391,7 +467,6 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
                 if (metatype == "PASSWORDBOX") {
@@ -399,12 +474,10 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
 
                 if (result) {
-                    context.clearValidationText(validationfield);
                     $(this).removeClass('requiredNotValid');
                 }
             }
@@ -415,30 +488,12 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text)
+Vue.prototype.isRequiredNotValid = function (uiid)
 {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
-
-    this.validation[validationfield] = text;
-    this.$forceUpdate();
+    return $("#" + uiid).hasClass("requiredNotValid");
 };
 
-Vue.prototype.clearValidationText = function (validationfield) {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
 
-    this.validation[validationfield] = "";
-    this.$forceUpdate();
-};
 
 Vue.prototype.onUserInput = function (event)
 {
@@ -463,14 +518,6 @@ Vue.prototype.onUserInput = function (event)
     });
 };
 
-
-
-Vue.prototype.addSubTableLine = function (tablename)
-{
-    var context = this;
-    context.model[tablename].push({ Id: 0, ParentId: 0 });
-    context.$forceUpdate();
-};
 
 Vue.prototype.downloadExcel = function () {
 

@@ -1,6 +1,5 @@
 ﻿@model IUIBinding
 @{
-    var validationfield = Model.UIId + "_validationmsg";
     var onclick = "$('#"+ Model.UIId + "').trigger('click');";
 }
 
@@ -16,7 +15,6 @@
                    class="uploadInput"
                    data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeImageBox"
                    data-title="@Model.LocalizedTitle"
-                   data-validationfield="@validationfield"
                    data-dbtable="@Model.DataTableDbName"
                    data-dbfield="@Model.DataColumnDbName"
                    data-required="@Model.Mandatory"

@@ -447,9 +447,7 @@ Vue.prototype.canSave = function () {
     {
         var required = $(this).data('required');
         if (required === "True") {
-            var validationfield = $(this).data('validationfield');
-            var id = $(this).attr('id');
-            var title = $(this).data('title');
+
             var metatype = $(this).data('metatype');
             var dbfield = $(this).data('dbfield');
             var dbtable = $(this).data('dbtable');
@@ -457,12 +455,11 @@ Vue.prototype.canSave = function () {
             if (!context.model[dbtable][dbfield]) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
+
             }
             else if (context.model[dbtable][dbfield].length == 0) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
             }
             else {
                 if (metatype == "EMAILBOX") {
@@ -470,7 +467,6 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
                 if (metatype == "PASSWORDBOX") {
@@ -478,12 +474,10 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
 
                 if (result) {
-                    context.clearValidationText(validationfield);
                     $(this).removeClass('requiredNotValid');
                 }
             }
@@ -494,30 +488,12 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text)
+Vue.prototype.isRequiredNotValid = function (uiid)
 {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
-
-    this.validation[validationfield] = text;
-    this.$forceUpdate();
+    return $("#" + uiid).hasClass("requiredNotValid");
 };
 
-Vue.prototype.clearValidationText = function (validationfield) {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
 
-    this.validation[validationfield] = "";
-    this.$forceUpdate();
-};
 
 Vue.prototype.onUserInput = function (event)
 {
@@ -542,14 +518,6 @@ Vue.prototype.onUserInput = function (event)
     });
 };
 
-
-
-Vue.prototype.addSubTableLine = function (tablename)
-{
-    var context = this;
-    context.model[tablename].push({ Id: 0, ParentId: 0 });
-    context.$forceUpdate();
-};
 
 Vue.prototype.downloadExcel = function () {
 

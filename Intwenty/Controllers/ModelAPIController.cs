@@ -396,6 +396,7 @@ namespace Intwenty.Controllers
                     if (!string.IsNullOrEmpty(dbi.DbName))
                         dbi.DbName = dbi.DbName.Replace(" ", "");
 
+
                     if (dbi.Id < 1)
                     {
 
@@ -408,7 +409,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = "",
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.System.MetaCode
                         };
 
@@ -425,7 +426,7 @@ namespace Intwenty.Controllers
                             existing.Description = dbi.Description;
                             existing.ParentMetaCode = BaseModelItem.MetaTypeRoot;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
@@ -445,7 +446,6 @@ namespace Intwenty.Controllers
                         continue;
 
 
-
                     if (dbi.Id < 1)
                     {
 
@@ -459,7 +459,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = dbi.DataType,
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.Application.SystemMetaCode
                         };
 
@@ -488,7 +488,7 @@ namespace Intwenty.Controllers
                             existing.MetaType = DatabaseModelItem.MetaTypeDataColumn;
                             existing.Description = dbi.Description;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
@@ -706,8 +706,6 @@ namespace Intwenty.Controllers
 
 
         #endregion
-
-      
 
         #region UI Model
 

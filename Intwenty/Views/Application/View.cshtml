@@ -195,8 +195,10 @@
                 {
                      var context = this;
 
-                    var savefunc = function ()
+                    var addLine = function ()
                     {
+                        context.currentline[dbtablename].Id = -1;
+                        context.currentline[dbtablename].ApplicationId = context.applicationId;
                         context.model[dbtablename].push(context.currentline[dbtablename]);
                     };
 
@@ -206,16 +208,16 @@
                         context.currentline = {[dbtablename]: {} };
                         context.currentline = {[dbtablename]: item };
 
-                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        //$('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                        //$('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
 
                     }
                     else
                     {
                         context.currentline = { [dbtablename]: {} };
-                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off('click', addLine);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLine);
                         $('#addEditModal_' + uimetacode).modal();
                     }
                 },

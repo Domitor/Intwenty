@@ -1,7 +1,7 @@
 ﻿@model IUIComplexBinding
 
 @{
-    var validationfield = Model.UIId + "_validationmsg";
+    var requiredmsg = string.Format("{0} {1}", Model.LocalizedTitle, Localizer["Is Required"]);
     var usesearch = "FALSE";
     var multiselect = "FALSE";
     var allowcreate = "FALSE";
@@ -26,19 +26,18 @@
               name="@Model.UIId"
               class="form-control form-control-sm"
               v-bind:idfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumnDbName"
-              @if (!string.IsNullOrEmpty(Model.DataColumn2DbName)){<text>v-bind:textfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumn2DbName"</text>}
+              @if (!string.IsNullOrEmpty(Model.DataColumn2DbName)) { <text> v-bind:textfield.sync="@Model.JavaScriptObjectName.@Model.DataTableDbName.@Model.DataColumn2DbName" </text> }
               data-metatype="@Intwenty.Model.UserInterfaceStructureModelItem.MetaTypeComboBox"
-              data-validationfield="@validationfield"
               data-title="@Model.Title"
               data-contextobject="@Model.JavaScriptObjectName"
               data-dbtable="@Model.DataTableDbName"
               data-dbfield="@Model.DataColumnDbName"
-              @if (!string.IsNullOrEmpty(Model.DataColumn2DbName)){<text>data-dbfield2="@Model.DataColumn2DbName"</text>}
+              @if (!string.IsNullOrEmpty(Model.DataColumn2DbName)) { <text> data-dbfield2="@Model.DataColumn2DbName" </text> }
               data-required="@Model.Mandatory"
               data-domain="@Model.DomainName"
               data-usesearch="@usesearch"
               data-multiselect="@multiselect"
               data-allowcreate="@allowcreate">
     </combobox>
-
+    <span class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
 </div>
