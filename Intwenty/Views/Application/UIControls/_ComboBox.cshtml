@@ -39,5 +39,5 @@
               data-multiselect="@multiselect"
               data-allowcreate="@allowcreate">
     </combobox>
-    <span class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
+    <span id="invalidtxt_@Model.UIId" class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
 </div>

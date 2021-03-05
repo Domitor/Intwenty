@@ -13,5 +13,5 @@
            data-dbtable="@Model.DataTableDbName"
            data-dbfield="@Model.DataColumnDbName"
            data-required="@Model.Mandatory" /> @Model.LocalizedTitle
-        <span class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
+        <span id="invalidtxt_@Model.UIId" class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
     </div>
