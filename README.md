@@ -6,12 +6,13 @@ Is a meta data driven Template that simplifies developing CMS, Blog Engines and 
 
 - It lets you create meta models that describes UI and data.
 - Models are stored as data instead of strongly typed objects.
-- It uses the model to build the database, SQL statements, UI and integration endpoints.
-- Models can be defined either programaticly or visually.
+- It uses the model to create the database, render UI and make you happier.
+- Applications are easily localized and may be defined either programaticly or visually with included designers.
 - Implements and extends Asp.Net Core Identity. Intwenty adds organization and product management.
 - Has built in support for tenant isolation
 - Uses Intwenty.DataClient (Instead of entity framework) a small but fast Db connection library with ORM functions and JSON support
 - The Nuget version is an RCL Package (Razor Class Library) that includes both UI and Controllers to get you up and running fast.
+- Is constantly improved (and changing)
 
  
 # How to ?
@@ -45,8 +46,7 @@ Is a meta data driven Template that simplifies developing CMS, Blog Engines and 
 - jquery 3.3.1
 - alasql 0.5.5
 - fontawesome-free-5.12.1-web
-- Select2 4.0.13
-- Select2 Bootstrap Theme v0.1.0-beta.10
+- selectize
 
 # Works with the following databases
 - MS Sql Server
