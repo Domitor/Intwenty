@@ -7,7 +7,7 @@ Is a meta data driven Template that simplifies developing CMS, Blog Engines and 
 - It lets you create meta models that describes UI and data.
 - Models are stored as data instead of strongly typed objects.
 - It uses the model to create the database, render UI and make you happier.
-- Applications are easily localized and may be defined either programaticly or visually with included designers.
+- Applications (models) are easily localized and may be defined either programaticly or visually with included designers.
 - Implements and extends Asp.Net Core Identity. Intwenty adds organization and product management.
 - Has built in support for tenant isolation
 - Uses Intwenty.DataClient (Instead of entity framework) a small but fast Db connection library with ORM functions and JSON support
