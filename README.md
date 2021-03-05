@@ -46,7 +46,7 @@ Is a meta data driven Template that simplifies developing CMS, Blog Engines and 
 - jquery 3.3.1
 - alasql 0.5.5
 - fontawesome-free-5.12.1-web
-- selectize
+- selectize 0.13.3
 
 # Works with the following databases
 - MS Sql Server
