@@ -554,6 +554,7 @@
                         data: JSON.stringify(context.model),
                         success: function (response) {
                             context.model = response;
+                            context.propertyCollection = response.propertyCollection;
                             context.addUserInputSelects();
                             raiseInformationModal("Success", "The UI model was successfully saved.");
                         },
@@ -674,6 +675,7 @@
                 //Application
                 $.get(endpointurl, function (response) {
                     context.model = response;
+                    context.propertyCollection = response.propertyCollection;
                     context.addUserInputSelects();
                 }).done(function () {
 

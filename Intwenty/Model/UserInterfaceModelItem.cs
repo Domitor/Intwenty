@@ -238,7 +238,7 @@ namespace Intwenty.Model
                 if (string.IsNullOrEmpty(s))
                     return Title;
                 else
-                    return string.Format("{0} {1} ({2})",Id, Title, s);
+                    return string.Format("{0} (Id {1}, Table {2})", Title, Id, s);
             
             }
         }

@@ -61,7 +61,7 @@
 
 
     <br />
-
+    <b>Functions</b>
     <div class="row">
         <div class="col-md-3">
             <button class="btn btn-sm btn-outline-secondary" v-if="hasFunction('FILTER')" v-on:click="openFunctionDlg('FILTER')" style="width:220px"><span class="fas fa-cog" title="Filter"></span> Configure Filter</button>
@@ -79,28 +79,6 @@
 
         </div>
     </div>
-
-    <br />
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label class="control-label">List Title</label>
-                <input type="text" class="form-control form-control-sm" v-model="model.table.title" />
-            </div>
-        </div>
-
-        <div class="col-md-3">
-
-        </div>
-        <div class="col-md-3">
-
-        </div>
-    </div>
-    
-
-    <br />
-    <br />
     <br />
     <div class="row">
         <div class="col-md-6">
@@ -116,10 +94,23 @@
         </div>
     </div>
 
+    <br />
 
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <b>Title</b>
+                <input type="text" class="form-control form-control-sm" v-model="model.table.title" />
+            </div>
+        </div>
 
+        <div class="col-md-3">
 
+        </div>
+        <div class="col-md-3">
 
+        </div>
+    </div>
 
     <br />
 

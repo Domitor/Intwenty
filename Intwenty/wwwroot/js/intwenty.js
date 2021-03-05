@@ -93,21 +93,21 @@ Vue.prototype.selectableProperties = function (item) {
     if (!item.metaType)
         return [];
 
-    if (!context.model.propertyCollection)
+    if (!context.propertyCollection)
         return [];
 
     var result = [];
-    for (var i = 0; i < context.model.propertyCollection.length; i++) {
+    for (var i = 0; i < context.propertyCollection.length; i++) {
         var isincluded = false;
-        if (context.model.propertyCollection[i].validFor) {
-            for (var z = 0; z < context.model.propertyCollection[i].validFor.length; z++) {
+        if (context.propertyCollection[i].validFor) {
+            for (var z = 0; z < context.propertyCollection[i].validFor.length; z++) {
 
-                if (item.metaType === context.model.propertyCollection[i].validFor[z])
+                if (item.metaType === context.propertyCollection[i].validFor[z])
                     isincluded = true;
             }
         }
         if (isincluded)
-            result.push(context.model.propertyCollection[i]);
+            result.push(context.propertyCollection[i]);
     }
 
     return result;

@@ -12,13 +12,15 @@
             <div class="card-body">
                 Create and manage views for application <b>@Model.Application.Title</b>
                 <br />
-                First you define one or more views and then you create and connect user interfaces to the views. Views can share user interfaces among them. For example a view used to create entities may share a user interface with a view to edit an entity.
                 <br />
+                <div class="alert alert-primary" role="alert">
+                    <i class="far fa-question-circle"></i>
+                    First you define one or more views and then you create and connect user interfaces to the views. Views can share user interfaces among them. For example a view used to create entities may share a user interface with a view to edit an entity.
+                </div>
                 <a asp-action="ApplicationList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
                 <br />
             </div>
         </div>
-
         <br />
         <br />
 
@@ -30,40 +32,49 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width:5%"></th>
-                    <th style="width:5%"></th>
-                    <th style="width:23%">View</th>
-                    <th style="width:42%">UI</th>
-                    <th style="width:25%">Functions</th>
-
+                    <th style="width:95%">Application Views</th>
                 </tr>
             </thead>
             <tr v-for="item in datalist">
-                <td><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a></td>
-                <td><a href="#" role="button" class="btn btn-sm btn-secondary" v-on:click="openEditViewDlg(item)"><i class="fa fa-edit"></i></a></td>
                 <td>
-                    <b>Title</b>
-                    <br />
-                    {{item.title}}
-                    <br />
-                    <br />
-                    <b>Path</b>
-                    <br />
-                    {{item.path}}
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <b>{{item.title}}</b> (Path: {{item.path}})
+                        </div>
+                        <div class="col-md-6"></div>
+                        <div class="col-md-1">
+                            <a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a>
+                        </div>
+                        <div class="col-md-1">
+                            <a href="#" role="button" class="btn btn-sm btn-secondary" v-on:click="openEditViewDlg(item)"><i class="fa fa-edit"></i></a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table" style="margin-top:8px">
+                                <thead class=".thead-light">
+                                    <tr>
+                                        <th colspan="4">
+                                            <a href="#" role="button" class="btn btn-sm btn-primary" v-on:click="openCreateUIDlg(item)"><i class="fa fa-plus"></i></a> User interfaces
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tr v-for="ui in item.userInterface">
+                                    <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteUI(ui)"><i class="fa fa-trash"></i></a></td>
+                                    <td style="width:20%" v-if="ui.isMetaTypeInputInterface"><a v-bind:href="'/Model/UserInterfaceInputDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
+                                    <td style="width:20%" v-if="ui.isMetaTypeListInterface"><a v-bind:href="'/Model/UserInterfaceListDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
+                                    <td style="width:70%">{{ui.description}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+
                 </td>
 
-                <td>
-                    <a href="#" role="button" class="btn btn-sm btn-primary" v-on:click="openCreateUIDlg(item)"><i class="fa fa-plus"></i> Add UI</a>
-                    <hr />
-                    <table class="table table-borderless">
-                        <tr v-for="ui in item.userInterface">
-                            <td style="width:10%"><a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteUI(ui)"><i class="fa fa-trash"></i></a></td>
-                            <td style="width:30%" v-if="ui.isMetaTypeInputInterface"><a v-bind:href="'/Model/UserInterfaceInputDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
-                            <td style="width:30%" v-if="ui.isMetaTypeListInterface"><a v-bind:href="'/Model/UserInterfaceListDesign/@Model.Application.Id/' + ui.metaCode" role="button" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i> Design</a></td>
-                            <td style="width:60%">{{ui.description}}</td>
-                        </tr>
-                    </table>
-                </td>
+            
+                <!--
                 <td>
                     <a href="#" role="button" class="btn btn-sm btn-primary" v-on:click="openAddFunctionDlg(item)"><i class="fa fa-plus"></i> Add Function</a>
                     <hr />
@@ -75,6 +86,7 @@
                         </tr>
                     </table>
                 </td>
+                -->
             </tr>
         </table>
 
@@ -85,25 +97,58 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Create Application View</h5>
+                    <h5 id="yesno_dlg_modal_hdr" class="modal-title">Application View</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="control-label">Title<span style="color: red"> *</span></label>
-                        <input id="viewtitle" type="text" class="form-control form-control-sm" v-model="model.title" />
-                    </div>
+                    <div class="mainpanel">
 
-                    <div class="form-group">
-                        <label class="control-label">Path<span style="color: red"> *</span></label>
-                        <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path" />
-                    </div>
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-viewsettingss-tab" data-toggle="tab" href="#nav-viewsettings" role="tab" aria-controls="nav-viewsettings" aria-selected="true">View</a>
+                                <a class="nav-item nav-link" id="nav-viewproperties-tab" data-toggle="tab" href="#nav-viewproperties" role="tab" aria-controls="nav-viewproperties" aria-selected="false">Properties</a>
+                            </div>
+                        </nav>
 
-                    <input type="checkbox" v-model="model.isPrimary" /> Is Primary
-                    <br />
-                    <input type="checkbox"  v-model="model.isPublic" /> Is Public
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-viewsettings" role="tabpanel" aria-labelledby="nav-viewsettings-tab">
+                                <div class="form-group">
+                                    <label class="control-label">Title<span style="color: red"> *</span></label>
+                                    <input id="viewtitle" type="text" class="form-control form-control-sm" v-model="model.title" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Path<span style="color: red"> *</span></label>
+                                    <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path" />
+                                </div>
+
+                                <input type="checkbox" v-model="model.isPrimary" /> Is Primary
+                                <br />
+                                <input type="checkbox" v-model="model.isPublic" /> Is Public
+                                <br />
+                                <input type="checkbox" v-model="model.saveFunction" /> Save Function
+                                <div class="form-group" v-if="model.saveFunction">
+                                    <input id="savebtntitle" type="text" class="form-control form-control-sm" v-model="model.saveFunctionTitle" />
+                                </div>
+                                <input type="checkbox" v-model="model.navigateFunction" /> Navigate Function
+                                <div class="form-group" v-if="model.navigateFunction">
+                                    <input id="navbtntitle" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionTitle" />
+                                </div>
+                                <div class="form-group" v-if="model.navigateFunction">
+                                    <input id="navpath" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionPath" />
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade" id="nav-viewproperties" role="tabpanel" aria-labelledby="nav-viewproperties-tab">
+                                @await Html.PartialAsync("_PropertyUI", "model")
+                            </div>
+
+                        </div>
+
+                    </div>
+                   
 
                 </div>
                 <div class="modal-footer">
@@ -173,7 +218,7 @@
                 </div>
                 <div class="modal-body">
 
-                    <div class="settingpnl">
+                    <div class="mainpanel">
 
                         <nav>
                             <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -255,10 +300,11 @@
             el: '#app',
             data: {
                 datalist: []
-                ,model: { propertyCollection : [] }
+                ,model: {}
                 ,uisettings: {}
                 ,currentuilist: []
                 ,functionsettings: {}
+                ,propertyCollection: []
             },
             methods:
             {
@@ -464,7 +510,7 @@
                 {
                     var context = this;
 
-                    context.model = { id:0, applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false};
+                    context.model = { id: 0, metaType:"UIVIEW", applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false, saveFunction: true, saveFunctionTitle: "Save", navigateFunction: true, navigateFunctionPath: "", navigateFunctionTitle: "", propertyList: [], currentProperty: {} };
 
                     var yesfunc = function ()
                     {
@@ -489,7 +535,7 @@
                         });
                     }
 
-
+                    context.initializePropertyUI(context.model);
                     $('#create_app_view_modal_yesbtn').off('click', yesfunc);
                     $('#create_app_view_modal_yesbtn').off().on('click', yesfunc);
                     $("#create_app_view_modal").modal();
@@ -500,7 +546,23 @@
                 {
                     var context = this;
 
-                    context.model = { id: item.id, applicationId:@Model.Application.Id, metaCode: item.metaCode, path: item.path, title: item.title, isPublic: item.isPublic, isPrimary: item.isPrimary };
+                    context.model = { id: item.id, metaType: "UIVIEW", applicationId:@Model.Application.Id, metaCode: item.metaCode, path: item.path, title: item.title, isPublic: item.isPublic, isPrimary: item.isPrimary, propertyList: [], currentProperty: {} };
+                    for (var i = 0; i < item.functions.length; i++)
+                    {
+                        var f = item.functions[i];
+                        if (f.isMetaTypeSave)
+                        {
+                            context.model.saveFunction = true;
+                            context.model.saveFunctionTitle = f.title;
+                            context.model.propertyList = f.propertyList;
+                        }
+                        if (f.isMetaTypeNavigate)
+                        {
+                            context.model.navigateFunction = true;
+                            context.model.navigateFunctionTitle = f.title;
+                            context.model.navigateFunctionPath = f.actionPath;
+                        }
+                    }
 
                     var yesfunc = function ()
                     {
@@ -525,7 +587,7 @@
                         });
                     }
 
-
+                    context.initializePropertyUI(context.model);
                     $('#create_app_view_modal_yesbtn').off('click', yesfunc);
                     $('#create_app_view_modal_yesbtn').off().on('click', yesfunc);
                     $("#create_app_view_modal").modal();
@@ -543,7 +605,7 @@
                          var endpointurl = baseurl + "GetAllProperties";
                          $.get(endpointurl, function (response)
                          {
-                             context.model.propertyCollection = response;
+                             context.propertyCollection = response;
                          });
                     });
                 },

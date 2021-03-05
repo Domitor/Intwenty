@@ -840,7 +840,6 @@ namespace Intwenty
                     appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
 
-
                     foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == appview.MetaCode && p.OwnerMetaType == appview.MetaType))
                     {
                         function.ApplicationInfo = app;
