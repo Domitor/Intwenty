@@ -3,12 +3,24 @@
 @{
 
     var mainDbName = Model.ApplicationInfo.DbName;
+    var subTableDbNames = new List<string>();
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
     int instanceid = (int)ViewBag.Id;
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
-    
+    var currentline_object = string.Empty;
+
+
+    //WHAT SHOULD HAPPEN WHEN THIS VIEW IS PERSISTED
+    if (Model.HasSaveFunction)
+    {
+        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+        if (aftersaveaction == "GOTOLISTVIEW")
+        {
+            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+        }
+    }
 }
 
 
@@ -21,102 +33,34 @@
 
 <div id="app">
 
+    <!-- 1. ADD MODALS AND SOME CONFIG -->
+    @{currentline_object = "{";}
     @foreach (var iface in Model.UserInterface)
     {
+        if (iface.IsSubTableUserInterface)
+        {
+            if (!subTableDbNames.Exists(p => p == iface.DataTableDbName))
+            {
+                if (currentline_object != "{") { currentline_object += ","; }
+                currentline_object += string.Format("{0}:", iface.DataTableDbName) + "{}";
+                subTableDbNames.Add(iface.DataTableDbName);
+            }
+        }
         @foreach (var mip in iface.ModalInterfaces)
         {
-
-            <div class="modal" id="addEditModal_@mip.MetaCode" role="dialog">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">@mip.LocalizedTitle</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="addEditModalBody_@mip.MetaCode">
-
-                                @if (Model.IsApplicationListView() && mip.IsMetaTypeInputInterface && mip.IsMainApplicationTableInterface)
-                                {
-                                    mip.CurrentRenderContext = CurrentRenderContextOptions.ModalView;
-                                    @await Html.PartialAsync("UISections/_InputInterface", mip);
-                                }
-                                @if (Model.IsApplicationInputView() && mip.IsMetaTypeInputInterface && !mip.IsMainApplicationTableInterface)
-                                {
-                                    mip.CurrentRenderContext = CurrentRenderContextOptions.ModalSubTable;
-                                    @await Html.PartialAsync("UISections/_InputInterface", mip);
-                                }
-
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="addEditModalSaveBtn_@mip.MetaCode" type="button" class="btn btn-sm btn-primary" data-dismiss="modal">@Localizer["Save"]</button>
-                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
         }
     }
+    @{currentline_object += "}";}
 
-    <div class="card">
-        <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
-        <div class="card-body">
 
-            <p>@Model.LocalizedDescription</p>
+    <!-- 2. RENDER THE VIEW HEADER -->
+    @await Html.PartialAsync("UISections/_ApplicationViewHeader", Model)
 
-            <ul class="nav">
-                @if (Model.HasCreateFunction)
-                {
-                    <li class="nav-item">
-                        @if (Model.CreateFunction.IsModalAction)
-                        {
-                            <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
-                        }
-                        else
-                        {
-                            <a href="@Model.CreateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
-
-                        }
-
-                    </li>
-                }
-
-                @if (Model.HasNavigateFunction)
-                {
-                    <li class="nav-item">
-                        <a href="@Model.NavigateFunction.ActionPath" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
-                    </li>
-                }
-
-                @if (Model.HasExportFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-secondary" type="button" v-on:click="exportToExcel()" style="margin:10px"><span class="fa fa-file-export" style="color:seagreen; font-size:large"></span> @Model.ExportFunction.LocalizedTitle</button>
-                    </li>
-                }
-
-                @if (Model.HasSaveFunction)
-                {
-                    <li class="nav-item">
-                        <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
-                    </li>
-
-                    aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
-                    if (aftersaveaction == "GOTOLISTVIEW")
-                    {
-                        aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
-                    }
-                }
-            </ul>
-
-        </div>
-    </div>
 
     <br />
 
+    <!-- 3. AFTER SAVE MESSAGE -->
     <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="modelSaved">
         <strong>@Localizer["Changes Saved"] !</strong><br />
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -129,194 +73,27 @@
     {
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
-        //RENDER MAIN TABLE INPUT INTERFACES
-        if (iface.IsMetaTypeInputInterface && iface.DataTableDbName == Model.ApplicationInfo.DbName)
+        <!-- 4. RENDER APPLICATION LISTVIEW -->
+        if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsMainApplicationTableInterface && Model.IsApplicationListView())
         {
+            @await Html.PartialAsync("UISections/_MainTableListInterface", iface)
+        }
 
+        <!-- 5. RENDER APPLICATION ONPAGE INPUT INTERFACES -->
+        if (iface.IsMetaTypeInputInterface && iface.IsMainApplicationTableInterface && Model.IsApplicationInputView())
+        {
             @await Html.PartialAsync("UISections/_InputInterface", iface)
         }
 
-        //RENDER APPLICATION LISTRVIEW OR SUBTABLE
-        if (iface.IsMetaTypeListInterface && iface.Table.Id > 0)
+        <!-- 6. RENDER APPLICATION ONPAGE SUBTABLE INTERFACES -->
+        if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsSubTableUserInterface && Model.IsApplicationInputView())
         {
-
-            <br />
-
-            @if (iface.HasFilterFunction)
-            {
-
-                <div class="row">
-
-                    <div class="col-lg-7">
-
-                        <button v-on:click="model.showFilter=!model.showFilter">
-                            <i class="fas fa-search"></i>
-                            <span v-if="model.showFilter">Hide Filter</span>
-                            <span v-if="!model.showFilter">Show Filter</span>
-                        </button>
-
-                        <br />
-                        <br />
-
-                        <fieldset style="padding:5px; border:1px solid black; border-radius:4px" v-if="model.showFilter">
-
-                            <div class="row">
-                                <div class="col-lg-5"><button type="button" v-on:click="addFilterValue()"><span class="fa fa-plus"></span> Add filter</button></div>
-                                <div class="col-lg-5"></div>
-                                <div class="col-lg-2"></div>
-                            </div>
-
-                            <div class="mt-2"></div>
-
-                            <div class="row" v-for="filteritem in pageInfo.filterValues">
-
-                                <div class="col-lg-5">
-                                    <div class="form-group">
-                                        <select v-model="filteritem.name" class="form-control form-control-sm" placeholder="Filter">
-                                            @{
-                                                foreach (var c in iface.Table.Columns)
-                                                {
-                                                    <option value="@c.DataColumnDbName">@c.LocalizedTitle</option>
-                                                }
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-5">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control form-control-sm" v-model="filteritem.value" v-on:blur="runFilter()" placeholder="Value to filter on" />
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-2">
-                                    <button type="button" class="btn btn-sm btn-danger" v-on:click="deleteFilterValue(filteritem)"><i class="fa fa-trash"></i></button>
-                                </div>
-
-
-
-                            </div>
-
-
-
-                        </fieldset>
-
-                    </div>
-                    <div class="col-lg-5"></div>
-
-                </div>
-
-
-            }
-
-            @if (iface.HasCreateFunction && Model.IsApplicationInputView())
-            {
-                @if (iface.CreateFunction.IsModalAction)
-                {
-                    <br />
-                    <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@iface.CreateFunction.ActionUserInterfaceMetaCode','@iface.DataTableDbName')"><span class="fa fa-plus"></span> @iface.CreateFunction.LocalizedTitle</button>
-                }
-            }
-
-            <table class="table table-responsive-sm">
-                <thead>
-                    <tr>
-                        @if (iface.HasDeleteFunction)
-                        {
-                            <th style="width:5%"></th>
-                        }
-                        @if (iface.HasEditFunction)
-                        {
-                            <th style="width:5%"></th>
-                        }
-
-                        @{
-                            foreach (var c in iface.Table.Columns)
-                            {
-                                @if (iface.IsMainApplicationTableInterface)
-                                {
-                                    @:<th v-on:click="sortBycolumn('@c.DataColumnDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
-
-                                }
-                                else
-                                {
-                                    @:<th>@c.LocalizedTitle</th>
-                        
-                                }
-                            }
-                        }
-                    </tr>
-                </thead>
-                
-            @if (iface.IsMainApplicationTableInterface)
-            {
-                @:<tr v-for="item in sortedResults">                 
-            }
-            else { 
-                @:<tr v-for="item in model.@iface.DataTableDbName">   
-            }
-
-                    @if (iface.HasDeleteFunction)
-                    {
-                        <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
-                    }
-                    @if (iface.HasEditFunction)
-                    {
-                        @if (iface.EditFunction.IsModalAction && Model.IsApplicationListView())
-                        {
-                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
-                        }
-                        else if (iface.EditFunction.IsModalAction && Model.IsApplicationInputView())
-                        {
-                            <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@iface.EditFunction.ActionUserInterfaceMetaCode','@iface.DataTableDbName')"><span class="fas fa-edit" title="Edit"></span></button></td>
-                        }
-                        else
-                        {
-                            <td style="vertical-align:middle"><a v-bind:href="'@iface.EditFunction.ActionPath/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
-                        }
-
-                    }
-
-                    @{
-                        foreach (var c in iface.UIStructure.Where(p => !p.IsRoot))
-                        {
-
-                            if (c.IsMetaTypeImage)
-                            {
-                                <td>
-                                    <img v-bind:src="item.@c.DataColumnDbName" width="80" class="rounded" />
-                                </td>
-                            }
-                            else
-                            {
-                                <td>{{item.@c.DataColumnDbName}}</td>
-                            }
-                        }
-
-                    }
-                @if (true)
-                {
-                    @:</tr>
-                }
-            </table>
-
-            @if (iface.HasPagingFunction)
-            {
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item" v-bind:class="{ disabled: isFirstPage }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{pageInfo.pageSize}}</a></li>
-                        <li class="page-item" v-bind:class="{ disabled: isLastPage }"><a class="page-link" href="#" v-on:click="nextpage()">Next {{pageInfo.pageSize}}</a></li>
-                    </ul>
-                </nav>
-            }
+            @await Html.PartialAsync("UISections/_SubTableListInterface", iface)
         }
-
 
 
 
     }
-
-
 
 
 </div>
@@ -338,8 +115,7 @@
                 ,instanceId: @instanceid
                 ,applist: []
                 ,model: { showFilter: false, ['@mainDbName']: {} }
-                , currentline: {
-                    wms_SalesLine: {} }
+                ,currentline: @Html.Raw(currentline_object)
                 ,pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
                 ,currentSort: ''
                 ,currentSortDir: 'asc'
@@ -419,8 +195,10 @@
                 {
                      var context = this;
 
-                    var savefunc = function ()
+                    var addLine = function ()
                     {
+                        context.currentline[dbtablename].Id = -1;
+                        context.currentline[dbtablename].ApplicationId = context.applicationId;
                         context.model[dbtablename].push(context.currentline[dbtablename]);
                     };
 
@@ -430,16 +208,16 @@
                         context.currentline = {[dbtablename]: {} };
                         context.currentline = {[dbtablename]: item };
 
-                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        //$('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
+                        //$('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
 
                     }
                     else
                     {
                         context.currentline = { [dbtablename]: {} };
-                        $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off('click', addLine);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLine);
                         $('#addEditModal_' + uimetacode).modal();
                     }
                 },
@@ -585,7 +363,6 @@
                         //context.setUpControls();
                     });
                 }
-
             },
             computed: {
 

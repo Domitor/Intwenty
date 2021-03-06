@@ -148,12 +148,14 @@ namespace Intwenty.Model
 
             prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOLISTVIEW", DisplayValue = "Go to list view" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Refresh saved data" });
             _properties.Add(prop);
 
             prop = new IntwentyProperty("GOTOLISTVIEWPATH", "List view path", "STRING");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");

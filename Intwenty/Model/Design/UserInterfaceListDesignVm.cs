@@ -41,7 +41,7 @@ namespace Intwenty.Model.Design
 
         public static ActionUserInterface Create(UserInterfaceModelItem model)
         {
-            var title = string.Format("Input UI for {0}", model.DataTableDbName);
+            var title = model.Description;
             return new ActionUserInterface() { Id= model.Id, MetaCode = model.MetaCode, Title = title };
         }
 

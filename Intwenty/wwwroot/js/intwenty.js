@@ -93,21 +93,21 @@ Vue.prototype.selectableProperties = function (item) {
     if (!item.metaType)
         return [];
 
-    if (!context.model.propertyCollection)
+    if (!context.propertyCollection)
         return [];
 
     var result = [];
-    for (var i = 0; i < context.model.propertyCollection.length; i++) {
+    for (var i = 0; i < context.propertyCollection.length; i++) {
         var isincluded = false;
-        if (context.model.propertyCollection[i].validFor) {
-            for (var z = 0; z < context.model.propertyCollection[i].validFor.length; z++) {
+        if (context.propertyCollection[i].validFor) {
+            for (var z = 0; z < context.propertyCollection[i].validFor.length; z++) {
 
-                if (item.metaType === context.model.propertyCollection[i].validFor[z])
+                if (item.metaType === context.propertyCollection[i].validFor[z])
                     isincluded = true;
             }
         }
         if (isincluded)
-            result.push(context.model.propertyCollection[i]);
+            result.push(context.propertyCollection[i]);
     }
 
     return result;
@@ -228,14 +228,12 @@ Vue.component("searchbox", {
 
                 if (!query || !usesearch)
                     query = 'ALL';
-                if (query.length < 2)
-                    query = 'ALL';
                 if (usesearch && query == 'ALL')
                     query = 'PRELOAD';
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response)
+                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response)
                 {
                     callback(response);
                     if (vm.idfield) {
@@ -334,7 +332,7 @@ Vue.component("combobox", {
             , preload: true
             , load: function (query, callback) {
               
-                $.get('/Application/API/GetVDomain/DOMAIN/ALL', function (response) {
+                $.get('/Application/API/GetValueDomain/DOMAIN/ALL', function (response) {
                     callback(response);
                     if (vm.idfield) {
                         var persisteditems = vm.idfield.split(",");
@@ -449,9 +447,7 @@ Vue.prototype.canSave = function () {
     {
         var required = $(this).data('required');
         if (required === "True") {
-            var validationfield = $(this).data('validationfield');
-            var id = $(this).attr('id');
-            var title = $(this).data('title');
+
             var metatype = $(this).data('metatype');
             var dbfield = $(this).data('dbfield');
             var dbtable = $(this).data('dbtable');
@@ -459,12 +455,11 @@ Vue.prototype.canSave = function () {
             if (!context.model[dbtable][dbfield]) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
+
             }
             else if (context.model[dbtable][dbfield].length == 0) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
             }
             else {
                 if (metatype == "EMAILBOX") {
@@ -472,7 +467,6 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
                 if (metatype == "PASSWORDBOX") {
@@ -480,12 +474,10 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
 
                 if (result) {
-                    context.clearValidationText(validationfield);
                     $(this).removeClass('requiredNotValid');
                 }
             }
@@ -496,30 +488,12 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text)
+Vue.prototype.isRequiredNotValid = function (uiid)
 {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
-
-    this.validation[validationfield] = text;
-    this.$forceUpdate();
+    return $("#" + uiid).hasClass("requiredNotValid");
 };
 
-Vue.prototype.clearValidationText = function (validationfield) {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
 
-    this.validation[validationfield] = "";
-    this.$forceUpdate();
-};
 
 Vue.prototype.onUserInput = function (event)
 {
@@ -544,14 +518,6 @@ Vue.prototype.onUserInput = function (event)
     });
 };
 
-
-
-Vue.prototype.addSubTableLine = function (tablename)
-{
-    var context = this;
-    context.model[tablename].push({ Id: 0, ParentId: 0 });
-    context.$forceUpdate();
-};
 
 Vue.prototype.downloadExcel = function () {
 

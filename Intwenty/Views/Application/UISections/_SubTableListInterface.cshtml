@@ -1,0 +1,146 @@
+﻿@model UserInterfaceModelItem
+
+@{
+
+    var tabletitle = string.Empty;
+    var uitable = Model.UIStructure.Find(p => p.IsMetaTypeTable);
+    if (uitable != null)
+    {
+        tabletitle = uitable.LocalizedTitle;
+    }
+}
+
+@if (Model.HasFilterFunction)
+{
+
+    <div class="row">
+
+        <div class="col-lg-7">
+
+            <button v-on:click="model.showFilter=!model.showFilter">
+                <i class="fas fa-search"></i>
+                <span v-if="model.showFilter">Hide Filter</span>
+                <span v-if="!model.showFilter">Show Filter</span>
+            </button>
+
+            <br />
+            <br />
+
+            <fieldset style="padding:5px; border:1px solid black; border-radius:4px" v-if="model.showFilter">
+
+                <div class="row">
+                    <div class="col-lg-5"><button type="button" v-on:click="addFilterValue()"><span class="fa fa-plus"></span> Add filter</button></div>
+                    <div class="col-lg-5"></div>
+                    <div class="col-lg-2"></div>
+                </div>
+
+                <div class="mt-2"></div>
+
+                <div class="row" v-for="filteritem in pageInfo.filterValues">
+
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <select v-model="filteritem.name" class="form-control form-control-sm" placeholder="Filter">
+                                @{
+                                    foreach (var c in Model.Table.Columns)
+                                    {
+                                        <option value="@c.DataColumnDbName">@c.LocalizedTitle</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" v-model="filteritem.value" v-on:blur="runFilter()" placeholder="Value to filter on" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <button type="button" class="btn btn-sm btn-danger" v-on:click="deleteFilterValue(filteritem)"><i class="fa fa-trash"></i></button>
+                    </div>
+
+
+
+                </div>
+
+
+
+            </fieldset>
+
+        </div>
+        <div class="col-lg-5"></div>
+
+    </div>
+
+
+}
+
+@if (Model.HasCreateFunction)
+{
+    @if (Model.CreateFunction.IsModalAction)
+    {
+        <br />
+        <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@Model.CreateFunction.ActionUserInterfaceMetaCode','@Model.DataTableDbName')"><span class="fa fa-plus"></span> @Model.CreateFunction.LocalizedTitle</button>
+        <br />
+    }
+}
+
+@if (!string.IsNullOrEmpty(tabletitle))
+{
+    <h5>@tabletitle</h5>
+}
+
+<table class="table table-responsive-sm">
+
+    <thead>
+        <tr>
+            @if (Model.HasDeleteFunction)
+            {
+                <th style="width:5%"></th>
+            }
+            @if (Model.HasEditFunction)
+            {
+                <th style="width:5%"></th>
+            }
+
+
+            @foreach (var c in Model.Table.Columns)
+            {
+                <th>@c.LocalizedTitle</th>
+            }
+
+        </tr>
+    </thead>
+
+    <tr v-for="item in model.@Model.DataTableDbName">
+
+        @if (Model.HasDeleteFunction)
+        {
+            <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteSubTableRow(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
+        }
+        @if (Model.HasEditFunction)
+        {
+
+            if (Model.EditFunction.IsModalAction)
+            {
+                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@Model.EditFunction.ActionUserInterfaceMetaCode','@Model.DataTableDbName')"><span class="fas fa-edit" title="Edit"></span></button></td>
+            }
+            else
+            {
+                <td style="vertical-align:middle"><a v-bind:href="'@Model.EditFunction.ActionPath/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+            }
+
+        }
+
+        @foreach (var c in Model.UIStructure.Where(p => !p.IsRoot && p.IsMetaTypeTableTextColumn))
+        {
+            <td>{{item.@c.DataColumnDbName}}</td>
+        }
+
+    </tr>
+
+</table>
+
+

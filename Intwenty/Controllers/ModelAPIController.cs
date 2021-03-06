@@ -18,6 +18,8 @@ using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Design;
 using Intwenty.DataClient;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Intwenty.Controllers
 {
@@ -394,6 +396,7 @@ namespace Intwenty.Controllers
                     if (!string.IsNullOrEmpty(dbi.DbName))
                         dbi.DbName = dbi.DbName.Replace(" ", "");
 
+
                     if (dbi.Id < 1)
                     {
 
@@ -406,7 +409,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = "",
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.System.MetaCode
                         };
 
@@ -423,7 +426,7 @@ namespace Intwenty.Controllers
                             existing.Description = dbi.Description;
                             existing.ParentMetaCode = BaseModelItem.MetaTypeRoot;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
@@ -443,7 +446,6 @@ namespace Intwenty.Controllers
                         continue;
 
 
-
                     if (dbi.Id < 1)
                     {
 
@@ -457,7 +459,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = dbi.DataType,
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.Application.SystemMetaCode
                         };
 
@@ -486,7 +488,7 @@ namespace Intwenty.Controllers
                             existing.MetaType = DatabaseModelItem.MetaTypeDataColumn;
                             existing.Description = dbi.Description;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
@@ -705,8 +707,6 @@ namespace Intwenty.Controllers
 
         #endregion
 
-      
-
         #region UI Model
 
 
@@ -755,6 +755,54 @@ namespace Intwenty.Controllers
                 client.InsertEntity(entity);
                 client.Close();
 
+                if (model.SaveFunction)
+                {
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeSave;
+                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        funcentity.Title = model.SaveFunctionTitle;
+                    else
+                        funcentity.Title = "Save";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+                if (model.NavigateFunction)
+                {
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
+                    funcentity.ActionPath = model.NavigateFunctionPath;
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        funcentity.Title = model.NavigateFunctionTitle;
+                    else
+                        funcentity.Title = "Back";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
                 ModelRepository.ClearCache();
 
             }
@@ -791,6 +839,7 @@ namespace Intwenty.Controllers
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var entities = client.GetEntities<ViewItem>();
+                var functions = client.GetEntities<FunctionItem>();
                 client.Close();
 
                 var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.Id == model.Id);
@@ -805,6 +854,102 @@ namespace Intwenty.Controllers
                 client.Open();
                 client.UpdateEntity(entity);
                 client.Close();
+
+                var savefuncentity = functions.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.OwnerMetaType == ViewModel.MetaTypeUIView && p.OwnerMetaCode == entity.MetaCode && p.MetaType == "SAVE");
+                var navfuncentity = functions.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.OwnerMetaType == ViewModel.MetaTypeUIView && p.OwnerMetaCode == entity.MetaCode && p.MetaType == "NAVIGATE");
+
+                if (savefuncentity != null && !model.SaveFunction)
+                {
+                    //DELETE
+                    client.Open();
+                    client.DeleteEntity(savefuncentity);
+                    client.Close();
+                }
+                else if (savefuncentity != null && model.SaveFunction)
+                {
+                    //UPDATE
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        savefuncentity.Title = model.SaveFunctionTitle;
+                    else
+                        savefuncentity.Title = "Save";
+
+                    savefuncentity.Properties = model.CompilePropertyString();
+                    client.Open();
+                    client.UpdateEntity(savefuncentity);
+                    client.Close();
+                }
+                else if (savefuncentity == null && model.SaveFunction)
+                {
+                    //INSERT
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeSave;
+                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        funcentity.Title = model.SaveFunctionTitle;
+                    else
+                        funcentity.Title = "Save";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+                if (navfuncentity != null && !model.NavigateFunction)
+                {
+                    //DELETE
+                    client.Open();
+                    client.DeleteEntity(navfuncentity);
+                    client.Close();
+                }
+                else if (navfuncentity != null && model.NavigateFunction)
+                {
+                    //UPDATE
+                    navfuncentity.ActionPath = model.NavigateFunctionPath;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        navfuncentity.Title = model.NavigateFunctionTitle;
+                    else
+                        navfuncentity.Title = "Back";
+
+                    navfuncentity.Properties = model.CompilePropertyString();
+                    client.Open();
+                    client.UpdateEntity(navfuncentity);
+                    client.Close();
+                }
+                else if (navfuncentity == null && model.NavigateFunction)
+                {
+                    //INSERT
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
+                    funcentity.ActionPath = model.NavigateFunctionPath;
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        funcentity.Title = model.NavigateFunctionTitle;
+                    else
+                        funcentity.Title = "Back";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+              
 
                 ModelRepository.ClearCache();
 
@@ -1012,7 +1157,7 @@ namespace Intwenty.Controllers
                 entity.ActionPath = model.ActionPath;
                 entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
                 entity.Title = model.Title;
-                entity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                entity.OwnerMetaType = model.OwnerMetaType;
                 entity.OwnerMetaCode = model.OwnerMetaCode;
                 entity.Properties = model.CompilePropertyString();
                 entity.IsModalAction = model.IsModalAction;
@@ -1636,8 +1781,12 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetValueDomains();
-            return new JsonResult(t.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct());
+            var vd = ModelRepository.GetValueDomains();
+            var apps = ModelRepository.GetAppModels();
+
+            var result = vd.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct().ToList();
+            result.AddRange(apps.Select(p => "APPDOMAIN." + p.MetaCode).Distinct().ToList());
+            return new JsonResult(result);
 
         }
 
@@ -1711,9 +1860,27 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var t = ModelRepository.GetExportModel();
+
+            //JSON
             var json = System.Text.Json.JsonSerializer.Serialize(t);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "intwentymodel.json");
+
+            //XML
+            /*
+            var xml = "";
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(ExportModel));
+            using (var sww = new StringWriter())
+            {
+                using (XmlWriter writer = XmlWriter.Create(sww))
+                {
+                    xsSubmit.Serialize(writer, t);
+                    xml = sww.ToString(); // Your XML
+                }
+            }
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(xml);
+            return File(bytes, "application/xml", "intwentymodel.xml");
+            */
         }
 
         [HttpPost("/Model/API/UploadModel")]
@@ -2568,7 +2735,6 @@ namespace Intwenty.Controllers
         }
 
         #endregion
-
 
         #region Tools
 
