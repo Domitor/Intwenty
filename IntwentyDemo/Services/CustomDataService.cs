@@ -29,6 +29,23 @@ namespace IntwentyDemo.Services
             
         }
 
+        public override List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state)
+        {
+            var client = this.GetDataClient();
+
+            if (domainname == "VENDOR")
+            {
+                client.Open();
+                var data = client.GetEntities<ValueDomainModelItem>("select Id, VendorId Code, VendorName Value from wms_Vendor");
+                client.Close();
+                foreach (var t in data)
+                    t.Value = t.Code + " - " + t.Value;
+                return data;
+            }
+
+            return base.GetApplicationDomain(domainname, state);
+        }
+
         /// <summary>
         /// EXAMPLE
         /// Set CustomerStatus when a new customer isadded
@@ -37,8 +54,8 @@ namespace IntwentyDemo.Services
         {
             if (model.Application.MetaCode == "CUSTOMER")
             {
-                //GIVE ALL CUSTOMERS THE SAME PHONE NO (Very useful)
-                state.Data.SetValue("CustomerStatus", "NEW");
+                var dbmodel = ModelRepository.GetDatabaseColumnModel(model, "CustomerStatus");
+                state.Data.SetValue(dbmodel, "NEW");
             }
             else
                 base.BeforeSave(model, state, client);
@@ -129,6 +146,7 @@ namespace IntwentyDemo.Services
             else
                 return base.Validate(model, state);
         }
+
 
     }
 }

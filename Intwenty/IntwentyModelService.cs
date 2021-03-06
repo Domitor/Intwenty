@@ -511,6 +511,12 @@ namespace Intwenty
             return t.Find(p => p.Application.Id == applicationid);
         }
 
+        public ApplicationModel GetApplicationModel(string metacode)
+        {
+            var t = GetApplicationModels();
+            return t.Find(p => p.Application.MetaCode == metacode);
+        }
+
         public List<ApplicationModel> GetApplicationModels()
         {
             List<ApplicationModel> res = null;
@@ -521,7 +527,7 @@ namespace Intwenty
             }
 
             res = new List<ApplicationModel>();
-            var appitems = GetAppModels();
+            var appitems = GetApplicationDescriptions();
             var dbitems = GetDatabaseModels();
             var views = GetViewModels();
             var systems = GetSystemModels();
@@ -608,7 +614,7 @@ namespace Intwenty
             if (user == null)
                 return res;
 
-            var apps = GetAppModels();
+            var apps = GetApplicationDescriptions();
             if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
                 return apps;
 
@@ -708,7 +714,7 @@ namespace Intwenty
 
 
 
-        public List<ApplicationModelItem> GetAppModels()
+        public List<ApplicationModelItem> GetApplicationDescriptions()
         {
 
             List<ApplicationModelItem> res = null;
@@ -759,7 +765,7 @@ namespace Intwenty
                 return res;
             }
 
-            var appmodels = GetAppModels();
+            var appmodels = GetApplicationDescriptions();
             var dbmodels = GetDatabaseModels();
 
             Client.Open();
@@ -822,7 +828,7 @@ namespace Intwenty
         {
 
             var dbmodelitems = GetDatabaseModels();
-            var apps = GetAppModels();
+            var apps = GetApplicationDescriptions();
 
             Client.Open();
             var application_views = Client.GetEntities<ViewItem>().Select(p => new ViewModel(p)).ToList();
@@ -1052,7 +1058,7 @@ namespace Intwenty
         public List<DatabaseModelItem> GetDatabaseModels()
         {
             var idgen = 260001;
-            var apps = GetAppModels();
+            var apps = GetApplicationDescriptions();
             Client.Open();
             var dbitems = Client.GetEntities<DatabaseItem>().Select(p => new DatabaseModelItem(p)).ToList();
             Client.Close();
@@ -1126,11 +1132,41 @@ namespace Intwenty
             return res;
         }
 
+        public DatabaseModelItem GetDatabaseColumnModel(ApplicationModel model, string columnname, string tablename = "")
+        {
+            if (model == null)
+                return null;
 
+            var result = model.DataStructure.FindAll(p => p.DbName == columnname && p.IsMetaTypeDataColumn);
+            if (result.Count == 1)
+                return result[0];
+
+            if (result.Count > 1)
+            {
+
+                if (!string.IsNullOrEmpty(tablename))
+                {
+                    var tblmodel = model.DataStructure.Find(p => p.DbName == tablename && p.IsMetaTypeDataTable);
+                    if (tblmodel == null)
+                        return null;
+
+                    var tmp = result.FindAll(p => p.ParentMetaCode == tblmodel.MetaCode);
+                    if (tmp.Count == 1)
+                        return tmp[0];
+                }
+                else
+                {
+                    var tmp = result.FindAll(p => p.DbName == columnname && p.IsRoot);
+                    if (tmp.Count == 1)
+                        return tmp[0];
+
+                }
+            }
+
+            return null;
+        }
 
         #endregion
-
-       
 
         #region Value Domains
 
@@ -1284,7 +1320,7 @@ namespace Intwenty
         {
             var databasemodel = GetDatabaseModels();
             var res = new List<OperationResult>();
-            var l = GetAppModels();
+            var l = GetApplicationDescriptions();
             foreach (var model in l)
             {
                 res.Add(await ConfigureDatabase(model, databasemodel, tableprefix));

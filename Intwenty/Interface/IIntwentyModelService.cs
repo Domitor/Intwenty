@@ -25,15 +25,17 @@ namespace Intwenty.Interface
 
 
         //APPLICATION
+        public List<ApplicationModelItem> GetApplicationDescriptions();
         public List<SystemModelItem> GetSystemModels();
         public List<ApplicationModel> GetApplicationModels();
         public ApplicationModel GetApplicationModel(int applicationid);
-        public List<ApplicationModelItem> GetAppModels();
-
+        public ApplicationModel GetApplicationModel(string metacode);
+      
 
 
         //DATABASE
         public List<DatabaseModelItem> GetDatabaseModels();
+        public DatabaseModelItem GetDatabaseColumnModel(ApplicationModel model, string columnname, string tablename="");
 
 
         //UI

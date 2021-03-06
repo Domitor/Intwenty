@@ -228,12 +228,14 @@ Vue.component("searchbox", {
 
                 if (!query || !usesearch)
                     query = 'ALL';
+                if (query.length < 2)
+                    query = 'ALL';
                 if (usesearch && query == 'ALL')
                     query = 'PRELOAD';
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetValueDomain/' + domainname + '/' + query, function (response)
+                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response)
                 {
                     callback(response);
                     if (vm.idfield) {
@@ -332,7 +334,7 @@ Vue.component("combobox", {
             , preload: true
             , load: function (query, callback) {
               
-                $.get('/Application/API/GetValueDomain/DOMAIN/ALL', function (response) {
+                $.get('/Application/API/GetVDomain/DOMAIN/ALL', function (response) {
                     callback(response);
                     if (vm.idfield) {
                         var persisteditems = vm.idfield.split(",");

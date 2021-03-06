@@ -210,12 +210,7 @@ namespace Intwenty.Model
                 if (!HasValueDomain && !HasAppDomain)
                     return string.Empty;
 
-                var splits = Domain.Split(".".ToCharArray());
-                if (splits.Length >= 2)
-                    return splits[1];
-                else
-                    return string.Empty;
-
+                return Domain;
             }
         }
 

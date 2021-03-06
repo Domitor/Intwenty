@@ -418,7 +418,7 @@ namespace Intwenty
 
             foreach (var t in state.Data.Values)
             {
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -470,7 +470,7 @@ namespace Intwenty
 
             foreach (var t in state.Data.Values)
             {
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -520,7 +520,7 @@ namespace Intwenty
 
             foreach (var t in state.Data.Values)
             {
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -668,7 +668,7 @@ namespace Intwenty
 
             foreach (var t in row.Values)
             {
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -735,7 +735,7 @@ namespace Intwenty
 
             foreach (var t in row.Values)
             {
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -795,7 +795,7 @@ namespace Intwenty
                 if (rowid < 1)
                     continue;
 
-                if (!t.HasModel && !t.IgnoreModelValidation)
+                if (!t.HasModel)
                     continue;
 
                 if (t.Model.IsFrameworkItem)
@@ -1773,194 +1773,21 @@ namespace Intwenty
         #endregion
 
         #region ValueDomain
-        public virtual DataListResult GetValueDomains(int applicationid)
-        {
-            DataListResult result = null;
+      
 
-            if (applicationid < 1)
-                return new DataListResult(false, MessageCode.SYSTEMERROR, "Parameter applicationid must be a valid ApplicationId.");
-
-            var client = GetDataClient();
-
-            try
-            {
-
-                var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
-                if (model == null)
-                    throw new InvalidOperationException(string.Format("applicationid {0} is not representing a valid application model", applicationid));
-
-
-                var domainindex = 0;
-                var rowindex = 0;
-                var valuedomains = new List<string>();
-                var domains = new List<IResultSet>();
-                var appdomainnames = model.GetDomainReferences();
-
-                //COLLECT DOMAINS AND VIEWS USED BY UI
-                foreach (var t in appdomainnames)
-                {
-                    var domainparts = t.Split(".".ToCharArray()).ToList();
-                    if (domainparts.Count >= 2)
-                    {
-                        if (!valuedomains.Exists(p => p == domainparts[1]))
-                            valuedomains.Add(domainparts[1]);
-                    }
-
-                }
-
-                client.Open();
-
-                foreach (var d in valuedomains)
-                {
-                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = d } };
-                    var domainset = client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
-                    domainset.Name = d;
-                    domains.Add(domainset);
-                }
-
-                var sb = new StringBuilder();
-                sb.Append("{");
-
-                foreach (IResultSet set in domains)
-                {
-
-                    if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
-                    else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
-
-                    domainindex += 1;
-                    rowindex = 0;
-
-
-                    foreach (var row in set.Rows)
-                    {
-                        if (rowindex == 0)
-                            sb.Append("{");
-                        else
-                            sb.Append(",{");
-
-                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
-                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
-
-                        sb.Append("}");
-                        rowindex += 1;
-                    }
-                    sb.Append("]");
-                }
-                sb.Append("}");
-
-                result = new DataListResult(true, MessageCode.RESULT, string.Format("Fetched domains used in ui for application {0}", model.Application.Title));
-                result.Data = sb.ToString();
-
-
-            }
-            catch (Exception ex)
-            {
-                result = new DataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("GetValueDomains(applicationid) used in an Intwenty application failed"));
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
-                LogError("IntwentyDataService.GetValueDomains: " + ex.Message);
-            }
-            finally
-            {
-                client.Close();
-            }
-            return result;
-
-        }
-
-        public virtual DataListResult GetValueDomains()
-        {
-            DataListResult result = null;
-
-            var client = GetDataClient();
-
-            try
-            {
-
-                var domainindex = 0;
-                var rowindex = 0;
-                var domains = new List<IResultSet>();
-
-                client.Open();
-
-                var names = client.GetResultSet("SELECT distinct DomainName FROM sysmodel_ValueDomainItem");
-                foreach (var d in names.Rows)
-                {
-                    var domainname = d.GetAsString("DomainName");
-                    var parameters = new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@P1", Value = domainname } };
-                    var domainset = client.GetResultSet("SELECT Id, DomainName, Code, Value FROM sysmodel_ValueDomainItem WHERE DomainName = @P1", parameters: parameters.ToArray());
-                    domainset.Name = domainname;
-                    domains.Add(domainset);
-                }
-
-                var sb = new StringBuilder();
-                sb.Append("{");
-
-                foreach (IResultSet set in domains)
-                {
-
-                    if (domainindex == 0)
-                        sb.Append("\"" + "VALUEDOMAIN_" + set.Name + "\":[");
-                    else
-                        sb.Append(",\"" + "VALUEDOMAIN_" + set.Name + "\":[");
-
-                    domainindex += 1;
-                    rowindex = 0;
-
-
-                    foreach (var row in set.Rows)
-                    {
-                        if (rowindex == 0)
-                            sb.Append("{");
-                        else
-                            sb.Append(",{");
-
-                        sb.Append(DBHelpers.GetJSONValue("Id", row.GetAsInt("Id").Value));
-                        sb.Append("," + DBHelpers.GetJSONValue("DomainName", row.GetAsString("DomainName")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Code", row.GetAsString("Code")));
-                        sb.Append("," + DBHelpers.GetJSONValue("Value", row.GetAsString("Value")));
-
-                        sb.Append("}");
-                        rowindex += 1;
-                    }
-                    sb.Append("]");
-                }
-                sb.Append("}");
-
-                result = new DataListResult(true, MessageCode.RESULT, "Fetched all value domins");
-                result.Data = sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                result = new DataListResult();
-                result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, "Fetch all valuedomains failed");
-                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                result.Data = "{}";
-                LogError("IntwentyDataService.GetValueDomains: " + ex.Message);
-            }
-            finally
-            {
-                client.Close();
-            }
-
-            return result;
-        }
-
-        public virtual List<ValueDomainModelItem> GetValueDomainItems()
+        public virtual List<ValueDomainModelItem> GetValueDomains()
         {
             return ModelRepository.GetValueDomains();
         }
 
-        public virtual List<ValueDomainModelItem> GetValueDomainItems(string domainname)
+        public virtual List<ValueDomainModelItem> GetValueDomain(string domainname)
         {
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
+        }
+
+        public virtual List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state)
+        {
+            return new List<ValueDomainModelItem>();
         }
 
         #endregion

@@ -76,7 +76,7 @@ namespace Intwenty.Controllers
             var res = new List<TestResult>();
 
             //CLEAN UP PREV TEST
-            var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
+            var model = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 10000);
 
 
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
@@ -401,7 +401,7 @@ namespace Intwenty.Controllers
 
                 _modelservice.ClearCache();
 
-                var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
+                var model = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 10000);
                 if (model == null)
                     throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
@@ -765,16 +765,10 @@ namespace Intwenty.Controllers
             {
 
                 var vd = _dataservice.GetValueDomains();
-                if (!vd.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetValueDomains() failed: " + vd.SystemError);
+                if (vd.Count == 0)
+                    throw new InvalidOperationException("IntwentyDataService.GetValueDomains() failed: ");
 
-                var data = vd.GetAsApplicationData();
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(vd.Data).RootElement);
-                if (data.SubTables.Count < 1)
-                    throw new InvalidOperationException("Could not create ApplicationData.SubTable from string json array");
-
-                if (!data.SubTables.Exists(p => p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
-                    throw new InvalidOperationException("Could not get list of intwenty value domain items.");
+               
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", result.Duration));

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Intwenty.Controllers
 {
@@ -120,31 +121,68 @@ namespace Intwenty.Controllers
            
         }
 
-        [HttpGet("/Application/API/GetValueDomain/{domainname}/{query}")]
-        public virtual List<ValueDomainVm> GetValueDomain(string domainname, string query)
+        [HttpGet("/Application/API/GetDomain/{domainname}/{query}")]
+        public virtual List<ValueDomainVm> GetDomain(string domainname, string query)
         {
+            if (string.IsNullOrEmpty(domainname))
+                return new List<ValueDomainVm>();
 
-            var result = new List<ValueDomainVm>();
-            result.Add(new ValueDomainVm() { Id = 1, Code = "1", Value = "Val 1" });
-            result.Add(new ValueDomainVm() { Id = 2, Code = "2", Value = "Val 2" });
-            result.Add(new ValueDomainVm() { Id = 3, Code = "3", Value = "Val 3" });
+            if (!domainname.Contains("."))
+                return new List<ValueDomainVm>();
 
-            return result;
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = new ClientStateInfo(User);
+            else
+                state = new ClientStateInfo();
+
+            var arr = domainname.Split(".");
+            var dtype = arr[0];
+            var dname = arr[1];
+
+            var retlist = new List<ValueDomainVm>();
+            List<ValueDomainModelItem> domaindata = null;
+
+            if (dtype.ToUpper() == "VALUEDOMAIN")
+            {
+                domaindata = DataRepository.GetValueDomain(dname);
+            }
+            if (dtype.ToUpper() == "APPDOMAIN")
+            {
+                domaindata = DataRepository.GetApplicationDomain(dname, state);
+            }
+
+            if (domaindata != null)
+            {
+                if (query.ToUpper() == "ALL")
+                {
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).ToList();
+                }
+                else if (query.ToUpper() == "PRELOAD")
+                {
+                    var result = new List<ValueDomainVm>();
+                    for (int i = 0; i < domaindata.Count; i++)
+                    {
+                        var p = domaindata[i];
+                        if (i < 50)
+                            result.Add(new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value });
+                        else
+                            break;
+                    }
+                    retlist = result;
+                }
+                else
+                {
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).Where(p=> p.Value.ToLower().Contains(query.ToLower())).ToList();
+                }
+            }
+
+          
+            return retlist;
+
         }
 
-        /// <summary>
-        /// Get Domain data based on the meta model for application with Id.
-        /// </summary>
-        [HttpGet]
-        public virtual JsonResult GetValueDomains(int id)
-        {
-            var data = DataRepository.GetValueDomains(id);
-            var res = new JsonResult(data);
-            return res;
 
-        }
-
-      
 
         /// <summary>
         /// Get a json structure for a new application, including defaultvalues
