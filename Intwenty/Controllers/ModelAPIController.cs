@@ -1782,7 +1782,7 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var vd = ModelRepository.GetValueDomains();
-            var apps = ModelRepository.GetAppModels();
+            var apps = ModelRepository.GetApplicationDescriptions();
 
             var result = vd.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct().ToList();
             result.AddRange(apps.Select(p => "APPDOMAIN." + p.MetaCode).Distinct().ToList());

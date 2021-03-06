@@ -187,9 +187,8 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 Vue.component("searchbox", {
     template: '<input><slot></slot></input>',
-    props: ['idfield','textfield'],
-    data: function ()
-    {
+    props: ['idfield', 'textfield'],
+    data: function () {
         return { selectizeinstance: null };
 
     },
@@ -208,8 +207,7 @@ Vue.component("searchbox", {
 
         var plugs = null;
         var maxitems = 1;
-        if (usemultiselect)
-        {
+        if (usemultiselect) {
             maxitems = 10;
             plugs = ['remove_button'];
         }
@@ -228,113 +226,12 @@ Vue.component("searchbox", {
 
                 if (!query || !usesearch)
                     query = 'ALL';
-                if (query.length < 2)
-                    query = 'ALL';
                 if (usesearch && query == 'ALL')
                     query = 'PRELOAD';
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response)
-                {
-                    callback(response);
-                    if (vm.idfield) {
-                        var persisteditems = vm.idfield.split(",");
-                        for (var i = 0; i < persisteditems.length; i++)
-                        {
-                            element[0].selectize.addItem(persisteditems[i], true);
-                        }
-                    }
-                });
-            }
-
-        }).on('change', function () {
-
-            var selected_objects = $.map(element[0].selectize.items, function (value) {
-                return element[0].selectize.options[value];
-            });
-
-            var codestr = "";
-            var valstr = "";
-            var delim = "";
-            for (var i = 0; i < selected_objects.length; i++) {
-                var code = selected_objects[i].code;
-                var val = selected_objects[i].value;
-                codestr += delim + code;
-                valstr += delim + val;
-                delim = ",";
-
-            }
-            vm.$emit('update:idfield', codestr);
-            vm.$emit('update:textfield', valstr);
-
-        });
-
-        vm.selectizeinstance = element[0].selectize;
-    },
-    updated: function ()
-    {
-        var t = "";
-    },
-    watch:
-    {
-        idfield: function (newval, oldval)
-        {
-            var t = "";
-
-
-            if (this.selectizeinstance)
-            {
-                this.selectizeinstance.clear(true);
-
-                if (newval) {
-                    var persisteditems = newval.split(",");
-                    for (var i = 0; i < persisteditems.length; i++) {
-                        //ADD ITEM BUT DONT TRIGGER CHANGE
-                        this.selectizeinstance.addItem(persisteditems[i], true);
-
-                    }
-                }
-            }
-
-            
-        },
-        textfield: function (newval, oldval)
-        {
-            var t = "";
-           
-        }
-
-
-    },
-    destroyed: function () {
-        this.selectizeinstance.destroy();
-    }
-});
-
-Vue.component("combobox", {
-    template: '<select><slot></slot></select>',
-    props: ['idfield', 'textfield'],
-    data: function () {
-        return { selectizeinstance: null };
-
-    },
-    mounted: function () {
-        var vm = this;
-        var element = $(this.$el);
-
-        element.selectize({
-             delimiter: ','
-            , maxItems: 1
-            , valueField: 'code'
-            , labelField: 'value'
-            , searchField: 'value'
-            , options: []
-            , create: false
-            , preload: true
-            , load: function (query, callback) {
-              
-                $.get('/Application/API/GetVDomain/DOMAIN/ALL', function (response) {
+                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response) {
                     callback(response);
                     if (vm.idfield) {
                         var persisteditems = vm.idfield.split(",");
@@ -364,17 +261,113 @@ Vue.component("combobox", {
             }
             vm.$emit('update:idfield', codestr);
             vm.$emit('update:textfield', valstr);
-           
+
+        });
+
+        vm.selectizeinstance = element[0].selectize;
+    },
+    updated: function () {
+        var t = "";
+    },
+    watch:
+    {
+        idfield: function (newval, oldval) {
+            var t = "";
+
+
+            if (this.selectizeinstance) {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+
+        },
+        textfield: function (newval, oldval) {
+            var t = "";
+
+        }
+
+
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
+
+Vue.component("combobox", {
+    template: '<select><slot></slot></select>',
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { selectizeinstance: null };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        var domainname = $(element).data('domain');
+
+        element.selectize({
+            delimiter: ','
+            , maxItems: 1
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: false
+            , preload: true
+            , load: function (query, callback) {
+
+                if (!domainname) return callback();
+
+                $.get('/Application/API/GetDomain/' + domainname +'/ALL', function (response) {
+                    callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+
         });
 
         vm.selectizeinstance = element[0].selectize;
 
-      
+
     },
-    updated: function ()
-    {
+    updated: function () {
         var t = "";
-       
+
 
     },
     watch:
@@ -412,13 +405,11 @@ Vue.component("combobox", {
 });
 
 
-Vue.prototype.onFileUpload = function ()
-{
-   
+Vue.prototype.onFileUpload = function () {
+
 };
 
-Vue.prototype.uploadImage = function (event)
-{
+Vue.prototype.uploadImage = function (event) {
     var context = this;
     var endpoint = context.baseurl + 'UploadImage';
     var formData = new FormData();
@@ -427,8 +418,7 @@ Vue.prototype.uploadImage = function (event)
     formData.append('FileSize', event.srcElement.files[0].size);
 
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function ()
-    {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             var dbtable = event.srcElement.dataset.dbtable;
             var dbfield = event.srcElement.dataset.dbfield;
@@ -445,8 +435,7 @@ Vue.prototype.uploadImage = function (event)
 Vue.prototype.canSave = function () {
     var context = this;
     var result = true;
-    $("[data-required]").each(function ()
-    {
+    $("[data-required]").each(function () {
         var required = $(this).data('required');
         if (required === "True") {
 
@@ -490,15 +479,13 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.isRequiredNotValid = function (uiid)
-{
+Vue.prototype.isRequiredNotValid = function (uiid) {
     return $("#" + uiid).hasClass("requiredNotValid");
 };
 
 
 
-Vue.prototype.onUserInput = function (event)
-{
+Vue.prototype.onUserInput = function (event) {
     if (!event)
         return;
 
@@ -525,8 +512,7 @@ Vue.prototype.downloadExcel = function () {
 
 };
 
-Vue.prototype.nextpage = function ()
-{
+Vue.prototype.nextpage = function () {
     var context = this;
     context.pageInfo.pageNumber++;
     context.getPage();
@@ -554,10 +540,8 @@ Vue.prototype.addFilterValue = function () {
 
 Vue.prototype.deleteFilterValue = function (item) {
     var context = this;
-    for (var i = 0; i < context.pageInfo.filterValues.length; i++)
-    {
-        if (context.pageInfo.filterValues[i].name === item.name)
-        {
+    for (var i = 0; i < context.pageInfo.filterValues.length; i++) {
+        if (context.pageInfo.filterValues[i].name === item.name) {
             context.pageInfo.filterValues.splice(i, 1);
             context.getPage();
             break;
@@ -565,4 +549,3 @@ Vue.prototype.deleteFilterValue = function (item) {
         }
     }
 };
-
