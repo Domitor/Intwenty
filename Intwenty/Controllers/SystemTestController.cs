@@ -716,8 +716,9 @@ namespace Intwenty.Controllers
                 var appdata = getresult.GetAsApplicationData();
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
+                var model = _modelservice.GetApplicationModel(state.ApplicationId);
                 var rowid = appdata.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.DeleteRow(state, rowid, appdata.SubTables[0].DbName);
+                var deleterowresult = _dataservice.DeleteTableLine(state, model, rowid, appdata.SubTables[0].DbName);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 

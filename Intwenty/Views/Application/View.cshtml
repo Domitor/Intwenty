@@ -123,6 +123,7 @@
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
+                ,idgen:-1
             },
             methods:
             {
@@ -197,7 +198,9 @@
 
                     var addLine = function ()
                     {
-                        context.currentline[dbtablename].Id = -1;
+                        context.idgen--;
+                        context.currentline[dbtablename].Id = 0;
+                        context.currentline[dbtablename].LocalId = context.idgen;
                         context.currentline[dbtablename].ApplicationId = context.applicationId;
                         context.model[dbtablename].push(context.currentline[dbtablename]);
                     };
@@ -207,9 +210,6 @@
                     {
                         context.currentline = {[dbtablename]: {} };
                         context.currentline = {[dbtablename]: item };
-
-                        //$('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        //$('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
 
                     }
@@ -220,6 +220,51 @@
                         $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLine);
                         $('#addEditModal_' + uimetacode).modal();
                     }
+                },
+                deleteTableLine: function (item, dbtablename)
+                {
+                    var context = this;
+                    var endpointurl = context.baseurl + "DeleteTableLine";
+
+                    var deletelinefunc = function ()
+                    {
+                        for (var i = 0; i < context.model[dbtablename].length; i++) {
+                            var lineitem = context.model[dbtablename][i];
+                            if (lineitem.Id > 0 && item.Id > 0 && lineitem.Id === item.Id) {
+
+                                var senddata = { Id: item.Id, ParentId: context.model[context.appMainTable].Id, TableName: dbtablename, ApplicationId: context.appId, ApplicationViewId: context.applicationViewId };
+
+                                $.ajax({
+                                    url: endpointurl,
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(senddata),
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            context.model[dbtablename].splice(i, 1);
+
+                                        }
+                                    },
+                                    error: function (response) {
+                                        raiseErrorModal(response);
+                                    }
+                                });
+
+                                break;
+                            }
+                            else {
+                                if (item.hasOwnProperty("LocalId") && lineitem.hasOwnProperty("LocalId")) {
+                                    if (lineitem.LocalId === item.LocalId) {
+                                        context.model[dbtablename].splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deletelinefunc);
+
                 },
                 saveApplication: function () {
                     var context = this;

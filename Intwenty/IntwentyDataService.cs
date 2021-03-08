@@ -1054,26 +1054,22 @@ namespace Intwenty
         }
 
 
-        public ModifyResult DeleteRow(ClientStateInfo state, int id, string modeltablename)
+        public ModifyResult DeleteTableLine(ClientStateInfo state, ApplicationModel model, int id, string tablename)
         {
             ModifyResult result = null;
 
             if (state == null)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting row.");
 
+            if (string.IsNullOrEmpty(tablename))
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No tablename found when deleting tableline.");
+
             if (state.ApplicationId < 1)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
-            if (state.Id < 1)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No state.Id found when deleting row.");
-
-            var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
-            if (model == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, string.Format("state.ApplicationId {0} is not representing a valid application model", state.ApplicationId));
-
-            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == modeltablename.ToLower());
+            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == tablename.ToLower() || model.Application.DbName.ToLower() == tablename.ToLower());
             if (modelitem == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The dbname did not match the application {0} dbname or any of it's subtables");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The tablename did not match any tables in the application");
 
             var client = GetDataClient();
 
@@ -1082,26 +1078,14 @@ namespace Intwenty
 
                 client.Open();
 
-                if (modelitem.IsMetaTypeDataTable)
+                if (state.Id > 0)
                 {
-
-                    var sysid = client.GetEntity<InstanceId>(id);
-                    if (sysid == null)
-                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", modeltablename));
-                    if (sysid.ParentId < 1)
-                        throw new InvalidOperationException(string.Format("Could not find parent id when deleting row in subtable {0}", modeltablename));
-
-                    RemoveFromApplicationCache(state.ApplicationId, sysid.ParentId);
-                    RemoveFromApplicationListCache(state.ApplicationId);
-                }
-                else
-                {
-                    RemoveFromApplicationCache(state.ApplicationId, id);
+                    RemoveFromApplicationCache(state.ApplicationId, state.Id);
                     RemoveFromApplicationListCache(state.ApplicationId);
                 }
 
 
-                if (modeltablename.ToLower() == model.Application.DbName.ToLower())
+                if (tablename.ToLower() == model.Application.DbName.ToLower())
                 {
 
                     client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(model.Application, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
@@ -1122,7 +1106,7 @@ namespace Intwenty
                     {
                         foreach (var table in model.DataStructure)
                         {
-                            if (table.IsMetaTypeDataTable && table.DbName.ToLower() == modeltablename.ToLower())
+                            if (table.IsMetaTypeDataTable && table.DbName.ToLower() == tablename.ToLower())
                             {
                                 client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(table, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
                                 client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
@@ -1144,9 +1128,9 @@ namespace Intwenty
                 result = new ModifyResult();
                 result.Status = LifecycleStatus.NONE;
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("DeleteById(applicationid,id,dbname) failed"));
+                result.AddMessage(MessageCode.USERERROR, "DeleteSubTableLine failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.DeleteById: " + ex.Message);
+                LogError("IntwentyDataService.DeleteSubTableLine: " + ex.Message);
             }
 
             return result;

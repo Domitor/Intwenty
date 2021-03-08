@@ -53,7 +53,7 @@ namespace Intwenty.Interface
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult DeleteRow(ClientStateInfo state, int id, string tablename);
+        ModifyResult DeleteTableLine(ClientStateInfo state, ApplicationModel model, int id, string tablename);
 
 
         /// <summary>
