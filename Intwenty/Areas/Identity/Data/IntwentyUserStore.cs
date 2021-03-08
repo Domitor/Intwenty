@@ -48,10 +48,13 @@ namespace Intwenty.Areas.Identity.Data
 
             IAMCache.Remove(UsersCacheKey);
 
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var allusers = await GetUsersAsync();
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
+
+            IAMCache.Remove(UsersCacheKey);
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
             await client.OpenAsync();
 
