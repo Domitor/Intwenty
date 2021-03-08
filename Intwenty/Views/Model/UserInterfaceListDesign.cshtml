@@ -197,7 +197,7 @@
 
                                 <div class="form-group" v-if="(functionHasPath() && !functionsettings.isModalAction)">
                                     <label class="control-label">Path</label>
-                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" />
+                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" :disabled="model.isSubTableUserInterface" />
                                 </div>
 
                             </div>
@@ -431,6 +431,10 @@
                         isModalAction = func.isModalAction;
                     }
                    
+                    if (context.model.isSubTableUserInterface)
+                    {
+                        actionPath = context.model.viewPath;
+                    }
 
                     context.functionsettings = {
                         id: id,

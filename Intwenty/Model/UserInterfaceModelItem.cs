@@ -39,14 +39,6 @@ namespace Intwenty.Model
             MetaType = entity.MetaType;
             ParentMetaCode = "ROOT";
             DataTableMetaCode = entity.DataTableMetaCode;
-            if (MetaType == MetaTypeInputInterface)
-            {
-                Title = "Input UI";
-            }
-            if (MetaType == MetaTypeListInterface)
-            {
-                Title = "List UI";
-            }
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
@@ -62,6 +54,7 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ViewPath)) ViewPath = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
@@ -81,6 +74,7 @@ namespace Intwenty.Model
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
+        public string ViewPath { get; set; }
         public int PageSize { get; set; }
         public CurrentRenderContextOptions CurrentRenderContext { get; set; }
         public bool IsMetaTypeInputInterface
@@ -234,11 +228,7 @@ namespace Intwenty.Model
         {
             get {
 
-                var s = DataTableDbName;
-                if (string.IsNullOrEmpty(s))
-                    return Title;
-                else
-                    return string.Format("{0} (Id {1}, Table {2})", Title, Id, s);
+                return Title;
             
             }
         }

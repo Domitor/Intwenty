@@ -1342,7 +1342,7 @@ namespace Intwenty.Controllers
             model.IsSubTableUserInterface = uimodel.IsSubTableUserInterface;
             model.DataTable = DatabaseModelCreator.GetTableVm(appmodel, uimodel.DataTableMetaCode);
             model.Functions = uimodel.Functions.Select(p => new FunctionVm(p)).ToList();
-
+            model.ViewPath = uimodel.ViewPath;
 
             foreach (var v in appmodel.Views)
             {

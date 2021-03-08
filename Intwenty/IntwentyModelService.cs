@@ -858,6 +858,7 @@ namespace Intwenty
                     {
                         userinterface.ApplicationInfo = app;
                         userinterface.SystemInfo = app.SystemInfo;
+                        userinterface.ViewPath = appview.Path;
 
                         foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == userinterface.MetaCode && p.OwnerMetaType == userinterface.MetaType))
                         {
@@ -948,25 +949,31 @@ namespace Intwenty
                                 }
                             }
 
-                           
-
-                        }
-
-
-                        //BUILD UI STRUCTURE
-                        foreach (var uic in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
-                        {
-                            if (uic.IsMetaTypeSection)
+                            if (item.IsMetaTypeSection)
                             {
-                                var sect = new UISection() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", RowOrder = uic.RowOrder, ColumnOrder = 1, TitleLocalizationKey = uic.TitleLocalizationKey };
-                                sect.Collapsible = uic.HasPropertyWithValue("COLLAPSIBLE", "TRUE");
-                                sect.StartExpanded = uic.HasPropertyWithValue("STARTEXPANDED", "TRUE");
-                                sect.ExcludeOnRender = uic.HasPropertyWithValue("EXCLUDEONRENDER", "TRUE");
+                                var sect = new UISection() { Id = item.Id, Title = item.Title, MetaCode = item.MetaCode, ParentMetaCode = "ROOT", RowOrder = item.RowOrder, ColumnOrder = 1, TitleLocalizationKey = item.TitleLocalizationKey };
+                                sect.Collapsible = item.HasPropertyWithValue("COLLAPSIBLE", "TRUE");
+                                sect.StartExpanded = item.HasPropertyWithValue("STARTEXPANDED", "TRUE");
+                                sect.ExcludeOnRender = item.HasPropertyWithValue("EXCLUDEONRENDER", "TRUE");
                                 userinterface.Sections.Add(sect);
+
+                                //UI Name used in designer
+                                if (string.IsNullOrEmpty(userinterface.Title))
+                                {
+                                    if (string.IsNullOrEmpty(sect.Title))
+                                    {
+                                        userinterface.Title = string.Format("Input UI {0} - {1}", sect.Id, userinterface.DataTableDbName);
+                                    }
+                                    else
+                                    {
+                                        userinterface.Title = string.Format("Input UI {0} - {1} ({2})", sect.Id, sect.Title, userinterface.DataTableDbName);
+                                    }
+                                }
                             }
-                            if (uic.IsMetaTypeTable)
+
+                            if (item.IsMetaTypeTable)
                             {
-                                var table = new UITable() { Id = uic.Id, Title = uic.Title, MetaCode = uic.MetaCode, ParentMetaCode = "ROOT", TitleLocalizationKey = uic.TitleLocalizationKey };
+                                var table = new UITable() { Id = item.Id, Title = item.Title, MetaCode = item.MetaCode, ParentMetaCode = "ROOT", TitleLocalizationKey = item.TitleLocalizationKey };
                                 userinterface.Table = table;
                                 foreach (var column in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
                                 {
@@ -977,8 +984,24 @@ namespace Intwenty
 
                                     table.Columns.Add(column);
                                 }
+
+
+                                //UI Name used in designer
+                                if (string.IsNullOrEmpty(userinterface.Title))
+                                {
+                                    if (string.IsNullOrEmpty(table.Title))
+                                    {
+                                        userinterface.Title = string.Format("List UI {0} - {1}", table.Id, userinterface.DataTableDbName);
+                                    }
+                                    else
+                                    {
+                                        userinterface.Title = string.Format("List UI {0} - {1} ({2})", table.Id, table.Title, userinterface.DataTableDbName);
+                                    }
+                                }
                             }
+
                         }
+
 
                         foreach (var section in userinterface.Sections)
                         {
