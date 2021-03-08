@@ -971,35 +971,33 @@ namespace Intwenty
                                 }
                             }
 
-                            if (item.IsMetaTypeTable)
+                            if (item.IsMetaTypeTable && userinterface.IsMetaTypeListInterface)
                             {
-                                var table = new UITable() { Id = item.Id, Title = item.Title, MetaCode = item.MetaCode, ParentMetaCode = "ROOT", TitleLocalizationKey = item.TitleLocalizationKey };
-                                userinterface.Table = table;
-                                foreach (var column in userinterface.UIStructure.OrderBy(p => p.RowOrder).ThenBy(p => p.ColumnOrder))
-                                {
-                                    if (column.ParentMetaCode != table.MetaCode)
-                                        continue;
-                                    if (!column.IsMetaTypeTableTextColumn)
-                                        continue;
-
-                                    table.Columns.Add(column);
-                                }
+                                userinterface.Table.Id = item.Id;
+                                userinterface.Table.Title = item.Title;
+                                userinterface.Table.MetaCode = item.MetaCode;
+                                userinterface.Table.ParentMetaCode = BaseModelItem.MetaTypeRoot;
+                                userinterface.Table.TitleLocalizationKey = item.TitleLocalizationKey;
 
 
                                 //UI Name used in designer
                                 if (string.IsNullOrEmpty(userinterface.Title))
                                 {
-                                    if (string.IsNullOrEmpty(table.Title))
+                                    if (string.IsNullOrEmpty(userinterface.Table.Title))
                                     {
-                                        userinterface.Title = string.Format("List UI {0} - {1}", table.Id, userinterface.DataTableDbName);
+                                        userinterface.Title = string.Format("List UI {0} - {1}", userinterface.Table.Id, userinterface.DataTableDbName);
                                     }
                                     else
                                     {
-                                        userinterface.Title = string.Format("List UI {0} - {1} ({2})", table.Id, table.Title, userinterface.DataTableDbName);
+                                        userinterface.Title = string.Format("List UI {0} - {1} ({2})", userinterface.Table.Id, userinterface.Table.Title, userinterface.DataTableDbName);
                                     }
                                 }
                             }
 
+                            if (item.IsMetaTypeTableTextColumn && userinterface.IsMetaTypeListInterface)
+                            {
+                                userinterface.Table.Columns.Add(item);
+                            }
                         }
 
 
@@ -1531,84 +1529,95 @@ namespace Intwenty
                 if (a.DataStructure.Count == 0)
                     res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
 
-                /*
-               if (a.UIStructure.Count == 0)
-                   res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no UI objects.", a.Application.Title));
+
+                foreach (var view in a.Views)
+                {
+                    if (string.IsNullOrEmpty(view.MetaCode))
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has no [MetaCode].", view.Id, a.Application.Title));
+                        return res;
+                    }
+
+                    if (string.IsNullOrEmpty(view.MetaType))
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has no [MetaType].", view.Id, a.Application.Title));
+                        return res;
+                    }
+
+                    if (string.IsNullOrEmpty(view.Title))
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has no [Title].", view.Id, a.Application.Title));
+                        return res;
+                    }
+
+                    if (string.IsNullOrEmpty(view.Path))
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has no [Path] and can't be routed to.", view.Title, a.Application.Title));
+                        return res;
+                    }
+
+                    var count = view.UserInterface.Where(p => p.IsMainApplicationTableInterface && p.IsMetaTypeListInterface).Count();
+                    if (count > 1)
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has more than one list ui defined for the main application table.", view.Title, a.Application.Title));
+                        return res;
+                    }
+
+                    count = view.UserInterface.Where(p => p.IsMainApplicationTableInterface).Count();
+                    if (count > 1)
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has more than one ui defined for the main application table.", view.Title, a.Application.Title));
+                        return res;
+                    }
+
+                    foreach (var viewfunc in view.Functions)
+                    {
+                        if (viewfunc.IsMetaTypeCreate && !viewfunc.IsModalAction && string.IsNullOrEmpty(viewfunc.ActionPath))
+                        {
+                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a non modal create function without [ActionPath] pointing at another view", view.Title, a.Application.Title));
+                        }
+
+                        if (viewfunc.IsMetaTypeEdit && !viewfunc.IsModalAction && string.IsNullOrEmpty(viewfunc.ActionPath))
+                        {
+                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a non modal edit function without [ActionPath] pointing at another view", view.Title, a.Application.Title));
+                        }
+
+                    }
 
 
-               foreach (var ui in a.UIStructure)
-               {
+                    foreach (var ui in view.UserInterface)
+                    {
+                        if (!ui.IsDataTableConnected)
+                        {
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has an ui {2} without [DataTableMetaCode].", view.Title, a.Application.Title, ui.Title));
+                            return res;
+                        }
 
-                   if (string.IsNullOrEmpty(ui.MetaCode))
-                   {
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has no [MetaCode].", ui.Title, a.Application.Title));
-                       return res;
-                   }
+                        if (ui.IsMetaTypeListInterface && ui.Sections.Count > 0)
+                        {
+                            res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has a list interface with sections.", view.Title, a.Application.Title));
+                            return res;
+                        }
 
-                   if (string.IsNullOrEmpty(ui.ParentMetaCode))
-                   {
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has no [ParentMetaCode].", ui.Title, a.Application.Title));
-                       return res;
-                   }
+                        if (ui.IsMetaTypeListInterface && ui.Table.Columns.Count == 0)
+                        {
+                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a list interface with no column definitions.", view.Title, a.Application.Title));
+                        }
 
-                   if (!ui.HasValidMetaType)
-                   {
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} in application: {1} has not a valid [MetaType].", ui.Title, a.Application.Title));
-                       return res;
-                   }
+                        foreach (var uifunc in ui.Functions)
+                        {
+                            if (ui.IsSubTableUserInterface && uifunc.IsMetaTypeCreate && !uifunc.IsModalAction && uifunc.ActionPath != view.Path)
+                                res.AddMessage(MessageCode.WARNING, string.Format("The non modal create function in the ui {0} has a missconfigured path, should be the same as parent view", uifunc.Title));
 
-                   if (string.IsNullOrEmpty(ui.Title) && 
-                           (ui.IsUIBindingType || ui.IsUIComplexBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIBindingType || ui.IsEditGridUIComplexBindingType) &&
-                           (!ui.IsMetaTypeLabel & !ui.IsMetaTypeImage & !ui.IsMetaTypeTextBlock)
-                       )
-                   {
+                            if (ui.IsSubTableUserInterface && uifunc.IsMetaTypeEdit && !uifunc.IsModalAction && uifunc.ActionPath != view.Path)
+                                res.AddMessage(MessageCode.WARNING, string.Format("The non modal edit function in the ui {0} has a missconfigured path, should be the same as parent view", ui.Title));
 
-                       res.AddMessage(MessageCode.WARNING, string.Format("The UI object {0} in application {1} has no [Title].", ui.MetaType, a.Application.Title));
-                   }
+                        }
 
-
-                   //if (ui.IsMetaTypeEditListView && !a.UIStructure.Exists(p => p.ParentMetaCode == ui.MetaCode && p.IsMetaTypeEditListViewColumn))
-                   //    res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITLISTVIEW in application {1} has no children with [MetaType]=EDITLISTVIEWFIELD.", ui.Title, a.Application.Title));
+                    }
 
 
-                   if (ui.IsMetaTypeLookUp && !ui.IsDataViewColumn1Connected)
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
-
-                   if (ui.IsMetaTypeLookUp && ui.IsDataViewColumn1Connected && ui.DataViewColumn1Info.IsMetaTypeDataViewColumn)
-                   {
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} has a connection (ViewMetaCode) to a DATAVIEWCOLUMN, it should be a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
-                   }
-
-                   if (ui.IsMetaTypeLookUp && !ui.IsDataViewConnected)
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type LOOKUP in application {1} is not connected to a dataview, check domainname.", ui.Title, a.Application.Title));
-
-                   if (!ui.IsMetaTypeEditGrid)
-                   {
-                       if (!ui.IsDataColumn1Connected && !ui.IsUIContainerType)
-                           res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database column [DataColumn1MetaCode].", new object[] { ui.Title, a.Application.Title }));
-                   }
-                   else
-                   {
-                       if (!ui.IsDataTableConnected)
-                           res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object: {0} in application {1} has a missconfigured connection to a database table [DataMetaCode].", new object[] { ui.Title, a.Application.Title }));
-                   }
-
-                   if (ui.IsMetaTypeEditGridLookUp && !ui.IsDataViewColumn1Connected)
-                       res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The UI object {0} of type EDITGRID_LOOKUP in application {1} has no connection to a DATAVIEWKEYCOLUMN", ui.Title, a.Application.Title));
-
-                   if (!ui.HasValidProperties)
-                   {
-                       res.AddMessage(MessageCode.WARNING, string.Format("One or more properties on the UI object: {0} of type {1} in application {2} is not valid and may not be implemented.", new object[] { ui.Title, ui.MetaType, a.Application.Title }));
-                   }
-
-               }
-
-
-               if (a.UIStructure.Count(p => p.IsMetaTypeEditListView) > 1)
-               {
-                   res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has multiple EDITLISTVIEW ui objects, which is not allowd", a.Application.Title));
-               }
-               */
+                }
 
                 foreach (var db in a.DataStructure)
                 {
