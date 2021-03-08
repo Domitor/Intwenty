@@ -48,7 +48,6 @@ namespace Intwenty.Model
             ActionUserInterfaceMetaCode = entity.ActionUserInterfaceMetaCode;
             OwnerMetaType = entity.OwnerMetaType;
             OwnerMetaCode = entity.OwnerMetaCode;
-            DataTableMetaCode = entity.DataTableMetaCode;
             IsModalAction = entity.IsModalAction;
             SetEmptyStrings();
            
@@ -67,7 +66,8 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(ActionPath)) ActionPath = string.Empty;
             if (string.IsNullOrEmpty(ActionUserInterfaceMetaCode)) ActionUserInterfaceMetaCode = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(OwnerMetaType)) OwnerMetaType = string.Empty;
+
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -77,7 +77,6 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string OwnerMetaType { get; set; }
         public string OwnerMetaCode { get; set; }
-        public string DataTableMetaCode { get; set; }
         public string ActionUserInterfaceMetaCode { get; set; }
 
         public string ActionPath { get; set; }

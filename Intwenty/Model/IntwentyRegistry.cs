@@ -40,7 +40,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImage, Title = "Image" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeImageBox, Title = "Image Upload" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeLabel, Title = "Label" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeLookUp, Title = "Look Up" , ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeSearchBox, Title = "Search Box" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeNumBox, Title = "Numbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypePanel, Title = "Panel" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypePasswordBox, Title = "Password Box" , ModelCode = "UISTRUCTUREMODEL" });
@@ -49,16 +49,11 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextArea, Title = "Text Area" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBlock, Title = "Text Block" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UISTRUCTUREMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeMultiSelect, Title = "Multi Select", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataView, Title = "Data View", ModelCode = "DATAVIEWMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewColumn, Title = "Data View Column", ModelCode = "DATAVIEWMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = DataViewModelItem.MetaTypeDataViewKeyColumn, Title = "Data View Key Column", ModelCode = "DATAVIEWMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get (GET)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableList, Title = "List (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableSave, Title = "Save (POST)", ModelCode = "ENDPOINTMODEL" });
-            _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeDataViewList, Title = "View (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomPost, Title = "Custom (POST)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeCustomGet, Title = "Custom (GET)", ModelCode = "ENDPOINTMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = ViewModel.MetaTypeUIView, Title = "Input View", ModelCode = "UIVIEWMODEL" });
@@ -113,10 +108,7 @@ namespace Intwenty.Model
             prop.ValidFor.Add(DatabaseModelItem.MetaTypeDataColumn);
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("HIDEFILTER", "Hide filter", "BOOLEAN");
-            prop.ValidFor.Add(DataViewModelItem.MetaTypeDataView);
-            _properties.Add(prop);
-
+           
 
             prop = new IntwentyProperty("COLLAPSIBLE", "Collapsible", "BOOLEAN");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSection);
@@ -127,11 +119,11 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("READONLY", "Read Only", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeCheckBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeComboBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeDatePicker);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeEmailBox);
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeLookUp);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeNumBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypePasswordBox);
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTextArea);
@@ -156,12 +148,14 @@ namespace Intwenty.Model
 
             prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOLISTVIEW", DisplayValue = "Go to list view" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Refresh saved data" });
             _properties.Add(prop);
 
             prop = new IntwentyProperty("GOTOLISTVIEWPATH", "List view path", "STRING");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
@@ -184,6 +178,18 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("MULTISELECT", "Multi Select", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("USESEARCH", "Use Search", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("ALLOWCREATE", "Allow Create", "BOOLEAN");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeSearchBox);
             _properties.Add(prop);
 
             return _properties;

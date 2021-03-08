@@ -29,7 +29,7 @@ namespace Intwenty.Controllers
             ModelRepository = sr;
         }
 
-        
+
         [HttpGet("/Model/ApplicationList")]
         public IActionResult ApplicationList()
         {
@@ -94,7 +94,7 @@ namespace Intwenty.Controllers
 
 
 
-    
+
 
         [HttpGet("/Model/UserInterfaceInputDesign/{applicationid}/{uimetacode}")]
         public IActionResult UserInterfaceInputDesign(int applicationid, string uimetacode)
@@ -167,15 +167,6 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        public IActionResult EditDataviews()
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            return View();
-        }
 
         public IActionResult EditValueDomains()
         {
@@ -234,7 +225,7 @@ namespace Intwenty.Controllers
                 foreach (var col in app.DataStructure.Where(p => p.IsMetaTypeDataColumn))
                 {
                     var dbtype = dbtypemap.Find(p => p.IntwentyType == col.DataType && p.DbEngine == client.Database);
-                    if (dbtype!=null)
+                    if (dbtype != null)
                         col.AddUpdateProperty("DBDATATYPE", dbtype.DBMSDataType);
                 }
             }
@@ -248,7 +239,7 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-          
+
             var cachedescription = ModelRepository.GetCachedObjectDescriptions();
             return View(cachedescription);
         }
@@ -275,7 +266,7 @@ namespace Intwenty.Controllers
             return View();
         }
 
-      
+
 
 
 

@@ -1,4 +1,6 @@
-﻿function raiseInformationModal(headertext, bodytext, close_callback) {
+﻿
+
+function raiseInformationModal(headertext, bodytext, close_callback) {
     $('#msg_dlg_modal_hdr').text(headertext);
     $('#msg_dlg_modal_text').text(bodytext);
     if (close_callback) {
@@ -84,82 +86,6 @@ Array.prototype.firstOrDefault = function (func) {
 };
 
 
-Vue.component("intwentyselect", {
-    template: '<select><slot></slot></select>',
-    mounted: function () {
-        var vm = this;
-        var element = $(this.$el);
-
-        element.select2({ theme: "bootstrap", closeOnSelect: true }).on("select2:select", function () {
-            var selectionstring = "";
-            var selectiontextstring = "";
-            var selections = element.select2('data');
-
-            //CANT BE ZERO IN THIS EVENT
-            if (selections.length == 0)
-                return;
-
-            for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "") {
-                    selectionstring += selections[i].id;
-                    selectiontextstring += selections[i].text;
-                }
-                else {
-                    selectionstring += "," + selections[i].id;
-                    selectiontextstring += "," + selections[i].text;
-                }
-            }
-
-            vm.$emit('update:idfield', selectionstring);
-            vm.$emit('update:textfield', selectiontextstring);
-
-        }).on("select2:unselect", function () {
-            var selectionstring = "";
-            var selectiontextstring = "";
-            var selections = element.select2('data');
-            for (var i = 0; i < selections.length; i++) {
-                if (selectionstring == "") {
-                    selectionstring += selections[i].id;
-                    selectiontextstring += selections[i].text;
-                }
-                else {
-                    selectionstring += "," + selections[i].id;
-                    selectiontextstring += "," + selections[i].text;
-                }
-            }
-
-            vm.$emit('update:idfield', selectionstring);
-            vm.$emit('update:textfield', selectiontextstring);
-        });
-
-
-    },
-    updated: function () {
-
-        $(this.$el).val(null).trigger("change");
-
-        if (!this.$attrs.idfield)
-            return;
-
-        var arr = this.$attrs.idfield.split(",");
-        $(this.$el).val(arr);
-        $(this.$el).val(arr).trigger("change");
-        $(this.$el).trigger("select2:select");
-
-    },
-    watch:
-    {
-        value: function (value) {
-            var x = "";
-        }
-
-    },
-    destroyed: function () {
-        $(this.$el).off().select2("destroy");
-    }
-});
-
-
 
 Vue.prototype.selectableProperties = function (item) {
     var context = this;
@@ -167,21 +93,21 @@ Vue.prototype.selectableProperties = function (item) {
     if (!item.metaType)
         return [];
 
-    if (!context.model.propertyCollection)
+    if (!context.propertyCollection)
         return [];
 
     var result = [];
-    for (var i = 0; i < context.model.propertyCollection.length; i++) {
+    for (var i = 0; i < context.propertyCollection.length; i++) {
         var isincluded = false;
-        if (context.model.propertyCollection[i].validFor) {
-            for (var z = 0; z < context.model.propertyCollection[i].validFor.length; z++) {
+        if (context.propertyCollection[i].validFor) {
+            for (var z = 0; z < context.propertyCollection[i].validFor.length; z++) {
 
-                if (item.metaType === context.model.propertyCollection[i].validFor[z])
+                if (item.metaType === context.propertyCollection[i].validFor[z])
                     isincluded = true;
             }
         }
         if (isincluded)
-            result.push(context.model.propertyCollection[i]);
+            result.push(context.propertyCollection[i]);
     }
 
     return result;
@@ -259,6 +185,225 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
 };
 
+Vue.component("searchbox", {
+    template: '<input><slot></slot></input>',
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { selectizeinstance: null };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+
+        var domainname = $(element).data('domain');
+        var usearch = $(element).data('usesearch');
+        var mselect = $(element).data('multiselect');
+        var acreate = $(element).data('allowcreate');
+        var allowcreate = (acreate == "TRUE");
+        var usesearch = (usearch == "TRUE");
+        var usemultiselect = (mselect == "TRUE");
+
+        var plugs = null;
+        var maxitems = 1;
+        if (usemultiselect) {
+            maxitems = 10;
+            plugs = ['remove_button'];
+        }
+
+        element.selectize({
+            plugins: plugs
+            , delimiter: ','
+            , maxItems: maxitems
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: allowcreate
+            , preload: true
+            , load: function (query, callback) {
+
+                if (!query || !usesearch)
+                    query = 'ALL';
+                if (usesearch && query == 'ALL')
+                    query = 'PRELOAD';
+
+                if (!domainname) return callback();
+
+                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response) {
+                    callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+
+        });
+
+        vm.selectizeinstance = element[0].selectize;
+    },
+    updated: function () {
+        var t = "";
+    },
+    watch:
+    {
+        idfield: function (newval, oldval) {
+            var t = "";
+
+
+            if (this.selectizeinstance) {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+
+        },
+        textfield: function (newval, oldval) {
+            var t = "";
+
+        }
+
+
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
+
+Vue.component("combobox", {
+    template: '<select><slot></slot></select>',
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { selectizeinstance: null };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        var domainname = $(element).data('domain');
+
+        element.selectize({
+            delimiter: ','
+            , maxItems: 1
+            , valueField: 'code'
+            , labelField: 'value'
+            , searchField: 'value'
+            , options: []
+            , create: false
+            , preload: true
+            , load: function (query, callback) {
+
+                if (!domainname) return callback();
+
+                $.get('/Application/API/GetDomain/' + domainname +'/ALL', function (response) {
+                    callback(response);
+                    if (vm.idfield) {
+                        var persisteditems = vm.idfield.split(",");
+                        for (var i = 0; i < persisteditems.length; i++) {
+                            element[0].selectize.addItem(persisteditems[i], true);
+                        }
+                    }
+                });
+            }
+
+        }).on('change', function () {
+
+            var selected_objects = $.map(element[0].selectize.items, function (value) {
+                return element[0].selectize.options[value];
+            });
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < selected_objects.length; i++) {
+                var code = selected_objects[i].code;
+                var val = selected_objects[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+            vm.$emit('update:idfield', codestr);
+            vm.$emit('update:textfield', valstr);
+
+        });
+
+        vm.selectizeinstance = element[0].selectize;
+
+
+    },
+    updated: function () {
+        var t = "";
+
+
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval) {
+            var t = "";
+
+
+            if (this.selectizeinstance) {
+                this.selectizeinstance.clear(true);
+
+                if (newval) {
+                    var persisteditems = newval.split(",");
+                    for (var i = 0; i < persisteditems.length; i++) {
+                        //ADD ITEM BUT DONT TRIGGER CHANGE
+                        this.selectizeinstance.addItem(persisteditems[i], true);
+
+                    }
+                }
+            }
+
+
+        },
+        textfield: function (newval, oldval) {
+            var t = "";
+
+        }
+
+
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
+
 
 Vue.prototype.onFileUpload = function () {
 
@@ -293,9 +438,7 @@ Vue.prototype.canSave = function () {
     $("[data-required]").each(function () {
         var required = $(this).data('required');
         if (required === "True") {
-            var validationfield = $(this).data('validationfield');
-            var id = $(this).attr('id');
-            var title = $(this).data('title');
+
             var metatype = $(this).data('metatype');
             var dbfield = $(this).data('dbfield');
             var dbtable = $(this).data('dbtable');
@@ -303,12 +446,11 @@ Vue.prototype.canSave = function () {
             if (!context.model[dbtable][dbfield]) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
+
             }
             else if (context.model[dbtable][dbfield].length == 0) {
                 result = false;
                 $(this).addClass('requiredNotValid');
-                context.setValidationText(validationfield, title + " is required");
             }
             else {
                 if (metatype == "EMAILBOX") {
@@ -316,7 +458,6 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
                 if (metatype == "PASSWORDBOX") {
@@ -324,12 +465,10 @@ Vue.prototype.canSave = function () {
                     if (!check.result) {
                         result = false;
                         $(this).addClass('requiredNotValid');
-                        context.setValidationText(validationfield, check.msg);
                     }
                 }
 
                 if (result) {
-                    context.clearValidationText(validationfield);
                     $(this).removeClass('requiredNotValid');
                 }
             }
@@ -340,29 +479,11 @@ Vue.prototype.canSave = function () {
     return result;
 };
 
-Vue.prototype.setValidationText = function (validationfield, text) {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
-
-    this.validation[validationfield] = text;
-    this.$forceUpdate();
+Vue.prototype.isRequiredNotValid = function (uiid) {
+    return $("#" + uiid).hasClass("requiredNotValid");
 };
 
-Vue.prototype.clearValidationText = function (validationfield) {
-    if (!this.validation)
-        return;
-    if (!validationfield)
-        return;
-    if (validationfield.length < 1)
-        return;
 
-    this.validation[validationfield] = "";
-    this.$forceUpdate();
-};
 
 Vue.prototype.onUserInput = function (event) {
     if (!event)
@@ -386,143 +507,6 @@ Vue.prototype.onUserInput = function (event) {
     });
 };
 
-Vue.prototype.setSelectedDataViewValue = function (item, lookupid) {
-    var context = this;
-
-    $("input[data-lookupid]").each(function () {
-        var id = $(this).data('lookupid');
-        if (id === lookupid) {
-            var dbfield = $(this).data('dbfield');
-            var viewfield = $(this).data('viewfield');
-            context.current_edit_line[dbfield] = item[viewfield];
-        }
-    });
-
-    context.$forceUpdate();
-};
-
-Vue.prototype.getDataViewValue = function (viewname, keyfield, lookupid) {
-
-    var context = this;
-
-    context.pageInfo.filterValues = [];
-
-    context.pageInfo.dataViewMetaCode = viewname;
-
-    $("input[data-lookupid]").each(function () {
-        var id = $(this).data('lookupid');
-        if (id === lookupid) {
-            var dbfield = $(this).data('dbfield');
-            var viewfield = $(this).data('viewfield');
-            if (dbfield === keyfield) {
-                if (viewfield != '' && context.model[context.appMainTable][dbfield]) {
-                    context.pageInfo.filterValues.push({ "name": viewfield, "value": context.model[context.appMainTable][dbfield] });
-                }
-            }
-        }
-    });
-
-
-    var endpointurl = context.baseurl + "GetDataViewValue";
-
-    $.ajax({
-        url: endpointurl,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(context.pageInfo),
-        success: function (response) {
-            var dataviewitem = JSON.parse(response.data);
-            $("input[data-lookupid]").each(function () {
-                var id = $(this).data('lookupid');
-                if (id === lookupid) {
-                    var dbfield = $(this).data('dbfield');
-                    var viewfield = $(this).data('viewfield');
-                    if (dbfield != keyfield) {
-                        context.model[context.appMainTable][dbfield] = dataviewitem[viewfield];
-                        context.$forceUpdate();
-                    }
-
-                }
-            });
-
-
-        }
-    });
-};
-
-Vue.prototype.openDataViewLookUp = function (viewname, line) {
-    if (!viewname)
-        return;
-
-    this.showFilter = false;
-    this.dlgFilterColumnName = "";
-    this.dlgFilterValue = "";
-    this.pageInfo.maxCount = 0;
-    this.pageInfo.pageNumber = 0;
-    this.pageInfo.dataViewMetaCode = viewname;
-    this.getDataViewLookUpPage();
-    this.current_edit_line = line;
-    $("#" + viewname).modal();
-};
-
-Vue.prototype.nextDataViewLookUpPage = function () {
-    var context = this;
-    context.pageInfo.pageNumber++;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.prevDataViewLookUpPage = function () {
-    var context = this;
-    context.pageInfo.pageNumber--;
-    if (context.pageInfo.pageNumber < 0)
-        context.pageInfo.pageNumber = 0;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.getDataViewLookUpPage = function () {
-    var context = this;
-
-    context.pageInfo.filterValues = [];
-    if (context.dlgFilterColumnName != '' && context.dlgFilterValue != '') {
-        context.pageInfo.filterValues.push({ "name": context.dlgFilterColumnName, "value": context.dlgFilterValue });
-    }
-
-    var endpointurl = context.baseurl + "GetDataView";
-
-    $.ajax({
-        url: endpointurl,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(context.pageInfo),
-        success: function (response) {
-            //DATA
-            context.dataview = JSON.parse(response.data);
-
-            //UPDATE CURRENT PAGE INFO
-            context.pageInfo = response.listFilter;
-        }
-    });
-};
-
-Vue.prototype.isFirstDataViewPage = function () {
-    return (this.pageInfo.pageNumber <= 0);
-};
-
-Vue.prototype.isLastDataViewPage = function () {
-    return (((this.pageInfo.pageNumber + 1) * this.pageInfo.pageSize) >= this.pageInfo.maxCount);
-};
-
-Vue.prototype.runDataViewFilter = function () {
-    var context = this;
-    context.pageInfo.pageNumber = 0;
-    context.getDataViewLookUpPage();
-};
-
-Vue.prototype.addSubTableLine = function (tablename) {
-    var context = this;
-    context.model[tablename].push({ Id: 0, ParentId: 0 });
-    context.$forceUpdate();
-};
 
 Vue.prototype.downloadExcel = function () {
 
@@ -565,4 +549,3 @@ Vue.prototype.deleteFilterValue = function (item) {
         }
     }
 };
-

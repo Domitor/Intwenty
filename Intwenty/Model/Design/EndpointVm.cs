@@ -21,7 +21,6 @@ namespace Intwenty.Model.Design
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableGet, title = "Get (GET)", datasourcetype = "TABLE" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save (POST)", datasourcetype = "TABLE" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List (POST)", datasourcetype = "TABLE" });
-                res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View (POST)", datasourcetype = "DATAVIEW" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (POST)", datasourcetype = "NONE" });
                 res.Add(new EndpointType() { id = EndpointModelItem.MetaTypeCustomGet, title = "Custom (GET)", datasourcetype = "NONE" });
                 return res;
@@ -68,8 +67,6 @@ namespace Intwenty.Model.Design
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableSave, title = "Save (POST)", datasourcetype = "TABLE" };
             else if (model.IsMetaTypeTableList)
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeTableList, title = "List (POST)", datasourcetype = "TABLE" };
-            else if (model.IsMetaTypeDataViewList)
-                t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeDataViewList, title = "View (POST)", datasourcetype = "DATAVIEW" };
             else if (model.IsMetaTypeCustomPost)
                 t.EndpointType = new EndpointType() { id = EndpointModelItem.MetaTypeCustomPost, title = "Custom (POST)", datasourcetype = "NONE" };
             else if (model.IsMetaTypeCustomGet)

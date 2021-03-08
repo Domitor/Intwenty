@@ -27,7 +27,7 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
-      
+
 
         public virtual async Task<IActionResult> View(int? id)
         {
@@ -51,7 +51,7 @@ namespace Intwenty.Controllers
 
         }
 
-      
+
 
 
 

@@ -23,8 +23,6 @@ namespace Intwenty.Entity
 
         public List<UserInterfaceStructureItem> UserInterfaceStructureItems { get; set; }
 
-        public List<DataViewItem> DataViewItems { get; set; }
-
         public List<TranslationItem> Translations { get; set; }
 
         public List<ValueDomainItem> ValueDomains { get; set; }
@@ -40,7 +38,6 @@ namespace Intwenty.Entity
             ViewItems = new List<ViewItem>();
             UserInterfaceItems = new List<UserInterfaceItem>();
             UserInterfaceStructureItems = new List<UserInterfaceStructureItem>();
-            DataViewItems = new List<DataViewItem>();
             Translations = new List<TranslationItem>();
             ValueDomains = new List<ValueDomainItem>();
             Endpoints = new List<EndpointItem>();

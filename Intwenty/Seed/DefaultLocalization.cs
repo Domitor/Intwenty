@@ -71,6 +71,8 @@ namespace Intwenty.Seed
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "New", Text = "Ny" });
                 temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "Save", Text = "Save" });
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Save", Text = "Spara" });
+                temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "Changes Saved", Text = "Changes saved" });
+                temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Changes Saved", Text = "Ändringar sparade" });
                 temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "Edit", Text = "Edit" });
                 temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Edit", Text = "Ändra" });
                 temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "Menu", Text = "Menu" });

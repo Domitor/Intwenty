@@ -34,14 +34,14 @@ namespace Intwenty.Model.Design
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeImage));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeImageBox));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeLabel));
-            UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeLookUp));
+            UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeSearchBox));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeNumBox));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypePasswordBox));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeStaticHTML));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextArea));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBlock));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBox));
-            UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeMultiSelect));
+
         }
 
     }

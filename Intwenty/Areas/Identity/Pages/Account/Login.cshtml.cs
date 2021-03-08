@@ -96,7 +96,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    _dataService.LogInfo(String.Format("User {0} logged in with password",Input.Email), username: Input.Email);
+                    await _dataService.LogIdentityActivity("INFO", string.Format("User {0} logged in with password",Input.Email), Input.Email);
                     client.Open();
                     var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
                     if (signedinuser != null)
@@ -127,6 +127,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    await _dataService.LogIdentityActivity("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.Email), Input.Email);
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
                     ReturnUrl = returnUrl;

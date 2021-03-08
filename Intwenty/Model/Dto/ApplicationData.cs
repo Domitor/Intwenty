@@ -275,8 +275,6 @@ namespace Intwenty.Model.Dto
 
         public DatabaseModelItem Model { get; set; }
 
-        public bool IgnoreModelValidation { get; set; }
-
         public ApplicationValue()
         {
             DbName = string.Empty;
@@ -567,6 +565,10 @@ namespace Intwenty.Model.Dto
             return value.GetAsDateTime();
         }
 
+        /// <summary>
+        /// Updates a current value or creates a new value
+        /// Warning: If a new value is inserted no model is set, which is required to save the value later.
+        /// </summary>
         public void SetValue(string dbname, object value)
         {
             var t = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
@@ -580,33 +582,28 @@ namespace Intwenty.Model.Dto
             }
         }
 
-        public void SetValue(string dbname, object value, bool ignoremodel)
+        /// <summary>
+        /// Updates a current value and model or creates a new value with the specified model
+        /// </summary>
+        public void SetValue(DatabaseModelItem model, object value)
         {
-            var t = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
+            if (model == null)
+                return;
+
+            var t = this.Values.Find(p => p.DbName.ToLower() == model.DbName.ToLower());
             if (t != null)
             {
-                t.IgnoreModelValidation = ignoremodel;
+                t.Model = model;
                 t.SetValue(value);
             }
             else
             {
-                this.Values.Add(new ApplicationValue() { DbName = dbname, Value = value, IgnoreModelValidation = ignoremodel });
+                this.Values.Add(new ApplicationValue() { DbName = model.DbName, Value = value,Model=model });
             }
         }
 
-        public void DisableModelValidation()
-        {
-            foreach (var v in Values)
-                v.IgnoreModelValidation = true;
+       
 
-        }
-
-        public void EnableModelValidation()
-        {
-            foreach (var v in Values)
-                v.IgnoreModelValidation = false;
-
-        }
 
     }
 

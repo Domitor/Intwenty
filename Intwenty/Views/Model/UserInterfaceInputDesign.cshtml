@@ -166,9 +166,9 @@
                                                             <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
                                                             <label class="control-label"><i>{{input.title}}</i></label>
 
-                                                            <div v-if="input.metaType==='MULTISELECT'">
+                                                            <div v-if="input.metaType==='SEARCHBOX'">
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control form-control-sm" placeholder="Input control for multiselection" disabled />
+                                                                    <input type="text" class="form-control form-control-sm" placeholder="Input with search and multiselect..." disabled />
                                                                 </div>
                                                             </div>
 
@@ -243,17 +243,7 @@
                                                                 </div>
                                                             </div>
 
-                                                            <div v-if="input.metaType==='LOOKUP'">
-                                                                <div>
-                                                                    <div class="form form-inline">
-                                                                        <button style="margin-left:5px" class="btn btn-sm btn-secondary"><span class="fa fa-plus"></span></button>
-                                                                        <input style="margin-left:5px" type="text" class="form-control form-control-sm" disabled />
-                                                                        <input style="margin-left:5px" type="text" class="form-control form-control-sm" disabled />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-
+                                                           
                                                         </div>
                                                     </div>
                                                 </div>
@@ -313,14 +303,6 @@
                                     <textarea type="text" class="form-control form-control-sm" rows="10" cols="200" v-model="active_setting_input.rawHTML"></textarea>
                                 </div>
 
-
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="control-label">Set data view</label>
-                                    <select v-model="active_setting_input.dataViewMetaCode" class="form-control form-control-sm">
-                                        <option v-for="dv in dataviews" v-bind:value="dv.metaCode">{{dv.title}}</option>
-                                    </select>
-                                </div>
-
                                 <div class="form-group" v-if="showSettingValueDomain">
                                     <label class="control-label">Set value domain</label>
                                     <select v-model="active_setting_input.domain" class="form-control form-control-sm">
@@ -335,26 +317,13 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="model.control-label">Set view column (Key)</label>
-                                    <select v-model="active_setting_input.dataViewColumn1DbName" class="form-control form-control-sm">
-                                        <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
                                 <div class="form-group" v-if="showSettingDbColumn2">
                                     <label class="control-label">Set database column 2 (opt.)</label>
                                     <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm">
                                         <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
-                                <div class="form-group" v-if="showSettingLookUp">
-                                    <label class="control-label">Set view column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.dataViewColumn2DbName" class="form-control form-control-sm">
-                                        <option v-for="col in viewColumns(active_setting_input.dataViewMetaCode)" v-bind:value="col.sqlQueryFieldName">{{col.sqlQueryFieldName}}</option>
-                                    </select>
-                                </div>
 
-         
 
                             </div>
                             <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
@@ -403,7 +372,6 @@
                 },
                 dbtables: [],
                 valuedomains: [],
-                dataviews: [],
                 listviewtable: {},
                 active_setting_input: {},
                 metaproperties: [],
@@ -471,13 +439,6 @@
                     for (var i = 0; i < this.dbtables.length; i++)
                         if (this.dbtables[i].dbName == tablename)
                             return this.dbtables[i].columns;
-
-                    return [];
-                },
-                viewColumns: function (viewname) {
-                    for (var i = 0; i < this.dataviews.length; i++)
-                        if (this.dataviews[i].metaCode == viewname)
-                            return this.dataviews[i].fields;
 
                     return [];
                 },
@@ -593,6 +554,7 @@
                         data: JSON.stringify(context.model),
                         success: function (response) {
                             context.model = response;
+                            context.propertyCollection = response.propertyCollection;
                             context.addUserInputSelects();
                             raiseInformationModal("Success", "The UI model was successfully saved.");
                         },
@@ -676,10 +638,10 @@
                 showSettingDbColumn2: function ()
                 {
 
-                    if (this.active_setting_input.metaType === "LOOKUP")
+                    if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
 
-                    if (this.active_setting_input.metaType === "MULTISELECT")
+                    if (this.active_setting_input.metaType === "SEARCHBOX")
                         return true;
 
                     return false;
@@ -688,17 +650,8 @@
                 {
                     if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
-                    if (this.active_setting_input.metaType === "MULTISELECT")
+                    if (this.active_setting_input.metaType === "SEARCHBOX")
                         return true;
-
-
-                    return false;
-                },
-                showSettingLookUp: function ()
-                {
-                    if (this.active_setting_input.metaType === "LOOKUP")
-                        return true;
-
 
 
                     return false;
@@ -722,6 +675,7 @@
                 //Application
                 $.get(endpointurl, function (response) {
                     context.model = response;
+                    context.propertyCollection = response.propertyCollection;
                     context.addUserInputSelects();
                 }).done(function () {
 
@@ -731,17 +685,10 @@
                         context.dbtables = response;
                     }).done(function () {
 
-                        //DataViews
-                        endpointurl = baseurl + "GetDataViewModels";
+                        //Valuedomains
+                        endpointurl = baseurl + "GetValueDomainNames";
                         $.get(endpointurl, function (response) {
-                            context.dataviews = response.views;
-                        }).done(function () {
-
-                            //Valuedomains
-                            endpointurl = baseurl + "GetValueDomainNames";
-                            $.get(endpointurl, function (response) {
-                                context.valuedomains = response;
-                            });
+                            context.valuedomains = response;
                         });
 
                     });

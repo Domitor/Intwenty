@@ -27,12 +27,6 @@ namespace Intwenty.Entity
         [NotNull]
         public string ParentMetaCode { get; set; }
 
-
-        /// <summary>
-        /// Reference to an Intwenty DataView
-        /// </summary>
-        public string DataViewMetaCode { get; set; }
-
         /// <summary>
         /// Reference to a DataTable
         /// </summary>
@@ -45,15 +39,6 @@ namespace Intwenty.Entity
         public string DataColumn1MetaCode { get; set; }
         public string DataColumn2MetaCode { get; set; }
 
-        /// <summary>
-        /// Reference to Intwenty DataView Columns
-        /// </summary>
-        public string DataViewColumn1MetaCode { get; set; }
-        public string DataViewColumn2MetaCode { get; set; }
-
-
-
-       
 
         public int ColumnOrder { get; set; }
 

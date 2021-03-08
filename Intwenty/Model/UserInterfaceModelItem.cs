@@ -24,6 +24,8 @@ namespace Intwenty.Model
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
+            CurrentRenderContext = CurrentRenderContextOptions.View;
+            ModalInterfaces = new List<UserInterfaceModelItem>();
         }
 
         public UserInterfaceModelItem(UserInterfaceItem entity)
@@ -37,19 +39,13 @@ namespace Intwenty.Model
             MetaType = entity.MetaType;
             ParentMetaCode = "ROOT";
             DataTableMetaCode = entity.DataTableMetaCode;
-            if (MetaType == MetaTypeInputInterface)
-            {
-                Title = "Input UI";
-            }
-            if (MetaType == MetaTypeListInterface)
-            {
-                Title = "List UI";
-            }
             SetEmptyStrings();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
             Table = new UITable();
             Functions = new List<FunctionModelItem>();
+            CurrentRenderContext = CurrentRenderContextOptions.View;
+            ModalInterfaces = new List<UserInterfaceModelItem>();
         }
 
         private void SetEmptyStrings()
@@ -58,11 +54,13 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(ViewMetaCode)) ViewMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ViewPath)) ViewPath = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
         }
 
+        public List<UserInterfaceModelItem> ModalInterfaces { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public List<UserInterfaceStructureModelItem> UIStructure { get; set; }
         public List<UISection> Sections { get; set; }
@@ -76,10 +74,9 @@ namespace Intwenty.Model
         public string SystemMetaCode { get; set; }
         public string AppMetaCode { get; set; }
         public string ViewMetaCode { get; set; }
+        public string ViewPath { get; set; }
         public int PageSize { get; set; }
-      
-  
-
+        public CurrentRenderContextOptions CurrentRenderContext { get; set; }
         public bool IsMetaTypeInputInterface
         {
             get { return MetaType == MetaTypeInputInterface; }
@@ -89,7 +86,18 @@ namespace Intwenty.Model
         {
             get { return MetaType == MetaTypeListInterface; }
         }
+        public bool IsMainApplicationTableInterface
+        {
+            get
+            {
 
+                if (DataTableDbName == ApplicationInfo.DbName)
+                    return true;
+
+
+                return false;
+            }
+        }
         public bool HasExportFunction
         {
             get
@@ -115,7 +123,7 @@ namespace Intwenty.Model
         {
             get
             {
-                if (Functions.Exists(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode))
+                if (Functions.Exists(p => p.IsMetaTypeDelete))
                     return true;
 
 
@@ -127,7 +135,7 @@ namespace Intwenty.Model
         {
             get
             {
-                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete && p.DataTableMetaCode == ApplicationInfo.MetaCode);
+                return Functions.FirstOrDefault(p => p.IsMetaTypeDelete);
             }
         }
 
@@ -220,11 +228,7 @@ namespace Intwenty.Model
         {
             get {
 
-                var s = DataTableDbName;
-                if (string.IsNullOrEmpty(s))
-                    return Title;
-                else
-                    return string.Format(Title + " ({0})",s);
+                return Title;
             
             }
         }
@@ -297,16 +301,7 @@ namespace Intwenty.Model
             get { return (DataTableInfo != null && !string.IsNullOrEmpty(DataTableMetaCode) && !DataTableInfo.IsFrameworkItem); }
         }
 
-        public List<IUIControl> GetModals()
-        {
-            var res = new List<IUIControl>();
-            foreach (var ctrl in UIStructure)
-            {
-                if (ctrl.IsMetaTypeLookUp)
-                    res.Add(ctrl);
-            }
-            return res;
-        }
+       
 
 
     }

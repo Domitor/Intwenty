@@ -79,8 +79,6 @@ namespace Intwenty.Model
         public string Path { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
-        public DatabaseModelItem DataTableInfo { get; set; }
-        public DataViewModelItem DataViewInfo { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }

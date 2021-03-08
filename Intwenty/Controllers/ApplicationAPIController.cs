@@ -10,6 +10,8 @@ using Intwenty.Areas.Identity.Data;
 using Microsoft.AspNetCore.Razor.Language;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Intwenty.Controllers
 {
@@ -26,26 +28,8 @@ namespace Intwenty.Controllers
             UserManager = usermanager;
         }
 
-        [HttpGet("/Application/API/GetModalInput/{applicationid}/{uimetacode}/{id}")]
-        public IActionResult GetModalInput(int applicationid, string uimetacode, int? id)
-        {
-
-            ViewBag.Id = 0;
-            if (id.HasValue && id.Value > 0)
-                ViewBag.Id = id;
-
-            var model = ModelRepository.GetApplicationModel(applicationid);
-            if (model == null)
-                return BadRequest();
-
-            var uimodel = model.GetUserInterface(uimetacode);
-            if (uimodel == null)
-                return BadRequest();
-
-            return View("~/Views/Application/ModalInput.cshtml", uimodel);
 
 
-        }
 
         /// <summary>
         /// Get the latest version data by id for an application with applicationid
@@ -137,39 +121,68 @@ namespace Intwenty.Controllers
            
         }
 
-        /// <summary>
-        /// Get Domain data based on the meta model for application with Id.
-        /// </summary>
-        [HttpGet]
-        public virtual JsonResult GetValueDomains(int id)
+        [HttpGet("/Application/API/GetDomain/{domainname}/{query}")]
+        public virtual List<ValueDomainVm> GetDomain(string domainname, string query)
         {
-            var data = DataRepository.GetValueDomains(id);
-            var res = new JsonResult(data);
-            return res;
+            if (string.IsNullOrEmpty(domainname))
+                return new List<ValueDomainVm>();
+
+            if (!domainname.Contains("."))
+                return new List<ValueDomainVm>();
+
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = new ClientStateInfo(User);
+            else
+                state = new ClientStateInfo();
+
+            var arr = domainname.Split(".");
+            var dtype = arr[0];
+            var dname = arr[1];
+
+            var retlist = new List<ValueDomainVm>();
+            List<ValueDomainModelItem> domaindata = null;
+
+            if (dtype.ToUpper() == "VALUEDOMAIN")
+            {
+                domaindata = DataRepository.GetValueDomain(dname);
+            }
+            if (dtype.ToUpper() == "APPDOMAIN")
+            {
+                domaindata = DataRepository.GetApplicationDomain(dname, state);
+            }
+
+            if (domaindata != null)
+            {
+                if (query.ToUpper() == "ALL")
+                {
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).ToList();
+                }
+                else if (query.ToUpper() == "PRELOAD")
+                {
+                    var result = new List<ValueDomainVm>();
+                    for (int i = 0; i < domaindata.Count; i++)
+                    {
+                        var p = domaindata[i];
+                        if (i < 50)
+                            result.Add(new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value });
+                        else
+                            break;
+                    }
+                    retlist = result;
+                }
+                else
+                {
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).Where(p=> p.Value.ToLower().Contains(query.ToLower())).ToList();
+                }
+            }
+
+          
+            return retlist;
 
         }
 
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost]
-        public virtual JsonResult GetDataViewValue([FromBody] ListFilter model)
-        {
-            var viewitem = DataRepository.GetDataViewRecord(model);
-            return new JsonResult(viewitem);
-        }
 
-        /// <summary>
-        /// Get a dataview record by a search value and a view name.
-        /// Used from the LOOKUP Control
-        /// </summary>
-        [HttpPost]
-        public virtual JsonResult GetDataView([FromBody] ListFilter model)
-        {
-            var dv = DataRepository.GetDataView(model);
-            return new JsonResult(dv);
-        }
 
         /// <summary>
         /// Get a json structure for a new application, including defaultvalues
@@ -189,45 +202,77 @@ namespace Intwenty.Controllers
         {
 
             ClientStateInfo state = null;
-            if (User.Identity.IsAuthenticated)
-                state = ClientStateInfo.CreateFromJSON(model, User);
-            else
-                state = ClientStateInfo.CreateFromJSON(model);
 
-            if (state == null)
-                return BadRequest();
-            if (state.ApplicationId < 1)
-                return BadRequest();
-            if (state.ApplicationViewId < 1)
-                return BadRequest();
-            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
-            if (appmodel == null)
-                return BadRequest();
-
-            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
-            if (viewmodel == null)
-                return BadRequest();
-
-
-            if (viewmodel.IsPublic)
+            try
             {
+
+
+                if (User.Identity.IsAuthenticated)
+                    state = ClientStateInfo.CreateFromJSON(model, User);
+                else
+                    state = ClientStateInfo.CreateFromJSON(model);
+
+                if (state == null)
+                    return BadRequest();
+                if (state.ApplicationId < 1)
+                    return BadRequest();
+
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+
+                if (state.ApplicationViewId > 0)
+                {
+                    var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                    if (viewmodel == null)
+                        return BadRequest();
+
+                    if (viewmodel.IsPublic)
+                    {
+                        var pub_save_res = DataRepository.Save(state, appmodel);
+                        if (!pub_save_res.IsSuccess)
+                            throw new InvalidOperationException(pub_save_res.UserError);
+
+                        return new JsonResult(pub_save_res);
+                    }
+                    else
+                    {
+                        if (!User.Identity.IsAuthenticated)
+                            throw new InvalidOperationException("You must login to use this function");
+
+                        if (!await UserManager.HasAuthorization(User, viewmodel))
+                            throw new InvalidOperationException(string.Format("You are not authorized to modify data in this view"));
+
+                    }
+                    
+                }
+                else
+                {
+                    if (!User.Identity.IsAuthenticated)
+                        throw new InvalidOperationException("You must login to use this function");
+
+                    if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                        throw new InvalidOperationException(string.Format("You are not authorized to modify data in this application"));
+
+                }
+
+
                 var res = DataRepository.Save(state, appmodel);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
                 return new JsonResult(res);
+
             }
-            else
+            catch (Exception ex)
             {
-                if (!User.Identity.IsAuthenticated)
-                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must login to use this function"));
-                if (!await UserManager.HasAuthorization(User, viewmodel))
-                   return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to modify data in this view or application")));
-
-
-                var res = DataRepository.Save(state, appmodel);
-                return new JsonResult(res);
-
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving an application.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
             }
-
-
         }
 
         [HttpPost]
@@ -235,32 +280,159 @@ namespace Intwenty.Controllers
         {
 
             ClientStateInfo state = null;
-            if (User.Identity.IsAuthenticated)
-                state = ClientStateInfo.CreateFromJSON(model, User);
-            else
-                state = ClientStateInfo.CreateFromJSON(model);
 
-            if (state == null)
-                return BadRequest();
-            if (state.ApplicationId < 1)
-                return BadRequest();
-            if (state.ApplicationViewId < 1)
-                return BadRequest();
-            var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
-            if (appmodel == null)
-                return BadRequest();
+            try
+            {
+                if (User.Identity.IsAuthenticated)
+                    state = ClientStateInfo.CreateFromJSON(model, User);
+                else
+                    state = ClientStateInfo.CreateFromJSON(model);
 
-            var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
-            if (viewmodel == null)
-                return BadRequest();
+                if (state == null)
+                    return BadRequest();
+                if (state.ApplicationId < 1)
+                    return BadRequest();
+              
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
 
-            if (!User.Identity.IsAuthenticated)
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You must log in to use this function"));
-            if (!await UserManager.HasAuthorization(User, viewmodel))
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You are not authorized to delete data in application {0}", appmodel.Application.Title)));
+                if (state.ApplicationViewId > 0)
+                {
+                    var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                    if (viewmodel == null)
+                        return BadRequest();
 
-            var res = DataRepository.Delete(state, appmodel);
-            return new JsonResult(res);
+                    if (viewmodel.IsPublic)
+                    {
+                        var pub_del_res = DataRepository.Delete(state, appmodel);
+                        if (!pub_del_res.IsSuccess)
+                            throw new InvalidOperationException(pub_del_res.UserError);
+
+                        return new JsonResult(pub_del_res);
+                    }
+                    else
+                    {
+                        if (!User.Identity.IsAuthenticated)
+                            throw new InvalidOperationException("You must login to use this function");
+
+                        if (!await UserManager.HasAuthorization(User, viewmodel))
+                            throw new InvalidOperationException(string.Format("You are not authorized to delete data in this view"));
+
+                    }
+                    
+                }
+                else
+                {
+                    if (!User.Identity.IsAuthenticated)
+                        throw new InvalidOperationException("You must login to use this function");
+
+                    if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                        throw new InvalidOperationException(string.Format("You are not authorized to delete data in this application"));
+
+                }
+
+                var res = DataRepository.Delete(state, appmodel);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
+                return new JsonResult(res);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting an application.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> DeleteTableLine([FromBody] System.Text.Json.JsonElement model)
+        {
+
+            ClientStateInfo state = null;
+
+            try
+            {
+                ApplicationData lineinfo = ApplicationData.CreateFromJSON(model);
+                var lineid = lineinfo.GetAsInt("Id").Value;
+                var appid = lineinfo.GetAsInt("ApplicationId").Value;
+                var viewid = lineinfo.GetAsInt("ApplicationViewId").Value;
+                var tablename = lineinfo.GetAsString("TableName");
+                var parentid = lineinfo.GetAsInt("ParentId").Value;
+
+                if (appid < 1)
+                    return BadRequest();
+
+                if (lineid < 1)
+                    return BadRequest();
+
+                if (string.IsNullOrEmpty(tablename))
+                    return BadRequest();
+
+                if (User.Identity.IsAuthenticated)
+                    state = new ClientStateInfo(User) { Id=parentid, ApplicationId = appid, ApplicationViewId = viewid };
+                else
+                    state = new ClientStateInfo() { Id=parentid, ApplicationId = appid, ApplicationViewId = viewid };
+
+
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+
+                if (state.ApplicationViewId > 0)
+                {
+                    var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                    if (viewmodel == null)
+                        return BadRequest();
+
+                    if (viewmodel.IsPublic)
+                    {
+                        var pub_del_res = DataRepository.DeleteTableLine(state, appmodel, lineid, tablename);
+                        if (!pub_del_res.IsSuccess)
+                            throw new InvalidOperationException(pub_del_res.UserError);
+
+                        return new JsonResult(pub_del_res);
+                    }
+                    else
+                    {
+                        if (!await UserManager.HasAuthorization(User, viewmodel))
+                            throw new InvalidOperationException(string.Format("You are not authorized to delete data in this view"));
+
+                     }
+                    
+                }
+                else
+                {
+                    if (!User.Identity.IsAuthenticated)
+                        throw new InvalidOperationException("You must login to use this function");
+
+                    if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                        throw new InvalidOperationException(string.Format("You are not authorized to delete data in this application"));
+
+                }
+
+
+                var res = DataRepository.DeleteTableLine(state, appmodel, lineid, tablename);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
+                return new JsonResult(res);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting a sub table line.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
 
         }
 

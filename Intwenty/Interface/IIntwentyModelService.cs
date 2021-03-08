@@ -25,16 +25,17 @@ namespace Intwenty.Interface
 
 
         //APPLICATION
+        public List<ApplicationModelItem> GetApplicationDescriptions();
         public List<SystemModelItem> GetSystemModels();
         public List<ApplicationModel> GetApplicationModels();
         public ApplicationModel GetApplicationModel(int applicationid);
-        public List<ApplicationModelItem> GetAppModels();
-
+        public ApplicationModel GetApplicationModel(string metacode);
+      
 
 
         //DATABASE
         public List<DatabaseModelItem> GetDatabaseModels();
-
+        public DatabaseModelItem GetDatabaseColumnModel(ApplicationModel model, string columnname, string tablename="");
 
 
         //UI
@@ -42,13 +43,6 @@ namespace Intwenty.Interface
         public ViewModel GetLocalizedViewModelById(int id);
         public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
         public ViewModel GetLocalizedViewModelByPath(string path);
-
-
-
-        //DATAVIEWS
-        public List<DataViewModelItem> GetLocalizedDataViewModels();
-        public List<DataViewModelItem> GetDataViewModels();
-
 
 
         //VALUE DOMAINS

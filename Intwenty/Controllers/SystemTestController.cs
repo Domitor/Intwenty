@@ -76,9 +76,9 @@ namespace Intwenty.Controllers
             var res = new List<TestResult>();
 
             //CLEAN UP PREV TEST
-            var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-            var dvmodels = _modelservice.GetDataViewModels().Where(p => p.MetaCode == "DVEVENTLOG" || p.ParentMetaCode == "DVEVENTLOG").ToList();
-           
+            var model = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 10000);
+            var simplemodel = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 20000);
+
 
             var db = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
             db.Open();
@@ -111,13 +111,12 @@ namespace Intwenty.Controllers
                 db.RunCommand("DROP TABLE tests_TestData2AutoInc");
             }
 
-          
 
-            if (dvmodels != null && dvmodels.Count > 0)
+            if (simplemodel != null && db.TableExists(simplemodel.DbName))
             {
-                foreach (var dv in dvmodels)
-                    db.DeleteEntity(new DataViewItem() { Id = dv.Id });
+                db.RunCommand(string.Format("DROP TABLE {0}", simplemodel.DbName));
             }
+           
 
             if (model != null)
             {
@@ -128,6 +127,17 @@ namespace Intwenty.Controllers
                 db.DeleteEntity(new ApplicationItem() { Id = model.Id });
             }
 
+
+            if (simplemodel != null)
+            {
+                var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == simplemodel.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == simplemodel.SystemMetaCode);
+                foreach (var dbitem in dbmodels)
+                    db.DeleteEntity(new DatabaseItem() { Id = simplemodel.Id });
+
+                db.DeleteEntity(new ApplicationItem() { Id = simplemodel.Id });
+            }
+
+
             db.Close();
 
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test1ORMCreateTable());
@@ -135,11 +145,11 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test3ORMUpdate());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test4ORMDelete());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test5NotUsed());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test6CreateIntwentyExampleModel());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test7CreateIntwentyApplication());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test8GetListOfIntwentyApplication());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test9GetListOfIntwentyApplicationByOwnerUser());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test11UpdateIntwentyApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test6CreateIntwentyStandardModel());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test7CreateIntwentyStandardApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test8GetListOfIntwentyStandardApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test9GetListOfIntwentyStandardApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test11UpdateIntwentyStandardApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test111GetTypedApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test12DeleteIntwentyApplication());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test13GetAllValueDomains());
@@ -147,8 +157,10 @@ namespace Intwenty.Controllers
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test15Transactions());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test17GetLists());
             _hubContext.Clients.All.SendAsync("ReceiveMessage", Test18TestIdentity());
-            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test500GetDataView());
-           
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test30CreateIntwentySimpleModel());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test32CreateIntwentySimpleApplication());
+            _hubContext.Clients.All.SendAsync("ReceiveMessage", Test34GetListOfIntwentySimpleApplication());
+
 
 
             //TEST ALL SUPPORTED DB
@@ -184,7 +196,7 @@ namespace Intwenty.Controllers
                 int expected = 5000;
                 for (int i = 0; i < 5; i++)
                 {
-                    if (i==0)
+                    if (i == 0)
                         _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(true));
                     else
                         _hubContext.Clients.All.SendAsync("ReceiveMessage", Test400PostgresInsertPerformance(false));
@@ -270,7 +282,7 @@ namespace Intwenty.Controllers
             try
             {
 
-               
+
                 dbstore.Open();
                 var check = dbstore.GetEntities<TestDataAutoInc>();
                 if (check.Count < 100)
@@ -373,7 +385,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test6CreateIntwentyExampleModel()
+        private TestResult Test6CreateIntwentyStandardModel()
         {
             TestResult result = new TestResult(true, MessageCode.RESULT, "Create an intwenty application (My test application)");
             var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
@@ -386,7 +398,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The default system could not be found");
 
                 dbstore.Open();
-                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode=system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
+                dbstore.InsertEntity(new ApplicationItem() { Id = 10000, SystemMetaCode = system.MetaCode, Description = "An app for testing intwenty", MetaCode = "TESTAPP", Title = "My test application", DbName = "def_TestApp", DataMode = 0, UseVersioning = true });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "TESTAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
@@ -402,26 +414,22 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new ValueDomainItem() { DomainName = "TESTDOMAIN", Value = "Domain Value 2", Code = "3" });
 
 
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode= system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataView, MetaCode = "DVEVENTLOG", SQLQuery ="select id,verbosity,message from sysdata_eventlog", Title = "Eventlog", ParentMetaCode = "ROOT" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewKeyColumn, MetaCode = "DVEVENTLOG_COL1", ParentMetaCode = "DVEVENTLOG", Title = "ID", SQLQueryFieldName = "id" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL2", ParentMetaCode = "DVEVENTLOG", Title = "MsgType", SQLQueryFieldName = "verbosity" });
-                dbstore.InsertEntity(new DataViewItem() { SystemMetaCode = system.MetaCode, MetaType = DataViewModelItem.MetaTypeDataViewColumn, MetaCode = "DVEVENTLOG_COL3", ParentMetaCode = "DVEVENTLOG", Title = "Message", SQLQueryFieldName = "message" });
                 dbstore.Close();
 
                 _modelservice.ClearCache();
 
-                var model = _modelservice.GetAppModels().Find(p => p.Id == 10000);
-                if (model==null)
+                var model = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 10000);
+                if (model == null)
                     throw new InvalidOperationException("The created intwenty 'TESTAPP' model could not be found");
 
                 var configres = _modelservice.ConfigureDatabase(model);
-                
+
                 if (!configres.Result.IsSuccess)
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
-              
+
             }
             catch (Exception ex)
             {
@@ -432,7 +440,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test7CreateIntwentyApplication()
+        private TestResult Test7CreateIntwentyStandardApplication()
         {
             TestResult result = new TestResult(true, MessageCode.RESULT, "Create 100 intwenty application based on the created test model");
 
@@ -490,7 +498,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test8GetListOfIntwentyApplication()
+        private TestResult Test8GetListOfIntwentyStandardApplication()
         {
             TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list just of created intwenty applications");
 
@@ -517,7 +525,7 @@ namespace Intwenty.Controllers
                     if (pageresult.Data.Length < 20)
                         throw new InvalidOperationException("GetPagedList - No result");
 
-                  
+
                     if (pageresult.ListFilter.MaxCount == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
 
@@ -528,7 +536,7 @@ namespace Intwenty.Controllers
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
 
-                
+
             }
             catch (Exception ex)
             {
@@ -538,17 +546,16 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test9GetListOfIntwentyApplicationByOwnerUser()
+        private TestResult Test9GetListOfIntwentyStandardApplication()
         {
-            TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list of created intwenty applications by owner user");
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list of created intwenty applications");
 
             try
             {
                 var f = new ListFilter() { ApplicationId = 10000 };
-                f.User.UserName = "OTHERUSER";
                 var getlistresult = _dataservice.GetJsonArray(f);
                 if (!getlistresult.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetListByOwnerUser(1000, OTHERUSER) failed: " + getlistresult.SystemError);
+                    throw new InvalidOperationException("IntwentyDataService.GetJsonArray(listfilter) failed: " + getlistresult.SystemError);
 
                 var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
@@ -569,9 +576,9 @@ namespace Intwenty.Controllers
             return result;
         }
 
-      
 
-        private TestResult Test11UpdateIntwentyApplication()
+
+        private TestResult Test11UpdateIntwentyStandardApplication()
         {
 
             TestResult result = new TestResult(true, MessageCode.RESULT, "Update intwenty application");
@@ -604,7 +611,7 @@ namespace Intwenty.Controllers
                 if (!saveresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
-                
+
                 var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
                 getbyidresult = _dataservice.Get(newstate);
                 if (!getbyidresult.IsSuccess)
@@ -661,7 +668,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var args = new ListFilter() { ApplicationId = 10000,  PageSize = 500 };
+                var args = new ListFilter() { ApplicationId = 10000, PageSize = 500 };
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
                 if (model == null)
                     throw new InvalidOperationException("Model not found");
@@ -717,7 +724,7 @@ namespace Intwenty.Controllers
 
                 var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
 
-    
+
                 var getresult = _dataservice.Get(state);
                 if (!getresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetLatestVersionByOwnerUser(state) failed: " + getresult.SystemError);
@@ -725,8 +732,9 @@ namespace Intwenty.Controllers
                 var appdata = getresult.GetAsApplicationData();
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
+                var model = _modelservice.GetApplicationModel(state.ApplicationId);
                 var rowid = appdata.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.DeleteRow(state, rowid, appdata.SubTables[0].DbName);
+                var deleterowresult = _dataservice.DeleteTableLine(state, model, rowid, appdata.SubTables[0].DbName);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 
@@ -774,16 +782,10 @@ namespace Intwenty.Controllers
             {
 
                 var vd = _dataservice.GetValueDomains();
-                if (!vd.IsSuccess)
-                    throw new InvalidOperationException("IntwentyDataService.GetValueDomains() failed: " + vd.SystemError);
+                if (vd.Count == 0)
+                    throw new InvalidOperationException("IntwentyDataService.GetValueDomains() failed: ");
 
-                var data = vd.GetAsApplicationData();
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(vd.Data).RootElement);
-                if (data.SubTables.Count < 1)
-                    throw new InvalidOperationException("Could not create ApplicationData.SubTable from string json array");
-
-                if (!data.SubTables.Exists(p => p.DbName == "VALUEDOMAIN_TESTDOMAIN"))
-                    throw new InvalidOperationException("Could not get list of intwenty value domain items.");
+               
 
                 result.Finish();
                 _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", result.Duration));
@@ -807,7 +809,7 @@ namespace Intwenty.Controllers
                 dbstore.Open();
                 var tbl = dbstore.GetResultSet("select * from sysdata_EventLog");
                 dbstore.Close();
-             
+
 
                 if (tbl == null)
                     throw new InvalidOperationException("GetDataSet based sysdata_EventLog returned null");
@@ -883,7 +885,7 @@ namespace Intwenty.Controllers
             return result;
         }
 
-      
+
 
         private TestResult Test17GetLists()
         {
@@ -1033,6 +1035,128 @@ namespace Intwenty.Controllers
 
             return result;
         }
+
+        private TestResult Test30CreateIntwentySimpleModel()
+        {
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Create an intwenty simple mode application");
+
+            var dbstore = new Connection(_settings.DefaultConnectionDBMS, _settings.DefaultConnection);
+
+            try
+            {
+
+                var system = _modelservice.GetSystemModels().Find(p => p.MetaCode == "INTWENTYDEFAULTSYS");
+                if (system == null)
+                    throw new InvalidOperationException("The default system could not be found");
+
+                dbstore.Open();
+                dbstore.InsertEntity(new ApplicationItem() { Id = 20000, SystemMetaCode = system.MetaCode, Description = "An app for testing intwenty simple model", MetaCode = "SIMPLEAPP", Title = "My simple mode test application", DbName = "def_SimpleTestApp", DataMode = 1, UseVersioning = false });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "HEADER", DbName = "Header", ParentMetaCode = "ROOT", DataType = "STRING" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "BOOLVALUE", DbName = "BoolValue", ParentMetaCode = "ROOT", DataType = "BOOLEAN" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
+                dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
+                
+                dbstore.Close();
+
+                _modelservice.ClearCache();
+
+                var model = _modelservice.GetApplicationDescriptions().Find(p => p.Id == 20000);
+                if (model == null)
+                    throw new InvalidOperationException("The created intwenty 'SIMPLEAPP' model could not be found");
+
+                var configres = _modelservice.ConfigureDatabase(model);
+
+                if (!configres.Result.IsSuccess)
+                    throw new InvalidOperationException("The created intwenty model could not be configured with success");
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test30CreateIntwentySimpleModel lasted  {0} ms", result.Duration));
+
+            }
+            catch (Exception ex)
+            {
+                dbstore.Close();
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private TestResult Test32CreateIntwentySimpleApplication()
+        {
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Create 200 intwenty application based on the created simple mode test model");
+
+            try
+            {
+                for (int i = 0; i < 200; i++)
+                {
+                    var state = new ClientStateInfo();
+                    state.ApplicationId = 20000;
+
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "Description", Value = "Test description " + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "BoolValue", Value = true });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "IntValue", Value = 25 + i });
+                    state.Data.Values.Add(new ApplicationValue() { DbName = "DecValue", Value = 777.77 });
+                   
+
+                    var saveresult = _dataservice.Save(state);
+                    if (!saveresult.IsSuccess)
+                        throw new InvalidOperationException("IntwentyDataService.Save() intwenty application failed: " + saveresult.SystemError);
+
+
+                }
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test32CreateIntwentySimpleApplication (Create 200 applications) lasted  {0} ms", result.Duration));
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+        private TestResult Test34GetListOfIntwentySimpleApplication()
+        {
+            TestResult result = new TestResult(true, MessageCode.RESULT, "Get a list just of created intwenty simple mode applications");
+
+            try
+            {
+                var filter = new ListFilter() { ApplicationId = 20000, SkipPaging = true };
+                var getlistresult = _dataservice.GetJsonArray(filter);
+                if (!getlistresult.IsSuccess)
+                    throw new InvalidOperationException("IntwentyDataService.GetJsonArray(listfilter) failed: " + getlistresult.SystemError);
+
+                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                if (state.Data.SubTables.Count < 1)
+                    throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
+
+                if (state.Data.SubTables[0].Rows.Count < 200)
+                    throw new InvalidOperationException("Could not get list of intwenty applications, should be 200 records");
+
+
+
+                result.Finish();
+                _dataservice.LogInfo(string.Format("Test Case: Test34GetListOfIntwentySimpleApplication (Get 200 Applications) lasted  {0} ms", result.Duration));
+
+
+            }
+            catch (Exception ex)
+            {
+                result.SetError(ex.Message, "Test failed");
+            }
+
+            return result;
+        }
+
+      
+      
+
 
         //SQLite performance
         private TestResult Test100SqliteInsertPerformance()
@@ -1666,33 +1790,6 @@ namespace Intwenty.Controllers
             return result;
         }
 
-        private TestResult Test500GetDataView()
-        {
-            TestResult result = new TestResult(true, MessageCode.RESULT, "Get an intwenty DataView");
-
-            try
-            {
-
-                var res = _dataservice.GetDataView(new ListFilter() { PageSize = 1000000, DataViewMetaCode = "DVEVENTLOG" });
-                if (!res.IsSuccess)
-                    throw new InvalidOperationException("DataView could not execute");
-
-
-                result.Finish();
-
-                _dataservice.LogInfo(string.Format("Test Case: Get an intwenty DataView lasted  {0} ms", result.Duration));
-
-
-            }
-            catch (Exception ex)
-            {
-                result.SetError(ex.Message, "Test failed");
-            }
-
-            return result;
-        }
-
-
 
 
 
@@ -1704,7 +1801,7 @@ namespace Intwenty.Controllers
 
 
 
-   
+
     public class def_TestApp : InformationHeader
     {
         public string Header { get; set; }
@@ -1723,7 +1820,8 @@ namespace Intwenty.Controllers
 
     [DbTablePrimaryKey("Id")]
     [DbTableName("tests_TestDataAutoInc")]
-    public class TestDataAutoInc {
+    public class TestDataAutoInc
+    {
 
         [AutoIncrement]
         public int Id { get; set; }

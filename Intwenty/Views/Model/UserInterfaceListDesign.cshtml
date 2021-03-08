@@ -61,7 +61,7 @@
 
 
     <br />
-
+    <b>Functions</b>
     <div class="row">
         <div class="col-md-3">
             <button class="btn btn-sm btn-outline-secondary" v-if="hasFunction('FILTER')" v-on:click="openFunctionDlg('FILTER')" style="width:220px"><span class="fas fa-cog" title="Filter"></span> Configure Filter</button>
@@ -79,28 +79,6 @@
 
         </div>
     </div>
-
-    <br />
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label class="control-label">List Title</label>
-                <input type="text" class="form-control form-control-sm" v-model="model.table.title" />
-            </div>
-        </div>
-
-        <div class="col-md-3">
-
-        </div>
-        <div class="col-md-3">
-
-        </div>
-    </div>
-    
-
-    <br />
-    <br />
     <br />
     <div class="row">
         <div class="col-md-6">
@@ -116,10 +94,23 @@
         </div>
     </div>
 
+    <br />
 
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <b>Title</b>
+                <input type="text" class="form-control form-control-sm" v-model="model.table.title" />
+            </div>
+        </div>
 
+        <div class="col-md-3">
 
+        </div>
+        <div class="col-md-3">
 
+        </div>
+    </div>
 
     <br />
 
@@ -206,7 +197,7 @@
 
                                 <div class="form-group" v-if="(functionHasPath() && !functionsettings.isModalAction)">
                                     <label class="control-label">Path</label>
-                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" />
+                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" :disabled="model.isSubTableUserInterface" />
                                 </div>
 
                             </div>
@@ -254,16 +245,15 @@
                                 <br />
 
                                 <div class="form-group">
+                                    <label class="control-label">Title</label>
+                                    <input id="coltitle" type="text" class="form-control form-control-sm" v-model="columnsettings.title" />
+                                </div>
+
+                                <div class="form-group">
                                     <label class="control-label">Binding<span style="color: red"> *</span></label>
                                     <select class="form-control form-control-sm" v-model="columnsettings.dataColumn1DbName">
                                         <option v-for="item in model.dataTable.columns" v-bind:value="item.dbName">{{item.dbName}}</option>
                                     </select>
-                                </div>
-
-
-                                <div class="form-group">
-                                    <label class="control-label">Title</label>
-                                    <input id="coltitle" type="text" class="form-control form-control-sm" v-model="columnsettings.title" />
                                 </div>
 
                             </div>
@@ -441,6 +431,10 @@
                         isModalAction = func.isModalAction;
                     }
                    
+                    if (context.model.isSubTableUserInterface)
+                    {
+                        actionPath = context.model.viewPath;
+                    }
 
                     context.functionsettings = {
                         id: id,

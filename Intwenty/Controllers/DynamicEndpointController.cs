@@ -159,30 +159,7 @@ namespace Intwenty.Controllers
            
         }
 
-        [HttpPost]
-        public IActionResult View([FromBody] ListFilter model)
-        {
-            if (!IsAuthenticated())
-                return Unauthorized();
-
-            var ep = GetEndpointModelFromPath();
-            if (ep == null)
-                return new BadRequestResult();
-
-            if (!ep.IsDataViewConnected)
-                return new JsonResult("Failure due to endpoint model configuration") { StatusCode = 400 };
-
-            if (model == null)
-                return new JsonResult("Invalid request body") { StatusCode = 400 };
-
-            model.DataViewMetaCode = ep.DataViewInfo.MetaCode;
-            var res = DataRepository.GetDataView(model);
-            if (!res.IsSuccess)
-                return new JsonResult(res.UserError) { StatusCode = 400 };
-
-            return new JsonResult(res);
-
-        }
+      
 
         private bool IsAuthenticated()
         {

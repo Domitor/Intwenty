@@ -14,7 +14,7 @@ namespace Intwenty.Model.Design
         public string MetaCode { get; set; }
         public UITable Table { get; set; }
         public DatabaseTableVm DataTable { get; set; }
-
+        public string ViewPath { get; set; }
         public bool IsSubTableUserInterface { get; set; }
 
         public List<ActionUserInterface> ActionUserInterfaces { get; set; }
@@ -28,6 +28,7 @@ namespace Intwenty.Model.Design
             Table = new UITable();
             MetaType = UserInterfaceModelItem.MetaTypeListInterface;
             Properties = "";
+            ViewPath = "";
 
         }
 
@@ -41,7 +42,7 @@ namespace Intwenty.Model.Design
 
         public static ActionUserInterface Create(UserInterfaceModelItem model)
         {
-            var title = string.Format("Input UI for {0}", model.DataTableDbName);
+            var title = model.Description;
             return new ActionUserInterface() { Id= model.Id, MetaCode = model.MetaCode, Title = title };
         }
 

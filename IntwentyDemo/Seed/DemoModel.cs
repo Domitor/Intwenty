@@ -14,7 +14,7 @@ namespace IntwentyDemo.Seed
 {
     public static class DemoModel
     {
-     
+
 
         public static void SeedModel(IServiceProvider services)
         {
@@ -31,16 +31,15 @@ namespace IntwentyDemo.Seed
             var userinterface = new List<UserInterfaceItem>();
             var functions = new List<FunctionItem>();
             var dbitems = new List<DatabaseItem>();
-            var dataviews = new List<DataViewItem>();
             var endpoints = new List<EndpointItem>();
 
             //SYSTEMS
-            systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title="Default", DbPrefix = "def" });
-            systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", DbPrefix ="wms" });
+            systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title = "Default", DbPrefix = "def" });
+            systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", DbPrefix = "wms" });
             systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", DbPrefix = "blog" });
 
             //APPLICATIONS
-            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode="WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey="CUSTOMER", DbName = "wms_Customer", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
+            applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode = "WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey = "CUSTOMER", DbName = "wms_Customer", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
             applications.Add(new ApplicationItem() { Id = 20, Description = "An app for managing items", SystemMetaCode = "WAREHOUSE", MetaCode = "ITEM", Title = "Item", TitleLocalizationKey = "ITEM", DbName = "wms_Item", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
             applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 2, TenantIsolationMethod = 2 });
             applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
@@ -61,7 +60,7 @@ namespace IntwentyDemo.Seed
             //APPLICATION CUSTOMER
             //--------------------
             //DATABASE - MAINTABLE
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING", Properties= "DEFVALUE=AUTO#DEFVALUE_START=1000#DEFVALUE_PREFIX=CUST#DEFVALUE_SEED=100#UNIQUE=TRUE#MANDATORY=TRUE" });
+            dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING", Properties = "DEFVALUE=AUTO#DEFVALUE_START=1000#DEFVALUE_PREFIX=CUST#DEFVALUE_SEED=100#UNIQUE=TRUE#MANDATORY=TRUE" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERPHONE", DbName = "CustomerPhone", ParentMetaCode = "ROOT", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMEREMAIL", DbName = "CustomerEmail", ParentMetaCode = "ROOT", DataType = "STRING" });
@@ -70,9 +69,9 @@ namespace IntwentyDemo.Seed
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "DATACOLUMN", MetaCode = "CUSTOMERTAGSTEXT", DbName = "CustomerTagsText", ParentMetaCode = "ROOT", DataType = "TEXT" });
 
             //APPLICATION - VIEWS
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "LV_CUSTOMER1", MetaType = "UIVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", Path = "Customers/List", IsPrimary = true, IsPublic=false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER1", MetaType = "UIVIEW", Title = "Create Customer", TitleLocalizationKey = "CUST_ADD", Path = "Customers/Create", IsPrimary = false, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER",  MetaCode = "INPUT_CUSTOMER2", MetaType = "UIVIEW", Title = "Edit Customer", TitleLocalizationKey = "CUST_EDIT", Path = "Customers/Edit/{id}", IsPrimary= false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaCode = "LV_CUSTOMER1", MetaType = "UIVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", Path = "Customers/List", IsPrimary = true, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaCode = "INPUT_CUSTOMER1", MetaType = "UIVIEW", Title = "Create Customer", TitleLocalizationKey = "CUST_ADD", Path = "Customers/Create", IsPrimary = false, IsPublic = false });
+            views.Add(new ViewItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaCode = "INPUT_CUSTOMER2", MetaType = "UIVIEW", Title = "Edit Customer", TitleLocalizationKey = "CUST_EDIT", Path = "Customers/Edit/{id}", IsPrimary = false, IsPublic = false });
 
             //UI
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "LV_CUSTOMER1", MetaCode = "CUST_LISTVIEW", MetaType = "LISTINTERFACE", DataTableMetaCode = "CUSTOMER" });
@@ -80,15 +79,15 @@ namespace IntwentyDemo.Seed
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", ViewMetaCode = "INPUT_CUSTOMER2", MetaCode = "CUST_INPUTVIEW", MetaType = "INPUTINTERFACE", DataTableMetaCode = "CUSTOMER" });
 
             //INPUT UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode= "CUST_INPUTVIEW", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1, Properties="READONLY=TRUE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL1", Title = "Basics", TitleLocalizationKey = "CUSTOMERBASIC", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TB_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUSTPNL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TB_CUSTNAME", DataColumn1MetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "CUSTPNL1", RowOrder = 2, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "MULTISELECT", MetaCode = "MS_TAGS", DataColumn1MetaCode = "CUSTOMERTAGS", DataColumn2MetaCode = "CUSTOMERTAGSTEXT", Domain = "VALUEDOMAIN.CUSTOMERTAGS", Title = "Tags", TitleLocalizationKey = "MS_TAGS", ParentMetaCode = "CUSTPNL1", RowOrder = 3, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL2",  Title = "Contact", TitleLocalizationKey = "CUSTOMERCONTACT", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 2 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "SEARCHBOX", MetaCode = "MS_TAGS", DataColumn1MetaCode = "CUSTOMERTAGS", DataColumn2MetaCode = "CUSTOMERTAGSTEXT", Domain = "VALUEDOMAIN.CUSTOMERTAGS", Title = "Tags", TitleLocalizationKey = "MS_TAGS", ParentMetaCode = "CUSTPNL1", RowOrder = 3, ColumnOrder = 1, Properties="MULTISELECT=TRUE#ALLOWCREATE=TRUE#USESEARCH=TRUE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "PANEL", MetaCode = "CUSTPNL2", Title = "Contact", TitleLocalizationKey = "CUSTOMERCONTACT", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "EMAILBOX", MetaCode = "TBCUSTMAIL", DataColumn1MetaCode = "CUSTOMEREMAIL", Title = "Email", TitleLocalizationKey = "CUSTOMEREMAIL", ParentMetaCode = "CUSTPNL2", RowOrder = 1, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "NUMBOX", MetaCode = "TBCUSTPHONE", DataColumn1MetaCode = "CUSTOMERPHONE", Title = "Phone", TitleLocalizationKey = "CUSTOMERPHONE", ParentMetaCode = "CUSTPNL2", RowOrder = 2, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TBCUSTSTAT", DataColumn1MetaCode = "CUSTOMERSTATUS", Title = "Status", TitleLocalizationKey = "", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2, Properties="READONLY=TRUE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_INPUTVIEW", MetaType = "TEXTBOX", MetaCode = "TBCUSTSTAT", DataColumn1MetaCode = "CUSTOMERSTATUS", Title = "Status", TitleLocalizationKey = "", ParentMetaCode = "CUSTPNL2", RowOrder = 3, ColumnOrder = 2, Properties = "READONLY=TRUE" });
 
             //LIST UI
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_LISTVIEW", MetaType = "TABLE", MetaCode = "CUST_LISTVIEW", Title = "Customer List", TitleLocalizationKey = "CUSTOMERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
@@ -96,24 +95,24 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_LISTVIEW", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_CUSTID", DataColumn1MetaCode = "CUSTOMERID", Title = "Customer ID", TitleLocalizationKey = "CUSTOMERID", ParentMetaCode = "CUST_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", UserInterfaceMetaCode = "CUST_LISTVIEW", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_CUSTNAME", DataColumn1MetaCode = "CUSTOMERNAME", Title = "Customer Name", TitleLocalizationKey = "CUSTOMERNAME", ParentMetaCode = "CUST_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
-          
+
 
             //UI FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", DataTableMetaCode= "CUSTOMER",  MetaCode = "CUST_FUNC_CREATE", ActionPath = "Customers/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT",   DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_EDIT", ActionPath = "Customers/Edit", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_DELETE", ActionPath = "Customers/API/Delete", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "CUST_FUNC_CREATE", ActionPath = "Customers/Create", IsModalAction = false, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT",MetaCode = "CUST_FUNC_EDIT", ActionPath = "Customers/Edit", IsModalAction = false, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "CUST_FUNC_DELETE", ActionPath = "Application/API/Delete", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "CUST_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "CUST_LISTVIEW", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING",MetaCode = "CUST_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER1", OwnerMetaType = "UIVIEW", MetaType = "SAVE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_SAVE", ActionPath = "Customers/API/Save", IsModalAction = false, Title = "Save", Properties= "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Customers/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER1", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", DataTableMetaCode = "CUSTOMER", MetaCode = "CUST_FUNC_BACK", ActionPath = "Customers/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER1", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "CUST_FUNC_SAVE", ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Customers/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER1", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "CUST_FUNC_BACK", ActionPath = "Customers/List", IsModalAction = false, Title = "Back to list" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER2", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "CUST_FUNC_SAVE1", DataTableMetaCode = "CUSTOMER", ActionPath = "Customers/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER2", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "CUST_FUNC_BACK1", DataTableMetaCode = "CUSTOMER", ActionPath = "Customers/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER2", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "CUST_FUNC_SAVE1", ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", OwnerMetaCode = "INPUT_CUSTOMER2", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "CUST_FUNC_BACK1", ActionPath = "Customers/List", IsModalAction = false, Title = "Back to list" });
 
 
             #endregion
-        
+
             #region item
 
             //APPLICATION ITEM
@@ -152,7 +151,7 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "COMBOBOX", MetaCode = "CB_CATEGORY", DataColumn1MetaCode = "CATCODE", Title = "Category", ParentMetaCode = "ITMPNL_B", RowOrder = 1, ColumnOrder = 2, Domain = "VALUEDOMAIN.ITEMCATEGORY" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "NUMBOX", MetaCode = "NUMBOX_PURCHPRICE", DataColumn1MetaCode = "PURCHASEPRICE", Title = "Purchase Price", ParentMetaCode = "ITMPNL_B", RowOrder = 2, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "NUMBOX", MetaCode = "NUMBOX_SALESPRICE", DataColumn1MetaCode = "SALESPRICE", Title = "Sales Pricee", ParentMetaCode = "ITMPNL_B", RowOrder = 3, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "LOOKUP", MetaCode = "LOOKUPVEND", DataColumn1MetaCode = "VENDORCODE", DataColumn2MetaCode = "VENDORTXT", DataViewMetaCode = "VENDORVIEW", DataViewColumn1MetaCode = "VF_VENDID", DataViewColumn2MetaCode = "VF_VENDNAME", Title = "Vendor", ParentMetaCode = "ITMPNL_B", RowOrder = 4, ColumnOrder = 2 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMINPUTUI", MetaType = "SEARCHBOX", MetaCode = "LOOKUPVEND", DataColumn1MetaCode = "VENDORCODE", DataColumn2MetaCode = "VENDORTXT", Domain="APPDOMAIN.VENDOR", Title = "Vendor", ParentMetaCode = "ITMPNL_B", RowOrder = 4, ColumnOrder = 2 });
 
 
             //UI LIST STRUCTURE
@@ -161,23 +160,23 @@ namespace IntwentyDemo.Seed
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMLISTUI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_ITEMID", DataColumn1MetaCode = "ITEMID", Title = "Item ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", UserInterfaceMetaCode = "ITEMLISTUI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_ITEMNAME", DataColumn1MetaCode = "NAME", Title = "Item Name", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_CREATE", ActionPath = "Items/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_EDIT", ActionPath = "Items/Edit", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_DELETE", ActionPath = "Items/API/Delete", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "ITEM_FUNC_CREATE", ActionPath = "Items/Create", IsModalAction = false, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "ITEM_FUNC_EDIT", ActionPath = "Items/Edit", IsModalAction = false, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "ITEM_FUNC_DELETE", ActionPath = "Application/API/Delete", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "ITEM_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEMLISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "ITEM_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_SAVE", ActionPath = "Items/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Items/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", DataTableMetaCode = "ITEM", MetaCode = "ITEM_FUNC_BACK", ActionPath = "Items/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "ITEM_FUNC_SAVE", ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Items/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "ITEM_FUNC_BACK", ActionPath = "Items/List", IsModalAction = false, Title = "Back to list" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "ITEM_FUNC_SAVE1", DataTableMetaCode = "ITEM", ActionPath = "Items/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "ITEM_FUNC_BACK1", DataTableMetaCode = "ITEM", ActionPath = "Items/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "ITEM_FUNC_SAVE1",  ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "ITEM", OwnerMetaCode = "ITEM_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "ITEM_FUNC_BACK1",  ActionPath = "Items/List", IsModalAction = false, Title = "Back to list" });
 
 
             #endregion
 
             #region Sales Order
-     
+
             //APPLICATION SALESORDER
             //--------------------
             //DATABASE - MAINTABLE
@@ -185,7 +184,7 @@ namespace IntwentyDemo.Seed
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "ORDERDATE", DbName = "OrderDate", ParentMetaCode = "ROOT", DataType = "DATETIME" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "CUSTID", DbName = "CustomerId", ParentMetaCode = "ROOT", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "CUSTNAME", DbName = "CustomerName", ParentMetaCode = "ROOT", DataType = "STRING" });
-            
+
             //DATABASE - SUBTABLE (SALESLINES)
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "DATATABLE", MetaCode = "DTORDLINE", DbName = "wms_SalesLine", ParentMetaCode = "ROOT", DataType = "" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", MetaType = "DATACOLUMN", MetaCode = "DTORDLINE_ITEMID", DbName = "ItemNo", ParentMetaCode = "DTORDLINE", DataType = "STRING" });
@@ -203,36 +202,58 @@ namespace IntwentyDemo.Seed
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_LISTVIEW", MetaCode = "SO_LISTUI", MetaType = "LISTINTERFACE", DataTableMetaCode = "SALESORDER" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_CREATE_VIEW", MetaCode = "SO_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "SALESORDER" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_EDIT_VIEW", MetaCode = "SO_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "SALESORDER" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_EDIT_VIEW", MetaCode = "SO_ORDLINE_UI", MetaType = "LISTINTERFACE", DataTableMetaCode = "DTORDLINE" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_EDIT_VIEW", MetaCode = "SO_CREATE_ORDLINE_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "DTORDLINE" });
+            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", ViewMetaCode = "SO_EDIT_VIEW", MetaCode = "SO_EDIT_ORDLINE_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "DTORDLINE" });
 
-
-
-            //INPUT UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode= "SO_INPUTUI", MetaType = "SECTION", MetaCode = "SECT_HDR", Title = "Sales Header", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            //INPUT UI STRUCTURE
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "SECTION", MetaCode = "SECT_HDR", Title = "Sales Header", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "PANEL", MetaCode = "PANEL1", Title = "", ParentMetaCode = "SECT_HDR", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "TEXTBOX", MetaCode = "TB_ORDERNO", DataColumn1MetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "PANEL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "DATEPICKER", MetaCode = "DP_ORDERDATE", DataColumn1MetaCode = "ORDERDATE", Title = "Order Date", ParentMetaCode = "PANEL1", RowOrder = 2, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "LOOKUP", MetaCode = "LOOKUP_CUSTOMER", DataColumn1MetaCode = "CUSTID", DataColumn2MetaCode = "CUSTNAME", DataViewMetaCode = "CUSTOMERVIEW", DataViewColumn1MetaCode = "VCUSTID", DataViewColumn2MetaCode = "VCUSTNAME", Title = "Customer", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_INPUTUI", MetaType = "SEARCHBOX", MetaCode = "LOOKUP_CUSTOMER", DataColumn1MetaCode = "CUSTID", DataColumn2MetaCode = "CUSTNAME", Domain="APPDOMAIN.CUSTOMER", Title = "Customer", ParentMetaCode = "PANEL1", RowOrder = 3, ColumnOrder = 1 });
+
+            //ORDERLINE LIST UI STRUCTURE
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_ORDLINE_UI", MetaType = "TABLE", MetaCode = "ORDERLINE_LISTVIEW", Title = "Order Lines", TitleLocalizationKey = "ORDLINES", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_ORDLINE_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "OL_ITEMID", DataColumn1MetaCode = "DTORDLINE_ITEMID", Title = "Item", ParentMetaCode = "ORDERLINE_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_ORDLINE_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "OL_ITEMNAME", DataColumn1MetaCode = "DTORDLINE_ITEMNAME", Title = "Name", ParentMetaCode = "ORDERLINE_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_ORDLINE_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "OL_QTY", DataColumn1MetaCode = "DTORDLINE_QTY", Title = "Qty", ParentMetaCode = "ORDERLINE_LISTVIEW", RowOrder = 1, ColumnOrder = 4 });
+
+            //CREATE ORDERLINE INPUT UI STRUCTURE
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_CREATE_ORDLINE_UI", MetaType = "SECTION", MetaCode = "SECT_CRORDLINE_HDR", Title = "Create Order Line", TitleLocalizationKey = "CRORDLINE", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_CREATE_ORDLINE_UI", MetaType = "PANEL", MetaCode = "CR_ORDLINE_PANEL", Title = "", ParentMetaCode = "SECT_CRORDLINE_HDR", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_CREATE_ORDLINE_UI", MetaType = "SEARCHBOX", MetaCode = "CR_TB_LINEITEM", DataColumn1MetaCode = "DTORDLINE_ITEMID", DataColumn2MetaCode = "DTORDLINE_ITEMNAME", Domain="APPDOMAIN.ITEM", Title = "Item", ParentMetaCode = "CR_ORDLINE_PANEL", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_CREATE_ORDLINE_UI", MetaType = "NUMBOX", MetaCode = "CR_TB_LINEQTY", DataColumn1MetaCode = "DTORDLINE_QTY", Title = "Qty", ParentMetaCode = "CR_ORDLINE_PANEL", RowOrder = 2, ColumnOrder = 1 });
+
+            //EDIT ORDERLINE INPUT UI STRUCTURE
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", MetaType = "SECTION", MetaCode = "SECT_ORDLINE_HDR", Title = "Edit Order Line", TitleLocalizationKey = "EDORDLINE", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", MetaType = "PANEL", MetaCode = "ORDLINE_PANEL", Title = "", ParentMetaCode = "SECT_ORDLINE_HDR", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", MetaType = "SEARCHBOX", MetaCode = "TB_LINEITEM", DataColumn1MetaCode = "DTORDLINE_ITEMID", DataColumn2MetaCode = "DTORDLINE_ITEMNAME", Domain = "APPDOMAIN.ITEM", Title = "Item", ParentMetaCode = "ORDLINE_PANEL", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", MetaType = "NUMBOX", MetaCode = "TB_LINEQTY", DataColumn1MetaCode = "DTORDLINE_QTY", Title = "Qty", ParentMetaCode = "ORDLINE_PANEL", RowOrder = 2, ColumnOrder = 1 });
 
 
-            //TABLE UI
+            //TABLE UI STRUCTURE
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_LISTUI", MetaType = "TABLE", MetaCode = "MAIN_EDITLISTVIEW", Title = "Sales Orders", TitleLocalizationKey = "SALESORDERLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_LISTUI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_ID", DataColumn1MetaCode = "ID", Title = "ID", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_LISTUI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LF_ORDERID", DataColumn1MetaCode = "ORDERNO", Title = "Order No", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 2 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", UserInterfaceMetaCode = "SO_LISTUI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LF_CUSTNAME", DataColumn1MetaCode = "CUSTNAME", Title = "Customer", ParentMetaCode = "MAIN_EDITLISTVIEW", RowOrder = 1, ColumnOrder = 3 });
 
             //FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_CREATE", ActionPath = "SalesOrders/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_EDIT", ActionPath = "SalesOrders/Edit", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_DELETE", ActionPath = "SalesOrders/API/Delete", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE",  MetaCode = "SO_FUNC_CREATE", ActionPath = "SalesOrders/Create", IsModalAction = false, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "SO_FUNC_EDIT", ActionPath = "SalesOrders/Edit", IsModalAction = false, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE",  MetaCode = "SO_FUNC_DELETE", ActionPath = "Application/API/Delete", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER",  MetaCode = "SO_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "SO_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_SAVE", ActionPath = "SalesOrders/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=SalesOrders/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", DataTableMetaCode = "SALESORDER", MetaCode = "SO_FUNC_BACK", ActionPath = "SalesOrders/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE",  MetaCode = "SO_FUNC_SAVE", ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=SalesOrders/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE",  MetaCode = "SO_FUNC_BACK", ActionPath = "SalesOrders/List", IsModalAction = false, Title = "Back to list" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "SO_FUNC_SAVE1", DataTableMetaCode = "SALESORDER", ActionPath = "SalesOrders/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "SO_FUNC_BACK1", DataTableMetaCode = "SALESORDER", ActionPath = "SalesOrders/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "SO_FUNC_SAVE1",  ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "SO_FUNC_BACK1",  ActionPath = "SalesOrders/List", IsModalAction = false, Title = "Back to list" });
 
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "OL_FUNC_CREATE", ActionPath = "SalesOrders/Create", IsModalAction = true, ActionUserInterfaceMetaCode= "SO_CREATE_ORDLINE_UI", Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "OL_FUNC_EDIT", ActionPath = "SalesOrders/Edit", IsModalAction = true, ActionUserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "OL_FUNC_DELETE", ActionPath = "Application/API/DeleteSubTableRow", IsModalAction = false, Title = "Delete" });
 
 
             #endregion
@@ -256,7 +277,7 @@ namespace IntwentyDemo.Seed
 
             //INPUT UI
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", UserInterfaceMetaCode = "VEND_INPUTUI", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", UserInterfaceMetaCode = "VEND_INPUTUI", MetaType = "PANEL", MetaCode = "PNL1",  Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
+            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", UserInterfaceMetaCode = "VEND_INPUTUI", MetaType = "PANEL", MetaCode = "PNL1", Title = "Basics", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", UserInterfaceMetaCode = "VEND_INPUTUI", MetaType = "TEXTBOX", MetaCode = "TB_VENDID", DataColumn1MetaCode = "VENDORID", Title = "Vendor ID", ParentMetaCode = "PNL1", RowOrder = 1, ColumnOrder = 1, Properties = "READONLY=TRUE" });
             userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", UserInterfaceMetaCode = "VEND_INPUTUI", MetaType = "TEXTBOX", MetaCode = "TB_VENDNAME", DataColumn1MetaCode = "VENDORNAME", Title = "Vendor Name", ParentMetaCode = "PNL1", RowOrder = 2, ColumnOrder = 1 });
 
@@ -269,17 +290,17 @@ namespace IntwentyDemo.Seed
 
 
             //FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", DataTableMetaCode = "VENDOR", ActionUserInterfaceMetaCode= "VEND_INPUTUI", MetaCode = "VEND_FUNC_CREATE", ActionPath = "Vendors/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", DataTableMetaCode = "VENDOR", ActionUserInterfaceMetaCode = "VEND_INPUTUI", MetaCode = "VEND_FUNC_EDIT", ActionPath = "Vendors/Edit", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", DataTableMetaCode = "VENDOR", MetaCode = "VEND_FUNC_DELETE", ActionPath = "Vendors/API/Delete", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", DataTableMetaCode = "VENDOR", MetaCode = "VEND_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", DataTableMetaCode = "VENDOR", MetaCode = "VEND_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE",  ActionUserInterfaceMetaCode = "VEND_INPUTUI", MetaCode = "VEND_FUNC_CREATE", ActionPath = "Vendors/Create", IsModalAction = false, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT",  ActionUserInterfaceMetaCode = "VEND_INPUTUI", MetaCode = "VEND_FUNC_EDIT", ActionPath = "Vendors/Edit", IsModalAction = false, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE",  MetaCode = "VEND_FUNC_DELETE", ActionPath = "Application/API/Delete", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER",  MetaCode = "VEND_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "VEND_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", DataTableMetaCode = "VENDOR", MetaCode = "VEND_FUNC_SAVE", ActionPath = "Vendors/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Vendors/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", DataTableMetaCode = "VENDOR", MetaCode = "VEND_FUNC_BACK", ActionPath = "Vendors/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "VEND_FUNC_SAVE", ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Vendors/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "VEND_FUNC_BACK", ActionPath = "Vendors/List", IsModalAction = false, Title = "Back to list" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "VEND_FUNC_SAVE1", DataTableMetaCode = "VENDOR", ActionPath = "Vendors/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "VEND_FUNC_BACK1", DataTableMetaCode = "VENDOR", ActionPath = "Vendors/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "VEND_FUNC_SAVE1",  ActionPath = "Application/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "VENDOR", OwnerMetaCode = "VEND_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "VEND_FUNC_BACK1",  ActionPath = "Vendors/List", IsModalAction = false, Title = "Back to list" });
 
 
 
@@ -305,7 +326,7 @@ namespace IntwentyDemo.Seed
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_LISTVIEW", MetaCode = "BLOG_LISTUI", MetaType = "LISTINTERFACE", DataTableMetaCode = "BLOGAPP" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_CREATE_VIEW", MetaCode = "BLOG_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "BLOGAPP" });
             userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", ViewMetaCode = "BLOG_EDIT_VIEW", MetaCode = "BLOG_INPUTUI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "BLOGAPP" });
-         
+
 
             //UI
             //INPUT
@@ -325,55 +346,32 @@ namespace IntwentyDemo.Seed
 
 
             //FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_CREATE", ActionPath = "Blog/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_EDIT", ActionPath = "Blog/Edit", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_DELETE", ActionPath = "Blog/API/Delete", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "BLOG_FUNC_CREATE", ActionPath = "Blog/Create", IsModalAction = false, Title = "Create" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT",  MetaCode = "BLOG_FUNC_EDIT", ActionPath = "Blog/Edit", IsModalAction = false, Title = "Edit" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE",MetaCode = "BLOG_FUNC_DELETE", ActionPath = "Application/API/Delete", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER",  MetaCode = "BLOG_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "BLOG_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_SAVE", ActionPath = "Blog/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Blog/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", DataTableMetaCode = "BLOGAPP", MetaCode = "BLOG_FUNC_BACK", ActionPath = "Blog/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "BLOG_FUNC_SAVE", ActionPath = "Blog/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOLISTVIEW#GOTOLISTVIEWPATH=Blog/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE",  MetaCode = "BLOG_FUNC_BACK", ActionPath = "Blog/List", IsModalAction = false, Title = "Back to list" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "BLOG_FUNC_SAVE1", DataTableMetaCode = "BLOGAPP", ActionPath = "Blog/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "BLOG_FUNC_BACK1", DataTableMetaCode = "BLOGAPP", ActionPath = "Blog/List", IsModalAction = false, Title = "Back to list" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "BLOG_FUNC_SAVE1",  ActionPath = "Blog/API/Save", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "BLOG", AppMetaCode = "BLOGAPP", OwnerMetaCode = "BLOG_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "BLOG_FUNC_BACK1",  ActionPath = "Blog/List", IsModalAction = false, Title = "Back to list" });
 
 
 
 
             #endregion
 
-            #region Dataviews
+          
 
-            //DATAVIEWS
-            //---------
-            //CUSTOMER
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "CUSTOMERVIEW", ParentMetaCode = "ROOT", SQLQuery = "select CustomerId, CustomerName from wms_Customer order by CustomerId asc", Title = "Customers", TitleLocalizationKey = "CUSTOMERS", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "VCUSTID", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Id", TitleLocalizationKey = "", SQLQueryFieldName = "CustomerId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "VCUSTNAME", ParentMetaCode = "CUSTOMERVIEW", SQLQuery = "", Title = "Name", TitleLocalizationKey = "NAME", SQLQueryFieldName = "CustomerName", SQLQueryFieldDataType = "STRING" });
-
-
-            //VENDOR
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "VENDORVIEW", ParentMetaCode = "ROOT", SQLQuery = "select VendorId, VendorName from wms_Vendor order by VendorId asc", Title = "Vendors", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "VF_VENDID", ParentMetaCode = "VENDORVIEW", SQLQuery = "", Title = "Id", SQLQueryFieldName = "VendorId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "VF_VENDNAME", ParentMetaCode = "VENDORVIEW", SQLQuery = "", Title = "Name", SQLQueryFieldName = "VendorName", SQLQueryFieldDataType = "STRING" });
-
-            //ITEM
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEW", MetaCode = "ITEMLOOKUP", ParentMetaCode = "ROOT", SQLQuery = "select ItemId, ItemName from wms_Item order by ItemId asc", Title = "Items", SQLQueryFieldName = "" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWKEYCOLUMN", MetaCode = "ITEMID", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Id", SQLQueryFieldName = "ItemId", SQLQueryFieldDataType = "STRING" });
-            dataviews.Add(new DataViewItem() { SystemMetaCode = "WAREHOUSE", MetaType = "DATAVIEWCOLUMN", MetaCode = "ITEMNAME", ParentMetaCode = "ITEMLOOKUP", SQLQuery = "", Title = "Name", SQLQueryFieldName = "ItemName", SQLQueryFieldDataType = "STRING" });
-
-            #endregion
-        
             #region endpoints
 
             //Define som endpoints for the customer application 
             endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TABLEGET", MetaCode = "EP_CUSTOMER_GETLATEST", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer", Title = "Get customer", Description = "Get latest version of a customer by id", ParentMetaCode = "ROOT" });
             endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TABLELIST", MetaCode = "EP_CUSTOMER_GETALL", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customers", Title = "Get all customers", Description = "Get all customers in the database", ParentMetaCode = "ROOT" });
             endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "CUSTOMER", MetaType = "TABLESAVE", MetaCode = "EP_CUSTOMER_SAVE", DataMetaCode = "CUSTOMER", Path = "MyAPI/Customer/Save", Title = "Save customer", Description = "Create or update customer", ParentMetaCode = "ROOT" });
-
-            //Define  endpoint for the vendor dataview
-            endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "DATAVIEWLIST", MetaCode = "EP_DV_1", DataMetaCode = "VENDORVIEW", Path = "MyAPI/Vendors", Title = "Get Vendors", Description = "Get vendors by using an intwenty dataview", ParentMetaCode = "ROOT" });
-
+           
             //Define free unbound endpoint
             endpoints.Add(new EndpointItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "", MetaType = "CUSTOMPOST", MetaCode = "EP_CUST_1", DataMetaCode = "", Path = "MyAPI/PostAnyThing", Title = "Post Anything", Description = "This endpoint must be implemented in a custom controller", ParentMetaCode = "ROOT" });
 
@@ -404,7 +402,7 @@ namespace IntwentyDemo.Seed
             var current_domains = client.GetEntities<ValueDomainItem>();
             foreach (var t in valuedomains)
             {
-                if (!current_domains.Exists(p => p.DomainName ==  t.DomainName))
+                if (!current_domains.Exists(p => p.DomainName == t.DomainName))
                     client.InsertEntity(t);
             }
 
@@ -443,15 +441,6 @@ namespace IntwentyDemo.Seed
                     client.InsertEntity(t);
             }
 
-          
-
-            var current_dataview = client.GetEntities<DataViewItem>();
-            foreach (var t in dataviews)
-            {
-                if (!current_dataview.Exists(p => p.MetaCode == t.MetaCode && p.MetaType == t.MetaType))
-                    client.InsertEntity(t);
-            }
-
             var current_endpoints = client.GetEntities<EndpointItem>();
             foreach (var t in endpoints)
             {
@@ -460,7 +449,7 @@ namespace IntwentyDemo.Seed
             }
 
             client.Close();
-           
+
         }
 
         public static void SeedLocalizations(IServiceProvider services)
@@ -487,6 +476,8 @@ namespace IntwentyDemo.Seed
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERNAME", Text = "Kund namn" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERCONTACT", Text = "Contact" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERCONTACT", Text = "Kontakt" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERBASIC", Text = "Basics" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERBASIC", Text = "Info" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERPHONE", Text = "Phone" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERPHONE", Text = "Telefon" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMEREMAIL", Text = "E-Mail" });
@@ -503,6 +494,12 @@ namespace IntwentyDemo.Seed
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDER", Text = "Säljorder" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDERLIST", Text = "Sales Orders" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDERLIST", Text = "Säljordrar" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ORDLINES", Text = "Order Lines" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ORDLINES", Text = "Orderrader" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CRORDLINE", Text = "Create Order Line" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CRORDLINE", Text = "Skapa Orderrad" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "EDORDLINE", Text = "Edit Order Line" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "EDORDLINE", Text = "Ändra Orderrad" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDOR", Text = "Vendor" });
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDOR", Text = "Tillverkare" });
             translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDORLIST", Text = "Vendors" });
@@ -538,11 +535,11 @@ namespace IntwentyDemo.Seed
             if (!Settings.Value.SeedDataOnStartUp)
                 return;
 
-          
+
 
         }
 
-      
+
 
 
     }

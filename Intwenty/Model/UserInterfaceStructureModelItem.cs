@@ -1,18 +1,25 @@
 ﻿using Intwenty.Entity;
 using Intwenty.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Intwenty.Model
 {
 
+    public enum CurrentRenderContextOptions
+    {
+        View = 0  
+       ,ModalView = 1  
+       ,SubTable = 2
+       ,ModalSubTable = 3
+    }
 
     public class UserInterfaceStructureModelItem : BaseModelItem, IUIBinding, IUIComplexBinding, ILocalizableTitle, IUIControl, IEditListViewColumn
     {
         //META TYPES
         public static readonly string MetaTypeTable = "TABLE";
         public static readonly string MetaTypeTableTextColumn = "TABLETEXTCOLUMN";
-        public static readonly string MetaTypeMultiSelect = "MULTISELECT";
         public static readonly string MetaTypeTextBlock = "TEXTBLOCK";
         public static readonly string MetaTypeLabel = "LABEL";
         public static readonly string MetaTypeImage = "IMAGE";
@@ -21,20 +28,20 @@ namespace Intwenty.Model
         public static readonly string MetaTypePasswordBox = "PASSWORDBOX";
         public static readonly string MetaTypeTextBox = "TEXTBOX";
         public static readonly string MetaTypeTextArea = "TEXTAREA";
-        public static readonly string MetaTypeLookUp = "LOOKUP";
         public static readonly string MetaTypeNumBox = "NUMBOX";
         public static readonly string MetaTypeCheckBox = "CHECKBOX";
-        public static readonly string MetaTypeComboBox = "COMBOBOX";
         public static readonly string MetaTypePanel = "PANEL";
         public static readonly string MetaTypeDatePicker = "DATEPICKER";
         public static readonly string MetaTypeSection = "SECTION";
         public static readonly string MetaTypeImageBox = "IMAGEBOX";
+        public static readonly string MetaTypeComboBox = "COMBOBOX";
+        public static readonly string MetaTypeSearchBox = "SEARCHBOX";
 
 
         public UserInterfaceStructureModelItem()
         {
+            CurrentRenderContext = CurrentRenderContextOptions.View;
             SetEmptyStrings();
-            //Children = new List<IUIControl>();
         }
 
     
@@ -55,15 +62,13 @@ namespace Intwenty.Model
             DataTableMetaCode = entity.DataTableMetaCode;
             DataColumn1MetaCode = entity.DataColumn1MetaCode;
             DataColumn2MetaCode = entity.DataColumn2MetaCode;
-            DataViewMetaCode = entity.DataViewMetaCode;
-            DataViewColumn1MetaCode = entity.DataViewColumn1MetaCode;
-            DataViewColumn2MetaCode = entity.DataViewColumn2MetaCode;
             Domain = entity.Domain;
             Properties = entity.Properties;
             RawHTML = entity.RawHTML;
             SystemMetaCode = entity.SystemMetaCode;
+            CurrentRenderContext = CurrentRenderContextOptions.View;
             SetEmptyStrings();
-            //Children = new List<IUIControl>();
+
         }
 
         private void SetEmptyStrings()
@@ -75,26 +80,17 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(DataTableMetaCode)) DataTableMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataColumn1MetaCode)) DataColumn1MetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataColumn2MetaCode)) DataColumn2MetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewMetaCode)) DataViewMetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn1MetaCode)) DataViewColumn1MetaCode = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn2MetaCode)) DataViewColumn2MetaCode = string.Empty;
             if (string.IsNullOrEmpty(Domain)) Domain = string.Empty;
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
             if (string.IsNullOrEmpty(RawHTML)) RawHTML = string.Empty;
-            if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(UserInterfaceMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DataTableDbName)) DataTableDbName = string.Empty;
             if (string.IsNullOrEmpty(DataColumn1DbName)) DataColumn1DbName = string.Empty;
             if (string.IsNullOrEmpty(DataColumn2DbName)) DataColumn2DbName = string.Empty;
-            if (string.IsNullOrEmpty(DataViewTitle)) DataViewTitle = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn1DbName)) DataViewColumn1DbName = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn2DbName)) DataViewColumn2DbName = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn1Title)) DataViewColumn1Title = string.Empty;
-            if (string.IsNullOrEmpty(DataViewColumn2Title)) DataViewColumn2Title = string.Empty;
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -104,22 +100,12 @@ namespace Intwenty.Model
         public string Description { get; set; }
         public string AppMetaCode { get; set; }
         public string DataTableMetaCode { get; set; }
-        public string DataViewMetaCode { get; set; }
         public string DataColumn1MetaCode { get; set; }
         public string DataColumn2MetaCode { get; set; }
-        public string DataViewColumn1MetaCode { get; set; }
-        public string DataViewColumn2MetaCode { get; set; }
         public string DataTableDbName { get; set; }
         public string DataColumnDbName => DataColumn1DbName;
         public string DataColumn1DbName { get; set; }
         public string DataColumn2DbName { get; set; }
-        public string DataViewTitle { get; set; }
-        public string DataViewColumnDbName => DataViewColumn1DbName;
-        public string DataViewColumn1DbName { get; set; }
-        public string DataViewColumn2DbName { get; set; }
-        public string DataViewColumnTitle => DataViewColumn1Title;
-        public string DataViewColumn1Title { get; set; }
-        public string DataViewColumn2Title { get; set; }
         public int ColumnOrder { get; set; }
         public int RowOrder { get; set; }
         public string Domain { get; set; }
@@ -127,12 +113,8 @@ namespace Intwenty.Model
         public DatabaseModelItem DataTableInfo { get; set; }
         public DatabaseModelItem DataColumn1Info { get; set; }
         public DatabaseModelItem DataColumn2Info { get; set; }
-        public DataViewModelItem DataViewInfo { get; set; }
-        public DataViewModelItem DataViewColumn1Info { get; set; }
-        public DataViewModelItem DataViewColumn2Info { get; set; }
-        //public List<IUIControl> Children { get; set; }
         public string UserInterfaceMetaCode { get; set; }
-        public string JavaScriptObjectName { get; set; }
+        public CurrentRenderContextOptions CurrentRenderContext { get; set; }
         public bool IsRemoved { get; set; }
 
         public override string ModelCode
@@ -177,7 +159,7 @@ namespace Intwenty.Model
                 return IsMetaTypeCheckBox || IsMetaTypeComboBox || IsMetaTypeDatePicker ||
                        IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
                        IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
-                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeMultiSelect;
+                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeSearchBox;
 
             }
 
@@ -208,24 +190,16 @@ namespace Intwenty.Model
             get { return (DataColumn2Info != null && !string.IsNullOrEmpty(DataColumn2MetaCode) && DataColumn2Info.IsMetaTypeDataColumn); }
         }
 
-        public bool IsDataViewConnected
-        {
-            get { return (DataViewInfo != null && !string.IsNullOrEmpty(DataViewMetaCode) && DataViewInfo.IsMetaTypeDataView); }
-        }
-
-        public bool IsDataViewColumn1Connected
-        {
-            get { return (DataViewColumn1Info != null && !string.IsNullOrEmpty(DataViewColumn1MetaCode)); }
-        }
-
-        public bool IsDataViewColumn2Connected
-        {
-            get { return (DataViewColumn2Info != null && !string.IsNullOrEmpty(DataViewColumn2MetaCode)); }
-        }
+      
 
         public bool HasValueDomain
         {
             get { return Domain.Contains("VALUEDOMAIN."); }
+        }
+
+        public bool HasAppDomain
+        {
+            get { return Domain.Contains("APPDOMAIN."); }
         }
 
 
@@ -233,24 +207,14 @@ namespace Intwenty.Model
         {
             get
             {
-                if (!HasValueDomain)
+                if (!HasValueDomain && !HasAppDomain)
                     return string.Empty;
 
-                var splits = Domain.Split(".".ToCharArray());
-                if (splits.Length >= 2)
-                    return splits[1];
-                else
-                    return string.Empty;
-
+                return Domain;
             }
         }
 
-        public bool IsMetaTypeMultiSelect
-        {
-            get { return MetaType == MetaTypeMultiSelect; }
-        }
 
-      
         public bool IsMetaTypeTableTextColumn
         {
             get { return MetaType == MetaTypeTableTextColumn; }
@@ -302,9 +266,9 @@ namespace Intwenty.Model
         }
 
  
-        public bool IsMetaTypeLookUp
+        public bool IsMetaTypeSearchBox
         {
-            get { return MetaType == MetaTypeLookUp; }
+            get { return MetaType == MetaTypeSearchBox; }
         }
 
     
@@ -358,6 +322,27 @@ namespace Intwenty.Model
             get { return MetaCode; }
         }
 
+        public string JavaScriptObjectName
+        {
+            get
+            {
+                //return "model";
+                
+                if (CurrentRenderContext == CurrentRenderContextOptions.View)
+                    return "model";
+                if (CurrentRenderContext == CurrentRenderContextOptions.ModalView)
+                    return "model";
+                if (CurrentRenderContext == CurrentRenderContextOptions.SubTable)
+                    return "currentline";
+                if (CurrentRenderContext == CurrentRenderContextOptions.ModalSubTable)
+                    return "currentline";
+
+                return "model";
+   
+            }
+
+        }
+
         public bool Mandatory
         {
             get 
@@ -397,6 +382,9 @@ namespace Intwenty.Model
             }
 
         }
+      
+        
+
 
     }
 

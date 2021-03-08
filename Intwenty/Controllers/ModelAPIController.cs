@@ -18,6 +18,8 @@ using Intwenty.Areas.Identity.Data;
 using Microsoft.Extensions.Options;
 using Intwenty.Model.Design;
 using Intwenty.DataClient;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Intwenty.Controllers
 {
@@ -70,7 +72,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                
+
                 ModelRepository.ClearCache();
 
                 model.ParentMetaCode = BaseModelItem.MetaTypeRoot;
@@ -82,9 +84,9 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Cant save a system withot a title");
 
                 var client = DataRepository.GetDataClient();
-   
+
                 var current_systems = ModelRepository.GetSystemModels();
- 
+
 
                 if (model.Id < 1)
                 {
@@ -135,7 +137,7 @@ namespace Intwenty.Controllers
         }
 
 
-      
+
 
         #endregion
 
@@ -394,6 +396,7 @@ namespace Intwenty.Controllers
                     if (!string.IsNullOrEmpty(dbi.DbName))
                         dbi.DbName = dbi.DbName.Replace(" ", "");
 
+
                     if (dbi.Id < 1)
                     {
 
@@ -406,7 +409,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = "",
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.System.MetaCode
                         };
 
@@ -423,14 +426,14 @@ namespace Intwenty.Controllers
                             existing.Description = dbi.Description;
                             existing.ParentMetaCode = BaseModelItem.MetaTypeRoot;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
 
                     }
 
-                  
+
 
                 }
 
@@ -442,11 +445,10 @@ namespace Intwenty.Controllers
                     if (app.DataStructure.Exists(p => p.IsFrameworkItem && p.DbName.ToUpper() == dbi.DbName.ToUpper()))
                         continue;
 
-              
 
                     if (dbi.Id < 1)
                     {
-                        
+
 
                         var t = new DatabaseItem()
                         {
@@ -457,7 +459,7 @@ namespace Intwenty.Controllers
                             ParentMetaCode = BaseModelItem.MetaTypeRoot,
                             DbName = dbi.DbName,
                             DataType = dbi.DataType,
-                            Properties = dbi.Properties,
+                            Properties = dbi.CompilePropertyString(),
                             SystemMetaCode = app.Application.SystemMetaCode
                         };
 
@@ -470,7 +472,7 @@ namespace Intwenty.Controllers
                                 t.ParentMetaCode = tbl.MetaCode;
                         }
 
-                        
+
 
                         client.InsertEntity(t);
 
@@ -486,7 +488,7 @@ namespace Intwenty.Controllers
                             existing.MetaType = DatabaseModelItem.MetaTypeDataColumn;
                             existing.Description = dbi.Description;
                             existing.DbName = dbi.DbName;
-                            existing.Properties = dbi.Properties;
+                            existing.Properties = dbi.CompilePropertyString();
                             client.UpdateEntity(existing);
                         }
 
@@ -532,7 +534,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ApplicationId is missing when removing db model");
 
 
-             
+
 
 
                 var client = DataRepository.GetDataClient();
@@ -555,7 +557,7 @@ namespace Intwenty.Controllers
                     }
                     else
                     {
-           
+
                         client.DeleteEntity(existing);
                     }
 
@@ -705,156 +707,6 @@ namespace Intwenty.Controllers
 
         #endregion
 
-        #region Dataview Model
-
-        /// <summary>
-        /// Get meta data for data views
-        /// </summary>
-        [HttpGet("/Model/API/GetDataViewModels")]
-        public IActionResult GetDataViewModels()
-        {
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            var t = ModelRepository.GetDataViewModels();
-            var model = DataViewModelCreator.GetDataViewModelVm(t);
-            model.PropertyCollection = IntwentyRegistry.IntwentyProperties;
-            var res = new JsonResult(model);
-            return res;
-
-        }
-
-
-        [HttpPost("/Model/API/SaveDataViewModels")]
-        public IActionResult SaveDataViewModels([FromBody] DataViewVm model)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                ModelRepository.ClearCache();
-
-                var list = DataViewModelCreator.GetDataViewModel(model);
-
-                foreach (var dv in list)
-                {
-
-                    if (dv.IsMetaTypeDataView)
-                        dv.ParentMetaCode = "ROOT";
-
-                    if (string.IsNullOrEmpty(dv.MetaCode))
-                        dv.MetaCode = BaseModelItem.GetQuiteUniqueString();
-
-                }
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                foreach (var dv in list)
-                {
-                    if (dv.Id < 1)
-                    {
-                        var t = new DataViewItem()
-                        {
-
-                            MetaCode = dv.MetaCode,
-                            MetaType = dv.MetaType,
-                            ParentMetaCode = dv.ParentMetaCode,
-                            Title = dv.Title,
-                            SQLQuery = dv.SQLQuery,
-                            SQLQueryFieldName = dv.SQLQueryFieldName,
-                            SystemMetaCode = dv.SystemMetaCode
-                        };
-                        client.InsertEntity(t);
-                    }
-                    else
-                    {
-                        var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == dv.Id);
-                        if (existing != null)
-                        {
-                            existing.SQLQuery = dv.SQLQuery;
-                            existing.SQLQueryFieldName = dv.SQLQueryFieldName;
-                            existing.Title = dv.Title;
-                            client.UpdateEntity(existing);
-                        }
-
-                    }
-
-                }
-
-                client.Close();
-
-
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when saving dataview model.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetDataViewModels();
-        }
-
-
-        [HttpPost("/Model/API/DeleteDataViewModel")]
-        public IActionResult DeleteDataViewModel([FromBody] DataViewVm model)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-                return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
-                return Forbid();
-
-            try
-            {
-                
-                ModelRepository.ClearCache();
-
-                var client = DataRepository.GetDataClient();
-                client.Open();
-
-                var existing = client.GetEntities<DataViewItem>().FirstOrDefault(p => p.Id == model.Id);
-                if (existing != null)
-                {
-                    var dto = new DataViewModelItem(existing);
-                    if (dto.IsMetaTypeDataView)
-                    {
-                        var childlist = client.GetEntities<DataViewItem>().Where(p => (p.MetaType == DataViewModelItem.MetaTypeDataViewColumn || p.MetaType == DataViewModelItem.MetaTypeDataViewKeyColumn) && p.ParentMetaCode == existing.MetaCode).ToList();
-                        client.DeleteEntity(existing);
-                        client.DeleteEntities(childlist);
-                    }
-                    else
-                    {
-                        client.DeleteEntity(existing);
-                    }
-                }
-                client.Close();
-
-            }
-            catch (Exception ex)
-            {
-                var r = new OperationResult();
-                r.SetError(ex.Message, "An error occured when deleting application dataview model.");
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
-            }
-
-            return GetDataViewModels();
-        }
-
-        #endregion
-
         #region UI Model
 
 
@@ -883,7 +735,7 @@ namespace Intwenty.Controllers
 
             try
             {
-               
+
                 var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
@@ -902,6 +754,54 @@ namespace Intwenty.Controllers
                 client.Open();
                 client.InsertEntity(entity);
                 client.Close();
+
+                if (model.SaveFunction)
+                {
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeSave;
+                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        funcentity.Title = model.SaveFunctionTitle;
+                    else
+                        funcentity.Title = "Save";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+                if (model.NavigateFunction)
+                {
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
+                    funcentity.ActionPath = model.NavigateFunctionPath;
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        funcentity.Title = model.NavigateFunctionTitle;
+                    else
+                        funcentity.Title = "Back";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
 
                 ModelRepository.ClearCache();
 
@@ -939,6 +839,7 @@ namespace Intwenty.Controllers
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var entities = client.GetEntities<ViewItem>();
+                var functions = client.GetEntities<FunctionItem>();
                 client.Close();
 
                 var entity = entities.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.Id == model.Id);
@@ -953,6 +854,102 @@ namespace Intwenty.Controllers
                 client.Open();
                 client.UpdateEntity(entity);
                 client.Close();
+
+                var savefuncentity = functions.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.OwnerMetaType == ViewModel.MetaTypeUIView && p.OwnerMetaCode == entity.MetaCode && p.MetaType == "SAVE");
+                var navfuncentity = functions.Find(p => p.AppMetaCode == appmodel.Application.MetaCode && p.OwnerMetaType == ViewModel.MetaTypeUIView && p.OwnerMetaCode == entity.MetaCode && p.MetaType == "NAVIGATE");
+
+                if (savefuncentity != null && !model.SaveFunction)
+                {
+                    //DELETE
+                    client.Open();
+                    client.DeleteEntity(savefuncentity);
+                    client.Close();
+                }
+                else if (savefuncentity != null && model.SaveFunction)
+                {
+                    //UPDATE
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        savefuncentity.Title = model.SaveFunctionTitle;
+                    else
+                        savefuncentity.Title = "Save";
+
+                    savefuncentity.Properties = model.CompilePropertyString();
+                    client.Open();
+                    client.UpdateEntity(savefuncentity);
+                    client.Close();
+                }
+                else if (savefuncentity == null && model.SaveFunction)
+                {
+                    //INSERT
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeSave;
+                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
+                        funcentity.Title = model.SaveFunctionTitle;
+                    else
+                        funcentity.Title = "Save";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+                if (navfuncentity != null && !model.NavigateFunction)
+                {
+                    //DELETE
+                    client.Open();
+                    client.DeleteEntity(navfuncentity);
+                    client.Close();
+                }
+                else if (navfuncentity != null && model.NavigateFunction)
+                {
+                    //UPDATE
+                    navfuncentity.ActionPath = model.NavigateFunctionPath;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        navfuncentity.Title = model.NavigateFunctionTitle;
+                    else
+                        navfuncentity.Title = "Back";
+
+                    navfuncentity.Properties = model.CompilePropertyString();
+                    client.Open();
+                    client.UpdateEntity(navfuncentity);
+                    client.Close();
+                }
+                else if (navfuncentity == null && model.NavigateFunction)
+                {
+                    //INSERT
+                    var funcentity = new FunctionItem();
+                    funcentity.SystemMetaCode = appmodel.System.MetaCode;
+                    funcentity.AppMetaCode = appmodel.Application.MetaCode;
+                    funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
+                    funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
+                    funcentity.ActionPath = model.NavigateFunctionPath;
+                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
+                        funcentity.Title = model.NavigateFunctionTitle;
+                    else
+                        funcentity.Title = "Back";
+
+                    funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                    funcentity.OwnerMetaCode = entity.MetaCode;
+                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.IsModalAction = false;
+
+                    client.Open();
+                    client.InsertEntity(funcentity);
+                    client.Close();
+                }
+
+              
 
                 ModelRepository.ClearCache();
 
@@ -999,12 +996,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                var appmodel  = ModelRepository.GetApplicationModel(model.ApplicationId);
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
                 if (appmodel == null)
                     return BadRequest();
 
                 var client = DataRepository.GetDataClient();
-                
+
 
                 var entity = new UserInterfaceItem();
                 if (!string.IsNullOrEmpty(model.MetaCode) && model.Method == "reuse")
@@ -1034,7 +1031,7 @@ namespace Intwenty.Controllers
                     client.Close();
 
                     ModelRepository.ClearCache();
-                    
+
 
                 }
                 else
@@ -1096,21 +1093,21 @@ namespace Intwenty.Controllers
                 {
                     foreach (var s in t.UserInterface)
                     {
-                      
-                            if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
-                                
-                            }
 
-                            if (model.MetaCode == s.MetaCode && model.Method == "ALL")
-                            {
-                                //Delete
-                                client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+                        if (model.ViewMetaCode == s.ViewMetaCode && model.MetaCode == s.MetaCode && model.Method == "ONE")
+                        {
+                            //Delete
+                            client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
 
-                            }
-                        
+                        }
+
+                        if (model.MetaCode == s.MetaCode && model.Method == "ALL")
+                        {
+                            //Delete
+                            client.DeleteEntity(new UserInterfaceItem() { Id = s.Id });
+
+                        }
+
 
                     }
 
@@ -1119,7 +1116,7 @@ namespace Intwenty.Controllers
                 client.Close();
                 ModelRepository.ClearCache();
 
-              
+
 
 
             }
@@ -1160,9 +1157,8 @@ namespace Intwenty.Controllers
                 entity.ActionPath = model.ActionPath;
                 entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
                 entity.Title = model.Title;
-                entity.OwnerMetaType = ViewModel.MetaTypeUIView;
+                entity.OwnerMetaType = model.OwnerMetaType;
                 entity.OwnerMetaCode = model.OwnerMetaCode;
-                entity.DataTableMetaCode = model.DataTableMetaCode;
                 entity.Properties = model.CompilePropertyString();
                 entity.IsModalAction = model.IsModalAction;
 
@@ -1251,7 +1247,7 @@ namespace Intwenty.Controllers
 
             try
             {
-               
+
                 var client = DataRepository.GetDataClient();
                 client.Open();
                 var entities = client.GetEntities<FunctionItem>();
@@ -1261,7 +1257,7 @@ namespace Intwenty.Controllers
                 if (entity == null)
                     return BadRequest();
 
-              
+
                 client.Open();
                 client.DeleteEntity(entity);
                 client.Close();
@@ -1282,7 +1278,7 @@ namespace Intwenty.Controllers
             return GetApplicationViews(model.ApplicationId);
         }
 
-      
+
 
         /// <summary>
         /// Get input UI model for application with id and the ui metacode
@@ -1345,9 +1341,9 @@ namespace Intwenty.Controllers
             model.Table = uimodel.Table;
             model.IsSubTableUserInterface = uimodel.IsSubTableUserInterface;
             model.DataTable = DatabaseModelCreator.GetTableVm(appmodel, uimodel.DataTableMetaCode);
-            model.Functions = uimodel.Functions.Select(p=> new FunctionVm(p)).ToList();
+            model.Functions = uimodel.Functions.Select(p => new FunctionVm(p)).ToList();
+            model.ViewPath = uimodel.ViewPath;
 
-           
             foreach (var v in appmodel.Views)
             {
                 foreach (var ui in v.UserInterface)
@@ -1378,7 +1374,6 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                var views = ModelRepository.GetDataViewModels();
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
@@ -1491,7 +1486,7 @@ namespace Intwenty.Controllers
                                         if (dmc != null)
                                             input.DataColumn1MetaCode = dmc.MetaCode;
                                     }
-                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeMultiSelect)
+                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
@@ -1500,7 +1495,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeMultiSelect)
+                                if (input.IsMetaTypeSearchBox)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {
@@ -1510,42 +1505,6 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeLookUp)
-                                {
-                                    if (!string.IsNullOrEmpty(input.DataViewMetaCode))
-                                    {
-                                        input.DataViewMetaCode = input.DataViewMetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn1DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataColumn2DbName))
-                                    {
-                                        var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
-                                        if (dmc != null)
-                                            input.DataColumn2MetaCode = dmc.MetaCode;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn1DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn1DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn1MetaCode = dmc.MetaCode;
-                                    }
-
-
-                                    if (!string.IsNullOrEmpty(input.DataViewColumn2DbName))
-                                    {
-                                        var dmc = views.Find(p => p.SQLQueryFieldName == input.DataViewColumn2DbName && p.ParentMetaCode == input.DataViewMetaCode);
-                                        if (dmc != null)
-                                            input.DataViewColumn2MetaCode = dmc.MetaCode;
-                                    }
-                                }
 
                                 if (input.Id > 0)
                                 {
@@ -1557,15 +1516,12 @@ namespace Intwenty.Controllers
                                     entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
                                     entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
                                     entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
                                     client.UpdateEntity(entity);
                                 }
                                 else
                                 {
                                     input.MetaCode = BaseModelItem.GetQuiteUniqueString();
-                                    entity = new UserInterfaceStructureItem() { MetaType=input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode= appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
+                                    entity = new UserInterfaceStructureItem() { MetaType = input.MetaType, AppMetaCode = appmodel.Application.MetaCode, SystemMetaCode = appmodel.System.MetaCode, MetaCode = input.MetaCode, ColumnOrder = input.ColumnOrder, RowOrder = input.RowOrder, Title = input.Title, ParentMetaCode = panel.MetaCode, UserInterfaceMetaCode = uimodel.MetaCode };
                                     entity.Title = input.Title;
                                     entity.Properties = input.CompilePropertyString();
                                     entity.MetaCode = input.MetaCode;
@@ -1574,9 +1530,6 @@ namespace Intwenty.Controllers
                                     entity.DataColumn1MetaCode = input.DataColumn1MetaCode;
                                     entity.DataColumn2MetaCode = input.DataColumn2MetaCode;
                                     entity.Domain = input.Domain;
-                                    entity.DataViewMetaCode = input.DataViewMetaCode;
-                                    entity.DataViewColumn1MetaCode = input.DataViewColumn1MetaCode;
-                                    entity.DataViewColumn2MetaCode = input.DataViewColumn2MetaCode;
                                     client.InsertEntity(entity);
                                 }
 
@@ -1585,7 +1538,7 @@ namespace Intwenty.Controllers
                     }
 
 
-                 }
+                }
 
                 client.Close();
 
@@ -1636,7 +1589,6 @@ namespace Intwenty.Controllers
                 if (uimodel == null)
                     return BadRequest();
 
-                var views = ModelRepository.GetDataViewModels();
                 var client = DataRepository.GetDataClient();
                 client.Open();
 
@@ -1777,7 +1729,6 @@ namespace Intwenty.Controllers
                         IsModalAction = function.IsModalAction,
                         ActionPath = function.ActionPath,
                         ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode,
-                        DataTableMetaCode = uimodel.DataTableMetaCode,
                         OwnerMetaCode = uimodel.MetaCode,
                         OwnerMetaType = UserInterfaceModelItem.MetaTypeListInterface,
                         Properties = function.CompilePropertyString(),
@@ -1797,7 +1748,7 @@ namespace Intwenty.Controllers
         }
 
 
-    
+
         #endregion
 
         #region Value Domains
@@ -1830,8 +1781,12 @@ namespace Intwenty.Controllers
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
 
-            var t = ModelRepository.GetValueDomains();
-            return new JsonResult(t.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct());
+            var vd = ModelRepository.GetValueDomains();
+            var apps = ModelRepository.GetApplicationDescriptions();
+
+            var result = vd.Select(p => "VALUEDOMAIN." + p.DomainName).Distinct().ToList();
+            result.AddRange(apps.Select(p => "APPDOMAIN." + p.MetaCode).Distinct().ToList());
+            return new JsonResult(result);
 
         }
 
@@ -1905,9 +1860,27 @@ namespace Intwenty.Controllers
                 return Forbid();
 
             var t = ModelRepository.GetExportModel();
+
+            //JSON
             var json = System.Text.Json.JsonSerializer.Serialize(t);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "intwentymodel.json");
+
+            //XML
+            /*
+            var xml = "";
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(ExportModel));
+            using (var sww = new StringWriter())
+            {
+                using (XmlWriter writer = XmlWriter.Create(sww))
+                {
+                    xsSubmit.Serialize(writer, t);
+                    xml = sww.ToString(); // Your XML
+                }
+            }
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(xml);
+            return File(bytes, "application/xml", "intwentymodel.xml");
+            */
         }
 
         [HttpPost("/Model/API/UploadModel")]
@@ -1932,7 +1905,7 @@ namespace Intwenty.Controllers
                 model.DeleteCurrentModel = delete;
                 result = ModelRepository.ImportModel(model);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 result.SetError(ex.Message, "An error occured when uploading a new model file.");
                 var jres = new JsonResult(result);
@@ -1963,7 +1936,7 @@ namespace Intwenty.Controllers
                 var sep = "";
                 foreach (var app in apps)
                 {
-                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging=true });
+                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging = true });
                     var appdata = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(appdatalist.Data).RootElement);
                     foreach (var istat in appdata.SubTables[0].Rows)
                     {
@@ -1995,13 +1968,13 @@ namespace Intwenty.Controllers
             {
                 DataRepository.LogError("Error exporting data: " + ex.Message, username: User.Identity.Name);
             }
-            finally 
+            finally
             {
                 client.Close();
             }
 
             return new JsonResult("");
-            
+
         }
 
 
@@ -2020,7 +1993,7 @@ namespace Intwenty.Controllers
             {
                 var authapps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
                 int savefail = 0;
-                int savesuccess= 0;
+                int savesuccess = 0;
                 string fileContents;
                 using (var stream = file.OpenReadStream())
                 using (var reader = new StreamReader(stream))
@@ -2034,7 +2007,7 @@ namespace Intwenty.Controllers
                 {
                     if (attr.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
                     {
-                       
+
                         var jsonarr = attr.Value.EnumerateArray();
                         foreach (var rec in jsonarr)
                         {
@@ -2045,7 +2018,7 @@ namespace Intwenty.Controllers
                                 if (istat.Name == "ApplicationId")
                                     app = authapps.Find(p => p.Id == istat.Value.GetInt32());
 
-                                if (istat.Name == "ApplicationData" && app!=null)
+                                if (istat.Name == "ApplicationData" && app != null)
                                 {
                                     var state = ClientStateInfo.CreateFromJSON(istat.Value, User);
                                     state.Id = 0;
@@ -2068,7 +2041,7 @@ namespace Intwenty.Controllers
                     }
                 }
 
-                if (savefail== 0)
+                if (savefail == 0)
                     result.SetSuccess(string.Format("Successfully imported {0} applications.", savesuccess));
                 else
                     result.SetSuccess(string.Format("Successfully imported {0} applications. Failed to import {1} applications.", savesuccess, savefail));
@@ -2129,7 +2102,7 @@ namespace Intwenty.Controllers
                             res.Add(new TranslationVm() { Culture = l.Culture, Key = a.Application.TitleLocalizationKey, ModelTitle = a.Application.Title + " (App), Title", Text = "" });
                     }
 
-                    foreach (var ct in trans.Where(p=> !langs.Exists(x=> x.Culture == p.Culture)))
+                    foreach (var ct in trans.Where(p => !langs.Exists(x => x.Culture == p.Culture)))
                     {
                         res.Add(new TranslationVm() { Culture = ct.Culture, Key = ct.Key, ModelTitle = a.Application.Title + " (App), Title", Text = ct.Text, Id = ct.Id });
                     }
@@ -2183,7 +2156,7 @@ namespace Intwenty.Controllers
                         {
                             var ct = trans.Find(p => p.Culture == l.Culture);
                             if (ct != null)
-                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType=2 });
+                                res.Add(new TranslationVm() { Culture = ct.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = ct.Text, Id = ct.Id, TranslationType = 2 });
                             else
                                 res.Add(new TranslationVm() { Culture = l.Culture, Key = view.DescriptionLocalizationKey, ModelTitle = description, Text = "", TranslationType = 2 });
                         }
@@ -2303,10 +2276,10 @@ namespace Intwenty.Controllers
 
         }
 
-            /// <summary>
-            /// Get translations, that is not used by a model
-            /// </summary>
-            [HttpGet("/Model/API/GetNonModelTranslations")]
+        /// <summary>
+        /// Get translations, that is not used by a model
+        /// </summary>
+        [HttpGet("/Model/API/GetNonModelTranslations")]
         public IActionResult GetNonModelTranslations()
         {
 
@@ -2396,7 +2369,7 @@ namespace Intwenty.Controllers
                             client.UpdateEntity(m);
                         }
                     }
-                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType==1)
+                    else if (t.ViewModelId > 0 && !string.IsNullOrEmpty(t.Text) && t.TranslationType == 1)
                     {
                         var m = client.GetEntity<ViewItem>(t.ViewModelId);
                         if (m != null)
@@ -2538,7 +2511,7 @@ namespace Intwenty.Controllers
                 {
                     client.Open();
                     client.DeleteEntity(existing);
-                   
+
                 }
 
                 client.Close();
@@ -2621,32 +2594,27 @@ namespace Intwenty.Controllers
                 res.Endpoints.Add(EndpointVm.CreateEndpointVm(ep));
             }
 
-           
+
 
             res.EndpointDataSources = new List<EndpointDataSource>();
             var apps = ModelRepository.GetApplicationModels();
             foreach (var a in apps)
             {
                 res.EndpointDataSources.Add(new EndpointDataSource() { id = a.Application.MetaCode + "|" + a.Application.MetaCode, title = a.Application.DbName, type = "TABLE" });
-                foreach (var subtable in a.DataStructure.Where(p=> p.IsMetaTypeDataTable))
+                foreach (var subtable in a.DataStructure.Where(p => p.IsMetaTypeDataTable))
                 {
                     res.EndpointDataSources.Add(new EndpointDataSource() { id = subtable.AppMetaCode + "|" + subtable.MetaCode, title = subtable.DbName, type = "TABLE" });
 
                 }
             }
-            var dataviews = ModelRepository.GetDataViewModels();
-            foreach (var dv in dataviews.Where(p=> p.IsMetaTypeDataView))
-            {
-                res.EndpointDataSources.Add(new EndpointDataSource() { id = dv.MetaCode, title = dv.Title, type = "DATAVIEW" });
-            }
+           
 
-            
 
             return new JsonResult(res);
 
         }
 
-      
+
 
 
         [HttpPost("/Model/API/SaveEndpoints")]
@@ -2767,7 +2735,6 @@ namespace Intwenty.Controllers
         }
 
         #endregion
-
 
         #region Tools
 

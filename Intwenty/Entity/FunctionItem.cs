@@ -6,7 +6,7 @@ namespace Intwenty.Entity
 
     [DbTablePrimaryKey("Id")]
     [DbTableName("sysmodel_FunctionItem")]
-   public class FunctionItem
+    public class FunctionItem
     {
         public FunctionItem()
         {
@@ -24,11 +24,9 @@ namespace Intwenty.Entity
         [NotNull]
         public string MetaType { get; set; }
         [NotNull]
-        public string OwnerMetaType{ get; set; }
+        public string OwnerMetaType { get; set; }
         [NotNull]
         public string OwnerMetaCode { get; set; }
-        [NotNull]
-        public string DataTableMetaCode { get; set; }
         [NotNull]
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
@@ -41,6 +39,6 @@ namespace Intwenty.Entity
 
     }
 
-   
+
 
 }

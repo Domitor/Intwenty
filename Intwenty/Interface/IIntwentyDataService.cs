@@ -26,13 +26,6 @@ namespace Intwenty.Interface
         /// Saves application data
         /// </summary>
         /// <returns>A result describing the state of the saved application</returns>
-        //ModifyResult Save<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
-        //ModifyResult SaveSubTable<TData>(ClientStateInfo<TData> state) where TData : InformationHeader, new();
-
-        /// <summary>
-        /// Saves application data
-        /// </summary>
-        /// <returns>A result describing the state of the saved application</returns>
         ModifyResult Save(ClientStateInfo state);
 
         /// <summary>
@@ -60,7 +53,7 @@ namespace Intwenty.Interface
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult DeleteRow(ClientStateInfo state, int id, string tablename);
+        ModifyResult DeleteTableLine(ClientStateInfo state, ApplicationModel model, int id, string tablename);
 
 
         /// <summary>
@@ -82,16 +75,7 @@ namespace Intwenty.Interface
         /// <returns>A result including the application data of type T</returns>
         DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : InformationHeader, new();
 
-        /// <summary>
-        /// Gets the latest version of the latest id for an application filtered on OwnerUserId and ApplicationId
-        /// </summary>
-        /// <returns>A result including the application json data</returns>
-        //DataResult GetLatestByOwnerUser(ClientStateInfo state);
-
-
-
-
-
+   
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
         /// This function supports paging. It returns the number of records specified in args.BatchSize
@@ -132,57 +116,24 @@ namespace Intwenty.Interface
         DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
 
 
-
-        /// <summary>
-        /// Get a list of (latest version) application data. 
-        /// All columns and rows from the application's main table is returned.
-        /// </summary>
-        /// <returns>An DataListResult including a list of T</returns>
-        //DataListResult<T> GetList<T>(int applicationid) where T : InformationHeader, new();
-
-
-
-        /// <summary>
-        /// Get a list of (latest version) application data. 
-        /// All columns and rows from the application's main table is returned.
-        /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        //DataListResult GetJsonArray(int applicationid);
-
-
-        /// <summary>
-        /// Get value domains for an application specified by application id
-        /// </summary>
-        DataListResult GetValueDomains(int ApplicationId);
-
-        /// <summary>
-        /// Get all value domains.
-        /// </summary>
-        DataListResult GetValueDomains();
-
         /// <summary>
         /// Get all value domain items.
         /// </summary>
         /// <returns>A list of ValueDomainModelItem</returns>
-        List<ValueDomainModelItem> GetValueDomainItems();
+        List<ValueDomainModelItem> GetValueDomains();
 
         /// <summary>
         /// Get all value domain items for one domain.
         /// </summary>
         /// <returns>A list of ValueDomainModelItem</returns>
-        List<ValueDomainModelItem> GetValueDomainItems(string domainname);
+        List<ValueDomainModelItem> GetValueDomain(string domainname);
 
         /// <summary>
-        /// Gets a list of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
+        /// Generate a value domain based on a customized query.
         /// </summary>
-        /// <returns>An OperationResult including a json array</returns>
-        DataListResult GetDataView(ListFilter args);
+        /// <returns>A list of ValueDomainModelItem</returns>
+        List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state);
 
-        /// <summary>
-        /// Gets  the first record of data based on the DataView defined by args.DataViewMetaCode and that matches the filter specified in args.
-        /// </summary>
-        /// <returns>An OperationResult including a json object</returns>
-        DataListResult GetDataViewRecord(ListFilter args);
 
         /// <summary>
         /// Validates an application according to validation rules in the model
@@ -195,6 +146,10 @@ namespace Intwenty.Interface
         void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
 
         void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
+
+        Task LogIdentityActivity(string verbosity, string message, string username = "");
+
+       
 
         /// <summary>
         /// Get eventlog items

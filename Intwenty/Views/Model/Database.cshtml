@@ -232,6 +232,7 @@
                 //Application
                 $.get(endpointurl, function (response){
                     context.model = response;
+                    context.propertyCollection = response.propertyCollection;
                     //DataTypes
                     endpointurl = baseurl + "GetIntwentyDataTypes";
                     $.get(endpointurl, function (response) {
