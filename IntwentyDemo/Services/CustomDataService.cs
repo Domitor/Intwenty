@@ -42,7 +42,7 @@ namespace IntwentyDemo.Services
                 var data = client.GetEntities<ValueDomainModelItem>("select Id, VendorId Code, VendorName Value from wms_Vendor");
                 client.Close();
                 foreach (var t in data)
-                    t.Value = t.Code + " - " + t.Value;
+                    t.LocalizedTitle = t.Code + " - " + t.Value;
                 return data;
             }
 
@@ -52,7 +52,7 @@ namespace IntwentyDemo.Services
                 var data = client.GetEntities<ValueDomainModelItem>("select Id, CustomerId Code, CustomerName Value from wms_Customer");
                 client.Close();
                 foreach (var t in data)
-                    t.Value = t.Code + " - " + t.Value;
+                    t.LocalizedTitle = t.Code + " - " + t.Value;
                 return data;
             }
 
@@ -63,7 +63,7 @@ namespace IntwentyDemo.Services
                 var data = client.GetEntities<ValueDomainModelItem>("select Id, ItemId Code, ItemName Value from wms_Item");
                 client.Close();
                 foreach (var t in data)
-                    t.Value = t.Code + " - " + t.Value;
+                    t.LocalizedTitle = t.Code + " - " + t.Value;
                 return data;
             }
 

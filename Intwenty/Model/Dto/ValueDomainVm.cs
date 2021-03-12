@@ -16,5 +16,7 @@ namespace Intwenty.Model.Dto
 
         public string Value { get; set; }
 
+        public string Display { get; set; }
+
     }
 }

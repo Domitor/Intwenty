@@ -20,6 +20,7 @@ namespace Intwenty.Model
             Code = entity.Code;
             Value = entity.Value;
             Title = entity.Value;
+            LocalizedTitle = entity.Value;
             TitleLocalizationKey = entity.ValueLocalizationKey;
             Properties = entity.Properties;
             SetEmptyStrings();

@@ -141,6 +141,8 @@ namespace Intwenty.Controllers
             var dname = arr[1];
 
             var retlist = new List<ValueDomainVm>();
+
+
             List<ValueDomainModelItem> domaindata = null;
 
             if (dtype.ToUpper() == "VALUEDOMAIN")
@@ -156,7 +158,7 @@ namespace Intwenty.Controllers
             {
                 if (query.ToUpper() == "ALL")
                 {
-                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).ToList();
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value, Display=p.LocalizedTitle }).ToList();
                 }
                 else if (query.ToUpper() == "PRELOAD")
                 {
@@ -165,7 +167,7 @@ namespace Intwenty.Controllers
                     {
                         var p = domaindata[i];
                         if (i < 50)
-                            result.Add(new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value });
+                            result.Add(new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value, Display = p.LocalizedTitle });
                         else
                             break;
                     }
@@ -173,7 +175,7 @@ namespace Intwenty.Controllers
                 }
                 else
                 {
-                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value }).Where(p=> p.Value.ToLower().Contains(query.ToLower())).ToList();
+                    retlist = domaindata.Select(p => new ValueDomainVm() { Id = p.Id, Code = p.Code, DomainName = dname, Value = p.Value, Display = p.LocalizedTitle }).Where(p=> p.Display.ToLower().Contains(query.ToLower())).ToList();
                 }
             }
 
