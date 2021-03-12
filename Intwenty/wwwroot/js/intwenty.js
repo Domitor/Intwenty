@@ -217,8 +217,8 @@ Vue.component("searchbox", {
             , delimiter: ','
             , maxItems: maxitems
             , valueField: 'code'
-            , labelField: 'value'
-            , searchField: 'value'
+            , labelField: 'display'
+            , searchField: 'display'
             , options: []
             , create: allowcreate
             , preload: true
@@ -319,8 +319,8 @@ Vue.component("combobox", {
             delimiter: ','
             , maxItems: 1
             , valueField: 'code'
-            , labelField: 'value'
-            , searchField: 'value'
+            , labelField: 'display'
+            , searchField: 'display'
             , options: []
             , create: false
             , preload: true
