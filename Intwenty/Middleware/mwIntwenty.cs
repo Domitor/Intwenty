@@ -298,7 +298,7 @@ namespace Intwenty.Middleware
         private static void CreateIntwentyFrameworkTables(IntwentySettings settings)
         {
 
-            if (!settings.SeedModelOnStartUp)
+            if (!settings.CreateIntwentyDbObjectsOnStartUp)
                 return;
 
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
@@ -339,7 +339,7 @@ namespace Intwenty.Middleware
         private static void CreateIntwentyIAMTables(IntwentySettings settings)
         {
 
-            if (!settings.SeedModelOnStartUp)
+            if (!settings.CreateIntwentyDbObjectsOnStartUp)
                 return;
 
             var client = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);

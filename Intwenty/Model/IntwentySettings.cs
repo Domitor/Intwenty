@@ -36,6 +36,11 @@ namespace Intwenty.Model
         public DBMS IAMConnectionDBMS { get; set; }
 
         /// <summary>
+        /// Create intwenty database table on startup, if tables already exist they will not be created
+        /// </summary>
+        public bool CreateIntwentyDbObjectsOnStartUp { get; set; }
+
+        /// <summary>
         /// If model is programaticly defined, create model container tables and seed the model
         /// </summary>
         public bool SeedModelOnStartUp { get; set; }

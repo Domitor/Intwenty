@@ -1904,6 +1904,8 @@ namespace Intwenty.Controllers
                 var model = System.Text.Json.JsonSerializer.Deserialize<ExportModel>(fileContents);
                 model.DeleteCurrentModel = delete;
                 result = ModelRepository.ImportModel(model);
+                if (result.IsSuccess)
+                   await ModelRepository.ConfigureDatabase();
             }
             catch (Exception ex)
             {
@@ -1936,6 +1938,7 @@ namespace Intwenty.Controllers
                 var sep = "";
                 foreach (var app in apps)
                 {
+                   
                     var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging = true });
                     var appdata = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(appdatalist.Data).RootElement);
                     foreach (var istat in appdata.SubTables[0].Rows)
@@ -1991,6 +1994,11 @@ namespace Intwenty.Controllers
 
             try
             {
+                //Make sure the database is configured
+                await ModelRepository.ConfigureDatabase();
+                var user = await UserManager.GetUserAsync(User);
+                await ModelRepository.CreateTenantIsolatedTables(user);
+
                 var authapps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
                 int savefail = 0;
                 int savesuccess = 0;
@@ -2017,6 +2025,9 @@ namespace Intwenty.Controllers
                             {
                                 if (istat.Name == "ApplicationId")
                                     app = authapps.Find(p => p.Id == istat.Value.GetInt32());
+
+                                if (app.TenantIsolationLevel != TenantIsolationOptions.None)
+                                    continue;
 
                                 if (istat.Name == "ApplicationData" && app != null)
                                 {
