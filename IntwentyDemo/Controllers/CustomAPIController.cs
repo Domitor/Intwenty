@@ -20,9 +20,9 @@ namespace IntwentyDemo.Controllers
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
         private IntwentyUserManager UserManager { get; }
-        private IntwentyOrganizationManager OrganizationManager { get; }
+        private IIntwentyOrganizationManager OrganizationManager { get; }
 
-        public CustomAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager, IntwentyOrganizationManager orgmanager) 
+        public CustomAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager, IIntwentyOrganizationManager orgmanager) 
         {
             DataRepository = dataservice;
             ModelRepository = modelservice;

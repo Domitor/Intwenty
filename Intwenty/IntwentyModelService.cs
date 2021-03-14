@@ -179,6 +179,9 @@ namespace Intwenty
             var uiitems = Client.GetEntities<UserInterfaceItem>();
             foreach (var a in uiitems)
                 t.UserInterfaceItems.Add(a);
+            var funcitems = Client.GetEntities<FunctionItem>();
+            foreach (var a in funcitems)
+                t.FunctionItems.Add(a);
             var uistructitems = Client.GetEntities<UserInterfaceStructureItem>();
             foreach (var a in uistructitems)
                 t.UserInterfaceStructureItems.Add(a);
@@ -228,6 +231,7 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
                     Client.DeleteEntities(Client.GetEntities<SystemItem>());
+                    Client.DeleteEntities(Client.GetEntities<FunctionItem>());
                 }
 
                 foreach (var a in model.Systems)
@@ -246,6 +250,9 @@ namespace Intwenty
                     Client.InsertEntity(a);
 
                 foreach (var a in model.UserInterfaceItems)
+                    Client.InsertEntity(a);
+
+                foreach (var a in model.FunctionItems)
                     Client.InsertEntity(a);
 
                 foreach (var a in model.UserInterfaceStructureItems)
