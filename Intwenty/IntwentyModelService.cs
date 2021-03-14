@@ -52,8 +52,6 @@ namespace Intwenty
 
         private static readonly string EndpointsCacheKey = "INTWENTYENDPOINTS";
 
-        private static readonly string DataViewCacheKey = "INTWENTYDATAVIEWS";
-
         private static readonly string SystemModelItemCacheKey = "INTWENTYSYSTEMS";
 
 
@@ -141,14 +139,13 @@ namespace Intwenty
 
             if (clearall)
             {
+                ModelCache.Remove(SystemModelItemCacheKey);
                 ModelCache.Remove(AppModelCacheKey);
                 ModelCache.Remove(AppModelItemsCacheKey);
                 ModelCache.Remove(DefaultVersioningTableColumnsCacheKey);
                 ModelCache.Remove(ValueDomainsCacheKey);
                 ModelCache.Remove(TranslationsCacheKey);
                 ModelCache.Remove(EndpointsCacheKey);
-                ModelCache.Remove(DataViewCacheKey);
-
             }
             else
             {
@@ -215,8 +212,7 @@ namespace Intwenty
             try
             {
 
-                ModelCache.Remove(AppModelCacheKey);
-                ModelCache.Remove(AppModelItemsCacheKey);
+                ClearCache();
 
                 Client.Open();
 
@@ -265,9 +261,8 @@ namespace Intwenty
                     Client.InsertEntity(a);
 
                 result.IsSuccess = true;
-                result.AddMessage(MessageCode.RESULT, "The model was imported successfully");
+                result.AddMessage(MessageCode.RESULT, "The model was imported successfully. If new or changed views (paths) were included, please restart the application.");
 
-                Client.Close();
             }
             catch (Exception ex)
             {
@@ -537,8 +532,6 @@ namespace Intwenty
             var appitems = GetApplicationDescriptions();
             var dbitems = GetDatabaseModels();
             var views = GetViewModels();
-            var systems = GetSystemModels();
-
 
             foreach (var app in appitems)
             {

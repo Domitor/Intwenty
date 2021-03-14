@@ -1994,12 +1994,18 @@ namespace Intwenty.Controllers
 
             try
             {
+              
+
                 //Make sure the database is configured
                 await ModelRepository.ConfigureDatabase();
                 var user = await UserManager.GetUserAsync(User);
                 await ModelRepository.CreateTenantIsolatedTables(user);
 
+                ModelRepository.ClearCache();
+
                 var authapps = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
+
+
                 int savefail = 0;
                 int savesuccess = 0;
                 string fileContents;
@@ -2025,9 +2031,6 @@ namespace Intwenty.Controllers
                             {
                                 if (istat.Name == "ApplicationId")
                                     app = authapps.Find(p => p.Id == istat.Value.GetInt32());
-
-                                if (app.TenantIsolationLevel != TenantIsolationOptions.None)
-                                    continue;
 
                                 if (istat.Name == "ApplicationData" && app != null)
                                 {
