@@ -31,12 +31,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             Settings = settings.Value;
         }
 
-        public bool HasAuthenticator { get; set; }
-
-        public int RecoveryCodesLeft { get; set; }
-
-        [BindProperty]
-        public bool Is2faEnabled { get; set; }
+        public bool HasTwofactorAuth { get; set; }
 
         public bool IsMachineRemembered { get; set; }
 
@@ -51,8 +46,10 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{UserManager.GetUserId(User)}'.");
             }
 
-            HasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(user) != null;
-            Is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
+         
+
+            //HasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(user) != null;
+            HasTwofactorAuth = await UserManager.GetTwoFactorEnabledAsync(user);
             IsMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
             //RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
 

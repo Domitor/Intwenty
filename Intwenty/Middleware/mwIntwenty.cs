@@ -101,7 +101,6 @@ namespace Intwenty.Middleware
 
                 options.User.RequireUniqueEmail = true;
 
-
             })
              .AddRoles<IntwentyProductAuthorizationItem>()
              .AddUserStore<IntwentyUserStore>()
@@ -110,6 +109,7 @@ namespace Intwenty.Middleware
              .AddSignInManager<IntwentySignInManager>()
              .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>();
             
+       
 
 
             if (settings.UseExternalLogins && settings.UseFacebookLogin)
