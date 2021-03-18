@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Intwenty.Interface
 {
-    public interface ISmsSender
+    public interface IIntwentyEmailService
     {
-        Task SendSmsAsync(string number, string message);
+        Task SendEmailAsync(string sendto, string subject, string message);
     }
 
 }

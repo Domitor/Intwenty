@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Intwenty;
@@ -14,6 +15,7 @@ using IntwentyDemo.Services;
 using Intwenty.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting.Internal;
+using Intwenty.Services;
 
 namespace IntwentyDemo
 {
@@ -36,7 +38,7 @@ namespace IntwentyDemo
                 {
                     webBuilder.UseStaticWebAssets();
 
-                    webBuilder.ConfigureServices((buildercontext,services) =>
+                    webBuilder.ConfigureServices((buildercontext, services) =>
                     {
 
                         var configuration = buildercontext.Configuration;
@@ -49,9 +51,16 @@ namespace IntwentyDemo
                         else
                             iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
 
+
+                        //Add Email and SMS
+                        services.TryAddTransient<IIntwentyEmailService, EmailService>();
+                        services.TryAddTransient<IIntwentySmsService, SmsService>();
+
                         //Add intwenty 
                         //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation
                         services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration); //customized services
+
+                      
 
                         //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
                         //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
@@ -81,7 +90,7 @@ namespace IntwentyDemo
 
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
                     })
-                    .Configure((applicationlifetime, app) =>
+                    .Configure((buildercontext, app) =>
                     {
                         var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
                         var logger = loggerFactory.CreateLogger<Program>();
@@ -99,6 +108,8 @@ namespace IntwentyDemo
 
                         //Set up everything related to intwenty
                         app.UseIntwenty();
+
+                      
 
 
                     });

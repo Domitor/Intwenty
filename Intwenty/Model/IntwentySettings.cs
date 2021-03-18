@@ -144,6 +144,13 @@ namespace Intwenty.Model
         public string UserAdminEmail { get; set; }
 
 
+        //SMS
+        public string SmsServiceAPIKey { get; set; }
+        public string SmsServiceUser { get; set; }
+        public string SmsServicePwd { get; set; }
+        public string SmsServiceFrom { get; set; }
+
+
         //STORAGE
         public bool StorageUseFileSystem { get; set; }
 

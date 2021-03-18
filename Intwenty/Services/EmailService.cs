@@ -1,5 +1,5 @@
-﻿using Intwenty.Model;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Intwenty.Interface;
+using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Intwenty.Services
 {
    
-    public class EmailService : IEmailSender
+    public class EmailService : IIntwentyEmailService
     {
         private IntwentySettings Settings { get; }
 
@@ -23,19 +23,7 @@ namespace Intwenty.Services
         }
 
 
-
-        public Task SendEmail(string sendto, string subject, string message)
-        {
-            if (Settings.RedirectAllOutgoingMailTo.Contains("@") && Settings.RedirectAllOutgoingMailTo.Contains("."))
-                Send(Settings.RedirectAllOutgoingMailTo, subject, message).Wait();
-            else
-                Send(sendto, subject, message).Wait();
-
-
-            return Task.FromResult(0);
-        }
-
-        public async Task SendEmailAsync(string sendto, string subject, string message)
+        public virtual async Task SendEmailAsync(string sendto, string subject, string message)
         {
             if (Settings.RedirectAllOutgoingMailTo.Contains("@") && Settings.RedirectAllOutgoingMailTo.Contains("."))
                 await Send(Settings.RedirectAllOutgoingMailTo, subject, message);
@@ -44,7 +32,7 @@ namespace Intwenty.Services
 
         }
 
-        private async Task Send(string sendto, string subject, string message)
+        protected virtual async Task Send(string sendto, string subject, string message)
         {
 
             if (string.IsNullOrEmpty(Settings.MailServiceServer))

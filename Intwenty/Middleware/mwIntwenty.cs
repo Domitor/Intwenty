@@ -69,10 +69,9 @@ namespace Intwenty.Middleware
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
             services.TryAddTransient<IIntwentySeeder, TInwentySeeder>();
-            services.TryAddTransient<IEmailSender, EmailService>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
             services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();
-       
+
 
 
             //Required for Intwenty services to work correctly
@@ -215,8 +214,8 @@ namespace Intwenty.Middleware
             builder.UseAuthentication();
             builder.UseAuthorization();
             builder.UseRequestLocalization();
-            builder.ConfigureEndpoints(settings);
             builder.ConfigureIntwentyTwoFactorAuth(settings);
+            builder.ConfigureEndpoints(settings);
             builder.ConfigureIntwentyAPI(settings);
             builder.SeedIntwenty(settings);
 
@@ -278,6 +277,15 @@ namespace Intwenty.Middleware
 
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
+
+
+                /* Handle all responses
+                endpoints.MapGet("/{**slug}", async context =>
+                {
+                   await context.Response.WriteAsync("Hello World!");
+                });
+                */
+
             });
 
         }
