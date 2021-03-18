@@ -9,7 +9,7 @@ namespace Intwenty.Model
 
     public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle };
 
-    public enum AllowedTwoFactorAuthTypes { All, None, Totp, Sms };
+    public enum AllowedTwoFactorAuthTypes { None, All, Totp, Sms, Email,SmsAndEmail, TotpAndSms, TotpAndEmail };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
@@ -269,6 +269,8 @@ namespace Intwenty.Model
             get
             {
                 if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Sms ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.SmsAndEmail ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndSms ||
                     TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
                 {
                     return true;
@@ -284,6 +286,25 @@ namespace Intwenty.Model
             get
             {
                 if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Totp ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndSms ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndEmail ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseEmailTwoFactorAuth
+        {
+
+            get
+            {
+                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Email ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.SmsAndEmail ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndEmail ||
                     TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
                 {
                     return true;
