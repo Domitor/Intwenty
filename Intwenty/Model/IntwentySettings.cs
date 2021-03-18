@@ -9,6 +9,8 @@ namespace Intwenty.Model
 
     public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle };
 
+    public enum AllowedTwoFactorAuthTypes { All, None, Totp, Sms };
+
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
     public enum LogVerbosityTypes { Information, Warning, Error };
@@ -84,9 +86,14 @@ namespace Intwenty.Model
         /// What kind of logins should be allowed
         /// </summary>
         public AllowedAccountTypes AllowedAccounts { get; set; }
+        public bool UseEmailVerification { get; set; }
+        public bool ForceEmailVerification { get; set; }
 
-       
-
+        /// <summary>
+        /// Allow new visitors to register
+        /// </summary>
+        public bool UserRegistrationAllow { get; set; }
+        public bool UserRegistrationRequireName { get; set; }
 
         /// <summary>
         /// SiteLocalization = Always use DefaultCulture to look up localization keys
@@ -106,12 +113,11 @@ namespace Intwenty.Model
         /// The title to show in authenticator apps
         /// </summary>
         public string AuthenticatorTitle { get; set; }
-        public bool EnableTwoFactorAuthentication { get; set; }
+        public AllowedTwoFactorAuthTypes TwoFactorAuthentication { get; set; }
         public bool ForceTwoFactorAuthentication { get; set; }
 
 
-        public bool EnableAPIKeyGeneration { get; set; }
-
+      
         /// <summary>
         /// Comma separated  roles to assign new users
         /// </summary>
@@ -125,11 +131,7 @@ namespace Intwenty.Model
         /// </summary>
         public bool EnableUserGroups { get; set; }
 
-        /// <summary>
-        /// Allow new visitors to register
-        /// </summary>
-        public bool UserRegistrationAllow { get; set; }
-        public bool UserRegistrationRequireName { get; set; }
+      
 
         //EMAIL
         public string MailServiceServer { get; set; }
@@ -254,6 +256,35 @@ namespace Intwenty.Model
 
         }
 
+        public bool UseSmsTwoFactorAuth
+        {
+
+            get
+            {
+                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Sms ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseTotpTwoFactorAuth
+        {
+
+            get
+            {
+                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Totp ||
+                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
 
 
     }

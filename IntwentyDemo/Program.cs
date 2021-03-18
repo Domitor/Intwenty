@@ -9,75 +9,124 @@ using Microsoft.Extensions.Configuration;
 using Intwenty.Interface;
 using IntwentyDemo.Seed;
 using System.Threading.Tasks;
+using Intwenty.Model;
+using IntwentyDemo.Services;
+using Intwenty.Middleware;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace IntwentyDemo
 {
     public class Program
     {
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
-            
-            using (var scope = host.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-
-                try
-                {
-                    //Below can be activated/deactivated in the appsetting.json file
-                    //-SeedProductAndOrganizationOnStartUp
-                    //-UseDemoSettings
-                    //-SeedModelOnStartUp
-                    //-SeedLocalizationsOnStartUp
-                    //-ConfigureDatabaseOnStartUp
-                    //-SeedDataOnStartUp
-
-
-                    //Use intwenty to create the configured product and the organization
-                    await Intwenty.Seed.Product.SeedProductAndOrganization(services);
-                    //Use intwenty to create an admin user and more
-                    await Intwenty.Seed.Demo.SeedDemoUsersAndRoles(services);
-                    //Use intwenty to seed some common localization
-                    await Intwenty.Seed.DefaultLocalization.Seed(services);
-
-
-                    DemoModel.SeedModel(services);
-                    DemoModel.SeedLocalizations(services);
-                    DemoModel.ConfigureDatabase(services);
-                    DemoModel.SeedData(services);
-
-                    //At last create product athorization items (based on systems and applications in the model)
-                    await Intwenty.Seed.Product.SeedProductAuthorizationItems(services);
-
-
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            await host.RunAsync();
-
-
+            CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-         Host.CreateDefaultBuilder(args)
-             .ConfigureAppConfiguration((hostingContext, config) =>
-              {
-                   config.AddUserSecrets("b77e8d87-d3be-4daf-9074-ec3ccd53ed21");
-              })
-             .ConfigureWebHostDefaults(webBuilder =>
-             {
-                 //To allow local folders, needed by sqlite, local documents and so on....
-                 webBuilder.UseStaticWebAssets();
 
-                 webBuilder.UseStartup<Startup>();
-                
-             });
+            Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddUserSecrets("b77e8d87-d3be-4daf-9074-ec3ccd53ed21");
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStaticWebAssets();
+
+                    webBuilder.ConfigureServices((buildercontext,services) =>
+                    {
+
+                        var configuration = buildercontext.Configuration;
+                        var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
+                        var adminroles = new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
+                        var userroles = new string[] { "USER", "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
+                        var iamroles = new string[] { };
+                        if (settings.UseSeparateIAMDatabase)
+                            iamroles = new string[] { "SUPERADMIN" };
+                        else
+                            iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
+
+                        //Add intwenty 
+                        //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation
+                        services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration); //customized services
+
+                        //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
+                        //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
+                        services.AddAuthorization(options =>
+                        {
+                            options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
+                            {
+                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                policy.RequireRole(userroles);
+                            });
+
+                            options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
+                            {
+                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                policy.RequireRole(adminroles);
+
+                            });
+
+                            options.AddPolicy("IntwentyUserAdminAuthorizationPolicy", policy =>
+                            {
+                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                policy.RequireRole(iamroles);
 
 
+                            });
+                        });
+
+                        services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+                    })
+                    .Configure((applicationlifetime, app) =>
+                    {
+                        var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger<Program>();
+                        var env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
+                        var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+
+                        //applicationLifetime.ApplicationStopped.Register(OnShutdown);
+                        //applicationlifetime.ApplicationStarted.Register(OnStarted);
+
+                        app.UseStaticFiles();
+                        app.UseExceptionHandler("/Home/Error");
+                        app.UseHsts();
+
+
+                        //Set up everything related to intwenty
+                        app.UseIntwenty();
+
+
+                    });
+                });
+        /*
+        private void OnShutdown()
+        {
+            try
+            {
+                var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
+                var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+                client.InsertEntity<EventLog>(new EventLog() { ApplicationId = 0, AppMetaCode = "", EventDate = DateTime.Now, Id = 0, Message = "Instance stopped", UserName = "", Verbosity = "INFO" });
+            }
+            catch { }
+        }
+
+        private void OnStarted()
+        {
+            try
+            {
+                var settings = Configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
+                var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+                client.InsertEntity<EventLog>(new EventLog() { ApplicationId = 0, AppMetaCode = "", EventDate = DateTime.Now, Id = 0, Message = "Instance started", UserName = "", Verbosity = "INFO" });
+            }
+            catch { }
+        }
+        */
+
+      
     }
 }

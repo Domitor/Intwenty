@@ -24,14 +24,20 @@ using System.Text;
 using Intwenty.DataClient;
 using Intwenty.Entity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Intwenty.Seed;
 
 namespace Intwenty.Middleware
 {
     public static class mwIntwenty
     {
+        public static void AddIntwenty<TIntwentyDataService, TIntwentyEventService>(this IServiceCollection services, IConfiguration configuration)
+                         where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService
+        {
+            services.AddIntwenty<TIntwentyDataService, TIntwentyEventService, IntwentySeeder>(configuration);
+        }
 
-        public static void AddIntwenty<TIntwentyDataService,TIntwentyEventService>(this IServiceCollection services, IConfiguration configuration) 
-                           where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService
+        public static void AddIntwenty<TIntwentyDataService,TIntwentyEventService,TInwentySeeder>(this IServiceCollection services, IConfiguration configuration) 
+                           where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService where TInwentySeeder : class, IIntwentySeeder
         {
             services.AddSignalR();
 
@@ -62,9 +68,11 @@ namespace Intwenty.Middleware
             services.TryAddTransient<IIntwentyDataService, TIntwentyDataService>();
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
+            services.TryAddTransient<IIntwentySeeder, TInwentySeeder>();
             services.TryAddTransient<IEmailSender, EmailService>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
             services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();
+       
 
 
             //Required for Intwenty services to work correctly
@@ -151,12 +159,6 @@ namespace Intwenty.Middleware
 
             services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
 
-         
-
-
-            //CHANGE 20210120
-            //services.AddRazorPages().AddViewLocalization();
-
             services.AddMvc(options =>
             {
                 // This pushes users to login if not authenticated
@@ -203,7 +205,6 @@ namespace Intwenty.Middleware
         public static IApplicationBuilder UseIntwenty(this IApplicationBuilder builder)
         {
             var configuration = builder.ApplicationServices.GetRequiredService<IConfiguration>();
-
             var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
 
             builder.UseHttpsRedirection();
@@ -211,11 +212,20 @@ namespace Intwenty.Middleware
             builder.UseRouting();
 
 
-            //Needed only if Identity is used
             builder.UseAuthentication();
             builder.UseAuthorization();
             builder.UseRequestLocalization();
+            builder.ConfigureEndpoints(settings);
+            builder.ConfigureIntwentyTwoFactorAuth(settings);
+            builder.ConfigureIntwentyAPI(settings);
+            builder.SeedIntwenty(settings);
 
+            return builder;
+
+        }
+
+        private static void ConfigureEndpoints(this IApplicationBuilder builder, IntwentySettings settings)
+        {
 
             builder.UseEndpoints(endpoints =>
             {
@@ -248,7 +258,7 @@ namespace Intwenty.Middleware
                 var appmodels = modelservice.GetApplicationModels();
                 foreach (var a in appmodels)
                 {
-                    
+
                     foreach (var view in a.Views)
                     {
                         if (string.IsNullOrEmpty(view.Path))
@@ -261,22 +271,29 @@ namespace Intwenty.Middleware
                         if (path[path.Length - 1] != '/')
                             path = path + "/";
 
-                        endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action= "View" });
+                        endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
                     }
                 }
 
 
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
-            }); 
+            });
 
-           
+        }
+
+        private static void ConfigureIntwentyTwoFactorAuth(this IApplicationBuilder builder, IntwentySettings settings)
+        {
 
             if (settings.ForceTwoFactorAuthentication)
             {
                 builder.UseMiddleware<mwMFA>();
             }
 
+        }
+
+        private static void ConfigureIntwentyAPI(this IApplicationBuilder builder, IntwentySettings settings)
+        {
             if (settings.UseIntwentyAPI)
             {
                 // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -290,8 +307,45 @@ namespace Intwenty.Middleware
                 });
             }
 
+        }
 
-            return builder;
+
+        private static void SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
+        {
+
+            //Below can be activated/deactivated in the appsetting.json file
+            //-SeedProductAndOrganizationOnStartUp
+            //-UseDemoSettings
+            //-SeedModelOnStartUp
+            //-SeedLocalizationsOnStartUp
+            //-ConfigureDatabaseOnStartUp
+            //-SeedDataOnStartUp
+
+            var seederservice = builder.ApplicationServices.GetRequiredService<IIntwentySeeder>();
+
+            //The order is important
+
+            if (settings.SeedLocalizationsOnStartUp)
+                seederservice.SeedLocalization(settings, builder.ApplicationServices);
+
+            if (settings.SeedProductAndOrganizationOnStartUp)
+                seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
+
+            if (settings.SeedDemoUserAccountsOnStartUp)
+                seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
+
+            if (settings.SeedModelOnStartUp)
+                seederservice.SeedModel(settings, builder.ApplicationServices);
+
+            if (settings.SeedDataOnStartUp)
+                seederservice.SeedData(settings, builder.ApplicationServices);
+
+            if (settings.ConfigureDatabaseOnStartUp)
+                seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
+
+            if (settings.SeedProductAndOrganizationOnStartUp)
+                seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
+
 
         }
 
