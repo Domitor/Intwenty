@@ -75,10 +75,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             //var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
             var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, Input.PhoneNumber);
             await _smsService.SendSmsAsync(Input.PhoneNumber, code);
-
-       
-
-            return RedirectToPage("./SmsMfaVerify", new { PhoneNumber=Input.PhoneNumber });
+            return RedirectToPage("./SmsMfaVerify", new { phonenumber=Input.PhoneNumber });
             
         }
 

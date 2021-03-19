@@ -31,7 +31,12 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             Settings = settings.Value;
         }
 
-        public bool HasTwofactorAuth { get; set; }
+        public bool HasAnyMFA { get; set; }
+        public bool HasBankIdMFA{ get; set; }
+        public bool HasSmsMFA { get; set; }
+        public bool HasEmailMFA { get; set; }
+        public bool HasFido2MFA { get; set; }
+        public bool HasTotpMFA { get; set; }
 
         public bool IsMachineRemembered { get; set; }
 
@@ -46,27 +51,31 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{UserManager.GetUserId(User)}'.");
             }
 
-         
+            HasBankIdMFA = await UserManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
+            HasSmsMFA = await UserManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE");
+            HasEmailMFA = await UserManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
+            HasFido2MFA = await UserManager.HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
+            HasTotpMFA = await UserManager.HasUserSettingWithValue(user, "TOTPMFA", "TRUE");
 
-            //HasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(user) != null;
-            HasTwofactorAuth = await UserManager.GetTwoFactorEnabledAsync(user);
+            if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
+                HasAnyMFA = true;
+
+
+             var t = await UserManager.GetTwoFactorEnabledAsync(user);
+            if (!t && HasAnyMFA)
+                await UserManager.SetTwoFactorEnabledAsync(user, true);
+            if (t && !HasAnyMFA)
+                await UserManager.SetTwoFactorEnabledAsync(user, false);
+
             IsMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
-            //RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
+
 
             return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
-            var user = await UserManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{UserManager.GetUserId(User)}'.");
-            }
-
-            await SignInManager.ForgetTwoFactorClientAsync();
-            StatusMessage = "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.";
-            return RedirectToPage();
+            return Page();
         }
     }
 }

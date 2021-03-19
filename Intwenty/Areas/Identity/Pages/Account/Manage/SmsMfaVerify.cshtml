@@ -8,16 +8,17 @@
 <h4>@ViewData["Title"]</h4>
 <partial name="_StatusMessage" for="StatusMessage" />
 
-<p class="alert alert-primary">We sent a code to your mobile phone, please input the code below</p>
+
 
 <div class="row">
     <div class="col-md-6">
-        <form id="change-password-form" method="post">
+        <form id="phoneverifyform" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Input.Code"></label>
                 <input asp-for="Input.Code" class="form-control" />
                 <span asp-validation-for="Input.Code" class="text-danger"></span>
+                <input type="hidden" asp-for="Input.PhoneNumber" />
             </div>
 
             <button type="submit" class="btn btn-primary">Send Code</button>

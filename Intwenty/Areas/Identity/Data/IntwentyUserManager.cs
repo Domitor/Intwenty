@@ -705,7 +705,111 @@ namespace Intwenty.Areas.Identity.Data
             }
         }
 
-       
+        public async Task AddUpdateUserSetting(IntwentyUser user, string key, string value)
+        {
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            if (usersetting.Count == 0)
+            {
+                IAMCache.Remove(IntwentyUserStore.UserSettingsCacheKey);
+
+                var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+                await client.OpenAsync();
+                await client.InsertEntityAsync(new IntwentyUserSetting() { UserId=user.Id, Key=key.ToUpper(), Value=value });
+                await client.CloseAsync();
+
+            }
+            else
+            {
+                IAMCache.Remove(IntwentyUserStore.UserSettingsCacheKey);
+
+                usersetting[0].Value = value;
+                var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(usersetting[0]);
+                await client.CloseAsync();
+            }
+
+        }
+
+        public async Task RemoveUserSetting(IntwentyUser user, string key)
+        {
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                IAMCache.Remove(IntwentyUserStore.UserSettingsCacheKey);
+
+                var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+                await client.OpenAsync();
+                await client.DeleteEntityAsync(usersetting[0]);
+                await client.CloseAsync();
+
+            }
+
+        }
+
+        public async Task<string> GetUserSettingValue(IntwentyUser user, string key)
+        {
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                return usersetting[0].Value;
+            }
+
+            return string.Empty;
+        }
+
+        public async Task<bool> HasUserSetting(IntwentyUser user, string key)
+        {
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
+        public async Task<bool> HasUserSettingWithValue(IntwentyUser user, string key, string value)
+        {
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper() && p.Value.ToUpper() == value.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
+        private async Task<List<IntwentyUserSetting>> GetAllUserSettings()
+        {
+            List<IntwentyUserSetting> res = null;
+            if (IAMCache.TryGetValue(IntwentyUserStore.UserSettingsCacheKey, out res))
+            {
+                return res;
+            }
+
+            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var result = await client.GetEntitiesAsync<IntwentyUserSetting>();
+            await client.CloseAsync();
+
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions();
+            cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(IntwentyUserStore.AuthCacheExpirationSeconds));
+            IAMCache.Set(IntwentyUserStore.UserSettingsCacheKey, result, cacheEntryOptions);
+
+            return result;
+
+        }
+
+
 
 
 

@@ -22,6 +22,7 @@ namespace Intwenty.Areas.Identity.Data
 
         private IMemoryCache IAMCache { get; }
 
+        public static readonly string UserSettingsCacheKey = "ALLUSERSETTINGS";
         public static readonly string UsersCacheKey = "ALLUSERS";
         public static readonly string UserAuthCacheKey = "USERAUTH";
         public static readonly int AuthCacheExpirationSeconds = 30;

@@ -12,8 +12,7 @@ namespace Intwenty.Areas.Identity.Entity
     [DbTablePrimaryKey("Id")]
     public class IntwentyUser : IdentityUser
     {
-        //[BsonId]
-        //public override string Id { get => base.Id; set => base.Id = value; }
+
 
         public string FirstName { get; set; }
 

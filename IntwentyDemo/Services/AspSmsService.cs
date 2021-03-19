@@ -20,8 +20,12 @@ namespace IntwentyDemo.Services
         }
 
 
-        public virtual Task SendSmsAsync(string number, string message)
+        public Task SendSmsAsync(string number, string message)
         {
+
+            if (string.IsNullOrEmpty(Settings.SmsServiceUser) || string.IsNullOrEmpty(Settings.SmsServicePwd))
+                return Task.FromResult(0); 
+
             ASPSMS.SMS SMSSender = new ASPSMS.SMS();
 
             SMSSender.Userkey = Settings.SmsServiceUser;
