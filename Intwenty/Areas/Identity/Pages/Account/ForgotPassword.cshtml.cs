@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Intwenty.Areas.Identity.Entity;
+using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -18,9 +18,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
     public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<IntwentyUser> _userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IIntwentyEmailService _emailSender;
 
-        public ForgotPasswordModel(UserManager<IntwentyUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<IntwentyUser> userManager, IIntwentyEmailService emailSender)
         {
             _userManager = userManager;
             _emailSender = emailSender;

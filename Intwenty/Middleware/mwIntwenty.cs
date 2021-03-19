@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,7 +83,7 @@ namespace Intwenty.Middleware
             });
 
             //Required for Intwenty if Identity is used
-            services.AddDefaultIdentity<IntwentyUser>(options =>
+            services.AddIdentity<IntwentyUser, IntwentyProductAuthorizationItem>(options =>
             {
                 //options.SignIn.RequireConfirmedAccount = true;
                 //options.SignIn.RequireConfirmedPhoneNumber = true;

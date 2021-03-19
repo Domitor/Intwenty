@@ -1,6 +1,5 @@
 ﻿using Intwenty.Interface;
 using Intwenty.SystemEvents;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ namespace IntwentyDemo.Services
     public class CustomEventService : IntwentyEventService
     {
 
-        public CustomEventService(IEmailSender emailsender, IIntwentyDataService dataservice) : base(emailsender, dataservice)
+        public CustomEventService(IIntwentyEmailService emailsender, IIntwentyDataService dataservice) : base(emailsender, dataservice)
         {
          
         }

@@ -1,5 +1,4 @@
 ﻿using Intwenty.Interface;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,10 +9,10 @@ namespace Intwenty.SystemEvents
    
     public class IntwentyEventService : IIntwentyEventService
     {
-        protected readonly IEmailSender EmailService;
+        protected readonly IIntwentyEmailService EmailService;
         protected readonly IIntwentyDataService DataService;
 
-        public IntwentyEventService(IEmailSender emailsender, IIntwentyDataService dataservice)
+        public IntwentyEventService(IIntwentyEmailService emailsender, IIntwentyDataService dataservice)
         {
             EmailService = emailsender;
             DataService = dataservice;
