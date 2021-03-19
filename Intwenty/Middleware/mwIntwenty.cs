@@ -106,7 +106,8 @@ namespace Intwenty.Middleware
              .AddRoleStore<IntwentyProductAuthorizationStore>()
              .AddUserManager<IntwentyUserManager>()
              .AddSignInManager<IntwentySignInManager>()
-             .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>();
+             .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>()
+             .AddDefaultTokenProviders();
             
        
 

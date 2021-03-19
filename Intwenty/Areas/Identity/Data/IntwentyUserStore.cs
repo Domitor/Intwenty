@@ -16,7 +16,7 @@ namespace Intwenty.Areas.Identity.Data
 {
     public class IntwentyUserStore : IUserStore<IntwentyUser>, IUserPasswordStore<IntwentyUser>, IUserRoleStore<IntwentyUser>, IUserPhoneNumberStore<IntwentyUser>, 
                                      IUserEmailStore<IntwentyUser>, IUserAuthenticatorKeyStore<IntwentyUser>, IUserTwoFactorStore<IntwentyUser>, IUserLockoutStore<IntwentyUser>,
-                                     IUserLoginStore<IntwentyUser>, IUserClaimStore<IntwentyUser>
+                                     IUserLoginStore<IntwentyUser>, IUserClaimStore<IntwentyUser>, IUserSecurityStampStore<IntwentyUser>
     {
         private IntwentySettings Settings { get; }
 
@@ -834,6 +834,33 @@ namespace Intwenty.Areas.Identity.Data
 
 
             return Task.FromResult(query);
+        }
+
+        public Task<string> GetSecurityStampAsync(IntwentyUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            return Task.FromResult(user.SecurityStamp);
+        }
+
+        public Task SetSecurityStampAsync(IntwentyUser user, string stamp, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            if (stamp == null)
+            {
+                throw new ArgumentNullException(nameof(stamp));
+            }
+            user.SecurityStamp = stamp;
+            return Task.CompletedTask;
         }
     }
 }

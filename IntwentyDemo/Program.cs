@@ -54,7 +54,7 @@ namespace IntwentyDemo
 
                         //Add Email and SMS
                         services.TryAddTransient<IIntwentyEmailService, EmailService>();
-                        services.TryAddTransient<IIntwentySmsService, SmsService>();
+                        services.TryAddTransient<IIntwentySmsService, AspSmsService>();
 
                         //Add intwenty 
                         //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation

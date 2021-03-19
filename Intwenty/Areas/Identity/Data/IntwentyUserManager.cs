@@ -42,7 +42,11 @@ namespace Intwenty.Areas.Identity.Data
             IAMCache = cache;
         }
 
-       
+        public override Task<IdentityResult> ChangePhoneNumberAsync(IntwentyUser user, string phoneNumber, string token)
+        {
+            return base.ChangePhoneNumberAsync(user, phoneNumber, token);
+        }
+
         /// <summary>
         /// Gets products that the user has access to (via organization membership)
         /// Products is only available to users via an organization

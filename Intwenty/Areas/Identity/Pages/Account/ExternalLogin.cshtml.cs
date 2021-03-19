@@ -141,7 +141,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     createaccount_result = await _userManager.AddLoginAsync(user, info);
                     if (createaccount_result.Succeeded)
                     {
-
+                        
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

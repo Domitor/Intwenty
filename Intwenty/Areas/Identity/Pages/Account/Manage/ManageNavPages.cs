@@ -20,7 +20,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         public static string PersonalData => "PersonalData";
 
-        public static string TwoFactorAuthentication => "TwoFactorAuthentication";
+        public static string MfaAuth => "MfaAuth";
 
         public static string APIKey => "APIKey";
 
@@ -43,7 +43,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         public static string PersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, PersonalData);
 
-        public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
+        public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, MfaAuth);
 
         public static string GroupMembersClass(ViewContext viewContext) => PageNavClass(viewContext, GroupMembers);
 

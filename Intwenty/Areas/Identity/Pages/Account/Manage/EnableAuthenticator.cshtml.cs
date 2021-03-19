@@ -97,7 +97,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             StatusMessage = "Your authenticator app has been verified.";
 
-            return RedirectToPage("./TwoFactorAuthentication");
+            return RedirectToPage("./MfaAuth");
             
         }
 

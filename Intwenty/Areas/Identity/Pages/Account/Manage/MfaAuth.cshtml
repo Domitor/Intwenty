@@ -1,0 +1,58 @@
+﻿@page
+@model TwoFactorAuthenticationModel
+@{
+    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.MfaAuth;
+
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<h4>@ViewData["Title"]</h4>
+
+
+@foreach (var m in Settings.Value.SupportedMfaMethods)
+{
+    <br />
+    <br />
+
+    if (m.MfaMethod == MfaAuthTypes.Email)
+    {
+        <a id="emailmfa" asp-page="./EnableEmailMfa" class="btn btn-primary" style="min-width:250px">Enable code to email mfa</a>
+    }
+    if (m.MfaMethod == MfaAuthTypes.Fido2)
+    {
+        <a id="fido2msa" asp-page="./EnableFido2Mfa" class="btn btn-primary" style="min-width:250px">Enable fido2 mfa</a>
+    }
+    if (m.MfaMethod == MfaAuthTypes.Sms)
+    {
+        <a id="smsmfa" asp-page="./SmsMfaEnable" class="btn btn-primary" style="min-width:250px">Enable sms mfa</a>
+    }
+    if (m.MfaMethod == MfaAuthTypes.SwedishBankId)
+    {
+        <a id="bankidmfa" asp-page="./EnableSwedishBankIdMfa" class="btn btn-primary" style="min-width:250px">Enable swedish bank id mfa</a>
+    }
+    if (m.MfaMethod == MfaAuthTypes.Totp)
+    {
+        <a id="totpmfa" asp-page="./EnableAuthenticator" class="btn btn-primary" style="min-width:250px">Enable authentication app</a>
+    }
+
+}
+
+
+@if (Model.HasTwofactorAuth && !Settings.Value.ForceMfaAuthentication)
+{
+    <a asp-page="./Disable2fa" class="btn btn-primary">Disable 2FA</a>
+}
+else if (Model.HasTwofactorAuth && Settings.Value.ForceMfaAuthentication)
+{
+    <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
+}
+else if (!Model.HasTwofactorAuth)
+{
+
+
+}
+
+
+
+
