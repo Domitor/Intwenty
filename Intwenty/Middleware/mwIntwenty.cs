@@ -293,7 +293,7 @@ namespace Intwenty.Middleware
         private static void ConfigureIntwentyTwoFactorAuth(this IApplicationBuilder builder, IntwentySettings settings)
         {
 
-            if (settings.ForceTwoFactorAuthentication)
+            if (settings.ForceMfaAuthentication)
             {
                 builder.UseMiddleware<mwMFA>();
             }

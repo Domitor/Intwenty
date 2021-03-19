@@ -9,7 +9,7 @@ namespace Intwenty.Model
 
     public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle };
 
-    public enum AllowedTwoFactorAuthTypes { None, All, Totp, Sms, Email,SmsAndEmail, TotpAndSms, TotpAndEmail };
+    public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
@@ -86,8 +86,7 @@ namespace Intwenty.Model
         /// What kind of logins should be allowed
         /// </summary>
         public AllowedAccountTypes AllowedAccounts { get; set; }
-        public bool UseEmailVerification { get; set; }
-        public bool ForceEmailVerification { get; set; }
+        public bool UseEmailAccountVerification { get; set; }
 
         /// <summary>
         /// Allow new visitors to register
@@ -113,11 +112,12 @@ namespace Intwenty.Model
         /// The title to show in authenticator apps
         /// </summary>
         public string AuthenticatorTitle { get; set; }
-        public AllowedTwoFactorAuthTypes TwoFactorAuthentication { get; set; }
-        public bool ForceTwoFactorAuthentication { get; set; }
+        public List<IntwentyMfaMethod> SupportedMfaMethods { get; set; }
+        public bool EnableMfaAuthentication { get; set; }
+        public bool ForceMfaAuthentication { get; set; }
 
 
-      
+
         /// <summary>
         /// Comma separated  roles to assign new users
         /// </summary>
@@ -263,52 +263,97 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseSmsTwoFactorAuth
+        public bool HasMfaMethods
         {
 
             get
             {
-                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Sms ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.SmsAndEmail ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndSms ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
-                {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Count > 0)
                     return true;
-                }
+
                 return false;
             }
 
         }
 
-        public bool UseTotpTwoFactorAuth
+        public bool UseSmsMfaAuth
         {
 
             get
             {
-                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Totp ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndSms ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndEmail ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
-                {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Sms))
                     return true;
-                }
+
                 return false;
             }
 
         }
 
-        public bool UseEmailTwoFactorAuth
+        public bool UseTotpMfaAuth
         {
 
             get
             {
-                if (TwoFactorAuthentication == AllowedTwoFactorAuthTypes.Email ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.SmsAndEmail ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.TotpAndEmail ||
-                    TwoFactorAuthentication == AllowedTwoFactorAuthTypes.All)
-                {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Totp))
                     return true;
-                }
+
+                return false;
+            }
+
+        }
+
+        public bool UseEmailMfaAuth
+        {
+
+            get
+            {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Email))
+                    return true;
+
+                return false;
+            }
+
+        }
+
+        public bool UseFido2MfaAuth
+        {
+
+            get
+            {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Fido2))
+                    return true;
+
+                return false;
+            }
+
+        }
+
+        public bool UseSwedishBankIdMfaAuth
+        {
+
+            get
+            {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.SwedishBankId))
+                    return true;
+
                 return false;
             }
 
@@ -322,5 +367,12 @@ namespace Intwenty.Model
         public string Name { get; set; }
 
         public string Culture { get; set; }
+    }
+
+    public class IntwentyMfaMethod
+    {
+        public string Name { get; set; }
+
+        public MfaAuthTypes MfaMethod { get; set; }
     }
 }

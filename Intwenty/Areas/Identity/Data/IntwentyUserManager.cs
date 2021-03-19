@@ -42,55 +42,7 @@ namespace Intwenty.Areas.Identity.Data
             IAMCache = cache;
         }
 
-        /*
-        public async Task<IdentityResult> CreateAsync(IntwentyUser user, int organizationid)
-        {
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            var allusers = await GetUsersAsync();
-            if (allusers.Exists(p => p.UserName == user.UserName))
-                return IdentityResult.Failed();
-
-            IAMCache.Remove(IntwentyUserStore.UsersCacheKey);
-
-            IntwentyOrganization org=null;
-
-
-            if (organizationid > 0)
-            {
-                await client.OpenAsync();
-                org = await client.GetEntityAsync<IntwentyOrganization>(organizationid);
-                await client.CloseAsync();
-            }
-
-            await client.OpenAsync();
-            await client.InsertEntityAsync(user);
-
-            if (org != null)
-            {
-                await client.OpenAsync();
-
-                var orgmemembers = await client.GetEntitiesAsync<IntwentyOrganizationMember>();
-                if (!orgmemembers.Exists(p => p.UserId == user.Id && p.OrganizationId == org.Id))
-                    await client.InsertEntityAsync(new IntwentyOrganizationMember() { UserId = user.Id, UserName = user.UserName, OrganizationId = org.Id });
-
-                await client.CloseAsync();
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format("There is no organization with Id {0}", organizationid));
-            }
-
-            await client.CloseAsync();
-            return IdentityResult.Success;
-        }
-        */
-
+       
         /// <summary>
         /// Gets products that the user has access to (via organization membership)
         /// Products is only available to users via an organization

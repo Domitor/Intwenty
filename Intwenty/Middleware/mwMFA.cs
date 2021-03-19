@@ -27,7 +27,7 @@ namespace Intwenty.Middleware
         {
 
 
-            if (settings.Value.ForceTwoFactorAuthentication &&
+            if (settings.Value.ForceMfaAuthentication &&
                 httpcontext.User.Identity.IsAuthenticated &&
                 !string.IsNullOrEmpty(httpcontext.User.Identity.Name))
             {

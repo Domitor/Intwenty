@@ -13,11 +13,11 @@
 
 
 
-@if (Model.HasTwofactorAuth && !Settings.Value.ForceTwoFactorAuthentication)
+@if (Model.HasTwofactorAuth && !Settings.Value.ForceMfaAuthentication)
 {
     <a asp-page="./Disable2fa" class="btn btn-primary">Disable 2FA</a>
 }
-else if (Model.HasTwofactorAuth && Settings.Value.ForceTwoFactorAuthentication)
+else if (Model.HasTwofactorAuth && Settings.Value.ForceMfaAuthentication)
 {
     <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
 }
