@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +17,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
     {
-        private readonly SignInManager<IntwentyUser> _signInManager;
-        private readonly ILogger<LoginWith2faModel> _logger;
+        private readonly IntwentySignInManager _signInManager;
+        private readonly IntwentyUserManager _userManager;
 
-        public LoginWith2faModel(SignInManager<IntwentyUser> signInManager, ILogger<LoginWith2faModel> logger)
+        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager)
         {
-            _signInManager = signInManager;
-            _logger = logger;
+            _signInManager = siginmanager;
+            _userManager = usermanager;
         }
 
         [BindProperty]
@@ -57,6 +58,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             RememberMe = rememberMe;
 
+            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, user.PhoneNumber);
+
             return Page();
         }
 
@@ -81,17 +84,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)
             {
-                _logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
                 return RedirectToPage("./Lockout");
             }
             else
             {
-                _logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return Page();
             }

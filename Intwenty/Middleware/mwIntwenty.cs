@@ -24,6 +24,7 @@ using Intwenty.DataClient;
 using Intwenty.Entity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Intwenty.Seed;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Intwenty.Middleware
 {
@@ -108,8 +109,17 @@ namespace Intwenty.Middleware
              .AddSignInManager<IntwentySignInManager>()
              .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>()
              .AddDefaultTokenProviders();
-            
-       
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.Cookie.Name = "IntwentyAuthCookie";
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                options.LoginPath = "/Identity/Account/Login";
+                options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
+                options.SlidingExpiration = true;
+            });
 
 
             if (settings.UseExternalLogins && settings.UseFacebookLogin)
