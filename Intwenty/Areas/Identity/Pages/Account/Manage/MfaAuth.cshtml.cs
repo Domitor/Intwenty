@@ -13,15 +13,14 @@ using Microsoft.Extensions.Options;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
-    public class TwoFactorAuthenticationModel : PageModel
+    public class MfaAuthModel : PageModel
     {
-        private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
 
         private IntwentyUserManager UserManager { get; }
         private IntwentySignInManager SignInManager { get; }
         private IntwentySettings Settings { get; }
 
-        public TwoFactorAuthenticationModel(
+        public MfaAuthModel(
             IntwentyUserManager userManager,
             IntwentySignInManager signinmanager,
             IOptions<IntwentySettings> settings)
@@ -37,7 +36,6 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
-
         public bool IsMachineRemembered { get; set; }
 
         [TempData]
@@ -60,15 +58,15 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
                 HasAnyMFA = true;
 
-
+            
              var t = await UserManager.GetTwoFactorEnabledAsync(user);
             if (!t && HasAnyMFA)
                 await UserManager.SetTwoFactorEnabledAsync(user, true);
             if (t && !HasAnyMFA)
                 await UserManager.SetTwoFactorEnabledAsync(user, false);
-
-            IsMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
-
+            
+            //IsMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
+            
 
             return Page();
         }

@@ -11,11 +11,11 @@ using Intwenty.Areas.Identity.Data;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
-    public class Disable2faModel : PageModel
+    public class MfaDisableModel : PageModel
     {
         private readonly IntwentyUserManager _userManager;
 
-        public Disable2faModel(IntwentyUserManager userManager)
+        public MfaDisableModel(IntwentyUserManager userManager)
         {
             _userManager = userManager;
         }
@@ -23,25 +23,14 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGet()
+        public IActionResult OnGet()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
             await _userManager.RemoveUserSetting(user, "BANKIDMFA");
             await _userManager.RemoveUserSetting(user, "SMSMFA");
             await _userManager.RemoveUserSetting(user, "EMAILMFA");
@@ -50,8 +39,9 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             await _userManager.SetTwoFactorEnabledAsync(user, false);
            
 
-            StatusMessage = "2fa has been disabled. You can reenable 2fa when you setup an authenticator app";
-            return RedirectToPage("./TwoFactorAuthentication");
+            StatusMessage = "2fa has been disabled.";
+
+            return RedirectToPage("./MfaAuth");
         }
     }
 }

@@ -15,14 +15,14 @@ using Intwenty.Areas.Identity.Entity;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
-    public class EnableAuthenticatorModel : PageModel
+    public class MfaTotpModel : PageModel
     {
         private readonly UserManager<IntwentyUser> _userManager;
         private readonly UrlEncoder _urlEncoder;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-        public EnableAuthenticatorModel(
+        public MfaTotpModel(
             UserManager<IntwentyUser> userManager,
             UrlEncoder urlEncoder)
         {

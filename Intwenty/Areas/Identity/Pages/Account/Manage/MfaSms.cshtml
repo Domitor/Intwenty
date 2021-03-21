@@ -1,0 +1,139 @@
+﻿@page
+@model MfaSmsModel
+@{
+    ViewData["Title"] = "Enable SMS mfa";
+    ViewData["ActivePage"] = ManageNavPages.MfaAuth;
+}
+
+
+<h4>@ViewData["Title"]</h4>
+
+<div id="app">
+    <div class="alert alert-primary" v-if="step==1">Please input the phonenumber to use with sms mfa.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="alert alert-danger" v-if="errorSendingSms">
+        Something went wrong. This service is not available at the moment
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="alert alert-primary" v-if="step==2">
+        We've sent a code to your phone input the code below
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="alert alert-danger" v-if="errorVerifySms">
+        The code could not be verified, try again by <a asp-page="./MfaSms">clicking here</a>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="form-group" v-if="step==1">
+                <label clase="control-label">Phone Number</label>
+                <input type="number" v-model="model.phoneNumber" class="form-control" />
+                <button class="btn btn-primary m-2" v-on:click="sendPhoneNumber()">Send</button>
+            </div>
+
+            <div class="form-group" v-if="step==2">
+                <label clase="control-label">Code</label>
+                <input type="number" v-model="model.code" class="form-control" />
+                <button class="btn btn-primary m-2" v-on:click="sendCode()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+    {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: { phoneNumber: "", code: "", resultCode:"" },
+                step: 1,
+                errorSendingSms: false,
+                errorVerifySms: false
+            },
+            methods: {
+
+                sendPhoneNumber: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                    var endpointurl = baseurl + "MfaSms?handler=UpdatePhoneNumber";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.step = 2;
+                            context.model = response;
+                        },
+                        error: function (response)
+                        {
+                            context.errorSendingSms = true;
+                            context.model = response;
+                        }
+                    });
+                },
+                sendCode: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                    var endpointurl = baseurl + "MfaSms?handler=VerifyCode";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers:
+                        {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response) {
+                            context.step = 3;
+                            context.model = response;
+                        },
+                        error: function (response) {
+                            context.errorVerifySms = true;
+                            context.model = response;
+                        }
+                    });
+                }
+
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+                var context = this;
+                var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                var endpointurl = baseurl + "MfaSms?handler=Load";
+                $.get(endpointurl, function (response)
+                {
+                    context.model = response;
+                });
+            }
+        });
+    </script>
+
+}
+

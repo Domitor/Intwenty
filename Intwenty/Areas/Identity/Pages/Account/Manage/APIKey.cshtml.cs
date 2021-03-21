@@ -12,9 +12,11 @@ using Microsoft.AspNetCore.WebUtilities;
 using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Entity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
+
     public partial class APIKeyModel : PageModel
     {
         private readonly UserManager<IntwentyUser> _userManager;
