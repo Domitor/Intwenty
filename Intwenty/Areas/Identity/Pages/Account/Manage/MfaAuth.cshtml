@@ -1,7 +1,7 @@
 ﻿@page
 @model MfaAuthModel
 @{
-    ViewData["Title"] = "Multi factor authentication (MFA)";
+    ViewData["Title"] = "Two factor authentication (2FA)";
     ViewData["ActivePage"] = ManageNavPages.MfaAuth;
 }
 
@@ -17,23 +17,23 @@
 
         if (m.MfaMethod == MfaAuthTypes.Email && !Model.HasEmailMFA)
         {
-            <a id="emailmfa" asp-page="./EnableEmailMfa" class="btn btn-primary m-2" style="min-width:250px">Enable code to email mfa</a>
+            <a id="emailmfa" asp-page="./MfaEmail" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable code to email 2FA</a>
         }
         if (m.MfaMethod == MfaAuthTypes.Fido2 && !Model.HasFido2MFA)
         {
-            <a id="fido2msa" asp-page="./EnableFido2Mfa" class="btn btn-primary m-2" style="min-width:250px">Enable fido2 mfa</a>
+            <a id="fido2msa" asp-page="./MfaFido2" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable FIDO2 2FA</a>
         }
         if (m.MfaMethod == MfaAuthTypes.Sms && !Model.HasSmsMFA)
         {
-            <a id="smsmfa" asp-page="./MfaSms" class="btn btn-primary m-2" style="min-width:250px">Enable sms mfa</a>
+            <a id="smsmfa" asp-page="./MfaSms" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable code to SMS 2FA</a>
         }
         if (m.MfaMethod == MfaAuthTypes.SwedishBankId && !Model.HasBankIdMFA)
         {
-            <a id="bankidmfa" asp-page="./EnableSwedishBankIdMfa" class="btn btn-primary m-2" style="min-width:250px">Enable swedish bank id mfa</a>
+            <a id="bankidmfa" asp-page="./MfaSwedishBankId" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable swedish bank ID 2FA</a>
         }
         if (m.MfaMethod == MfaAuthTypes.Totp && !Model.HasTotpMFA)
         {
-            <a id="totpmfa" asp-page="./MfaTotpModel" class="btn btn-primary m-2" style="min-width:250px">Enable authentication app</a>
+            <a id="totpmfa" asp-page="./MfaTotp" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable authentication app</a>
         }
 
     }

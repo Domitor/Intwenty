@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
+using Intwenty.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +20,23 @@ namespace Intwenty.Areas.Identity.Pages.Account
     {
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
+        private readonly IIntwentySmsService _smsService;
+        private readonly IIntwentyEmailService _emailService;
 
-        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager)
+        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentySmsService smsservice, IIntwentyEmailService emailservice)
         {
             _signInManager = siginmanager;
             _userManager = usermanager;
+            _smsService = smsservice;
+            _emailService = emailservice;
         }
+
+        public bool HasAnyMFA { get; set; }
+        public bool HasBankIdMFA { get; set; }
+        public bool HasSmsMFA { get; set; }
+        public bool HasEmailMFA { get; set; }
+        public bool HasFido2MFA { get; set; }
+        public bool HasTotpMFA { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -38,10 +50,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             [Required]
             [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Text)]
-            [Display(Name = "Authenticator code")]
             public string TwoFactorCode { get; set; }
-
-            [Display(Name = "Remember this machine")]
             public bool RememberMachine { get; set; }
         }
 
@@ -58,7 +67,29 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             RememberMe = rememberMe;
 
-            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, user.PhoneNumber);
+            HasBankIdMFA = await _userManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
+            HasSmsMFA = await _userManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE");
+            HasEmailMFA = await _userManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
+            HasFido2MFA = await _userManager.HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
+            HasTotpMFA = await _userManager.HasUserSettingWithValue(user, "TOTPMFA", "TRUE");
+
+            if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
+                HasAnyMFA = true;
+
+            if (HasSmsMFA)
+            {
+                var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
+                await _smsService.SendSmsAsync(user.PhoneNumber, code);
+            }
+            else if (HasEmailMFA)
+            {
+                var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangeEmailTokenProvider);
+                await _smsService.SendSmsAsync(user.PhoneNumber, code);
+            }
+            else
+            {
+
+            }
 
             return Page();
         }
@@ -78,10 +109,23 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
-            var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            Microsoft.AspNetCore.Identity.SignInResult result = null;
+            if (await _userManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE")) 
+            {
+                result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangePhoneNumberTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
+            }
+            else if (await _userManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE"))
+            {
+                result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangeEmailTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
+            }
+            else 
+            {
+                var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+                result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
 
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
+            }
 
+        
             if (result.Succeeded)
             {
                 return LocalRedirect(returnUrl);
@@ -95,6 +139,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return Page();
             }
+
+          
+            
         }
     }
 }
