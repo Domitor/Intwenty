@@ -18,10 +18,7 @@ namespace Intwenty.SystemEvents
             DataService = dataservice;
         }
 
-        public virtual void NewUserCreated(NewUserCreatedData data) 
-        {
-            EmailService.SendEmailAsync("test", "New user created", "A new Intwenty user was created.");
-        }
+        public virtual void NewUserCreated(NewUserCreatedData data) {}
         public virtual void UserInvitedToGroup(UserInvitedData data) { }
         public virtual void UserRemovedFromGroup(UserRemovedFromGroupData data) { }
         public virtual void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { }

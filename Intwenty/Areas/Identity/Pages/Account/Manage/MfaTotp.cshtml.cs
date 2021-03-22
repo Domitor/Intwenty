@@ -29,27 +29,29 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             _urlEncoder = urlencoder;
         }
 
-        public string SharedKey { get; set; }
-
-        public string AuthenticatorUri { get; set; }
-
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public class InputModel
+        public IActionResult OnGetAsync()
         {
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Text)]
-            [Display(Name = "Verification Code")]
-            public string Code { get; set; }
+            return Page();
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetLoad()
         {
+            var model = new IntwentyMfaModel();
+            model.MfaType = Model.MfaAuthTypes.Totp;
+
             var user = await _userManager.GetUserAsync(User);
-            await LoadSharedKeyAndQrCodeUriAsync(user);
-            return Page();
+
+            // Load the authenticator key & QR code URI to display on the form
+            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(unformattedKey))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+            model.SharedKey = FormatKey(unformattedKey);
+            model.AuthenticatorURI = GenerateQrCodeUri(user.Email, unformattedKey);
+
+            return new JsonResult(model);
         }
 
         public IActionResult OnPostAsync()
@@ -60,20 +62,23 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostVerifyCode([FromBody] IntwentyMfaModel model)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (!ModelState.IsValid)
-            {
-                await LoadSharedKeyAndQrCodeUriAsync(user);
-                return Page();
-            }
+           
 
-            // Strip spaces and hypens
-            var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
-
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code);
             if (!is2faTokenValid)
             {
                 model.ResultCode = "ERROR_VERIFY_TOKEN";
-                await LoadSharedKeyAndQrCodeUriAsync(user);
+
+                var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+                if (string.IsNullOrEmpty(unformattedKey))
+                {
+                    await _userManager.ResetAuthenticatorKeyAsync(user);
+                    unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+                }
+                model.SharedKey = FormatKey(unformattedKey);
+                model.AuthenticatorURI = GenerateQrCodeUri(user.Email, unformattedKey);
+
+
                 return new JsonResult(model) { StatusCode = 501 };
             }
 
@@ -83,21 +88,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         }
 
-        private async Task LoadSharedKeyAndQrCodeUriAsync(IntwentyUser user)
-        {
-            // Load the authenticator key & QR code URI to display on the form
-            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-            if (string.IsNullOrEmpty(unformattedKey))
-            {
-                await _userManager.ResetAuthenticatorKeyAsync(user);
-                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-            }
-
-            SharedKey = FormatKey(unformattedKey);
-
-            var email = await _userManager.GetEmailAsync(user);
-            AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
-        }
+     
 
         private string FormatKey(string unformattedKey)
         {

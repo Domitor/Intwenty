@@ -124,7 +124,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         await _organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
                     }
 
-                    var code = _userManager.GenerateEmailConfirmationTokenAsync(user).Result;
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",

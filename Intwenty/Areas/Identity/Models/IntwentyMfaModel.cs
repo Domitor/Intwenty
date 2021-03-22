@@ -23,6 +23,8 @@ namespace Intwenty.Areas.Identity.Models
         public string PhoneNumber { get; set; }
         public string Code { get; set; }
         public string ResultCode { get; set; }
+        public string SharedKey { get; set; }
+        public string AuthenticatorURI { get; set; }
 
 
     }
