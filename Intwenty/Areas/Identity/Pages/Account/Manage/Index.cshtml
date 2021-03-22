@@ -12,21 +12,28 @@
         <form id="profile-form" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Username"></label>
+                <label>User Name</label>
                 <input asp-for="Username" class="form-control" disabled />
             </div>
+            @if (!Settings.Value.UseEmailAsUserName)
+            {
+                <div class="form-group">
+                    <label>Email</label>
+                    <input asp-for="Input.Email" class="form-control"  />
+                </div>
+            }
             <div class="form-group">
-                <label asp-for="Input.PhoneNumber"></label>
+                <label>Phone Number</label>
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Input.FirstName"></label>
+                <label>First Name</label>
                 <input asp-for="Input.FirstName" class="form-control" />
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Input.LastName"></label>
+                <label>Last Name</label>
                 <input asp-for="Input.LastName" class="form-control" />
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>

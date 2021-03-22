@@ -91,6 +91,7 @@ namespace Intwenty.Model
         /// <summary>
         /// Allow new visitors to register
         /// </summary>
+        public bool UseEmailAsUserName { get; set; }
         public bool UserRegistrationAllow { get; set; }
         public bool UserRegistrationRequireName { get; set; }
 

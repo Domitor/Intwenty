@@ -14,6 +14,7 @@
 
 
 <ul class="nav nav-pills bg-light flex-column" style="padding:10px">
+
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
 
     @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
@@ -21,11 +22,10 @@
         <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">Language</a></li>
     }
 
-    <!--  li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li    -->
+    <!-- li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li    -->
 
     @if (!isexternal)
     {
-
         <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
     }
 
