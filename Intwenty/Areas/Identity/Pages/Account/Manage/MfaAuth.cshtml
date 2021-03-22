@@ -5,46 +5,131 @@
     ViewData["ActivePage"] = ManageNavPages.MfaAuth;
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
+
 <h4>@ViewData["Title"]</h4>
 
 
-@if (!Model.HasAnyMFA)
-{
-    foreach (var m in Settings.Value.SupportedMfaMethods)
+<div id="app">
+
+    @if (!Model.HasAnyMFA && Settings.Value.SupportedMfaMethods.Count > 0)
     {
+        @if (Settings.Value.ForceMfaAuthentication)
+        {
+            <div class="alert alert-primary">
+                To add extra security our service is using forced 2FA. You are enforced to enable one of the options below.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-primary">
+                Our service is Enable 2FA adds extra security to your account, choose one option below.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+
+        }
 
 
-        if (m.MfaMethod == MfaAuthTypes.Email && !Model.HasEmailMFA)
-        {
-            <a id="emailmfa" asp-page="./MfaEmail" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable code to email 2FA</a>
-        }
-        if (m.MfaMethod == MfaAuthTypes.Fido2 && !Model.HasFido2MFA)
-        {
-            <a id="fido2msa" asp-page="./MfaFido2" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable FIDO2 2FA</a>
-        }
-        if (m.MfaMethod == MfaAuthTypes.Sms && !Model.HasSmsMFA)
-        {
-            <a id="smsmfa" asp-page="./MfaSms" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable code to SMS 2FA</a>
-        }
-        if (m.MfaMethod == MfaAuthTypes.SwedishBankId && !Model.HasBankIdMFA)
-        {
-            <a id="bankidmfa" asp-page="./MfaSwedishBankId" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable swedish bank ID 2FA</a>
-        }
-        if (m.MfaMethod == MfaAuthTypes.Totp && !Model.HasTotpMFA)
-        {
-            <a id="totpmfa" asp-page="./MfaTotp" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable authentication app</a>
-        }
 
+        <br />
+
+        foreach (var m in Settings.Value.SupportedMfaMethods)
+        {
+
+
+            if (m.MfaMethod == MfaAuthTypes.Email && !Model.HasEmailMFA)
+            {
+                <a id="emailmfa" asp-page="./MfaEmail" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable Code To Email 2FA</a>
+            }
+            if (m.MfaMethod == MfaAuthTypes.Fido2 && !Model.HasFido2MFA)
+            {
+                <a id="fido2msa" asp-page="./MfaFido2" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable FIDO2 2FA</a>
+            }
+            if (m.MfaMethod == MfaAuthTypes.Sms && !Model.HasSmsMFA)
+            {
+                <a id="smsmfa" asp-page="./MfaSms" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable SMS Code 2FA</a>
+            }
+            if (m.MfaMethod == MfaAuthTypes.SwedishBankId && !Model.HasBankIdMFA)
+            {
+                <a id="bankidmfa" asp-page="./MfaSwedishBankId" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable Swedish Bank ID 2FA</a>
+            }
+            if (m.MfaMethod == MfaAuthTypes.Totp && !Model.HasTotpMFA)
+            {
+                <a id="totpmfa" asp-page="./MfaTotp" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable Microsoft Authenticator</a>
+                <a id="totpmfa" asp-page="./MfaTotp" class="btn btn-outline-secondary m-2" style="min-width:250px">Enable Google Authenticator</a>
+            }
+
+        }
     }
-}
 
-<br />
+    <br />
 
-@if (Model.HasAnyMFA)
-{
-    <a asp-page="./MfaDisable" class="btn btn-danger m-2">Disable 2FA</a>
-}
+    @if (Model.HasAnyMFA)
+    {
+        if (Request.Query.ContainsKey("success"))
+        {
+            <div class="alert alert-success">
+                Great you're done. Next time you login you will be promted for a security code.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        }
+
+        if (Model.HasBankIdMFA)
+        {
+            <b>You're using 'Bank ID' 2FA</b>
+        }
+
+        if (Model.HasEmailMFA)
+        {
+            <b>You're using 'Code To Email' 2FA</b>
+        }
+
+        if (Model.HasFido2MFA)
+        {
+            <b>You're using 'FIDO2' 2FA</b>
+        }
+
+        if (Model.HasSmsMFA)
+        {
+            <b>You're using 'SMS Code' 2FA</b>
+        }
+
+        if (Model.HasTotpMFA)
+        {
+            <b>You're using 'Authentication App' 2FA</b>
+        }
+
+        <div class="alert alert-warning" role="alert">
+            @if (Settings.Value.ForceMfaAuthentication)
+            {
+                <p><strong>This action resets your 2FA settings.</strong> Since our service is using enforced 2FA you must configure it again in order to login.</p>
+            }
+            else
+            {
+                <p><strong>This action disables your 2FA settings.</strong> To achive the best security you should set it up again later.</p>
+            }
+        </div>
+
+
+        @if (Settings.Value.ForceMfaAuthentication)
+        {
+            <div>
+                <form method="post" class="form-group">
+                    <button class="btn btn-danger" type="submit">Reset 2FA</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div>
+                <form method="post" class="form-group">
+                    <button class="btn btn-danger" type="submit">Disable 2FA</button>
+                </form>
+            </div>
+        }
+    }
+
+</div>
 
 
 

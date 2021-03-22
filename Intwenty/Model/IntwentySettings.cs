@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Intwenty.Model
 {
 
-    public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle };
+    public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle, BankId };
 
     public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId };
 
@@ -254,6 +254,21 @@ namespace Intwenty.Model
             {
                 if (AllowedAccounts == AllowedAccountTypes.SocialGoogle ||
                     AllowedAccounts == AllowedAccountTypes.Social ||
+                    AllowedAccounts == AllowedAccountTypes.All)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        public bool UseBankIdLogin
+        {
+
+            get
+            {
+                if (AllowedAccounts == AllowedAccountTypes.BankId ||
                     AllowedAccounts == AllowedAccountTypes.All)
                 {
                     return true;

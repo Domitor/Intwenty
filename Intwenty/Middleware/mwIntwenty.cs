@@ -142,7 +142,7 @@ namespace Intwenty.Middleware
                 });
             }
 
-          
+
 
 
             if (string.IsNullOrEmpty(settings.DefaultCulture))

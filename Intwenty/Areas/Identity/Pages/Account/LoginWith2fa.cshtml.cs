@@ -83,8 +83,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else if (HasEmailMFA)
             {
-                var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangeEmailTokenProvider);
-                await _smsService.SendSmsAsync(user.PhoneNumber, code);
+                var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
+                await _emailService.SendEmailAsync(user.Email, "Use this code to login", code);
             }
             else
             {
@@ -116,7 +116,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else if (await _userManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE"))
             {
-                result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangeEmailTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
+                result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangePhoneNumberTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
             }
             else 
             {
@@ -136,7 +136,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+                ModelState.AddModelError(string.Empty, "Invalid code.");
                 return Page();
             }
 

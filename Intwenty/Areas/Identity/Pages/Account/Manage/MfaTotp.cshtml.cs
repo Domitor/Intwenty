@@ -11,34 +11,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Intwenty.Areas.Identity.Entity;
-
+using Intwenty.Areas.Identity.Data;
+using Intwenty.Areas.Identity.Models;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class MfaTotpModel : PageModel
     {
-        private readonly UserManager<IntwentyUser> _userManager;
+        private readonly IntwentyUserManager _userManager;
         private readonly UrlEncoder _urlEncoder;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-        public MfaTotpModel(
-            UserManager<IntwentyUser> userManager,
-            UrlEncoder urlEncoder)
+        public MfaTotpModel(IntwentyUserManager usermanager, UrlEncoder urlencoder)
         {
-            _userManager = userManager;
-            _urlEncoder = urlEncoder;
+            _userManager = usermanager;
+            _urlEncoder = urlencoder;
         }
 
         public string SharedKey { get; set; }
 
         public string AuthenticatorUri { get; set; }
-
-        [TempData]
-        public string[] RecoveryCodes { get; set; }
-
-        [TempData]
-        public string StatusMessage { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -55,24 +48,18 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
             await LoadSharedKeyAndQrCodeUriAsync(user);
-
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPostAsync()
+        {
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostVerifyCode([FromBody] IntwentyMfaModel model)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
             if (!ModelState.IsValid)
             {
                 await LoadSharedKeyAndQrCodeUriAsync(user);
@@ -82,23 +69,18 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             // Strip spaces and hypens
             var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
-                user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
-
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                model.ResultCode = "ERROR_VERIFY_TOKEN";
                 await LoadSharedKeyAndQrCodeUriAsync(user);
-                return Page();
+                return new JsonResult(model) { StatusCode = 501 };
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            var userId = await _userManager.GetUserIdAsync(user);
+            await _userManager.AddUpdateUserSetting(user, "TOTPMFA", "TRUE");
+            return new JsonResult(model);
 
-            StatusMessage = "Your authenticator app has been verified.";
-
-            return RedirectToPage("./MfaAuth");
-            
         }
 
         private async Task LoadSharedKeyAndQrCodeUriAsync(IntwentyUser user)

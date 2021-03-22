@@ -1,13 +1,14 @@
 ﻿@page
 @model MfaTotpModel
 @{
-    ViewData["Title"] = "Configure authenticator app";
+    ViewData["Title"] = "Configure 2FA App";
     ViewData["ActivePage"] = ManageNavPages.MfaAuth;
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
+
 <h4>@ViewData["Title"]</h4>
-<div>
+
+<div id="app">
     <p>To use an authenticator app go through the following steps:</p>
     <ol class="list">
         <li>
@@ -33,15 +34,11 @@
             </p>
             <div class="row">
                 <div class="col-md-6">
-                    <form id="send-code" method="post">
-                        <div class="form-group">
-                            <label asp-for="Input.Code" class="control-label">Verification Code</label>
-                            <input asp-for="Input.Code" class="form-control" autocomplete="off" />
-                            <span asp-validation-for="Input.Code" class="text-danger"></span>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Verify</button>
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    </form>
+                    <div class="form-group">
+                        <label class="control-label">Verification Code</label>
+                        <input type="number" class="form-control" autocomplete="off" v-model="model.code" />
+                    </div>
+                    <button type="submit" class="btn btn-primary" v-on:click="sendCode()">Verify</button>
                 </div>
             </div>
         </li>
@@ -59,5 +56,62 @@
                 width: 150,
                 height: 150
             });
+    </script>
+
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: { code: "", resultCode:"" },
+                step: 1,
+                errorVerifyCode: false
+            },
+            methods: {
+
+
+                sendCode: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/Manage/")';
+                    var endpointurl = baseurl + "MfaTotp?handler=VerifyCode";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers:
+                        {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response) {
+                            context.step = 2;
+                            context.model = response;
+                        },
+                        error: function (response) {
+                            context.errorVerifyCode = true;
+                            context.model = response;
+                        }
+                    });
+                }
+
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+               
+            }
+        });
     </script>
 }

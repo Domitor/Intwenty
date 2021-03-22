@@ -36,19 +36,12 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
-        public bool IsMachineRemembered { get; set; }
 
-        [TempData]
-        public string StatusMessage { get; set; }
+  
 
         public async Task<IActionResult> OnGet()
         {
             var user = await UserManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{UserManager.GetUserId(User)}'.");
-            }
-
             HasBankIdMFA = await UserManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
             HasSmsMFA = await UserManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE");
             HasEmailMFA = await UserManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
@@ -65,14 +58,21 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             if (t && !HasAnyMFA)
                 await UserManager.SetTwoFactorEnabledAsync(user, false);
             
-            //IsMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
-            
 
             return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
+            var user = await UserManager.GetUserAsync(User);
+            await UserManager.RemoveUserSetting(user, "BANKIDMFA");
+            await UserManager.RemoveUserSetting(user, "SMSMFA");
+            await UserManager.RemoveUserSetting(user, "EMAILMFA");
+            await UserManager.RemoveUserSetting(user, "FIDO2MFA");
+            await UserManager.RemoveUserSetting(user, "TOTPMFA");
+            await UserManager.SetTwoFactorEnabledAsync(user, false);
+
+
             return Page();
         }
     }

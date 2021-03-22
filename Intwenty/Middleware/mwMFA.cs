@@ -34,9 +34,9 @@ namespace Intwenty.Middleware
                 var user = await usermanager.FindByNameAsync(httpcontext.User.Identity.Name);
                
                 if (!user.TwoFactorEnabled && 
-                    !httpcontext.Request.Path.Value.Contains("EnableAuthenticator"))
+                    !httpcontext.Request.Path.Value.Contains("MfaAuth"))
                 {
-                    httpcontext.Response.Redirect("/Identity/Account/Manage/EnableAuthenticator");
+                    httpcontext.Response.Redirect("/Identity/Account/Manage/MfaAuth");
 
                 }
 
