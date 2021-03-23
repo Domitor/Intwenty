@@ -46,18 +46,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            IntwentySettings Settings { get; }
-            public InputModel(IntwentySettings settings)
-            {
-                Settings = settings;
-            }
-            public InputModel()
-            {
-            }
 
             [Required]
             public string UserName { get; set; }
-
 
             [Required]
             [DataType(DataType.Password)]
@@ -65,16 +56,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             public bool RememberMe { get; set; }
 
-          
         }
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-          
-            if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                ModelState.AddModelError(string.Empty, ErrorMessage);
-            }
+            ErrorMessage = string.Empty;
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
@@ -83,13 +69,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-
             ReturnUrl = returnUrl;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
+
+            ErrorMessage = string.Empty;
 
             if (ModelState.IsValid)
             {
@@ -130,11 +117,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 {
                     if (attemptinguser != null && _settings.Value.RequireConfirmedAccount && !attemptinguser.EmailConfirmed)
                     {
-                        ModelState.AddModelError(string.Empty, "You must confirm your account by clicking the link in the confirmation email we sent you");
+                        ErrorMessage = "You must confirm your account by clicking the link in the confirmation email we sent you";
+                        ModelState.AddModelError(string.Empty, ErrorMessage);
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "No user with that combination");
+                        ErrorMessage = "No user with that combination";
+                        ModelState.AddModelError(string.Empty, ErrorMessage);
                     }
 
                     await _dataService.LogIdentityActivity("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.UserName), Input.UserName);
