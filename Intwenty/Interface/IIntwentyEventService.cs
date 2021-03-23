@@ -2,15 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Intwenty.Interface
 {
     public interface IIntwentyEventService
     {
-        void NewUserCreated(NewUserCreatedData data);
-        void UserInvitedToGroup(UserInvitedData data);
-        void UserRemovedFromGroup(UserRemovedFromGroupData data);
-        void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data);
+        Task NewUserCreated(NewUserCreatedData data);
+        Task EmailChanged(EmailChangedData data);
+        Task UserInvitedToGroup(UserInvitedData data);
+        Task UserRemovedFromGroup(UserRemovedFromGroupData data);
+        Task UserRequestedToJoinGroup(UserRequestedToJoinGroupData data);
     }
 
 }

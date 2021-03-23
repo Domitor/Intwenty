@@ -172,20 +172,14 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
-        public IActionResult OnGetLoadGroups()
+        public async Task<IActionResult> OnGetLoadGroups()
         {
             var result = new MyGroupConnections();
            
             try
             {
-                var user = _userManager.GetUserAsync(User).Result;
-                if (user == null)
-                {
-                    throw new InvalidOperationException("Could not find the user when listing groups");
-                }
-         
-
-                var usergroups = _userManager.GetUserGroups(user).Result;
+                var user = await _userManager.GetUserAsync(User);
+                var usergroups = await _userManager.GetUserGroups(user);
                 foreach (var ug in usergroups)
                 {
                     var vm = new IntwentyUserGroupVm(ug);
@@ -211,7 +205,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 }
                 foreach (var group in result.MyGroupsMembers) 
                 {
-                    var groupmembers = _userManager.GetGroupMembers(new IntwentyProductGroup() { Id = group.GroupId, Name=group.GroupName }).Result;
+                    var groupmembers = await _userManager.GetGroupMembers(new IntwentyProductGroup() { Id = group.GroupId, Name=group.GroupName });
                     foreach (var gm in groupmembers)
                     {
                         group.Members.Add(new IntwentyUserGroupVm(gm));
@@ -256,30 +250,30 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         }
 
        
-        public IActionResult OnPostMembershipChange([FromBody] SetMembershipModel model)
+        public async Task<IActionResult> OnPostMembershipChange([FromBody] SetMembershipModel model)
         {
 
-            var user =  _userManager.FindByIdAsync(model.UserId).Result;
+            var user =  await _userManager.FindByIdAsync(model.UserId);
             if (user != null)
             {
                 if (model.Status == "REMOVE")
                 {
-                    var t = _userManager.RemoveFromGroupAsync(user.Id, model.GroupId);
-                    if (t.Result == IdentityResult.Success)
+                    var t = await _userManager.RemoveFromGroupAsync(user.Id, model.GroupId);
+                    if (t == IdentityResult.Success)
                     {
                         try
                         {
-                            var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
-                            var me = _userManager.GetUserAsync(User).Result;
-                            _eventservice.UserRemovedFromGroup(new UserRemovedFromGroupData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                            var group = await _userManager.GetGroupByIdAsync(model.GroupId);
+                            var me = await _userManager.GetUserAsync(User);
+                            await _eventservice.UserRemovedFromGroup(new UserRemovedFromGroupData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
                         }
                         catch { }
                    }
                 }
                 else
                 {
-                    var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
-                    _userManager.UpdateGroupMembershipAsync(user, group, model.Status);
+                    var group = await _userManager.GetGroupByIdAsync(model.GroupId);
+                    await _userManager.UpdateGroupMembershipAsync(user, group, model.Status);
 
                 }
             }
@@ -289,30 +283,30 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         }
 
         
-       public IActionResult OnPostInviteToGroup([FromBody] InviteToGroupModel model)
+       public async Task<IActionResult> OnPostInviteToGroup([FromBody] InviteToGroupModel model)
        {
             try
             {
 
-                var user = _userManager.FindByEmailAsync(model.Email).Result;
+                var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null)
                 {
-                    var group = _userManager.GetGroupByIdAsync(model.GroupId).Result;
+                    var group = await _userManager.GetGroupByIdAsync(model.GroupId);
                     if (group != null)
                     {
-                        var members = _userManager.GetGroupMembers(group).Result;
+                        var members = await _userManager.GetGroupMembers(group);
                         if (members != null)
                         {
                             if (members.Exists(p => p.UserName.ToUpper() == model.Email.ToUpper()))
                                 throw new InvalidOperationException("The user " +  model.Email + " is already a member of " + group.Name);
                         }
-                        var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
-                        if (t.Result == IdentityResult.Success)
+                        var t = await _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "INVITED");
+                        if (t == IdentityResult.Success)
                         {
                             try
                             {
-                                var me = _userManager.GetUserAsync(User).Result;
-                                _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
+                                var me = await _userManager.GetUserAsync(User);
+                                await _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = me.UserName, ReceiverUserName = user.UserName });
                             }
                             catch { }
                         }
@@ -337,31 +331,26 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
        }
 
-        public IActionResult OnPostRenameGroup([FromBody] RenameGroupModel model)
+        public async Task<IActionResult> OnPostRenameGroup([FromBody] RenameGroupModel model)
         {
 
-            _userManager.ChangeGroupNameAsync(model.GroupId, model.NewName);
+            await _userManager.ChangeGroupNameAsync(model.GroupId, model.NewName);
             return new JsonResult("{}");
 
         }
 
 
-        public IActionResult OnPostCreateGroup([FromBody] CreateOrJoinGroupModel model)
+        public async Task<IActionResult> OnPostCreateGroup([FromBody] CreateOrJoinGroupModel model)
         {
 
             try
             {
-                var user = _userManager.GetUserAsync(User).Result;
-                if (user == null)
-                {
-                    throw new InvalidOperationException("Could not find the user when adding a group");
-                }
-
-                if (_userManager.GroupExists(model.GroupName).Result)
+                var user = await _userManager.GetUserAsync(User);
+                if (await _userManager.GroupExists(model.GroupName))
                     throw new InvalidOperationException("The group already exists, type another name.");
 
-                var group = _userManager.AddGroupAsync(model.GroupName).Result;
-                _userManager.AddGroupMemberAsync(user, group, "GROUPADMIN", "ACCEPTED");
+                var group = await _userManager.AddGroupAsync(model.GroupName);
+                await _userManager.AddGroupMemberAsync(user, group, "GROUPADMIN", "ACCEPTED");
 
             }
             catch (Exception ex)
@@ -377,32 +366,29 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         }
 
-        public IActionResult OnPostJoinGroup([FromBody] CreateOrJoinGroupModel model)
+        public async Task<IActionResult> OnPostJoinGroup([FromBody] CreateOrJoinGroupModel model)
         {
 
             try
             {
-                var user = _userManager.GetUserAsync(User).Result;
-                if (user == null)
-                {
-                    throw new InvalidOperationException("Could not find the user when adding a group");
-                }
-
-                if (!_userManager.GroupExists(model.GroupName).Result)
+                var user = await _userManager.GetUserAsync(User);
+               
+                if (!await _userManager.GroupExists(model.GroupName))
                     throw new InvalidOperationException("The group does not exists, type another groupname.");
 
-                var usergroups = _userManager.GetUserGroups(user).Result;
+                var usergroups = await _userManager.GetUserGroups(user);
                 if (usergroups.Exists(p=> p.GroupName== model.GroupName))
                     throw new InvalidOperationException("You are already a member or admin of this group.");
 
-                var group = _userManager.GetGroupByNameAsync(model.GroupName).Result;
-                var t = _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "REQUESTED");
-                if (t.Result == IdentityResult.Success)
+                var group = await _userManager.GetGroupByNameAsync(model.GroupName);
+                var t = await _userManager.AddGroupMemberAsync(user, group, "GROUPMEMBER", "REQUESTED");
+                if (t == IdentityResult.Success)
                 {
                     try
                     {
-                        var owner = _userManager.GetGroupMembers(group).Result.Find(p => p.MembershipType == "GROUPADMIN");
-                        _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = user.UserName, ReceiverUserName = owner.UserName });
+                        var members = await _userManager.GetGroupMembers(group);
+                        var owner = members.Find(p => p.MembershipType == "GROUPADMIN");
+                        await _eventservice.UserInvitedToGroup(new UserInvitedData() { GroupName = group.Name, SenderUserName = user.UserName, ReceiverUserName = owner.UserName });
                     }
                     catch { }
                 }
@@ -421,12 +407,12 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         }
 
-        public IActionResult OnPostLeaveGroup([FromBody] LeaveGroupModel model)
+        public async Task<IActionResult> OnPostLeaveGroup([FromBody] LeaveGroupModel model)
         {
 
             try
             {
-                _userManager.RemoveFromGroupAsync(model.UserId, model.GroupId);
+               await  _userManager.RemoveFromGroupAsync(model.UserId, model.GroupId);
                
             }
             catch (Exception ex)

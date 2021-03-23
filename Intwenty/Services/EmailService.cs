@@ -35,7 +35,7 @@ namespace Intwenty.Services
         protected virtual async Task Send(string sendto, string subject, string message)
         {
 
-            if (string.IsNullOrEmpty(Settings.MailServiceServer))
+            if (string.IsNullOrEmpty(Settings.MailServiceServer) || string.IsNullOrEmpty(Settings.MailServiceUser) || string.IsNullOrEmpty(Settings.MailServicePwd))
                 return;
 
                 var mail = new MailMessage();

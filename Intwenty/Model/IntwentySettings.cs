@@ -86,7 +86,7 @@ namespace Intwenty.Model
         /// What kind of logins should be allowed
         /// </summary>
         public AllowedAccountTypes AllowedAccounts { get; set; }
-        public bool UseEmailAccountVerification { get; set; }
+        public bool RequireConfirmedAccount { get; set; }
 
         /// <summary>
         /// Allow new visitors to register

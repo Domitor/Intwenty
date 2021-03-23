@@ -6,6 +6,7 @@ namespace Intwenty.Areas.Identity.Models
 {
     public class RegisterVm
     {
+        public string UserName { get; set; }
         public string Language { get; set; }
         public string AccountType { get; set; }
         public string GroupName { get; set; }

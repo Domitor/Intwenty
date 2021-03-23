@@ -447,48 +447,54 @@ namespace Intwenty.Areas.Identity.Data
 
         #region Intwenty Groups
 
-        public Task<IntwentyProductGroup> AddGroupAsync(string groupname)
+        public async Task<IntwentyProductGroup> AddGroupAsync(string groupname)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
             var t = new IntwentyProductGroup();
             t.Id = Guid.NewGuid().ToString();
             t.ProductId = Settings.ProductId;
             t.Name = groupname;
-            client.Open();
-            var user = client.InsertEntity(t);
-            client.Close();
-            return Task.FromResult(t);
+            await client.OpenAsync();
+            var user = await client.InsertEntityAsync(t);
+            await client.CloseAsync();
+            return t;
         }
 
-        public Task<IntwentyProductGroup> GetGroupByNameAsync(string groupname)
+        public async Task<IntwentyProductGroup> GetGroupByNameAsync(string groupname)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
-            client.Close();
-            return Task.FromResult(t);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyProductGroup>();
+            await client.CloseAsync();
+            var t = res.Find(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
+           
+            return t;
         }
 
-        public Task<IntwentyProductGroup> GetGroupByIdAsync(string groupid)
+        public async Task<IntwentyProductGroup> GetGroupByIdAsync(string groupid)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var t = client.GetEntities<IntwentyProductGroup>().Find(p => p.Id== groupid && p.ProductId == Settings.ProductId);
-            client.Close();
-            return Task.FromResult(t);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyProductGroup>();
+            await client.CloseAsync();
+            var t = res.Find(p => p.Id== groupid && p.ProductId == Settings.ProductId);
+           
+            return t;
         }
 
-        public Task<IdentityResult> AddGroupMemberAsync(IntwentyUser user, IntwentyProductGroup group, string membershiptype, string membershipstatus)
+        public async Task<IdentityResult> AddGroupMemberAsync(IntwentyUser user, IntwentyProductGroup group, string membershiptype, string membershipstatus)
         {
             if (user == null || group == null)
                 throw new InvalidOperationException("Error when adding member to group.");
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            client.Open();
-            var check = client.GetEntities<IntwentyUserProductGroup>().Exists(p => p.UserName.ToUpper() == user.UserName.ToUpper() && p.GroupName.ToUpper() == group.Name.ToUpper() && p.ProductId == Settings.ProductId);
-            client.Close();
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+            var check = res.Exists(p => p.UserName.ToUpper() == user.UserName.ToUpper() && p.GroupName.ToUpper() == group.Name.ToUpper() && p.ProductId == Settings.ProductId);
+            
             if (check)
-                return Task.FromResult(IdentityResult.Success);
+                return IdentityResult.Success;
 
             var t = new IntwentyUserProductGroup();
             t.Id = Guid.NewGuid().ToString();
@@ -499,152 +505,152 @@ namespace Intwenty.Areas.Identity.Data
             t.GroupName = group.Name;
             t.MembershipType = membershiptype;
             t.MembershipStatus = membershipstatus;
-            client.Open();
-            client.InsertEntity(t);
-            client.Close();
+
+            await client.OpenAsync();
+            await client.InsertEntityAsync(t);
+            await client.CloseAsync();
 
 
-            return Task.FromResult(IdentityResult.Success);
+            return IdentityResult.Success;
         }
 
-        public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, string groupname, string membershipstatus)
+        public async Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, string groupname, string membershipstatus)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            var result = IdentityResult.Success;
             
-            client.Open();
-            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.GroupName.ToUpper() == groupname.ToUpper() && p.UserId == user.Id && p.ProductId == Settings.ProductId);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+            var t = res.Find(p => p.GroupName.ToUpper() == groupname.ToUpper() && p.UserId == user.Id && p.ProductId == Settings.ProductId);
             if (t != null)
             {
                 t.MembershipStatus = membershipstatus;
-                client.UpdateEntity(t);
-            }
-            else
-            {
-                result = IdentityResult.Failed();
-            }
-            client.Close();
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(t);
+                await client.CloseAsync();
 
-            return Task.FromResult(result);
+                return IdentityResult.Success;
+            }
+          
+            return IdentityResult.Failed();
         }
 
-        public Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyProductGroup group, string membershipstatus)
+        public async Task<IdentityResult> UpdateGroupMembershipAsync(IntwentyUser user, IntwentyProductGroup group, string membershipstatus)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            var result = IdentityResult.Success;
 
-            client.Open();
-            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.GroupId == group.Id && p.UserId == user.Id && p.ProductId == Settings.ProductId);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+            var t = res.Find(p => p.GroupId == group.Id && p.UserId == user.Id && p.ProductId == Settings.ProductId);
             if (t != null)
             {
                 t.MembershipStatus = membershipstatus;
-                client.UpdateEntity(t);
-            }
-            else
-            {
-                result = IdentityResult.Failed();
-            }
-            client.Close();
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(t);
+                await client.CloseAsync();
 
-            return Task.FromResult(result);
+                return IdentityResult.Success;
+            }
+
+            return IdentityResult.Failed();
         }
 
-        public Task<IdentityResult> ChangeGroupNameAsync(string groupid, string newgroupname)
+        public async Task<IdentityResult> ChangeGroupNameAsync(string groupid, string newgroupname)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-            var result = IdentityResult.Success;
 
-            client.Open();
-            var t = client.GetEntity<IntwentyProductGroup>(groupid);
+            await client.OpenAsync();
+            var t = await client.GetEntityAsync<IntwentyProductGroup>(groupid);
+            await client.CloseAsync();
             if (t != null)
             {
                 t.Name = newgroupname;
-                client.UpdateEntity(t);
 
-                var l = client.GetEntities<IntwentyUserProductGroup>();
+                await client.OpenAsync();
+                await client.UpdateEntityAsync(t);
+
+                var l = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
                 foreach (var g in l)
                 {
                     if (g.GroupId == groupid)
                     {
                         g.GroupName = newgroupname;
-                        client.UpdateEntity(g);
+                        await client.UpdateEntityAsync(g);
                     }
                 }
+
+                await client.CloseAsync();
+                return IdentityResult.Success;
             }
-            else
-            {
-                result = IdentityResult.Failed();
-            }
-            client.Close();
+            
 
-            return Task.FromResult(result);
+            return IdentityResult.Failed();
         }
 
-        public Task<bool> GroupExists(string groupname)
+        public async Task<bool> GroupExists(string groupname)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-
-            client.Open();
-            var t = client.GetEntities<IntwentyProductGroup>().Exists(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
-            client.Close();
-
-            return Task.FromResult(t);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyProductGroup>();
+            await client.CloseAsync();
+            var t = res.Exists(p => p.Name.ToUpper() == groupname.ToUpper() && p.ProductId == Settings.ProductId);
+            return t;
         }
 
-        public Task<List<IntwentyUserProductGroup>> GetUserGroups(IntwentyUser user)
+        public async Task<List<IntwentyUserProductGroup>> GetUserGroups(IntwentyUser user)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-
-            client.Open();
-            var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).ToList();
-            client.Close();
-
-            return Task.FromResult(t);
-
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+            var t = res.Where(p => p.UserId == user.Id && p.ProductId == Settings.ProductId).ToList();
+            return t;
         }
 
 
-        public Task<List<IntwentyUserProductGroup>> GetGroupMembers(IntwentyProductGroup group)
+        public async Task<List<IntwentyUserProductGroup>> GetGroupMembers(IntwentyProductGroup group)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-
-            client.Open();
-            var t = client.GetEntities<IntwentyUserProductGroup>().Where(p => p.GroupId == group.Id);
-            client.Close();
-
-            return Task.FromResult(t.ToList());
-
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+            var t = res.Where(p => p.GroupId == group.Id);
+            return t.ToList();
         }
 
-        public Task<bool> IsWaitingToJoinGroup(string username)
+        public async Task<bool> IsWaitingToJoinGroup(string username)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
-            client.Open();
-            var list = client.GetEntities<IntwentyUserProductGroup>();
-            client.Close();
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
 
-            var t = list.Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "WAITING");
-            if (list.Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "ACCEPTED"))
+            var t = res.Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "WAITING");
+            if (res.Exists(p => p.UserName.ToUpper() == username.ToUpper() && p.MembershipStatus == "ACCEPTED"))
                 t = false;
 
           
-            return Task.FromResult(t);
+            return t;
 
         }
 
-        public Task<IdentityResult> RemoveFromGroupAsync(string userid, string groupid)
+        public async Task<IdentityResult> RemoveFromGroupAsync(string userid, string groupid)
         {
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
-            client.Open();
-            var t = client.GetEntities<IntwentyUserProductGroup>().Find(p => p.UserId == userid && p.GroupId == groupid && p.ProductId == Settings.ProductId);
+            await client.OpenAsync();
+            var res = await client.GetEntitiesAsync<IntwentyUserProductGroup>();
+            await client.CloseAsync();
+
+            var t = res.Find(p => p.UserId == userid && p.GroupId == groupid && p.ProductId == Settings.ProductId);
             if (t!=null)
-                client.DeleteEntity(t);
+                await client.DeleteEntityAsync(t);
 
             client.Close();
 
-            return Task.FromResult(IdentityResult.Success);
+            return IdentityResult.Success;
 
         }
 

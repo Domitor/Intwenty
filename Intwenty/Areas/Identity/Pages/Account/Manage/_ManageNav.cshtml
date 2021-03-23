@@ -22,8 +22,6 @@
         <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">Language</a></li>
     }
 
-    <!-- li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li    -->
-
     @if (!isexternal)
     {
         <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>

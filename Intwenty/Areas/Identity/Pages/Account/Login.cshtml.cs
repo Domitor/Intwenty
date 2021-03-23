@@ -22,14 +22,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         public readonly IIntwentyDataService _dataService;
-        private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IOptions<IntwentySettings> _settings;
 
-        public LoginModel(SignInManager<IntwentyUser> signInManager,
-            IIntwentyDataService dataservice,
-            IOptions<IntwentySettings> settings,
-            IntwentyUserManager userManager)
+        public LoginModel(IntwentySignInManager signInManager, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings, IntwentyUserManager userManager)
         {
             _dataService = dataservice;
             _signInManager = signInManager;
@@ -49,18 +46,26 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Display(Name = "Email")]
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            IntwentySettings Settings { get; }
+            public InputModel(IntwentySettings settings)
+            {
+                Settings = settings;
+            }
+            public InputModel()
+            {
+            }
 
-            [Display(Name = "Password")]
+            [Required]
+            public string UserName { get; set; }
+
+
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
+
+          
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -92,12 +97,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    await _dataService.LogIdentityActivity("INFO", string.Format("User {0} logged in with password",Input.Email), Input.Email);
+                    await _dataService.LogIdentityActivity("INFO", string.Format("User {0} logged in with password",Input.UserName), Input.UserName);
                     client.Open();
-                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.UserName == Input.UserName);
                     if (signedinuser != null)
                     {
                         signedinuser.LastLoginProduct = _settings.Value.ProductId;
@@ -111,7 +116,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 if (result.RequiresTwoFactor)
                 {
                     client.Open();
-                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.NormalizedEmail == Input.Email.ToUpper());
+                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.UserName == Input.UserName.ToUpper());
                     if (signedinuser != null)
                     {
                         signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -126,7 +131,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    await _dataService.LogIdentityActivity("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.Email), Input.Email);
+                    await _dataService.LogIdentityActivity("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.UserName), Input.UserName);
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
                     ReturnUrl = returnUrl;

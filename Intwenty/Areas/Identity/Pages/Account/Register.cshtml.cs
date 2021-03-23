@@ -46,35 +46,10 @@ namespace Intwenty.Areas.Identity.Pages.Account
             _organizationManager = orgmanager;
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
         public string ReturnUrl { get; set; }
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public class InputModel
-        {
-
-            [Display(Name = "Language")]
-            public string Language { get; set; }
-
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-        }
 
         public async Task  OnGetAsync(string returnUrl = null)
         {
@@ -100,12 +75,16 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
                 }
+                if (!_settings.UseEmailAsUserName)
+                {
+                    user.UserName = model.UserName;
+                }
 
                 if (string.IsNullOrEmpty(user.Culture))
                     user.Culture = _settings.DefaultCulture;
 
 
-                var result = _userManager.CreateAsync(user, model.Password).Result;
+                var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
@@ -126,33 +105,29 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = user.Id, code = code },
-                        protocol: Request.Scheme);
-
-                    _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
+                    var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
+                    await _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
-                  
+
                 }
                 else
                 {
-                    foreach (var error in result.Errors)
+                    if (result.Errors != null && result.Errors.Count() > 0)
                     {
-                        throw new InvalidOperationException(error.Description);
+                        var errors = result.Errors.ToList();
+                        return new JsonResult(new OperationResult(false, MessageCode.USERERROR, errors[0].Description)) { StatusCode = 500 };
+                    } 
+                    else 
+                    {
+                        throw new InvalidOperationException("Unexpected error registering user");
                     }
                 }
 
             }
             catch (Exception ex)
             {
-                var r = new OperationResult();
-                r.SetError("", ex.Message);
-                var jres = new JsonResult(r);
-                jres.StatusCode = 500;
-                return jres;
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpecter error occured")) { StatusCode = 500 };
             }
 
             return new JsonResult(model);

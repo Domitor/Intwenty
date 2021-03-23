@@ -7,21 +7,29 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Intwenty.Areas.Identity.Entity;
-
+using Intwenty.Areas.Identity.Data;
+using Intwenty.Model;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
+using Intwenty.Interface;
+using Intwenty.SystemEvents;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<IntwentyUser> _userManager;
-        private readonly SignInManager<IntwentyUser> _signInManager;
+        private readonly IntwentyUserManager _userManager;
+        private readonly IntwentySignInManager _signInManager;
+        private readonly IntwentySettings _settings;
+        private readonly IIntwentyEventService _eventService;
 
-        public IndexModel(
-            UserManager<IntwentyUser> userManager,
-            SignInManager<IntwentyUser> signInManager)
+        public IndexModel(IntwentyUserManager usermanager, IntwentySignInManager signinmanager, IOptions<IntwentySettings> settings, IIntwentyEventService eventservice)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _userManager = usermanager;
+            _signInManager = signinmanager;
+            _settings = settings.Value;
+            _eventService = eventservice;
         }
 
         public string Username { get; set; }
@@ -52,6 +60,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName
@@ -61,11 +70,6 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
             Load(user);
             return Page();
         }
@@ -73,18 +77,25 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
+           
             if (!ModelState.IsValid)
             {
                 Load(user);
                 return Page();
             }
 
+            var emailconf = false;
             var doupdate = false;
+            if (Input.Email != user.Email)
+            {
+                user.Email = Input.Email;
+                doupdate = true;
+                if (_settings.RequireConfirmedAccount)
+                {
+                    emailconf = true;
+                }
+            }
+
             if (Input.PhoneNumber != user.PhoneNumber)
             {
                 user.PhoneNumber = Input.PhoneNumber;
@@ -109,8 +120,21 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 if (!updateresult.Succeeded)
                 {
                     var userId = await _userManager.GetUserIdAsync(user);
-                    throw new InvalidOperationException($"Unexpected error occurred updating user with ID '{userId}'.");
+                    throw new InvalidOperationException("Unexpected error occurred updating user.");
                 }
+                else
+                {
+                    if (emailconf)
+                    {
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
+                        await _eventService.EmailChanged(new EmailChangedData() { UserName = user.Email, ConfirmCallbackUrl = callbackUrl });
+                    }
+
+                }
+
+
             }
 
             await _signInManager.RefreshSignInAsync(user);

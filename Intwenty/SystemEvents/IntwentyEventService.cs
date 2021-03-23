@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Threading.Tasks;
 
 namespace Intwenty.SystemEvents
 {
@@ -18,10 +18,17 @@ namespace Intwenty.SystemEvents
             DataService = dataservice;
         }
 
-        public virtual void NewUserCreated(NewUserCreatedData data) {}
-        public virtual void UserInvitedToGroup(UserInvitedData data) { }
-        public virtual void UserRemovedFromGroup(UserRemovedFromGroupData data) { }
-        public virtual void UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { }
+        public virtual async Task NewUserCreated(NewUserCreatedData data) 
+        {
+            await DataService.LogIdentityActivity("INFO", string.Format("A new user {0} created an account", data.UserName), data.UserName);
+        }
+        public virtual async Task EmailChanged(EmailChangedData data) 
+        {
+            await DataService.LogIdentityActivity("INFO", string.Format("A user {0} changed registered email to {1}", data.UserName, data.Email), data.UserName);
+        }
+        public virtual Task UserInvitedToGroup(UserInvitedData data) { return Task.FromResult(0);  }
+        public virtual Task UserRemovedFromGroup(UserRemovedFromGroupData data) { return Task.FromResult(0);  }
+        public virtual Task UserRequestedToJoinGroup(UserRequestedToJoinGroupData data) { return Task.FromResult(0); }
 
 
     }
@@ -53,8 +60,18 @@ namespace Intwenty.SystemEvents
     {
        public string UserName { get; set; }
 
-       public string ConfirmCallbackUrl { get; set; }
+        public string Email { get; set; }
+
+        public string ConfirmCallbackUrl { get; set; }
     }
 
+    public class EmailChangedData
+    {
+        public string UserName { get; set; }
+
+        public string Email { get; set; }
+
+        public string ConfirmCallbackUrl { get; set; }
+    }
 
 }
