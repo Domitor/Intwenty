@@ -6,29 +6,34 @@ using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
+using Intwenty.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Extensions.Options;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
     {
+        private readonly IIntwentyDataService _dataService;
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IIntwentySmsService _smsService;
         private readonly IIntwentyEmailService _emailService;
+        private readonly IntwentySettings _settings;
 
-        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentySmsService smsservice, IIntwentyEmailService emailservice)
+        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentySmsService smsservice, IIntwentyEmailService emailservice, IOptions<IntwentySettings> settings, IIntwentyDataService dataservice)
         {
             _signInManager = siginmanager;
             _userManager = usermanager;
             _smsService = smsservice;
             _emailService = emailservice;
+            _settings = settings.Value;
+            _dataService = dataservice;
         }
 
         public bool HasAnyMFA { get; set; }
@@ -128,6 +133,16 @@ namespace Intwenty.Areas.Identity.Pages.Account
         
             if (result.Succeeded)
             {
+                if (user != null)
+                {
+                    user.LastLoginProduct = _settings.ProductId;
+                    user.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    var client = _dataService.GetIAMDataClient();
+                    await client.OpenAsync();
+                    await client.UpdateEntityAsync(user);
+                    await client.CloseAsync();
+                }
+
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)
@@ -136,7 +151,15 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid code.");
+                if (_settings.RequireConfirmedAccount && !user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid Code or unconfirmed account.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid Code.");
+                }
+               
                 return Page();
             }
 

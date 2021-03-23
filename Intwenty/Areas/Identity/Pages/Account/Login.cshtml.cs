@@ -21,7 +21,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        public readonly IIntwentyDataService _dataService;
+        private readonly IIntwentyDataService _dataService;
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IOptions<IntwentySettings> _settings;
@@ -95,34 +95,31 @@ namespace Intwenty.Areas.Identity.Pages.Account
             {
                 var client = _dataService.GetIAMDataClient();
 
+                IntwentyUser attemptinguser = null;
+                await client.OpenAsync();
+                var userlist = await client.GetEntitiesAsync<IntwentyUser>();
+                attemptinguser = userlist.Find(p => p.UserName == Input.UserName);
+                await client.CloseAsync();
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     await _dataService.LogIdentityActivity("INFO", string.Format("User {0} logged in with password",Input.UserName), Input.UserName);
-                    client.Open();
-                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.UserName == Input.UserName);
-                    if (signedinuser != null)
+                    if (attemptinguser != null)
                     {
-                        signedinuser.LastLoginProduct = _settings.Value.ProductId;
-                        signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        client.UpdateEntity(signedinuser);
+                        attemptinguser.LastLoginProduct = _settings.Value.ProductId;
+                        attemptinguser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        await client.OpenAsync();
+                        await client.UpdateEntityAsync(attemptinguser);
+                        await client.CloseAsync();
                     }
-                    client.Close();
 
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
-                    client.Open();
-                    var signedinuser = client.GetEntities<IntwentyUser>().Find(p => p.UserName == Input.UserName.ToUpper());
-                    if (signedinuser != null)
-                    {
-                        signedinuser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        client.UpdateEntity(signedinuser);
-                    }
-                    client.Close();
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)
@@ -131,8 +128,17 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    if (attemptinguser != null && _settings.Value.RequireConfirmedAccount && !attemptinguser.EmailConfirmed)
+                    {
+                        ModelState.AddModelError(string.Empty, "You must confirm your account by clicking the link in the confirmation email we sent you");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "No user with that combination");
+                    }
+
                     await _dataService.LogIdentityActivity("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.UserName), Input.UserName);
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                   
                     ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
                     ReturnUrl = returnUrl;
                     return Page();

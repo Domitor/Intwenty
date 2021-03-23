@@ -87,8 +87,6 @@ namespace Intwenty.Middleware
             services.AddIdentity<IntwentyUser, IntwentyProductAuthorizationItem>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = settings.RequireConfirmedAccount;
-                //options.SignIn.RequireConfirmedPhoneNumber = true;
-
 
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;

@@ -86,6 +86,16 @@ namespace IntwentyDemo
 
 
                             });
+
+                            options.AddPolicy("IntwentyProtectedLinkPolicy", policy =>
+                            {
+                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                policy.RequireRole(userroles);
+                                policy.RequireAuthenticatedUser();
+                                policy.RequireClaim("linktoken");
+
+
+                            });
                         });
 
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();

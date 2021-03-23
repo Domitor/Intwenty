@@ -127,7 +127,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             catch (Exception ex)
             {
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpecter error occured")) { StatusCode = 500 };
+                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpected error occured, contact support")) { StatusCode = 500 };
             }
 
             return new JsonResult(model);
