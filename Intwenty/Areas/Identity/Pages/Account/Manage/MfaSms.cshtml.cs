@@ -14,19 +14,21 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.SystemEvents;
+using Intwenty.Helpers;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class MfaSmsModel : PageModel
     {
         private readonly IntwentyUserManager _userManager;
-        private readonly IIntwentySmsService _smsService;
+        private readonly IIntwentyEventService _eventService;
 
 
-        public MfaSmsModel(IntwentyUserManager usermanager, IIntwentySmsService smsservice)
+        public MfaSmsModel(IntwentyUserManager usermanager, IIntwentyEventService eventservice)
         {
             _userManager = usermanager;
-            _smsService = smsservice;
+            _eventService = eventservice;
         }
 
        
@@ -59,11 +61,20 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         {
             try
             {
+                model.ResultCode = string.Empty;
+                var phone = model.PhoneNumber.GetCellPhone();
+                if (phone == "INVALID")
+                {
+                    model.ResultCode = "ERROR_INVALID_PHONE";
+                    return new JsonResult(model) { StatusCode = 501 };
+                }
+
+               
+                model.PhoneNumber = phone;
 
                 var user = await _userManager.GetUserAsync(User);
-                //var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
                 var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
-                await _smsService.SendSmsAsync(model.PhoneNumber, code);
+                await _eventService.UserActivatedSmsMfa(new UserActivatedSmsMfaData() { Code = code, PhoneNumber = model.PhoneNumber, UserName = user.UserName });
                 return new JsonResult(model);
 
             }

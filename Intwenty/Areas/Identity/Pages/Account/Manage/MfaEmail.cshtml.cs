@@ -14,19 +14,20 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.SystemEvents;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
     public class MfaEmailModel : PageModel
     {
         private readonly IntwentyUserManager _userManager;
-        private readonly IIntwentyEmailService _emailService;
+        private readonly IIntwentyEventService _eventService;
 
 
-        public MfaEmailModel(IntwentyUserManager usermanager, IIntwentyEmailService emailservice)
+        public MfaEmailModel(IntwentyUserManager usermanager, IIntwentyEventService eventservice)
         {
             _userManager = usermanager;
-            _emailService = emailservice;
+            _eventService = eventservice;
         }
 
        
@@ -43,10 +44,18 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             try
             {
+               
                 var user = await _userManager.GetUserAsync(User);
+
+                if (string.IsNullOrEmpty(user.Email))
+                {
+                    model.ResultCode = "ERROR_NOEMAIL";
+                    return new JsonResult(model) { StatusCode = 501 };
+                }
+
                 model.Email = user.Email;
                 var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
-                await _emailService.SendEmailAsync(model.Email, "Please confirm your email address", code);
+                await _eventService.UserActivatedEmailMfa(new UserActivatedEmailMfaData() { Code = code, Email = user.Email, UserName = user.UserName });
                 return new JsonResult(model);
             }
             catch
@@ -66,6 +75,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 var result = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider, model.Code);
                 if (result)
                 {
+                    model.ResultCode = string.Empty;
                     await _userManager.SetTwoFactorEnabledAsync(user, true);
                     await _userManager.AddUpdateUserSetting(user, "EMAILMFA", "TRUE");
                     return new JsonResult(model);

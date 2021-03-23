@@ -15,15 +15,15 @@
     {
         @if (Settings.Value.ForceMfaAuthentication)
         {
-            <div class="alert alert-primary">
-                To add extra security our service is using forced 2FA. You are enforced to enable one of the options below.
+            <div class="alert alert-danger">
+                To add extra security, our service is using forced 2FA. You are enforced to enable one of the options below.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
         }
         else
         {
             <div class="alert alert-primary">
-                Our service is Enable 2FA adds extra security to your account, choose one option below.
+                Enable 2FA to add extra security to your account. Choose one option below.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
 

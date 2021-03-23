@@ -13,6 +13,10 @@ namespace Intwenty.Interface
         Task UserInvitedToGroup(UserInvitedData data);
         Task UserRemovedFromGroup(UserRemovedFromGroupData data);
         Task UserRequestedToJoinGroup(UserRequestedToJoinGroupData data);
+        Task UserActivatedEmailMfa(UserActivatedEmailMfaData data);
+        Task UserActivatedSmsMfa(UserActivatedSmsMfaData data);
+        Task UserRequestedEmailMfaCode(UserRequestedEmailMfaCodeData data);
+        Task UserRequestedSmsMfaCode(UserRequestedSmsMfaCodeData data);
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using Intwenty.Areas.Identity.Entity;
+﻿using Intwenty.Areas.Identity.Data;
+using Intwenty.Areas.Identity.Entity;
 using Intwenty.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -21,20 +22,19 @@ namespace Intwenty.Middleware
             _next = next;
         }
 
-        public async Task Invoke(HttpContext httpcontext,
-            UserManager<IntwentyUser> usermanager,
-            IOptions<IntwentySettings> settings)
+        public async Task Invoke(HttpContext httpcontext, IntwentyUserManager usermanager, IOptions<IntwentySettings> settings)
         {
 
 
-            if (settings.Value.ForceMfaAuthentication &&
-                httpcontext.User.Identity.IsAuthenticated &&
-                !string.IsNullOrEmpty(httpcontext.User.Identity.Name))
+            if (settings.Value.ForceMfaAuthentication && httpcontext.User.Identity.IsAuthenticated)
             {
                 var user = await usermanager.FindByNameAsync(httpcontext.User.Identity.Name);
                
                 if (!user.TwoFactorEnabled && 
-                    !httpcontext.Request.Path.Value.Contains("MfaAuth"))
+                    !httpcontext.Request.Path.Value.Contains("MfaAuth") &&
+                    !httpcontext.Request.Path.Value.Contains("MfaEmail") &&
+                    !httpcontext.Request.Path.Value.Contains("MfaTotp") &&
+                    !httpcontext.Request.Path.Value.Contains("MfaSms"))
                 {
                     httpcontext.Response.Redirect("/Identity/Account/Manage/MfaAuth");
 

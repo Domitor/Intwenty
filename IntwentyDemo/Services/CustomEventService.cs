@@ -13,7 +13,7 @@ namespace IntwentyDemo.Services
     public class CustomEventService : IntwentyEventService
     {
         private IntwentySettings Settings { get; }
-        public CustomEventService(IIntwentyEmailService emailsender, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings) : base(emailsender, dataservice)
+        public CustomEventService(IIntwentyEmailService emailservice, IIntwentySmsService smsservice, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings) : base(emailservice, smsservice, dataservice)
         {
             Settings = settings.Value;
         }
@@ -32,10 +32,47 @@ namespace IntwentyDemo.Services
 
             await base.EmailChanged(data);
 
-            var mailmsg = string.Format("<br /><br /><b>You update your email at {0}</b><br /><br />", Settings.SiteTitle);
+            var mailmsg = string.Format("<br /><br /><b>You updated your email at {0}</b><br /><br />", Settings.SiteTitle);
             mailmsg += $"Please confirm by <a href='{HtmlEncoder.Default.Encode(data.ConfirmCallbackUrl)}'>clicking here</a>";
 
             await EmailService.SendEmailAsync(data.Email, "Please confirm changed email.", mailmsg);
+        }
+
+        public override async Task UserActivatedEmailMfa(UserActivatedEmailMfaData data)
+        {
+            await base.UserActivatedEmailMfa(data);
+
+            var mailmsg = string.Format("<br /><br /><b>Use this code to activate 'Code To Email' 2FA at {0}</b><br /><br />", Settings.SiteTitle);
+            mailmsg += string.Format("Your code is: {0}", data.Code);
+
+            await EmailService.SendEmailAsync(data.Email, "Activate Code To Email 2FA.", mailmsg);
+        }
+
+        public override async Task UserActivatedSmsMfa(UserActivatedSmsMfaData data)
+        {
+            await base.UserActivatedSmsMfa(data);
+
+            var smsmsg = string.Format("Use this code to activate 'Code To SMS' 2FA: {0}", data.Code);
+
+            await SmsService.SendSmsAsync(data.PhoneNumber, smsmsg);
+        }
+
+        public override async Task UserRequestedEmailMfaCode(UserRequestedEmailMfaCodeData data)
+        {
+            await base.UserRequestedEmailMfaCode(data);
+
+            var mailmsg = string.Format("<br /><br />Your requested security code is: <b>{0}</b>", data.Code);
+
+            await EmailService.SendEmailAsync(data.Email, "Your requested security code.", mailmsg);
+        }
+
+        public override async Task UserRequestedSmsMfaCode(UserRequestedSmsMfaCodeData data)
+        {
+            await base.UserRequestedSmsMfaCode(data);
+
+            var smsmsg = string.Format("Your requested security code is: {0}", data.Code);
+
+            await SmsService.SendSmsAsync(data.PhoneNumber, smsmsg);
         }
 
     }

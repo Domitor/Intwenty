@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using Intwenty.Interface;
 using Intwenty.SystemEvents;
+using Intwenty.Helpers;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
@@ -86,7 +87,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
             var emailconf = false;
             var doupdate = false;
-            if (Input.Email != user.Email)
+            if (Input.Email != user.Email && !string.IsNullOrEmpty(Input.Email))
             {
                 user.Email = Input.Email;
                 doupdate = true;
@@ -96,9 +97,16 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            if (Input.PhoneNumber != user.PhoneNumber)
+            if (Input.PhoneNumber != user.PhoneNumber && !string.IsNullOrEmpty(Input.PhoneNumber))
             {
-                user.PhoneNumber = Input.PhoneNumber;
+                var phone = Input.PhoneNumber.GetCellPhone();
+                if (phone == "INVALID")
+                {
+                    ModelState.AddModelError("Input.PhoneNumber", "Invalid phone number format.");
+                    Load(user);
+                    return Page();
+                }
+                user.PhoneNumber = phone;
                 doupdate = true;
             }
 

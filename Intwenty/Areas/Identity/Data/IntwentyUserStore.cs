@@ -271,7 +271,10 @@ namespace Intwenty.Areas.Identity.Data
             }
 
             var userroles = await GetRolesAsync(user, cancellationToken);
-            return userroles.Contains(roleName);
+
+            var res = userroles.Contains(roleName);
+
+            return res;
 
         }
 

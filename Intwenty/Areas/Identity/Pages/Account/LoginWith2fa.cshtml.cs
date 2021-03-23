@@ -7,6 +7,7 @@ using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
 using Intwenty.Model;
+using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,16 +23,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IIntwentyDataService _dataService;
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
-        private readonly IIntwentySmsService _smsService;
-        private readonly IIntwentyEmailService _emailService;
         private readonly IntwentySettings _settings;
+        private readonly IIntwentyEventService _eventService;
 
-        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentySmsService smsservice, IIntwentyEmailService emailservice, IOptions<IntwentySettings> settings, IIntwentyDataService dataservice)
+        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentyEventService eventservice, IOptions<IntwentySettings> settings, IIntwentyDataService dataservice)
         {
             _signInManager = siginmanager;
             _userManager = usermanager;
-            _smsService = smsservice;
-            _emailService = emailservice;
+            _eventService = eventservice;
             _settings = settings.Value;
             _dataService = dataservice;
         }
@@ -64,12 +63,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 
-            if (user == null)
-            {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
-            }
-
             ReturnUrl = returnUrl;
+
             RememberMe = rememberMe;
 
             HasBankIdMFA = await _userManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
@@ -84,12 +79,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
             if (HasSmsMFA)
             {
                 var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
-                await _smsService.SendSmsAsync(user.PhoneNumber, code);
+                await _eventService.UserRequestedSmsMfaCode(new UserRequestedSmsMfaCodeData() { Code = code, PhoneNumber = user.PhoneNumber, UserName = user.UserName });
             }
             else if (HasEmailMFA)
             {
                 var code = await _userManager.GenerateTwoFactorTokenAsync(user, _userManager.Options.Tokens.ChangePhoneNumberTokenProvider);
-                await _emailService.SendEmailAsync(user.Email, "Use this code to login", code);
+                await _eventService.UserRequestedEmailMfaCode(new UserRequestedEmailMfaCodeData() { Code = code, Email = user.Email, UserName = user.UserName });
             }
             else
             {

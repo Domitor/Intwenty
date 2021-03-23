@@ -36,6 +36,7 @@
             <div class="form-group" v-if="step==1">
                 <label clase="control-label">Phone Number</label>
                 <input type="number" v-model="model.phoneNumber" class="form-control" />
+                <div class="text-danger" v-if="errorInvalidPhone">Invalid phone number format</div>
                 <button class="btn btn-primary m-2" v-on:click="sendPhoneNumber()">Send</button>
             </div>
 
@@ -60,6 +61,7 @@
                 model: { phoneNumber: "", code: "", resultCode:"" },
                 step: 1,
                 errorSendingSms: false,
+                errorInvalidPhone: false,
                 errorVerifySms: false
             },
             methods: {
@@ -86,8 +88,17 @@
                         },
                         error: function (response)
                         {
-                            context.errorSendingSms = true;
-                            context.model = response;
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "ERROR_INVALID_PHONE")
+                            {
+                                context.errorInvalidPhone = true;
+                            }
+                            if (context.model.resultCode == "ERROR_GEN_TOKEN")
+                            {
+                                context.errorSendingSms = true;
+                            }
+                          
+                            
                         }
                     });
                 },
