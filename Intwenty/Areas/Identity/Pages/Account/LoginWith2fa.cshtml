@@ -4,31 +4,40 @@
     ViewData["Title"] = "Two-factor authentication";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-@if (Model.HasSmsMFA)
-{
-    <div class="alert alert-primary">
-        We've sent a code to your cell phone, please enter the code and click login
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    </div>
+<br />
+<br />
 
-}
-else if (Model.HasEmailMFA)
-{
-    <div class="alert alert-primary">
-        We've sent a code to your registered email address, please enter the code and click login
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    </div>
+<div class="card">
+    <div class="card-header"><h2>@ViewData["Title"]</h2></div>
+    <div class="card-body">
+        @if (Model.HasSmsMFA)
+        {
+            <div class="alert alert-primary">
+                We've sent a code to your cell phone, please enter the code and click login
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
 
-}
-else if (Model.HasTotpMFA)
-{
-    <div class="alert alert-primary">
-        Your login is protected with an authenticator app. Enter your authenticator code and click login
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        }
+        else if (Model.HasEmailMFA)
+        {
+            <div class="alert alert-primary">
+                We've sent a code to your registered email address, please enter the code and click login
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+
+        }
+        else if (Model.HasTotpMFA)
+        {
+            <div class="alert alert-primary">
+                Your login is protected with an authenticator app. Enter your authenticator code and click login
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        }
+
     </div>
-}
+</div>
+
+
 
 
 <div class="row">
@@ -57,5 +66,5 @@ else if (Model.HasTotpMFA)
 
 <br />
 
-<p>Is this not working ? If you don't receive 2FA codes or if the codes is not working contact technical support</p>
+<p>Is this not working ? If you don't receive 2FA codes or if the codes is not working contact technical support: @Settings.Value.UserAdminEmail</p>
 
