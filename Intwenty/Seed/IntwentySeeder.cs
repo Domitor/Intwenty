@@ -16,7 +16,7 @@ namespace Intwenty.Seed
 {
     public class IntwentySeeder : IIntwentySeeder
     {
-        public virtual async Task SeedLocalization(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedLocalization(IntwentySettings settings, IServiceProvider services)
         {
            
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
@@ -24,7 +24,6 @@ namespace Intwenty.Seed
     
             var temp = new List<TranslationItem>();
 
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "XXXXXXX" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "Vi har skickat en länk till din epostadress, klicka på den för att återställa ditt lösenord." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "RESETPWDMAIL", Text = "Please check your email to reset your password." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset password confirmation", Text = "Bekräftelse på återställt lösenord" });
@@ -60,7 +59,6 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFASMSPHONEREQ", Text = "Vänligen ange det telefonnummer du vill använda ör att ta emot koder." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFASMSPHONEREQ", Text = "Please input the phonenumber to use with sms 2FA." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Verify", Text = "Verifiera" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Code", Text = "Kod" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Invalid format", Text = "Ogiltigt format" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "You must update your email first, do it by", Text = "Du måste ange en epostadress först, det gär du genom att" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Thank you. Two-factor authentication is now set up", Text = "Tack 2-faktor autentisering är nu aktiverad." });
@@ -182,78 +180,79 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "COPYRIGHT", Text = "2021 Intwenty - Alla rättighter reserverade" });
 
 
-            await client.OpenAsync();
+            client.Open();
 
-            var existing = await client.GetEntitiesAsync<TranslationItem>();
+            var existing = client.GetEntities<TranslationItem>();
 
             foreach (var t in temp)
             {
                 if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
                 {
-
-                      await client.InsertEntityAsync(t);
-                    
+                      client.InsertEntity(t);
                 }
                 
             }
 
-            await client.CloseAsync();
+            client.Close();
 
         }
 
-        public virtual async Task SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
         {
 
             var productManager = services.GetRequiredService<IIntwentyProductManager>();
             var organizationManager = services.GetRequiredService<IIntwentyOrganizationManager>();
 
-            
-
-            IntwentyProduct product = await productManager.FindByIdAsync(settings.ProductId);
-            if (product == null)
+            var t = Task.Run(async () =>
             {
-                product = new IntwentyProduct();
-                product.Id = settings.ProductId;
-                product.ProductName = settings.SiteTitle;
-                await productManager.CreateAsync(product);
-            }
+                IntwentyProduct product = await productManager.FindByIdAsync(settings.ProductId);
+                if (product == null)
+                {
+                    product = new IntwentyProduct();
+                    product.Id = settings.ProductId;
+                    product.ProductName = settings.SiteTitle;
+                    await productManager.CreateAsync(product);
+                }
 
-            IntwentyOrganization org = await organizationManager.FindByNameAsync(settings.DefaultProductOrganization);
-            if (org == null)
-            {
-                org = new IntwentyOrganization();
-                org.Name = settings.DefaultProductOrganization;
-                await organizationManager.CreateAsync(org);
-            }
+                IntwentyOrganization org = await organizationManager.FindByNameAsync(settings.DefaultProductOrganization);
+                if (org == null)
+                {
+                    org = new IntwentyOrganization();
+                    org.Name = settings.DefaultProductOrganization;
+                    await organizationManager.CreateAsync(org);
+                }
 
-            var all_products = await organizationManager.GetProductsAsync(org.Id);
-            var thisproduct = all_products.Find(p => p.ProductId == product.Id);
-            if (thisproduct == null)
-            {
-                await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
-            }
+                var all_products = await organizationManager.GetProductsAsync(org.Id);
+                var thisproduct = all_products.Find(p => p.ProductId == product.Id);
+                if (thisproduct == null)
+                {
+                    await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
+                }
+            });
+
+            t.GetAwaiter().GetResult();
         }
-        public virtual async Task SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services)
         {
             
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
 
-            await client.OpenAsync();
-            var current_apps = await client.GetEntitiesAsync<ApplicationItem>();
-            var current_systems = await client.GetEntitiesAsync<SystemItem>();
-            var current_views = await client.GetEntitiesAsync<ViewItem>();
-            await client.CloseAsync();
+            client.Open();
+            var current_apps = client.GetEntities<ApplicationItem>();
+            var current_systems = client.GetEntities<SystemItem>();
+            var current_views = client.GetEntities<ViewItem>();
+            client.Close();
 
             var iamclient = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);
-            await iamclient.OpenAsync();
-            var current_permissions = await iamclient.GetEntitiesAsync<IntwentyProductAuthorizationItem>();
+            iamclient.Open();
+            var current_permissions =  iamclient.GetEntities<IntwentyProductAuthorizationItem>();
 
             foreach (var t in current_systems)
             {
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == settings.ProductId && p.AuthorizationType == SystemModelItem.MetaTypeSystem))
                 {
                     var sysauth = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = SystemModelItem.MetaTypeSystem, ProductId = settings.ProductId };
-                    await iamclient.InsertEntityAsync(sysauth);
+                    iamclient.InsertEntity(sysauth);
                 }
             }
 
@@ -263,7 +262,7 @@ namespace Intwenty.Seed
                 if (!current_permissions.Exists(p => p.MetaCode == t.MetaCode && p.ProductId == settings.ProductId && p.AuthorizationType == ApplicationModelItem.MetaTypeApplication))
                 {
                     var appauth = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title, NormalizedName = t.MetaCode.ToUpper(), AuthorizationType = ApplicationModelItem.MetaTypeApplication, ProductId = settings.ProductId };
-                    await iamclient.InsertEntityAsync(appauth);
+                    iamclient.InsertEntity(appauth);
                 }
 
                 foreach (var v in current_views)
@@ -273,16 +272,16 @@ namespace Intwenty.Seed
                         if (!current_permissions.Exists(p => p.MetaCode == v.MetaCode && p.ProductId == settings.ProductId && p.AuthorizationType == ViewModel.MetaTypeUIView))
                         {
                             var appauth = new IntwentyProductAuthorizationItem() { Id = Guid.NewGuid().ToString(), Name = t.Title + " - " + v.Title, NormalizedName = v.MetaCode.ToUpper(), AuthorizationType = ViewModel.MetaTypeUIView, ProductId = settings.ProductId };
-                            await iamclient.InsertEntityAsync(appauth);
+                            iamclient.InsertEntity(appauth);
                         }
                     }
                 }
             }
 
-            await iamclient.CloseAsync();
+            iamclient.Close();
         }
 
-        public virtual async Task SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services)
         {
 
             var userManager = services.GetRequiredService<IntwentyUserManager>();
@@ -290,146 +289,151 @@ namespace Intwenty.Seed
             var productManager = services.GetRequiredService<IIntwentyProductManager>();
             var organizationManager = services.GetRequiredService<IIntwentyOrganizationManager>();
 
-            //ENSURE WE HAVE A PRODUCT AND ORG
-            IntwentyProduct product = await productManager.FindByIdAsync(settings.ProductId);
-            if (product == null)
+            var t = Task.Run(async () =>
             {
-                product = new IntwentyProduct();
-                product.Id = settings.ProductId;
-                product.ProductName = settings.SiteTitle;
-                await productManager.CreateAsync(product);
-            }
-
-            IntwentyOrganization org = await organizationManager.FindByNameAsync(settings.DefaultProductOrganization);
-            if (org == null)
-            {
-                org = new IntwentyOrganization();
-                org.Name = settings.DefaultProductOrganization;
-                await organizationManager.CreateAsync(org);
-            }
-
-            var all_products = await organizationManager.GetProductsAsync(org.Id);
-            var thisproduct = all_products.Find(p => p.ProductId == product.Id);
-            if (thisproduct == null)
-            {
-                await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
-            }
-
-
-
-            var admrole = await roleManager.FindByNameAsync("SUPERADMIN");
-            if (admrole == null)
-            {
-                var role = new IntwentyProductAuthorizationItem();
-                role.ProductId = product.Id;
-                role.Name = "SUPERADMIN";
-                role.AuthorizationType = "ROLE";
-                await roleManager.CreateAsync(role);
-            }
-
-            admrole = await roleManager.FindByNameAsync("USERADMIN");
-            if (admrole == null)
-            {
-                var role = new IntwentyProductAuthorizationItem();
-                role.ProductId = product.Id;
-                role.Name = "USERADMIN";
-                role.AuthorizationType = "ROLE";
-                await roleManager.CreateAsync(role);
-            }
-
-            admrole = await roleManager.FindByNameAsync("SYSTEMADMIN");
-            if (admrole == null)
-            {
-                var role = new IntwentyProductAuthorizationItem();
-                role.ProductId = product.Id;
-                role.Name = "SYSTEMADMIN";
-                role.AuthorizationType = "ROLE";
-                await roleManager.CreateAsync(role);
-            }
-
-            var userrole = await roleManager.FindByNameAsync("USER");
-            if (userrole == null)
-            {
-                var role = new IntwentyProductAuthorizationItem();
-                role.ProductId = product.Id;
-                role.Name = "USER";
-                role.AuthorizationType = "ROLE";
-                await roleManager.CreateAsync(role);
-            }
-
-            userrole = await roleManager.FindByNameAsync("APIUSER");
-            if (userrole == null)
-            {
-                var role = new IntwentyProductAuthorizationItem();
-                role.ProductId = product.Id;
-                role.Name = "APIUSER";
-                role.AuthorizationType = "ROLE";
-                await roleManager.CreateAsync(role);
-            }
-
-            if (!string.IsNullOrEmpty(settings.DemoAdminUser) && !string.IsNullOrEmpty(settings.DemoAdminPassword))
-            {
-                IntwentyUser admin_user = await userManager.FindByNameAsync(settings.DemoAdminUser);
-                if (admin_user == null)
+                //ENSURE WE HAVE A PRODUCT AND ORG
+                IntwentyProduct product = await productManager.FindByIdAsync(settings.ProductId);
+                if (product == null)
                 {
-                    admin_user = new IntwentyUser();
-                    admin_user.UserName = settings.DemoAdminUser;
-                    admin_user.Email = settings.DemoAdminUser;
-                    admin_user.FirstName = "Admin";
-                    admin_user.LastName = "Adminsson";
-                    admin_user.EmailConfirmed = true;
-                    admin_user.Culture = settings.DefaultCulture;
-                    await userManager.CreateAsync(admin_user, settings.DemoAdminPassword);
+                    product = new IntwentyProduct();
+                    product.Id = settings.ProductId;
+                    product.ProductName = settings.SiteTitle;
+                    await productManager.CreateAsync(product);
                 }
 
-                var all_members = await organizationManager.GetMembersAsync(org.Id);
-                var admin_member = all_members.Find(p => p.UserId == admin_user.Id);
-                if (admin_member == null)
+                IntwentyOrganization org = await organizationManager.FindByNameAsync(settings.DefaultProductOrganization);
+                if (org == null)
                 {
-                    await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = admin_user.Id, UserName = admin_user.UserName });
-                    await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", admin_user.Id, org.Id, settings.ProductId);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(settings.DemoUser) && !string.IsNullOrEmpty(settings.DemoUserPassword))
-            {
-                IntwentyUser default_user = await userManager.FindByNameAsync(settings.DemoUser);
-                if (default_user == null)
-                {
-                    default_user = new IntwentyUser();
-                    default_user.UserName = settings.DemoUser;
-                    default_user.Email = settings.DemoUser;
-                    default_user.FirstName = "User";
-                    default_user.LastName = "Usersson";
-                    default_user.EmailConfirmed = true;
-                    default_user.Culture = settings.DefaultCulture;
-                    await userManager.CreateAsync(default_user, settings.DemoUserPassword);
+                    org = new IntwentyOrganization();
+                    org.Name = settings.DefaultProductOrganization;
+                    await organizationManager.CreateAsync(org);
                 }
 
-                var all_members = await organizationManager.GetMembersAsync(org.Id);
-                var user_member = all_members.Find(p => p.UserId == default_user.Id);
-                if (user_member == null)
+                var all_products = await organizationManager.GetProductsAsync(org.Id);
+                var thisproduct = all_products.Find(p => p.ProductId == product.Id);
+                if (thisproduct == null)
                 {
-                    await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = default_user.Id, UserName = default_user.UserName });
-                    await userManager.AddUpdateUserRoleAuthorizationAsync("USER", default_user.Id, org.Id, settings.ProductId);
+                    await organizationManager.AddProductAsync(new IntwentyOrganizationProduct() { OrganizationId = org.Id, ProductId = product.Id, ProductName = product.ProductName });
                 }
-            }
+
+
+
+                var admrole = await roleManager.FindByNameAsync("SUPERADMIN");
+                if (admrole == null)
+                {
+                    var role = new IntwentyProductAuthorizationItem();
+                    role.ProductId = product.Id;
+                    role.Name = "SUPERADMIN";
+                    role.AuthorizationType = "ROLE";
+                    await roleManager.CreateAsync(role);
+                }
+
+                admrole = await roleManager.FindByNameAsync("USERADMIN");
+                if (admrole == null)
+                {
+                    var role = new IntwentyProductAuthorizationItem();
+                    role.ProductId = product.Id;
+                    role.Name = "USERADMIN";
+                    role.AuthorizationType = "ROLE";
+                    await roleManager.CreateAsync(role);
+                }
+
+                admrole = await roleManager.FindByNameAsync("SYSTEMADMIN");
+                if (admrole == null)
+                {
+                    var role = new IntwentyProductAuthorizationItem();
+                    role.ProductId = product.Id;
+                    role.Name = "SYSTEMADMIN";
+                    role.AuthorizationType = "ROLE";
+                    await roleManager.CreateAsync(role);
+                }
+
+                var userrole = await roleManager.FindByNameAsync("USER");
+                if (userrole == null)
+                {
+                    var role = new IntwentyProductAuthorizationItem();
+                    role.ProductId = product.Id;
+                    role.Name = "USER";
+                    role.AuthorizationType = "ROLE";
+                    await roleManager.CreateAsync(role);
+                }
+
+                userrole = await roleManager.FindByNameAsync("APIUSER");
+                if (userrole == null)
+                {
+                    var role = new IntwentyProductAuthorizationItem();
+                    role.ProductId = product.Id;
+                    role.Name = "APIUSER";
+                    role.AuthorizationType = "ROLE";
+                    await roleManager.CreateAsync(role);
+                }
+
+                if (!string.IsNullOrEmpty(settings.DemoAdminUser) && !string.IsNullOrEmpty(settings.DemoAdminPassword))
+                {
+                    IntwentyUser admin_user = await userManager.FindByNameAsync(settings.DemoAdminUser);
+                    if (admin_user == null)
+                    {
+                        admin_user = new IntwentyUser();
+                        admin_user.UserName = settings.DemoAdminUser;
+                        admin_user.Email = settings.DemoAdminUser;
+                        admin_user.FirstName = "Admin";
+                        admin_user.LastName = "Adminsson";
+                        admin_user.EmailConfirmed = true;
+                        admin_user.Culture = settings.DefaultCulture;
+                        await userManager.CreateAsync(admin_user, settings.DemoAdminPassword);
+                    }
+
+                    var all_members = await organizationManager.GetMembersAsync(org.Id);
+                    var admin_member = all_members.Find(p => p.UserId == admin_user.Id);
+                    if (admin_member == null)
+                    {
+                        await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = admin_user.Id, UserName = admin_user.UserName });
+                        await userManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", admin_user.Id, org.Id, settings.ProductId);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(settings.DemoUser) && !string.IsNullOrEmpty(settings.DemoUserPassword))
+                {
+                    IntwentyUser default_user = await userManager.FindByNameAsync(settings.DemoUser);
+                    if (default_user == null)
+                    {
+                        default_user = new IntwentyUser();
+                        default_user.UserName = settings.DemoUser;
+                        default_user.Email = settings.DemoUser;
+                        default_user.FirstName = "User";
+                        default_user.LastName = "Usersson";
+                        default_user.EmailConfirmed = true;
+                        default_user.Culture = settings.DefaultCulture;
+                        await userManager.CreateAsync(default_user, settings.DemoUserPassword);
+                    }
+
+                    var all_members = await organizationManager.GetMembersAsync(org.Id);
+                    var user_member = all_members.Find(p => p.UserId == default_user.Id);
+                    if (user_member == null)
+                    {
+                        await organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = default_user.Id, UserName = default_user.UserName });
+                        await userManager.AddUpdateUserRoleAuthorizationAsync("USER", default_user.Id, org.Id, settings.ProductId);
+                    }
+                }
+            });
+
+            t.GetAwaiter().GetResult();
         }
 
 
      
 
-        public virtual Task SeedModel(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedModel(IntwentySettings settings, IServiceProvider services)
         {
-            return Task.CompletedTask;
+
         }
 
-        public virtual Task SeedData(IntwentySettings settings, IServiceProvider services)
+        public virtual void SeedData(IntwentySettings settings, IServiceProvider services)
         {
-            return Task.CompletedTask;
+
         }
 
-        public virtual async Task ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
+        public virtual void ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
         {
 
             if (!settings.ConfigureDatabaseOnStartUp)
@@ -437,8 +441,9 @@ namespace Intwenty.Seed
 
             var modelservice = services.GetRequiredService<IIntwentyModelService>();
 
-            await modelservice.ConfigureDatabase();
+            var t = modelservice.ConfigureDatabase();
 
+            t.GetAwaiter().GetResult();
         }
 
       

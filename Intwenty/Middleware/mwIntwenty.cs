@@ -211,7 +211,7 @@ namespace Intwenty.Middleware
 
         }
 
-        public static async Task<IApplicationBuilder> UseIntwenty(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseIntwenty(this IApplicationBuilder builder)
         {
             var configuration = builder.ApplicationServices.GetRequiredService<IConfiguration>();
             var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
@@ -227,7 +227,7 @@ namespace Intwenty.Middleware
 
             builder.ConfigureIntwentyTwoFactorAuth(settings);
 
-            await builder.SeedIntwenty(settings);
+            builder.SeedIntwenty(settings);
 
             builder.ConfigureEndpoints(settings);
 
@@ -333,7 +333,7 @@ namespace Intwenty.Middleware
         }
 
 
-        private static async Task SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
+        private static void SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
         {
 
             //Below can be activated/deactivated in the appsetting.json file
@@ -349,26 +349,33 @@ namespace Intwenty.Middleware
             //The order is important
 
             if (settings.SeedLocalizationsOnStartUp)
-                await seederservice.SeedLocalization(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedLocalization(settings, builder.ApplicationServices);
+            }
             if (settings.SeedProductAndOrganizationOnStartUp)
-                await seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
+            }
             if (settings.SeedDemoUserAccountsOnStartUp)
-                await seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
+            }
             if (settings.SeedModelOnStartUp)
-                await seederservice.SeedModel(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedModel(settings, builder.ApplicationServices);
+            }
             if (settings.SeedDataOnStartUp)
-                await seederservice.SeedData(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedData(settings, builder.ApplicationServices);
+            }
             if (settings.ConfigureDatabaseOnStartUp)
-                await seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
-
+            {
+                seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
+            }
             if (settings.SeedProductAndOrganizationOnStartUp)
-                await seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
-
+            {
+                seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
+            }
 
         }
 

@@ -17,10 +17,10 @@ namespace IntwentyDemo.Seed
 {
     public class DemoSeeder : IntwentySeeder, IIntwentySeeder
     {
-        public override async Task SeedLocalization(IntwentySettings settings, IServiceProvider services)
+        public override void SeedLocalization(IntwentySettings settings, IServiceProvider services)
         {
             //SEED INTWENTY DEFAULT LOCALIZATIONS
-            await base.SeedLocalization(settings, services);
+            base.SeedLocalization(settings, services);
 
            
             var translations = new List<TranslationItem>();
@@ -72,38 +72,38 @@ namespace IntwentyDemo.Seed
 
 
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
-            await client.OpenAsync();
+            client.Open();
 
-            var current_trans = await client.GetEntitiesAsync<TranslationItem>();
+            var current_trans = client.GetEntities<TranslationItem>();
             foreach (var t in translations)
             {
                 if (!current_trans.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            await client.CloseAsync();
+            client.Close();
            
  
         }
 
-        public override async Task SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
+        public override void SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
         {
-            await base.SeedProductAndOrganization(settings, services);
+            base.SeedProductAndOrganization(settings, services);
         }
-        public override async Task SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services)
+        public override void SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services)
         {
-            await base.SeedProductAuthorizationItems(settings, services);
+            base.SeedProductAuthorizationItems(settings, services);
         }
 
-        public override async Task SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services)
+        public override void SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services)
         {
-            await base.SeedUsersAndRoles(settings, services);
+            base.SeedUsersAndRoles(settings, services);
         }
 
 
      
 
-        public override async Task SeedModel(IntwentySettings settings, IServiceProvider services)
+        public override void SeedModel(IntwentySettings settings, IServiceProvider services)
         {
             
             var systems = new List<SystemItem>();
@@ -466,82 +466,82 @@ namespace IntwentyDemo.Seed
 
             //Insert models if not existing
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
-            await client.OpenAsync();
+            client.Open();
 
-            var current_systems = await client.GetEntitiesAsync<SystemItem>();
+            var current_systems = client.GetEntities<SystemItem>();
             foreach (var t in systems)
             {
                 if (!current_systems.Exists(p => p.MetaCode == t.MetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_apps = await client.GetEntitiesAsync<ApplicationItem>();
+            var current_apps = client.GetEntities<ApplicationItem>();
             foreach (var t in applications)
             {
                 if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_domains = await client.GetEntitiesAsync<ValueDomainItem>();
+            var current_domains = client.GetEntities<ValueDomainItem>();
             foreach (var t in valuedomains)
             {
                 if (!current_domains.Exists(p => p.DomainName == t.DomainName))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_views = await client.GetEntitiesAsync<ViewItem>();
+            var current_views = client.GetEntities<ViewItem>();
             foreach (var t in views)
             {
                 if (!current_views.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_userinterface = await client.GetEntitiesAsync<UserInterfaceItem>();
+            var current_userinterface = client.GetEntities<UserInterfaceItem>();
             foreach (var t in userinterface)
             {
                 if (!current_userinterface.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_ui_structure = await client.GetEntitiesAsync<UserInterfaceStructureItem>();
+            var current_ui_structure = client.GetEntities<UserInterfaceStructureItem>();
             foreach (var t in userinterfacestructure)
             {
                 if (!current_ui_structure.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_functions = await client.GetEntitiesAsync<FunctionItem>();
+            var current_functions = client.GetEntities<FunctionItem>();
             foreach (var t in functions)
             {
                 if (!current_functions.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_db = await client.GetEntitiesAsync<DatabaseItem>();
+            var current_db = client.GetEntities<DatabaseItem>();
             foreach (var t in dbitems)
             {
                 if (!current_db.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            var current_endpoints = await client.GetEntitiesAsync<EndpointItem>();
+            var current_endpoints = client.GetEntities<EndpointItem>();
             foreach (var t in endpoints)
             {
                 if (!current_endpoints.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))
-                    await client.InsertEntityAsync(t);
+                    client.InsertEntity(t);
             }
 
-            await client.CloseAsync();
+            client.Close();
         }
 
-        public override async Task SeedData(IntwentySettings settings, IServiceProvider services)
+        public override void SeedData(IntwentySettings settings, IServiceProvider services)
         {
-            await base.SeedData(settings, services);
+            base.SeedData(settings, services);
         }
 
-        public override async Task ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
+        public override void ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
         {
-            await base.ConfigureDataBase(settings, services);
+            base.ConfigureDataBase(settings, services);
         }
 
       

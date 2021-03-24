@@ -26,11 +26,12 @@ namespace IntwentyDemo
         {
             try
             {
-                CreateHostBuilder(args).Build().Run();
+                var intwentyhost = CreateHostBuilder(args).Build();
+                intwentyhost.Run();
             }
             catch(Exception ex)
             {
-                var s = "";
+                throw ex;
             }
         }
 
@@ -108,21 +109,18 @@ namespace IntwentyDemo
 
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
                     })
-                    .Configure(async (buildercontext, app) =>
+                    .Configure((buildercontext, app) =>
                     {
 
                         var env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
                         var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-
-                        //applicationLifetime.ApplicationStopped.Register(OnShutdown);
-                        //applicationlifetime.ApplicationStarted.Register(OnStarted);
 
                         app.UseStaticFiles();
                         app.UseExceptionHandler("/Home/Error");
                         app.UseHsts();
 
                         //Set up everything related to intwenty
-                        await app.UseIntwenty();
+                        app.UseIntwenty();
 
                     });
                 });
