@@ -225,9 +225,10 @@ namespace Intwenty.Middleware
             builder.UseRequestLocalization();
 
             builder.ConfigureIntwentyTwoFactorAuth(settings);
+            builder.SeedIntwenty(settings);
             builder.ConfigureEndpoints(settings);
             builder.ConfigureIntwentyAPI(settings);
-            builder.SeedIntwenty(settings);
+            
 
             return builder;
 

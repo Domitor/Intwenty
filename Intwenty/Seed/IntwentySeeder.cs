@@ -334,7 +334,6 @@ namespace Intwenty.Seed
 
             await modelservice.ConfigureDatabase();
 
-            modelservice.ClearCache();
         }
 
       
