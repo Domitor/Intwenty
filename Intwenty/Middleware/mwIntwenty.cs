@@ -24,6 +24,7 @@ using Intwenty.Entity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Intwenty.Seed;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Threading.Tasks;
 
 namespace Intwenty.Middleware
 {
@@ -210,7 +211,7 @@ namespace Intwenty.Middleware
 
         }
 
-        public static IApplicationBuilder UseIntwenty(this IApplicationBuilder builder)
+        public static async Task<IApplicationBuilder> UseIntwenty(this IApplicationBuilder builder)
         {
             var configuration = builder.ApplicationServices.GetRequiredService<IConfiguration>();
             var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
@@ -225,8 +226,11 @@ namespace Intwenty.Middleware
             builder.UseRequestLocalization();
 
             builder.ConfigureIntwentyTwoFactorAuth(settings);
-            builder.SeedIntwenty(settings);
+
+            await builder.SeedIntwenty(settings);
+
             builder.ConfigureEndpoints(settings);
+
             builder.ConfigureIntwentyAPI(settings);
             
 
@@ -329,7 +333,7 @@ namespace Intwenty.Middleware
         }
 
 
-        private static void SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
+        private static async Task SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
         {
 
             //Below can be activated/deactivated in the appsetting.json file
@@ -345,25 +349,25 @@ namespace Intwenty.Middleware
             //The order is important
 
             if (settings.SeedLocalizationsOnStartUp)
-                seederservice.SeedLocalization(settings, builder.ApplicationServices);
+                await seederservice.SeedLocalization(settings, builder.ApplicationServices);
 
             if (settings.SeedProductAndOrganizationOnStartUp)
-                seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
+                await seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
 
             if (settings.SeedDemoUserAccountsOnStartUp)
-                seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
+                await seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
 
             if (settings.SeedModelOnStartUp)
-                seederservice.SeedModel(settings, builder.ApplicationServices);
+                await seederservice.SeedModel(settings, builder.ApplicationServices);
 
             if (settings.SeedDataOnStartUp)
-                seederservice.SeedData(settings, builder.ApplicationServices);
+                await seederservice.SeedData(settings, builder.ApplicationServices);
 
             if (settings.ConfigureDatabaseOnStartUp)
-                seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
+                await seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
 
             if (settings.SeedProductAndOrganizationOnStartUp)
-                seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
+                await seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
 
 
         }

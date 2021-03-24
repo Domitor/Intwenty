@@ -30,13 +30,14 @@ namespace IntwentyDemo
             }
             catch(Exception ex)
             {
-
+                var s = "";
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
 
-            Host.CreateDefaultBuilder(args)
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.AddUserSecrets("b77e8d87-d3be-4daf-9074-ec3ccd53ed21");
@@ -67,7 +68,7 @@ namespace IntwentyDemo
                         //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation
                         services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration); //customized services
 
-                      
+
 
                         //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
                         //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
@@ -107,13 +108,11 @@ namespace IntwentyDemo
 
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
                     })
-                    .Configure((buildercontext, app) =>
+                    .Configure(async (buildercontext, app) =>
                     {
-                        //var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
-                        //var logger = loggerFactory.CreateLogger<Program>();
+
                         var env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
                         var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-
 
                         //applicationLifetime.ApplicationStopped.Register(OnShutdown);
                         //applicationlifetime.ApplicationStarted.Register(OnStarted);
@@ -122,15 +121,13 @@ namespace IntwentyDemo
                         app.UseExceptionHandler("/Home/Error");
                         app.UseHsts();
 
-
                         //Set up everything related to intwenty
-                        app.UseIntwenty();
-
-                      
-
+                        await app.UseIntwenty();
 
                     });
                 });
+
+        }
         /*
         private void OnShutdown()
         {

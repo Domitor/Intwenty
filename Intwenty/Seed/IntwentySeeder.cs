@@ -24,6 +24,7 @@ namespace Intwenty.Seed
     
             var temp = new List<TranslationItem>();
 
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "XXXXXXX" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "Vi har skickat en länk till din epostadress, klicka på den för att återställa ditt lösenord." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "RESETPWDMAIL", Text = "Please check your email to reset your password." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset password confirmation", Text = "Bekräftelse på återställt lösenord" });
@@ -42,7 +43,6 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Passwords must match", Text = "Lösenorden skiljer sig åt" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Sorry, registration is closed", Text = "Tjänsten är stängd för registrering" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enter your email", Text = "Ange din epostadress" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Forgot your password", Text = "Glömt ditt lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPUNVERIFIED", Text = "Koden kunde inte verifiera testa nästa kod i din app." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPUNVERIFIED", Text = "The code could not be verified, try the next code from your authenticator app." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_1", Text = "För att använda en autentiserings app, går du igenom följande steg:" });
@@ -182,17 +182,22 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "COPYRIGHT", Text = "2021 Intwenty - Alla rättighter reserverade" });
 
 
-                await client.OpenAsync();
+            await client.OpenAsync();
 
-                var existing = await client.GetEntitiesAsync<TranslationItem>();
+            var existing = await client.GetEntitiesAsync<TranslationItem>();
 
-                foreach (var t in temp)
+            foreach (var t in temp)
+            {
+                if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
                 {
-                    if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
-                        await client.InsertEntityAsync(t);
-                }
 
-                await client.CloseAsync();
+                      await client.InsertEntityAsync(t);
+                    
+                }
+                
+            }
+
+            await client.CloseAsync();
 
         }
 
