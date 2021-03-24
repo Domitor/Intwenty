@@ -11,19 +11,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Data;
+using Intwenty.Services;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        private readonly UserManager<IntwentyUser> _userManager;
-        private readonly IIntwentyEmailService _emailSender;
+        private readonly IntwentyUserManager _userManager;
+        private readonly IIntwentyEventService _eventService;
 
-        public ForgotPasswordModel(UserManager<IntwentyUser> userManager, IIntwentyEmailService emailSender)
+        public ForgotPasswordModel(IntwentyUserManager usermanager, IIntwentyEventService eventservice)
         {
-            _userManager = userManager;
-            _emailSender = emailSender;
+            _userManager = usermanager;
+            _eventService = eventservice;
         }
 
         [BindProperty]
@@ -47,21 +49,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     return RedirectToPage("./ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please 
-                // visit https://go.microsoft.com/fwlink/?LinkID=532713
+
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/ResetPassword",
-                    pageHandler: null,
-                    values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
-
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+                var callbackUrl = Url.Page("/Account/ResetPassword",pageHandler: null,values: new { area = "Identity", code },protocol: Request.Scheme);
+                await _eventService.UserRequestedPasswordReset(new UserRequestedPasswordResetData() { Email=Input.Email, UserName = user.UserName, ConfirmCallbackUrl = callbackUrl });
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 

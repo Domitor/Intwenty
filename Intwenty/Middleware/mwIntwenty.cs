@@ -4,7 +4,6 @@ using Intwenty.Localization;
 using Intwenty.Interface;
 using Intwenty.Model;
 using Intwenty.Services;
-using Intwenty.SystemEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -64,7 +63,7 @@ namespace Intwenty.Middleware
             services.Configure<IntwentySettings>(configuration.GetSection("IntwentySettings"));
 
             //Required for Intwenty: Services
-            //Override default intwenty dataservice
+            services.TryAddTransient<IIntwentyDbLoggerService, DbLoggerService>();
             services.TryAddTransient<IIntwentyDataService, TIntwentyDataService>();
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
@@ -224,6 +223,7 @@ namespace Intwenty.Middleware
             builder.UseAuthentication();
             builder.UseAuthorization();
             builder.UseRequestLocalization();
+
             builder.ConfigureIntwentyTwoFactorAuth(settings);
             builder.ConfigureEndpoints(settings);
             builder.ConfigureIntwentyAPI(settings);

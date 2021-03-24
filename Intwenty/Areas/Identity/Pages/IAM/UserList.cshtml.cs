@@ -20,13 +20,13 @@ namespace Intwenty.Areas.Identity.Pages.IAM
     public class UserListModel : PageModel
     {
 
-        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyDbLoggerService DbLogger { get; }
         private IntwentySettings Settings { get; }
         private IntwentyUserManager UserManager { get; }
 
-        public UserListModel(IIntwentyDataService ms, IOptions<IntwentySettings> settings, IntwentyUserManager usermanager)
+        public UserListModel(IIntwentyDbLoggerService logger, IOptions<IntwentySettings> settings, IntwentyUserManager usermanager)
         {
-            DataRepository = ms;
+            DbLogger = logger;
             Settings = settings.Value;
             UserManager = usermanager;
         }
@@ -38,7 +38,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<JsonResult> OnGetLoad()
         {
-            var client = DataRepository.GetIAMDataClient();
+            var client = UserManager.GetIAMDataClient();
             await client.OpenAsync();
             var result = await client.GetEntitiesAsync<IntwentyUser>();
             var list = result.Select(p => new IntwentyUserVm(p));
@@ -63,7 +63,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             var result = await UserManager.CreateAsync(user, password);
 
             if (result.Succeeded)
-                DataRepository.LogInfo(string.Format("A new user {0} with temporary password {1} was created", user.UserName, password), username: user.UserName);
+                await DbLogger.LogInfoAsync(string.Format("A new user {0} with temporary password {1} was created", user.UserName, password), username: user.UserName);
 
             return await OnGetLoad();
         }

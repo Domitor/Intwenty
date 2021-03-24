@@ -14,7 +14,7 @@ using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Models;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Intwenty.Helpers;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage

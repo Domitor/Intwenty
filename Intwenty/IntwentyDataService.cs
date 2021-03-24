@@ -29,13 +29,16 @@ namespace Intwenty
 
         protected DateTime ApplicationSaveTimeStamp { get; }
 
+        protected IIntwentyDbLoggerService DbLogger { get; }
 
-        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache)
+
+        public IntwentyDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IIntwentyDbLoggerService dblogger, IMemoryCache cache)
         {
             Settings = settings.Value;
             ModelRepository = modelservice;
             ApplicationCache = cache;
             ApplicationSaveTimeStamp = DateTime.Now;
+            DbLogger = dblogger;
         }
 
         public IDataClient GetDataClient()
@@ -43,10 +46,7 @@ namespace Intwenty
             return new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
         }
 
-        public IDataClient GetIAMDataClient()
-        {
-            return new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
-        }
+       
 
         #region Create
 
@@ -105,7 +105,7 @@ namespace Intwenty
             catch (Exception ex)
             {
                 result.SetError(ex.Message, "Error when creating a new application");
-                LogError("IntwentyDataService.CreateNew: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.CreateNew: " + ex.Message);
             }
             finally
             {
@@ -316,7 +316,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty application failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.Save: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.Save: " + ex.Message);
             }
             finally
             {
@@ -1042,7 +1042,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Delete application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.Delete: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.Delete: " + ex.Message);
             }
             finally
             {
@@ -1130,7 +1130,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, "DeleteSubTableLine failed");
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.DeleteSubTableLine: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.DeleteSubTableLine: " + ex.Message);
             }
 
             return result;
@@ -1266,7 +1266,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetPagedList<T> of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetPagedList<T>: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.GetPagedList<T>: " + ex.Message);
             }
             finally
             {
@@ -1457,7 +1457,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("GetList(args) of Intwenty applications failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetPagedList: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.GetPagedList: " + ex.Message);
                 return result;
             }
             finally
@@ -1546,7 +1546,7 @@ namespace Intwenty
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Get<T> failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
-                LogError("IntwentyDataService.GetLatestVersionById: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.GetLatestVersionById: " + ex.Message);
             }
             finally
             {
@@ -1737,7 +1737,7 @@ namespace Intwenty
                 result.AddMessage(MessageCode.USERERROR, string.Format("Get application {0} failed", model.Application.Title));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 result.Data = "{}";
-                LogError("IntwentyDataService.Get: " + ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.Get: " + ex.Message);
             }
             finally
             {
@@ -1833,87 +1833,6 @@ namespace Intwenty
         #endregion
 
        
-
-        public void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            Task.Run(() => LogEvent("ERROR", message, applicationid, appmetacode, username));
-        }
-
-        public void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            Task.Run(() => LogEvent("INFO", message, applicationid, appmetacode, username));
-        }
-
-        public void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
-        {
-            Task.Run(() => LogEvent("WARNING", message, applicationid, appmetacode, username));
-        }
-
-        public async Task LogIdentityActivity(string verbosity, string message, string username = "")
-        {
-            if (Settings.LogVerbosity == LogVerbosityTypes.Error && (verbosity == "WARNING" || verbosity == "INFO"))
-                return;
-            if (Settings.LogVerbosity == LogVerbosityTypes.Warning && verbosity == "INFO")
-                return;
-
-            var client = GetIAMDataClient();
-            await client.OpenAsync();
-
-            try
-            {
-
-                var parameters = new List<IIntwentySqlParameter>();
-                parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
-                parameters.Add(new IntwentySqlParameter("@Message", message));
-                parameters.Add(new IntwentySqlParameter("@AppMetaCode", "NONE"));
-                parameters.Add(new IntwentySqlParameter("@ApplicationId", 0));
-                parameters.Add(new IntwentySqlParameter("@UserName", username));
-
-                var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.IAMConnectionDBMS);
-
-                await client.RunCommandAsync("INSERT INTO sysdata_EventLog (EventDate, Verbosity, Message, AppMetaCode, ApplicationId,UserName) VALUES (" + getdatecmd.Command + ", @Verbosity, @Message, @AppMetaCode, @ApplicationId,@UserName)", parameters: parameters.ToArray());
-
-            }
-            catch { }
-            finally
-            {
-                await client.CloseAsync();
-            }
-        }
-
-        public virtual async Task<List<EventLog>> GetEventLog(string verbosity)
-        {
-
-            var client = GetDataClient();
-            await client.OpenAsync();
-
-            try
-            {
-                if (string.IsNullOrEmpty(verbosity))
-                {
-
-                    var result = await client.GetEntitiesAsync<EventLog>("SELECT * FROM sysdata_EventLog ORDER BY Id DESC", false);
-                    return result;
-                }
-                else
-                {
-                    var parameters = new List<IIntwentySqlParameter>();
-                    parameters.Add(new IntwentySqlParameter("@Verbosity", verbosity));
-                    var result = await client.GetEntitiesAsync<EventLog>("SELECT * FROM sysdata_EventLog WHERE Verbosity=@Verbosity ORDER BY Id DESC", false, parameters.ToArray());
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogError("Error fetching eventlog - GetEventLog(string verbosity): " + ex.Message);
-            }
-            finally
-            {
-                await client.CloseAsync();
-            }
-
-            return new List<EventLog>();
-        }
 
         private void LogEvent(string verbosity, string message, int applicationid = 0, string appmetacode = "NONE", string username = "")
         {

@@ -36,6 +36,8 @@ namespace Intwenty
 
         private IIntwentyOrganizationManager OrganizationManager { get; }
 
+        private IIntwentyDbLoggerService DbLogger { get; }
+
         private string CurrentCulture { get; }
 
         private List<TypeMapItem> DataTypes { get; set; }
@@ -55,8 +57,9 @@ namespace Intwenty
         private static readonly string SystemModelItemCacheKey = "INTWENTYSYSTEMS";
 
 
-        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IntwentyUserManager usermanager, IIntwentyOrganizationManager orgmanager)
+        public IntwentyModelService(IOptions<IntwentySettings> settings, IMemoryCache cache, IntwentyUserManager usermanager, IIntwentyOrganizationManager orgmanager, IIntwentyDbLoggerService dblogger)
         {
+            DbLogger = dblogger;
             OrganizationManager = orgmanager;
             UserManager = usermanager;
             ModelCache = cache;
@@ -389,6 +392,30 @@ namespace Intwenty
 
             return null;
 
+        }
+
+        public string GetLocalizedString(string localizationkey)
+        {
+
+            if (string.IsNullOrEmpty(localizationkey))
+                return string.Empty;
+
+            var translations = GetTranslations();
+            var trans = translations.Find(p => p.Culture == CurrentCulture && p.Key == localizationkey);
+            if (trans != null)
+            {
+                var res = trans.Text;
+                if (string.IsNullOrEmpty(res))
+                    return localizationkey;
+
+                return res;
+            }
+            else
+            {
+                return localizationkey;
+            }
+
+            
         }
 
         private void LocalizeViewModel(ViewModel model)
@@ -1329,7 +1356,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                //DataRepository.LogError("Error creating tenant isolated tables for user." + ex.Message, username: user.UserName);
+                await DbLogger.LogErrorAsync("Error creating tenant isolated tables for user." + ex.Message, username: user.UserName);
             }
 
             return result;

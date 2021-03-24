@@ -14,6 +14,7 @@ namespace Intwenty.Areas.Identity.Data
 {
     public interface IIntwentyProductManager
     {
+        IDataClient GetIAMDataClient();
         Task<IdentityResult> CreateAsync(IntwentyProduct product);
         Task<IdentityResult> UpdateAsync(IntwentyProduct product);
         Task<IdentityResult> DeleteAsync(IntwentyProduct product);
@@ -36,6 +37,11 @@ namespace Intwenty.Areas.Identity.Data
         public IntwentyProductManager(IOptions<IntwentySettings> settings) 
         {
             Settings = settings.Value;
+        }
+
+        public IDataClient GetIAMDataClient()
+        {
+            return new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
         }
 
         public async Task<IdentityResult> CreateAsync(IntwentyProduct product)

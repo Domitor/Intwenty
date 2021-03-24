@@ -43,6 +43,7 @@ namespace Intwenty.Interface
         public ViewModel GetLocalizedViewModelById(int id);
         public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
         public ViewModel GetLocalizedViewModelByPath(string path);
+        public string GetLocalizedString(string localizationkey);
 
 
         //VALUE DOMAINS

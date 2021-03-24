@@ -17,6 +17,7 @@ namespace Intwenty.Areas.Identity.Data
 {
     public interface IIntwentyOrganizationManager
     {
+        IDataClient GetIAMDataClient();
         Task<IdentityResult> CreateAsync(IntwentyOrganization organization);
         Task<IdentityResult> UpdateAsync(IntwentyOrganization organization);
         Task<IdentityResult> DeleteAsync(IntwentyOrganization organization);
@@ -52,6 +53,12 @@ namespace Intwenty.Areas.Identity.Data
             Settings = settings.Value;
             AuthCache = cache;
         }
+
+        public IDataClient GetIAMDataClient()
+        {
+            return new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+        }
+
 
         public async Task<IdentityResult> CreateAsync(IntwentyOrganization organization)
         {

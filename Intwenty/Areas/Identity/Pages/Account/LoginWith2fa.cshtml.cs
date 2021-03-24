@@ -7,7 +7,7 @@ using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Interface;
 using Intwenty.Model;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +20,19 @@ namespace Intwenty.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
     {
-        private readonly IIntwentyDataService _dataService;
+        private readonly IIntwentyDbLoggerService _dbloggerService;
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IntwentySettings _settings;
         private readonly IIntwentyEventService _eventService;
 
-        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentyEventService eventservice, IOptions<IntwentySettings> settings, IIntwentyDataService dataservice)
+        public LoginWith2faModel(IntwentySignInManager siginmanager, IntwentyUserManager usermanager, IIntwentyEventService eventservice, IOptions<IntwentySettings> settings, IIntwentyDbLoggerService dblogger)
         {
             _signInManager = siginmanager;
             _userManager = usermanager;
             _eventService = eventservice;
             _settings = settings.Value;
-            _dataService = dataservice;
+            _dbloggerService = dblogger;
         }
 
         public bool HasAnyMFA { get; set; }
@@ -132,7 +132,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 {
                     user.LastLoginProduct = _settings.ProductId;
                     user.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    var client = _dataService.GetIAMDataClient();
+                    var client = _userManager.GetIAMDataClient();
                     await client.OpenAsync();
                     await client.UpdateEntityAsync(user);
                     await client.CloseAsync();

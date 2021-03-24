@@ -24,7 +24,7 @@ namespace IntwentyDemo.Services
 
     public class CustomDataService : IntwentyDataService, IIntwentyDataService
     {
-        public CustomDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IMemoryCache cache) : base(settings, modelservice, cache)
+        public CustomDataService(IOptions<IntwentySettings> settings, IIntwentyModelService modelservice, IIntwentyDbLoggerService dblogger, IMemoryCache cache) : base(settings, modelservice, dblogger, cache)
         {
             
         }

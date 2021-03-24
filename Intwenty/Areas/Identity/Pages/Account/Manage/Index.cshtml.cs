@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using Intwenty.Interface;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Intwenty.Helpers;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage

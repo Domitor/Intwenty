@@ -27,7 +27,7 @@ namespace Intwenty.Controllers
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class SystemTestController : Controller
     {
-
+        private readonly IIntwentyDbLoggerService _dbloggerservice;
         private readonly IIntwentyModelService _modelservice;
         private readonly IIntwentyDataService _dataservice;
         private readonly IntwentySettings _settings;
@@ -44,7 +44,8 @@ namespace Intwenty.Controllers
                                     SignInManager<IntwentyUser> signinmgr,
                                     RoleManager<IntwentyProductAuthorizationItem> rolemgr,
                                     IIntwentyOrganizationManager orgmanager,
-                                    IHubContext<ServerToClientPush> hubcontext)
+                                    IHubContext<ServerToClientPush> hubcontext,
+                                    IIntwentyDbLoggerService dblogger)
         {
             _modelservice = modelservice;
             _dataservice = dataservice;
@@ -54,6 +55,7 @@ namespace Intwenty.Controllers
             _rolemanager = rolemgr;
             _orgmanager = orgmanager;
             _hubContext = hubcontext;
+            _dbloggerservice = dblogger;
 
         }
 
@@ -227,7 +229,7 @@ namespace Intwenty.Controllers
                 dbstore.Close();
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test1ORMCreateTable (DataClient.CreateTable) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test1ORMCreateTable (DataClient.CreateTable) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -261,7 +263,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("AutoInc failed on DataClient.InsertEntity<T>");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test2ORMInsert (Create 100 records and retrieve them) lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -318,7 +320,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Updated string value was not persisted.");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test3ORMUpdate lasted (GetAll, GetOne, Update) {0} ms", result.Duration));
                 dbstore.Close();
             }
             catch (Exception ex)
@@ -355,7 +357,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test4ORMDelete (Delete 100 records one by one) lasted  {0} ms", result.Duration));
                 dbstore.Close();
             }
             catch (Exception ex)
@@ -374,7 +376,7 @@ namespace Intwenty.Controllers
             {
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test5NotUsed lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test5NotUsed lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -428,7 +430,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test6CreateIntwentyExampleModel lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -487,7 +489,7 @@ namespace Intwenty.Controllers
                 }
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test7CreateIntwentyApplication (Create 100 applications) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test7CreateIntwentyApplication (Create 100 applications) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -534,7 +536,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test8GetListOfIntwentyApplication (Get 100 Applications) lasted  {0} ms", result.Duration));
 
 
             }
@@ -565,7 +567,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not get list of intwenty applications owned by OTHERUSER, should be 20 records");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test9GetListOfIntwentyApplicationByOwnerUser lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -650,7 +652,7 @@ namespace Intwenty.Controllers
                 appdata = getbyidresult.GetAsApplicationData();
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test11UpdateIntwentyApplication (Get Application, Update, JSONOperations) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test11UpdateIntwentyApplication (Get Application, Update, JSONOperations) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -693,7 +695,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("No data found when using Get<def_TestApp>()");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test111GetTypedApplication (Get typed intwenty application) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test111GetTypedApplication (Get typed intwenty application) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -762,7 +764,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test12DeleteIntwentyApplication (Delete Subtable Row, Delete Application) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test12DeleteIntwentyApplication (Delete Subtable Row, Delete Application) lasted  {0} ms", result.Duration));
 
 
 
@@ -788,7 +790,7 @@ namespace Intwenty.Controllers
                
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test13GetAllValueDomains lasted  {0} ms", result.Duration));
             }
             catch (Exception ex)
             {
@@ -818,7 +820,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("GetDataSet on sysdata_EventLog returned 0 rows");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test14GetDataSet (Eventlog records) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test14GetDataSet (Eventlog records) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -941,7 +943,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test17GetLists (GetLists, JSON Operations) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test17GetLists (GetLists, JSON Operations) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -1025,7 +1027,7 @@ namespace Intwenty.Controllers
                 */
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -1072,7 +1074,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The created intwenty model could not be configured with success");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test30CreateIntwentySimpleModel lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test30CreateIntwentySimpleModel lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -1110,7 +1112,7 @@ namespace Intwenty.Controllers
                 }
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test32CreateIntwentySimpleApplication (Create 200 applications) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test32CreateIntwentySimpleApplication (Create 200 applications) lasted  {0} ms", result.Duration));
 
             }
             catch (Exception ex)
@@ -1142,7 +1144,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Test34GetListOfIntwentySimpleApplication (Get 200 Applications) lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test34GetListOfIntwentySimpleApplication (Get 200 Applications) lasted  {0} ms", result.Duration));
 
 
             }
@@ -1183,7 +1185,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLite performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1213,7 +1215,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLite performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1243,7 +1245,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Entities could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLite performance - GetEntities 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1273,7 +1275,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ResultSet could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLite performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1303,7 +1305,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("DataTable could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLite performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLite performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1340,7 +1342,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLServer performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1370,7 +1372,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLServer performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1400,7 +1402,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Entities could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLServer performance - GetEntities 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1430,7 +1432,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ResultSet could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLServer performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1460,7 +1462,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("DataTable could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: SQLServer performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: SQLServer performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1498,7 +1500,7 @@ namespace Intwenty.Controllers
 
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: MariaDb performance - Insert 5000 - Autoincrementation, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1528,7 +1530,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("JSON could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: MariaDb performance - GetJSONArray 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1558,7 +1560,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Entities could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetEntities 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: MariaDb performance - GetEntities 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1588,7 +1590,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ResultSet could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: MariaDb performance - GetResultSet 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1618,7 +1620,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("DataTable could not be feteched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: MariaDb performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: MariaDb performance - GetDataTable 5000, lasted  {0} ms", result.Duration));
 
                 dbstore.Close();
             }
@@ -1658,7 +1660,7 @@ namespace Intwenty.Controllers
                 }
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - Insert {0} - Autoincrementation, lasted  {1} ms", 5000, result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Postgres performance - Insert {0} - Autoincrementation, lasted  {1} ms", 5000, result.Duration));
 
                 dbstore.Close();
             }
@@ -1688,7 +1690,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("JSON could not be fetched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetJSONArray {0}, lasted  {1} ms", expectedtotal, result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Postgres performance - GetJSONArray {0}, lasted  {1} ms", expectedtotal, result.Duration));
 
                 dbstore.Close();
             }
@@ -1718,7 +1720,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Entities could not be fetched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetEntities {0}, lasted  {1} ms", expectedtotal, result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Postgres performance - GetEntities {0}, lasted  {1} ms", expectedtotal, result.Duration));
 
                 dbstore.Close();
             }
@@ -1748,7 +1750,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("ResultSet could not be fetched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetResultSet {0}, lasted  {1} ms", expectedtotal, result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Postgres performance - GetResultSet {0}, lasted  {1} ms", expectedtotal, result.Duration));
 
                 dbstore.Close();
             }
@@ -1778,7 +1780,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("DataTable could not be fetched");
 
                 result.Finish();
-                _dataservice.LogInfo(string.Format("Test Case: Postgres performance - GetDataTable {0}, lasted  {1} ms", expectedtotal, result.Duration));
+                _dbloggerservice.LogInfoAsync(string.Format("Test Case: Postgres performance - GetDataTable {0}, lasted  {1} ms", expectedtotal, result.Duration));
 
                 dbstore.Close();
             }

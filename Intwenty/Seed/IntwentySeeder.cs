@@ -21,8 +21,7 @@ namespace Intwenty.Seed
            
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
 
-            try
-            {
+    
                 var temp = new List<TranslationItem>();
 
                 temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "Code", Text = "Code" });
@@ -92,16 +91,8 @@ namespace Intwenty.Seed
                     if (!existing.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
                         await client.InsertEntityAsync(t);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                await client.CloseAsync();
-            }
 
+                await client.CloseAsync();
 
         }
 
@@ -323,14 +314,14 @@ namespace Intwenty.Seed
 
      
 
-        public virtual async Task SeedModel(IntwentySettings settings, IServiceProvider services)
+        public virtual Task SeedModel(IntwentySettings settings, IServiceProvider services)
         {
-          
+            return Task.CompletedTask;
         }
 
-        public virtual async Task SeedData(IntwentySettings settings, IServiceProvider services)
+        public virtual Task SeedData(IntwentySettings settings, IServiceProvider services)
         {
-          
+            return Task.CompletedTask;
         }
 
         public virtual async Task ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
@@ -342,6 +333,8 @@ namespace Intwenty.Seed
             var modelservice = services.GetRequiredService<IIntwentyModelService>();
 
             await modelservice.ConfigureDatabase();
+
+            modelservice.ClearCache();
         }
 
       

@@ -20,20 +20,21 @@ namespace IntwentyDemo.Services
     {
         Task<bool> DeleteDocument(string filename);
         Task<string> StoreDocument(string filename, Stream document);
-        void SetDocumentURIs(List<DocumentVm> doclist);
+        Task SetDocumentURIs(List<DocumentVm> doclist);
     }
 
 
     public class DocumentStorageService : IDocumentStorageService
     {
+        private IIntwentyDbLoggerService DbLogger { get; }
+        private IOptions<IntwentySettings> Settings { get; }
+        private IIntwentyDataService DataService { get; }
 
-        private IOptions<IntwentySettings> Settings { get; set; }
-        private IIntwentyDataService DataService { get; set; }
-
-        public DocumentStorageService(IOptions<IntwentySettings> setings, IIntwentyDataService ds)
+        public DocumentStorageService(IOptions<IntwentySettings> setings, IIntwentyDataService ds, IIntwentyDbLoggerService dblogger)
         {
             this.Settings = setings;
             this.DataService = ds;
+            this.DbLogger = dblogger;
         }
 
         public async Task<bool> DeleteDocument(string blobname)
@@ -46,7 +47,7 @@ namespace IntwentyDemo.Services
             }
             catch (Exception ex)
             {
-                DataService.LogError(String.Format("Error in DocumentStorageService.DeleteDocument {0}", ex.Message));
+                await DbLogger.LogErrorAsync(String.Format("Error in DocumentStorageService.DeleteDocument {0}", ex.Message));
             }
             return true;
         }
@@ -67,7 +68,7 @@ namespace IntwentyDemo.Services
             }
             catch(Exception ex) 
             {
-                DataService.LogError(String.Format("Error in DocumentStorageService.StoreDocument {0}", ex.Message));
+                await DbLogger.LogErrorAsync(String.Format("Error in DocumentStorageService.StoreDocument {0}", ex.Message));
             }
 
             return string.Empty;
@@ -76,7 +77,7 @@ namespace IntwentyDemo.Services
         /// <summary>
         /// Fetch URI's for shared access
         /// </summary>
-        public void SetDocumentURIs(List<DocumentVm> doclist)
+        public async Task SetDocumentURIs(List<DocumentVm> doclist)
         {
             try
             {
@@ -91,7 +92,7 @@ namespace IntwentyDemo.Services
             }
             catch (Exception ex)
             {
-                DataService.LogError(String.Format("Error in DocumentStorageService.SetDocumentURIs {0}", ex.Message));
+                await DbLogger.LogErrorAsync(String.Format("Error in DocumentStorageService.SetDocumentURIs {0}", ex.Message));
             }
         }
 

@@ -28,19 +28,21 @@ namespace Intwenty.Controllers
     [Authorize(Policy = "IntwentyModelAuthorizationPolicy")]
     public class ModelAPIController : Controller
     {
-        public IIntwentyDataService DataRepository { get; }
-        public IIntwentyModelService ModelRepository { get; }
+        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyModelService ModelRepository { get; }
         private IntwentyUserManager UserManager { get; }
         private IIntwentyProductManager ProductManager { get; }
+        private IIntwentyDbLoggerService Dblogger { get; }
         private IntwentySettings Settings { get; }
 
-        public ModelAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager, IIntwentyProductManager prodmanager, IOptions<IntwentySettings> settings)
+        public ModelAPIController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager, IIntwentyProductManager prodmanager, IOptions<IntwentySettings> settings, IIntwentyDbLoggerService dblogger)
         {
             DataRepository = dataservice;
             ModelRepository = modelservice;
             UserManager = usermanager;
             ProductManager = prodmanager;
             Settings = settings.Value;
+            Dblogger = dblogger;
         }
 
         #region Systems
@@ -1969,7 +1971,7 @@ namespace Intwenty.Controllers
             }
             catch (Exception ex)
             {
-                DataRepository.LogError("Error exporting data: " + ex.Message, username: User.Identity.Name);
+                Dblogger.LogErrorAsync("Error exporting data: " + ex.Message, username: User.Identity.Name);
             }
             finally
             {
@@ -2755,7 +2757,7 @@ namespace Intwenty.Controllers
         [HttpGet("Model/API/GetEventlog/{verbosity?}")]
         public async Task<IActionResult> GetEventlog(string verbosity)
         {
-            var log = await DataRepository.GetEventLog(verbosity);
+            var log = await Dblogger.GetEventLogAsync(verbosity);
             return new JsonResult(log);
         }
 

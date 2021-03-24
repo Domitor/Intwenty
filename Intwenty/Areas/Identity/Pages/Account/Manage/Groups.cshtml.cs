@@ -17,7 +17,7 @@ using Intwenty.Model.Dto;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage

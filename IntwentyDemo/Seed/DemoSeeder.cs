@@ -22,79 +22,68 @@ namespace IntwentyDemo.Seed
             //SEED INTWENTY DEFAULT LOCALIZATIONS
             await base.SeedLocalization(settings, services);
 
+           
+            var translations = new List<TranslationItem>();
+
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_ADD", Text = "New Customer" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_ADD", Text = "Ny Kund" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_EDIT", Text = "Edit Customer" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_EDIT", Text = "Ändra Kund" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERS", Text = "Kunder" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERLIST", Text = "Customer list" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERLIST", Text = "Kunder" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERID", Text = "Customer ID" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERID", Text = "Kund ID" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERNAME", Text = "Customer Name" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERNAME", Text = "Kund namn" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERCONTACT", Text = "Contact" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERCONTACT", Text = "Kontakt" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERBASIC", Text = "Basics" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERBASIC", Text = "Info" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERPHONE", Text = "Phone" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERPHONE", Text = "Telefon" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMEREMAIL", Text = "E-Mail" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMEREMAIL", Text = "E-Post" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "NAME", Text = "Name" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "NAME", Text = "Namn" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "MENU", Text = "Menu" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MENU", Text = "Meny" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEM", Text = "Item" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEM", Text = "Artikel" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEMLIST", Text = "Item list" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEMLIST", Text = "Artiklar" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDER", Text = "Sales Order" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDER", Text = "Säljorder" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDERLIST", Text = "Sales Orders" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDERLIST", Text = "Säljordrar" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ORDLINES", Text = "Order Lines" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ORDLINES", Text = "Orderrader" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CRORDLINE", Text = "Create Order Line" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CRORDLINE", Text = "Skapa Orderrad" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "EDORDLINE", Text = "Edit Order Line" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "EDORDLINE", Text = "Ändra Orderrad" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDOR", Text = "Vendor" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDOR", Text = "Tillverkare" });
+            translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDORLIST", Text = "Vendors" });
+            translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDORLIST", Text = "Tillverkare" });
+
+
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+            await client.OpenAsync();
 
-            try
+            var current_trans = await client.GetEntitiesAsync<TranslationItem>();
+            foreach (var t in translations)
             {
-                var translations = new List<TranslationItem>();
-
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_ADD", Text = "New Customer" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_ADD", Text = "Ny Kund" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUST_EDIT", Text = "Edit Customer" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUST_EDIT", Text = "Ändra Kund" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMER", Text = "Customer" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMER", Text = "Kund" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERS", Text = "Customers" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERS", Text = "Kunder" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERLIST", Text = "Customer list" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERLIST", Text = "Kunder" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERID", Text = "Customer ID" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERID", Text = "Kund ID" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERNAME", Text = "Customer Name" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERNAME", Text = "Kund namn" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERCONTACT", Text = "Contact" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERCONTACT", Text = "Kontakt" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERBASIC", Text = "Basics" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERBASIC", Text = "Info" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMERPHONE", Text = "Phone" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMERPHONE", Text = "Telefon" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CUSTOMEREMAIL", Text = "E-Mail" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CUSTOMEREMAIL", Text = "E-Post" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "NAME", Text = "Name" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "NAME", Text = "Namn" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "MENU", Text = "Menu" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MENU", Text = "Meny" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEM", Text = "Item" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEM", Text = "Artikel" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ITEMLIST", Text = "Item list" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ITEMLIST", Text = "Artiklar" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDER", Text = "Sales Order" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDER", Text = "Säljorder" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "SALESORDERLIST", Text = "Sales Orders" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "SALESORDERLIST", Text = "Säljordrar" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "ORDLINES", Text = "Order Lines" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ORDLINES", Text = "Orderrader" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "CRORDLINE", Text = "Create Order Line" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "CRORDLINE", Text = "Skapa Orderrad" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "EDORDLINE", Text = "Edit Order Line" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "EDORDLINE", Text = "Ändra Orderrad" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDOR", Text = "Vendor" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDOR", Text = "Tillverkare" });
-                translations.Add(new TranslationItem() { Culture = "en-US", TransKey = "VENDORLIST", Text = "Vendors" });
-                translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDORLIST", Text = "Tillverkare" });
-
-              
-                await client.OpenAsync();
-
-                var current_trans = await client.GetEntitiesAsync<TranslationItem>();
-                foreach (var t in translations)
-                {
-                    if (!current_trans.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
-                        await client.InsertEntityAsync(t);
-                }
-
-                await client.CloseAsync();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                await client.CloseAsync();
+                if (!current_trans.Exists(p => p.Culture == t.Culture && p.TransKey == t.TransKey))
+                    await client.InsertEntityAsync(t);
             }
 
-
+            await client.CloseAsync();
+           
+ 
         }
 
         public override async Task SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
@@ -116,8 +105,7 @@ namespace IntwentyDemo.Seed
 
         public override async Task SeedModel(IntwentySettings settings, IServiceProvider services)
         {
-            //await base.SeedModel(settings, services);
-
+            
             var systems = new List<SystemItem>();
             var applications = new List<ApplicationItem>();
             var valuedomains = new List<ValueDomainItem>();
@@ -548,7 +536,7 @@ namespace IntwentyDemo.Seed
 
         public override async Task SeedData(IntwentySettings settings, IServiceProvider services)
         {
-            //await base.SeedData(settings, services);
+            await base.SeedData(settings, services);
         }
 
         public override async Task ConfigureDataBase(IntwentySettings settings, IServiceProvider services)

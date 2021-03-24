@@ -1,4 +1,4 @@
-﻿using Intwenty.SystemEvents;
+﻿using Intwenty.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +17,7 @@ namespace Intwenty.Interface
         Task UserActivatedSmsMfa(UserActivatedSmsMfaData data);
         Task UserRequestedEmailMfaCode(UserRequestedEmailMfaCodeData data);
         Task UserRequestedSmsMfaCode(UserRequestedSmsMfaCodeData data);
+        Task UserRequestedPasswordReset(UserRequestedPasswordResetData data);
     }
 
 }

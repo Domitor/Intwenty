@@ -17,7 +17,7 @@ namespace Intwenty.Areas.Identity.Pages
     public class OrganizationProductModel : PageModel
     {
 
-        private IIntwentyDataService DataRepository { get; }
+        private IIntwentyDbLoggerService DbLogger { get; }
 
         private IIntwentyOrganizationManager OrganizationManager { get; }
 
@@ -27,9 +27,9 @@ namespace Intwenty.Areas.Identity.Pages
         public string ProductId { get; set; }
 
 
-        public OrganizationProductModel(IIntwentyDataService ms, IIntwentyOrganizationManager orgmanager, IIntwentyProductManager prodmanager)
+        public OrganizationProductModel(IIntwentyDbLoggerService dblogger, IIntwentyOrganizationManager orgmanager, IIntwentyProductManager prodmanager)
         {
-            DataRepository = ms;
+            DbLogger = dblogger;
             OrganizationManager = orgmanager;
             ProductManager = prodmanager;
         }
@@ -64,7 +64,7 @@ namespace Intwenty.Areas.Identity.Pages
         {
 
             //FIND OBJECT IN DB, UPDATE FROM MODEL AND SAVE
-            var client = DataRepository.GetIAMDataClient();
+            var client = ProductManager.GetIAMDataClient();
             await client.OpenAsync();
             var orgproduct = await client.GetEntityAsync<IntwentyOrganizationProduct>(model.Id);
             await client.CloseAsync();

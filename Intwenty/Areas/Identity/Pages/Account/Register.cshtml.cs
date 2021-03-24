@@ -18,7 +18,7 @@ using Intwenty.Model;
 using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Model.Dto;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Pages.Account

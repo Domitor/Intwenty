@@ -24,7 +24,14 @@ namespace IntwentyDemo
 
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            try
+            {
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -102,8 +109,8 @@ namespace IntwentyDemo
                     })
                     .Configure((buildercontext, app) =>
                     {
-                        var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
-                        var logger = loggerFactory.CreateLogger<Program>();
+                        //var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
+                        //var logger = loggerFactory.CreateLogger<Program>();
                         var env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
                         var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
 

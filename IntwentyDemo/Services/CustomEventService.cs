@@ -1,6 +1,6 @@
 ﻿using Intwenty.Interface;
 using Intwenty.Model;
-using Intwenty.SystemEvents;
+using Intwenty.Services;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace IntwentyDemo.Services
 {
-    public class CustomEventService : IntwentyEventService
+    public class CustomEventService : EventService
     {
         private IntwentySettings Settings { get; }
-        public CustomEventService(IIntwentyEmailService emailservice, IIntwentySmsService smsservice, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings) : base(emailservice, smsservice, dataservice)
+        public CustomEventService(IIntwentyEmailService emailservice, IIntwentySmsService smsservice, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings, IIntwentyDbLoggerService dblogger) : base(emailservice, smsservice, dataservice, dblogger)
         {
             Settings = settings.Value;
         }
@@ -73,6 +73,16 @@ namespace IntwentyDemo.Services
             var smsmsg = string.Format("Your requested security code is: {0}", data.Code);
 
             await SmsService.SendSmsAsync(data.PhoneNumber, smsmsg);
+        }
+
+        public override async Task UserRequestedPasswordReset(UserRequestedPasswordResetData data)
+        {
+            await base.UserRequestedPasswordReset(data);
+
+            var mailmsg = string.Format("<br /><br /><b>{0} - Password Reset</b><br /><br />", Settings.SiteTitle);
+            mailmsg += $"Reset your password by <a href='{HtmlEncoder.Default.Encode(data.ConfirmCallbackUrl)}'>clicking here</a>";
+            await EmailService.SendEmailAsync(data.Email, "Password Reset", mailmsg);
+
         }
 
     }

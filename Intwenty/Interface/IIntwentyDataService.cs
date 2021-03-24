@@ -141,25 +141,8 @@ namespace Intwenty.Interface
         /// <returns>OperationResult as the result of the validation</returns>
         ModifyResult Validate(ClientStateInfo state);
 
-        void LogError(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
-
-        void LogWarning(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
-
-        void LogInfo(string message, int applicationid = 0, string appmetacode = "NONE", string username = "");
-
-        Task LogIdentityActivity(string verbosity, string message, string username = "");
-
-       
-
-        /// <summary>
-        /// Get eventlog items
-        /// </summary>
-        /// <returns>A list of eventlog items</returns>
-        Task<List<EventLog>> GetEventLog(string verbosity);
-
         IDataClient GetDataClient();
 
-        IDataClient GetIAMDataClient();
 
     }
 }

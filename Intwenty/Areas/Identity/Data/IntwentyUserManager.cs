@@ -42,6 +42,11 @@ namespace Intwenty.Areas.Identity.Data
             IAMCache = cache;
         }
 
+        public IDataClient GetIAMDataClient()
+        {
+            return new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+        }
+
         public override Task<IdentityResult> ChangePhoneNumberAsync(IntwentyUser user, string phoneNumber, string token)
         {
             return base.ChangePhoneNumberAsync(user, phoneNumber, token);
