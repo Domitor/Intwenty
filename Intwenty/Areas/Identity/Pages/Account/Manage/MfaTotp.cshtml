@@ -10,39 +10,34 @@
 
 <div id="app">
     <div class="alert alert-danger" v-if="errorVerifyCode">
-        The code could not be verified, try the next code from your authenticator app.
+        @Localizer["MFATOTPUNVERIFIED"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
     <div class="alert alert-success" v-if="step==2">
-        Thank you. 2FA with an authentication app is now set up.
+        @Localizer["Thank you. Two-factor authentication is now set up"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
 
     <div v-if="step==1">
-        <p>To use an authenticator app go through the following steps:</p>
+        <p>@Localizer["MFATOTPSTEPS_1"]</p>
         <ol class="list">
             <li>
-                <p>
-                    Download an authentication app (Microsoft Authenticator or Google Authenticator) to your phone or the device yo're using
-                </p>
+                <p>@Localizer["MFATOTPSTEPS_2"]</p>
             </li>
             <li>
-                <p>Scan the QR Code or enter this key <kbd>{{model.sharedKey}}</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
+                <p>@Localizer["MFATOTPSTEPS_3"] <kbd>{{model.sharedKey}}</kbd> @Localizer["MFATOTPSTEPS_4"]</p>
                 <div id="qrCode"></div>
                 <div id="qrCodeData" v-bind:data-url="model.authenticatorURI"></div>
             </li>
             <li>
-                <p>
-                    Once you have scanned the QR code or input the key above, your two factor authentication app will provide you
-                    with a unique code. Enter the code in the confirmation box below.
-                </p>
+                <p> @Localizer["MFATOTPSTEPS_5"]</p>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="control-label">Verification Code</label>
+                            <label class="control-label">@Localizer["Code"]</label>
                             <input type="number" class="form-control" autocomplete="off" v-model="model.code" />
                         </div>
-                        <button type="submit" class="btn btn-primary" v-on:click="sendCode()">Verify</button>
+                        <button type="submit" class="btn btn-primary" v-on:click="sendCode()">@Localizer["Verify"]</button>
                     </div>
                 </div>
             </li>

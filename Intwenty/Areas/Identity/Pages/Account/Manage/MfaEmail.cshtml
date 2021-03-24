@@ -1,7 +1,7 @@
 ﻿@page
 @model MfaEmailModel
 @{
-    ViewData["Title"] = "Enable Email 2FA";
+    ViewData["Title"] = "Email 2FA";
     ViewData["ActivePage"] = ManageNavPages.MfaAuth;
 }
 
@@ -11,19 +11,19 @@
 <div id="app">
 
     <div class="alert alert-primary" v-if="step==1">
-        We've sent a code to your email, please input that code and push verify
+        @Localizer["MFAEMALCODESENT"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
     <div class="alert alert-danger" v-if="errorVerifyEmail">
-        The code could not be verified, try again by <a asp-page="./MfaEmail">clicking here</a>
+        @Localizer["MFANOTVERIFIED"] <a asp-page="./MfaEmail">@Localizer["clicking here"]</a>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
     <div class="alert alert-success" v-if="step==2">
-        Thank you. Email 2FA is now set up.
+        @Localizer["Thank you. Two-factor authentication is now set up"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
     <div class="alert alert-danger" v-if="model.resultCode=='ERROR_NOEMAIL'">
-        You must update your email first, do it by <a asp-page="./Index">clicking here</a>
+        @Localizer["You must update your email first, do it by"] <a asp-page="./Index">@Localizer["clicking here"]</a>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
 
@@ -31,9 +31,9 @@
         <div class="col-md-6">
 
             <div class="form-group" v-if="step==1">
-                <label clase="control-label">Code</label>
+                <label clase="control-label">@Localizer["Code"]</label>
                 <input type="text" v-model="model.code" class="form-control" />
-                <button class="btn btn-primary m-2" v-on:click="sendCode()" :disable="model.resultCode=='ERROR_NOEMAIL'">Send</button>
+                <button class="btn btn-primary m-2" v-on:click="sendCode()" :disable="model.resultCode=='ERROR_NOEMAIL'">@Localizer["Verify"]</button>
             </div>
         </div>
     </div>
