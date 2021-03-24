@@ -13,7 +13,7 @@
         @if (Model.HasSmsMFA)
         {
             <div class="alert alert-primary">
-                We've sent a code to your cell phone, please enter the code and click login
+                @Localizer["MFALOGINSMS"]
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
 
@@ -21,7 +21,7 @@
         else if (Model.HasEmailMFA)
         {
             <div class="alert alert-primary">
-                We've sent a code to your registered email address, please enter the code and click login
+                @Localizer["MFALOGINEMAIL"]
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
 
@@ -29,7 +29,7 @@
         else if (Model.HasTotpMFA)
         {
             <div class="alert alert-primary">
-                Your login is protected with an authenticator app. Enter your authenticator code and click login
+                 @Localizer["MFALOGINTOTP"]
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
         }
@@ -46,19 +46,19 @@
             <input asp-for="RememberMe" type="hidden" />
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label>Authentication Code</label>
+                <label>@Localizer["Code"]</label>
                 <input asp-for="Input.TwoFactorCode" class="form-control" autocomplete="off" />
                 <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <div class="checkbox">
                     <label asp-for="Input.RememberMachine">
-                        <input asp-for="Input.RememberMachine" /> Remember me on this device
+                        <input asp-for="Input.RememberMachine" /> @Localizer["Rememeber Me"]
                     </label>
                 </div>
             </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Log in</button>
+                <button type="submit" class="btn btn-primary">@Localizer["Login"]</button>
             </div>
         </form>
     </div>
@@ -66,5 +66,5 @@
 
 <br />
 
-<p>Is this not working ? If you don't receive 2FA codes or if the codes is not working contact technical support: @Settings.Value.UserAdminEmail</p>
+<p><i>Is this not working ? If you don't receive 2FA codes or if the codes is not working contact technical support:</i> @Settings.Value.UserAdminEmail</p>
 

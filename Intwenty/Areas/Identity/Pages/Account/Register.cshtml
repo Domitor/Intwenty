@@ -1,7 +1,7 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = Localizer["Register"];
 }
 
 @await Html.PartialAsync("_Modals")
@@ -10,8 +10,7 @@
 {
    <br />
    <br />
-    <h1>Sorry, registration is closed</h1>
-
+   <h1>@Localizer["Sorry, registration is closed"]</h1>
     return;
 }
 
@@ -20,8 +19,8 @@
     <br />
     <br />
     <div class="card">
-        <div class="card-header"><h2>Register</h2></div>
-        <div class="card-body">Create a new account</div>
+        <div class="card-header"><h2>@ViewData["Title"]</h2></div>
+        <div class="card-body">@Localizer["Create a new account"]</div>
     </div>
     <br />
     <br />
@@ -38,7 +37,7 @@
                     @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
                     {
                         <div class="form-group">
-                            <label>Language</label>
+                            <label>@Localizer["Language"]</label>
                             <select v-model="model.language" class="form-control" id="lang" v-on:input="onUserInput(event)" data-required="True">
                                 @{
                                     foreach (var t in Settings.Value.SupportedLanguages)
@@ -60,7 +59,7 @@
                     else
                     {
                         <div class="form-group">
-                            <label>User Name <span style="color: red"> *</span></label>
+                            <label>@Localizer["User Name"] <span style="color: red"> *</span></label>
                             <input type="email" v-model="model.userName" class="form-control" id="username" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
                         </div>
 
@@ -74,27 +73,27 @@
                     @if (Settings.Value.UserRegistrationRequireName)
                     {
                         <div class="form-group">
-                            <label>First Name <span style="color: red"> *</span></label>
+                            <label>@Localizer["First Name"] <span style="color: red"> *</span></label>
                             <input type="text" v-model="model.firstName" class="form-control" id="firstname" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
                         </div>
 
                         <div class="form-group">
-                            <label>Last Name <span style="color: red"> *</span></label>
+                            <label>@Localizer["Last Name"] <span style="color: red"> *</span></label>
                             <input type="text" v-model="model.lastName" class="form-control" id="lastname" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
                         </div>
 
                     }
 
                     <div class="form-group">
-                        <label>Password <span style="color: red"> *</span></label>
+                        <label>@Localizer["Password"] <span style="color: red"> *</span></label>
                         <input v-model="model.password" type="password" class="form-control" id="password" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
                     </div>
                     <div class="form-group">
-                        <label>Confirm Password <span style="color: red"> *</span></label>
+                        <label>@Localizer["Confirm Password"] <span style="color: red"> *</span></label>
                         <input v-model="model.confirmPassword" type="password" class="form-control" id="confpassword" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
                     </div>
-                    <div v-if="!passwordsMatch" class="alert alert-danger">Passwords must match !</div>
-                    <button type="button" class="btn btn-primary" v-on:click="registerNewUser()">Register</button>
+                    <div v-if="!passwordsMatch" class="alert alert-danger">@Localizer["Passwords must match"] !</div>
+                    <button type="button" class="btn btn-primary" v-on:click="registerNewUser()">@Localizer["Register"]</button>
                 </section>
 
             </div>

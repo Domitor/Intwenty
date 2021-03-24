@@ -99,20 +99,9 @@
             <b>@Localizer["You're using an authentication app for 2FA"]</b>
         }
 
-        <hr />
-
-        <div class="alert alert-warning" role="alert">
-            @if (Settings.Value.ForceMfaAuthentication)
-            {
-                @Localizer["MFAFORCEDRESETINFO"]
-            }
-            else
-            {
-                 @Localizer["MFARESETINFO"]
-            }
-        </div>
-
         <br />
+        <br />
+        <hr />
 
         @if (Settings.Value.ForceMfaAuthentication)
         {
@@ -130,6 +119,23 @@
                 </form>
             </div>
         }
+
+        <br />
+
+        <div class="alert alert-warning" role="alert">
+            @if (Settings.Value.ForceMfaAuthentication)
+            {
+                @Localizer["MFAFORCEDRESETINFO"]
+            }
+            else
+            {
+                @Localizer["MFARESETINFO"]
+            }
+        </div>
+
+
+
+
     }
 
 </div>

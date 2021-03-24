@@ -24,45 +24,51 @@ namespace Intwenty.Seed
     
             var temp = new List<TranslationItem>();
 
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "Vi har skickat en länk till din epostadress, klicka på den för att återställa ditt lösenord." });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "RESETPWDMAIL", Text = "Please check your email to reset your password." });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset password confirmation", Text = "Bekräftelse på återställt lösenord" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Your password has been reset", Text = "Ditt lösenord har återställts" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset Password", Text = "Återställ Lösenord" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Access Denied", Text = "Du saknar behörighet för den begärda informationen" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFALOGINSMS", Text = "Vi har skickat en kod till din telefon, ange koden och klicka på logga in" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFALOGINSMS", Text = "We've sent a code to your phone, please enter the code and click login" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFALOGINEMAIL", Text = "Vi har skickat en kod till den registrerade epostadress, ange koden och klicka på logga in" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFALOGINEMAIL", Text = "We've sent a code to your registered email address, please enter the code and click login" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFALOGINTOTP", Text = "Ditt konto använder en autensierings app, ange koden från appen och klicka på logga in" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFALOGINTOTP", Text = "Your login is protected with an authenticator app. Enter your authenticator code and click login" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Register", Text = "Registrera " });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Create Account", Text = "Skapa Konto" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Create a new account", Text = "Skapa nytt konto" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Passwords must match", Text = "Lösenorden skiljer sig åt" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Sorry, registration is closed", Text = "Tjänsten är stängd för registrering" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enter your email", Text = "Ange din epostadress" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Forgot your password", Text = "Glömt ditt lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPUNVERIFIED", Text = "Koden kunde inte verifiera testa nästa kod i din app." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPUNVERIFIED", Text = "The code could not be verified, try the next code from your authenticator app." });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_1", Text = "För att använda en autentiserings app, går du igenom följande steg:" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_1", Text = "To use an authenticator app go through the following steps:" });
-
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_2", Text = "Ladda den en autentiserings app (Microsoft Authenticator or Google Authenticator) till din mobiltelefon" });
-            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_2", Text = "Download an authentication app (Microsoft Authenticator or Google Authenticator) to your phone" });
-
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_2", Text = "Ladda ned en autentiserings app (Microsoft Authenticator or Google Authenticator) till din mobiltelefon." });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_2", Text = "Download an authentication app (Microsoft Authenticator or Google Authenticator) to your phone." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_3", Text = "Skanna QR koden nedan eller ange denna kod" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_3", Text = "Scan the QR Code or enter this key" });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_4", Text = "i din autentiserings app i telefonen" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_4", Text = "into your two factor authenticator app" });
-
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_5", Text = "När du skannat qr-koden eller matat in koden kommer din autentiserings app att ge dig en unik kod, ange den koden i rutan nedan och klicka på skicka" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFATOTPSTEPS_5", Text = "När du skannat qr-koden eller matat in koden kommer din autentiserings app att ge dig en unik kod, ange den koden i rutan nedan och klicka på verifiera." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFATOTPSTEPS_5", Text = "Once you have scanned the QR code or input the key above, your two factor authentication app will provide you with a unique code.Enter the code in the confirmation box below." });
-
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFASMSCODESENT", Text = "Vi har skickat en kod till ditt telefonnummer, vänligen ange det nedan." });
-            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFASMSCODESENT", Text = "We've sent a code to your phone, input the code below" });
-
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFASMSCODESENT", Text = "We've sent a code to your phone, input the code below." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFASMSPHONEREQ", Text = "Vänligen ange det telefonnummer du vill använda ör att ta emot koder." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFASMSPHONEREQ", Text = "Please input the phonenumber to use with sms 2FA." });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Verify", Text = "Verifiera" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Code", Text = "Kod" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Invalid format", Text = "Ogiltigt format" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "You must update your email first, do it by", Text = "Du måste ange en epostadress först, det gär du genom att" });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Thank you. Two-factor authentication is now set up", Text = "Tack 2-faktor autentisering är nu aktiverad." });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFANOTVERIFIED", Text = "Koden kunde inte verifieras, du kan försöka igen genom att" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFANOTVERIFIED", Text = "The code could not be verified, try again by" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "clicking here", Text = "Klicka här" });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFAEMALCODESENT", Text = "Vi har skickat en kod till din epostadress, vänligen mata in koden nedan." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFAEMALCODESENT", Text = "We've sent a code to your email, please input that code and push verify." });
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset 2FA", Text = "Återställ 2FA" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Disable 2FA", Text = "Avaktivera 2FA" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFARESETINFO", Text = "Denna åtgärd tar bort dina 2FA inställningar. För att bibehålla en hög säkerhet bör du aktivera 2FA igen senare" });
@@ -76,12 +82,12 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "You're using an authentication app for 2FA", Text = "Du använder 2FA via en autentiserings app" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFASTATUS", Text = "Du är klar. När du loggar in kommer du efterfrågas en extra säkerhetskod som levereras till dig på det sätt du valt." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFASTATUS", Text = "You're done. Next time you login you will be promted for a security code." });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Email Code 2FA", Text = "Aktivera 'Kod via Epost' 2FA" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable FIDO2 2FA", Text = "Aktivera 'FIDO2' 2FA" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable SMS Code 2FA", Text = "Aktivera 'Kod via SMS' 2FA" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Bank ID 2FA", Text = "Aktivera 2FA via Bank ID" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Microsoft Authenticator", Text = "Aktivera Microsoft Authenticator 2FA" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Google Authenticator", Text = "Aktivera Google Authenticator 2FA" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Email Code 2FA", Text = "'Kod via Epost' 2FA" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable FIDO2 2FA", Text = "'FIDO2' 2FA" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable SMS Code 2FA", Text = "'Kod via SMS' 2FA" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Bank ID 2FA", Text = "2FA via Bank ID" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Microsoft Authenticator", Text = "Microsoft Authenticator 2FA" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Enable Google Authenticator", Text = "Google Authenticator 2FA" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFAOPTIONAL", Text = "Genom att aktivera två-faktor autentisering så höjer du säkerheten på ditt konto, vänligen välj ett av alternativen nedan." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "MFAOPTIONAL", Text = "By adding two-factor authentication you can add extra security to your account. Please choose one option below." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "MFAFORCED", Text = "För att nå en hög säkerhet använder vi tvingande 2-faktor autentisering. För att använda tjänsten måste du välja ett alternativ nedan." });
@@ -117,7 +123,7 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Current Password", Text = "Nuvarande lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "New Password", Text = "Nytt lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Confirm Password", Text = "Bekräfta lösenord" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Account settings", Text = "kontoinställningar" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Account settings", Text = "Kontoinställningar" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Manage Account", Text = "Hantera ditt konto" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Create Key", Text = "Skapa nyckel" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Renew Key", Text = "Förnya nyckel" });
@@ -135,7 +141,8 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Remember Me", Text = "Kom i håg mig" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Password", Text = "Lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "User Name", Text = "Användarnamn" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Log In", Text = "Logga In" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Logout", Text = "Logga Ut" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Login", Text = "Logga In" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Code", Text = "Kod" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Address", Text = "Adress" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Message", Text = "Meddelande" });
@@ -171,8 +178,8 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "BACKTOLIST", Text = "Tillbaka" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "ADDEDIT", Text = "Add / Edit" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "ADDEDIT", Text = "Lägg till / Ändra" });
-            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "COPYRIGHT", Text = "2020 Intwenty - All rights reserved" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "COPYRIGHT", Text = "2020 Intwenty - Alla rättighter reserverade" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "COPYRIGHT", Text = "2021 Intwenty - All rights reserved" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "COPYRIGHT", Text = "2021 Intwenty - Alla rättighter reserverade" });
 
 
                 await client.OpenAsync();
