@@ -2,7 +2,7 @@
 @inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @model LanguageModel
 @{
-    ViewData["Title"] = "Manage Language";
+    ViewData["Title"] = Localizer["Language"];
     ViewData["ActivePage"] = ManageNavPages.Language;
 }
 
@@ -14,7 +14,7 @@
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="Input.NewLanguage"></label>
+                <label>@Localizer["Language"]</label>
 
                 <select asp-for="Input.NewLanguage" class="form-control">
                     @{
@@ -27,7 +27,7 @@
 
 
             </div>
-            <button id="change-language-button" type="submit" asp-page-handler="ChangeLanguage" class="btn btn-primary">Set Language</button>
+            <button id="change-language-button" type="submit" asp-page-handler="ChangeLanguage" class="btn btn-primary">@Localizer["Save"]</button>
         </form>
     </div>
 </div>

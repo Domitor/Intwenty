@@ -5,7 +5,7 @@
 @inject IOptions<IntwentySettings> Settings
 
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = Localizer["Log In"];
     var demouser = "";
     var demopwd = "";
     if (Settings.Value.ShowDemoLoginInfo)
@@ -47,7 +47,7 @@
                     }
                     else
                     {
-                        <label>User Name @demouser</label>
+                        <label>@Localizer["User Name"] @demouser</label>
                     }
                     <input asp-for="Input.UserName" class="form-control" />
                     <span asp-validation-for="Input.UserName" class="text-danger"></span>
@@ -56,24 +56,24 @@
 
 
                 <div class="form-group">
-                    <label>Password @demopwd</label>
+                    <label>@Localizer["Password"] @demopwd</label>
                     <input asp-for="Input.Password" class="form-control" />
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <div class="checkbox">
-                        <label><input asp-for="Input.RememberMe" /> Remember me ?</label>
+                        <label><input asp-for="Input.RememberMe" /> @Localizer["Remember Me"] ?</label>
                     </div>
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Log in</button>
+                    <button type="submit" class="btn btn-primary">@Localizer["Log In"]</button>
                 </div>
                 <div class="form-group">
                     <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                        <a id="forgot-password" asp-page="./ForgotPassword">@Localizer["Forgot your password"] ?</a>
                     </p>
                     <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register as a new user"]</a>
                     </p>
                 </div>
             </form>
@@ -88,7 +88,7 @@
         @if (Settings.Value.UseExternalLogins)
         {
 
-            <label class="pl-2">Use external accounts</label>
+        <label class="pl-2">@Localizer["Use external accounts"]</label>
 
             <section>
 

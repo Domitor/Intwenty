@@ -1,5 +1,5 @@
 ﻿
-@inject SignInManager<IntwentyUser> SignInManager
+@inject IntwentySignInManager SignInManager
 @inject IntwentyUserManager UserManager
 
 @{
@@ -15,33 +15,30 @@
 
 <ul class="nav nav-pills bg-light flex-column" style="padding:10px">
 
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">@Localizer["Profile"]</a></li>
 
     @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
     {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">Language</a></li>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">@Localizer["Language"]</a></li>
     }
 
     @if (!isexternal)
     {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">@Localizer["Password"]</a></li>
     }
 
     @if (Settings.Value.HasMfaMethods)
     {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./MfaAuth">Two-factor authentication</a></li>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./MfaAuth">@Localizer["Two-factor authentication"]</a></li>
     }
     @if (Settings.Value.UseIntwentyAPI)
     {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.APIKeyNavClass(ViewContext)" id="apikey-data" asp-page="./APIKey">API Key</a></li>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.APIKeyNavClass(ViewContext)" id="apikey-data" asp-page="./APIKey">@Localizer["API Key"]</a></li>
     }
     @if (Settings.Value.EnableUserGroups)
     {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.GroupsClass(ViewContext)" id="apikey-data" asp-page="./Groups">Groups</a></li>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.GroupsClass(ViewContext)" id="apikey-data" asp-page="./Groups">@Localizer["Groups"]</a></li>
     }
 
-    @if (!isexternal)
-    {
-        <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
-    }
+   
 </ul>

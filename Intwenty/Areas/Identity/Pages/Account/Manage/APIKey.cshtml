@@ -1,7 +1,7 @@
 ﻿@page
 @model APIKeyModel
 @{
-    ViewData["Title"] = "Manage API Keys";
+    ViewData["Title"] = Localizer["API Key"];
     ViewData["ActivePage"] = ManageNavPages.APIKey;
 }
 <h4>@ViewData["Title"]</h4>
@@ -21,14 +21,14 @@
 
                 @if (Model.Input.HasAPIKey)
                 {
-                    <b>Your current API Key:</b> @Model.Input.APIKey
+                    <b>@Localizer["API Key"]:</b> @Model.Input.APIKey
                     <br />
                     <br />
-                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">Renew Key</button>
+                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">@Localizer["Renew Key"]</button>
                 }
                 else
                 {
-                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">Create Key</button>
+                    <button id="create-apikey-button" type="submit" asp-page-handler="CreateAPIKey" class="btn btn-primary">@Localizer["Create Key"]</button>
                 }
 
 
