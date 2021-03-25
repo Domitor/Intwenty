@@ -26,9 +26,9 @@ using Intwenty.Seed;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Threading.Tasks;
 
-namespace Intwenty.Middleware
+namespace Intwenty.Builder
 {
-    public static class mwIntwenty
+    public static class IntwentyBuilder
     {
         public static void AddIntwenty<TIntwentyDataService, TIntwentyEventService>(this IServiceCollection services, IConfiguration configuration)
                          where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService
@@ -166,7 +166,7 @@ namespace Intwenty.Middleware
 
             services.AddLocalization();
 
-            services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
+            services.AddScoped<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
 
             services.AddMvc(options =>
             {
@@ -179,7 +179,7 @@ namespace Intwenty.Middleware
             {
                 services.AddSwaggerGen(options =>
                 {
-                    options.DocumentFilter<mwSwaggerDocumentFilter>();
+                    options.DocumentFilter<APIDocumentFilter>();
                     options.AddSecurityDefinition("API-Key", new OpenApiSecurityScheme
                     {
                         Description = "API-Key",
@@ -310,7 +310,7 @@ namespace Intwenty.Middleware
 
             if (settings.ForceMfaAuthentication)
             {
-                builder.UseMiddleware<mwMFA>();
+                builder.UseMiddleware<Forced2FaMiddleware>();
             }
 
         }

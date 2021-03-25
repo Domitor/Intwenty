@@ -125,7 +125,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 }
 
             }
-            catch (Exception ex)
+            catch
             {
                 return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpected error occured, contact support")) { StatusCode = 500 };
             }

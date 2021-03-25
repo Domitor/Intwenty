@@ -12,14 +12,14 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
-namespace Intwenty.Middleware
+namespace Intwenty.Builder
 {
-    public class mwSwaggerDocumentFilter : IDocumentFilter
+    public class APIDocumentFilter : IDocumentFilter
     {
 
         private readonly IIntwentyModelService _modelservice;
 
-        public mwSwaggerDocumentFilter(IIntwentyModelService ms)
+        public APIDocumentFilter(IIntwentyModelService ms)
         {
             _modelservice = ms;
         }

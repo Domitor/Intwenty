@@ -17,9 +17,7 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Areas.Identity.Data
 {
-    /// <summary>
-    /// NOT IN USE
-    /// </summary>
+   
     public class IntwentySignInManager : SignInManager<IntwentyUser>
     {
 

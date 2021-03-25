@@ -10,14 +10,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Intwenty.Middleware
+namespace Intwenty.Builder
 {
   
-    public class mwMFA
+    public class Forced2FaMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public mwMFA(RequestDelegate next)
+        public Forced2FaMiddleware(RequestDelegate next)
         {
             _next = next;
         }

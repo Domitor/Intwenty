@@ -3,19 +3,16 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using Intwenty;
 using Microsoft.Extensions.Configuration;
-using Intwenty.Interface;
-using IntwentyDemo.Seed;
-using System.Threading.Tasks;
-using Intwenty.Model;
-using IntwentyDemo.Services;
-using Intwenty.Middleware;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting.Internal;
+using Intwenty;
+using Intwenty.Interface;
+using Intwenty.Model;
 using Intwenty.Services;
+using Intwenty.Builder;
+using IntwentyDemo.Services;
+using IntwentyDemo.Seed;
 
 namespace IntwentyDemo
 {
