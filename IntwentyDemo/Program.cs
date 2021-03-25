@@ -109,6 +109,8 @@ namespace IntwentyDemo
                             });
                         });
 
+                        //****** Required ******
+                        //Remove AddRazorRuntimeCompilation() in production
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
 
                         
@@ -123,7 +125,9 @@ namespace IntwentyDemo
                         app.UseExceptionHandler("/Home/Error");
                         app.UseHsts();
 
+                        //****** Required ******
                         //Set up everything related to intwenty
+                        //Services,routing,endpoints,localization,data seeding and more....
                         app.UseIntwenty();
 
                     });
