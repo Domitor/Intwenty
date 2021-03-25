@@ -57,37 +57,42 @@ namespace IntwentyDemo
                         else
                             iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
 
-
-                        //Add Email and SMS
+                        //****** Required ******
+                        //Plug in your own communication service that implements IIntwentyEmailService and IIntwentySmsService
                         services.TryAddTransient<IIntwentyEmailService, EmailService>();
                         services.TryAddTransient<IIntwentySmsService, AspSmsService>();
+                        //Default services
+                        //services.TryAddTransient<IIntwentyEmailService, EmailService>();
+                        //services.TryAddTransient<IIntwentySmsService, SmsService>();
 
+                        //****** Required ******
                         //Add intwenty 
-                        //services.AddIntwenty<IntwentyDataService,IntwentyEventService>(Configuration); //with default implementation
-                        services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration); //customized services
+                        //Here's where you plug in your own code in intwenty, by overriding esential services.
+                        services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration);
+                        //Default services
+                        //services.AddIntwenty<IntwentyDataService, EventService>(configuration);
 
 
-
+                        //****** Required ******
                         //Default is anonymus athorization, comment out this line and use policy.RequireRole to apply role base authorization
-                        //services.AddScoped<IAuthorizationHandler, IntwentyAllowAnonymousAuthorization>();
                         services.AddAuthorization(options =>
                         {
                             options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                             {
-                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
                                 policy.RequireRole(userroles);
                             });
 
                             options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
                             {
-                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
                                 policy.RequireRole(adminroles);
 
                             });
 
                             options.AddPolicy("IntwentyUserAdminAuthorizationPolicy", policy =>
                             {
-                                //policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
+                                //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
                                 policy.RequireRole(iamroles);
 
 
