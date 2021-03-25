@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -23,24 +24,153 @@ namespace Intwenty.Services
 
         public FrejaClientService(HttpClient http_client, IOptions<IntwentySettings> options)
         {
-            // Set values for instance variables
             this.client = http_client;
             this.settings = options.Value;
-            // Set values for the client
             this.client.BaseAddress = new Uri(this.settings.FrejaBaseAddress);
             this.client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        } 
-   
+        }
+
+        public async Task<FrejaStatusResponse> InitQRAuthentication()
+        {
+
+            try
+            {
+                // Create a request
+                FrejaRequest request = new FrejaRequest
+                {
+                    userInfoType = "INFERRED",
+                    userInfo = "N/A"
+                };
+                // Set serializer options
+                var json_options = new JsonSerializerOptions
+                {
+                    IgnoreNullValues = true,
+                    WriteIndented = false,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                // Convert request to json
+                string json = JsonSerializer.Serialize(request, json_options);
+                // Create string content
+                var content = new StringContent("initAuthRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
+                content.Headers.ContentType.MediaType = "application/json";
+                content.Headers.ContentType.CharSet = "utf-8";
+                // Get the response
+                HttpResponseMessage response = await client.PostAsync("/authentication/1.0/initAuthentication", content);
+                // Check the status code for the response
+                if (response.IsSuccessStatusCode == true)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+                    var status_response = JsonSerializer.Deserialize<FrejaStatusResponse>(data);
+                    return status_response;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+
+            return null;
+        }
+
+        public Uri GetQRCode(string authref)
+        {
+
+            try
+            {
+                var encoded_authref = WebUtility.UrlEncode(authref);
+                var scheme = string.Format("frejaeid://bindUserToTransaction?transactionReference={0}", encoded_authref);
+                var encoded_schema = WebUtility.UrlEncode(scheme);
+                return new Uri(string.Format(settings.FrejaQRCodeEndpoint, encoded_schema));
+            }
+            catch (Exception ex)
+            {
+            
+            }
+          
+
+            return null;
+        }
+
+        public async Task<bool> Authenticate(string authref)
+        {
+         
+            try
+            {
+                if (string.IsNullOrEmpty(authref))
+                    return false;
+
+                var json = "{" + string.Format("\"authRef\":\"{0}\"", authref) +"}";
+                var content = new StringContent("getOneAuthResultRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
+                content.Headers.ContentType.MediaType = "application/json";
+                content.Headers.ContentType.CharSet = "utf-8";
+                Int32 timeout = this.settings.FrejaTimeoutInMilliseconds;
+
+                while (true)
+                {
+                    // Check for a timeout
+                    if (timeout <= 0)
+                    {
+                        // Cancel the order and return false
+                        content = new StringContent("cancelAuthRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
+                        content.Headers.ContentType.MediaType = "application/json";
+                        content.Headers.ContentType.CharSet = "utf-8";
+                        var cancelresponse = await client.PostAsync("/authentication/1.0/cancel", content);
+                        return false;
+                    }
+                    // Sleep for 2 seconds
+                    await Task.Delay(2000);
+                    timeout -= 2000;
+                    // Collect a signature
+                    var getoneresponse = await client.PostAsync("/authentication/1.0/getOneResult", content);
+                    // Check the status code for the response
+                    if (getoneresponse.IsSuccessStatusCode == true)
+                    {
+     
+                        string data = await getoneresponse.Content.ReadAsStringAsync();
+                        var status_response = JsonSerializer.Deserialize<FrejaStatusResponse>(data);
+                        if (status_response.status == "APPROVED")
+                        {
+
+                            break;
+                        }
+                        else if (status_response.status == "STARTED" || status_response.status == "DELIVERED_TO_MOBILE" || status_response.status == "OPENED" || status_response.status == "OPENED")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            // CANCELED, RP_CANCELED, EXPIRED or REJECTED
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+              
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+           
+            return true;
+        }
+
+
         public async Task<bool> Authenticate(string userInfoType, string userInfo)
         {
-            // Variables
+
             StringContent content = null;
             FrejaStatusResponse status_response = null;
 
             try
             {
-                // Create a request
+                
                 FrejaRequest request = new FrejaRequest
                 {
                     userInfoType = userInfoType,
@@ -70,31 +200,30 @@ namespace Intwenty.Services
                         }
                     }
                 };
-                // Set serializer options
+          
+
                 var json_options = new JsonSerializerOptions
                 {
                     IgnoreNullValues = true,
-                    WriteIndented = true,
+                    WriteIndented = false,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 };
-                // Convert request to json
+
+       
                 string json = JsonSerializer.Serialize(request, json_options);
-                // Create string content
+           
                 content = new StringContent("initAuthRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
                 content.Headers.ContentType.MediaType = "application/json";
                 content.Headers.ContentType.CharSet = "utf-8";
-                // Get the response
+
                 HttpResponseMessage response = await client.PostAsync("/authentication/1.0/initAuthentication", content);
-                // Check the status code for the response
                 if (response.IsSuccessStatusCode == true)
                 {
-                    // Get string data
+            
                     json = await response.Content.ReadAsStringAsync();
-                    // Add content
                     content = new StringContent("getOneAuthResultRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
                     content.Headers.ContentType.MediaType = "application/json";
                     content.Headers.ContentType.CharSet = "utf-8";
-                    // Wait for authentication
                     Int32 timeout = this.settings.FrejaTimeoutInMilliseconds;
                     while (true)
                     {
@@ -108,27 +237,22 @@ namespace Intwenty.Services
                             response = await client.PostAsync("/authentication/1.0/cancel", content);
                             return false;
                         }
-                        // Sleep for 2 seconds
+       
                         await Task.Delay(2000);
                         timeout -= 2000;
-                        // Collect a signature
+             
                         response = await client.PostAsync("/authentication/1.0/getOneResult", content);
-                        // Check the status code for the response
                         if (response.IsSuccessStatusCode == true)
                         {
-                            // Get string data
                             string data = await response.Content.ReadAsStringAsync();
                             // Convert data to a bankid response
                             status_response = JsonSerializer.Deserialize<FrejaStatusResponse>(data);
                             if (status_response.status == "APPROVED")
                             {
-                                // Break out from the loop
                                 break;
                             }
-                            else if (status_response.status == "STARTED" || status_response.status == "DELIVERED_TO_MOBILE"
-                                || status_response.status == "OPENED" || status_response.status == "OPENED")
+                            else if (status_response.status == "STARTED" || status_response.status == "DELIVERED_TO_MOBILE" || status_response.status == "OPENED" || status_response.status == "OPENED")
                             {
-                                // Continue to loop
                                 continue;
                             }
                             else
@@ -139,9 +263,7 @@ namespace Intwenty.Services
                         }
                         else
                         {
-                            // Get string data
                             string data = await response.Content.ReadAsStringAsync();
-                            // Return false
                             return false;
                         }
                     }

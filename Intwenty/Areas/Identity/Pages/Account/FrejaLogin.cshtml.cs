@@ -29,6 +29,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IFrejaClient _frejaClient;
 
 
+        public string QRCodeUrl {get; set;}
+
         public FrejaLoginModel(IntwentyUserManager usermanager, IIntwentyEventService eventservice, IFrejaClient frejaclient)
         {
             _userManager = usermanager;
@@ -38,8 +40,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
        
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
+            try
+            {
+                var startref = await _frejaClient.InitQRAuthentication();
+                var t = _frejaClient.GetQRCode(startref.authRef);
+                this.QRCodeUrl = t.OriginalString;
+            }
+            catch
+            {
+            }
+
             return Page();
         }
 
@@ -48,6 +60,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             try
             {
+              
+
             }
             catch
             {

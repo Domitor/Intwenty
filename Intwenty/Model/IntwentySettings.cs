@@ -182,6 +182,7 @@ namespace Intwenty.Model
         /// Freja E ID Settings
         /// </summary>
         public string FrejaBaseAddress { get; set; }
+        public string FrejaQRCodeEndpoint { get; set; }
         public string FrejaJWSCertificate { get; set; }
         public int FrejaTimeoutInMilliseconds { get; set; }
 
