@@ -227,7 +227,7 @@ namespace Intwenty.Builder
 
             builder.ConfigureIntwentyTwoFactorAuth(settings);
 
-           // builder.SeedIntwenty(settings);
+            builder.SeedIntwenty(settings);
 
             builder.ConfigureEndpoints(settings);
 
