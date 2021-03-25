@@ -17,10 +17,16 @@ namespace IntwentyDemo.Seed
 {
     public class DemoSeeder : IntwentySeeder, IIntwentySeeder
     {
-        public override void SeedLocalization(IntwentySettings settings, IServiceProvider services)
+        public DemoSeeder(IOptions<IntwentySettings> settings, IntwentyUserManager usermanager, RoleManager<IntwentyProductAuthorizationItem> rolemanager, IIntwentyProductManager productmanager, IIntwentyOrganizationManager orgmanager, IIntwentyModelService modelservice)
+                            : base(settings, usermanager, rolemanager, productmanager, orgmanager, modelservice)
+        {
+           
+        }
+
+        public override void SeedLocalization()
         {
             //SEED INTWENTY DEFAULT LOCALIZATIONS
-            base.SeedLocalization(settings, services);
+            base.SeedLocalization();
 
            
             var translations = new List<TranslationItem>();
@@ -71,7 +77,7 @@ namespace IntwentyDemo.Seed
             translations.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "VENDORLIST", Text = "Tillverkare" });
 
 
-            var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
 
             var current_trans = client.GetEntities<TranslationItem>();
@@ -86,24 +92,21 @@ namespace IntwentyDemo.Seed
  
         }
 
-        public override void SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services)
+        public override void SeedProductAndOrganization()
         {
-            base.SeedProductAndOrganization(settings, services);
+            base.SeedProductAndOrganization();
         }
-        public override void SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services)
+        public override void SeedProductAuthorizationItems()
         {
-            base.SeedProductAuthorizationItems(settings, services);
-        }
-
-        public override void SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services)
-        {
-            base.SeedUsersAndRoles(settings, services);
+            base.SeedProductAuthorizationItems();
         }
 
+        public override void SeedUsersAndRoles()
+        {
+            base.SeedUsersAndRoles();
+        }
 
-     
-
-        public override void SeedModel(IntwentySettings settings, IServiceProvider services)
+        public override void SeedModel()
         {
             
             var systems = new List<SystemItem>();
@@ -465,7 +468,7 @@ namespace IntwentyDemo.Seed
 
 
             //Insert models if not existing
-            var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             client.Open();
 
             var current_systems = client.GetEntities<SystemItem>();
@@ -534,14 +537,14 @@ namespace IntwentyDemo.Seed
             client.Close();
         }
 
-        public override void SeedData(IntwentySettings settings, IServiceProvider services)
+        public override void SeedData()
         {
-            base.SeedData(settings, services);
+            base.SeedData();
         }
 
-        public override void ConfigureDataBase(IntwentySettings settings, IServiceProvider services)
+        public override void ConfigureDataBase()
         {
-            base.ConfigureDataBase(settings, services);
+            base.ConfigureDataBase();
         }
 
       

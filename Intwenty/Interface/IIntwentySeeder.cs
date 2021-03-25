@@ -8,13 +8,13 @@ namespace Intwenty.Interface
 {
     public interface IIntwentySeeder
     {
-        void SeedLocalization(IntwentySettings settings, IServiceProvider services);
-        void SeedProductAndOrganization(IntwentySettings settings, IServiceProvider services);
-        void SeedProductAuthorizationItems(IntwentySettings settings, IServiceProvider services);
-        void SeedUsersAndRoles(IntwentySettings settings, IServiceProvider services);
-        void SeedModel(IntwentySettings settings, IServiceProvider services);
-        void SeedData(IntwentySettings settings, IServiceProvider services);
-        void ConfigureDataBase(IntwentySettings settings, IServiceProvider services);
+        void SeedLocalization();
+        void SeedProductAndOrganization();
+        void SeedProductAuthorizationItems();
+        void SeedUsersAndRoles();
+        void SeedModel();
+        void SeedData();
+        void ConfigureDataBase();
     }
 
 }

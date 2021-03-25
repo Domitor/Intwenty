@@ -1,10 +1,14 @@
-﻿using Intwenty.Interface;
+﻿using Intwenty.DataClient;
+using Intwenty.Entity;
+using Intwenty.Interface;
 using Intwenty.Model;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -15,12 +19,12 @@ namespace Intwenty.Localization
     {
         private readonly ConcurrentDictionary<string, IntwentyStringLocalizer> Cache = new ConcurrentDictionary<string, IntwentyStringLocalizer>();
 
-        private IIntwentyModelService ModelService { get; }
+        private IMemoryCache ModelCache { get; }
         private IntwentySettings Settings { get; }
 
-        public IntwentyStringLocalizerFactory(IIntwentyModelService ms, IOptions<IntwentySettings> settings)
+        public IntwentyStringLocalizerFactory(IMemoryCache cache, IOptions<IntwentySettings> settings)
         {
-            ModelService = ms;
+            ModelCache = cache;
             Settings = settings.Value;
         }
 
@@ -37,7 +41,7 @@ namespace Intwenty.Localization
                 return value;
             }
 
-            value = new IntwentyStringLocalizer(ModelService, Settings);
+            value = new IntwentyStringLocalizer(GetLocalizations(), Settings);
 
             Cache.TryAdd(basename, value);
 
@@ -55,11 +59,28 @@ namespace Intwenty.Localization
                 return value;
             }
 
-            value = new IntwentyStringLocalizer(ModelService, Settings);
+            value = new IntwentyStringLocalizer(GetLocalizations(), Settings);
 
             Cache.TryAdd(basename, value);
 
             return value;
+        }
+
+        private List<TranslationModelItem> GetLocalizations()
+        {
+            List<TranslationModelItem> res;
+            if (ModelCache.TryGetValue("UILOCALIZATIONS", out res))
+            {
+                return res;
+            }
+            var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
+            client.Open();
+            var t = client.GetEntities<TranslationItem>().Select(p => new TranslationModelItem(p)).ToList();
+            client.Close();
+
+            ModelCache.Set("UILOCALIZATIONS", t);
+
+            return t;
         }
     }
     

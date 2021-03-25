@@ -105,6 +105,8 @@ namespace IntwentyDemo
                         });
 
                         services.AddRazorPages().AddViewLocalization().AddRazorRuntimeCompilation();
+
+                        
                     })
                     .Configure((buildercontext, app) =>
                     {

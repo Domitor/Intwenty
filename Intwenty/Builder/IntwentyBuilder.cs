@@ -68,9 +68,9 @@ namespace Intwenty.Builder
             services.TryAddTransient<IIntwentyDataService, TIntwentyDataService>();
             services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
-            services.TryAddTransient<IIntwentySeeder, TInwentySeeder>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
             services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();
+            services.TryAddTransient<IIntwentySeeder, TInwentySeeder>();
 
 
 
@@ -166,7 +166,7 @@ namespace Intwenty.Builder
 
             services.AddLocalization();
 
-            services.AddScoped<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
+            services.AddSingleton<IStringLocalizerFactory, IntwentyStringLocalizerFactory>();
 
             services.AddMvc(options =>
             {
@@ -227,7 +227,7 @@ namespace Intwenty.Builder
 
             builder.ConfigureIntwentyTwoFactorAuth(settings);
 
-            builder.SeedIntwenty(settings);
+           // builder.SeedIntwenty(settings);
 
             builder.ConfigureEndpoints(settings);
 
@@ -250,45 +250,48 @@ namespace Intwenty.Builder
                 endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
                 endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
 
-                var modelservice = builder.ApplicationServices.GetRequiredService<IIntwentyModelService>();
-
-                //REGISTER ENDPOINTS
-                if (settings.UseIntwentyAPI)
+                using (var scope = builder.ApplicationServices.CreateScope())
                 {
-                    var epmodels = modelservice.GetEndpointModels();
+                    var serviceProvider = scope.ServiceProvider;
+                    var modelservice = serviceProvider.GetRequiredService<IIntwentyModelService>();
 
-                    foreach (var ep in epmodels)
+                    //REGISTER ENDPOINTS
+                    if (settings.UseIntwentyAPI)
                     {
-                        if (ep.IsMetaTypeCustomPost)
-                            continue;
-                        if (ep.IsMetaTypeCustomGet)
-                            continue;
+                        var epmodels = modelservice.GetEndpointModels();
 
-                        endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicEndpoint" });
+                        foreach (var ep in epmodels)
+                        {
+                            if (ep.IsMetaTypeCustomPost)
+                                continue;
+                            if (ep.IsMetaTypeCustomGet)
+                                continue;
+
+                            endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicEndpoint" });
+                        }
+                    }
+                    //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
+
+                    var appmodels = modelservice.GetApplicationModels();
+                    foreach (var a in appmodels)
+                    {
+
+                        foreach (var view in a.Views)
+                        {
+                            if (string.IsNullOrEmpty(view.Path))
+                                continue;
+
+                            var path = view.Path;
+                            path.Trim();
+                            if (path[0] != '/')
+                                path = "/" + path;
+                            if (path[path.Length - 1] != '/')
+                                path = path + "/";
+
+                            endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                        }
                     }
                 }
-                //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
-
-                var appmodels = modelservice.GetApplicationModels();
-                foreach (var a in appmodels)
-                {
-
-                    foreach (var view in a.Views)
-                    {
-                        if (string.IsNullOrEmpty(view.Path))
-                            continue;
-
-                        var path = view.Path;
-                        path.Trim();
-                        if (path[0] != '/')
-                            path = "/" + path;
-                        if (path[path.Length - 1] != '/')
-                            path = path + "/";
-
-                        endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
-                    }
-                }
-
 
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
@@ -333,7 +336,7 @@ namespace Intwenty.Builder
         }
 
 
-        private static void SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
+        public static void SeedIntwenty(this IApplicationBuilder builder, IntwentySettings settings)
         {
 
             //Below can be activated/deactivated in the appsetting.json file
@@ -344,39 +347,43 @@ namespace Intwenty.Builder
             //-ConfigureDatabaseOnStartUp
             //-SeedDataOnStartUp
 
-            var seederservice = builder.ApplicationServices.GetRequiredService<IIntwentySeeder>();
+            using (var scope = builder.ApplicationServices.CreateScope())
+            {
+                var serviceProvider = scope.ServiceProvider;
 
-            //The order is important
+                var seederservice = serviceProvider.GetRequiredService<IIntwentySeeder>();
 
-            if (settings.SeedLocalizationsOnStartUp)
-            {
-                seederservice.SeedLocalization(settings, builder.ApplicationServices);
-            }
-            if (settings.SeedProductAndOrganizationOnStartUp)
-            {
-                seederservice.SeedProductAndOrganization(settings, builder.ApplicationServices);
-            }
-            if (settings.SeedDemoUserAccountsOnStartUp)
-            {
-                seederservice.SeedUsersAndRoles(settings, builder.ApplicationServices);
-            }
-            if (settings.SeedModelOnStartUp)
-            {
-                seederservice.SeedModel(settings, builder.ApplicationServices);
-            }
-            if (settings.SeedDataOnStartUp)
-            {
-                seederservice.SeedData(settings, builder.ApplicationServices);
-            }
-            if (settings.ConfigureDatabaseOnStartUp)
-            {
-                seederservice.ConfigureDataBase(settings, builder.ApplicationServices);
-            }
-            if (settings.SeedProductAndOrganizationOnStartUp)
-            {
-                seederservice.SeedProductAuthorizationItems(settings, builder.ApplicationServices);
-            }
+                //The order is important
 
+                if (settings.SeedLocalizationsOnStartUp)
+                {
+                    seederservice.SeedLocalization();
+                }
+                if (settings.SeedProductAndOrganizationOnStartUp)
+                {
+                    seederservice.SeedProductAndOrganization();
+                }
+                if (settings.SeedDemoUserAccountsOnStartUp)
+                {
+                    seederservice.SeedUsersAndRoles();
+                }
+                if (settings.SeedModelOnStartUp)
+                {
+                    seederservice.SeedModel();
+                }
+                if (settings.SeedDataOnStartUp)
+                {
+                    seederservice.SeedData();
+                }
+                if (settings.ConfigureDatabaseOnStartUp)
+                {
+                    seederservice.ConfigureDataBase();
+                }
+                if (settings.SeedProductAndOrganizationOnStartUp)
+                {
+                    seederservice.SeedProductAuthorizationItems();
+                }
+            }
         }
 
         private static void CreateIntwentyFrameworkTables(IntwentySettings settings)
