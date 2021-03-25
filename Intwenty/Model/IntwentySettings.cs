@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Intwenty.Model
 {
 
-    public enum AllowedAccountTypes { All, Social, Local, SocialFb, SocialGoogle, BankId };
+    public enum AccountTypes { All, Social, Local, Facebook, Google, BankId, FrejaEId };
 
-    public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId };
+    public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId,FrejaEId };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
@@ -85,7 +85,7 @@ namespace Intwenty.Model
         /// <summary>
         /// What kind of logins should be allowed
         /// </summary>
-        public AllowedAccountTypes AllowedAccounts { get; set; }
+        public List<IntwentyAccount> AllowedAccounts { get; set; }
         public bool RequireConfirmedAccount { get; set; }
 
         /// <summary>
@@ -179,6 +179,14 @@ namespace Intwenty.Model
 
 
         /// <summary>
+        /// Freja E ID Settings
+        /// </summary>
+        public string FrejaBaseAddress { get; set; }
+        public string FrejaJWSCertificate { get; set; }
+        public int FrejaTimeoutInMilliseconds { get; set; }
+
+
+        /// <summary>
         /// TEST DB CONNECTIONS
         /// </summary>
         public string TestDbConnectionSqlite { get; set; }
@@ -205,28 +213,43 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.SocialGoogle ||
-                    AllowedAccounts == AllowedAccountTypes.SocialFb ||
-                    AllowedAccounts == AllowedAccountTypes.Social ||
-                    AllowedAccounts == AllowedAccountTypes.All)
-                {
+                if (AllowedAccounts == null)
+                    return false;
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
                     return true;
-                }
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.BankId))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Facebook))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Google))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Social))
+                    return true;
+
                 return false;
             }
 
         }
+
+      
 
         public bool UseLocalLogins
         {
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.Local ||
-                    AllowedAccounts == AllowedAccountTypes.All)
-                {
+                if (AllowedAccounts == null)
+                    return false;
+
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
                     return true;
-                }
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Local))
+                    return true;
+
                 return false;
             }
 
@@ -237,12 +260,17 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.SocialFb ||
-                    AllowedAccounts == AllowedAccountTypes.Social ||
-                    AllowedAccounts == AllowedAccountTypes.All)
-                {
+                if (AllowedAccounts == null)
+                    return false;
+
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
                     return true;
-                }
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Facebook))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Social))
+                    return true;
+
                 return false;
             }
 
@@ -253,12 +281,17 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.SocialGoogle ||
-                    AllowedAccounts == AllowedAccountTypes.Social ||
-                    AllowedAccounts == AllowedAccountTypes.All)
-                {
+                if (AllowedAccounts == null)
+                    return false;
+
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
                     return true;
-                }
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Google))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Social))
+                    return true;
+
                 return false;
             }
 
@@ -269,11 +302,36 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == AllowedAccountTypes.BankId ||
-                    AllowedAccounts == AllowedAccountTypes.All)
-                {
+                if (AllowedAccounts == null)
+                    return false;
+
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
                     return true;
-                }
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.BankId))
+                    return true;
+              
+
+                return false;
+            }
+
+        }
+
+        public bool UseFrejaEIdLogin
+        {
+
+            get
+            {
+                if (AllowedAccounts == null)
+                    return false;
+
+
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.All))
+                    return true;
+                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return true;
+
+
                 return false;
             }
 
@@ -375,6 +433,22 @@ namespace Intwenty.Model
 
         }
 
+        public bool UseFrejaEIdMfaAuth
+        {
+
+            get
+            {
+                if (SupportedMfaMethods == null)
+                    return false;
+
+                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.FrejaEId))
+                    return true;
+
+                return false;
+            }
+
+        }
+
 
     }
 
@@ -391,4 +465,12 @@ namespace Intwenty.Model
 
         public MfaAuthTypes MfaMethod { get; set; }
     }
+
+    public class IntwentyAccount
+    {
+        public string Name { get; set; }
+
+        public AccountTypes AccountType { get; set; }
+    }
+
 }

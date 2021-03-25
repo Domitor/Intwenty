@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
-namespace Intwenty.Builder
+namespace Intwenty.WebHostBuilder
 {
     public class APIDocumentFilter : IDocumentFilter
     {

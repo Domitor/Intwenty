@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Intwenty.Builder
+namespace Intwenty.WebHostBuilder
 {
   
     public class Forced2FaMiddleware

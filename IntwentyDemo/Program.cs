@@ -10,7 +10,7 @@ using Intwenty;
 using Intwenty.Interface;
 using Intwenty.Model;
 using Intwenty.Services;
-using Intwenty.Builder;
+using Intwenty.WebHostBuilder;
 using IntwentyDemo.Services;
 using IntwentyDemo.Seed;
 

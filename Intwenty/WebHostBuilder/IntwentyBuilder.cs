@@ -25,8 +25,12 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Intwenty.Seed;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 
-namespace Intwenty.Builder
+namespace Intwenty.WebHostBuilder
 {
     public static class IntwentyBuilder
     {
@@ -142,7 +146,23 @@ namespace Intwenty.Builder
                 });
             }
 
+            if (settings.UseFrejaEIdLogin)
+            {
+                services.AddHttpClient<IFrejaClient, FrejaClientService>()
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                {
+                    HttpClientHandler handler = new HttpClientHandler
+                    {
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                        ClientCertificateOptions = ClientCertificateOption.Manual,
+                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
+                    };
+                    handler.ClientCertificates.Add(new X509Certificate2("C:\\DomitorConsultingAB.pfx", "5iTCTp"));
+                    return handler;
+                });
 
+            }
 
 
             if (string.IsNullOrEmpty(settings.DefaultCulture))
