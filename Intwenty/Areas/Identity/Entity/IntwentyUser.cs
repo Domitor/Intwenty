@@ -1,6 +1,5 @@
 ﻿using Intwenty.DataClient.Reflection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Intwenty.Areas.Identity.Entity
