@@ -8,7 +8,11 @@
 <br />
 <p>API Key</p>
 
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+@if (Model.StatusCode == "SUCCESS")
+{
+    <partial name="_StatusMessage" model="@Localizer["API Key Changed"] !" />
+}
+
 
 <div class="row">
     <div class="col-md-6">

@@ -41,6 +41,17 @@ namespace Intwenty.Seed
     
             var temp = new List<TranslationItem>();
 
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "API Key Updated", Text = "API nyckeln uppdaterades" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "You must type a user name and a password", Text = "Vänligen ange användarnamn och lösenord" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Invalid login attemt", Text = "Inloggningen misslyckades" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "LOGIN_REQUIRE_CONF", Text = "Your account must be confirmed before you can login, pleas check your email and follow the instructions." });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "LOGIN_REQUIRE_CONF", Text = "Du måste bekräfta ditt konto innan du kan logga in, vänligen kontrollera din epost" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "FREJA_UNAVAILABLE", Text = "Sorry, the service is temporary unavailable" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "FREJA_UNAVAILABLE", Text = "Vi ber om ursäkt, men det går inte att logga in för tillfället" });
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "FREJA_INSTRUCTION", Text = "To login, open your Freja e ID app and scan the QR code below" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "FREJA_INSTRUCTION", Text = "För att logga in öppnar du appen Freja eID på din telefon och skannar sedan QR koden nedan." });
+
+
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "Vi har skickat en länk till din epostadress, klicka på den för att återställa ditt lösenord." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "RESETPWDMAIL", Text = "Please check your email to reset your password." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset password confirmation", Text = "Bekräftelse på återställt lösenord" });
