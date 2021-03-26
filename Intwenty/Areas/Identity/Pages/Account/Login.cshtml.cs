@@ -15,6 +15,8 @@ using Microsoft.Extensions.Options;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Models;
+using System.Security.Claims;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -26,59 +28,204 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IntwentySignInManager _signInManager;
         private readonly IntwentyUserManager _userManager;
         private readonly IOptions<IntwentySettings> _settings;
+        private readonly IFrejaClientService _frejaClient;
 
-        public LoginModel(IntwentySignInManager signInManager, IIntwentyDataService dataservice, IOptions<IntwentySettings> settings, IntwentyUserManager userManager, IIntwentyDbLoggerService dblogger)
+        public LoginModel(IntwentySignInManager signinmanager, 
+                          IIntwentyDataService dataservice, 
+                          IOptions<IntwentySettings> settings, 
+                          IntwentyUserManager usermanager, 
+                          IIntwentyDbLoggerService dblogger,
+                          IFrejaClientService frejaclient)
         {
             _dataService = dataservice;
-            _signInManager = signInManager;
+            _signInManager = signinmanager;
             _settings = settings;
-            _userManager = userManager;
+            _userManager = usermanager;
             _dbloggerService = dblogger;
+            _frejaClient = frejaclient;
+
+
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
+      
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public string ReturnUrl { get; set; }
 
+        public string QRCodeUrl { get; set; }
+
         [TempData]
-        public string ErrorMessage { get; set; }
-
-        public class InputModel
-        {
-
-            [Required]
-            public string UserName { get; set; }
-
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-
-            public bool RememberMe { get; set; }
-
-        }
+        public string ExternalAuthenticationReference { get; set; }
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            ErrorMessage = string.Empty;
+            ExternalAuthenticationReference = string.Empty;
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (_settings.Value.UseExternalLogins)
+            {
+                ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            }
+
+            if (_settings.Value.UseFrejaEIdLogin)
+            {
+                var externalauthref = await _frejaClient.InitQRAuthentication();
+                ExternalAuthenticationReference = externalauthref.authRef;
+                if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
+                {
+                    this.QRCodeUrl = _frejaClient.GetQRCode(ExternalAuthenticationReference).OriginalString;
+                }
+            }
 
             ReturnUrl = returnUrl;
         }
 
+        public async Task<IActionResult> OnGetFrejaLogin()
+        {
+            var model = new IntwentyLoginModel() { AccountType = AccountTypes.FrejaEId, ResultCode = "SUCCESS" };
+
+            try
+            {
+                if (string.IsNullOrEmpty(ExternalAuthenticationReference))
+                {
+                    model.ResultCode = "FREJA_NO_AUTHREF";
+                    return new JsonResult(model) { StatusCode = 503 };
+                }
+
+                var authresult = await _frejaClient.Authenticate(ExternalAuthenticationReference);
+                if (authresult != null)
+                {
+
+                    var client = _userManager.GetIAMDataClient();
+
+                    IntwentyUser attemptinguser = null;
+                    await client.OpenAsync();
+                    var userlist = await client.GetEntitiesAsync<IntwentyUser>();
+                    attemptinguser = userlist.Find(p => p.NormalizedEmail == authresult.emailAddress.ToUpper());
+                    await client.CloseAsync();
+
+                    if (attemptinguser == null)
+                    {
+                        model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+
+                    var result = await _signInManager.SignInFrejaId(attemptinguser, ExternalAuthenticationReference);
+                    if (result.IsNotAllowed)
+                    {
+                        model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (result.RequiresTwoFactor)
+                    {
+                        model.ResultCode = "REQUIREMFA";
+                        model.RedirectUrl = "./LoginWith2fa";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else
+                    {
+                        model.ReturnUrl = Url.Content("~/");
+                        model.ResultCode = "SUCCESS";
+                        await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} logged in with Freja e Id", attemptinguser.UserName), attemptinguser.UserName);
+                        return new JsonResult(model);
+
+                    }
+                }
+                else
+                {
+                    model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                    return new JsonResult(model) { StatusCode = 401 };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on login.OnGetFrejaLogin: " + ex.Message);
+            }
+
+            model.ResultCode = "UNEXPECTED_ERROR";
+            return new JsonResult(model) { StatusCode = 500 };
+        }
+
+        public async Task<IActionResult> OnPostLocalLogin([FromBody] IntwentyLoginModel model)
+        {
+            if (string.IsNullOrEmpty(model.UserName) || string.IsNullOrEmpty(model.Password))
+            {
+                model.ResultCode = "MISSING_USERNAME_OR_PWD";
+                return new JsonResult(model) { StatusCode = 401 };
+            }
+
+            var client = _userManager.GetIAMDataClient();
+
+            IntwentyUser attemptinguser = null;
+            await client.OpenAsync();
+            var userlist = await client.GetEntitiesAsync<IntwentyUser>();
+            attemptinguser = userlist.Find(p => p.UserName == model.UserName);
+            await client.CloseAsync();
+
+            if (attemptinguser==null)
+            {
+                model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                return new JsonResult(model) { StatusCode = 401 };
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+            if (result.Succeeded)
+            {
+                await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} logged in with password", model.UserName), model.UserName);
+                if (attemptinguser != null)
+                {
+                    attemptinguser.LastLoginProduct = _settings.Value.ProductId;
+                    attemptinguser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    await client.OpenAsync();
+                    await client.UpdateEntityAsync(attemptinguser);
+                    await client.CloseAsync();
+                }
+
+                model.ResultCode = "SUCCESS";
+                return new JsonResult(model);
+            }
+            if (result.RequiresTwoFactor)
+            {
+                model.ResultCode = "REQUIREMFA";
+                model.RedirectUrl = "./LoginWith2fa";
+                return new JsonResult(model) { StatusCode = 401 };
+
+            }
+            if (result.IsLockedOut)
+            {
+                model.ResultCode = "LOCKEDOUT";
+                model.RedirectUrl = "./Lockout";
+                return new JsonResult(model) { StatusCode = 401 };
+            }
+            else
+            {
+                if (attemptinguser != null && _settings.Value.RequireConfirmedAccount && !attemptinguser.EmailConfirmed)
+                {
+                    model.ResultCode = "REQUIRECONFIRMATION";
+                   
+                }
+                else
+                {
+                    model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                   
+                }
+
+                await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("Failed log in attempt with password, user: {0}", model.UserName), model.UserName);
+
+
+                return new JsonResult(model) { StatusCode = 401 };
+            }
+        }
+
+        /*
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            ErrorMessage = string.Empty;
 
             if (ModelState.IsValid)
             {
@@ -139,5 +286,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
+        */
     }
 }

@@ -27,6 +27,7 @@ namespace Intwenty.Areas.Identity.Data
 
         private IIntwentyModelService ModelRepository { get; }
 
+        private new IntwentyUserManager UserManager { get; }
 
         public IntwentySignInManager(
             IntwentyUserManager userManager,
@@ -44,6 +45,7 @@ namespace Intwenty.Areas.Identity.Data
             OrganizationManager = orgmanager;
             Settings = settings.Value;
             ModelRepository = modelservice;
+            UserManager = userManager;
         }
 
         
@@ -84,6 +86,30 @@ namespace Intwenty.Areas.Identity.Data
                 ModelRepository.CreateTenantIsolatedTables(user);
 
             return result;
+        }
+
+        public async Task<SignInResult> SignInFrejaId(IntwentyUser user, string authref)
+        {
+            var cansignin = await CanSignInAsync(user);
+            if (!cansignin)
+                return SignInResult.NotAllowed;
+
+            var mfastatus = await UserManager.GetTwoFactorStatus(user);
+            if (mfastatus.HasAnyMFA)
+            {
+                var identity = new ClaimsIdentity(IdentityConstants.TwoFactorUserIdScheme);
+                identity.AddClaim(new Claim(ClaimTypes.Name, user.Id));
+                identity.AddClaim(new Claim("FrejaLogin", authref));
+                await Context.SignInAsync(IdentityConstants.TwoFactorUserIdScheme, new ClaimsPrincipal(identity));
+                return SignInResult.TwoFactorRequired;
+            }
+
+            var frejaclaims = new List<Claim>();
+            frejaclaims.Add(new Claim("FrejaLogin", authref));
+            await SignInWithClaimsAsync(user, false, frejaclaims);
+
+            return SignInResult.Success;
+
         }
 
         public override async Task<bool> CanSignInAsync(IntwentyUser user)

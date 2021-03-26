@@ -152,6 +152,40 @@ namespace Intwenty.Model.FrejaEId
         public string status { get; set; }
         public string details { get; set; }
         public RequestedAttributes requestedAttributes { get; set; }
+
+        public bool HasWaitForUserStatus
+        {
+
+            get
+            {
+                if (string.IsNullOrEmpty(status))
+                    return false;
+
+                if (status == "STARTED" || status == "DELIVERED_TO_MOBILE" || status == "OPENED" || status == "OPENED")
+                    return true;
+
+                return false;
+            }
+        }
+
+        public bool HasApprovedStatus
+        {
+
+            get
+            {
+                if (string.IsNullOrEmpty(status))
+                    return false;
+
+                if (status == "APPROVED")
+                    return true;
+
+                return false;
+            }
+        }
+
+       
+        
+
     } 
 
     public class FrejaResponseHeader

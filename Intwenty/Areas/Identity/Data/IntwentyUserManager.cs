@@ -52,6 +52,63 @@ namespace Intwenty.Areas.Identity.Data
             return base.ChangePhoneNumberAsync(user, phoneNumber, token);
         }
 
+        public async Task<IntwentyMfaStatus> GetTwoFactorStatus(IntwentyUser user)
+        {
+            var result = new IntwentyMfaStatus();
+
+            result.HasFrejaMFA = await HasUserSettingWithValue(user, "FREJAMFA", "TRUE");
+            result.HasBankIdMFA = await HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
+            result.HasSmsMFA = await HasUserSettingWithValue(user, "SMSMFA", "TRUE");
+            result.HasEmailMFA = await HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
+            result.HasFido2MFA = await HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
+            result.HasTotpMFA = await HasUserSettingWithValue(user, "TOTPMFA", "TRUE");
+
+            if (!user.TwoFactorEnabled && result.HasAnyMFA)
+                await SetTwoFactorEnabledAsync(user, true);
+            if (user.TwoFactorEnabled && !result.HasAnyMFA)
+                await SetTwoFactorEnabledAsync(user, false);
+
+            return result;
+        }
+
+    
+        public override async Task<IdentityResult> SetTwoFactorEnabledAsync(IntwentyUser user, bool enabled)
+        {
+            if (!enabled)
+            {
+                await RemoveUserSetting(user, "BANKIDMFA");
+                await RemoveUserSetting(user, "SMSMFA");
+                await RemoveUserSetting(user, "EMAILMFA");
+                await RemoveUserSetting(user, "FIDO2MFA");
+                await RemoveUserSetting(user, "TOTPMFA");
+                await RemoveUserSetting(user, "FREJAMFA");
+            }
+
+            return await base.SetTwoFactorEnabledAsync(user, enabled);
+        }
+
+        public async Task<IdentityResult> SetTwoFactorEnabledAsync(IntwentyUser user, bool enabled, MfaAuthTypes mfatype)
+        {
+            var result = await SetTwoFactorEnabledAsync(user, enabled);
+
+            if (mfatype == MfaAuthTypes.Email && enabled)
+                await AddUpdateUserSetting(user, "EMAILMFA", "TRUE");
+            if (mfatype == MfaAuthTypes.Fido2 && enabled)
+                await AddUpdateUserSetting(user, "FIDO2MFA", "TRUE");
+            if (mfatype == MfaAuthTypes.FrejaEId && enabled)
+                await AddUpdateUserSetting(user, "FREJAMFA", "TRUE");
+            if (mfatype == MfaAuthTypes.Sms && enabled)
+                await AddUpdateUserSetting(user, "SMSMFA", "TRUE");
+            if (mfatype == MfaAuthTypes.SwedishBankId && enabled)
+                await AddUpdateUserSetting(user, "BANKIDMFA", "TRUE");
+            if (mfatype == MfaAuthTypes.Totp && enabled)
+                await AddUpdateUserSetting(user, "TOTPMFA", "TRUE");
+
+            return result;
+
+        }
+
+
         /// <summary>
         /// Gets products that the user has access to (via organization membership)
         /// Products is only available to users via an organization

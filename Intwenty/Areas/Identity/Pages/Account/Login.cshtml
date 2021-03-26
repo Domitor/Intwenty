@@ -20,53 +20,66 @@
 
 <div class="card">
     <div class="card-header"><h2>@ViewData["Title"]</h2></div>
-    <div class="card-body"></div>
+    <div class="card-body">
+        
+    </div>
 </div>
 
 <br />
 <br />
 
-<div class="row">
+<div id="app">
 
-    <div class="col-md-4">
-        @if (Settings.Value.UseLocalLogins)
-        {
-        <section>
-            <form id="account" method="post">
+    <div class="row">
 
-                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                {
-                    <div class="alert alert-danger">@Model.ErrorMessage</div>
-                }
+        <div class="col-md-6">
 
-
-                <div class="form-group">
-                    @if (Settings.Value.UseEmailAsUserName)
-                    {
-                        <label>Email @demouser</label>
-                    }
-                    else
-                    {
-                        <label>@Localizer["User Name"] @demouser</label>
-                    }
-                    <input asp-for="Input.UserName" class="form-control" />
-                    <span asp-validation-for="Input.UserName" class="text-danger"></span>
-                </div>
-
-
-
-                <div class="form-group">
-                    <label>@Localizer["Password"] @demopwd</label>
-                    <input asp-for="Input.Password" class="form-control" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label><input asp-for="Input.RememberMe" /> @Localizer["Remember Me"] ?</label>
+            <div class="alert alert-danger" v-if="model.resultCode=='MISSING_USERNAME_OR_PWD'">
+                You must type a user name and a password
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="alert alert-danger" v-if="model.resultCode=='INVALID_LOGIN_ATTEMPT'">
+                Invalid login attemt
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="alert alert-danger" v-if="model.resultCode=='REQUIRECONFIRMATION'">
+                Your account require confirmation, check your email
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="alert alert-danger" v-if="model.resultCode=='FREJA_NO_AUTHREF'">
+                We're having a trouble with the connection to Freja e ID
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            @if (Settings.Value.UseLocalLogins)
+            {
+                <form v-on:submit.prevent="localLogin">
+                    <div class="form-group">
+                        @if (Settings.Value.UseEmailAsUserName)
+                        {
+                            <label>Email @demouser</label>
+                        }
+                        else
+                        {
+                            <label>@Localizer["User Name"] @demouser</label>
+                        }
+                        <input id="local_email" type="email" v-model="model.userName" class="form-control" />
+                        <span id="local_email_validation" class="text-danger"></span>
                     </div>
-                </div>
+
+
+                    <div class="form-group">
+                        <label>@Localizer["Password"] @demopwd</label>
+                        <input id="local_password" type="password" v-model="model.password" class="form-control" />
+                        <span id="local_password_validation" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label><input type="checkbox" v-model="model.rememberMe" /> @Localizer["Remember Me"] ?</label>
+                        </div>
+                    </div>
+                </form>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">@Localizer["Login"]</button>
+                    <button type="button" class="btn btn-primary" v-on:click="localLogin()">@Localizer["Login"]</button>
                 </div>
                 <div class="form-group">
                     <p>
@@ -76,54 +89,138 @@
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register as a new user"]</a>
                     </p>
                 </div>
-            </form>
-        </section>
 
-      }
-    </div>
-    
-   
-    <div class="col-md-6 col-md-offset-2">
+            }
 
-        @if (Settings.Value.UseExternalLogins)
-        {
-
-        <label class="pl-2">@Localizer["Use external accounts"]</label>
-
-            <section>
-
-                <div class="d-flex flex-wrap">
-
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        @foreach (var provider in Model.ExternalLogins)
-                        {
-                            <div class="p-2">
-                                @if (provider.Name.ToUpper().Contains("FACE"))
-                                {
-                                    <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
-
-                                }
-                                @if (provider.Name.ToUpper().Contains("GOOGLE"))
-                                {
-                                    <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
-                                }
-
-                            </div>
-                        }
-                    </form>
-
-                    @if (Settings.Value.UseFrejaEIdLogin)
-                    {
-
-                        <a asp-page="./FrejaLogin"><img src="~/images/frejaeid.png" class="rounded mx-auto d-block" alt="Freja eId" style="max-width:50%" /></a>
-
-
-                    }
+            @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
+            {
+                <div class="alert alert-primary">
+                    To login, open your Freja e ID app and scan the QR code below
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
+                <br />
+                <img src="@Model.QRCodeUrl" />
 
-            </section>
-        }
+            }
+
+
+        </div>
+
+
+        <div class="col-md-6">
+
+            @if (Settings.Value.UseExternalLogins)
+            {
+
+                <label class="pl-2">@Localizer["Use external accounts"]</label>
+
+                    <div class="d-flex flex-column mb-3">
+
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                            
+                                    @if (provider.Name.ToUpper().Contains("FACE") && Settings.Value.UseFacebookLogin)
+                                    {
+                                        <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
+
+                                    }
+                                    @if (provider.Name.ToUpper().Contains("GOOGLE") && Settings.Value.UseGoogleLogin)
+                                    {
+                                        <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
+                                    }
+
+                            }
+                        </form>
+
+                    </div>
+
+            }
+        </div>
+
     </div>
-
 </div>
 
+@section Scripts
+ {
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data:
+            {
+                model: { userName: "", password: "", resultCode: "", returnUrl: "@Model.ReturnUrl" }
+            },
+            methods: {
+
+                localLogin: function ()
+                {
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=LocalLogin";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers:
+                        {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            window.location = response.returnUrl;
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA" )
+                            {
+                                window.location = context.model.redirectUrl;
+                            }
+                        }
+                    });
+                }
+
+            },
+            computed:
+            {
+                example: function ()
+                {
+
+                }
+
+            },
+            mounted: function ()
+            {
+               @if(Settings.Value.UseFrejaEIdLogin)
+               {
+                   <text>
+
+                        var context = this;
+                        var baseurl = '@Url.Content("~/Identity/Account/")';
+                        var endpointurl = baseurl + "Login?handler=FrejaLogin";
+
+                        $.get(endpointurl, function (response)
+                        {
+                            window.location = response.returnUrl;
+
+                        }).fail(function (response) {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        });
+
+                   </text>
+               }
+
+
+
+            }
+        });
+    </script>
+}

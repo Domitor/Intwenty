@@ -41,6 +41,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
+        public bool HasFrejaMFA { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -67,14 +68,16 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             RememberMe = rememberMe;
 
-            HasBankIdMFA = await _userManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
-            HasSmsMFA = await _userManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE");
-            HasEmailMFA = await _userManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
-            HasFido2MFA = await _userManager.HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
-            HasTotpMFA = await _userManager.HasUserSettingWithValue(user, "TOTPMFA", "TRUE");
+            var status = await _userManager.GetTwoFactorStatus(user);
 
-            if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
-                HasAnyMFA = true;
+            HasFrejaMFA = status.HasFrejaMFA;
+            HasBankIdMFA = status.HasBankIdMFA;
+            HasSmsMFA = status.HasSmsMFA;
+            HasEmailMFA = status.HasEmailMFA;
+            HasFido2MFA = status.HasFido2MFA;
+            HasTotpMFA = status.HasTotpMFA;
+            HasAnyMFA = status.HasAnyMFA;
+
 
             if (HasSmsMFA)
             {
@@ -109,12 +112,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
+            var mfastatus = await _userManager.GetTwoFactorStatus(user);
+
             Microsoft.AspNetCore.Identity.SignInResult result = null;
-            if (await _userManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE")) 
+            if (mfastatus.HasSmsMFA) 
             {
                 result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangePhoneNumberTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
             }
-            else if (await _userManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE"))
+            else if (mfastatus.HasEmailMFA)
             {
                 result = await _signInManager.TwoFactorSignInAsync(_userManager.Options.Tokens.ChangePhoneNumberTokenProvider, Input.TwoFactorCode, true, Input.RememberMachine);
             }

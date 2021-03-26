@@ -36,27 +36,22 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
+        public bool HasFrejaMFA { get; set; }
 
-  
+
 
         public async Task<IActionResult> OnGet()
         {
             var user = await UserManager.GetUserAsync(User);
-            HasBankIdMFA = await UserManager.HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
-            HasSmsMFA = await UserManager.HasUserSettingWithValue(user, "SMSMFA", "TRUE");
-            HasEmailMFA = await UserManager.HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
-            HasFido2MFA = await UserManager.HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
-            HasTotpMFA = await UserManager.HasUserSettingWithValue(user, "TOTPMFA", "TRUE");
+            var status = await UserManager.GetTwoFactorStatus(user);
 
-            if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
-                HasAnyMFA = true;
-
-            
-             var t = await UserManager.GetTwoFactorEnabledAsync(user);
-            if (!t && HasAnyMFA)
-                await UserManager.SetTwoFactorEnabledAsync(user, true);
-            if (t && !HasAnyMFA)
-                await UserManager.SetTwoFactorEnabledAsync(user, false);
+            HasFrejaMFA = status.HasFrejaMFA;
+            HasBankIdMFA = status.HasBankIdMFA;
+            HasSmsMFA = status.HasSmsMFA;
+            HasEmailMFA = status.HasEmailMFA;
+            HasFido2MFA = status.HasFido2MFA;
+            HasTotpMFA = status.HasTotpMFA;
+            HasAnyMFA = status.HasAnyMFA;
             
 
             return Page();
@@ -65,14 +60,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPost()
         {
             var user = await UserManager.GetUserAsync(User);
-            await UserManager.RemoveUserSetting(user, "BANKIDMFA");
-            await UserManager.RemoveUserSetting(user, "SMSMFA");
-            await UserManager.RemoveUserSetting(user, "EMAILMFA");
-            await UserManager.RemoveUserSetting(user, "FIDO2MFA");
-            await UserManager.RemoveUserSetting(user, "TOTPMFA");
             await UserManager.SetTwoFactorEnabledAsync(user, false);
-
-
             return Page();
         }
     }

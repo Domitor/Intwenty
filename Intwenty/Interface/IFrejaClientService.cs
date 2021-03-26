@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Interface
 {
-    public interface IFrejaClient
+    public interface IFrejaClientService
     {
         Task<FrejaStatusResponse> InitQRAuthentication();
         Uri GetQRCode(string authref);
-        Task<bool> Authenticate(string authref);
-        Task<bool> Authenticate(string userInfoType, string userInfo);
+        Task<RequestedAttributes> Authenticate(string authref);
+        Task<RequestedAttributes> Authenticate(string userInfoType, string userInfo);
         Task<bool> Sign(string userInfoType, string userInfo, Signature signature);
         SignatureValidationResult Validate(Signature signature);
     }

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Services
 {
-    public class FrejaClientService : IFrejaClient
+    public class FrejaClientService : IFrejaClientService
     {
    
         private readonly HttpClient client;
@@ -40,8 +40,21 @@ namespace Intwenty.Services
                 FrejaRequest request = new FrejaRequest
                 {
                     userInfoType = "INFERRED",
-                    userInfo = "N/A"
+                    userInfo = "N/A",
+                    minRegistrationLevel = settings.FrejaMinRegistrationLevel, // BASIC, EXTENDED or PLUS
+                    attributesToReturn=new List<AttributesToReturnItem>()
                 };
+
+                if (!string.IsNullOrEmpty(settings.FrejaRequestedAttributes))
+                {
+                    var list = settings.FrejaRequestedAttributes.Split(",",StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var t in list)
+                    {
+                        request.attributesToReturn.Add(new AttributesToReturnItem() { attribute=t });
+                    }
+                }
+
+
                 // Set serializer options
                 var json_options = new JsonSerializerOptions
                 {
@@ -49,15 +62,13 @@ namespace Intwenty.Services
                     WriteIndented = false,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 };
-                // Convert request to json
+
                 string json = JsonSerializer.Serialize(request, json_options);
-                // Create string content
                 var content = new StringContent("initAuthRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
                 content.Headers.ContentType.MediaType = "application/json";
                 content.Headers.ContentType.CharSet = "utf-8";
-                // Get the response
+
                 HttpResponseMessage response = await client.PostAsync("/authentication/1.0/initAuthentication", content);
-                // Check the status code for the response
                 if (response.IsSuccessStatusCode == true)
                 {
                     var data = await response.Content.ReadAsStringAsync();
@@ -94,13 +105,13 @@ namespace Intwenty.Services
             return null;
         }
 
-        public async Task<bool> Authenticate(string authref)
+        public async Task<RequestedAttributes> Authenticate(string authref)
         {
          
             try
             {
                 if (string.IsNullOrEmpty(authref))
-                    return false;
+                    return null;
 
                 var json = "{" + string.Format("\"authRef\":\"{0}\"", authref) +"}";
                 var content = new StringContent("getOneAuthResultRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
@@ -113,56 +124,55 @@ namespace Intwenty.Services
                     // Check for a timeout
                     if (timeout <= 0)
                     {
-                        // Cancel the order and return false
+                        // Cancel
                         content = new StringContent("cancelAuthRequest=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(json)));
                         content.Headers.ContentType.MediaType = "application/json";
                         content.Headers.ContentType.CharSet = "utf-8";
                         var cancelresponse = await client.PostAsync("/authentication/1.0/cancel", content);
-                        return false;
+                        return null;
                     }
-                    // Sleep for 2 seconds
+          
                     await Task.Delay(2000);
                     timeout -= 2000;
-                    // Collect a signature
+
+
                     var getoneresponse = await client.PostAsync("/authentication/1.0/getOneResult", content);
-                    // Check the status code for the response
                     if (getoneresponse.IsSuccessStatusCode == true)
                     {
      
                         string data = await getoneresponse.Content.ReadAsStringAsync();
                         var status_response = JsonSerializer.Deserialize<FrejaStatusResponse>(data);
-                        if (status_response.status == "APPROVED")
+                        if (status_response.HasApprovedStatus)
                         {
-
-                            break;
+                            return status_response.requestedAttributes;
                         }
-                        else if (status_response.status == "STARTED" || status_response.status == "DELIVERED_TO_MOBILE" || status_response.status == "OPENED" || status_response.status == "OPENED")
+                        else if (status_response.HasWaitForUserStatus)
                         {
                             continue;
                         }
                         else
                         {
                             // CANCELED, RP_CANCELED, EXPIRED or REJECTED
-                            return false;
+                            return null;
                         }
                     }
                     else
                     {
-                        return false;
+                        return null;
                     }
                 }
               
             }
             catch (Exception ex)
             {
-                return false;
+                
             }
            
-            return true;
+            return null;
         }
 
 
-        public async Task<bool> Authenticate(string userInfoType, string userInfo)
+        public async Task<RequestedAttributes> Authenticate(string userInfoType, string userInfo)
         {
 
             StringContent content = null;
@@ -176,31 +186,18 @@ namespace Intwenty.Services
                     userInfoType = userInfoType,
                     userInfo = userInfo,
                     minRegistrationLevel = "PLUS", // BASIC, EXTENDED or PLUS
-                    attributesToReturn = new List<AttributesToReturnItem>
-                    {
-                        new AttributesToReturnItem
-                        {
-                            attribute = "BASIC_USER_INFO",
-                        },
-                        new AttributesToReturnItem
-                        {
-                            attribute = "EMAIL_ADDRESS",
-                        },
-                        new AttributesToReturnItem
-                        {
-                            attribute = "DATE_OF_BIRTH",
-                        },
-                        new AttributesToReturnItem
-                        {
-                            attribute = "ADDRESSES",
-                        },
-                        new AttributesToReturnItem
-                        {
-                            attribute = "SSN",
-                        }
-                    }
+                    attributesToReturn = new List<AttributesToReturnItem>()
                 };
-          
+
+                if (!string.IsNullOrEmpty(settings.FrejaRequestedAttributes))
+                {
+                    var list = settings.FrejaRequestedAttributes.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var t in list)
+                    {
+                        request.attributesToReturn.Add(new AttributesToReturnItem() { attribute = t });
+                    }
+                }
+
 
                 var json_options = new JsonSerializerOptions
                 {
@@ -235,7 +232,7 @@ namespace Intwenty.Services
                             content.Headers.ContentType.MediaType = "application/json";
                             content.Headers.ContentType.CharSet = "utf-8";
                             response = await client.PostAsync("/authentication/1.0/cancel", content);
-                            return false;
+                            return null;
                         }
        
                         await Task.Delay(2000);
@@ -245,39 +242,35 @@ namespace Intwenty.Services
                         if (response.IsSuccessStatusCode == true)
                         {
                             string data = await response.Content.ReadAsStringAsync();
-                            // Convert data to a bankid response
                             status_response = JsonSerializer.Deserialize<FrejaStatusResponse>(data);
-                            if (status_response.status == "APPROVED")
+                            if (status_response.HasApprovedStatus)
                             {
-                                break;
+                                return status_response.requestedAttributes;
                             }
-                            else if (status_response.status == "STARTED" || status_response.status == "DELIVERED_TO_MOBILE" || status_response.status == "OPENED" || status_response.status == "OPENED")
+                            else if (status_response.HasWaitForUserStatus)
                             {
                                 continue;
                             }
                             else
                             {
                                 // CANCELED, RP_CANCELED, EXPIRED or REJECTED
-                                return false;
+                                return null;
                             }
                         }
                         else
                         {
-                            string data = await response.Content.ReadAsStringAsync();
-                            return false;
+                            return null;
                         }
                     }
                 }
                 else
                 {
-  
-                    string data = await response.Content.ReadAsStringAsync();
-                    return false;
+                    return null;
                 }
             }
             catch (Exception ex)
             {
-                return false;
+                
             }
             finally
             {
@@ -286,11 +279,14 @@ namespace Intwenty.Services
                     content.Dispose();
                 }
             }
-            return true;
+
+            return null;
         } 
 
         public async Task<bool> Sign(string userInfoType, string userInfo, Signature signature)
         {
+            throw new NotImplementedException();
+            /*
             // Variables
             StringContent content = null;
             FrejaStatusResponse status_response = null;
@@ -446,10 +442,13 @@ namespace Intwenty.Services
             }
  
             return true;
+            */
         } 
 
         public SignatureValidationResult Validate(Signature signature)
         {
+            throw new NotImplementedException();
+            /*
             // Create the result to return
             SignatureValidationResult result = new SignatureValidationResult();
             result.signature_data = signature.data;
@@ -490,7 +489,7 @@ namespace Intwenty.Services
 
 
             return result;
-
+            */
         } 
 
 

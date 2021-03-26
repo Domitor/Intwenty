@@ -148,21 +148,35 @@ namespace Intwenty.WebHostBuilder
 
             if (settings.UseFrejaEIdLogin)
             {
-                services.AddHttpClient<IFrejaClient, FrejaClientService>()
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                {
-                    HttpClientHandler handler = new HttpClientHandler
-                    {
-                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                        ClientCertificateOptions = ClientCertificateOption.Manual,
-                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
-                    };
-                    handler.ClientCertificates.Add(new X509Certificate2("C:\\DomitorConsultingAB.pfx", "5iTCTp"));
-                    return handler;
-                });
+                services.AddHttpClient<IFrejaClientService, FrejaClientService>()
+              .ConfigurePrimaryHttpMessageHandler(() =>
+              {
+                  HttpClientHandler handler = new HttpClientHandler
+                  {
+                      AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                      ClientCertificateOptions = ClientCertificateOption.Manual,
+                      SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                      ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
+                  };
 
+                  X509Store certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                  certStore.Open(OpenFlags.ReadOnly);
+                   X509Certificate2Collection certCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.FrejaClientCertThumbPrint, false);
+                  if (certCollection.Count > 0)
+                  {
+                      X509Certificate2 cert = certCollection[0];
+                      handler.ClientCertificates.Add(cert);
+                  }
+                  certStore.Close();
+                  return handler;
+              });
             }
+            else
+            {
+                services.AddHttpClient<IFrejaClientService, FrejaClientService>();
+            }
+
+           
 
 
             if (string.IsNullOrEmpty(settings.DefaultCulture))

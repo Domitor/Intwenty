@@ -94,7 +94,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             {
                 return LocalRedirect(returnUrl);
             }
-            if (result.IsLockedOut)
+            else if (result.IsLockedOut)
             {
                 return RedirectToPage("./Lockout");
             }
