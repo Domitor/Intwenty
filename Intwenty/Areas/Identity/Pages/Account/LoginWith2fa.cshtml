@@ -1,7 +1,7 @@
 ﻿@page
 @model LoginWith2faModel
 @{
-    ViewData["Title"] = "Two-factor authentication";
+    ViewData["Title"] = Localizer["Two-factor authentication"];
 }
 
 <br />
@@ -53,7 +53,7 @@
             <div class="form-group">
                 <div class="checkbox">
                     <label asp-for="Input.RememberMachine">
-                        <input asp-for="Input.RememberMachine" /> @Localizer["Rememeber Me"]
+                        <input asp-for="Input.RememberMachine" /> @Localizer["Remember Me"]
                     </label>
                 </div>
             </div>

@@ -41,6 +41,8 @@ namespace Intwenty.Seed
     
             var temp = new List<TranslationItem>();
 
+            temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "LOCKED_OUT_ACCOUNT", Text = "This account has been locked out, please try again later." });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "LOCKED_OUT_ACCOUNT", Text = "Det här kontot har spärrats, försök igen senare eller kontakta systemansvarig" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "API Key Updated", Text = "API nyckeln uppdaterades" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "You must type a user name and a password", Text = "Vänligen ange användarnamn och lösenord" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Invalid login attemt", Text = "Inloggningen misslyckades" });
