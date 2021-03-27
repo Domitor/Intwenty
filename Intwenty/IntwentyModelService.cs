@@ -1457,6 +1457,8 @@ namespace Intwenty
                         res = new OperationResult(false, MessageCode.SYSTEMERROR, "Error creating database objects: " + ex.Message);
                     else
                         res = new OperationResult(false, MessageCode.SYSTEMERROR, string.Format("Error creating database objects with tableprefix {0} " + ex.Message, tableprefix));
+
+                    DbLogger.LogErrorAsync(res.SystemError);
                 }
 
             });
@@ -2012,6 +2014,8 @@ namespace Intwenty
         {
             var res = string.Format("CREATE TABLE {0}", tablename) + " (";
             var sep = "";
+            var is_mysql_forced_pk = false;
+
             foreach (var c in columns)
             {
                 TypeMapItem dt;
@@ -2033,6 +2037,7 @@ namespace Intwenty
                         }
                         else if (Client.Database == DBMS.MariaDB || Client.Database == DBMS.MySql)
                         {
+                            is_mysql_forced_pk = true;
                             var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MariaDB && p.Key == "AUTOINC");
                             res += string.Format("`{0}` {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
                         }
@@ -2048,12 +2053,12 @@ namespace Intwenty
                         }
                         else
                         {
-                            res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                            res += sep + string.Format("{0} {1} NOT NULL", c.Name, dt.DBMSDataType);
                         }
                     }
                     else
                     {
-                        res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                        res += sep + string.Format("{0} {1} NOT NULL", c.Name, dt.DBMSDataType);
                     }
                 }
                 else
@@ -2068,6 +2073,7 @@ namespace Intwenty
                         }
                         else if (Client.Database == DBMS.MariaDB || Client.Database == DBMS.MySql)
                         {
+                            is_mysql_forced_pk = true;
                             var autoinccmd = Client.GetDbCommandMap().Find(p => p.DbEngine == DBMS.MariaDB && p.Key == "AUTOINC");
                             res += string.Format("`{0}` {1} {2} {3}", new object[] { c.Name, dt.DBMSDataType, "NOT NULL", autoinccmd.Command });
                         }
@@ -2083,16 +2089,21 @@ namespace Intwenty
                         }
                         else
                         {
-                            res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                            res += sep + string.Format("{0} {1} NOT NULL", c.Name, dt.DBMSDataType);
                         }
                     }
                     else
                     {
-                        res += sep + string.Format("{0} {1} not null", c.Name, dt.DBMSDataType);
+                        res += sep + string.Format("{0} {1} NOT NULL", c.Name, dt.DBMSDataType);
                     }
 
                 }
                 sep = ", ";
+            }
+
+            if (is_mysql_forced_pk)
+            {
+                res += sep + "PRIMARY KEY (Id)";
             }
 
             res += ")";

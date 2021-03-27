@@ -454,15 +454,15 @@ Vue.prototype.canSave = function () {
             }
             else {
                 if (metatype == "EMAILBOX") {
-                    var check = isValidEmail(context.model[dbtable][dbfield]);
-                    if (!check.result) {
+                    var check = context.model[dbtable][dbfield]
+                    if (check.indexOf("@") < 1) {
                         result = false;
                         $(this).addClass('requiredNotValid');
                     }
                 }
                 if (metatype == "PASSWORDBOX") {
-                    var check = isValidPassword(context.model[dbtable][dbfield]);
-                    if (!check.result) {
+                    var check = context.model[dbtable][dbfield].length;
+                    if (check > 40) {
                         result = false;
                         $(this).addClass('requiredNotValid');
                     }

@@ -301,7 +301,7 @@
                         },
                         error: function (response)
                         {
-                            raiseErrorModal(response);
+                            raiseErrorModal(response.responseJSON);
                         }
                     });
                 },
@@ -381,7 +381,7 @@
                             },
                             error: function (response)
                             {
-                                raiseErrorModal(response);
+                                raiseErrorModal(response.responseJSON);
                             }
                         });
                     };

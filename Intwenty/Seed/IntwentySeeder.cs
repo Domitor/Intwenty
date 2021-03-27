@@ -52,8 +52,6 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "FREJA_UNAVAILABLE", Text = "Vi ber om ursäkt, men det går inte att logga in för tillfället" });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "FREJA_INSTRUCTION", Text = "To login, open your Freja e ID app and scan the QR code below" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "FREJA_INSTRUCTION", Text = "För att logga in öppnar du appen Freja eID på din telefon och skannar sedan QR koden nedan." });
-
-
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "RESETPWDMAIL", Text = "Vi har skickat en länk till din epostadress, klicka på den för att återställa ditt lösenord." });
             temp.Add(new TranslationItem() { Culture = "en-US", TransKey = "RESETPWDMAIL", Text = "Please check your email to reset your password." });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Reset password confirmation", Text = "Bekräftelse på återställt lösenord" });
@@ -141,7 +139,6 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Join Group", Text = "Gå med i grupp" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "My Groups", Text = "Mina grupper" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "My role", Text = "Min roll" });
-            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Invite Member", Text = "Bjud in medlem" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Accept", Text = "Acceptera" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Members", Text = "Medlemmar" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Members of my groups", Text = "Medlemmar i mina grupper" });
@@ -193,6 +190,7 @@ namespace Intwenty.Seed
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Event", Text = "Händelse" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Leave", Text = "Lämna" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Name", Text = "Namn" });
+            temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Menu", Text = "Meny" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Rename", Text = "Ändra namn" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "Create new", Text = "Skapa ny" });
             temp.Add(new TranslationItem() { Culture = "sv-SE", TransKey = "New", Text = "Ny" });

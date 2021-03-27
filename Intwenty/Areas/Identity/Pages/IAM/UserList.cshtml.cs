@@ -63,7 +63,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             var result = await UserManager.CreateAsync(user, password);
 
             if (result.Succeeded)
-                await DbLogger.LogInfoAsync(string.Format("A new user {0} with temporary password {1} was created", user.UserName, password), username: user.UserName);
+                await DbLogger.LogIdentityActivityAsync("INFO", string.Format("A new user {0} with temporary password {1} was created", user.UserName, password), username: user.UserName);
 
             return await OnGetLoad();
         }

@@ -178,12 +178,17 @@ namespace Intwenty.Controllers
             return View();
         }
 
-        public IActionResult EventLog()
+        public IActionResult EventLog(string logname)
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
             if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
                 return Forbid();
+
+            if (string.IsNullOrEmpty(logname))
+                logname = "Intwenty";
+
+            ViewBag.LogName = logname;
 
             return View();
         }

@@ -83,10 +83,14 @@ namespace Intwenty.Services
             }
         }
 
-        public virtual async Task<List<EventLog>> GetEventLogAsync(string verbosity)
+        public virtual async Task<List<EventLog>> GetEventLogAsync(string verbosity, string logname)
         {
+            IDataClient client = null;
+            if (logname.ToUpper() == "IAM")
+                client = GetIAMDataClient();
+            else
+                client = GetDataClient();
 
-            var client = GetDataClient();
             await client.OpenAsync();
 
             try
@@ -107,7 +111,7 @@ namespace Intwenty.Services
             }
             catch (Exception ex)
             {
-                await LogErrorAsync("Error fetching eventlog - GetEventLog(string verbosity): " + ex.Message);
+                await LogErrorAsync("Error fetching eventlog - GetEventLog(): " + ex.Message);
             }
             finally
             {

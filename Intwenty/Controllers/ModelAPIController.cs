@@ -2754,10 +2754,15 @@ namespace Intwenty.Controllers
 
         #region Tools
 
-        [HttpGet("Model/API/GetEventlog/{verbosity?}")]
-        public async Task<IActionResult> GetEventlog(string verbosity)
+        [HttpGet("Model/API/GetEventlog/{logname?}")]
+        public async Task<IActionResult> GetEventlog(string logname)
         {
-            var log = await Dblogger.GetEventLogAsync(verbosity);
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+                return Forbid();
+
+            var log = await Dblogger.GetEventLogAsync(string.Empty, logname);
             return new JsonResult(log);
         }
 

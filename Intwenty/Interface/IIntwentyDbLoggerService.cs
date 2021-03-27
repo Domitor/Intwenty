@@ -19,7 +19,7 @@ namespace Intwenty.Interface
 
         Task LogIdentityActivityAsync(string verbosity, string message, string username = "");
 
-        Task<List<EventLog>> GetEventLogAsync(string verbosity);
+        Task<List<EventLog>> GetEventLogAsync(string verbosity, string logname);
     }
 
 }
