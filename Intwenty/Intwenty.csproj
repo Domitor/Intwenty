@@ -22,14 +22,14 @@
 - Fixed di bugs that caused error when running from dotnet run
 - Freja e-Id Authentication (Swedish Auth Provider)
 - Fixed bug in Forced two-factor authentication
-- Two factur authentication by user choice, via sms, email or totp app (Google/Microsft) Authenticator
+- Two factor authentication by user choice, via sms, email or totp app (Google/Microsft) Authenticator
 - Enabled localization in account management UI
 - Added seeding service
 - Add db logger service
 - Added sms service
 - Removed the startup class
 - Changes to IntwentySettings
-- And more
+- Lots of refactoring
 
 To upgrade from 1.6.6 ensure you use the new appsettings.js file  (IntwentySettings)</PackageReleaseNotes>
     <AssemblyVersion>1.7.0.0</AssemblyVersion>
