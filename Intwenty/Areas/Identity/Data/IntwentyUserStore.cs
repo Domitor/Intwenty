@@ -1,4 +1,5 @@
 ﻿using Intwenty.Areas.Identity.Entity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Pages.Account;
 using Intwenty.DataClient;
 using Intwenty.Model;

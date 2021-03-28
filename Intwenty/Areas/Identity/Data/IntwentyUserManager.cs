@@ -399,7 +399,7 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null || application == null)
                 throw new InvalidOperationException("Error authorizing application usage.");
 
-            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await this.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return true;
 
 
@@ -439,7 +439,7 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null || system == null)
                 throw new InvalidOperationException("Error authorizing system usage.");
 
-            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await this.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return true;
 
 
@@ -473,7 +473,7 @@ namespace Intwenty.Areas.Identity.Data
             if (user == null || requestedview == null)
                 throw new InvalidOperationException("Error authorizing view usage.");
 
-            if (await this.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await this.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return true;
 
 

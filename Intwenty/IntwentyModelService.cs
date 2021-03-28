@@ -600,7 +600,7 @@ namespace Intwenty
                 return res;
 
             var systems = GetSystemModels();
-            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await UserManager.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return systems;
 
             var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
@@ -642,7 +642,7 @@ namespace Intwenty
                 return res;
 
             var apps = GetApplicationDescriptions();
-            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await UserManager.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return apps;
 
             var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);
@@ -698,7 +698,7 @@ namespace Intwenty
                 viewmodels.AddRange(a.Views);
             }
 
-            if (await UserManager.IsInRoleAsync(user, "SUPERADMIN"))
+            if (await UserManager.IsInRoleAsync(user, IntwentyRoles.RoleSuperAdmin))
                 return viewmodels;
 
             var authorizations = await UserManager.GetUserAuthorizationsAsync(user, Settings.ProductId);

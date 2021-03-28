@@ -13,6 +13,7 @@ using Intwenty.Services;
 using Intwenty.WebHostBuilder;
 using IntwentyDemo.Services;
 using IntwentyDemo.Seed;
+using Intwenty.Areas.Identity.Models;
 
 namespace IntwentyDemo
 {
@@ -49,13 +50,7 @@ namespace IntwentyDemo
 
                         var configuration = buildercontext.Configuration;
                         var settings = configuration.GetSection("IntwentySettings").Get<IntwentySettings>();
-                        var adminroles = new string[] { "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
-                        var userroles = new string[] { "USER", "SUPERADMIN", "USERADMIN", "SYSTEMADMIN" };
-                        var iamroles = new string[] { };
-                        if (settings.UseSeparateIAMDatabase)
-                            iamroles = new string[] { "SUPERADMIN" };
-                        else
-                            iamroles = new string[] { "SUPERADMIN", "USERADMIN" };
+                       
 
                         //****** Required ******
                         //Plug in your own communication service that implements IIntwentyEmailService and IIntwentySmsService
@@ -80,20 +75,20 @@ namespace IntwentyDemo
                             options.AddPolicy("IntwentyAppAuthorizationPolicy", policy =>
                             {
                                 //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                                policy.RequireRole(userroles);
+                                policy.RequireRole(IntwentyRoles.UserRoles);
                             });
 
                             options.AddPolicy("IntwentyModelAuthorizationPolicy", policy =>
                             {
                                 //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                                policy.RequireRole(adminroles);
+                                policy.RequireRole(IntwentyRoles.AdminRoles);
 
                             });
 
                             options.AddPolicy("IntwentyUserAdminAuthorizationPolicy", policy =>
                             {
                                 //Anonymus = policy.AddRequirements(new IntwentyAllowAnonymousAuthorization());
-                                policy.RequireRole(iamroles);
+                                policy.RequireRole(IntwentyRoles.IAMRoles);
 
 
                             });

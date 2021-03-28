@@ -1,5 +1,6 @@
 ﻿using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Entity;
+using Intwenty.Areas.Identity.Models;
 using Intwenty.DataClient;
 using Intwenty.Entity;
 using Intwenty.Interface;
@@ -340,52 +341,52 @@ namespace Intwenty.Seed
 
 
 
-                var admrole = await RoleManager.FindByNameAsync("SUPERADMIN");
+                var admrole = await RoleManager.FindByNameAsync(IntwentyRoles.RoleSuperAdmin);
                 if (admrole == null)
                 {
                     var role = new IntwentyProductAuthorizationItem();
                     role.ProductId = product.Id;
-                    role.Name = "SUPERADMIN";
+                    role.Name = IntwentyRoles.RoleSuperAdmin;
                     role.AuthorizationType = "ROLE";
                     await RoleManager.CreateAsync(role);
                 }
 
-                admrole = await RoleManager.FindByNameAsync("USERADMIN");
+                admrole = await RoleManager.FindByNameAsync(IntwentyRoles.RoleUserAdmin);
                 if (admrole == null)
                 {
                     var role = new IntwentyProductAuthorizationItem();
                     role.ProductId = product.Id;
-                    role.Name = "USERADMIN";
+                    role.Name = IntwentyRoles.RoleUserAdmin;
                     role.AuthorizationType = "ROLE";
                     await RoleManager.CreateAsync(role);
                 }
 
-                admrole = await RoleManager.FindByNameAsync("SYSTEMADMIN");
+                admrole = await RoleManager.FindByNameAsync(IntwentyRoles.RoleSystemAdmin);
                 if (admrole == null)
                 {
                     var role = new IntwentyProductAuthorizationItem();
                     role.ProductId = product.Id;
-                    role.Name = "SYSTEMADMIN";
+                    role.Name = IntwentyRoles.RoleSystemAdmin;
                     role.AuthorizationType = "ROLE";
                     await RoleManager.CreateAsync(role);
                 }
 
-                var userrole = await RoleManager.FindByNameAsync("USER");
+                var userrole = await RoleManager.FindByNameAsync(IntwentyRoles.RoleUser);
                 if (userrole == null)
                 {
                     var role = new IntwentyProductAuthorizationItem();
                     role.ProductId = product.Id;
-                    role.Name = "USER";
+                    role.Name = IntwentyRoles.RoleUser;
                     role.AuthorizationType = "ROLE";
                     await RoleManager.CreateAsync(role);
                 }
 
-                userrole = await RoleManager.FindByNameAsync("APIUSER");
+                userrole = await RoleManager.FindByNameAsync(IntwentyRoles.RoleAPIUser);
                 if (userrole == null)
                 {
                     var role = new IntwentyProductAuthorizationItem();
                     role.ProductId = product.Id;
-                    role.Name = "APIUSER";
+                    role.Name = IntwentyRoles.RoleAPIUser;
                     role.AuthorizationType = "ROLE";
                     await RoleManager.CreateAsync(role);
                 }
@@ -410,7 +411,7 @@ namespace Intwenty.Seed
                     if (admin_member == null)
                     {
                         await OrganizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = admin_user.Id, UserName = admin_user.UserName });
-                        await UserManager.AddUpdateUserRoleAuthorizationAsync("SUPERADMIN", admin_user.Id, org.Id, Settings.ProductId);
+                        await UserManager.AddUpdateUserRoleAuthorizationAsync(IntwentyRoles.RoleSuperAdmin, admin_user.Id, org.Id, Settings.ProductId);
                     }
                 }
 
@@ -434,7 +435,7 @@ namespace Intwenty.Seed
                     if (user_member == null)
                     {
                         await OrganizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = default_user.Id, UserName = default_user.UserName });
-                        await UserManager.AddUpdateUserRoleAuthorizationAsync("USER", default_user.Id, org.Id, Settings.ProductId);
+                        await UserManager.AddUpdateUserRoleAuthorizationAsync(IntwentyRoles.RoleUser, default_user.Id, org.Id, Settings.ProductId);
                     }
                 }
             });

@@ -55,7 +55,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var res = await ModelRepository.GetAuthorizedSystemModelsAsync(User);
@@ -69,7 +69,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -153,7 +153,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetApplicationModel(applicationid);
@@ -169,7 +169,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = await ModelRepository.GetAuthorizedApplicationModelsAsync(User);
@@ -183,7 +183,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
 
@@ -305,7 +305,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -371,7 +371,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -525,7 +525,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -591,7 +591,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -641,7 +641,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = new DatabaseModelItem();
@@ -657,7 +657,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -674,7 +674,7 @@ namespace Intwenty.Controllers
             if (!User.Identity.IsAuthenticated)
                 if (!User.Identity.IsAuthenticated)
                     return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var appmodel = ModelRepository.GetApplicationModel(applicationid);
@@ -698,7 +698,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == applicationid);
@@ -717,7 +717,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             return new JsonResult(IntwentyRegistry.IntwentyProperties);
@@ -732,7 +732,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -829,7 +829,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -976,7 +976,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetApplicationModel(applicationid);
@@ -993,7 +993,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1079,7 +1079,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1142,7 +1142,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1192,7 +1192,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1244,7 +1244,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1290,7 +1290,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var appmodel = ModelRepository.GetApplicationModel(applicationid);
@@ -1318,7 +1318,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var appmodel = ModelRepository.GetApplicationModel(applicationid);
@@ -1364,7 +1364,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1579,7 +1579,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1764,7 +1764,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetValueDomains();
@@ -1780,7 +1780,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var vd = ModelRepository.GetValueDomains();
@@ -1797,7 +1797,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1822,7 +1822,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -1858,7 +1858,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var t = ModelRepository.GetExportModel();
@@ -1890,7 +1890,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var result = new OperationResult();
@@ -1928,7 +1928,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var client = DataRepository.GetDataClient();
@@ -1989,7 +1989,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var result = new OperationResult();
@@ -2087,7 +2087,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var res = new List<TranslationVm>();
@@ -2301,7 +2301,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
 
@@ -2353,7 +2353,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2458,7 +2458,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2512,7 +2512,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2551,7 +2551,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2597,7 +2597,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var res = new EndpointManagementVm();
@@ -2639,7 +2639,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2719,7 +2719,7 @@ namespace Intwenty.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             try
@@ -2759,7 +2759,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var log = await Dblogger.GetEventLogAsync(string.Empty, logname);
@@ -2774,7 +2774,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var res = await ModelRepository.ConfigureDatabase();
@@ -2789,7 +2789,7 @@ namespace Intwenty.Controllers
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
-            if (!User.IsInRole("SYSTEMADMIN") && !User.IsInRole("SUPERADMIN"))
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
                 return Forbid();
 
             var client = DataRepository.GetDataClient();
