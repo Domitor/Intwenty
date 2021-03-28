@@ -53,7 +53,7 @@ namespace Intwenty.Areas.Identity.Data
             if (allusers.Exists(p => p.UserName == user.UserName))
                 return IdentityResult.Failed();
 
-            IAMCache.Remove(UsersCacheKey);
+         
 
             var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
 
@@ -73,6 +73,9 @@ namespace Intwenty.Areas.Identity.Data
 
             await client.InsertEntityAsync(user);
             await client.CloseAsync();
+
+            IAMCache.Remove(UsersCacheKey);
+
             return IdentityResult.Success;
         }
 
@@ -228,16 +231,16 @@ namespace Intwenty.Areas.Identity.Data
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Replaced by UserManager.AddUserAuthemticationAsync
-        /// </summary>
-        [Obsolete]
+      
         public Task AddToRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            throw new NotImplementedException();
         }
 
-       
+        public Task<IList<IntwentyUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<IList<string>> GetRolesAsync(IntwentyUser user, CancellationToken cancellationToken)
         {
@@ -257,10 +260,7 @@ namespace Intwenty.Areas.Identity.Data
             return result;
         }
 
-        public Task<IList<IntwentyUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+      
 
         public async Task<bool> IsInRoleAsync(IntwentyUser user, string roleName, CancellationToken cancellationToken)
         {

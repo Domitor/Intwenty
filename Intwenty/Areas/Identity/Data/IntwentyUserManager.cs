@@ -52,6 +52,39 @@ namespace Intwenty.Areas.Identity.Data
             return base.ChangePhoneNumberAsync(user, phoneNumber, token);
         }
 
+        /// <summary>
+        /// Dont use with Intwenty: Replaced with AddUpdateUserRoleAuthorizationAsync()
+        /// </summary>
+        public override Task<IdentityResult> AddToRoleAsync(IntwentyUser user, string role)
+        {
+            return Task.FromResult(IdentityResult.Failed());
+        }
+
+        /// <summary>
+        /// Dont use with Intwenty: Replaced with AddUpdateUserRoleAuthorizationAsync()
+        /// </summary>
+        public override Task<IdentityResult> AddToRolesAsync(IntwentyUser user, IEnumerable<string> roles)
+        {
+            return Task.FromResult(IdentityResult.Failed());
+        }
+
+        /// <summary>
+        /// Dont use with Intwenty: Replaced with RemoveUserAuthorizationAsync()
+        /// </summary>
+        public override Task<IdentityResult> RemoveFromRoleAsync(IntwentyUser user, string role)
+        {
+            
+            return Task.FromResult(IdentityResult.Failed());
+        }
+
+        /// <summary>
+        /// Dont use with Intwenty: Replaced with RemoveUserAuthorizationAsync()
+        /// </summary>
+        public override Task<IdentityResult> RemoveFromRolesAsync(IntwentyUser user, IEnumerable<string> roles)
+        {
+            return Task.FromResult(IdentityResult.Failed());
+        }
+
         public async Task<IntwentyMfaStatus> GetTwoFactorStatus(IntwentyUser user)
         {
             var result = new IntwentyMfaStatus();

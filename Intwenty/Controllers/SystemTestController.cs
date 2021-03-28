@@ -33,7 +33,7 @@ namespace Intwenty.Controllers
         private readonly IntwentySettings _settings;
         private readonly IntwentyUserManager _usermanager;
         private readonly IIntwentyOrganizationManager _orgmanager;
-        private readonly SignInManager<IntwentyUser> _signinmanager;
+        private readonly IntwentySignInManager _signinmanager;
         private readonly RoleManager<IntwentyProductAuthorizationItem> _rolemanager;
         private readonly IHubContext<ServerToClientPush> _hubContext;
 
@@ -41,7 +41,7 @@ namespace Intwenty.Controllers
                                     IIntwentyDataService dataservice,
                                     IOptions<IntwentySettings> settings,
                                     IntwentyUserManager usermgr,
-                                    SignInManager<IntwentyUser> signinmgr,
+                                    IntwentySignInManager signinmgr,
                                     RoleManager<IntwentyProductAuthorizationItem> rolemgr,
                                     IIntwentyOrganizationManager orgmanager,
                                     IHubContext<ServerToClientPush> hubcontext,
@@ -91,6 +91,12 @@ namespace Intwenty.Controllers
             {
                 db.RunCommand(string.Format("DROP TABLE {0}", model.DbName));
             }
+
+            if (simplemodel != null && db.TableExists(simplemodel.DbName))
+            {
+                db.RunCommand(string.Format("DROP TABLE {0}", simplemodel.DbName));
+            }
+
             if (model != null && db.TableExists(model.VersioningTableName))
             {
                 db.RunCommand(string.Format("DROP TABLE {0}", model.VersioningTableName));
@@ -107,17 +113,10 @@ namespace Intwenty.Controllers
             {
                 db.RunCommand("DROP TABLE tests_TestDataIndexNoAutoInc");
             }
-
             if (db.TableExists("tests_TestData2AutoInc"))
             {
                 db.RunCommand("DROP TABLE tests_TestData2AutoInc");
-            }
-
-
-            if (simplemodel != null && db.TableExists(simplemodel.DbName))
-            {
-                db.RunCommand(string.Format("DROP TABLE {0}", simplemodel.DbName));
-            }
+            }      
            
 
             if (model != null)
@@ -134,7 +133,7 @@ namespace Intwenty.Controllers
             {
                 var dbmodels = _modelservice.GetDatabaseModels().Where(p => p.AppMetaCode == simplemodel.MetaCode && !p.IsFrameworkItem && p.SystemMetaCode == simplemodel.SystemMetaCode);
                 foreach (var dbitem in dbmodels)
-                    db.DeleteEntity(new DatabaseItem() { Id = simplemodel.Id });
+                    db.DeleteEntity(new DatabaseItem() { Id = dbitem.Id });
 
                 db.DeleteEntity(new ApplicationItem() { Id = simplemodel.Id });
             }
@@ -961,6 +960,10 @@ namespace Intwenty.Controllers
 
             try
             {
+                IntwentyOrganization org = _orgmanager.FindByNameAsync(_settings.DefaultProductOrganization).Result;
+                if (org==null)
+                    throw new InvalidOperationException("Could not retrieve default organization, not seeded ?");
+
                 var retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole != null)
                     _rolemanager.DeleteAsync(retrievedrole);
@@ -972,8 +975,10 @@ namespace Intwenty.Controllers
                     var retval = _usermanager.DeleteAsync(retrieveduser).Result;
                 }
 
-                var user = new IntwentyUser() { Email = "systemtest@systemtest.com", FirstName = "Testony", LastName = "Testson", UserName = "systemtest@systemtest.com" };
-                _usermanager.CreateAsync(user, "testpassword");
+                var user = new IntwentyUser() { UserName = "systemtest@systemtest.com", Email = "systemtest@systemtest.com", FirstName = "Testony", LastName = "Testson" };
+                var createresult = _usermanager.CreateAsync(user, "testpassword").Result;
+                if (!createresult.Succeeded)
+                    throw new InvalidOperationException("Create user failed");
 
                 retrieveduser = _usermanager.FindByNameAsync(user.UserName).Result;
                 if (retrieveduser == null)
@@ -981,15 +986,23 @@ namespace Intwenty.Controllers
                 if (string.IsNullOrEmpty(retrieveduser.Id))
                     throw new InvalidOperationException("The inserted user has no id");
 
+               var addmemberresult =  _orgmanager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName  }).Result;
+                if (!addmemberresult.Succeeded)
+                    throw new InvalidOperationException("Add user to organization failed");
+
+
                 var role = new IntwentyProductAuthorizationItem() { Name = "TESTXROLE", NormalizedName = "TESTXROLE", AuthorizationType = "ROLE", ProductId = _settings.ProductId };
-                _rolemanager.CreateAsync(role);
+                var roleresult = _rolemanager.CreateAsync(role).Result;
+                if (!roleresult.Succeeded)
+                    throw new InvalidOperationException("Create role failed");
+
                 retrievedrole = _rolemanager.FindByNameAsync("TESTXROLE").Result;
                 if (retrievedrole == null)
                     throw new InvalidOperationException("The inserted role could not be retrieved");
                 if (string.IsNullOrEmpty(retrievedrole.Id))
                     throw new InvalidOperationException("The inserted role has no id");
 
-                IntwentyOrganization org = _orgmanager.FindByNameAsync(_settings.DefaultProductOrganization).Result;
+               
                 var addresult = _usermanager.AddUpdateUserRoleAuthorizationAsync("TESTXROLE", retrieveduser.Id, org.Id, _settings.ProductId).Result;
                 if (!_usermanager.IsInRoleAsync(retrieveduser, "TESTXROLE").Result)
                     throw new InvalidOperationException("UserManager.IsInRoleAsync returned false for TESTXROLE, despite it was assigned to the user");
@@ -1018,13 +1031,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("The delete user could be retrieved despite it was deleted");
 
 
-                /*
-                var signinresult = _signinmanager.PasswordSignInAsync(retrieveduser.UserName, "testpassword", false, false).Result;
-                if (!signinresult.Succeeded)
-                    throw new InvalidOperationException("The inserted user could not be signed in");
-
-                _signinmanager.SignOutAsync();
-                */
+             
 
                 result.Finish();
                 _dbloggerservice.LogInfoAsync(string.Format("Test Case: Test18TestIdentity lasted  {0} ms", result.Duration));
@@ -1059,7 +1066,6 @@ namespace Intwenty.Controllers
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "INTVALUE", DbName = "IntValue", ParentMetaCode = "ROOT", DataType = "INTEGER" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE", DbName = "DecValue", ParentMetaCode = "ROOT", DataType = "3DECIMAL" });
                 dbstore.InsertEntity(new DatabaseItem() { SystemMetaCode = system.MetaCode, AppMetaCode = "SIMPLEAPP", MetaType = "DATACOLUMN", MetaCode = "DECVALUE2", DbName = "DecValue2", ParentMetaCode = "ROOT", DataType = "2DECIMAL" });
-                
                 dbstore.Close();
 
                 _modelservice.ClearCache();

@@ -12,6 +12,7 @@ using System.Linq;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.DataClient.Model;
 using Microsoft.Extensions.Caching.Memory;
+using Intwenty.Interface;
 
 namespace Intwenty.Areas.Identity.Data
 {
@@ -45,13 +46,15 @@ namespace Intwenty.Areas.Identity.Data
     {
 
         private IntwentySettings Settings { get; }
-
         private IMemoryCache AuthCache { get; }
+        private IIntwentyDbLoggerService DbLogger { get; }
 
-        public IntwentyOrganizationManager(IOptions<IntwentySettings> settings, IMemoryCache cache) 
+        public IntwentyOrganizationManager(IOptions<IntwentySettings> settings, IMemoryCache cache, IIntwentyDbLoggerService logservice) 
         {
             Settings = settings.Value;
             AuthCache = cache;
+            DbLogger = logservice;
+
         }
 
         public IDataClient GetIAMDataClient()
@@ -152,6 +155,40 @@ namespace Intwenty.Areas.Identity.Data
             if (allexisting.Exists(p=> p.OrganizationId == member.OrganizationId && p.UserId == member.UserId))
                 return IdentityResult.Success;
 
+
+            //----------------------------------------------------------
+            //Get all organizations products
+            client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var orgproducts = await client.GetEntitiesAsync<IntwentyOrganizationProduct>();
+            await client.CloseAsync();
+
+            //Get the products in the org that the user will be added to
+            var products_in_the_new_org = orgproducts.FindAll(p => p.OrganizationId == member.OrganizationId);
+
+            //Get all other orgs that the user belongs to
+            var current_member_orgs = allexisting.FindAll(p => p.UserId == member.UserId && p.OrganizationId != member.OrganizationId);
+
+            foreach (var org in current_member_orgs) 
+            {
+                //Get product for an org that the user belongs to
+                var products_in_the_current_orgs = orgproducts.FindAll(p => p.OrganizationId == org.OrganizationId);
+                foreach (var prod in products_in_the_current_orgs)
+                {
+                    //Ilegal case, user cant be added to an org that has a product that exists on another org that the user belongs to
+                    //The system must be abel to identify an org based on a user and a product
+                    if (products_in_the_new_org.Exists(p => p.ProductId == prod.ProductId))
+                    {
+                        var error =  string.Format("User {0} cant be added to this organization since it has a product that is used by another organization where the user is a member", member.UserName);
+                        await DbLogger.LogIdentityActivityAsync("ERROR", error);
+                        return IdentityResult.Failed(new IdentityError() { Code = "MEMBER_HAS_PRODUCT_IN_OTHER_ORG", Description=error });
+
+                    }
+                   
+                }
+            }
+            //---------------------------------------------------
+
             await client.OpenAsync();
             var t = await client.InsertEntityAsync(member);
             await client.CloseAsync();
@@ -191,6 +228,41 @@ namespace Intwenty.Areas.Identity.Data
             await client.CloseAsync();
             if (allexisting.Exists(p => p.OrganizationId == product.OrganizationId && p.ProductId == product.ProductId))
                 return IdentityResult.Success;
+
+
+            //----------------------------------------------------------
+            //Get all organizations members
+            client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
+            await client.OpenAsync();
+            var orgmembers = await client.GetEntitiesAsync<IntwentyOrganizationMember>();
+            await client.CloseAsync();
+
+            //Get the members in the org that the product will be added to
+            var members_in_the_org_that_products_is_added_to = orgmembers.FindAll(p => p.OrganizationId == product.OrganizationId);
+
+            //Get all other orgs that the product added belongs to
+            var current_product_orgs = allexisting.FindAll(p => p.ProductId == product.ProductId && p.OrganizationId != product.OrganizationId);
+
+            foreach (var org in current_product_orgs)
+            {
+                //Get product for an org that the user belongs to
+                var members_in_the_current_orgs = orgmembers.FindAll(p => p.OrganizationId == org.OrganizationId);
+                foreach (var member in members_in_the_current_orgs)
+                {
+                    //Ilegal case, product cant be added to an org that has members that exists on another orgs that already has the procuct
+                    //The system must be able to identify an org based on a user and a product
+                    if (members_in_the_org_that_products_is_added_to.Exists(p => p.UserId == member.UserId))
+                    {
+                        var error = string.Format("Product {0} cant be added to the org since it has members that is members in another organization that use the same product", product.ProductName);
+                        await DbLogger.LogIdentityActivityAsync("ERROR", error);
+                        return IdentityResult.Failed(new IdentityError() { Code = "PRODUCT_HAS_SAME_USER_IN_OTHER_ORG", Description = error });
+                    }
+                }
+            }
+            //---------------------------------------------------
+
+
+
 
             await client.OpenAsync();
             var t = await client.InsertEntityAsync(product);

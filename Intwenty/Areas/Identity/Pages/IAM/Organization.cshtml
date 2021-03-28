@@ -35,6 +35,24 @@
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
+    <div class="alert alert-danger fade show" role="alert" v-if="resultCode=='UNEXPECTED_ERROR'">
+        An error occured !
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="alert alert-danger fade show" role="alert" v-if="resultCode=='MEMBER_HAS_PRODUCT_IN_OTHER_ORG'">
+        User cant be added to this organization since it has a product that is used in another organization where the user is a member
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="alert alert-danger fade show" role="alert" v-if="resultCode=='PRODUCT_HAS_SAME_USER_IN_OTHER_ORG'">
+        Product cant be added since it has members that is members in other organizations that use the same product
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 
     <br />
 
@@ -179,7 +197,8 @@
                 product: {},
                 users: [],
                 products: [],
-                idgen: -1
+                idgen: -1,
+                resultCode:""
             },
             methods: {
 
@@ -214,7 +233,7 @@
                 {
 
                     var context = this;
-
+                    context.resultCode = "";
                     context.updateEntity();
 
                     context.member = {organizationId:@Model.Id};
@@ -239,7 +258,8 @@
                             },
                             error: function (response)
                             {
-                                //raiseErrorModal(response.responseJSON);
+                                if (response.responseJSON.userError)
+                                    context.resultCode = response.responseJSON.userError;
                             }
                         });
                     }
@@ -250,7 +270,8 @@
                 },
                removeMember: function (item)
                 {
-                    var context = this;
+                   var context = this;
+                   context.resultCode = "";
                     var yesfunc = function ()
                     {
 
@@ -281,7 +302,7 @@
                 {
 
                     var context = this;
-
+                    context.resultCode = "";
                     context.updateEntity();
 
                     context.product = {};
@@ -309,7 +330,8 @@
                             },
                             error: function (response)
                             {
-                                //raiseErrorModal(response.responseJSON);
+                                if (response.responseJSON.userError)
+                                    context.resultCode = response.responseJSON.userError;
                             }
                         });
                     }

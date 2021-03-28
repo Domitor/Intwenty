@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Intwenty.Areas.Identity.Data;
+using Intwenty.Model.Dto;
 
 namespace Intwenty.Areas.Identity.Pages.IAM
 {
@@ -104,7 +105,19 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             if (user==null)
                 return await OnGetLoad(model.OrganizationId);
 
-            await OrganizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = model.OrganizationId,  UserId = model.UserId, UserName = user.UserName });
+            var result = await OrganizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = model.OrganizationId,  UserId = model.UserId, UserName = user.UserName });
+            if (!result.Succeeded) 
+            {
+                var error = new OperationResult();
+                if (result.Errors != null && result.Errors.Count() > 0)
+                    error.AddMessage(MessageCode.USERERROR, result.Errors.FirstOrDefault().Code);
+                else
+                    error.AddMessage(MessageCode.USERERROR, "UNEXPECTED_ERROR");
+
+
+                return new JsonResult(error) { StatusCode = 500 };
+
+            }
             return await OnGetLoad(model.OrganizationId);
 
         }
@@ -118,7 +131,20 @@ namespace Intwenty.Areas.Identity.Pages.IAM
 
         public async Task<IActionResult> OnPostAddProduct([FromBody] IntwentyOrganizationProduct model)
         {
-            await OrganizationManager.AddProductAsync(model);
+            var result = await OrganizationManager.AddProductAsync(model);
+            if (!result.Succeeded)
+            {
+                var error = new OperationResult();
+                if (result.Errors != null && result.Errors.Count() > 0)
+                    error.AddMessage(MessageCode.USERERROR,result.Errors.FirstOrDefault().Code);
+                else
+                    error.AddMessage(MessageCode.USERERROR, "UNEXPECTED_ERROR");
+
+
+                return new JsonResult(error) { StatusCode = 500 };
+
+            }
+
             return await OnGetLoad(model.OrganizationId);
         }
 
