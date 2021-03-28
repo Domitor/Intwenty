@@ -122,13 +122,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var createaccount_result = await _userManager.CreateAsync(user);
                 if (createaccount_result.Succeeded)
                 {
-                    var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
+                    var org = await _organizationManager.FindByNameAsync(_settings.ProductOrganization);
                     if (org != null)
                     {
-                        if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                        if (!string.IsNullOrEmpty(_settings.AccountsRegistrationAssignRoles))
                         {
 
-                            var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                            var roles = _settings.AccountsRegistrationAssignRoles.Split(",".ToCharArray());
                             foreach (var r in roles)
                             {
                                 await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);

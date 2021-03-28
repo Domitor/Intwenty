@@ -26,7 +26,7 @@ namespace Intwenty.WebHostBuilder
         {
 
 
-            if (settings.Value.ForceMfaAuthentication && httpcontext.User.Identity.IsAuthenticated)
+            if (settings.Value.TwoFactorForced && httpcontext.User.Identity.IsAuthenticated)
             {
                 var user = await usermanager.FindByNameAsync(httpcontext.User.Identity.Name);
                

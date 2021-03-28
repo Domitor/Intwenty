@@ -90,7 +90,7 @@ namespace Intwenty.WebHostBuilder
             //Required for Intwenty if Identity is used
             services.AddIdentity<IntwentyUser, IntwentyProductAuthorizationItem>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = settings.RequireConfirmedAccount;
+                options.SignIn.RequireConfirmedAccount = settings.AccountsRequireConfirmed;
 
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -130,8 +130,8 @@ namespace Intwenty.WebHostBuilder
             {
                 services.AddAuthentication().AddFacebook(options =>
                 {
-                    options.AppId = settings.FacebookAppId;
-                    options.AppSecret = settings.FacebookAppSecret;
+                    options.AppId = settings.AccountsFacebookAppId;
+                    options.AppSecret = settings.AccountsFacebookAppSecret;
 
                 });
             }
@@ -140,8 +140,8 @@ namespace Intwenty.WebHostBuilder
             {
                 services.AddAuthentication().AddGoogle(options =>
                 {
-                    options.ClientId = settings.GoogleClientId;
-                    options.ClientSecret = settings.GoogleClientSecret;
+                    options.ClientId = settings.AccountsGoogleClientId;
+                    options.ClientSecret = settings.AccountsGoogleClientSecret;
 
                 });
             }
@@ -179,19 +179,19 @@ namespace Intwenty.WebHostBuilder
            
 
 
-            if (string.IsNullOrEmpty(settings.DefaultCulture))
+            if (string.IsNullOrEmpty(settings.LocalizationDefaultCulture))
                 throw new InvalidOperationException("Could not find DefaultCulture in setting file");
-            if (settings.SupportedLanguages == null)
+            if (settings.LocalizationSupportedLanguages == null)
                 throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
-            if (settings.SupportedLanguages.Count == 0)
+            if (settings.LocalizationSupportedLanguages.Count == 0)
                 throw new InvalidOperationException("Could not find SupportedLanguages in setting file");
 
-            var supportedCultures = settings.SupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
+            var supportedCultures = settings.LocalizationSupportedLanguages.Select(p => new CultureInfo(p.Culture)).ToList();
             services.Configure<RequestLocalizationOptions>(
                 options =>
                 {
                     options.AddInitialRequestCultureProvider(new UserCultureProvider());
-                    options.DefaultRequestCulture = new RequestCulture(culture: settings.DefaultCulture, uiCulture: settings.DefaultCulture);
+                    options.DefaultRequestCulture = new RequestCulture(culture: settings.LocalizationDefaultCulture, uiCulture: settings.LocalizationDefaultCulture);
                     options.SupportedCultures = supportedCultures;
                     options.SupportedUICultures = supportedCultures;
                     options.RequestCultureProviders.Insert(0, new UserCultureProvider());
@@ -209,7 +209,7 @@ namespace Intwenty.WebHostBuilder
                 
             }).AddViewLocalization();
 
-            if (settings.UseIntwentyAPI)
+            if (settings.APIEnable)
             {
                 services.AddSwaggerGen(options =>
                 {
@@ -290,7 +290,7 @@ namespace Intwenty.WebHostBuilder
                     var modelservice = serviceProvider.GetRequiredService<IIntwentyModelService>();
 
                     //REGISTER ENDPOINTS
-                    if (settings.UseIntwentyAPI)
+                    if (settings.APIEnable)
                     {
                         var epmodels = modelservice.GetEndpointModels();
 
@@ -345,7 +345,7 @@ namespace Intwenty.WebHostBuilder
         private static void ConfigureIntwentyTwoFactorAuth(this IApplicationBuilder builder, IntwentySettings settings)
         {
 
-            if (settings.ForceMfaAuthentication)
+            if (settings.TwoFactorForced)
             {
                 builder.UseMiddleware<Forced2FaMiddleware>();
             }
@@ -354,7 +354,7 @@ namespace Intwenty.WebHostBuilder
 
         private static void ConfigureIntwentyAPI(this IApplicationBuilder builder, IntwentySettings settings)
         {
-            if (settings.UseIntwentyAPI)
+            if (settings.APIEnable)
             {
                 // Enable middleware to serve generated Swagger as a JSON endpoint.
                 builder.UseSwagger();
@@ -389,31 +389,31 @@ namespace Intwenty.WebHostBuilder
 
                 //The order is important
 
-                if (settings.SeedLocalizationsOnStartUp)
+                if (settings.StartUpSeedLocalizations)
                 {
                     seederservice.SeedLocalization();
                 }
-                if (settings.SeedProductAndOrganizationOnStartUp)
+                if (settings.StartUpSeedProductAndOrganization)
                 {
                     seederservice.SeedProductAndOrganization();
                 }
-                if (settings.SeedDemoUserAccountsOnStartUp)
+                if (settings.StartUpSeedDemoUserAccounts)
                 {
                     seederservice.SeedUsersAndRoles();
                 }
-                if (settings.SeedModelOnStartUp)
+                if (settings.StartUpSeedModel)
                 {
                     seederservice.SeedModel();
                 }
-                if (settings.SeedDataOnStartUp)
+                if (settings.StartUpSeedData)
                 {
                     seederservice.SeedData();
                 }
-                if (settings.ConfigureDatabaseOnStartUp)
+                if (settings.StartUpConfigureDatabase)
                 {
                     seederservice.ConfigureDataBase();
                 }
-                if (settings.SeedProductAndOrganizationOnStartUp)
+                if (settings.StartUpSeedProductAndOrganization)
                 {
                     seederservice.SeedProductAuthorizationItems();
                 }
@@ -423,7 +423,7 @@ namespace Intwenty.WebHostBuilder
         private static void CreateIntwentyFrameworkTables(IntwentySettings settings)
         {
 
-            if (!settings.CreateIntwentyDbObjectsOnStartUp)
+            if (!settings.StartUpIntwentyDbObjects)
                 return;
 
             var client = new Connection(settings.DefaultConnectionDBMS, settings.DefaultConnection);
@@ -464,7 +464,7 @@ namespace Intwenty.WebHostBuilder
         private static void CreateIntwentyIAMTables(IntwentySettings settings)
         {
 
-            if (!settings.CreateIntwentyDbObjectsOnStartUp)
+            if (!settings.StartUpIntwentyDbObjects)
                 return;
 
             var client = new Connection(settings.IAMConnectionDBMS, settings.IAMConnection);

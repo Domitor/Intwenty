@@ -22,7 +22,7 @@ namespace IntwentyDemo.Services
         {
             await base.NewUserCreated(data);
 
-            var mailmsg = string.Format("<br /><br /><b>Thank you for registering an account at {0}</b><br /><br />", Settings.SiteTitle);
+            var mailmsg = string.Format("<br /><br /><b>Thank you for registering an account at {0}</b><br /><br />", Settings.ProductTitle);
             mailmsg += $"Please confirm that this was sent to your email by <a href='{HtmlEncoder.Default.Encode(data.ConfirmCallbackUrl)}'>clicking here</a>";
             await EmailService.SendEmailAsync(data.Email, "Thank you for creating an account.", mailmsg);
         }
@@ -32,7 +32,7 @@ namespace IntwentyDemo.Services
 
             await base.EmailChanged(data);
 
-            var mailmsg = string.Format("<br /><br /><b>You updated your email at {0}</b><br /><br />", Settings.SiteTitle);
+            var mailmsg = string.Format("<br /><br /><b>You updated your email at {0}</b><br /><br />", Settings.ProductTitle);
             mailmsg += $"Please confirm by <a href='{HtmlEncoder.Default.Encode(data.ConfirmCallbackUrl)}'>clicking here</a>";
 
             await EmailService.SendEmailAsync(data.Email, "Please confirm changed email.", mailmsg);
@@ -42,7 +42,7 @@ namespace IntwentyDemo.Services
         {
             await base.UserActivatedEmailMfa(data);
 
-            var mailmsg = string.Format("<br /><br /><b>Use this code to activate 'Code To Email' 2FA at {0}</b><br /><br />", Settings.SiteTitle);
+            var mailmsg = string.Format("<br /><br /><b>Use this code to activate 'Code To Email' 2FA at {0}</b><br /><br />", Settings.ProductTitle);
             mailmsg += string.Format("Your code is: {0}", data.Code);
 
             await EmailService.SendEmailAsync(data.Email, "Activate Code To Email 2FA.", mailmsg);
@@ -79,7 +79,7 @@ namespace IntwentyDemo.Services
         {
             await base.UserRequestedPasswordReset(data);
 
-            var mailmsg = string.Format("<br /><br /><b>{0} - Password Reset</b><br /><br />", Settings.SiteTitle);
+            var mailmsg = string.Format("<br /><br /><b>{0} - Password Reset</b><br /><br />", Settings.ProductTitle);
             mailmsg += $"Reset your password by <a href='{HtmlEncoder.Default.Encode(data.ConfirmCallbackUrl)}'>clicking here</a>";
             await EmailService.SendEmailAsync(data.Email, "Password Reset", mailmsg);
 

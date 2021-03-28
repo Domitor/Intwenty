@@ -18,9 +18,7 @@ namespace Intwenty.Model
 
     public class IntwentySettings
     {
-        public string ProductId { get; set; }
-
-        public string DefaultProductOrganization { get; set; }
+      
 
         public IntwentySettings()
         {
@@ -37,103 +35,63 @@ namespace Intwenty.Model
         public string IAMConnection { get; set; }
         public DBMS IAMConnectionDBMS { get; set; }
 
+        #region Product
+        public string ProductId { get; set; }
+        public string ProductTitle { get; set; }
+        public string ProductOrganization { get; set; }
+        public string ProductSuperAdminEmail { get; set; }
+        public string ProductSystemAdminEmail { get; set; }
+        public string ProductUserAdminEmail { get; set; }
+        #endregion
+
+        #region StartUp
+
         /// <summary>
         /// Create intwenty database table on startup, if tables already exist they will not be created
         /// </summary>
-        public bool CreateIntwentyDbObjectsOnStartUp { get; set; }
+        public bool StartUpIntwentyDbObjects { get; set; }
 
         /// <summary>
         /// If model is programaticly defined, create model container tables and seed the model
         /// </summary>
-        public bool SeedModelOnStartUp { get; set; }
+        public bool StartUpSeedModel { get; set; }
         /// <summary>
         /// Create database objects according to the model
         /// </summary>
-        public bool ConfigureDatabaseOnStartUp { get; set; }
+        public bool StartUpConfigureDatabase { get; set; }
         /// <summary>
         /// Seed application data 
         /// </summary>
-        public bool SeedDataOnStartUp { get; set; }
+        public bool StartUpSeedData { get; set; }
         /// <summary>
         /// Seed localization definitions 
         /// </summary>
-        public bool SeedLocalizationsOnStartUp { get; set; }
+        public bool StartUpSeedLocalizations { get; set; }
 
         /// <summary>
         /// Seed product and organization info
         /// </summary>
-        public bool SeedProductAndOrganizationOnStartUp { get; set; }
+        public bool StartUpSeedProductAndOrganization { get; set; }
 
         /// <summary>
         /// Seed demo user accounts
         /// </summary>
-        public bool SeedDemoUserAccountsOnStartUp { get; set; }
+        public bool StartUpSeedDemoUserAccounts { get; set; }
 
+        #endregion
 
-        //FOR DEBUG AND DEMO MODE
+        #region Demo
         /// <summary>
         /// If true this will show the username and password to use on the login page, DO NOT USE IN PRODUCTION
         /// </summary>
-        public bool ShowDemoLoginInfo { get; set; }
+        public bool DemoShowLoginInfo { get; set; }
         public string DemoAdminUser { get; set; }
         public string DemoAdminPassword { get; set; }
         public string DemoUser { get; set; }
         public string DemoUserPassword { get; set; }
-        public string RedirectAllOutgoingMailTo { get; set; }
-        public string RedirectAllOutgoingSMSTo { get; set; }
+        #endregion
 
-        /// <summary>
-        /// What kind of logins should be allowed
-        /// </summary>
-        public List<IntwentyAccount> AllowedAccounts { get; set; }
-        public bool RequireConfirmedAccount { get; set; }
-
-        /// <summary>
-        /// Allow new visitors to register
-        /// </summary>
-        public bool UseEmailAsUserName { get; set; }
-        public bool UserRegistrationAllow { get; set; }
-        public bool UserRegistrationRequireName { get; set; }
-
-        /// <summary>
-        /// SiteLocalization = Always use DefaultCulture to look up localization keys
-        /// UserLocalization = Always use UserCulture to  look up localization keys
-        /// </summary>
-        public LocalizationMethods LocalizationMethod { get; set; }
-        public string DefaultCulture { get; set; }
-        public List<IntwentyLanguage> SupportedLanguages { get; set; }
-
-
-        /// <summary>
-        /// The title of the site where intwenty is used
-        /// </summary>
-        public string SiteTitle { get; set; }
-
-        /// <summary>
-        /// The title to show in authenticator apps
-        /// </summary>
-        public string AuthenticatorTitle { get; set; }
-        public List<IntwentyMfaMethod> SupportedMfaMethods { get; set; }
-        public bool EnableMfaAuthentication { get; set; }
-        public bool ForceMfaAuthentication { get; set; }
-
-
-
-        /// <summary>
-        /// Comma separated  roles to assign new users
-        /// </summary>
-        public string NewUserRoles  { get; set; }
-
-        /// <summary>
-        /// if true a new user can create a group account and invite others to be member users, or users can join a group
-        /// Users can ask a group administrator to join a group
-        /// A group admin can accept or reject user requests to join
-        /// A group admin can invite users to the group
-        /// </summary>
-        public bool EnableUserGroups { get; set; }
-
-      
-
+        #region Email
         //EMAIL
         public string MailServiceServer { get; set; }
         public int MailServicePort { get; set; }
@@ -141,16 +99,62 @@ namespace Intwenty.Model
         public string MailServicePwd { get; set; }
         public string MailServiceAPIKey { get; set; }
         public string MailServiceFromEmail { get; set; }
+        public string MailRedirectOutgoingTo { get; set; }
         public string SystemAdminEmail { get; set; }
         public string UserAdminEmail { get; set; }
+        #endregion
 
-
-        //SMS
+        #region SMS
         public string SmsServiceAPIKey { get; set; }
         public string SmsServiceUser { get; set; }
         public string SmsServicePwd { get; set; }
         public string SmsServiceFrom { get; set; }
+        public string SmsRedirectOutgoingTo { get; set; }
+        #endregion
 
+        #region Account
+        public List<IntwentyAccount> AccountsAllowedList { get; set; }
+        public bool AccountsRequireConfirmed { get; set; }
+        public bool AccountsUseEmailAsUserName { get; set; }
+        public bool AccountsAllowRegistration { get; set; }
+        public bool AccountsRegistrationRequireName { get; set; }
+        /// <summary>
+        /// Comma separated  roles to assign new users
+        /// </summary>
+        public string AccountsRegistrationAssignRoles { get; set; }
+        /// <summary>
+        /// if true a new user can create a group account and invite others to be member users, or users can join a group
+        /// Users can ask a group administrator to join a group
+        /// A group admin can accept or reject user requests to join
+        /// A group admin can invite users to the group
+        /// </summary>
+        public bool AccountsEnableUserGroups { get; set; }
+        public string AccountsFacebookAppId { get; set; }
+        public string AccountsFacebookAppSecret { get; set; }
+        public string AccountsGoogleClientId { get; set; }
+        public string AccountsGoogleClientSecret { get; set; }
+        #endregion
+
+        #region Localization
+        /// <summary>
+        /// SiteLocalization = Always use DefaultCulture to look up localization keys
+        /// UserLocalization = Always use UserCulture to  look up localization keys
+        /// </summary>
+        public LocalizationMethods LocalizationMethod { get; set; }
+        public string LocalizationDefaultCulture { get; set; }
+        public List<IntwentyLanguage> LocalizationSupportedLanguages { get; set; }
+        #endregion
+
+        #region Two-Factor Authentication
+
+        public bool TwoFactorEnable { get; set; }
+        public string TwoFactorAppTitle { get; set; }
+        public List<IntwentyMfaMethod> TwoFactorSupportedMethods { get; set; }
+        public bool TwoFactorForced { get; set; }
+
+        #endregion
+
+        #region Storage
 
         //STORAGE
         public bool StorageUseFileSystem { get; set; }
@@ -160,21 +164,15 @@ namespace Intwenty.Model
         public string StorageContainer { get; set; }
 
         public string StorageConnectionString { get; set; }
+        #endregion
 
 
-        //SOCIAL LOGINS
-
-        public string FacebookAppId { get; set; }
-
-        public string FacebookAppSecret { get; set; }
-
-        public string GoogleClientId { get; set; }
-
-        public string GoogleClientSecret { get; set; }
+        #region API
+            public bool APIEnable { get; set; }
+        #endregion
 
 
-        //API
-        public bool UseIntwentyAPI { get; set; }
+
 
 
 
@@ -239,14 +237,14 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
             
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Facebook))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook))
                     return true;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Google))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google))
                     return true;
                 
 
@@ -262,10 +260,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Local))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Local))
                     return true;
 
                 return false;
@@ -278,10 +276,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Facebook))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook))
                     return true;
              
 
@@ -295,10 +293,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.Google))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google))
                     return true;
                
                 return false;
@@ -311,10 +309,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.BankId))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return true;
               
 
@@ -328,10 +326,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (AllowedAccounts == null)
+                if (AccountsAllowedList == null)
                     return false;
 
-                if (AllowedAccounts.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
                     return true;
 
 
@@ -345,10 +343,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Count > 0)
+                if (TwoFactorSupportedMethods.Count > 0)
                     return true;
 
                 return false;
@@ -361,10 +359,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Sms))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Sms))
                     return true;
 
                 return false;
@@ -377,10 +375,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Totp))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Totp))
                     return true;
 
                 return false;
@@ -393,10 +391,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Email))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Email))
                     return true;
 
                 return false;
@@ -409,10 +407,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Fido2))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.Fido2))
                     return true;
 
                 return false;
@@ -425,10 +423,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.SwedishBankId))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.SwedishBankId))
                     return true;
 
                 return false;
@@ -441,10 +439,10 @@ namespace Intwenty.Model
 
             get
             {
-                if (SupportedMfaMethods == null)
+                if (TwoFactorSupportedMethods == null)
                     return false;
 
-                if (SupportedMfaMethods.Exists(p => p.MfaMethod == MfaAuthTypes.FrejaEId))
+                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.FrejaEId))
                     return true;
 
                 return false;

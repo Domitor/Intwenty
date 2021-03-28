@@ -25,8 +25,8 @@ namespace Intwenty.Services
 
         public virtual async Task SendEmailAsync(string sendto, string subject, string message)
         {
-            if (Settings.RedirectAllOutgoingMailTo.Contains("@") && Settings.RedirectAllOutgoingMailTo.Contains("."))
-                await Send(Settings.RedirectAllOutgoingMailTo, subject, message);
+            if (Settings.MailRedirectOutgoingTo.Contains("@") && Settings.MailRedirectOutgoingTo.Contains("."))
+                await Send(Settings.MailRedirectOutgoingTo, subject, message);
             else
                 await Send(sendto, subject, message);
 

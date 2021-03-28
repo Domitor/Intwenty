@@ -6,7 +6,7 @@
 
 @await Html.PartialAsync("_Modals")
 
-@if (!Settings.Value.UserRegistrationAllow)
+@if (!Settings.Value.AccountsAllowRegistration)
 {
    <br />
    <br />
@@ -40,7 +40,7 @@
                             <label>@Localizer["Language"]</label>
                             <select v-model="model.language" class="form-control" id="lang" v-on:input="onUserInput(event)" data-required="True">
                                 @{
-                                    foreach (var t in Settings.Value.SupportedLanguages)
+                                    foreach (var t in Settings.Value.LocalizationSupportedLanguages)
                                     {
                                         <option value="@t.Culture">@t.Name</option>
                                     }
@@ -49,7 +49,7 @@
                         </div>
                     }
 
-                    @if (Settings.Value.UseEmailAsUserName)
+                    @if (Settings.Value.AccountsUseEmailAsUserName)
                     {
                         <div class="form-group">
                             <label>Email <span style="color: red"> *</span></label>
@@ -70,7 +70,7 @@
 
                     }
 
-                    @if (Settings.Value.UserRegistrationRequireName)
+                    @if (Settings.Value.AccountsRegistrationRequireName)
                     {
                         <div class="form-group">
                             <label>@Localizer["First Name"] <span style="color: red"> *</span></label>
@@ -174,7 +174,7 @@
                         </text>
                     }
 
-                    @if (Settings.Value.UserRegistrationRequireName)
+                    @if (Settings.Value.AccountsRegistrationRequireName)
                     {
                         <text>
                         if (!context.model.firstName)
@@ -189,7 +189,7 @@
                         </text>
                     }
 
-                     @if (!Settings.Value.UseEmailAsUserName)
+                     @if (!Settings.Value.AccountsUseEmailAsUserName)
                     {
                         <text>
                         if (!context.model.userName)

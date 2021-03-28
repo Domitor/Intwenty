@@ -8,7 +8,7 @@
     ViewData["Title"] = Localizer["Log In"];
     var demouser = "";
     var demopwd = "";
-    if (Settings.Value.ShowDemoLoginInfo)
+    if (Settings.Value.DemoShowLoginInfo)
     {
         demouser = " (" + Settings.Value.DemoAdminUser + ")";
         demopwd = " (" + Settings.Value.DemoAdminPassword + ")";
@@ -54,7 +54,7 @@
             {
                 <form v-on:submit.prevent="localLogin">
                     <div class="form-group">
-                        @if (Settings.Value.UseEmailAsUserName)
+                        @if (Settings.Value.AccountsUseEmailAsUserName)
                         {
                             <label>Email @demouser</label>
                         }

@@ -61,7 +61,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
         {
             try
             {
-                if (!_settings.UserRegistrationAllow)
+                if (!_settings.AccountsAllowRegistration)
                 {
                     throw new InvalidOperationException("User registration is closed");
                 }
@@ -70,30 +70,30 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 model.ReturnUrl = Url.Content("~/");
 
                 var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };
-                if (_settings.UserRegistrationRequireName)
+                if (_settings.AccountsRegistrationRequireName)
                 {
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
                 }
-                if (!_settings.UseEmailAsUserName)
+                if (!_settings.AccountsUseEmailAsUserName)
                 {
                     user.UserName = model.UserName;
                 }
 
                 if (string.IsNullOrEmpty(user.Culture))
-                    user.Culture = _settings.DefaultCulture;
+                    user.Culture = _settings.LocalizationDefaultCulture;
 
 
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    var org = await _organizationManager.FindByNameAsync(_settings.DefaultProductOrganization);
+                    var org = await _organizationManager.FindByNameAsync(_settings.ProductOrganization);
                     if (org != null)
                     {
-                        if (!string.IsNullOrEmpty(_settings.NewUserRoles))
+                        if (!string.IsNullOrEmpty(_settings.AccountsRegistrationAssignRoles))
                         {
 
-                            var roles = _settings.NewUserRoles.Split(",".ToCharArray());
+                            var roles = _settings.AccountsRegistrationAssignRoles.Split(",".ToCharArray());
                             foreach (var r in roles)
                             {
                                 await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);

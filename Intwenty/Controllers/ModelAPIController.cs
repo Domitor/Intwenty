@@ -2093,7 +2093,7 @@ namespace Intwenty.Controllers
             var res = new List<TranslationVm>();
             var translations = ModelRepository.GetTranslations();
             var apps = ModelRepository.GetApplicationModels();
-            var langs = ModelRepository.Settings.SupportedLanguages;
+            var langs = ModelRepository.Settings.LocalizationSupportedLanguages;
             var metatypes = IntwentyRegistry.IntwentyMetaTypes;
 
             foreach (var a in apps)

@@ -66,14 +66,14 @@ namespace Intwenty
             Settings = settings.Value;
             Client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);
             DataTypes = Client.GetDbTypeMap();
-            CurrentCulture = Settings.DefaultCulture;
+            CurrentCulture = Settings.LocalizationDefaultCulture;
             if (Settings.LocalizationMethod == LocalizationMethods.UserLocalization)
             {
 
-                if (Settings.SupportedLanguages != null && Settings.SupportedLanguages.Count > 0)
+                if (Settings.LocalizationSupportedLanguages != null && Settings.LocalizationSupportedLanguages.Count > 0)
                     CurrentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
                 else
-                    CurrentCulture = Settings.DefaultCulture;
+                    CurrentCulture = Settings.LocalizationDefaultCulture;
             }
 
         }

@@ -151,7 +151,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else
             {
-                if (_settings.RequireConfirmedAccount && !user.EmailConfirmed)
+                if (_settings.AccountsRequireConfirmed && !user.EmailConfirmed)
                 {
                     ModelState.AddModelError(string.Empty, "Invalid Code or unconfirmed account.");
                 }

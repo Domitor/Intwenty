@@ -234,15 +234,15 @@ namespace Intwenty.Seed
                 {
                     product = new IntwentyProduct();
                     product.Id = Settings.ProductId;
-                    product.ProductName = Settings.SiteTitle;
+                    product.ProductName = Settings.ProductTitle;
                     await ProductManager.CreateAsync(product);
                 }
 
-                IntwentyOrganization org = await OrganizationManager.FindByNameAsync(Settings.DefaultProductOrganization);
+                IntwentyOrganization org = await OrganizationManager.FindByNameAsync(Settings.ProductOrganization);
                 if (org == null)
                 {
                     org = new IntwentyOrganization();
-                    org.Name = Settings.DefaultProductOrganization;
+                    org.Name = Settings.ProductOrganization;
                     await OrganizationManager.CreateAsync(org);
                 }
 
@@ -319,15 +319,15 @@ namespace Intwenty.Seed
                 {
                     product = new IntwentyProduct();
                     product.Id = Settings.ProductId;
-                    product.ProductName = Settings.SiteTitle;
+                    product.ProductName = Settings.ProductTitle;
                     await ProductManager.CreateAsync(product);
                 }
 
-                IntwentyOrganization org = await OrganizationManager.FindByNameAsync(Settings.DefaultProductOrganization);
+                IntwentyOrganization org = await OrganizationManager.FindByNameAsync(Settings.ProductOrganization);
                 if (org == null)
                 {
                     org = new IntwentyOrganization();
-                    org.Name = Settings.DefaultProductOrganization;
+                    org.Name = Settings.ProductOrganization;
                     await OrganizationManager.CreateAsync(org);
                 }
 
@@ -401,7 +401,7 @@ namespace Intwenty.Seed
                         admin_user.FirstName = "Admin";
                         admin_user.LastName = "Adminsson";
                         admin_user.EmailConfirmed = true;
-                        admin_user.Culture = Settings.DefaultCulture;
+                        admin_user.Culture = Settings.LocalizationDefaultCulture;
                         await UserManager.CreateAsync(admin_user, Settings.DemoAdminPassword);
                     }
 
@@ -425,7 +425,7 @@ namespace Intwenty.Seed
                         default_user.FirstName = "User";
                         default_user.LastName = "Usersson";
                         default_user.EmailConfirmed = true;
-                        default_user.Culture = Settings.DefaultCulture;
+                        default_user.Culture = Settings.LocalizationDefaultCulture;
                         await UserManager.CreateAsync(default_user, Settings.DemoUserPassword);
                     }
 
@@ -460,7 +460,7 @@ namespace Intwenty.Seed
         public virtual void ConfigureDataBase()
         {
 
-            if (!Settings.ConfigureDatabaseOnStartUp)
+            if (!Settings.StartUpConfigureDatabase)
                 return;
 
             var t = ModelService.ConfigureDatabase();

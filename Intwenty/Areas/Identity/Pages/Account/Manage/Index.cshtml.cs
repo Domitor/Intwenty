@@ -91,7 +91,7 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             {
                 user.Email = Input.Email;
                 doupdate = true;
-                if (_settings.RequireConfirmedAccount)
+                if (_settings.AccountsRequireConfirmed)
                 {
                     emailconf = true;
                 }

@@ -56,7 +56,7 @@ namespace Intwenty.Areas.Identity.Pages.IAM
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.EmailConfirmed = true;
-            user.Culture = Settings.DefaultCulture;
+            user.Culture = Settings.LocalizationDefaultCulture;
 
             var password = PasswordGenerator.GeneratePassword(false, true, true, false, 6);
 

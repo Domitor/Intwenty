@@ -18,7 +18,7 @@
 
                 <select asp-for="Input.NewLanguage" class="form-control">
                     @{
-                        foreach (var t in Settings.Value.SupportedLanguages)
+                        foreach (var t in Settings.Value.LocalizationSupportedLanguages)
                         {
                             <option value="@t.Culture">@t.Name</option>
                         }

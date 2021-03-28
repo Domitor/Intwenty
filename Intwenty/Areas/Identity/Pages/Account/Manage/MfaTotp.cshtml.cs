@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Intwenty.Areas.Identity.Entity;
 using Intwenty.Areas.Identity.Data;
 using Intwenty.Areas.Identity.Models;
+using Intwenty.Model;
+using Microsoft.Extensions.Options;
 
 namespace Intwenty.Areas.Identity.Pages.Account.Manage
 {
@@ -20,13 +22,15 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
     {
         private readonly IntwentyUserManager _userManager;
         private readonly UrlEncoder _urlEncoder;
+        private readonly IntwentySettings _settings;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-        public MfaTotpModel(IntwentyUserManager usermanager, UrlEncoder urlencoder)
+        public MfaTotpModel(IntwentyUserManager usermanager, UrlEncoder urlencoder, IOptions<IntwentySettings> settings)
         {
             _userManager = usermanager;
             _urlEncoder = urlencoder;
+            _settings = settings.Value;
         }
 
         public IActionResult OnGetAsync()
@@ -109,11 +113,11 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
 
         private string GenerateQrCodeUri(string email, string unformattedKey)
         {
-            return string.Format(
-                AuthenticatorUriFormat,
-                _urlEncoder.Encode("Intwenty"),
-                _urlEncoder.Encode(email),
-                unformattedKey);
+            var title = "No Title";
+            if (!string.IsNullOrEmpty(_settings.TwoFactorAppTitle))
+                title = _settings.TwoFactorAppTitle;
+
+            return string.Format(AuthenticatorUriFormat,_urlEncoder.Encode(title),_urlEncoder.Encode(email), unformattedKey);
         }
     }
 }

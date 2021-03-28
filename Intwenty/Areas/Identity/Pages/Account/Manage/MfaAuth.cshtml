@@ -11,9 +11,9 @@
 
 <div id="app">
 
-    @if (!Model.HasAnyMFA && Settings.Value.SupportedMfaMethods.Count > 0)
+    @if (!Model.HasAnyMFA && Settings.Value.TwoFactorSupportedMethods.Count > 0)
     {
-        @if (Settings.Value.ForceMfaAuthentication)
+        @if (Settings.Value.TwoFactorForced)
         {
             <div class="alert alert-danger">
                 @Localizer["MFAFORCED"]
@@ -33,7 +33,7 @@
 
         <br />
 
-        foreach (var m in Settings.Value.SupportedMfaMethods)
+        foreach (var m in Settings.Value.TwoFactorSupportedMethods)
         {
 
 
@@ -103,7 +103,7 @@
         <br />
         <hr />
 
-        @if (Settings.Value.ForceMfaAuthentication)
+        @if (Settings.Value.TwoFactorForced)
         {
             <div>
                 <form method="post" class="form-group">
@@ -123,7 +123,7 @@
         <br />
 
         <div class="alert alert-warning" role="alert">
-            @if (Settings.Value.ForceMfaAuthentication)
+            @if (Settings.Value.TwoFactorForced)
             {
                 @Localizer["MFAFORCEDRESETINFO"]
             }

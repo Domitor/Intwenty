@@ -203,7 +203,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
             else
             {
-                if (attemptinguser != null && _settings.Value.RequireConfirmedAccount && !attemptinguser.EmailConfirmed)
+                if (attemptinguser != null && _settings.Value.AccountsRequireConfirmed && !attemptinguser.EmailConfirmed)
                 {
                     model.ResultCode = "REQUIRECONFIRMATION";
                    

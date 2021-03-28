@@ -960,7 +960,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                IntwentyOrganization org = _orgmanager.FindByNameAsync(_settings.DefaultProductOrganization).Result;
+                IntwentyOrganization org = _orgmanager.FindByNameAsync(_settings.ProductOrganization).Result;
                 if (org==null)
                     throw new InvalidOperationException("Could not retrieve default organization, not seeded ?");
 

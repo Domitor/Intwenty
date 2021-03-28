@@ -40,7 +40,7 @@ namespace Intwenty.Localization
                 */
 
 
-                string culture = Settings.DefaultCulture;
+                string culture = Settings.LocalizationDefaultCulture;
 
                 if (Settings.LocalizationMethod != LocalizationMethods.SiteLocalization)
                    culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
@@ -67,7 +67,7 @@ namespace Intwenty.Localization
                     throw new ArgumentNullException(nameof(name));
 
 
-                string culture = Settings.DefaultCulture;
+                string culture = Settings.LocalizationDefaultCulture;
 
                 if (Settings.LocalizationMethod != LocalizationMethods.SiteLocalization)
                     culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
@@ -91,7 +91,7 @@ namespace Intwenty.Localization
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
-            var culture = Settings.DefaultCulture;
+            var culture = Settings.LocalizationDefaultCulture;
 
             if (string.IsNullOrEmpty(culture))
                 throw new InvalidOperationException("Missing culture in settingfile");

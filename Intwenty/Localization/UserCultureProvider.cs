@@ -31,27 +31,27 @@ namespace Intwenty.Localization
             IntwentySettings Settings = httpContext.RequestServices.GetRequiredService<IOptions<IntwentySettings>>().Value;
 
             if (Settings.LocalizationMethod == LocalizationMethods.SiteLocalization)
-                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+                return Task.FromResult(new ProviderCultureResult(Settings.LocalizationDefaultCulture));
 
             if (httpContext.Request.Path.HasValue && httpContext.Request.Path.Value.Contains("Model/"))
-                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+                return Task.FromResult(new ProviderCultureResult(Settings.LocalizationDefaultCulture));
 
             UserManager<IntwentyUser> UserManager = httpContext.RequestServices.GetRequiredService<UserManager<IntwentyUser>>();
 
             if (!httpContext.User.Identity.IsAuthenticated)
             {
-                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+                return Task.FromResult(new ProviderCultureResult(Settings.LocalizationDefaultCulture));
             }
 
             var user = UserManager.GetUserAsync(httpContext.User).Result;
             if (user == null)
             {
-                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+                return Task.FromResult(new ProviderCultureResult(Settings.LocalizationDefaultCulture));
             }
 
             if (string.IsNullOrEmpty(user.Culture))
             {
-                return Task.FromResult(new ProviderCultureResult(Settings.DefaultCulture));
+                return Task.FromResult(new ProviderCultureResult(Settings.LocalizationDefaultCulture));
             }
 
             return Task.FromResult(new ProviderCultureResult(user.Culture));
