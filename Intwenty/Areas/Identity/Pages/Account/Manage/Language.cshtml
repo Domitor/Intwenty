@@ -2,7 +2,7 @@
 @inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @model LanguageModel
 @{
-    ViewData["Title"] = Localizer["Language"];
+    ViewData["Title"] = Localizer["Language"].Value;
     ViewData["ActivePage"] = ManageNavPages.Language;
 }
 

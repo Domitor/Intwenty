@@ -279,6 +279,12 @@ namespace Intwenty.Model
                 if (AccountsAllowedList == null)
                     return false;
 
+                if (string.IsNullOrEmpty(AccountsFacebookAppId))
+                    return false;
+
+                if (string.IsNullOrEmpty(AccountsFacebookAppSecret))
+                    return false;
+
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook))
                     return true;
              
@@ -294,6 +300,12 @@ namespace Intwenty.Model
             get
             {
                 if (AccountsAllowedList == null)
+                    return false;
+
+                if (string.IsNullOrEmpty(AccountsGoogleClientId))
+                    return false;
+
+                if (string.IsNullOrEmpty(AccountsGoogleClientSecret))
                     return false;
 
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google))

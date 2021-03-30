@@ -4,7 +4,7 @@ using System;
 
 namespace Intwenty.Areas.Identity.Entity
 {
-    [DbTableIndex("USRSETTING_IDX_1", true, "UserId,Key")]
+    [DbTableIndex("USRSETTING_IDX_1", true, "UserId,Code")]
     [DbTableName("security_UserSetting")]
     [DbTablePrimaryKey("Id")]
     public class IntwentyUserSetting
@@ -14,7 +14,7 @@ namespace Intwenty.Areas.Identity.Entity
 
         public string UserId { get; set; }
 
-        public string Key { get; set; }
+        public string Code { get; set; }
 
         public string Value { get; set; }
 

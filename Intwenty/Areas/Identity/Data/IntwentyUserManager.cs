@@ -809,14 +809,14 @@ namespace Intwenty.Areas.Identity.Data
         public async Task AddUpdateUserSetting(IntwentyUser user, string key, string value)
         {
             var settings = await GetAllUserSettings();
-            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Code.ToUpper() == key.ToUpper()).ToList();
             if (usersetting.Count == 0)
             {
                 IAMCache.Remove(IntwentyUserStore.UserSettingsCacheKey);
 
                 var client = new Connection(Settings.IAMConnectionDBMS, Settings.IAMConnection);
                 await client.OpenAsync();
-                await client.InsertEntityAsync(new IntwentyUserSetting() { UserId=user.Id, Key=key.ToUpper(), Value=value });
+                await client.InsertEntityAsync(new IntwentyUserSetting() { UserId=user.Id, Code = key.ToUpper(), Value=value });
                 await client.CloseAsync();
 
             }
@@ -836,7 +836,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task RemoveUserSetting(IntwentyUser user, string key)
         {
             var settings = await GetAllUserSettings();
-            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Code.ToUpper() == key.ToUpper()).ToList();
             if (usersetting.Count > 0)
             {
                 IAMCache.Remove(IntwentyUserStore.UserSettingsCacheKey);
@@ -853,7 +853,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<string> GetUserSettingValue(IntwentyUser user, string key)
         {
             var settings = await GetAllUserSettings();
-            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Code.ToUpper() == key.ToUpper()).ToList();
             if (usersetting.Count > 0)
             {
                 return usersetting[0].Value;
@@ -865,7 +865,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<bool> HasUserSetting(IntwentyUser user, string key)
         {
             var settings = await GetAllUserSettings();
-            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper()).ToList();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Code.ToUpper() == key.ToUpper()).ToList();
             if (usersetting.Count > 0)
             {
                 return true;
@@ -878,7 +878,7 @@ namespace Intwenty.Areas.Identity.Data
         public async Task<bool> HasUserSettingWithValue(IntwentyUser user, string key, string value)
         {
             var settings = await GetAllUserSettings();
-            var usersetting = settings.Where(p => p.UserId == user.Id && p.Key.ToUpper() == key.ToUpper() && p.Value.ToUpper() == value.ToUpper()).ToList();
+            var usersetting = settings.Where(p => p.UserId == user.Id && p.Code.ToUpper() == key.ToUpper() && p.Value.ToUpper() == value.ToUpper()).ToList();
             if (usersetting.Count > 0)
             {
                 return true;

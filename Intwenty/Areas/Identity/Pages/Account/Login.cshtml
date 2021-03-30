@@ -5,7 +5,7 @@
 @inject IOptions<IntwentySettings> Settings
 
 @{
-    ViewData["Title"] = Localizer["Log In"];
+    ViewData["Title"] = Localizer["Log In"].Value;
     var demouser = "";
     var demopwd = "";
     if (Settings.Value.DemoShowLoginInfo)
