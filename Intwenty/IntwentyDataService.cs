@@ -558,7 +558,7 @@ namespace Intwenty
 
             if (client.Database == DBMS.MSSqlServer)
             {
-                state.Id = Convert.ToInt32(client.GetScalarValue("SELECT SCOPE_IDENTITY()"));
+                state.Id = Convert.ToInt32(client.GetScalarValue("SELECT @@IDENTITY"));
             }
 
             if (client.Database == DBMS.SQLite)
