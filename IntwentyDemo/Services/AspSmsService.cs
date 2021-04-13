@@ -32,7 +32,10 @@ namespace IntwentyDemo.Services
             SMSSender.Password = Settings.SmsServicePwd;
             SMSSender.Originator = Settings.SmsServiceFrom;
 
-            SMSSender.AddRecipient(number);
+            if (string.IsNullOrEmpty(Settings.SmsRedirectOutgoingTo))
+                SMSSender.AddRecipient(number);
+            else
+                SMSSender.AddRecipient(Settings.SmsRedirectOutgoingTo);
 
             SMSSender.MessageData = message;
 
