@@ -105,11 +105,10 @@ namespace Intwenty.Model
         #endregion
 
         #region SMS
-        public string SmsServiceAPIKey { get; set; }
-        public string SmsServiceUser { get; set; }
-        public string SmsServicePwd { get; set; }
-        public string SmsServiceFrom { get; set; }
-        public string SmsRedirectOutgoingTo { get; set; }
+        public string SmsServiceAccountKey { get; set; }
+        public string SmsServiceAuthToken { get; set; }
+        public string SmsServiceSid { get; set; }
+        public string SmsServiceRedirectOutgoingTo { get; set; }
         #endregion
 
         #region Account

@@ -9,11 +9,19 @@ using Intwenty.Interface;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using Azure.Storage;
+using IntwentyDemo.Models;
 
 namespace Intwenty.Services
 {
 
-    
+    public interface IStorageService
+    {
+        Task<bool> DeleteDocument(string filename);
+
+        Task<string> StoreDocument(string filename, Stream document);
+
+        void SetSharedAccessURI(List<DocumentVm> documentlist, string resourcetype = "b", int expireminutes = 60);
+    }
 
     public class AzureBlobStorageService
     {
@@ -27,7 +35,7 @@ namespace Intwenty.Services
             DbLogger = dblogger;
         }
 
-        public virtual async Task<string> StoreDocument(string filename, Stream document)
+        public async Task<string> StoreDocument(string filename, Stream document)
         {
 
             try
@@ -53,7 +61,7 @@ namespace Intwenty.Services
             return string.Empty;
         }
 
-        public virtual async Task<bool> DeleteDocument(string filename)
+        public async Task<bool> DeleteDocument(string filename)
         {
             try
             {
@@ -75,7 +83,7 @@ namespace Intwenty.Services
         /// <summary>
         /// Assigns shared access URIs with read permissions to the documents in the list, resourcetype is set default to b (blobs)
         /// </summary>
-        public void SetSharedAccessURI<T>(List<T> documentlist, string resourcetype="b", int expireminutes=60) where T : Document, new()
+        public void SetSharedAccessURI(List<DocumentVm> documentlist, string resourcetype="b", int expireminutes=60)
         {
             try
             {

@@ -23,22 +23,20 @@ namespace IntwentyDemo.Services
         public Task SendSmsAsync(string number, string message)
         {
 
-            if (string.IsNullOrEmpty(Settings.SmsServiceUser) || string.IsNullOrEmpty(Settings.SmsServicePwd))
-                return Task.FromResult(0); 
+            if (string.IsNullOrEmpty(Settings.SmsServiceAccountKey) || string.IsNullOrEmpty(Settings.SmsServiceAuthToken) || string.IsNullOrEmpty(number))
+                return Task.FromResult(0);
 
             ASPSMS.SMS SMSSender = new ASPSMS.SMS();
+            SMSSender.Userkey = Settings.SmsServiceAccountKey;
+            SMSSender.Password = Settings.SmsServiceAuthToken;
+            SMSSender.Originator = "Intwenty";
 
-            SMSSender.Userkey = Settings.SmsServiceUser;
-            SMSSender.Password = Settings.SmsServicePwd;
-            SMSSender.Originator = Settings.SmsServiceFrom;
-
-            if (string.IsNullOrEmpty(Settings.SmsRedirectOutgoingTo))
+            if (string.IsNullOrEmpty(Settings.SmsServiceRedirectOutgoingTo))
                 SMSSender.AddRecipient(number);
             else
-                SMSSender.AddRecipient(Settings.SmsRedirectOutgoingTo);
+                SMSSender.AddRecipient(Settings.SmsServiceRedirectOutgoingTo);
 
             SMSSender.MessageData = message;
-
             SMSSender.SendTextSMS();
 
             return Task.FromResult(0);
