@@ -158,17 +158,32 @@ namespace Intwenty.Model
 
         //STORAGE
         public bool StorageUseFileSystem { get; set; }
-
+        /// <summary>
+        ///The name of folder below the wwwroot
+        /// </summary>
+        public bool StorageFileSystemFolder { get; set; }
         public bool StorageUseStorageAccount { get; set; }
-      
-        public string StorageContainer { get; set; }
-
+        /// <summary>
+        /// Azure: The storage account connectionstring
+        /// </summary>
         public string StorageConnectionString { get; set; }
+        /// <summary>
+        /// Azure: The shared key of the storage account, used to get shared key access
+        /// </summary>
+        public string StorageSharedKey { get; set; }
+        /// <summary>
+        /// Azure: The name of the storage account
+        /// </summary>
+        public string StorageName { get; set; }
+        /// <summary>
+        /// Azure: The name of the container
+        /// </summary>
+        public string StorageContainerName { get; set; }
         #endregion
 
 
         #region API
-            public bool APIEnable { get; set; }
+        public bool APIEnable { get; set; }
         #endregion
 
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.Model
 {
-    public class DocumentVm
+    public class Document
     {
         public string Id { get; set; }
 
