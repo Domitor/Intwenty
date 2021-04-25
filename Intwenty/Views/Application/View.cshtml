@@ -450,30 +450,68 @@
                 nextPage: function (dbtablename)
                 {
                     var context = this;
-                    context.pageInfo.pageNumber++;
+
+                    var objname = "";
+                    if (dbtablename)
+                        objname = dbtablename + "_pageInfo";
+                    else
+                        objname = "model_pageInfo";
+
+                    context[objname].pageNumber++;
                     context.getPage();
                 },
                 prevPage: function (dbtablename) {
                     var context = this;
-                    context.pageInfo.pageNumber--;
-                    if (context.pageInfo.pageNumber < 0)
-                        context.pageInfo.pageNumber = 0;
+
+                    var objname = "";
+                    if (dbtablename)
+                        objname = dbtablename + "_pageInfo";
+                    else
+                        objname = "model_pageInfo";
+
+                    context[objname].pageNumber--;
+                    if (context[objname].pageNumber < 0)
+                        context[objname].pageNumber = 0;
                     context.getPage();
                 },
-                runFilter: function (dbtablename) {
+                runFilter: function (dbtablename)
+                {
                     var context = this;
-                    if (context.pageInfo.filterValues.length > 0)
+
+                    var objname = "";
+                    if (dbtablename)
+                        objname = dbtablename + "_pageInfo";
+                    else
+                        objname = "model_pageInfo";
+
+                    if (context[objname].filterValues.length > 0)
                         context.getPage();
                 },
-                addFilterValue: function (dbtablename) {
+                addFilterValue: function (dbtablename)
+                {
                     var context = this;
-                    context.pageInfo.filterValues.push({ "name": "", "value": "" });
+
+                    var objname = "";
+                    if (dbtablename)
+                        objname = dbtablename + "_pageInfo";
+                    else
+                        objname = "model_pageInfo";
+
+                    context[objname].filterValues.push({ "name": "", "value": "" });
                 },
-                deleteFilterValue: function (item, dbtablename) {
+                deleteFilterValue: function (item, dbtablename)
+                {
                     var context = this;
-                    for (var i = 0; i < context.pageInfo.filterValues.length; i++) {
-                        if (context.pageInfo.filterValues[i].name === item.name) {
-                            context.pageInfo.filterValues.splice(i, 1);
+
+                    var objname = "";
+                    if (dbtablename)
+                        objname = dbtablename + "_pageInfo";
+                    else
+                        objname = "model_pageInfo";
+
+                    for (var i = 0; i < context[objname].filterValues.length; i++) {
+                        if (context[objname].filterValues[i].name === item.name) {
+                            context[objname].filterValues.splice(i, 1);
                             context.getPage();
                             break;
 
