@@ -1716,9 +1716,17 @@ namespace Intwenty.Controllers
                     }
 
                     order++;
-                    if (!string.IsNullOrEmpty(column.DataColumn1DbName))
+                    if (!string.IsNullOrEmpty(column.DataColumn1DbName) && !model.IsSubTableUserInterface)
                     {
+
                         var dmc = appmodel.DataStructure.Find(p => p.DbName == column.DataColumn1DbName && p.IsRoot);
+                        if (dmc != null)
+                            column.DataColumn1MetaCode = dmc.MetaCode;
+                    }
+                    if (!string.IsNullOrEmpty(column.DataColumn1DbName) && model.IsSubTableUserInterface)
+                    {
+
+                        var dmc = appmodel.DataStructure.Find(p => p.DbName == column.DataColumn1DbName && p.ParentMetaCode == model.DataTable.MetaCode);
                         if (dmc != null)
                             column.DataColumn1MetaCode = dmc.MetaCode;
                     }
