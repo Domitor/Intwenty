@@ -160,7 +160,7 @@ namespace Intwenty.Model
         /// <summary>
         ///The name of folder below the wwwroot
         /// </summary>
-        public bool StorageFileSystemFolder { get; set; }
+        public string StorageFileSystemFolder { get; set; }
         public bool StorageUseStorageAccount { get; set; }
         /// <summary>
         /// Azure: The storage account connectionstring

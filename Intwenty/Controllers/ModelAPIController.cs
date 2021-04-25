@@ -969,6 +969,89 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
+        /// Create an application view
+        /// </summary>
+        [HttpPost("/Model/API/DeleteApplicationView")]
+        public IActionResult DeleteApplicationView([FromBody] ApplicationViewVm model)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole(IntwentyRoles.RoleSystemAdmin) && !User.IsInRole(IntwentyRoles.RoleSuperAdmin))
+                return Forbid();
+
+            try
+            {
+                var appmodel = ModelRepository.GetApplicationModel(model.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+
+                var client = DataRepository.GetDataClient();
+                client.Open();
+
+                foreach (var v in appmodel.Views)
+                {
+                    if (v.Id != model.Id)
+                        continue;
+                    if (v.AppMetaCode != appmodel.Application.MetaCode)
+                        continue;
+
+                    foreach (var func in v.Functions)
+                    {
+                        var funcitem = client.GetEntity<FunctionItem>(func.Id);
+                        if (funcitem != null)
+                            client.DeleteEntity(funcitem);
+
+                    }
+
+                    foreach (var ui in v.UserInterface)
+                    {
+                        foreach (var uifunc in ui.Functions)
+                        {
+                            var funcitem = client.GetEntity<FunctionItem>(uifunc.Id);
+                            if (funcitem != null)
+                                client.DeleteEntity(funcitem);
+
+                        }
+
+                        foreach (var uistruct in ui.UIStructure)
+                        {
+                            var structitem = client.GetEntity<UserInterfaceStructureItem>(uistruct.Id);
+                            if (structitem != null)
+                                client.DeleteEntity(structitem);
+
+                        }
+
+                        var uiitem = client.GetEntity<UserInterfaceItem>(ui.Id);
+                        if (uiitem != null)
+                            client.DeleteEntity(uiitem);
+
+                    }
+
+                    var viewitem = client.GetEntity<ViewItem>(v.Id);
+                    if (viewitem != null)
+                        client.DeleteEntity(viewitem);
+
+                }
+
+                client.Close();          
+
+                ModelRepository.ClearCache();
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when deleting an application view.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+            return GetApplicationViews(model.ApplicationId);
+        }
+
+        /// <summary>
         /// Get application views for an application
         /// </summary>
         [HttpGet("/Model/API/GetApplicationViews/{applicationid}")]

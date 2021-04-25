@@ -311,13 +311,13 @@
                 getFunctionDescription: function () {
                     var context = this;
 
-                   
+
                     if (context.functionsettings.metaType == 'NAVIGATE')
                         return "Adds a button to the view that navigates the user to the [path]";
-                   
+
                     if (context.functionsettings.metaType == 'SAVE')
                         return "Adds a button to the view that triggers the application save operation";
-                 
+
 
 
                     return "";
@@ -684,6 +684,8 @@
                 {
                     var context = this;
 
+                    var deletemodel = { id: item.id, metaType: "UIVIEW", applicationId:@Model.Application.Id, metaCode: item.metaCode }
+
                     var yesfunc = function ()
                     {
 
@@ -696,7 +698,7 @@
                             url: endpointurl,
                             type: "POST",
                             contentType: "application/json",
-                            data: JSON.stringify(item),
+                            data: JSON.stringify(deletemodel),
                             success: function (response) {
                                 context.datalist = response;
                             },
