@@ -17,16 +17,16 @@
 
         <div class="col-lg-7">
 
-            <button v-on:click="model.showFilter=!model.showFilter">
+            <button v-on:click="@Model.DataTableDbName@@_settings.showFilter=!@Model.DataTableDbName@@_settings.showFilter">
                 <i class="fas fa-search"></i>
-                <span v-if="model.showFilter">Hide Filter</span>
-                <span v-if="!model.showFilter">Show Filter</span>
+                <span v-if="@Model.DataTableDbName@@_settings.showFilter">Hide Filter</span>
+                <span v-if="!@Model.DataTableDbName@@_settings.showFilter">Show Filter</span>
             </button>
 
             <br />
             <br />
 
-            <fieldset style="padding:5px; border:1px solid black; border-radius:4px" v-if="model.showFilter">
+            <fieldset style="padding:5px; border:1px solid black; border-radius:4px" v-if="@Model.DataTableDbName@@_settings.showFilter">
 
                 <div class="row">
                     <div class="col-lg-5"><button type="button" v-on:click="addFilterValue()"><span class="fa fa-plus"></span> Add filter</button></div>
@@ -36,7 +36,7 @@
 
                 <div class="mt-2"></div>
 
-                <div class="row" v-for="filteritem in pageInfo.filterValues">
+                <div class="row" v-for="filteritem in @Model.DataTableDbName@@_pageInfo.filterValues">
 
                     <div class="col-lg-5">
                         <div class="form-group">
@@ -108,13 +108,12 @@
 
             @foreach (var c in Model.Table.Columns)
             {
-                <th>@c.LocalizedTitle</th>
+                <th v-on:click="sortBycolumn('@c.DataColumnDbName','@Model.DataTableDbName')" style="cursor:pointer">@c.LocalizedTitle <span class="fa fa-sort-alpha-down-alt"></span></th>
             }
-
         </tr>
     </thead>
 
-    <tr v-for="item in model.@Model.DataTableDbName">
+    <tr v-for="item in model.sorted_@Model.DataTableDbName">
 
         @if (Model.HasDeleteFunction)
         {
@@ -143,4 +142,13 @@
 
 </table>
 
+@if (Model.HasPagingFunction)
+{
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" v-bind:class="{ disabled: isFirstPage('@Model.DataTableDbName') }"><a class="page-link" href="#" v-on:click="prevpage()">Previous {{@Html.Raw(Model.DataTableDbName)_pageInfo.pageSize}}</a></li>
+            <li class="page-item" v-bind:class="{ disabled: isLastPage('@Model.DataTableDbName') }"><a class="page-link" href="#" v-on:click="nextpage()">Next {{@Html.Raw(Model.DataTableDbName)_pageInfo.pageSize}}</a></li>
+        </ul>
+    </nav>
+}
 
