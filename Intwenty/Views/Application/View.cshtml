@@ -116,28 +116,22 @@
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
-                ,idgen:-1
+                , idgen: -1
+                ,model_settings: { showModel: true, currentSort: "", currentSortDir: "" }
+                ,model_pageInfo: { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
+                 @foreach (var s in subTableDbNames)
+                 {
+                 <text>
+                 ,@Html.Raw(s)_line = {}
+                 ,@Html.Raw(s)_settings = { showModel: true, currentSort: "", currentSortDir: "" }
+                 ,@Html.Raw(s)_pageInfo = { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
+                 </text>
+                 }
+
             },
             methods:
             {
 
-                initApp: function ()
-                {
-                    var context = this;
-                    context.model_settings = { showModel: true, currentSort:"", currentSortDir:""};
-                    context.model_pageInfo = { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] };
-
-
-                    @foreach (var s in subTableDbNames)
-                    {
-                        <text>
-                            context.@Html.Raw(s)_line = {};
-                            context.@Html.Raw(s)_settings = { showModel: true, currentSort: "", currentSortDir: "" };
-                            context.@Html.Raw(s)_pageInfo = { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] };
-                        </text>
-
-                    }
-                },
                 openApplicationModal: function (item, uimetacode)
                 {
                     var context = this;
@@ -532,25 +526,25 @@
                     });
                 }
                 @foreach (var s in subTableDbNames)
+                {<text>
+                ,sorted_@Html.Raw(s): function()
                 {
-                    <text>
-                    ,sorted_@Html.Raw(s): function()
-                      {
-
-                            var lineobjectname = @Html.Raw(s) + "_settings";
-                            return this.model.@Html.Raw(s)@@.sort((a, b) => {
-                                let modifier = 1;
-                                if (this.model_settings.currentSortDir === 'desc') modifier = -1;
-                                if (a[this[lineobjectname].currentSort] < b[this[lineobjectname].currentSort]) return -1 * modifier;
-                                if (a[this[lineobjectname].currentSort] > b[this[lineobjectname].currentSort]) return 1 * modifier;
-                                return 0;
-                            });
-                        }
-                    </text>
+                    var dbtablename = @Html.Raw(s);
+                    var lineobjectname = @Html.Raw(s) + "_settings";
+                    return this.model[dbtablename].sort((a, b) => {
+                        let modifier = 1;
+                        if (this.model_settings.currentSortDir === 'desc') modifier = -1;
+                        if (a[this[lineobjectname].currentSort] < b[this[lineobjectname].currentSort]) return -1 * modifier;
+                        if (a[this[lineobjectname].currentSort] > b[this[lineobjectname].currentSort]) return 1 * modifier;
+                        return 0;
+                    });
+                 }
+                 </text>
             },
-            mounted: function () {
+            mounted: function ()
+            {
                 var context = this;
-                context.initApp();
+
                 @if (Model.IsApplicationListView())
                 {
                     <text>
