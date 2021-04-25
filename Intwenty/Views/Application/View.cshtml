@@ -117,14 +117,14 @@
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
                 , idgen: -1
-                ,model_settings: { showModel: true, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
+                ,model_settings: { showFilter: true, currentSort: "", currentSortDir: "" }
+                ,model_pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
                  @foreach (var s in subTableDbNames)
                  {
                  <text>
                  ,@Html.Raw(s)_line = {}
-                 ,@Html.Raw(s)_settings = { showModel: true, currentSort: "", currentSortDir: "" }
-                 ,@Html.Raw(s)_pageInfo = { applicationId: "+ applicationId + ", applicationViewId: "+ applicationViewId + ", maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [] }
+                 ,@Html.Raw(s)_settings = { showFilter: true, currentSort: "", currentSortDir: "" }
+                 ,@Html.Raw(s)_pageInfo = { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
                  </text>
                  }
 
@@ -320,13 +320,13 @@
                     var context = this;
                     var endpointurl = context.baseurl + "GetPagedList";
 
-                    this.pageInfo.applicationViewId = context.applicationViewId;
+                    this.model_pageInfo.applicationViewId = context.applicationViewId;
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(this.pageInfo),
+                        data: JSON.stringify(this.model_pageInfo),
                         success: function (response) {
                             //DATA
                             context.applist = JSON.parse(response.data);
@@ -539,7 +539,7 @@
                         return 0;
                     });
                  }
-                 </text>
+                 </text>}
             },
             mounted: function ()
             {
