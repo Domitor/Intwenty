@@ -131,7 +131,7 @@ namespace Intwenty.Controllers
 
 
         /// <summary>
-        /// Loads data for a listview for the application with supplied Id
+        /// Get a list based on a main application table or a sub table
         /// </summary>
         [HttpPost]
         public virtual async Task<IActionResult> GetPagedList([FromBody] ListFilter model)
@@ -176,7 +176,7 @@ namespace Intwenty.Controllers
            
         }
 
-        [HttpGet("/Application/API/GetDomain/{domainname}/{query}")]
+        [HttpGet]
         public virtual List<ValueDomainVm> GetDomain(string domainname, string query)
         {
             if (string.IsNullOrEmpty(domainname))

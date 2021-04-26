@@ -36,6 +36,16 @@ namespace Intwenty.Controllers
             if (id.HasValue && id.Value > 0)
                 ViewBag.Id = id;
 
+            ViewBag.BaseAPIPath = Url.Content("~/Application/API/");
+            ViewBag.SaveAPIPath = Url.Content("~/Application/API/Save");
+            ViewBag.SaveLineAPIPath = Url.Content("~/Application/API/SaveSubTableLine");
+            ViewBag.GetApplicationAPIPath = Url.Content("~/Application/API/GetApplication");
+            ViewBag.GetListAPIPath = Url.Content("~/Application/API/GetPagedList");
+            ViewBag.GetDomainAPIPath = Url.Content("~/Application/API/GetDomain");
+            ViewBag.DeleteApplicationAPIPath = Url.Content("~/Application/API/Delete");
+            ViewBag.DeleteLineAPIPath = Url.Content("~/Application/API/DeleteSubTableLine");
+            ViewBag.CreateNewAPIPath = Url.Content("~/Application/API/CreateNew");
+
             var path = this.Request.Path.Value;
             var current_view = ModelRepository.GetLocalizedViewModelByPath(path);
 

@@ -103,7 +103,7 @@
         var app = new Vue({
             el: '#app',
             data: {
-                baseurl: '@Url.Content("~/Application/API/")'
+                baseurl:"@Html.Raw(ViewBag.BaseAPIPath)"
                 ,appMainTable: '@mainDbName'
                 ,appId: @applicationId
                 ,applicationViewId: @applicationViewId
@@ -137,7 +137,7 @@
 
                     var savefunc = function ()
                     {
-                        var saveendpoint = context.baseurl + "Save";
+                        var saveendpoint = "@Html.Raw(ViewBag.SaveAPIPath)";
                         context.model[context.appMainTable].ApplicationId = context.appId;
                         context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
 
@@ -177,7 +177,7 @@
                     else
                     {
 
-                        var endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                        var endpointurl = "@Html.Raw(ViewBag.CreateNewAPIPath)/" + context.appId;
                         $.get(endpointurl, function (response)
                         {
                             context.model = JSON.parse(response.data);
@@ -225,7 +225,7 @@
                     {
                         var saveFunc = function ()
                         {
-                             var endpointurl = context.baseurl + "SaveSubTableLine";
+                            var endpointurl = "@Html.Raw(ViewBag.SaveLineAPIPath)";
 
                             context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.model[context.appMainTable].Id;
@@ -277,7 +277,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = context.baseurl + "DeleteSubTableLine";
+                    var endpointurl = "@Html.Raw(ViewBag.DeleteLineAPIPath)";
 
                     var deletelinefunc = function ()
                     {
@@ -321,7 +321,7 @@
                 },
                 saveApplication: function () {
                     var context = this;
-                    var endpointurl = context.baseurl + "Save";
+                    var endpointurl = "@Html.Raw(ViewBag.SaveAPIPath)";
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
                     context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
@@ -337,8 +337,8 @@
                         success: function (response)
                         {
                             if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
-                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                    window.location.href = endpointurl;
+                                endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                window.location.href = endpointurl;
                             }
                             else if (context.aftersaveaction == 'REFRESH')
                             {
@@ -363,7 +363,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = context.baseurl + "GetPagedList";
+                    var endpointurl = "@Html.Raw(ViewBag.GetListAPIPath)";
 
                     var objname = "";
                     var ismaintable = false;
@@ -421,7 +421,7 @@
                 {
                     var context = this;
                     var args =  { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
-                    var endpointurl = context.baseurl + "GetPagedList";
+                    var endpointurl = '@Html.Raw(ViewBag.GetListAPIPath)';
 
                     $.ajax({
                         url: endpointurl,
@@ -441,7 +441,7 @@
                 },
                 deleteApplication: function (item) {
                     var context = this;
-                    var endpointurl = context.baseurl + "Delete";
+                   var endpointurl = "@Html.Raw(ViewBag.DeleteApplicationAPIPath)";
 
                     var deleteapp = function ()
                     {
@@ -469,7 +469,7 @@
                 getApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    var endpointurl = "@Html.Raw(ViewBag.GetApplicationAPIPath)/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     $.get(endpointurl, function (response)
                     {
                         var maindata = JSON.parse(response.data);
@@ -477,7 +477,7 @@
 
                     }).done(function () {
 
-                        @foreach (var s in subTableDbNames) 
+                        @foreach (var s in subTableDbNames)
                         {
                             <text>
                             context.getPage('@s');
@@ -490,7 +490,7 @@
                 createNewApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = context.baseurl + "CreateNew/" + context.appId;
+                    var endpointurl = "@Html.Raw(ViewBag.CreateNewAPIPath)/" + context.appId;
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
