@@ -100,8 +100,6 @@
 
     <script>
 
-        var modalapps = [];
-
         var app = new Vue({
             el: '#app',
             data: {
@@ -111,23 +109,22 @@
                 ,applicationViewId: @applicationViewId
                 ,instanceId: @instanceid
                 ,applist: []
-                ,model: {  ['@mainDbName']: {} }
+                ,model: { @mainDbName: {} @foreach (var s in subTableDbNames){<text>,@Html.Raw(s):[]</text>}}
                 ,validation: {}
                 ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
-                , idgen: -1
-                ,model_settings: { showFilter: true, currentSort: "", currentSortDir: "" }
+                ,idgen: -1
+                ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
                 ,model_pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
                  @foreach (var s in subTableDbNames)
                  {
                  <text>
-                 ,@Html.Raw(s)_line = {}
-                 ,@Html.Raw(s)_settings = { showFilter: true, currentSort: "", currentSortDir: "" }
-                 ,@Html.Raw(s)_pageInfo = { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
+                 ,@Html.Raw(s): {}
+                 ,@Html.Raw(s)_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
+                 ,@Html.Raw(s)_pageInfo: { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
                  </text>
                  }
-
             },
             methods:
             {
@@ -199,27 +196,25 @@
                 {
                     var context = this;
 
-                    var lineobjectname = dbtablename + "_line";
-
                     var addLocalLine = function ()
                     {
                         context.idgen--;
                         context.model[dbtablename].Id = 0;
-                        context[lineobjectname].LocalId = context.idgen;
-                        context[lineobjectname].ApplicationId = context.applicationId;
-                        context.model[dbtablename].push(context[lineobjectname]);
+                        context[dbtablename].LocalId = context.idgen;
+                        context[dbtablename].ApplicationId = context.applicationId;
+                        context.model[dbtablename].push(context[dbtablename]);
                     };
 
                     if (context.instanceId == 0)
                     {
                         if (item) {
-                            context[lineobjectname] = {};
-                            context[lineobjectname] = item;
+                            context[dbtablename] = {};
+                            context[dbtablename] = item;
                             $('#addEditModal_' + uimetacode).modal();
 
                         }
                         else {
-                            context[lineobjectname] = {};
+                            context[dbtablename] = {};
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', addLocalLine);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLocalLine);
                             $('#addEditModal_' + uimetacode).modal();
@@ -231,16 +226,16 @@
                         {
                              var endpointurl = context.baseurl + "SaveSubTableLine";
 
-                            context[lineobjectname].ParentId = context.model[context.appMainTable].Id;
-                            context[lineobjectname].TableName = dbtablename;
-                            context[lineobjectname].ApplicationId = context.appId;
-                            context[lineobjectname].ApplicationViewId = context.applicationViewId;
+                            context[dbtablename].ParentId = context.model[context.appMainTable].Id;
+                            context[dbtablename].TableName = dbtablename;
+                            context[dbtablename].ApplicationId = context.appId;
+                            context[dbtablename].ApplicationViewId = context.applicationViewId;
 
                               $.ajax({
                                 url: endpointurl,
                                 type: "POST",
                                 contentType: "application/json",
-                                data: JSON.stringify(context[lineobjectname]),
+                                data: JSON.stringify(context[dbtablename]),
                                 success: function (response)
                                 {
                                     if (response.isSuccess)
@@ -257,15 +252,15 @@
 
 
                         if (item) {
-                            context[lineobjectname] = {};
-                            context[lineobjectname] = item;
+                            context[dbtablename] = {};
+                            context[dbtablename] = item;
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', saveFunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', saveFunc);
                             $('#addEditModal_' + uimetacode).modal();
 
                         }
                         else {
-                            context[lineobjectname] = {};
+                            context[dbtablename] = {};
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', saveFunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', saveFunc);
                             $('#addEditModal_' + uimetacode).modal();
@@ -383,8 +378,16 @@
                         objname = "model_pageInfo";
                     }
                     context[objname].applicationViewId = context.applicationViewId;
+                   
                     if (!ismaintable)
+                    {
                         context[objname].dataTableDbName = dbtablename;
+                        context[objname].foreignKeyId = 0;
+                    }
+                    else
+                    {
+                        context[objname].foreignKeyId = context.instanceId;
+                    }
 
                     $.ajax({
                         url: endpointurl,
@@ -602,12 +605,9 @@
                         return 0;
                     });
                 }
-                @foreach (var s in subTableDbNames)
-                {<text>
-                ,sorted_@Html.Raw(s): function()
-                {
-                    var dbtablename = @Html.Raw(s);
-                    var lineobjectname = @Html.Raw(s) + "_settings";
+                @foreach (var s in subTableDbNames){<text>,sorted_@Html.Raw(s): function(){
+                    var dbtablename = '@Html.Raw(s)';
+                    var lineobjectname = '@Html.Raw(s)' + '_settings';
                     return this.model[dbtablename].sort((a, b) => {
                         let modifier = 1;
                         if (this.model_settings.currentSortDir === 'desc') modifier = -1;
@@ -615,8 +615,8 @@
                         if (a[this[lineobjectname].currentSort] > b[this[lineobjectname].currentSort]) return 1 * modifier;
                         return 0;
                     });
-                 }
-                 </text>}
+                  }</text>
+                }
             },
             mounted: function ()
             {

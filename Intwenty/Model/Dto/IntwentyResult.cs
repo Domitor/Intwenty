@@ -182,12 +182,9 @@ namespace Intwenty.Model.Dto
 
         public void AddApplicationJSONArray(string jsonname, string jsonaray)
         {
-            var check = Data.IndexOf("{", 2);
-            if (check < 2)
-                return;
-
-            check = Data.IndexOf("}", check);
-            if (check < 2)
+          
+            var check = Data.LastIndexOf("}");
+            if (check < 1)
                 return;
 
             var value = ",\"" + jsonname + "\":" + jsonaray;

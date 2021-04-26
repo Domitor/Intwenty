@@ -333,12 +333,38 @@ namespace Intwenty.Model
                 if (CurrentRenderContext == CurrentRenderContextOptions.ModalView)
                     return "model";
                 if (CurrentRenderContext == CurrentRenderContextOptions.SubTable)
-                    return "currentline";
+                    return string.Empty;
                 if (CurrentRenderContext == CurrentRenderContextOptions.ModalSubTable)
-                    return "currentline";
+                    return string.Empty;
 
                 return "model";
    
+            }
+
+        }
+
+        public string VueModelBinding
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(JavaScriptObjectName))
+                    return string.Format("{0}.{1}.{2}", JavaScriptObjectName, DataTableDbName, DataColumnDbName);
+                else
+                    return string.Format("{0}.{1}", DataTableDbName, DataColumnDbName);
+
+            }
+
+        }
+
+        public string VueModelBinding2
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(JavaScriptObjectName))
+                    return string.Format("{0}.{1}.{2}", JavaScriptObjectName, DataTableDbName, DataColumn2DbName);
+                else
+                    return string.Format("{0}.{1}", DataTableDbName, DataColumn2DbName);
+
             }
 
         }

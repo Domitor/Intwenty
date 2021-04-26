@@ -31,6 +31,8 @@ namespace Intwenty.Interface
 
         string JavaScriptObjectName { get;  }
 
+        string VueModelBinding { get; }
+
     }
 
     public interface IUIComplexBinding : IUIBinding
@@ -40,7 +42,7 @@ namespace Intwenty.Interface
 
         string DataColumn2DbName { get; }
 
-
+        string VueModelBinding2 { get; }
     }
 
   

@@ -336,6 +336,8 @@ namespace IntwentyDemo.Seed
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "OL_FUNC_CREATE", ActionPath = "SalesOrders/Create", IsModalAction = true, ActionUserInterfaceMetaCode = "SO_CREATE_ORDLINE_UI", Title = "Create" });
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "OL_FUNC_EDIT", ActionPath = "SalesOrders/Edit", IsModalAction = true, ActionUserInterfaceMetaCode = "SO_EDIT_ORDLINE_UI", Title = "Edit" });
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "OL_FUNC_DELETE", ActionPath = "Application/API/DeleteSubTableRow", IsModalAction = false, Title = "Delete" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "OL_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_ORDLINE_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "OL_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
 
             #endregion

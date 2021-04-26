@@ -25,6 +25,19 @@ namespace Intwenty.Model.UIRendering
 
         public string JavaScriptObjectName { get; set; }
 
+        public string VueModelBinding
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(JavaScriptObjectName))
+                    return string.Format("{0}.{1}.{2}", JavaScriptObjectName, DataTableDbName, DataColumnDbName);
+                else
+                    return string.Format("{0}.{1}", DataTableDbName, DataColumnDbName);
+
+            }
+
+        }
+   
         public UIBinding()
         {
             DataTableDbName = "";
@@ -38,14 +51,22 @@ namespace Intwenty.Model.UIRendering
 
     public class UIComplexBinding : UIBinding, IUIComplexBinding
     {
-        public string DataViewMetaCode { get; set; }
-        public string DataViewTitle { get; set; }
+      
         public string DomainName { get; set; }
         public string DataColumn2DbName { get; set; }
-        public string DataViewColumnDbName{ get; set; }
-        public string DataViewColumnTitle { get; set; }
-        public string DataViewColumn2DbName { get; set; }
-        public string DataViewColumn2Title { get; set; }
+
+        public string VueModelBinding2
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(JavaScriptObjectName))
+                    return string.Format("{0}.{1}.{2}", JavaScriptObjectName, DataTableDbName, DataColumn2DbName);
+                else
+                    return string.Format("{0}.{1}", DataTableDbName, DataColumn2DbName);
+
+            }
+
+        }
 
         public UIComplexBinding()
         {
@@ -54,15 +75,10 @@ namespace Intwenty.Model.UIRendering
             Title = "";
             DataColumnDbName = "";
             DataColumn2DbName = "";
-            DataViewMetaCode = "";
             DomainName = "";
-            DataViewColumnDbName = "";
-            DataViewColumn2DbName = "";
-            DataViewColumnTitle = "";
-            DataViewColumn2Title = "";
-
 
         }
+
     }
 
 

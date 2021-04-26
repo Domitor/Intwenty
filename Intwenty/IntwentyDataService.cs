@@ -1306,12 +1306,15 @@ namespace Intwenty
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName,args.ForeignKeyId));
 
                 }
                 else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
                 {
@@ -1319,6 +1322,7 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("FROM {0} t1", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
@@ -1326,8 +1330,10 @@ namespace Intwenty
 
                     sql_list_stmt.Append("SELECT t2.MetaCode, t2.PerformDate, t2.StartDate, t2.EndDate, t1.* ");
                     sql_list_stmt.Append("FROM sysdata_InformationStatus t2 ");
-                    sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
 
@@ -1501,7 +1507,7 @@ namespace Intwenty
 
                 var sql_list_stmt = new StringBuilder();
                 var parameters = new List<IIntwentySqlParameter>();
-                if (model.Application.DataMode == DataModeOptions.Simple)
+                if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate ", model.Application.MetaCode));
                     foreach (var col in model.DataStructure)
@@ -1510,6 +1516,20 @@ namespace Intwenty
                             sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
                     }
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+
+                }
+                else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
+                {
+                    sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate ", model.Application.MetaCode));
+                    foreach (var col in model.DataStructure)
+                    {
+                        if (col.IsMetaTypeDataColumn && !col.IsRoot && col.ParentMetaCode == dbtablemodel.MetaCode)
+                            sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
+                    }
+                    sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
                 {
@@ -1517,20 +1537,21 @@ namespace Intwenty
 
                     foreach (var col in model.DataStructure)
                     {
-                        if (col.IsMetaTypeDataColumn && col.IsRoot)
+                        if (col.IsMetaTypeDataColumn && !col.IsRoot && col.ParentMetaCode == dbtablemodel.MetaCode)
                         {
                             sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
                         }
                     }
 
-                    sql_list_stmt.Append(string.Format("FROM {0} t1", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append(string.Format("FROM {0} t1 ", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
                 {
-                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
+                    sql_list_stmt.Append("SELECT t2.MetaCode, t2.PerformDate, t2.StartDate, t2.EndDate ");
                     foreach (var col in model.DataStructure)
                     {
                         if (col.IsMetaTypeDataColumn && col.IsRoot)
@@ -1539,9 +1560,12 @@ namespace Intwenty
                         }
                     }
 
-                    sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                    sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
-                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                    sql_list_stmt.Append("FROM sysdata_InformationStatus t2 ");
+                    sql_list_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
 
                 }
@@ -1604,7 +1628,8 @@ namespace Intwenty
                     }
                 }
 
-                var queryresult = client.GetJsonArray(sql_list_stmt.ToString(), false, parameters.ToArray());
+                var sqlstmt = sql_list_stmt.ToString();
+                var queryresult = client.GetJsonArray(sqlstmt, false, parameters.ToArray());
                 result.Data = queryresult.GetJsonString();
 
                 result.Finish();

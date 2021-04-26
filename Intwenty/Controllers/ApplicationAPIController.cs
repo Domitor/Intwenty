@@ -58,10 +58,10 @@ namespace Intwenty.Controllers
                     var data = DataRepository.Get(state, model);
                     foreach (var listui in viewmodel.UserInterface)
                     {
-                        if (!listui.IsSubTableUserInterface)
+                        if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
                             continue;
 
-                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName };
+                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName, ForeignKeyId = id };
                         var subtablearray = DataRepository.GetJsonArray(filter);
                         data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
 
@@ -80,10 +80,10 @@ namespace Intwenty.Controllers
                     var data = DataRepository.Get(state, model);
                     foreach (var listui in viewmodel.UserInterface)
                     {
-                        if (!listui.IsSubTableUserInterface)
+                        if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
                             continue;
 
-                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName };
+                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName, ForeignKeyId = id };
                         var subtablearray = DataRepository.GetJsonArray(filter);
                         data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
 

@@ -34,6 +34,9 @@ namespace Intwenty.Model.Dto
 
         public List<FilterValue> FilterValues { get; set; }
 
+        public string ForeignKeyColumnName { get; set; }
+
+        public int ForeignKeyId { get; set; }
 
         public bool HasFilter
         {
@@ -51,6 +54,7 @@ namespace Intwenty.Model.Dto
             PageSize = 20;
             User = new UserInfo();
             FilterValues = new List<FilterValue>();
+            ForeignKeyColumnName = "ParentId";
         }
 
         public ListFilter(ClaimsPrincipal user)
@@ -58,6 +62,7 @@ namespace Intwenty.Model.Dto
             PageSize = 20;
             User = new UserInfo(user);
             FilterValues = new List<FilterValue>();
+            ForeignKeyColumnName = "ParentId";
         }
 
         public void SetUser(ClaimsPrincipal user)
