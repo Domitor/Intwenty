@@ -108,6 +108,7 @@
                 ,appId: @applicationId
                 ,applicationViewId: @applicationViewId
                 ,instanceId: @instanceid
+                ,version:1
                 ,applist: []
                 ,model: { @mainDbName: {} @foreach (var s in subTableDbNames){<text>,@Html.Raw(s):[]</text>}}
                 ,validation: {}
@@ -226,6 +227,7 @@
                         {
                              var endpointurl = context.baseurl + "SaveSubTableLine";
 
+                            context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.model[context.appMainTable].Id;
                             context[dbtablename].TableName = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
@@ -334,20 +336,17 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
-                            if (response.isSuccess)
-                            {
-                                if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
+                            if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
                                     endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
                                     window.location.href = endpointurl;
-                                }
-                                else if (context.aftersaveaction == 'REFRESH')
-                                {
-                                    context.instanceId = response.id;
-                                    context.model_settings.modelSaved = true;
-                                    context.getApplication();
-                                    setTimeout(function () { context.model_settings.modelSaved = false; }, 3000);
-                                }
-
+                            }
+                            else if (context.aftersaveaction == 'REFRESH')
+                            {
+                                context.version = response.version;
+                                context.instanceId = response.id;
+                                context.model_settings.modelSaved = true;
+                                context.getApplication();
+                                setTimeout(function () { context.model_settings.modelSaved = false; }, 3000);
                             }
                         },
                         error: function (response)
@@ -377,16 +376,17 @@
                         ismaintable = true;
                         objname = "model_pageInfo";
                     }
+
                     context[objname].applicationViewId = context.applicationViewId;
-                   
+
                     if (!ismaintable)
                     {
                         context[objname].dataTableDbName = dbtablename;
-                        context[objname].foreignKeyId = 0;
+                        context[objname].foreignKeyId = context.instanceId;
                     }
                     else
                     {
-                        context[objname].foreignKeyId = context.instanceId;
+                        context[objname].foreignKeyId = 0;
                     }
 
                     $.ajax({
@@ -472,10 +472,20 @@
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     $.get(endpointurl, function (response)
                     {
-                        context.model = JSON.parse(response.data);
+                        var maindata = JSON.parse(response.data);
+                        context.model[context.appMainTable] = maindata[context.appMainTable];
+
                     }).done(function () {
+
+                        @foreach (var s in subTableDbNames) 
+                        {
+                            <text>
+                            context.getPage('@s');
+                            </text>
+                        }
+
                         context.$forceUpdate();
-                    });
+                     });
                 },
                 createNewApplication: function ()
                 {
@@ -495,7 +505,9 @@
                     else
                         objname = "model_pageInfo";
 
-                    return (this[objname].pageNumber <= 0);
+                    var pageno = this[objname].pageNumber;
+
+                    return (pageno <= 0);
                 },
                 isLastPage: function (dbtablename)
                 {
@@ -505,7 +517,11 @@
                     else
                         objname = "model_pageInfo";
 
-                    return ((this[objname].pageNumber + 1) * this[objname].pageSize) >= this[objname].maxCount;
+                    var pageno = this[objname].pageNumber;
+                    var pagesize = this[objname].pageSize;
+                    var maxcount = this[objname].maxCount;
+
+                    return ((pageno + 1) * pagesize) >= maxcount;
                 },
                 sortBycolumn: function (s, dbtablename)
                 {
@@ -605,17 +621,22 @@
                         return 0;
                     });
                 }
-                @foreach (var s in subTableDbNames){<text>,sorted_@Html.Raw(s): function(){
-                    var dbtablename = '@Html.Raw(s)';
-                    var lineobjectname = '@Html.Raw(s)' + '_settings';
-                    return this.model[dbtablename].sort((a, b) => {
-                        let modifier = 1;
-                        if (this.model_settings.currentSortDir === 'desc') modifier = -1;
-                        if (a[this[lineobjectname].currentSort] < b[this[lineobjectname].currentSort]) return -1 * modifier;
-                        if (a[this[lineobjectname].currentSort] > b[this[lineobjectname].currentSort]) return 1 * modifier;
-                        return 0;
-                    });
-                  }</text>
+                @foreach (var s in subTableDbNames)
+                {
+                    <text>
+                    ,sorted_@Html.Raw(s): function()
+                    {
+                        var dbtablename = '@Html.Raw(s)';
+                        var lineobjectname = '@Html.Raw(s)' + '_settings';
+                        return this.model[dbtablename].sort((a, b) => {
+                            let modifier = 1;
+                            if (this.model_settings.currentSortDir === 'desc') modifier = -1;
+                            if (a[this[lineobjectname].currentSort] < b[this[lineobjectname].currentSort]) return -1 * modifier;
+                            if (a[this[lineobjectname].currentSort] > b[this[lineobjectname].currentSort]) return 1 * modifier;
+                            return 0;
+                        });
+                    }
+                </text>
                 }
             },
             mounted: function ()

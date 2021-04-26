@@ -368,7 +368,7 @@ namespace Intwenty
 
           
 
-            var result = new ModifyResult(true, MessageCode.RESULT, string.Format("Saved {0} line", state.Data.SubTables[0].DbName), state.Id, state.Version);
+            var result = new ModifyResult(true, MessageCode.RESULT, string.Format("Saved {0} line", row.Table.DbName), row.Id, row.Version);
 
             var client = GetDataClient();
 
@@ -424,7 +424,7 @@ namespace Intwenty
             }
             catch (Exception ex)
             {
-                result = new ModifyResult() { Id = state.Id, Version = state.Version };
+                result = new ModifyResult() { Id = row.Id, Version = state.Version };
                 result.IsSuccess = false;
                 result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty sub table row failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
@@ -1279,16 +1279,39 @@ namespace Intwenty
 
                 if (args.MaxCount == 0 && !args.SkipPaging)
                 {
-                    object max = null;
-                    if (model.Application.DataMode == DataModeOptions.Simple)
-                        max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM  {0}", GetTenantTableName(model.Application, args)));
-                    else
+                    var maxcount_stmt = new StringBuilder();
+ 
+                    if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                     {
-                        if (!IsSubTable)
-                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
-                        else
-                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM {0} t1 JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version where t2.ApplicationId = {1}", GetTenantTableName(model.Application, args), model.Application.Id));
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                            maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+
                     }
+                    else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
+                    {
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ForeignKeyId));
+                    }
+                    else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
+                    {
+                        maxcount_stmt.Append("SELECT COUNT(*) FROM sysdata_InformationStatus t2 ");
+                        maxcount_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ",model.Application.Id));
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                            maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+                                 
+                    }
+                    else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
+                    {
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
+                        maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
+                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    }
+                    
+
+                    object max = client.GetScalarValue(maxcount_stmt.ToString());
                     if (max == DBNull.Value)
                         args.MaxCount = 0;
                     else
@@ -1484,17 +1507,39 @@ namespace Intwenty
 
                 if (args.MaxCount == 0 && !args.SkipPaging)
                 {
+                    var maxcount_stmt = new StringBuilder();
 
-                    object max = null;
-                    if (model.Application.DataMode == DataModeOptions.Simple)
-                        max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM  {0}", GetTenantTableName(model.Application, args)));
-                    else
+                    if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                     {
-                        if (!IsSubTable)
-                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
-                        else
-                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM {0} t1 JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version where t2.ApplicationId = {1}", GetTenantTableName(model.Application, args), model.Application.Id));
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                            maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+
                     }
+                    else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
+                    {
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ForeignKeyId));
+                    }
+                    else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
+                    {
+                        maxcount_stmt.Append("SELECT COUNT(*) FROM sysdata_InformationStatus t2 ");
+                        maxcount_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                            maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
+
+                    }
+                    else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
+                    {
+                        maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 ", GetTenantTableName(model.Application, args)));
+                        maxcount_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
+                        maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
+                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    }
+
+
+                    object max = client.GetScalarValue(maxcount_stmt.ToString());
                     if (max == DBNull.Value)
                         args.MaxCount = 0;
                     else

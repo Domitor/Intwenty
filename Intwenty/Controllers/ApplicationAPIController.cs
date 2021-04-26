@@ -56,6 +56,8 @@ namespace Intwenty.Controllers
                 if (viewmodel.IsPublic)
                 {
                     var data = DataRepository.Get(state, model);
+
+                    /*
                     foreach (var listui in viewmodel.UserInterface)
                     {
                         if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
@@ -66,6 +68,7 @@ namespace Intwenty.Controllers
                         data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
 
                     }
+                    */
 
                     return new JsonResult(data);
                 }
@@ -78,6 +81,7 @@ namespace Intwenty.Controllers
                         return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                     var data = DataRepository.Get(state, model);
+                    /*
                     foreach (var listui in viewmodel.UserInterface)
                     {
                         if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
@@ -88,7 +92,7 @@ namespace Intwenty.Controllers
                         data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
 
                     }
-
+                    */
                     return new JsonResult(data);
 
                 }
@@ -108,6 +112,7 @@ namespace Intwenty.Controllers
 
                 var data = DataRepository.Get(state, model);
 
+                /*
                 foreach (var dt in model.DataStructure)
                 {
                     if (!dt.IsMetaTypeDataTable)
@@ -118,7 +123,7 @@ namespace Intwenty.Controllers
                     data.AddApplicationJSONArray(dt.DbName, subtablearray.Data);
 
                 }
-
+                */
                 return new JsonResult(data);
             }
 
@@ -346,14 +351,14 @@ namespace Intwenty.Controllers
                 if (row.ParentId < 1)
                     return BadRequest();
 
-                if (row.Id < 1)
-                    return BadRequest();
 
                 if (User.Identity.IsAuthenticated)
                     state = new ClientStateInfo(User) { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
                 else
                     state = new ClientStateInfo() { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
 
+                if (state.Version < 1)
+                    state.Version = 1;
 
 
                 var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
