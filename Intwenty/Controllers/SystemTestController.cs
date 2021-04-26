@@ -640,8 +640,8 @@ namespace Intwenty.Controllers
                         throw new InvalidOperationException("Updated application did not recieve a new version id");
                 }
 
-                getbyidresult.AddApplicationJSON("AddedTestString", "TestString", false);
-                getbyidresult.AddApplicationJSON("AddedTestInt", 99, true);
+                getbyidresult.AddApplicationJSONValue("AddedTestString", "TestString", false);
+                getbyidresult.AddApplicationJSONValue("AddedTestInt", 99, true);
 
                 appdata = getbyidresult.GetAsApplicationData();
 
@@ -734,8 +734,8 @@ namespace Intwenty.Controllers
 
                 //DELETE THE LAST SUBTABLE ROW IN APP
                 var model = _modelservice.GetApplicationModel(state.ApplicationId);
-                var rowid = appdata.SubTables[0].Rows.Last().Id;
-                var deleterowresult = _dataservice.DeleteTableLine(state, model, rowid, appdata.SubTables[0].DbName);
+                var row = appdata.SubTables[0].Rows.Last();
+                var deleterowresult = _dataservice.DeleteSubTableLine(state, model, row);
                 if (!deleterowresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.DeleteById(applicationid,id, dbname) failed when deleting row: " + deleterowresult.SystemError);
 

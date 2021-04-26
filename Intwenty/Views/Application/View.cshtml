@@ -201,7 +201,7 @@
 
                     var lineobjectname = dbtablename + "_line";
 
-                    var addLine = function ()
+                    var addLocalLine = function ()
                     {
                         context.idgen--;
                         context.model[dbtablename].Id = 0;
@@ -210,27 +210,77 @@
                         context.model[dbtablename].push(context[lineobjectname]);
                     };
 
+                    if (context.instanceId == 0)
+                    {
+                        if (item) {
+                            context[lineobjectname] = {};
+                            context[lineobjectname] = item;
+                            $('#addEditModal_' + uimetacode).modal();
 
-                    if (item) {
-                        context[lineobjectname] = { [dbtablename]: {} };
-                        context[lineobjectname] = { [dbtablename]: item };
-                        $('#addEditModal_' + uimetacode).modal();
-
+                        }
+                        else {
+                            context[lineobjectname] = {};
+                            $('#addEditModalSaveBtn_' + uimetacode).off('click', addLocalLine);
+                            $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLocalLine);
+                            $('#addEditModal_' + uimetacode).modal();
+                        }
                     }
-                    else {
-                        context[lineobjectname] = { [dbtablename]: {} };
-                        $('#addEditModalSaveBtn_' + uimetacode).off('click', addLine);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', addLine);
-                        $('#addEditModal_' + uimetacode).modal();
+                    else
+                    {
+                        var saveFunc = function ()
+                        {
+                             var endpointurl = context.baseurl + "SaveSubTableLine";
+
+                            context[lineobjectname].ParentId = context.model[context.appMainTable].Id;
+                            context[lineobjectname].TableName = dbtablename;
+                            context[lineobjectname].ApplicationId = context.appId;
+                            context[lineobjectname].ApplicationViewId = context.applicationViewId;
+
+                              $.ajax({
+                                url: endpointurl,
+                                type: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify(context[lineobjectname]),
+                                success: function (response)
+                                {
+                                    if (response.isSuccess)
+                                    {
+                                        context.getPage(dbtablename);
+                                    }
+                                },
+                                error: function (response)
+                                {
+                                    raiseErrorModal(response.responseJSON);
+                                }
+                            });
+                        };
+
+
+                        if (item) {
+                            context[lineobjectname] = {};
+                            context[lineobjectname] = item;
+                            $('#addEditModalSaveBtn_' + uimetacode).off('click', saveFunc);
+                            $('#addEditModalSaveBtn_' + uimetacode).off().on('click', saveFunc);
+                            $('#addEditModal_' + uimetacode).modal();
+
+                        }
+                        else {
+                            context[lineobjectname] = {};
+                            $('#addEditModalSaveBtn_' + uimetacode).off('click', saveFunc);
+                            $('#addEditModalSaveBtn_' + uimetacode).off().on('click', saveFunc);
+                            $('#addEditModal_' + uimetacode).modal();
+                        }
+
+
+
+
                     }
                 },
                 deleteTableLine: function (item, dbtablename)
                 {
                     var context = this;
 
-                    var lineobjectname = dbtablename + "_line";
-
-                    var endpointurl = context.baseurl + "DeleteTableLine";
+                    var endpointurl = context.baseurl + "DeleteSubTableLine";
 
                     var deletelinefunc = function ()
                     {
@@ -315,26 +365,52 @@
                 {
                     this.uploadImage(event);
                 },
-                getPage: function ()
+                getPage: function (dbtablename)
                 {
                     var context = this;
+
                     var endpointurl = context.baseurl + "GetPagedList";
 
-                    this.model_pageInfo.applicationViewId = context.applicationViewId;
+                    var objname = "";
+                    var ismaintable = false;
+                    if (dbtablename)
+                    {
+                        objname = dbtablename + "_pageInfo";
+                    }
+                    else
+                    {
+                        ismaintable = true;
+                        objname = "model_pageInfo";
+                    }
+                    context[objname].applicationViewId = context.applicationViewId;
+                    if (!ismaintable)
+                        context[objname].dataTableDbName = dbtablename;
 
                     $.ajax({
                         url: endpointurl,
                         type: "POST",
                         contentType: "application/json",
-                        data: JSON.stringify(this.model_pageInfo),
-                        success: function (response) {
+                        data: JSON.stringify(context[objname]),
+                        success: function (response)
+                        {
                             //DATA
-                            context.applist = JSON.parse(response.data);
+                            if (ismaintable)
+                            {
+                                context.applist = JSON.parse(response.data);
 
-                            //UPDATE CURRENT PAGE INFO
-                            context.model_pageInfo = response.listFilter;
-                            if (context.model_pageInfo.filterValues.length === 0)
-                                context.addFilterValue();
+                                //UPDATE CURRENT PAGE INFO
+                                context.model_pageInfo = response.listFilter;
+                                if (context.model_pageInfo.filterValues.length === 0)
+                                    context.addFilterValue();
+                            }
+                            else
+                            {
+                                context.model[dbtablename] = JSON.parse(response.data);
+                                context[objname] = response.listFilter;
+                                if (context[objname].filterValues.length === 0)
+                                    context.addFilterValue(dbtablename);
+
+                            }
                         }
                     });
                 },
@@ -453,7 +529,7 @@
                         objname = "model_pageInfo";
 
                     context[objname].pageNumber++;
-                    context.getPage();
+                    context.getPage(dbtablename);
                 },
                 prevPage: function (dbtablename) {
                     var context = this;
@@ -467,7 +543,7 @@
                     context[objname].pageNumber--;
                     if (context[objname].pageNumber < 0)
                         context[objname].pageNumber = 0;
-                    context.getPage();
+                    context.getPage(dbtablename);
                 },
                 runFilter: function (dbtablename)
                 {
@@ -480,7 +556,7 @@
                         objname = "model_pageInfo";
 
                     if (context[objname].filterValues.length > 0)
-                        context.getPage();
+                        context.getPage(dbtablename);
                 },
                 addFilterValue: function (dbtablename)
                 {
@@ -507,7 +583,7 @@
                     for (var i = 0; i < context[objname].filterValues.length; i++) {
                         if (context[objname].filterValues[i].name === item.name) {
                             context[objname].filterValues.splice(i, 1);
-                            context.getPage();
+                            context.getPage(dbtablename);
                             break;
 
                         }

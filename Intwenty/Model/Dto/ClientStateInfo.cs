@@ -9,7 +9,7 @@ using Intwenty.Areas.Identity.Data;
 namespace Intwenty.Model.Dto
 {
 
-    public enum ApplicationRetrievalMode
+    public enum ActionModeOptions
     {
         AllTables, MainTable
     }
@@ -29,7 +29,7 @@ namespace Intwenty.Model.Dto
 
         public ApplicationData Data { get; set; }
 
-        public ApplicationRetrievalMode RetrievalMode { get; set; }
+        public ActionModeOptions ActionMode { get; set; }
 
 
         public ClientStateInfo()
@@ -37,7 +37,7 @@ namespace Intwenty.Model.Dto
             Properties = "";
             Data = new ApplicationData();
             User = new UserInfo();
-            RetrievalMode = ApplicationRetrievalMode.AllTables;
+            ActionMode = ActionModeOptions.AllTables;
         }
 
         public ClientStateInfo(ClaimsPrincipal user)
@@ -64,7 +64,7 @@ namespace Intwenty.Model.Dto
             var state = new ClientStateInfo();
             state.Data = ApplicationData.CreateFromJSON(model);
             state.ApplicationId = state.Data.ApplicationId;
-            state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId").Value;
+            state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
             return state;
@@ -75,7 +75,7 @@ namespace Intwenty.Model.Dto
             var state = new ClientStateInfo(user);
             state.Data = ApplicationData.CreateFromJSON(model);
             state.ApplicationId = state.Data.ApplicationId;
-            state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId").Value;
+            state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
             return state;

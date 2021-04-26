@@ -53,12 +53,12 @@
 
                     <div class="col-lg-5">
                         <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" v-model="filteritem.value" v-on:blur="runFilter()" placeholder="Value to filter on" />
+                            <input type="text" class="form-control form-control-sm" v-model="filteritem.value" v-on:blur="runFilter('@Model.DataTableDbName')" placeholder="Value to filter on" />
                         </div>
                     </div>
 
                     <div class="col-lg-2">
-                        <button type="button" class="btn btn-sm btn-danger" v-on:click="deleteFilterValue(filteritem)"><i class="fa fa-trash"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger" v-on:click="deleteFilterValue(filteritem,'@Model.DataTableDbName')"><i class="fa fa-trash"></i></button>
                     </div>
 
 

@@ -239,7 +239,8 @@ namespace Intwenty
                             BeforeSaveNew(model, state, client);
                             InsertMainTable(model, state, client);
                             InsertInformationStatus(model, state, client);
-                            HandleSubTables(model, state, client);
+                            if (state.ActionMode == ActionModeOptions.AllTables)
+                                HandleSubTables(model, state, client);
                             result.Status = LifecycleStatus.NEW_SAVED;
                         }
                         else if (state.Id > 0 && model.Application.UseVersioning)
@@ -253,7 +254,9 @@ namespace Intwenty
                             BeforeSaveUpdate(model, state, client);
                             InsertMainTable(model, state, client);
                             UpdateInformationStatus(state, client);
-                            HandleSubTables(model, state, client);
+                            if (state.ActionMode == ActionModeOptions.AllTables)
+                                HandleSubTables(model, state, client);
+
                             result.Status = LifecycleStatus.EXISTING_SAVED;
                         }
                         else if (state.Id > 0 && !model.Application.UseVersioning)
@@ -265,7 +268,9 @@ namespace Intwenty
                             BeforeSaveUpdate(model, state, client);
                             UpdateMainTable(model, state, client);
                             UpdateInformationStatus(state, client);
-                            HandleSubTables(model, state, client);
+                            if (state.ActionMode == ActionModeOptions.AllTables)
+                                HandleSubTables(model, state, client);
+
                             result.Status = LifecycleStatus.EXISTING_SAVED;
                         }
 
@@ -329,39 +334,99 @@ namespace Intwenty
 
         }
 
-        public ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model)
+        public virtual ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row)
         {
 
+         
+            if (row == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No row info found when about to save subtable row.");
+
+            if (row.Table == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No table info found when about to save subtable row.");
+
+            if (string.IsNullOrEmpty(row.Table.DbName))
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No tablename found when saving table row.");
+
             if (state == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save sub table line.");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when saving sub table row.");
 
             if (state.ApplicationId < 1)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
-            if (!state.HasData)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
+            if (row.ParentId < 1)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The sub table row must have a valid parent id");
 
-            if (model == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == row.Table.DbName.ToLower() && p.IsMetaTypeDataTable);
+            if (modelitem == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The tablename did not match any sub tables in the application");
 
-            if (model.Application.Id != state.ApplicationId)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
 
-            if (state.Data.SubTables.Count != 1)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "State data should only contain one subtable when saving a line");
+            row.InferModel(model);
+
+            if (row.Table.Model == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No table model info found when about to delete subtable row.");
+
+          
 
             var result = new ModifyResult(true, MessageCode.RESULT, string.Format("Saved {0} line", state.Data.SubTables[0].DbName), state.Id, state.Version);
 
+            var client = GetDataClient();
+
             try
             {
+                client.Open();
 
+                BeforeSaveSubTableRow(model, row, client);
+
+                //NEW ROW
+                if (row.Id < 1)
+                {
+                    BeforeInsertSubTableRow(model, row, client);
+                    if (model.Application.UseVersioning)
+                    {
+                        var rowid = GetNewInstanceId(model.Application.Id, DatabaseModelItem.MetaTypeDataTable, row.Table.Model.MetaCode, state, client);
+                        if (rowid < 1)
+                            throw new InvalidOperationException("Could not get a new row id for table " + row.Table.DbName);
+
+                        //NEW ROW ID
+                        row.Id = rowid;
+
+                        InsertVersionedTableRow(model, row, state, client);
+                    }
+                    else
+                    {
+                        InsertAutoIncrementalTableRow(model, row, state, client);
+                    }
+
+                }
+                else
+                {
+                    //CURRENT ROW
+                    //VERSIONING = CREATE ROW WITH NEW VERSION, BUT SAME ID
+                    if (model.Application.UseVersioning)
+                    {
+                        BeforeInsertSubTableRow(model, row, client);
+                        InsertVersionedTableRow(model, row, state, client);
+                    }
+                    else
+                    {
+                        //NO VERSIONG = JUST UPDATE
+                        BeforeUpdateSubTableRow(model, row, client);
+                        UpdateTableRow(row, state, client);
+                    }
+
+                }
+
+                AfterSaveSubTableRow(model, row, client);
+
+                
 
             }
             catch (Exception ex)
             {
                 result = new ModifyResult() { Id = state.Id, Version = state.Version };
                 result.IsSuccess = false;
-                result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty sub table line failed"));
+                result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty sub table row failed"));
                 result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
                 DbLogger.LogErrorAsync("IntwentyDataService.SaveSubTableLine: " + ex.Message);
             }
@@ -835,7 +900,7 @@ namespace Intwenty
             foreach (var t in row.Values)
             {
                 if (t.DbName.ToLower() == "id")
-                    rowid = t.GetAsInt().Value;
+                    rowid = t.GetAsInt();
 
                 if (rowid < 1)
                     continue;
@@ -979,16 +1044,16 @@ namespace Intwenty
                 else if (p.Model.IsDataTypeInt)
                 {
                     var val = p.GetAsInt();
-                    if (val.HasValue)
-                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    if (p.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val));
                     else
                         parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
                 }
                 else if (p.Model.IsDataTypeBool)
                 {
                     var val = p.GetAsBool();
-                    if (val.HasValue)
-                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    if (p.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val));
                     else
                         parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
                 }
@@ -1003,8 +1068,8 @@ namespace Intwenty
                 else if (p.Model.IsDataType1Decimal || p.Model.IsDataType2Decimal || p.Model.IsDataType3Decimal)
                 {
                     var val = p.GetAsDecimal();
-                    if (val.HasValue)
-                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val.Value));
+                    if (p.HasValue)
+                        parameters.Add(new IntwentySqlParameter("@" + p.DbName, val));
                     else
                         parameters.Add(new IntwentySqlParameter("@" + p.DbName, DBNull.Value));
                 }
@@ -1099,22 +1164,34 @@ namespace Intwenty
         }
 
 
-        public ModifyResult DeleteTableLine(ClientStateInfo state, ApplicationModel model, int id, string tablename)
+        public ModifyResult DeleteSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row)
         {
             ModifyResult result = null;
+
+            if (row == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No row info found when about to delete subtable row.");
+
+            if (row.Table == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No table info found when about to delete subtable row.");
+
+            if (string.IsNullOrEmpty(row.Table.DbName))
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No tablename found when deleting tableline.");
 
             if (state == null)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when deleting row.");
 
-            if (string.IsNullOrEmpty(tablename))
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No tablename found when deleting tableline.");
-
             if (state.ApplicationId < 1)
                 return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
 
-            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == tablename.ToLower() || model.Application.DbName.ToLower() == tablename.ToLower());
+            var modelitem = model.DataStructure.Find(p => p.DbName.ToLower() == row.Table.DbName.ToLower() && p.IsMetaTypeDataTable);
             if (modelitem == null)
-                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The tablename did not match any tables in the application");
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "The tablename did not match any sub tables in the application");
+
+
+            row.InferModel(model);
+
+            if (row.Table.Model == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No table model info found when about to delete subtable row.");
 
             var client = GetDataClient();
 
@@ -1130,37 +1207,18 @@ namespace Intwenty
                 }
 
 
-                if (tablename.ToLower() == model.Application.DbName.ToLower())
+                if (model.Application.DataMode == DataModeOptions.Standard)
                 {
-
-                    client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(model.Application, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                    if (model.Application.UseVersioning && model.Application.DataMode != DataModeOptions.Simple)
-                        client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(model.Application, model.Application.VersioningTableName, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-
-                    if (model.Application.DataMode != DataModeOptions.Simple)
-                    {
-                        client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                        client.RunCommand("DELETE FROM sysdata_InformationStatus WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                    }
-                    result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted application {0}", model.Application.Title), id);
-
+                    client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(row.Table.Model, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = row.Id } });
+                    client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = row.Id } });
+                    result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", row.Table.DbName), row.Id);
                 }
                 else
                 {
-                    if (model.Application.DataMode != DataModeOptions.Simple)
-                    {
-                        foreach (var table in model.DataStructure)
-                        {
-                            if (table.IsMetaTypeDataTable && table.DbName.ToLower() == tablename.ToLower())
-                            {
-                                client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(table, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                                client.RunCommand("DELETE FROM sysdata_InstanceId WHERE Id=@Id", parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = id } });
-                                result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", table.DbName), id);
-                            }
-                        }
-                    }
+                    client.RunCommand(string.Format("DELETE FROM {0} WHERE Id=@Id", GetTenantTableName(row.Table.Model, state)), parameters: new IntwentySqlParameter[] { new IntwentySqlParameter() { Name = "@Id", Value = row.Id } });
+                    result = new ModifyResult(true, MessageCode.RESULT, string.Format("Deleted sub table row {0}", row.Table.DbName), row.Id);
                 }
-
+                
 
                 if (result == null)
                     throw new InvalidOperationException("Found nothing to delete");
@@ -1792,7 +1850,7 @@ namespace Intwenty
 
                     jsonresult.Append("\"" + model.Application.DbName + "\":" + appjson.ToString());
 
-                    if (state.RetrievalMode == ApplicationRetrievalMode.AllTables)
+                    if (state.ActionMode == ActionModeOptions.AllTables)
                     {
                         //SUBTABLES
                         foreach (var t in model.DataStructure)

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace Intwenty.Model.Dto
 {
 
+   
     public class ApplicationData : ValueCollectionBase
     {
         public int ApplicationId { get; set; }
@@ -102,15 +103,15 @@ namespace Intwenty.Model.Dto
                             }
                             var rowid = tablerow.Values.Find(p => p.DbName == "Id");
                             if (rowid != null)
-                                tablerow.Id = rowid.GetAsInt().Value;
+                                tablerow.Id = rowid.GetAsInt();
 
                             var rowversion = tablerow.Values.Find(p => p.DbName == "Version");
                             if (rowversion != null)
-                                tablerow.Version = rowversion.GetAsInt().Value;
+                                tablerow.Version = rowversion.GetAsInt();
 
                             var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
                             if (parentid != null)
-                                tablerow.ParentId = parentid.GetAsInt().Value;
+                                tablerow.ParentId = parentid.GetAsInt();
 
                             var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
                             if (rowownedby != null)
@@ -131,15 +132,15 @@ namespace Intwenty.Model.Dto
 
                 var appid = res.Values.Find(p => p.DbName == "ApplicationId");
                 if (appid != null)
-                    res.ApplicationId = appid.GetAsInt().Value;
+                    res.ApplicationId = appid.GetAsInt();
 
                 var dataid = res.Values.Find(p => p.DbName == "Id");
                 if (dataid != null)
-                    res.Id = dataid.GetAsInt().Value;
+                    res.Id = dataid.GetAsInt();
 
                 var dataversion = res.Values.Find(p => p.DbName == "Version");
                 if (dataversion != null)
-                    res.Version = dataversion.GetAsInt().Value;
+                    res.Version = dataversion.GetAsInt();
 
                 var ownedby = res.Values.Find(p => p.DbName == "OwnedBy");
                 if (ownedby != null)
@@ -177,15 +178,15 @@ namespace Intwenty.Model.Dto
                     }
                     var rowid = tablerow.Values.Find(p => p.DbName == "Id");
                     if (rowid != null)
-                        tablerow.Id = rowid.GetAsInt().Value;
+                        tablerow.Id = rowid.GetAsInt();
 
                     var rowversion = tablerow.Values.Find(p => p.DbName == "Version");
                     if (rowversion != null)
-                        tablerow.Version = rowversion.GetAsInt().Value;
+                        tablerow.Version = rowversion.GetAsInt();
 
                     var parentid = tablerow.Values.Find(p => p.DbName == "ParentId");
                     if (parentid != null)
-                        tablerow.ParentId = parentid.GetAsInt().Value;
+                        tablerow.ParentId = parentid.GetAsInt();
 
                     var rowownedby = tablerow.Values.Find(p => p.DbName == "OwnedBy");
                     if (rowownedby != null)
@@ -313,12 +314,12 @@ namespace Intwenty.Model.Dto
             Value = value;
         }
 
-        public int? GetAsInt()
+        public int GetAsInt()
         {
             if (HasValue)
                 return Convert.ToInt32(Value);
 
-            return null;
+            return 0;
         }
 
         public string GetAsString()
@@ -329,20 +330,20 @@ namespace Intwenty.Model.Dto
             return string.Empty;
         }
 
-        public bool? GetAsBool()
+        public bool GetAsBool()
         {
             if (HasValue)
                 return Convert.ToBoolean(Value);
 
-            return null;
+            return false;
         }
 
-        public decimal? GetAsDecimal()
+        public decimal GetAsDecimal()
         {
             if (HasValue)
                 return Convert.ToDecimal(Value);
 
-            return null;
+            return 0;
         }
 
         public DateTime? GetAsDateTime()
@@ -389,7 +390,7 @@ namespace Intwenty.Model.Dto
 
       
 
-        public int? FirstRowGetAsInt(string dbname)
+        public int FirstRowGetAsInt(string dbname)
         {
             if (!HasRows)
                 return 0;
@@ -397,10 +398,8 @@ namespace Intwenty.Model.Dto
             var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
                 return 0;
-            if (!value.GetAsInt().HasValue)
-                return 0;
-
-            return value.GetAsInt().Value;
+            
+            return value.GetAsInt();
         }
 
         public string FirstRowGetAsString(string dbname)
@@ -415,26 +414,26 @@ namespace Intwenty.Model.Dto
             return value.GetAsString();
         }
 
-        public bool? FirstRowGetAsBool(string dbname)
+        public bool FirstRowGetAsBool(string dbname)
         {
             if (!HasRows)
-                return null;
+                return false;
 
             var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
-                return null;
+                return false;
 
             return value.GetAsBool();
         }
 
-        public decimal? FirstRowGetAsDecimal(string dbname)
+        public decimal FirstRowGetAsDecimal(string dbname)
         {
             if (!HasRows)
-                return null;
+                return 0;
 
             var value = this.Rows[0].Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
-                return null;
+                return 0;
 
             return value.GetAsDecimal();
         }
@@ -476,8 +475,16 @@ namespace Intwenty.Model.Dto
             if (Table == null)
                 return;
 
-            if (Table.Model == null)
+            if (Table.Model == null && string.IsNullOrEmpty(Table.DbName))
                 return;
+            else if (Table.Model == null && !string.IsNullOrEmpty(Table.DbName))
+            {
+                var tablemodel = model.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName.ToUpper() == Table.DbName.ToUpper());
+                if (tablemodel == null)
+                    return;
+
+                Table.Model = tablemodel;
+            }
 
             foreach (var item in model.DataStructure)
             {
@@ -492,6 +499,65 @@ namespace Intwenty.Model.Dto
 
                 }
             }
+
+        }
+
+        public static ApplicationTableRow CreateFromJSON(System.Text.Json.JsonElement JSON)
+        {
+         
+
+            var res = new ApplicationTableRow();
+            res.Table = new ApplicationTable();
+            res.Table.Rows.Add(res);
+
+            if (JSON.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                var jsonarr = JSON.EnumerateObject();
+                foreach (var j in jsonarr)
+                {
+                    if (j.Value.ValueKind == System.Text.Json.JsonValueKind.String || j.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetString() });
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.Number)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetDecimal() });
+                    else if (j.Value.ValueKind == System.Text.Json.JsonValueKind.False || j.Value.ValueKind == System.Text.Json.JsonValueKind.True)
+                        res.Values.Add(new ApplicationValue() { DbName = j.Name, Value = j.Value.GetBoolean() });
+                   
+                }
+
+
+                var dataid = res.Values.Find(p => p.DbName == "Id");
+                if (dataid != null)
+                    res.Id = dataid.GetAsInt();
+
+                var dataversion = res.Values.Find(p => p.DbName == "Version");
+                if (dataversion != null)
+                    res.Version = dataversion.GetAsInt();
+
+                var parentid = res.Values.Find(p => p.DbName == "ParentId");
+                if (parentid != null)
+                    res.ParentId = parentid.GetAsInt();
+
+                var ownedby = res.Values.Find(p => p.DbName == "OwnedBy");
+                if (ownedby != null)
+                    res.OwnerUserId = ownedby.GetAsString();
+
+                var ownedbyorgid = res.Values.Find(p => p.DbName == "OwnedByOrganizationId");
+                if (ownedbyorgid != null)
+                    res.OwnerOrganizationId = ownedbyorgid.GetAsString();
+
+                var ownedbyorgname = res.Values.Find(p => p.DbName == "OwnedByOrganizationName");
+                if (ownedbyorgname != null)
+                    res.OwnerOrganizationName = ownedbyorgname.GetAsString();
+
+                var tablename = res.Values.Find(p => p.DbName == "TableName");
+                if (tablename != null)
+                    res.Table.DbName = tablename.GetAsString();
+
+
+            }
+            
+
+            return res;
 
         }
 
@@ -518,15 +584,13 @@ namespace Intwenty.Model.Dto
             OwnerOrganizationName = string.Empty;
         }
 
-        public int? GetAsInt(string dbname)
+        public int GetAsInt(string dbname)
         {
             var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
                 return 0;
-            if (!value.GetAsInt().HasValue)
-                return 0;
-
-            return value.GetAsInt().Value;
+          
+            return value.GetAsInt();
         }
 
         public string GetAsString(string dbname)
@@ -538,20 +602,20 @@ namespace Intwenty.Model.Dto
             return value.GetAsString();
         }
 
-        public bool? GetAsBool(string dbname)
+        public bool GetAsBool(string dbname)
         {
             var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
-                return null;
+                return false;
 
             return value.GetAsBool();
         }
 
-        public decimal? GetAsDecimal(string dbname)
+        public decimal GetAsDecimal(string dbname)
         {
             var value = this.Values.Find(p => p.DbName.ToLower() == dbname.ToLower());
             if (value == null)
-                return null;
+                return 0;
 
             return value.GetAsDecimal();
         }

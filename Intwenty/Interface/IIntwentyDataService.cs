@@ -35,6 +35,12 @@ namespace Intwenty.Interface
         ModifyResult Save(ClientStateInfo state, ApplicationModel model);
 
         /// <summary>
+        /// Saves an application sub table row
+        /// </summary>
+        /// <returns>A result describing the result of the save operation</returns>
+        ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row);
+
+        /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
@@ -53,7 +59,7 @@ namespace Intwenty.Interface
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult DeleteTableLine(ClientStateInfo state, ApplicationModel model, int id, string tablename);
+        ModifyResult DeleteSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row);
 
 
         /// <summary>
