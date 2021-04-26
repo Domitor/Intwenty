@@ -159,7 +159,7 @@ namespace Intwenty.Model.Dto
             return result;
         }
 
-        public void AddApplicationJSON(string jsonname, object jsonvalue, bool isnumeric = false)
+        public void AddApplicationJSONValue(string jsonname, object jsonvalue, bool isnumeric = false)
         {
             var check = Data.IndexOf("{", 2);
             if (check < 2)
@@ -176,6 +176,22 @@ namespace Intwenty.Model.Dto
             else
                 value = ",\"" + jsonname + "\":" + System.Text.Json.JsonEncodedText.Encode(Convert.ToString(jsonvalue)).ToString();
 
+            Data = Data.Insert(check, value);
+
+        }
+
+        public void AddApplicationJSONArray(string jsonname, string jsonaray)
+        {
+            var check = Data.IndexOf("{", 2);
+            if (check < 2)
+                return;
+
+            check = Data.IndexOf("}", check);
+            if (check < 2)
+                return;
+
+            var value = ",\"" + jsonname + "\":" + jsonaray;
+        
             Data = Data.Insert(check, value);
 
         }

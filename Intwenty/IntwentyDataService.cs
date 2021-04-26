@@ -329,6 +329,51 @@ namespace Intwenty
 
         }
 
+        public ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model)
+        {
+
+            if (state == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "No client state found when performing save sub table line.");
+
+            if (state.ApplicationId < 1)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Parameter state must contain a valid ApplicationId");
+
+            if (!state.HasData)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "There's no data in state.Data");
+
+            if (model == null)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Coluld not find the requested application model");
+
+            if (model.Application.Id != state.ApplicationId)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from state.applicationid");
+
+            if (state.Data.SubTables.Count != 1)
+                return new ModifyResult(false, MessageCode.SYSTEMERROR, "State data should only contain one subtable when saving a line");
+
+            var result = new ModifyResult(true, MessageCode.RESULT, string.Format("Saved {0} line", state.Data.SubTables[0].DbName), state.Id, state.Version);
+
+            try
+            {
+
+
+            }
+            catch (Exception ex)
+            {
+                result = new ModifyResult() { Id = state.Id, Version = state.Version };
+                result.IsSuccess = false;
+                result.AddMessage(MessageCode.USERERROR, string.Format("Save Intwenty sub table line failed"));
+                result.AddMessage(MessageCode.SYSTEMERROR, ex.Message);
+                DbLogger.LogErrorAsync("IntwentyDataService.SaveSubTableLine: " + ex.Message);
+            }
+            finally
+            {
+                client.Close();
+                result.Finish();
+            }
+
+            return result;
+        }
+
         protected virtual void BeforeSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
         {
 
@@ -1154,15 +1199,25 @@ namespace Intwenty
             if (model.Application.Id != args.ApplicationId)
                 return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Bad request, model.Application.Id differ from args.Applicationid");
 
+            if (string.IsNullOrEmpty(args.DataTableDbName))
+                args.DataTableDbName = model.Application.DbName;
+
+            var IsSubTable = false;
+            var dbtablemodel = model.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName.ToUpper() == args.DataTableDbName.ToUpper());
+            if (dbtablemodel != null)
+                IsSubTable = true;
+
+
             DataListResult<T> result = null;
 
             var client = GetDataClient();
+
             client.Open();
 
             try
             {
 
-                result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for application {0}", model.Application.Title));
+                result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for table {0}", args.DataTableDbName));
 
                 if (args.MaxCount == 0 && !args.SkipPaging)
                 {
@@ -1170,7 +1225,12 @@ namespace Intwenty
                     if (model.Application.DataMode == DataModeOptions.Simple)
                         max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM  {0}", GetTenantTableName(model.Application, args)));
                     else
-                        max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
+                    {
+                        if (!IsSubTable)
+                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
+                        else
+                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM {0} t1 JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version where t2.ApplicationId = {1}", GetTenantTableName(model.Application, args), model.Application.Id));
+                    }
                     if (max == DBNull.Value)
                         args.MaxCount = 0;
                     else
@@ -1184,19 +1244,32 @@ namespace Intwenty
                 var parameters = new List<IIntwentySqlParameter>();
                 var sql_list_stmt = new StringBuilder();
 
-                if (model.Application.DataMode == DataModeOptions.Simple)
+                if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
 
                 }
-                else
+                else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
+                {
+                    sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
+                    sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
+                }
+                else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
+                {
+                    sql_list_stmt.Append("SELECT t2.MetaCode, t2.PerformDate, t2.StartDate, t2.EndDate, t1.* ");
+                    sql_list_stmt.Append(string.Format("FROM {0} t1", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
+                    sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                }
+                else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
                 {
 
-                    sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate, t2.* ");
-                    sql_list_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                    sql_list_stmt.Append("SELECT t2.MetaCode, t2.PerformDate, t2.StartDate, t2.EndDate, t1.* ");
+                    sql_list_stmt.Append("FROM sysdata_InformationStatus t2 ");
                     sql_list_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
-                    sql_list_stmt.Append("WHERE t1.ApplicationId = @ApplicationId ");
+                    sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
 
@@ -1227,12 +1300,12 @@ namespace Intwenty
 
                         if (v.ExactMatch)
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
+                            sql_list_stmt.Append("AND t1." + v.Name + " = @FV_" + v.Name + " ");
                             parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
                         }
                         else
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " LIKE '%" + v.Value + "%'  ");
+                             sql_list_stmt.Append("AND t1." + v.Name + " LIKE '%" + v.Value + "%'  ");
                         }
                     }
                 }
@@ -1327,6 +1400,14 @@ namespace Intwenty
                 return t;
             }
 
+            if (string.IsNullOrEmpty(args.DataTableDbName))
+                args.DataTableDbName = model.Application.DbName;
+
+            var IsSubTable = false;
+            var dbtablemodel = model.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName.ToUpper() == args.DataTableDbName.ToUpper());
+            if (dbtablemodel != null)
+                IsSubTable = true;
+
 
             var client = GetDataClient();
             client.Open();
@@ -1344,7 +1425,12 @@ namespace Intwenty
                     if (model.Application.DataMode == DataModeOptions.Simple)
                         max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM  {0}", GetTenantTableName(model.Application, args)));
                     else
-                        max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
+                    {
+                        if (!IsSubTable)
+                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM sysdata_InformationStatus where ApplicationId = {0}", model.Application.Id));
+                        else
+                            max = client.GetScalarValue(string.Format("SELECT COUNT(*) FROM {0} t1 JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version where t2.ApplicationId = {1}", GetTenantTableName(model.Application, args), model.Application.Id));
+                    }
                     if (max == DBNull.Value)
                         args.MaxCount = 0;
                     else
@@ -1367,14 +1453,31 @@ namespace Intwenty
                     }
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
                 }
-                else
+                else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
+                {
+                    sql_list_stmt.Append("SELECT t2.MetaCode, t2.PerformDate, t2.StartDate, t2.EndDate ");
+
+                    foreach (var col in model.DataStructure)
+                    {
+                        if (col.IsMetaTypeDataColumn && col.IsRoot)
+                        {
+                            sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
+                        }
+                    }
+
+                    sql_list_stmt.Append(string.Format("FROM {0} t1", GetTenantTableName(model.Application, args)));
+                    sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
+                    sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
+                    parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
+                }
+                else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
                 {
                     sql_list_stmt.Append("SELECT t1.MetaCode, t1.PerformDate, t1.StartDate, t1.EndDate ");
                     foreach (var col in model.DataStructure)
                     {
                         if (col.IsMetaTypeDataColumn && col.IsRoot)
                         {
-                            sql_list_stmt.Append(string.Format(", t2.{0} ", col.DbName));
+                            sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
                         }
                     }
 
@@ -1415,12 +1518,12 @@ namespace Intwenty
 
                         if (v.ExactMatch)
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " = @FV_" + v.Name + " ");
+                            sql_list_stmt.Append("AND t1." + v.Name + " = @FV_" + v.Name + " ");
                             parameters.Add(new IntwentySqlParameter() { Name = "@FV_" + v.Name, Value = v.Value });
                         }
                         else
                         {
-                            sql_list_stmt.Append("AND t2." + v.Name + " LIKE '%" + v.Value + "%'  ");
+                            sql_list_stmt.Append("AND t1." + v.Name + " LIKE '%" + v.Value + "%'  ");
                         }
                     }
                 }
@@ -1689,30 +1792,33 @@ namespace Intwenty
 
                     jsonresult.Append("\"" + model.Application.DbName + "\":" + appjson.ToString());
 
-                    //SUBTABLES
-                    foreach (var t in model.DataStructure)
+                    if (state.RetrievalMode == ApplicationRetrievalMode.AllTables)
                     {
-                        if (t.IsMetaTypeDataTable && t.IsRoot)
+                        //SUBTABLES
+                        foreach (var t in model.DataStructure)
                         {
-                            char sep = ' ';
-                            sql_stmt = new StringBuilder("SELECT ");
-                            foreach (var col in model.DataStructure)
+                            if (t.IsMetaTypeDataTable && t.IsRoot)
                             {
-                                if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
+                                char sep = ' ';
+                                sql_stmt = new StringBuilder("SELECT ");
+                                foreach (var col in model.DataStructure)
                                 {
-                                    sql_stmt.Append(sep + string.Format(" t2.{0} ", col.DbName));
-                                    sep = ',';
+                                    if (col.IsMetaTypeDataColumn && col.ParentMetaCode == t.MetaCode)
+                                    {
+                                        sql_stmt.Append(sep + string.Format(" t2.{0} ", col.DbName));
+                                        sep = ',';
+                                    }
                                 }
+                                sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
+                                sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ", GetTenantTableName(t, state)));
+                                sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
+                                sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
+
+                                var tablearray = client.GetJsonArray(sql_stmt.ToString()).GetJsonString();
+
+                                jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
+
                             }
-                            sql_stmt.Append("FROM sysdata_InformationStatus t1 ");
-                            sql_stmt.Append(string.Format("JOIN {0} t2 on t1.Id=t2.ParentId and t1.Version = t2.Version ", GetTenantTableName(t, state)));
-                            sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
-                            sql_stmt.Append(string.Format("AND t1.Id = {0}", state.Id));
-
-                            var tablearray = client.GetJsonArray(sql_stmt.ToString()).GetJsonString();
-
-                            jsonresult.Append(", \"" + t.DbName + "\": " + tablearray.ToString());
-
                         }
                     }
 
@@ -1976,18 +2082,18 @@ namespace Intwenty
                 if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.UserTablePrefix, state.DataTableDbName);
             }
             else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
                 if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
+                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, state.DataTableDbName);
             }
             else
             {
-                return model.DbName;
+                return state.DataTableDbName;
             }
 
         }
@@ -2044,6 +2150,8 @@ namespace Intwenty
             }
 
         }
+
+     
 
 
     }

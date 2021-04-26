@@ -44,31 +44,82 @@ namespace Intwenty.Controllers
                 return BadRequest();
 
             var viewmodel = model.Views.Find(p => p.Id == viewid);
-            if (viewmodel==null)
-                return BadRequest();
+            if (viewmodel != null)
+            {
+               
+                ClientStateInfo state = null;
+                if (User.Identity.IsAuthenticated)
+                    state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, RetrievalMode = ApplicationRetrievalMode.MainTable };
+                else
+                    state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, RetrievalMode = ApplicationRetrievalMode.MainTable };
 
-            ClientStateInfo state = null;
-            if (User.Identity.IsAuthenticated)
-                state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
+                if (viewmodel.IsPublic)
+                {
+                    var data = DataRepository.Get(state, model);
+                    foreach (var listui in viewmodel.UserInterface)
+                    {
+                        if (!listui.IsSubTableUserInterface)
+                            continue;
+
+                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName };
+                        var subtablearray = DataRepository.GetJsonArray(filter);
+                        data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
+
+                    }
+
+                    return new JsonResult(data);
+                }
+                else
+                {
+
+                    if (!User.Identity.IsAuthenticated)
+                        return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
+                    if (!await UserManager.HasAuthorization(User, viewmodel))
+                        return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
+
+                    var data = DataRepository.Get(state, model);
+                    foreach (var listui in viewmodel.UserInterface)
+                    {
+                        if (!listui.IsSubTableUserInterface)
+                            continue;
+
+                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName };
+                        var subtablearray = DataRepository.GetJsonArray(filter);
+                        data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
+
+                    }
+
+                    return new JsonResult(data);
+
+                }
+            }
             else
-                state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid };
-
-            if (viewmodel.IsPublic)
             {
-                var data = DataRepository.Get(state, model);
-                return new JsonResult(data);
-            } 
-            else 
-            {
+                ClientStateInfo state = null;
+                if (User.Identity.IsAuthenticated)
+                    state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, RetrievalMode = ApplicationRetrievalMode.MainTable };
+                else
+                    state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, RetrievalMode = ApplicationRetrievalMode.MainTable };
 
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, viewmodel))
+                if (!await UserManager.HasAuthorization(User, model))
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                 var data = DataRepository.Get(state, model);
+
+                foreach (var dt in model.DataStructure)
+                {
+                    if (!dt.IsMetaTypeDataTable)
+                        continue;
+
+                    var filter = new ListFilter(User) { ApplicationId = model.Application.Id, DataTableDbName = dt.DbName };
+                    var subtablearray = DataRepository.GetJsonArray(filter);
+                    data.AddApplicationJSONArray(dt.DbName, subtablearray.Data);
+
+                }
+
                 return new JsonResult(data);
-                
             }
 
         }
@@ -430,6 +481,90 @@ namespace Intwenty.Controllers
             {
                 var r = new OperationResult();
                 r.SetError(ex.Message, "An error occured when deleting a sub table line.");
+                var jres = new JsonResult(r);
+                jres.StatusCode = 500;
+                return jres;
+            }
+
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> SaveSubTableLine([FromBody] System.Text.Json.JsonElement model)
+        {
+
+            ClientStateInfo state = null;
+
+            try
+            {
+                ApplicationData lineinfo = ApplicationData.CreateFromJSON(model);
+                var lineid = lineinfo.GetAsInt("Id").Value;
+                var appid = lineinfo.GetAsInt("ApplicationId").Value;
+                var viewid = lineinfo.GetAsInt("ApplicationViewId").Value;
+                var tablename = lineinfo.GetAsString("TableName");
+                var parentid = lineinfo.GetAsInt("ParentId").Value;
+
+                if (appid < 1)
+                    return BadRequest();
+
+
+                if (string.IsNullOrEmpty(tablename))
+                    return BadRequest();
+
+                if (User.Identity.IsAuthenticated)
+                    state = new ClientStateInfo(User) { Id = parentid, ApplicationId = appid, ApplicationViewId = viewid };
+                else
+                    state = new ClientStateInfo() { Id = parentid, ApplicationId = appid, ApplicationViewId = viewid };
+
+
+                var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);
+                if (appmodel == null)
+                    return BadRequest();
+
+
+                if (state.ApplicationViewId > 0)
+                {
+                    var viewmodel = appmodel.Views.Find(p => p.Id == state.ApplicationViewId);
+                    if (viewmodel == null)
+                        return BadRequest();
+
+                    if (viewmodel.IsPublic)
+                    {
+                        var pub_del_res = DataRepository.SaveSubTableLine(state, appmodel, lineid, tablename);
+                        if (!pub_del_res.IsSuccess)
+                            throw new InvalidOperationException(pub_del_res.UserError);
+
+                        return new JsonResult(pub_del_res);
+                    }
+                    else
+                    {
+                        if (!await UserManager.HasAuthorization(User, viewmodel))
+                            throw new InvalidOperationException(string.Format("You are not authorized to modify data in this view"));
+
+                    }
+
+                }
+                else
+                {
+                    if (!User.Identity.IsAuthenticated)
+                        throw new InvalidOperationException("You must login to use this function");
+
+                    if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                        throw new InvalidOperationException(string.Format("You are not authorized to modify data in this application"));
+
+                }
+
+
+                var res = DataRepository.SaveSubTableLine(state, appmodel, lineid, tablename);
+                if (!res.IsSuccess)
+                    throw new InvalidOperationException(res.UserError);
+
+                return new JsonResult(res);
+
+            }
+            catch (Exception ex)
+            {
+                var r = new OperationResult();
+                r.SetError(ex.Message, "An error occured when saving a sub table line.");
                 var jres = new JsonResult(r);
                 jres.StatusCode = 500;
                 return jres;

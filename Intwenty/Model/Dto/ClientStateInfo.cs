@@ -9,6 +9,12 @@ using Intwenty.Areas.Identity.Data;
 namespace Intwenty.Model.Dto
 {
 
+    public enum ApplicationRetrievalMode
+    {
+        AllTables, MainTable
+    }
+
+
     public class ClientStateInfo : HashTagPropertyObject
     {
         public UserInfo User { get; set; }
@@ -23,6 +29,7 @@ namespace Intwenty.Model.Dto
 
         public ApplicationData Data { get; set; }
 
+        public ApplicationRetrievalMode RetrievalMode { get; set; }
 
 
         public ClientStateInfo()
@@ -30,6 +37,7 @@ namespace Intwenty.Model.Dto
             Properties = "";
             Data = new ApplicationData();
             User = new UserInfo();
+            RetrievalMode = ApplicationRetrievalMode.AllTables;
         }
 
         public ClientStateInfo(ClaimsPrincipal user)

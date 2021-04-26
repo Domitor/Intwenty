@@ -15,7 +15,10 @@ namespace Intwenty.Model.Dto
 
         public int ApplicationViewId { get; set; }
 
-        public string DataViewMetaCode { get; set; }
+        /// <summary>
+        /// If this is blank the main table of the application will be used otherwise the table specified
+        /// </summary>
+        public string DataTableDbName { get; set; }
 
         public bool SkipPaging { get; set; }
 

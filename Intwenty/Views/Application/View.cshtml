@@ -391,7 +391,8 @@
                 {
                     var context = this;
                     var endpointurl = context.baseurl + "GetApplication/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
-                    $.get(endpointurl, function (response) {
+                    $.get(endpointurl, function (response)
+                    {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
                         context.$forceUpdate();
