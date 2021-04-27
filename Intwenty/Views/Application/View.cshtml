@@ -225,31 +225,41 @@
                     {
                         var saveFunc = function ()
                         {
-                            var endpointurl = "@Html.Raw(ViewBag.SaveLineAPIPath)";
 
-                            context[dbtablename].Version = context.version;
-                            context[dbtablename].ParentId = context.model[context.appMainTable].Id;
-                            context[dbtablename].TableName = dbtablename;
-                            context[dbtablename].ApplicationId = context.appId;
-                            context[dbtablename].ApplicationViewId = context.applicationViewId;
+                            var savetableline = function ()
+                            {
 
-                              $.ajax({
-                                url: endpointurl,
-                                type: "POST",
-                                contentType: "application/json",
-                                data: JSON.stringify(context[dbtablename]),
-                                success: function (response)
-                                {
-                                    context.modelSaved = true;
-                                    setTimeout(function () { context.modelSaved = false; }, 3000);
-                                    context.getPage(dbtablename);
+                                var endpointurl = "@Html.Raw(ViewBag.SaveLineAPIPath)";
 
-                                },
-                                error: function (response)
-                                {
-                                    raiseErrorModal(response.responseJSON);
-                                }
-                            });
+                                context[dbtablename].Version = context.version;
+                                context[dbtablename].ParentId = context.instanceId;
+                                context[dbtablename].TableName = dbtablename;
+                                context[dbtablename].ApplicationId = context.appId;
+                                context[dbtablename].ApplicationViewId = context.applicationViewId;
+
+                                $.ajax({
+                                    url: endpointurl,
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(context[dbtablename]),
+                                    success: function (response) {
+                                        context.modelSaved = true;
+                                        setTimeout(function () { context.modelSaved = false; }, 3000);
+                                        context.getPage(dbtablename);
+
+                                    },
+                                    error: function (response) {
+                                        raiseErrorModal(response.responseJSON);
+                                    }
+                                });
+                            };
+
+                            if (context.instanceId === 0) {
+                                context.saveApplication();
+                                savetableline();
+                            } else {
+                                savetableline();
+                            }
                         };
 
 
@@ -319,8 +329,10 @@
                     raiseYesNoModal("Delete ?", "This record will be deleted, are you sure ?", deletelinefunc);
 
                 },
-                saveApplication: function () {
+                saveApplication: function ()
+                {
                     var context = this;
+
                     var endpointurl = "@Html.Raw(ViewBag.SaveAPIPath)";
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
@@ -336,6 +348,7 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
+                                    
                             if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
                                 window.location.href = endpointurl;
@@ -348,12 +361,16 @@
                                 context.getApplication();
                                 setTimeout(function () { context.modelSaved = false; }, 3000);
                             }
+
+                            resolve();
                         },
                         error: function (response)
                         {
                             raiseErrorModal(response.responseJSON);
+                            reject();
                         }
                     });
+                     
                 },
                 onImageChanged: function (event)
                 {

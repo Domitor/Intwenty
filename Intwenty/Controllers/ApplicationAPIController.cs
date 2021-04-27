@@ -57,19 +57,6 @@ namespace Intwenty.Controllers
                 {
                     var data = DataRepository.Get(state, model);
 
-                    /*
-                    foreach (var listui in viewmodel.UserInterface)
-                    {
-                        if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
-                            continue;
-
-                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName, ForeignKeyId = id };
-                        var subtablearray = DataRepository.GetJsonArray(filter);
-                        data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
-
-                    }
-                    */
-
                     return new JsonResult(data);
                 }
                 else
@@ -81,18 +68,7 @@ namespace Intwenty.Controllers
                         return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                     var data = DataRepository.Get(state, model);
-                    /*
-                    foreach (var listui in viewmodel.UserInterface)
-                    {
-                        if (!listui.IsSubTableUserInterface || !listui.IsMetaTypeListInterface)
-                            continue;
-
-                        var filter = new ListFilter(User) { ApplicationId = model.Application.Id, ApplicationViewId = viewmodel.Id, DataTableDbName = listui.DataTableDbName, ForeignKeyId = id };
-                        var subtablearray = DataRepository.GetJsonArray(filter);
-                        data.AddApplicationJSONArray(listui.DataTableDbName, subtablearray.Data);
-
-                    }
-                    */
+                   
                     return new JsonResult(data);
 
                 }
@@ -111,19 +87,7 @@ namespace Intwenty.Controllers
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", model.Application.Title)));
 
                 var data = DataRepository.Get(state, model);
-
-                /*
-                foreach (var dt in model.DataStructure)
-                {
-                    if (!dt.IsMetaTypeDataTable)
-                        continue;
-
-                    var filter = new ListFilter(User) { ApplicationId = model.Application.Id, DataTableDbName = dt.DbName };
-                    var subtablearray = DataRepository.GetJsonArray(filter);
-                    data.AddApplicationJSONArray(dt.DbName, subtablearray.Data);
-
-                }
-                */
+           
                 return new JsonResult(data);
             }
 
@@ -269,12 +233,8 @@ namespace Intwenty.Controllers
                 else
                     state = ClientStateInfo.CreateFromJSON(model);
 
+                 state.ActionMode = ActionModeOptions.MainTable;
 
-                if (state.Id > 0)
-                    state.ActionMode = ActionModeOptions.MainTable;
-
-                if (state == null)
-                    return BadRequest();
                 if (state.ApplicationId < 1)
                     return BadRequest();
 
