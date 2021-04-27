@@ -281,8 +281,15 @@ namespace Intwenty.WebHostBuilder
                 endpoints.MapDefaultControllerRoute();
 
                 //INTWENTY ROUTING
-                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=All}/{id?}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=All}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=GetApplication}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=GetPagedList}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_3", "Application/API/{action=GetDomain}/{domainname}/{query}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_4", "Application/API/{action=CreateNew}/{id}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_5", "Application/API/{action=Save}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_6", "Application/API/{action=SaveSubTableLine}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_7", "Application/API/{action=Delete}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_8", "Application/API/{action=DeleteSubTableLine}", defaults: new { controller = "ApplicationAPI" });
+                endpoints.MapControllerRoute("apiroute_9", "Application/API/{action=UploadImage}", defaults: new { controller = "ApplicationAPI" });
 
                 using (var scope = builder.ApplicationServices.CreateScope())
                 {

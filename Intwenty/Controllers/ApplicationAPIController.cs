@@ -176,7 +176,7 @@ namespace Intwenty.Controllers
            
         }
 
-        [HttpGet]
+        [HttpGet("/Application/API/GetDomain/{domainname}/{query}")]
         public virtual List<ValueDomainVm> GetDomain(string domainname, string query)
         {
             if (string.IsNullOrEmpty(domainname))
