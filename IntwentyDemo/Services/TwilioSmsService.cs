@@ -9,7 +9,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
-namespace ToothSpec.Services
+namespace IntwentyDemo.Services
 {
     
     public class TwilioSmsService : IIntwentySmsService

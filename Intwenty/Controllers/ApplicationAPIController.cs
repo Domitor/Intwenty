@@ -35,7 +35,7 @@ namespace Intwenty.Controllers
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
         /// <param name="id">The data id</param>
-        [HttpGet]
+        [HttpGet("/Application/API/GetApplication/{applicationid}/{viewid}/{id}")]
         public virtual async Task<IActionResult> GetApplication(int applicationid, int viewid, int id)
         {
 
@@ -97,7 +97,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get a list based on a main application table or a sub table
         /// </summary>
-        [HttpPost]
+        [HttpPost("/Application/API/GetPagedList")]
         public virtual async Task<IActionResult> GetPagedList([FromBody] ListFilter model)
         {
            
@@ -208,7 +208,7 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get a json structure for a new application, including defaultvalues
         /// </summary>
-        [HttpGet]
+        [HttpGet("/Application/API/CreateNew/{id}")]
         public virtual JsonResult CreateNew(int id)
         {
             var state = new ClientStateInfo() { ApplicationId = id };
@@ -218,7 +218,7 @@ namespace Intwenty.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("/Application/API/Save")]
         public virtual async Task<IActionResult> Save([FromBody] System.Text.Json.JsonElement model)
         {
 
@@ -296,7 +296,7 @@ namespace Intwenty.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("/Application/API/SaveSubTableLine")]
         public virtual async Task<IActionResult> SaveSubTableLine([FromBody] System.Text.Json.JsonElement model)
         {
 
@@ -377,7 +377,7 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost("/Application/API/Delete")]
         public virtual async Task<IActionResult> Delete([FromBody] System.Text.Json.JsonElement model)
         {
 
@@ -452,7 +452,7 @@ namespace Intwenty.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost("/Application/API/DeleteSubTableLine")]
         public virtual async Task<IActionResult> DeleteSubTableLine([FromBody] System.Text.Json.JsonElement model)
         {
 
@@ -531,9 +531,9 @@ namespace Intwenty.Controllers
 
         }
 
-       
 
-        [HttpPost]
+
+        [HttpPost("/Application/API/UploadImage")]
         public virtual async Task<JsonResult> UploadImage(IFormFile file)
         {
             var uniquefilename = $"{DateTime.Now.Ticks}_{file.FileName}";

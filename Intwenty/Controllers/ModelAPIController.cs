@@ -764,7 +764,7 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionPath = "";
                     funcentity.ActionUserInterfaceMetaCode = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;
@@ -888,7 +888,7 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "Application/API/Save";
+                    funcentity.ActionPath = "";
                     funcentity.ActionUserInterfaceMetaCode = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;

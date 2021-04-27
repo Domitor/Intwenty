@@ -11,7 +11,7 @@ using Azure.Storage.Sas;
 using Azure.Storage;
 using IntwentyDemo.Models;
 
-namespace Intwenty.Services
+namespace IntwentyDemo.Services
 {
 
     public interface IStorageService
