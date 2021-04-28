@@ -231,6 +231,17 @@ namespace Intwenty
                             state.Id = GetNewInstanceId(model.Application.Id, "APPLICATION", model.Application.MetaCode, state, client);
                             result.Status = LifecycleStatus.NEW_NOT_SAVED;
 
+                            if (state.HasProperty("FOREIGNKEYID") && state.HasProperty("FOREIGNKEYNAME"))
+                            {
+                                var columnname = state.GetPropertyValue("FOREIGNKEYNAME");
+                                if (!string.IsNullOrEmpty(columnname))
+                                {
+                                    var colmodel = model.DataStructure.Find(p=>p.DbName.ToLower()==columnname.ToLower() && p.IsMetaTypeDataColumn);
+                                    if (colmodel!= null)
+                                        state.Data.SetValue(colmodel, state.GetAsInt("FOREIGNKEYID"));
+                                }
+                            }
+
                             if (model.Application.UseVersioning)
                                 state.Version = CreateVersionRecord(model, state, client);
                             else
@@ -284,6 +295,16 @@ namespace Intwenty
                         if (state.Id < 1)
                         {
                             result.Status = LifecycleStatus.NEW_NOT_SAVED;
+                            if (state.HasProperty("FOREIGNKEYID") && state.HasProperty("FOREIGNKEYNAME"))
+                            {
+                                var columnname = state.GetPropertyValue("FOREIGNKEYNAME");
+                                if (!string.IsNullOrEmpty(columnname))
+                                {
+                                    var colmodel = model.DataStructure.Find(p => p.DbName.ToLower() == columnname.ToLower() && p.IsMetaTypeDataColumn);
+                                    if (colmodel != null)
+                                        state.Data.SetValue(colmodel, state.GetAsInt("FOREIGNKEYID"));
+                                }
+                            }
                             BeforeSaveNew(model, state, client);
                             InsertAutoIncrementalMainTable(model, state, client);
                             result.Status = LifecycleStatus.NEW_SAVED;
@@ -525,6 +546,8 @@ namespace Intwenty
                 sql_insert_value.Append(sep + "@" + t.DbName);
                 sep = ',';
             }
+
+
 
             foreach (var t in state.Data.Values)
             {
@@ -1277,6 +1300,21 @@ namespace Intwenty
 
                 result = new DataListResult<T>(true, MessageCode.RESULT, string.Format("Fetched list for table {0}", args.DataTableDbName));
 
+
+                if (args.HasProperty("FOREIGNKEYID") && args.HasProperty("FOREIGNKEYNAME"))
+                {
+                    var columnname = args.GetPropertyValue("FOREIGNKEYNAME");
+                    if (!string.IsNullOrEmpty(columnname))
+                    {
+                        var colmodel = model.DataStructure.Find(p => p.DbName.ToLower() == columnname.ToLower() && p.IsMetaTypeDataColumn);
+                        if (colmodel != null)
+                        {
+                            args.ForeignKeyColumnName = columnname;
+                            args.ForeignKeyId = args.GetAsInt("FOREIGNKEYID");
+                        }
+                    }
+                }
+
                 if (args.MaxCount == 0 && !args.SkipPaging)
                 {
                     var maxcount_stmt = new StringBuilder();
@@ -1504,8 +1542,22 @@ namespace Intwenty
 
             try
             {
+                if (args.HasProperty("FOREIGNKEYID") && args.HasProperty("FOREIGNKEYNAME"))
+                {
+                    var columnname = args.GetPropertyValue("FOREIGNKEYNAME");
+                    if (!string.IsNullOrEmpty(columnname))
+                    {
+                        var colmodel = model.DataStructure.Find(p => p.DbName.ToLower() == columnname.ToLower() && p.IsMetaTypeDataColumn);
+                        if (colmodel != null)
+                        {
+                            args.ForeignKeyColumnName = columnname;
+                            args.ForeignKeyId = args.GetAsInt("FOREIGNKEYID");
+                        }
+                    }
+                }
 
                 var result = new TDataListResult();
+
                 result.SetSuccess(string.Format("Fetched list for application {0}", model.Application.Title));
 
                 if (args.MaxCount == 0 && !args.SkipPaging)
@@ -2012,6 +2064,11 @@ namespace Intwenty
         }
 
         public virtual List<ValueDomainModelItem> GetValueDomain(string domainname)
+        {
+            return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
+        }
+
+        public virtual List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state)
         {
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }

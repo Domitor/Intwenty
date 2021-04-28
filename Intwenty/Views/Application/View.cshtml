@@ -123,7 +123,7 @@
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
+                ,model_pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false, properties:"" }
                  @foreach (var s in subTableDbNames)
                  {
                      var table = s;
@@ -132,7 +132,7 @@
                  <text>
                  ,@table:{}
                  ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                 ,@table_pageinfo: { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
+                 ,@table_pageinfo: { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false,properties:"" }
                  </text>
                  }
             },
@@ -149,7 +149,7 @@
                         var saveendpoint = "@ViewBag.SaveAPIPath";
                         context.model[context.appMainTable].ApplicationId = context.appId;
                         context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
-                        context.model[context.appMainTable].RequestInfo = context.requestInfo;
+                        context.model[context.appMainTable].Properties = context.requestInfo;
 
                         $.ajax({
                             url: saveendpoint,
@@ -227,7 +227,7 @@
                         {
                             context.model[context.appMainTable].ApplicationId = context.appId;
                             context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
-                            context.model[context.appMainTable].RequestInfo = context.requestInfo;
+                            context.model[context.appMainTable].Properties = context.requestInfo;
 
                             if (!context.canSave())
                                 return;
@@ -249,7 +249,7 @@
                                     context[dbtablename].TableName = dbtablename;
                                     context[dbtablename].ApplicationId = context.appId;
                                     context[dbtablename].ApplicationViewId = context.applicationViewId;
-                                    context[dbtablename].RequestInfo = context.requestInfo;
+                                    context[dbtablename].Properties = context.requestInfo;
 
                                     endpointurl = "@ViewBag.SaveLineAPIPath";
 
@@ -299,7 +299,7 @@
                             context[dbtablename].TableName = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
                             context[dbtablename].ApplicationViewId = context.applicationViewId;
-                            context[dbtablename].RequestInfo = context.requestInfo;
+                            context[dbtablename].Properties = context.requestInfo;
 
                             $.ajax({
                                 url: endpointurl,
@@ -348,7 +348,7 @@
                             var lineitem = context.model[dbtablename][i];
                             if (lineitem.Id > 0 && item.Id > 0 && lineitem.Id === item.Id) {
 
-                                var senddata = { Id: item.Id, ParentId: context.model[context.appMainTable].Id, TableName: dbtablename, ApplicationId: context.appId, ApplicationViewId: context.applicationViewId, RequestInfo: context.requestInfo };
+                                var senddata = { Id: item.Id, ParentId: context.model[context.appMainTable].Id, TableName: dbtablename, ApplicationId: context.appId, ApplicationViewId: context.applicationViewId, Properties: context.requestInfo };
 
                                 $.ajax({
                                     url: endpointurl,
@@ -390,7 +390,7 @@
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
                     context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
-                    context.model[context.appMainTable].RequestInfo = context.requestInfo;
+                    context.model[context.appMainTable].Properties = context.requestInfo;
 
                     if (!context.canSave())
                         return;
@@ -452,7 +452,7 @@
                     }
 
                     context[objname].applicationViewId = context.applicationViewId;
-                    context[objname].requestInfo = context.requestInfo;
+                    context[objname].properties = context.requestInfo;
 
                     if (!ismaintable)
                     {
@@ -522,7 +522,7 @@
                     {
                         item.ApplicationId = context.appId;
                         item.ApplicationViewId = context.applicationViewId;
-                        item.RequestInfo = context.requestInfo;
+                        item.Properties = context.requestInfo;
 
                         $.ajax({
                             url: endpointurl,

@@ -125,9 +125,9 @@ namespace Intwenty.Model.Dto
                             if (rowownedbyorgname != null)
                                 tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
 
-                            var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "RequestInfo");
+                            var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "Properties");
                             if (rowrequestinfo != null)
-                                tablerow.RequestInfo = rowrequestinfo.GetAsString();
+                                tablerow.Properties = rowrequestinfo.GetAsString();
                         }
 
                     }
@@ -158,9 +158,9 @@ namespace Intwenty.Model.Dto
                 if (ownedbyorgname != null)
                     res.OwnerOrganizationName = ownedbyorgname.GetAsString();
 
-                var requestinfo = res.Values.Find(p => p.DbName == "RequestInfo");
+                var requestinfo = res.Values.Find(p => p.DbName == "Properties");
                 if (requestinfo != null)
-                    res.RequestInfo = requestinfo.GetAsString();
+                    res.Properties = requestinfo.GetAsString();
 
 
 
@@ -208,9 +208,9 @@ namespace Intwenty.Model.Dto
                     if (rowownedbyorgname != null)
                         tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
 
-                    var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "RequestInfo");
+                    var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "Properties");
                     if (rowrequestinfo != null)
-                        tablerow.RequestInfo = rowrequestinfo.GetAsString();
+                        tablerow.Properties = rowrequestinfo.GetAsString();
                 }
             }
 
@@ -565,9 +565,9 @@ namespace Intwenty.Model.Dto
                 if (tablename != null)
                     res.Table.DbName = tablename.GetAsString();
 
-                var requestinfo = res.Values.Find(p => p.DbName == "RequestInfo");
+                var requestinfo = res.Values.Find(p => p.DbName == "Properties");
                 if (requestinfo != null)
-                    res.RequestInfo = requestinfo.GetAsString();
+                    res.Properties = requestinfo.GetAsString();
 
             }
             
@@ -590,7 +590,7 @@ namespace Intwenty.Model.Dto
 
         public string OwnerOrganizationName { get; set; }
 
-        public string RequestInfo { get; set; }
+        public string Properties { get; set; }
 
         public List<ApplicationValue> Values { get; set; }
 
@@ -679,7 +679,7 @@ namespace Intwenty.Model.Dto
             }
             else
             {
-                this.Values.Add(new ApplicationValue() { DbName = model.DbName, Value = value,Model=model });
+                this.Values.Add(new ApplicationValue() { DbName = model.DbName, Value = value, Model=model });
             }
         }
 

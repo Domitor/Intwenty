@@ -3,6 +3,7 @@ using Intwenty;
 using Intwenty.Model.Dto;
 using Intwenty.Interface;
 using Intwenty.Model;
+using IntwentyDemo.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.IdentityModel.Tokens;
 
 namespace IntwentyDemo.Services
 {
@@ -28,6 +30,56 @@ namespace IntwentyDemo.Services
         {
             
         }
+
+        public List<Project> GetProjects(ClientStateInfo state)
+        {
+            var model = ModelRepository.GetApplicationModel(200);
+            if (model == null)
+                return new List<Project>();
+
+            var tablename = this.GetTenantTableName(model.Application, state);
+
+            var client = this.GetDataClient();
+            client.Open();
+            var data = client.GetEntities<Project>(string.Format("select Id, ProjectName Title from {0}", tablename));
+            client.Close();
+            foreach (var a in data)
+            {
+                a.UrlEncodedId = Base64UrlEncoder.Encode(string.Format("PROJECTID={0}#FOREIGNKEYID={0}#FOREIGNKEYNAME=ProjectId", a.Id));
+            }
+
+            return data;
+        }
+
+        public override List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state)
+        {
+          
+
+            if (domainname == "FEATURETAGS" && state.HasProperty("PROJECTID"))
+            {
+                var projectid = state.GetAsInt("PROJECTID");
+                if (projectid == 0)
+                    return new List<ValueDomainModelItem>();
+
+                var model = ModelRepository.GetApplicationModel(200);
+                var tablemodel = model.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName.ToLower() == "fm_projecttags");
+                var tablename = this.GetTenantTableName(tablemodel, state);
+
+                var client = this.GetDataClient();
+                client.Open();
+                var data = client.GetEntities<ValueDomainModelItem>(string.Format("select Id, TagText Value from {0} where ParentId={1}", tablename, projectid));
+                client.Close();
+                foreach (var t in data)
+                {
+                    t.Code = Convert.ToString(t.Id);
+                    t.LocalizedTitle = t.Value;
+                }
+                return data;
+            }
+
+            return base.GetApplicationDomain(domainname, state);
+        }
+
 
         /// <summary>
         /// Implement APPDOMAINS
@@ -67,6 +119,7 @@ namespace IntwentyDemo.Services
                 return data;
             }
 
+           
             return base.GetApplicationDomain(domainname, state);
         }
 

@@ -133,7 +133,7 @@ namespace Intwenty.Interface
         /// </summary>
         /// <returns>A list of ValueDomainModelItem</returns>
         List<ValueDomainModelItem> GetValueDomain(string domainname);
-
+        List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state);
         /// <summary>
         /// Generate a value domain based on a customized query.
         /// </summary>

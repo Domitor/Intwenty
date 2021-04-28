@@ -6,7 +6,7 @@ using System.Text;
 namespace Intwenty.Model.Dto
 {
 
-    public class ListFilter
+    public class ListFilter : HashTagPropertyObject
     {
        
         public UserInfo User { get; set; }
@@ -35,8 +35,6 @@ namespace Intwenty.Model.Dto
         public int PageSize { get; set; }
 
         public List<FilterValue> FilterValues { get; set; }
-
-        public string RequestInfo { get; set; }
 
         public string ForeignKeyColumnName { get; set; }
 

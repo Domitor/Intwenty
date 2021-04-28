@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Claims;
 using Intwenty.Areas.Identity.Data;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Intwenty.Model.Dto
 {
@@ -27,8 +28,6 @@ namespace Intwenty.Model.Dto
 
         public int ApplicationViewId { get; set; }
 
-        public string RequestInfo { get; set; }
-
         public ApplicationData Data { get; set; }
 
         public ActionModeOptions ActionMode { get; set; }
@@ -41,7 +40,6 @@ namespace Intwenty.Model.Dto
             Data = new ApplicationData();
             User = new UserInfo();
             ActionMode = ActionModeOptions.AllTables;
-            RequestInfo = "";
         }
 
         public ClientStateInfo(ClaimsPrincipal user)
@@ -49,8 +47,6 @@ namespace Intwenty.Model.Dto
             Properties = "";
             Data = new ApplicationData();
             User = new UserInfo(user);
-            RequestInfo = "";
-
         }
 
 
@@ -72,9 +68,13 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
-            state.RequestInfo = state.Data.GetAsString("RequestInfo");
-            if (state.RequestInfo.Contains("#"))
-                state.Properties = state.RequestInfo;
+            state.Properties = state.Data.GetAsString("Properties");
+            if (!string.IsNullOrEmpty(state.Properties))
+            {
+                state.Properties = Base64UrlEncoder.Decode(state.Properties);
+               
+            }
+
             return state;
         }
 
@@ -86,9 +86,12 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
-            state.RequestInfo = state.Data.GetAsString("RequestInfo");
-            if (state.RequestInfo.Contains("#"))
-                state.Properties = state.RequestInfo;
+            state.Properties = state.Data.GetAsString("Properties");
+            if (!string.IsNullOrEmpty(state.Properties))
+            {
+                state.Properties = Base64UrlEncoder.Decode(state.Properties);
+            }
+
             return state;
         }
 

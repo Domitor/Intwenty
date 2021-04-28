@@ -11,6 +11,7 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Intwenty.Controllers
 {
@@ -55,11 +56,7 @@ namespace Intwenty.Controllers
 
                 if (!string.IsNullOrEmpty(requestinfo))
                 {
-                    state.RequestInfo = requestinfo;
-                    if (state.RequestInfo.Contains("#"))
-                    {
-                        state.Properties = state.RequestInfo;
-                    }
+                    state.Properties = Base64UrlEncoder.Decode(requestinfo);
                 }
 
                 if (viewmodel.IsPublic)
@@ -92,11 +89,7 @@ namespace Intwenty.Controllers
 
                 if (!string.IsNullOrEmpty(requestinfo))
                 {
-                    state.RequestInfo = requestinfo;
-                    if (state.RequestInfo.Contains("#"))
-                    {
-                        state.Properties = state.RequestInfo;
-                    }
+                    state.Properties = Base64UrlEncoder.Decode(requestinfo);
                 }
 
                 if (!User.Identity.IsAuthenticated)
@@ -135,7 +128,11 @@ namespace Intwenty.Controllers
 
             if (User.Identity.IsAuthenticated)
                 model.SetUser(User);
-         
+
+            if (!string.IsNullOrEmpty(model.Properties))
+            {
+                model.Properties = Base64UrlEncoder.Decode(model.Properties);
+            }
 
             if (viewmodel.IsPublic)
             {
@@ -173,6 +170,11 @@ namespace Intwenty.Controllers
             else
                 state = new ClientStateInfo();
 
+            if (!string.IsNullOrEmpty(requestinfo))
+            {
+                state.Properties = Base64UrlEncoder.Decode(requestinfo);
+            }
+
             var arr = domainname.Split(".");
             var dtype = arr[0];
             var dname = arr[1];
@@ -184,7 +186,7 @@ namespace Intwenty.Controllers
 
             if (dtype.ToUpper() == "VALUEDOMAIN")
             {
-                domaindata = DataRepository.GetValueDomain(dname);
+                domaindata = DataRepository.GetValueDomain(dname, state);
             }
             if (dtype.ToUpper() == "APPDOMAIN")
             {
@@ -229,15 +231,17 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/API/CreateNew/{id}/{requestinfo?}")]
         public virtual JsonResult CreateNew(int id, string requestinfo)
         {
-            var state = new ClientStateInfo() { ApplicationId = id};
+            ClientStateInfo state = null;
+            if (User.Identity.IsAuthenticated)
+                state = new ClientStateInfo(User) { ApplicationId = id };
+            else
+                state = new ClientStateInfo() { ApplicationId = id };
+
             if (!string.IsNullOrEmpty(requestinfo))
             {
-                state.RequestInfo = requestinfo;
-                if (state.RequestInfo.Contains("#"))
-                {
-                    state.Properties = state.RequestInfo;
-                }
+                state.Properties = Base64UrlEncoder.Decode(requestinfo);
             }
+
             var t = DataRepository.New(state);
             return new JsonResult(t);
 
