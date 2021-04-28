@@ -6,11 +6,13 @@
     var subTableDbNames = new List<string>();
     var applicationId = Model.ApplicationInfo.Id;
     var applicationViewId = Model.Id;
-    int instanceid = (int)ViewBag.Id;
+    var instanceid = (int)ViewBag.Id;
+    var requestInfo = (string)ViewBag.RequestInfo;
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
-   
 
+    //SET REQUESTINFO TO USE WHEN RENDERING INTERFACES
+    Model.RequestInfo = requestInfo;
 
     //WHAT SHOULD HAPPEN WHEN THIS VIEW IS PERSISTED
     if (Model.HasSaveFunction)
@@ -68,6 +70,8 @@
 
     @foreach (var iface in Model.UserInterface)
     {
+        iface.RequestInfo = requestInfo;
+
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
         <!-- 4. RENDER APPLICATION LISTVIEW -->
@@ -104,8 +108,9 @@
             el: '#app',
             data:
             {
-                baseurl:"@Html.Raw(ViewBag.BaseAPIPath)"
-                ,appMainTable: '@mainDbName'
+                baseurl: "@ViewBag.BaseAPIPath"
+                ,requestInfo: "@requestInfo"
+                ,appMainTable: "@mainDbName"
                 ,appId: @applicationId
                 ,applicationViewId: @applicationViewId
                 ,instanceId: @instanceid
@@ -144,6 +149,7 @@
                         var saveendpoint = "@ViewBag.SaveAPIPath";
                         context.model[context.appMainTable].ApplicationId = context.appId;
                         context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
+                        context.model[context.appMainTable].RequestInfo = context.requestInfo;
 
                         $.ajax({
                             url: saveendpoint,
@@ -182,6 +188,9 @@
                     {
 
                         var endpointurl = "@ViewBag.CreateNewAPIPath/" + context.appId;
+                        if (context.requestInfo != "")
+                            endpointurl += "/" + context.requestInfo;
+
                         $.get(endpointurl, function (response)
                         {
                             context.model = JSON.parse(response.data);
@@ -218,6 +227,7 @@
                         {
                             context.model[context.appMainTable].ApplicationId = context.appId;
                             context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
+                            context.model[context.appMainTable].RequestInfo = context.requestInfo;
 
                             if (!context.canSave())
                                 return;
@@ -239,6 +249,7 @@
                                     context[dbtablename].TableName = dbtablename;
                                     context[dbtablename].ApplicationId = context.appId;
                                     context[dbtablename].ApplicationViewId = context.applicationViewId;
+                                    context[dbtablename].RequestInfo = context.requestInfo;
 
                                     endpointurl = "@ViewBag.SaveLineAPIPath";
 
@@ -251,6 +262,12 @@
                                         {
                                             if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
                                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
+                                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
+                                                }
+                                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
+                                                    endpointurl = endpointurl.replace("{requestinfo}", "");
+                                                }
                                                 window.location.href = endpointurl;
                                             }
                                             else if (context.aftersaveaction == 'REFRESH')
@@ -282,6 +299,7 @@
                             context[dbtablename].TableName = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
                             context[dbtablename].ApplicationViewId = context.applicationViewId;
+                            context[dbtablename].RequestInfo = context.requestInfo;
 
                             $.ajax({
                                 url: endpointurl,
@@ -330,7 +348,7 @@
                             var lineitem = context.model[dbtablename][i];
                             if (lineitem.Id > 0 && item.Id > 0 && lineitem.Id === item.Id) {
 
-                                var senddata = { Id: item.Id, ParentId: context.model[context.appMainTable].Id, TableName: dbtablename, ApplicationId: context.appId, ApplicationViewId: context.applicationViewId };
+                                var senddata = { Id: item.Id, ParentId: context.model[context.appMainTable].Id, TableName: dbtablename, ApplicationId: context.appId, ApplicationViewId: context.applicationViewId, RequestInfo: context.requestInfo };
 
                                 $.ajax({
                                     url: endpointurl,
@@ -372,6 +390,7 @@
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
                     context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
+                    context.model[context.appMainTable].RequestInfo = context.requestInfo;
 
                     if (!context.canSave())
                         return;
@@ -386,6 +405,12 @@
 
                             if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
+                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
+                                }
+                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
+                                    endpointurl = endpointurl.replace("{requestinfo}", "");
+                                }
                                 window.location.href = endpointurl;
                             }
                             else if (context.aftersaveaction == 'REFRESH')
@@ -427,6 +452,7 @@
                     }
 
                     context[objname].applicationViewId = context.applicationViewId;
+                    context[objname].requestInfo = context.requestInfo;
 
                     if (!ismaintable)
                     {
@@ -496,6 +522,7 @@
                     {
                         item.ApplicationId = context.appId;
                         item.ApplicationViewId = context.applicationViewId;
+                        item.RequestInfo = context.requestInfo;
 
                         $.ajax({
                             url: endpointurl,
@@ -519,6 +546,8 @@
                 {
                     var context = this;
                     var endpointurl = "@ViewBag.GetApplicationAPIPath/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    if (context.requestInfo != "")
+                        endpointurl += "/" + context.requestInfo;
                     $.get(endpointurl, function (response)
                     {
                         var maindata = JSON.parse(response.data);

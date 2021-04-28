@@ -27,6 +27,8 @@ namespace Intwenty.Model.Dto
 
         public int ApplicationViewId { get; set; }
 
+        public string RequestInfo { get; set; }
+
         public ApplicationData Data { get; set; }
 
         public ActionModeOptions ActionMode { get; set; }
@@ -38,6 +40,7 @@ namespace Intwenty.Model.Dto
             Data = new ApplicationData();
             User = new UserInfo();
             ActionMode = ActionModeOptions.AllTables;
+            RequestInfo = "";
         }
 
         public ClientStateInfo(ClaimsPrincipal user)
@@ -45,7 +48,8 @@ namespace Intwenty.Model.Dto
             Properties = "";
             Data = new ApplicationData();
             User = new UserInfo(user);
-          
+            RequestInfo = "";
+
         }
 
 
@@ -67,6 +71,9 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
+            state.RequestInfo = state.Data.GetAsString("RequestInfo");
+            if (state.RequestInfo.Contains("#"))
+                state.Properties = state.RequestInfo;
             return state;
         }
 
@@ -78,6 +85,9 @@ namespace Intwenty.Model.Dto
             state.ApplicationViewId = state.Data.GetAsInt("ApplicationViewId");
             state.Id = state.Data.Id;
             state.Version = state.Data.Version;
+            state.RequestInfo = state.Data.GetAsString("RequestInfo");
+            if (state.RequestInfo.Contains("#"))
+                state.Properties = state.RequestInfo;
             return state;
         }
 

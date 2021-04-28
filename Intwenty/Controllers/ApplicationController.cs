@@ -29,13 +29,18 @@ namespace Intwenty.Controllers
 
 
 
-        public virtual async Task<IActionResult> View(int? id)
+        public virtual async Task<IActionResult> View(int? viewid, int? id, string requestinfo)
         {
-
+            
             ViewBag.Id = 0;
             if (id.HasValue && id.Value > 0)
-                ViewBag.Id = id;
+                ViewBag.Id = id.Value;
 
+            ViewBag.RequestInfo = "";
+            if (!string.IsNullOrEmpty(requestinfo))
+                ViewBag.RequestInfo = requestinfo;
+            
+           
             ViewBag.BaseAPIPath = Url.Content("~/Application/API/");
             ViewBag.SaveAPIPath = Url.Content("~/Application/API/Save");
             ViewBag.SaveLineAPIPath = Url.Content("~/Application/API/SaveSubTableLine");
@@ -46,8 +51,16 @@ namespace Intwenty.Controllers
             ViewBag.DeleteLineAPIPath = Url.Content("~/Application/API/DeleteSubTableLine");
             ViewBag.CreateNewAPIPath = Url.Content("~/Application/API/CreateNew");
 
-            var path = this.Request.Path.Value;
-            var current_view = ModelRepository.GetLocalizedViewModelByPath(path);
+            ViewModel current_view = null;
+            if (viewid.HasValue && viewid.Value > 0)
+            {
+                current_view = ModelRepository.GetLocalizedViewModelById(viewid.Value);
+            }
+            else
+            {
+                var path = this.Request.Path.Value;
+                current_view = ModelRepository.GetLocalizedViewModelByPath(path);
+            }
 
             if (current_view == null)
                 return NotFound();

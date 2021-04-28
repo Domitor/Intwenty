@@ -34,6 +34,8 @@ namespace Intwenty.Model.Dto
 
         public List<FilterValue> FilterValues { get; set; }
 
+        public string RequestInfo { get; set; }
+
         public string ForeignKeyColumnName { get; set; }
 
         public int ForeignKeyId { get; set; }

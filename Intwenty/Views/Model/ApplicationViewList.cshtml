@@ -16,6 +16,15 @@
                 <div class="alert alert-primary" role="alert">
                     <i class="far fa-question-circle"></i>
                     First you define one or more views and then you create and connect user interfaces to the views. Views can share user interfaces among them. For example a view used to create entities may share a user interface with a view to edit an entity.
+                    <br />
+                    Regarding Paths: View paths specifies the path in the URL. A path may contain parameters. Allowed parameters are <b>{viewid}=a view model id,{id}=a data id, for example a product id and {requestinfo} = any info</b>
+                    <br />
+                    <b>Examples</b>
+                    <br />
+                    <i>products/create, usage: products/create</i><br />
+                    <i>products/edit/{id}, usage: products/edit/1</i><br />
+                    <i>products/edit/{id}/{requestinfo}, usage: products/edit/1/someinfo</i><br />
+                    <i>products/edit/{viewid}/{id}/{requestinfo}, usage: products/edit/10/1/someinfo</i>
                 </div>
                 <a asp-action="ApplicationList" asp-controller="Model" role="button" class="btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> Back to list</a>
                 <br />

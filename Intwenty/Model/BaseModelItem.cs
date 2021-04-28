@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Intwenty.Interface;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace Intwenty.Model
 {
-    public abstract class BaseModelItem : HashTagPropertyObject
+    public abstract class BaseModelItem : HashTagPropertyObject, IRequestInfo
     {
         public int Id { get; set; }
 
@@ -28,7 +29,10 @@ namespace Intwenty.Model
 
         public abstract string ModelCode { get; }
 
-      
+        public string RequestInfo { set; get; }
+
+
+
 
         public bool IsRoot
         {

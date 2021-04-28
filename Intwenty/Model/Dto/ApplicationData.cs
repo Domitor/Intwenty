@@ -124,6 +124,10 @@ namespace Intwenty.Model.Dto
                             var rowownedbyorgname = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationName");
                             if (rowownedbyorgname != null)
                                 tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
+
+                            var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "RequestInfo");
+                            if (rowrequestinfo != null)
+                                tablerow.RequestInfo = rowrequestinfo.GetAsString();
                         }
 
                     }
@@ -153,6 +157,10 @@ namespace Intwenty.Model.Dto
                 var ownedbyorgname = res.Values.Find(p => p.DbName == "OwnedByOrganizationName");
                 if (ownedbyorgname != null)
                     res.OwnerOrganizationName = ownedbyorgname.GetAsString();
+
+                var requestinfo = res.Values.Find(p => p.DbName == "RequestInfo");
+                if (requestinfo != null)
+                    res.RequestInfo = requestinfo.GetAsString();
 
 
 
@@ -199,6 +207,10 @@ namespace Intwenty.Model.Dto
                     var rowownedbyorgname = tablerow.Values.Find(p => p.DbName == "OwnedByOrganizationName");
                     if (rowownedbyorgname != null)
                         tablerow.OwnerOrganizationName = rowownedbyorgname.GetAsString();
+
+                    var rowrequestinfo = tablerow.Values.Find(p => p.DbName == "RequestInfo");
+                    if (rowrequestinfo != null)
+                        tablerow.RequestInfo = rowrequestinfo.GetAsString();
                 }
             }
 
@@ -553,6 +565,9 @@ namespace Intwenty.Model.Dto
                 if (tablename != null)
                     res.Table.DbName = tablename.GetAsString();
 
+                var requestinfo = res.Values.Find(p => p.DbName == "RequestInfo");
+                if (requestinfo != null)
+                    res.RequestInfo = requestinfo.GetAsString();
 
             }
             
@@ -574,6 +589,8 @@ namespace Intwenty.Model.Dto
         public string OwnerOrganizationId { get; set; }
 
         public string OwnerOrganizationName { get; set; }
+
+        public string RequestInfo { get; set; }
 
         public List<ApplicationValue> Values { get; set; }
 

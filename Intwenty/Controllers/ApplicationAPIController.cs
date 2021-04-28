@@ -35,8 +35,8 @@ namespace Intwenty.Controllers
         /// </summary>
         /// <param name="applicationid">The ID of the application in the meta model</param>
         /// <param name="id">The data id</param>
-        [HttpGet("/Application/API/GetApplication/{applicationid}/{viewid}/{id}")]
-        public virtual async Task<IActionResult> GetApplication(int applicationid, int viewid, int id)
+        [HttpGet("/Application/API/GetApplication/{applicationid}/{viewid}/{id}/{requestinfo?}")]
+        public virtual async Task<IActionResult> GetApplication(int applicationid, int viewid, int id,string requestinfo)
         {
 
             var model = ModelRepository.GetApplicationModel(applicationid);
@@ -52,6 +52,15 @@ namespace Intwenty.Controllers
                     state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
                 else
                     state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
+
+                if (!string.IsNullOrEmpty(requestinfo))
+                {
+                    state.RequestInfo = requestinfo;
+                    if (state.RequestInfo.Contains("#"))
+                    {
+                        state.Properties = state.RequestInfo;
+                    }
+                }
 
                 if (viewmodel.IsPublic)
                 {
@@ -80,6 +89,15 @@ namespace Intwenty.Controllers
                     state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
                 else
                     state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
+
+                if (!string.IsNullOrEmpty(requestinfo))
+                {
+                    state.RequestInfo = requestinfo;
+                    if (state.RequestInfo.Contains("#"))
+                    {
+                        state.Properties = state.RequestInfo;
+                    }
+                }
 
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
@@ -208,10 +226,18 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Get a json structure for a new application, including defaultvalues
         /// </summary>
-        [HttpGet("/Application/API/CreateNew/{id}")]
-        public virtual JsonResult CreateNew(int id)
+        [HttpGet("/Application/API/CreateNew/{id}/{requestinfo?}")]
+        public virtual JsonResult CreateNew(int id, string requestinfo)
         {
-            var state = new ClientStateInfo() { ApplicationId = id };
+            var state = new ClientStateInfo() { ApplicationId = id};
+            if (!string.IsNullOrEmpty(requestinfo))
+            {
+                state.RequestInfo = requestinfo;
+                if (state.RequestInfo.Contains("#"))
+                {
+                    state.Properties = state.RequestInfo;
+                }
+            }
             var t = DataRepository.New(state);
             return new JsonResult(t);
 

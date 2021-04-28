@@ -1,5 +1,33 @@
 ﻿@model UserInterfaceModelItem
 
+@{
+
+    var func_edit_path = "";
+    var func_edit_path_use_requestinfo = false;
+
+    if (Model.HasEditFunction)
+    {
+        if (!Model.EditFunction.IsModalAction)
+        {
+            func_edit_path = Model.EditFunction.ActionPath;
+            if (func_edit_path.Contains("{requestinfo}") && !string.IsNullOrEmpty(Model.RequestInfo))
+            {
+                func_edit_path_use_requestinfo = true;
+                func_edit_path = func_edit_path.Replace("/{requestinfo}", "");
+            }
+            if (func_edit_path.Contains("{id}"))
+            {
+                func_edit_path = func_edit_path.Replace("/{id}", "");
+            }
+            if (func_edit_path.Contains("{viewid}"))
+            {
+                func_edit_path = func_edit_path.Replace("{viewid}", "0");
+            }
+
+        }
+    }
+}
+
 @if (Model.HasFilterFunction)
 {
 
@@ -101,7 +129,15 @@
             }
             else
             {
-                <td style="vertical-align:middle"><a v-bind:href="'@Model.EditFunction.ActionPath/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                @if (func_edit_path_use_requestinfo)
+                {
+                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id + '/@Model.RequestInfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                }
+                else
+                {
+                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                }
+
             }
         }
 
@@ -110,7 +146,7 @@
             <td>{{item.@c.DataColumnDbName}}</td>
         }
 
-     </tr>
+    </tr>
 </table>
 
 @if (Model.HasPagingFunction)
