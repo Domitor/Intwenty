@@ -33,6 +33,7 @@ namespace Intwenty.Model.Dto
 
         public ActionModeOptions ActionMode { get; set; }
 
+        public bool IgnoreTenantIsolation { get; set; }
 
         public ClientStateInfo()
         {

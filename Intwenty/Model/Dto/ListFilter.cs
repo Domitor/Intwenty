@@ -26,6 +26,8 @@ namespace Intwenty.Model.Dto
 
         public bool ForceCurrentOrganizationFilter { get; set; }
 
+        public bool IgnoreTenantIsolation { get; set; }
+
         public int MaxCount { get; set; }
 
         public int PageNumber { get; set; }

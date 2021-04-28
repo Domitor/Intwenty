@@ -139,6 +139,9 @@ namespace IntwentyDemo.Seed
             valuedomains.Add(new ValueDomainItem() { DomainName = "CUSTOMERTAGS", Code = "2", Value = "Tag 2" });
             valuedomains.Add(new ValueDomainItem() { DomainName = "CUSTOMERTAGS", Code = "3", Value = "Tag 3" });
 
+            valuedomains.Add(new ValueDomainItem() { DomainName = "FEATURETAGS", Code = "T1", Value = "T1" });
+         
+
 
             #region Customer
 
@@ -457,10 +460,12 @@ namespace IntwentyDemo.Seed
             //DATABASE - MAINTABLE
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTNAME", DbName = "ProjectName", ParentMetaCode = "ROOT", DataType = "STRING", Properties = "MANDATORY=TRUE" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTDESCRIPTION", DbName = "ProjectDescription", ParentMetaCode = "ROOT", DataType = "TEXT" });
+            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTCODE", DbName = "ProjectCode", ParentMetaCode = "ROOT", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATATABLE", MetaCode = "PROJECTTAGS", DbName = "fm_ProjectTags", ParentMetaCode = "ROOT", DataType = "" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "TAGCODE", DbName = "TagCode", ParentMetaCode = "PROJECTTAGS", DataType = "STRING" });
             dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "TAGTEXT", DbName = "TagText", ParentMetaCode = "PROJECTTAGS", DataType = "STRING" });
            
+
 
             //APPLICATION - VIEWS
             views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaCode = "PROJECT_LIST_UIVIEW", MetaType = "UIVIEW", Title = "Project List", TitleLocalizationKey = "PROJECTLIST", Path = "Projects/List", IsPrimary = true, IsPublic = false });

@@ -134,7 +134,7 @@
                  ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
                  ,@table_pageinfo: { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false }
                  </text>
-                 } 
+                 }
             },
             methods:
             {
@@ -219,7 +219,7 @@
                         context.model[dbtablename].push(context[dbtablename]);
                     };
 
-                  
+
                     var saveFunc = function ()
                     {
 
@@ -334,7 +334,7 @@
                         $('#addEditModal_' + uimetacode).modal();
                     }
 
-                    
+
                 },
                 deleteTableLine: function (item, dbtablename)
                 {
@@ -420,7 +420,7 @@
                                 context.modelSaved = true;
                                 context.getApplication();
                                 setTimeout(function () { context.modelSaved = false; }, 3000);
-                            }                         
+                            }
                         },
                         error: function (response)
                         {
@@ -572,8 +572,21 @@
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
-                        //context.setUpControls();
+                        //
                     });
+                },
+                getDomain: function (domainname, query, donefunc)
+                {
+                    var context = this;
+                    var endpointurl = "@ViewBag.GetDomainAPIPath/" + domainname + "/" + query;
+                    if (context.requestInfo != "")
+                        endpointurl += "/" + context.requestInfo;
+
+                    $.get(endpointurl, function (response)
+                    {
+                        donefunc(response);
+                    });
+
                 },
                 isFirstPage: function (dbtablename)
                 {

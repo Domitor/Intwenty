@@ -328,7 +328,7 @@ Vue.component("combobox", {
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetDomain/' + domainname +'/ALL', function (response) {
+                $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
                     callback(response);
                     if (vm.idfield) {
                         var persisteditems = vm.idfield.split(",");

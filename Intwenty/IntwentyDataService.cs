@@ -1360,22 +1360,25 @@ namespace Intwenty
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
 
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
+                if (!args.IgnoreTenantIsolation)
                 {
-                    if (!args.User.HasValidUserId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
+                    {
+                        if (!args.User.HasValidUserId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
 
-                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
-                }
+                        sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+                        parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
+                    }
 
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
-                {
-                    if (!args.User.HasValidOrganizationId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
+                    {
+                        if (!args.User.HasValidOrganizationId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
 
-                    sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
+                        sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
+                        parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
+                    }
                 }
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
@@ -1615,26 +1618,27 @@ namespace Intwenty
 
                 }
 
-
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
+                if (!args.IgnoreTenantIsolation)
                 {
-                    if (!args.User.HasValidUserId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentUserFilter)
+                    {
+                        if (!args.User.HasValidUserId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
 
-                    sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
+                        sql_list_stmt.Append("AND t1.OwnedBy = @OwnedBy ");
+                        parameters.Add(new IntwentySqlParameter() { Name = "@OwnedBy", Value = args.User.UserName });
+                    }
+
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
+                    {
+                        if (!args.User.HasValidOrganizationId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+
+                        sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
+                        parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
+                    }
+
                 }
-
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows) || args.ForceCurrentOrganizationFilter)
-                {
-                    if (!args.User.HasValidOrganizationId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
-
-                    sql_list_stmt.Append("AND t1.OwnedByOrganizationId = @OwnedByOrganizationId ");
-                    parameters.Add(new IntwentySqlParameter() { Name = "@OwnedByOrganizationId", Value = args.User.OrganizationId });
-                }
-
-
 
                 if (args.FilterValues != null && args.FilterValues.Count > 0)
                 {
@@ -1737,20 +1741,23 @@ namespace Intwenty
                     sql_stmt.Append(string.Format("AND t1.Id = {0} ", state.Id));
                 }
 
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                if (!state.IgnoreTenantIsolation)
                 {
-                    if (!state.User.HasValidUserId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                    {
+                        if (!state.User.HasValidUserId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
 
-                    sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
-                }
+                        sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
+                    }
 
-                if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
-                {
-                    if (!state.User.HasValidOrganizationId)
-                        throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                    {
+                        if (!state.User.HasValidOrganizationId)
+                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
 
-                    sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                        sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                    }
                 }
 
                 client.Open();
@@ -1844,20 +1851,23 @@ namespace Intwenty
 
                     sql_stmt.Append(string.Format("FROM {0} t1 WHERE t1.Id={1} ", GetTenantTableName(model.Application, state), state.Id));
 
-                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                    if (!state.IgnoreTenantIsolation)
                     {
-                        if (!state.User.HasValidUserId)
-                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+                        if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                        {
+                            if (!state.User.HasValidUserId)
+                                throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
 
-                        sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
-                    }
+                            sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
+                        }
 
-                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
-                    {
-                        if (!state.User.HasValidOrganizationId)
-                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+                        if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                        {
+                            if (!state.User.HasValidOrganizationId)
+                                throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
 
-                        sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                            sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                        }
                     }
 
                     var appjson = client.GetJsonObject(sql_stmt.ToString()).GetJsonString();
@@ -1890,20 +1900,23 @@ namespace Intwenty
                     sql_stmt.Append(string.Format("WHERE t1.ApplicationId = {0} ", model.Application.Id));
                     sql_stmt.Append(string.Format("AND t1.Id = {0} ", state.Id));
 
-                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                    if (!state.IgnoreTenantIsolation)
                     {
-                        if (!state.User.HasValidUserId)
-                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
+                        if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.User && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                        {
+                            if (!state.User.HasValidUserId)
+                                throw new InvalidOperationException("No valid username found when querying app with tenant isolation by user or forced to filter by user");
 
-                        sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
-                    }
+                            sql_stmt.Append(string.Format("AND t1.OwnedBy = '{0}'", state.User.UserName));
+                        }
 
-                    if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
-                    {
-                        if (!state.User.HasValidOrganizationId)
-                            throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
+                        if ((model.Application.TenantIsolationLevel == TenantIsolationOptions.Organization && model.Application.TenantIsolationMethod == TenantIsolationMethodOptions.ByRows))
+                        {
+                            if (!state.User.HasValidOrganizationId)
+                                throw new InvalidOperationException("No valid username found when querying app with tenant isolation by organization or forced to filter by organization");
 
-                        sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                            sql_stmt.Append(string.Format("AND t1.OwnedByOrganizationId = '{0}'", state.User.OrganizationId));
+                        }
                     }
 
                     var appjson = client.GetJsonObject(sql_stmt.ToString()).GetJsonString();

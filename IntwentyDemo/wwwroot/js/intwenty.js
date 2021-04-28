@@ -231,15 +231,31 @@ Vue.component("searchbox", {
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response) {
-                    callback(response);
-                    if (vm.idfield) {
-                        var persisteditems = vm.idfield.split(",");
-                        for (var i = 0; i < persisteditems.length; i++) {
-                            element[0].selectize.addItem(persisteditems[i], true);
+                if (vm.$root.getDomain)
+                {
+                    vm.$root.getDomain(domainname, query, function (response) {
+                        callback(response);
+                        if (vm.idfield) {
+                            var persisteditems = vm.idfield.split(",");
+                            for (var i = 0; i < persisteditems.length; i++) {
+                                element[0].selectize.addItem(persisteditems[i], true);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                else
+                {
+                    $.get('/Application/API/GetDomain/' + domainname + '/' + query, function (response) {
+                        callback(response);
+                        if (vm.idfield) {
+                            var persisteditems = vm.idfield.split(",");
+                            for (var i = 0; i < persisteditems.length; i++) {
+                                element[0].selectize.addItem(persisteditems[i], true);
+                            }
+                        }
+                    });
+                }
+          
             }
 
         }).on('change', function () {
@@ -328,15 +344,32 @@ Vue.component("combobox", {
 
                 if (!domainname) return callback();
 
-                $.get('/Application/API/GetDomain/' + domainname +'/ALL', function (response) {
-                    callback(response);
-                    if (vm.idfield) {
-                        var persisteditems = vm.idfield.split(",");
-                        for (var i = 0; i < persisteditems.length; i++) {
-                            element[0].selectize.addItem(persisteditems[i], true);
+                if (vm.$root.getDomain)
+                {
+                    vm.$root.getDomain(domainname, 'ALL', function (response) {
+                        callback(response);
+                        if (vm.idfield) {
+                            var persisteditems = vm.idfield.split(",");
+                            for (var i = 0; i < persisteditems.length; i++) {
+                                element[0].selectize.addItem(persisteditems[i], true);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                else
+                {
+                    $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
+                        callback(response);
+                        if (vm.idfield) {
+                            var persisteditems = vm.idfield.split(",");
+                            for (var i = 0; i < persisteditems.length; i++) {
+                                element[0].selectize.addItem(persisteditems[i], true);
+                            }
+                        }
+                    });
+                }
+
+              
             }
 
         }).on('change', function () {
