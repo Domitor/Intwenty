@@ -18,10 +18,10 @@
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
     <Description>Create metadata driven applications with vue.js and ASP.NET Core. Use this package with visual studio 2019 or later. See https://github.com/Domitor/Intwenty for instructions about using this package.</Description>
     <EnableDefaultContentItems>true</EnableDefaultContentItems>
-    <PackageReleaseNotes>- Bugfixes from 1.7.1
-- Better filer and paging in sub tables
-- Better path handling
-</PackageReleaseNotes>
+    <PackageReleaseNotes>- Bugfixes
+- Improvments on filter and paging in sub tables
+- Improvments on path handling
+- Easier parent child app development</PackageReleaseNotes>
     <AssemblyVersion>1.7.2.0</AssemblyVersion>
     <FileVersion>1.7.2.0</FileVersion>
   </PropertyGroup>
