@@ -4,8 +4,8 @@
 
     var mainDbName = Model.ApplicationInfo.DbName;
     var subTableDbNames = new List<string>();
-    var applicationId = Model.ApplicationInfo.Id;
-    var applicationViewId = Model.Id;
+    var applicationId = (int)ViewBag.ApplicationId;
+    var applicationViewId = (int)ViewBag.ApplicationViewId;
     var instanceid = (int)ViewBag.Id;
     var requestInfo = (string)ViewBag.RequestInfo;
     var aftersaveaction = string.Empty;

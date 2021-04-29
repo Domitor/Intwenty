@@ -14,7 +14,7 @@ using Intwenty.DataClient;
 using Intwenty.DataClient.Model;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.IdentityModel.Tokens;
+using Intwenty.Helpers;
 
 namespace IntwentyDemo.Services
 {
@@ -45,7 +45,8 @@ namespace IntwentyDemo.Services
             client.Close();
             foreach (var a in data)
             {
-                a.UrlEncodedId = Base64UrlEncoder.Encode(string.Format("PROJECTID={0}#FOREIGNKEYID={0}#FOREIGNKEYNAME=ProjectId", a.Id));
+                var requestinfo = string.Format("PROJECTID={0}#FOREIGNKEYID={0}#FOREIGNKEYNAME=ProjectId", a.Id);
+                a.UrlEncodedId = requestinfo.B64UrlEncode();
             }
 
             return data;
@@ -77,7 +78,7 @@ namespace IntwentyDemo.Services
                 return data;
             }
 
-            return base.GetApplicationDomain(domainname, state);
+            return base.GetValueDomain(domainname, state);
         }
 
 

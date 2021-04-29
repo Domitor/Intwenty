@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Claims;
 using Intwenty.Areas.Identity.Data;
-using Microsoft.IdentityModel.Tokens;
+using Intwenty.Helpers;
 
 namespace Intwenty.Model.Dto
 {
@@ -70,10 +70,7 @@ namespace Intwenty.Model.Dto
             state.Version = state.Data.Version;
             state.Properties = state.Data.GetAsString("Properties");
             if (!string.IsNullOrEmpty(state.Properties))
-            {
-                state.Properties = Base64UrlEncoder.Decode(state.Properties);
-               
-            }
+                state.Properties = state.Properties.B64UrlDecode();
 
             return state;
         }
@@ -88,9 +85,7 @@ namespace Intwenty.Model.Dto
             state.Version = state.Data.Version;
             state.Properties = state.Data.GetAsString("Properties");
             if (!string.IsNullOrEmpty(state.Properties))
-            {
-                state.Properties = Base64UrlEncoder.Decode(state.Properties);
-            }
+                state.Properties = state.Properties.B64UrlDecode();
 
             return state;
         }

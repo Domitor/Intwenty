@@ -11,7 +11,7 @@ using Intwenty.Areas.Identity.Models;
 using Intwenty.Model;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.IdentityModel.Tokens;
+using Intwenty.Helpers;
 
 namespace Intwenty.Controllers
 {
@@ -55,9 +55,7 @@ namespace Intwenty.Controllers
                     state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
 
                 if (!string.IsNullOrEmpty(requestinfo))
-                {
-                    state.Properties = Base64UrlEncoder.Decode(requestinfo);
-                }
+                    state.Properties = requestinfo.B64UrlDecode();
 
                 if (viewmodel.IsPublic)
                 {
@@ -88,9 +86,7 @@ namespace Intwenty.Controllers
                     state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
 
                 if (!string.IsNullOrEmpty(requestinfo))
-                {
-                    state.Properties = Base64UrlEncoder.Decode(requestinfo);
-                }
+                    state.Properties = requestinfo.B64UrlDecode();
 
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
@@ -130,9 +126,7 @@ namespace Intwenty.Controllers
                 model.SetUser(User);
 
             if (!string.IsNullOrEmpty(model.Properties))
-            {
-                model.Properties = Base64UrlEncoder.Decode(model.Properties);
-            }
+                model.Properties = model.Properties.B64UrlDecode();
 
             if (viewmodel.IsPublic)
             {
@@ -171,9 +165,7 @@ namespace Intwenty.Controllers
                 state = new ClientStateInfo();
 
             if (!string.IsNullOrEmpty(requestinfo))
-            {
-                state.Properties = Base64UrlEncoder.Decode(requestinfo);
-            }
+                state.Properties = requestinfo.B64UrlDecode();
 
             var arr = domainname.Split(".");
             var dtype = arr[0];
@@ -238,9 +230,7 @@ namespace Intwenty.Controllers
                 state = new ClientStateInfo() { ApplicationId = id };
 
             if (!string.IsNullOrEmpty(requestinfo))
-            {
-                state.Properties = Base64UrlEncoder.Decode(requestinfo);
-            }
+                state.Properties = requestinfo.B64UrlDecode();
 
             var t = DataRepository.New(state);
             return new JsonResult(t);

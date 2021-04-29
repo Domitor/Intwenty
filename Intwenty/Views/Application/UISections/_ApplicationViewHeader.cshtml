@@ -19,10 +19,6 @@
                     func_create_path = func_create_path.Replace("/{requestinfo}","");
                 }
             }
-            if (func_create_path.Contains("{viewid}"))
-            {
-                func_create_path = func_create_path.Replace("{viewid}", "0");
-            }
             if (func_create_path.Contains("{id}"))
             {
                 func_create_path = func_create_path.Replace("{id}", "0");
@@ -43,10 +39,6 @@
             {
                 func_navigate_path = func_navigate_path.Replace("/{requestinfo}", "");
             }
-        }
-        if (func_navigate_path.Contains("{viewid}"))
-        {
-            func_navigate_path = func_navigate_path.Replace("{viewid}", "0");
         }
         if (func_navigate_path.Contains("{id}"))
         {

@@ -19,10 +19,15 @@
             {
                 func_edit_path = func_edit_path.Replace("/{id}", "");
             }
-            if (func_edit_path.Contains("{viewid}"))
+            else
             {
-                func_edit_path = func_edit_path.Replace("{viewid}", "0");
+                //TODO: 
+                //Call edit view with b64 encoded request info
+                //Need (per tableline): 1. js decode requestinfo. 2. insert ID= js.id 3. reencode requestinfo, assign it to url
+                //
+
             }
+           
 
         }
     }
