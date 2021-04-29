@@ -5,44 +5,105 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Intwenty.Model.Dto;
 using Microsoft.AspNetCore.Http;
-using Intwenty;
 using Intwenty.Interface;
+using Intwenty.Areas.Identity.Data;
+using Intwenty.Model;
+using Intwenty.Helpers;
 
 namespace IntwentyDemo.Controllers
 {
-    /*
-     
-       -- This is an example of how to override the Intwenty ApplicationController --
-       1.   Name the controller ApplicationController and put in the Controllers folder. 
-       2.   Attribute routing must be used otherwise it will be conflicts with routes in the base controller.
-
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Policy = "IntwentyAppAuthorizationPolicy")]
-    public class ApplicationController : Intwenty.Controllers.ApplicationController
+    public class ApplicationController : Controller
     {
 
         private IIntwentyDataService DataRepository { get; }
         private IIntwentyModelService ModelRepository { get; }
+        private IntwentyUserManager UserManager { get; }
 
-      
-        public ApplicationController(IIntwentyDataService dataservice, IIntwentyModelService modelservice) : base(dataservice, modelservice)
+        public ApplicationController(IIntwentyDataService dataservice, IIntwentyModelService modelservice, IntwentyUserManager usermanager)
         {
             DataRepository = dataservice;
             ModelRepository = modelservice;
+            UserManager = usermanager;
         }
 
-        /// <summary>
-        /// Generate UI based on UIStructure for the application with the supplied Id.
-        /// </summary>
-        [HttpGet("Application/Create/{id}")]
-        public override IActionResult Create(int id)
+        [HttpGet("Features/Edit/{id}/{requestinfo}")]
+        [HttpGet("Features/Create/{requestinfo}")]
+        [HttpGet("Features/List/{requestinfo}")]
+        public virtual async Task<IActionResult> View(int? id, string requestinfo)
         {
-            return base.Create(id);
+            ViewBag.ApplicationId = 0;
+            ViewBag.ApplicationViewId = 0;
+            ViewBag.Id = 0;
+
+            if (id.HasValue && id.Value > 0)
+                ViewBag.Id = id.Value;
+
+            ViewBag.RequestInfo = "";
+            if (!string.IsNullOrEmpty(requestinfo))
+            {
+                ViewBag.RequestInfo = requestinfo;
+
+                var props = new HashTagPropertyObject();
+                props.Properties = requestinfo.B64UrlDecode();
+
+                var pid = props.GetAsInt("ID");
+                if (pid > 0 && ViewBag.Id == 0)
+                    ViewBag.Id = pid;
+
+                var vid = props.GetAsInt("VIEWID");
+                if (vid > 0)
+                    ViewBag.ApplicationViewId = vid;
+
+                var aid = props.GetAsInt("APPLICATIONID");
+                if (aid > 0)
+                    ViewBag.ApplicationId = aid;
+            }
+
+
+            ViewBag.BaseAPIPath = Url.Content("~/Application/API/");
+            ViewBag.SaveAPIPath = Url.Content("~/Application/API/Save");
+            ViewBag.SaveLineAPIPath = Url.Content("~/Application/API/SaveSubTableLine");
+            ViewBag.GetApplicationAPIPath = Url.Content("~/Application/API/GetApplication");
+            ViewBag.GetListAPIPath = Url.Content("~/Application/API/GetPagedList");
+            ViewBag.GetDomainAPIPath = Url.Content("~/Application/API/GetDomain");
+            ViewBag.DeleteApplicationAPIPath = Url.Content("~/Application/API/Delete");
+            ViewBag.DeleteLineAPIPath = Url.Content("~/Application/API/DeleteSubTableLine");
+            ViewBag.CreateNewAPIPath = Url.Content("~/Application/API/CreateNew");
+
+            ViewModel current_view = null;
+            if (ViewBag.ApplicationViewId > 0)
+            {
+                current_view = ModelRepository.GetLocalizedViewModelById(ViewBag.ApplicationViewId);
+            }
+            else
+            {
+                var path = this.Request.Path.Value;
+                current_view = ModelRepository.GetLocalizedViewModelByPath(path);
+            }
+
+
+
+            if (current_view == null)
+                return NotFound();
+
+            ViewBag.ApplicationId = current_view.ApplicationInfo.Id;
+            ViewBag.ApplicationViewId = current_view.Id;
+
+            if (current_view.IsPublic)
+                return View(current_view);
+            if (await UserManager.HasAuthorization(User, current_view))
+                return View(current_view);
+            else
+                return Forbid();
+
+
         }
 
-      
+
+
 
 
     }
-
-    */
 }

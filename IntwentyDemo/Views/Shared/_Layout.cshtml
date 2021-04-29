@@ -46,6 +46,7 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
+                        <!--
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @Localizer["Manage Features"]</span> <span class="caret"></span></a>
                             <div class="dropdown-menu">
@@ -56,7 +57,7 @@
 
                             </div>
                         </li>
-
+                        -->
                         @await Html.PartialAsync("_IntwentyAppMenu")
 
                         @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN"))

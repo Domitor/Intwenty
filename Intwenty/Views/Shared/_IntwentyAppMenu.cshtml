@@ -38,7 +38,7 @@
                 <div class="dropdown-item"><strong>@sys.Title</strong></div>
                 <div class="dropdown-divider"></div>
 
-                foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode))
+                foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode && !p.Path.Contains("{")))
                 {
                     <a class="dropdown-item" href="@Url.Content("~/"+view.Path)">@view.LocalizedTitle</a>
                 }

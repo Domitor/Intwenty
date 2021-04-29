@@ -18,9 +18,9 @@
     if (Model.HasSaveFunction)
     {
         aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
-        if (aftersaveaction == "GOTOLISTVIEW")
+        if (aftersaveaction == "GOTOVIEW")
         {
-            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOLISTVIEWPATH");
+            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOVIEWPATH");
         }
     }
 }
@@ -260,13 +260,16 @@
                                         data: JSON.stringify(context[dbtablename]),
                                         success: function (response)
                                         {
-                                            if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
+                                            if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
                                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
                                                 if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
                                                     endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
                                                 }
                                                 else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
                                                     endpointurl = endpointurl.replace("{requestinfo}", "");
+                                                }
+                                                if (endpointurl.indexOf("{id}") > 1) {
+                                                    endpointurl = endpointurl.replace("{id}", context.instanceId);
                                                 }
                                                 window.location.href = endpointurl;
                                             }
@@ -403,7 +406,7 @@
                         success: function (response)
                         {
 
-                            if (context.aftersaveaction == 'GOTOLISTVIEW' && context.aftersaveactionpath != '') {
+                            if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
                                 if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
                                     endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
@@ -411,6 +414,11 @@
                                 else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
                                     endpointurl = endpointurl.replace("{requestinfo}", "");
                                 }
+
+                                if (endpointurl.indexOf("{id}") > 1) {
+                                    endpointurl = endpointurl.replace("{id}", response.id);
+                                }
+
                                 window.location.href = endpointurl;
                             }
                             else if (context.aftersaveaction == 'REFRESH')
