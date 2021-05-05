@@ -119,7 +119,7 @@ namespace IntwentyDemo.Seed
             systems.Add(new SystemItem() { MetaCode = "INTWENTYDEFAULTSYS", Title = "Default", DbPrefix = "def" });
             systems.Add(new SystemItem() { MetaCode = "WAREHOUSE", Title = "WMS", DbPrefix = "wms" });
             systems.Add(new SystemItem() { MetaCode = "BLOG", Title = "The blog engine", DbPrefix = "blog" });
-            systems.Add(new SystemItem() { MetaCode = "FEATUREMINE", Title = "The featuremine system", DbPrefix = "fm" });
+
 
             //APPLICATIONS
             applications.Add(new ApplicationItem() { Id = 10, Description = "An app for managing customers", SystemMetaCode = "WAREHOUSE", MetaCode = "CUSTOMER", Title = "Customer", TitleLocalizationKey = "CUSTOMER", DbName = "wms_Customer", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
@@ -127,9 +127,7 @@ namespace IntwentyDemo.Seed
             applications.Add(new ApplicationItem() { Id = 30, Description = "An app for managing sales orders", SystemMetaCode = "WAREHOUSE", MetaCode = "SALESORDER", Title = "Sales Order", TitleLocalizationKey = "SALESORDER", DbName = "wms_SalesHeader", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 2, TenantIsolationMethod = 2 });
             applications.Add(new ApplicationItem() { Id = 40, Description = "An app for managing vendors", SystemMetaCode = "WAREHOUSE", MetaCode = "VENDOR", Title = "Vendor", TitleLocalizationKey = "VENDOR", DbName = "wms_Vendor", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
             applications.Add(new ApplicationItem() { Id = 50, Description = "An app for blogging", SystemMetaCode = "BLOG", MetaCode = "BLOGAPP", Title = "The blog", TitleLocalizationKey = "", DbName = "blog_Blog", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 0, TenantIsolationMethod = 0 });
-            applications.Add(new ApplicationItem() { Id = 200, Description = "An app for feature projects", SystemMetaCode = "FEATUREMINE", MetaCode = "FMPROJECTS", Title = "Feature Projects", TitleLocalizationKey = "FMPROJECTS", DbName = "fm_Project", DataMode = 0, UseVersioning = false, TenantIsolationLevel = 2, TenantIsolationMethod = 2 });
-            applications.Add(new ApplicationItem() { Id = 210, Description = "An app for features", SystemMetaCode = "FEATUREMINE", MetaCode = "FEATURES", Title = "Features", TitleLocalizationKey = "FEATURES", DbName = "fm_Feature", DataMode = 1, UseVersioning = false, TenantIsolationLevel = 2, TenantIsolationMethod = 2 });
-
+          
 
 
             //VALUEDOMAIN (USED IN COMBOBOXES ETC)
@@ -139,8 +137,7 @@ namespace IntwentyDemo.Seed
             valuedomains.Add(new ValueDomainItem() { DomainName = "CUSTOMERTAGS", Code = "2", Value = "Tag 2" });
             valuedomains.Add(new ValueDomainItem() { DomainName = "CUSTOMERTAGS", Code = "3", Value = "Tag 3" });
 
-            valuedomains.Add(new ValueDomainItem() { DomainName = "FEATURETAGS", Code = "T1", Value = "T1" });
-         
+          
 
 
             #region Customer
@@ -333,7 +330,7 @@ namespace IntwentyDemo.Seed
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "SO_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_LISTUI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "SO_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
 
-            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "SO_FUNC_SAVE", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOVIEW#GOTOVIEWPATH=SalesOrders/List" });
+            functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "SO_FUNC_SAVE", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOVIEW#GOTOVIEWPATH=SalesOrders/Edit/{id}" });
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_CREATE_VIEW", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "SO_FUNC_BACK", ActionPath = "SalesOrders/List", IsModalAction = false, Title = "Back to list" });
 
             functions.Add(new FunctionItem() { SystemMetaCode = "WAREHOUSE", AppMetaCode = "SALESORDER", OwnerMetaCode = "SO_EDIT_VIEW", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "SO_FUNC_SAVE1", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
@@ -450,142 +447,6 @@ namespace IntwentyDemo.Seed
 
 
 
-
-            #endregion
-
-            #region Feature Projects
-
-            //APPLICATION FEATURE PROJECTS
-            //--------------------
-            //DATABASE - MAINTABLE
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTNAME", DbName = "ProjectName", ParentMetaCode = "ROOT", DataType = "STRING", Properties = "MANDATORY=TRUE" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTDESCRIPTION", DbName = "ProjectDescription", ParentMetaCode = "ROOT", DataType = "TEXT" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "PROJECTCODE", DbName = "ProjectCode", ParentMetaCode = "ROOT", DataType = "STRING" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATATABLE", MetaCode = "PROJECTTAGS", DbName = "fm_ProjectTags", ParentMetaCode = "ROOT", DataType = "" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "TAGCODE", DbName = "TagCode", ParentMetaCode = "PROJECTTAGS", DataType = "STRING" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaType = "DATACOLUMN", MetaCode = "TAGTEXT", DbName = "TagText", ParentMetaCode = "PROJECTTAGS", DataType = "STRING" });
-           
-
-
-            //APPLICATION - VIEWS
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaCode = "PROJECT_LIST_UIVIEW", MetaType = "UIVIEW", Title = "Project List", TitleLocalizationKey = "PROJECTLIST", Path = "Projects/List", IsPrimary = true, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaCode = "INPUT_PROJECT_UIVIEW_1", MetaType = "UIVIEW", Title = "Create Project", TitleLocalizationKey = "PROJ_ADD", Path = "Projects/Create", IsPrimary = false, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", MetaCode = "INPUT_PROJECT_UIVIEW_2", MetaType = "UIVIEW", Title = "Edit Project", TitleLocalizationKey = "PROJ_EDIT", Path = "Projects/Edit/{id}", IsPrimary = false, IsPublic = false });
-
-            //UI
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "PROJECT_LIST_UIVIEW", MetaCode = "PROJ_LIST_UI", MetaType = "LISTINTERFACE", DataTableMetaCode = "FMPROJECTS" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "INPUT_PROJECT_UIVIEW_1", MetaCode = "PROJ_INPUT_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "FMPROJECTS" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "INPUT_PROJECT_UIVIEW_2", MetaCode = "PROJ_INPUT_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "FMPROJECTS" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "INPUT_PROJECT_UIVIEW_2", MetaCode = "PROJ_TAGLIST_UI", MetaType = "LISTINTERFACE", DataTableMetaCode = "PROJECTTAGS" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "INPUT_PROJECT_UIVIEW_2", MetaCode = "PROJ_CREATE_TAG_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "PROJECTTAGS" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", ViewMetaCode = "INPUT_PROJECT_UIVIEW_2", MetaCode = "PROJ_EDIT_TAG_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "PROJECTTAGS" });
-
-            //INPUT UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_INPUT_UI", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_INPUT_UI", MetaType = "PANEL", MetaCode = "FMPROJ_PNL1", Title = "", TitleLocalizationKey = "FMPROJ_PNL1", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_INPUT_UI", MetaType = "TEXTBOX", MetaCode = "TB_PROJNAME", DataColumn1MetaCode = "PROJECTNAME", Title = "Project Name", TitleLocalizationKey = "Project Name", ParentMetaCode = "FMPROJ_PNL1", RowOrder = 1, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_INPUT_UI", MetaType = "TEXTAREA", MetaCode = "TA_PROJDESC", DataColumn1MetaCode = "PROJECTDESCRIPTION", Title = "Project Description", TitleLocalizationKey = "Description", ParentMetaCode = "FMPROJ_PNL1", RowOrder = 2, ColumnOrder = 1 });
-
-            //TAG LIST UI STRUCTURE
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_TAGLIST_UI", MetaType = "TABLE", MetaCode = "TAG_LISTVIEW", Title = "Feature Tags", TitleLocalizationKey = "Feature Tags", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_TAGLIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "TL_TAGTEXT", DataColumn1MetaCode = "TAGTEXT", Title = "Tag", ParentMetaCode = "TAG_LISTVIEW", RowOrder = 1, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_TAGLIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "TL_CREATEDBY", DataColumn1MetaCode = "CHANGEDBY", Title = "Changed By", ParentMetaCode = "TAG_LISTVIEW", RowOrder = 1, ColumnOrder = 3 });
-
-
-            //CREATE TAG INPUT UI STRUCTURE
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_CREATE_TAG_UI", MetaType = "SECTION", MetaCode = "CR_SECT_TAGLINE_HDR", Title = "Create Tag", TitleLocalizationKey = "CR_TAG_LINE", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_CREATE_TAG_UI", MetaType = "PANEL", MetaCode = "CR_TAGLINE_PANEL", Title = "", ParentMetaCode = "CR_SECT_TAGLINE_HDR", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_CREATE_TAG_UI", MetaType = "TEXTBOX", MetaCode = "CR_TAGLINE_TB_TAG", DataColumn1MetaCode = "TAGTEXT", Domain = "", Title = "Tag Text", ParentMetaCode = "CR_TAGLINE_PANEL", RowOrder = 1, ColumnOrder = 1 });
-
-            //EDIT TAG INPUT UI STRUCTURE
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_EDIT_TAG_UI", MetaType = "SECTION", MetaCode = "ED_SECT_TAGLINE_HDR", Title = "Create Tag", TitleLocalizationKey = "CR_TAG_LINE", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_EDIT_TAG_UI", MetaType = "PANEL", MetaCode = "ED_TAGLINE_PANEL", Title = "", ParentMetaCode = "ED_SECT_TAGLINE_HDR", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_EDIT_TAG_UI", MetaType = "TEXTBOX", MetaCode = "ED_TAGLINE_TB_TAG", DataColumn1MetaCode = "TAGTEXT", Domain = "", Title = "Tag Text", ParentMetaCode = "ED_TAGLINE_PANEL", RowOrder = 1, ColumnOrder = 1 });
-
-
-            //LIST UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_LIST_UI", MetaType = "TABLE", MetaCode = "PROJ_LV", Title = "Project List", TitleLocalizationKey = "PROJECTLIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_TITLE", DataColumn1MetaCode = "PROJECTNAME", Title = "Project Name", TitleLocalizationKey= "Project Name", ParentMetaCode = "PROJ_LV", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_CHANGEDBY", DataColumn1MetaCode = "CHANGEDBY", Title = "Changed By", TitleLocalizationKey = "Changed By", ParentMetaCode = "PROJ_LV", RowOrder = 1, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", UserInterfaceMetaCode = "PROJ_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_CHANGEDATE", DataColumn1MetaCode = "CHANGEDDATE", Title = "Changed", TitleLocalizationKey = "Changed", ParentMetaCode = "PROJ_LV", RowOrder = 1, ColumnOrder = 3 });
-
-
-
-            //UI FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "FMPROJ_FUNC_CREATE", ActionPath = "Projects/Create", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "FMPROJ_FUNC_EDIT", ActionPath = "Projects/Edit/{id}", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "FMPROJ_FUNC_DELETE", ActionPath = "", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "FMPROJ_FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "FMPROJ_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
-
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "INPUT_PROJECT_UIVIEW_1", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "FMPROJ_FUNC_SAVE", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOVIEW#GOTOVIEWPATH=Projects/List" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "INPUT_PROJECT_UIVIEW_1", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "FMPROJ_FUNC_BACK", ActionPath = "Projects/List", IsModalAction = false, Title = "Back to list" });
-
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "INPUT_PROJECT_UIVIEW_2", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "FMPROJ_FUNC_SAVE1", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "INPUT_PROJECT_UIVIEW_2", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "FMPROJ_FUNC_BACK1", ActionPath = "Projects/List", IsModalAction = false, Title = "Back to list" });
-
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_TAGLIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "TL_FUNC_CREATE", ActionPath = "", IsModalAction = true, ActionUserInterfaceMetaCode = "PROJ_CREATE_TAG_UI", Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_TAGLIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "TL_FUNC_EDIT", ActionPath = "", IsModalAction = true, ActionUserInterfaceMetaCode = "PROJ_EDIT_TAG_UI", Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_TAGLIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "TL_FUNC_DELETE", ActionPath = "", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FMPROJECTS", OwnerMetaCode = "PROJ_TAGLIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "TL_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
-
-            #endregion
-
-            #region Features
-
-            //APPLICATION FEATURES
-            //--------------------
-            //DATABASE - MAINTABLE
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_TITLE", DbName = "Title", ParentMetaCode = "ROOT", DataType = "STRING", Properties = "MANDATORY=TRUE" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_DESCRIPTION", DbName = "Description", ParentMetaCode = "ROOT", DataType = "TEXT", Properties = "" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_TAGCODE", DbName = "TagCode", ParentMetaCode = "ROOT", DataType = "TEXT" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_TAGTEXT", DbName = "TagText", ParentMetaCode = "ROOT", DataType = "TEXT" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_PRIO", DbName = "Priority", ParentMetaCode = "ROOT", DataType = "INTEGER" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_REQUESTEDBY", DbName = "RequestedBy", ParentMetaCode = "ROOT", DataType = "TEXT" });
-            dbitems.Add(new DatabaseItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaType = "DATACOLUMN", MetaCode = "F_PROJID", DbName = "ProjectId", ParentMetaCode = "ROOT", DataType = "INTEGER" });
-
-
-            //APPLICATION - VIEWS
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaCode = "FEATURE_LIST_UIVIEW", MetaType = "UIVIEW", Title = "Feature List", TitleLocalizationKey = "FEATURELIST", Path = "Features/List/{requestinfo}", IsPrimary = true, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaCode = "INPUT_FEATURE_UIVIEW_1", MetaType = "UIVIEW", Title = "Create Feature", TitleLocalizationKey = "FEATURE_ADD", Path = "Features/Create/{requestinfo}", IsPrimary = false, IsPublic = false });
-            views.Add(new ViewItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", MetaCode = "INPUT_FEATURE_UIVIEW_2", MetaType = "UIVIEW", Title = "Edit Feature", TitleLocalizationKey = "FEATURE_EDIT", Path = "Features/Edit/{id}/{requestinfo}", IsPrimary = false, IsPublic = false });
-
-            //UI
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", ViewMetaCode = "FEATURE_LIST_UIVIEW", MetaCode = "FEATURE_LIST_UI", MetaType = "LISTINTERFACE", DataTableMetaCode = "FEATURES" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", ViewMetaCode = "INPUT_FEATURE_UIVIEW_1", MetaCode = "FEATURE_INPUT_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "FEATURES" });
-            userinterface.Add(new UserInterfaceItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", ViewMetaCode = "INPUT_FEATURE_UIVIEW_2", MetaCode = "FEATURE_INPUT_UI", MetaType = "INPUTINTERFACE", DataTableMetaCode = "FEATURES" });
-            
-            //INPUT UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "SECTION", MetaCode = "MAINSECTION", Title = "", ParentMetaCode = "ROOT", RowOrder = 1, ColumnOrder = 1, Properties = "COLLAPSIBLE=FALSE#STARTEXPANDED=FALSE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "PANEL", MetaCode = "FEATURE_PNL1", Title = "", TitleLocalizationKey = "FEATURE_PNL1", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "TEXTBOX", MetaCode = "TB_F_TITLE", DataColumn1MetaCode = "F_TITLE", Title = "Title", TitleLocalizationKey = "Title", ParentMetaCode = "FEATURE_PNL1", RowOrder = 1, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "TEXTAREA", MetaCode = "TB_F_DESC", DataColumn1MetaCode = "F_DESCRIPTION", Title = "Description", TitleLocalizationKey = "Description", ParentMetaCode = "FEATURE_PNL1", RowOrder = 2, ColumnOrder = 1, Properties = "" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "PANEL", MetaCode = "FEATURE_PNL2", Title = "", TitleLocalizationKey = "FEATURE_PNL2", ParentMetaCode = "MAINSECTION", RowOrder = 1, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "SEARCHBOX", MetaCode = "SB_F_TAGS", Domain="VALUEDOMAIN.FEATURETAGS", DataColumn1MetaCode = "F_TAGCODE", DataColumn2MetaCode= "F_TAGTEXT", Title = "Tags", TitleLocalizationKey = "Tags", ParentMetaCode = "FEATURE_PNL2", RowOrder = 1, ColumnOrder = 2, Properties ="MULTISELECT=TRUE" });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "NUMBOX", MetaCode = "NB_F_PRIO", DataColumn1MetaCode = "F_PRIO", Title = "Priority", TitleLocalizationKey = "Priority", ParentMetaCode = "FEATURE_PNL2", RowOrder = 2, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_INPUT_UI", MetaType = "TEXTBOX", MetaCode = "TA_F_REQUESTEDBY", DataColumn1MetaCode = "F_REQUESTEDBY", Title = "Requested By", TitleLocalizationKey = "Requested By", ParentMetaCode = "FEATURE_PNL2", RowOrder = 3, ColumnOrder = 2 });
-
-
-            //LIST UI
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_LIST_UI", MetaType = "TABLE", MetaCode = "FEATURE_TABLE", Title = "Features", TitleLocalizationKey = "FEATURELIST", ParentMetaCode = "ROOT", RowOrder = 0, ColumnOrder = 0 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_TITLE", DataColumn1MetaCode = "F_TITLE", Title = "Title", TitleLocalizationKey = "Title", ParentMetaCode = "FEATURE_TABLE", RowOrder = 1, ColumnOrder = 1 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_TAGS", DataColumn1MetaCode = "F_TAGTEXT", Title = "Tags", TitleLocalizationKey = "Tags", ParentMetaCode = "FEATURE_TABLE", RowOrder = 1, ColumnOrder = 2 });
-            userinterfacestructure.Add(new UserInterfaceStructureItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", UserInterfaceMetaCode = "FEATURE_LIST_UI", MetaType = "TABLETEXTCOLUMN", MetaCode = "LV_PRIO", DataColumn1MetaCode = "F_PRIO", Title = "Priority", TitleLocalizationKey = "Priority", ParentMetaCode = "FEATURE_TABLE", RowOrder = 1, ColumnOrder = 3 });
-
-
-
-            //UI FUNCTIONS
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "FEATURE_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "CREATE", MetaCode = "FL_FUNC_CREATE", ActionPath = "Features/Create/{requestinfo}", IsModalAction = false, Title = "Create" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "FEATURE_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "EDIT", MetaCode = "FL_FUNC_EDIT", ActionPath = "Features/Edit/{id}/{requestinfo}", IsModalAction = false, Title = "Edit" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "FEATURE_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "DELETE", MetaCode = "FL_FUNC_DELETE", ActionPath = "", IsModalAction = false, Title = "Delete" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "FEATURE_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "FILTER", MetaCode = "FL__FUNC_FILTER", ActionPath = "", IsModalAction = false, Title = "Filter" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "FEATURE_LIST_UI", OwnerMetaType = "LISTINTERFACE", MetaType = "PAGING", MetaCode = "FL_FUNC_PAGING", ActionPath = "", IsModalAction = false, Title = "Paging" });
-
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "INPUT_FEATURE_UIVIEW_1", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "FL_FUNC_SAVE", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=GOTOVIEW#GOTOVIEWPATH=Features/List/{requestinfo}" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "INPUT_FEATURE_UIVIEW_1", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "FL_FUNC_BACK", ActionPath = "Features/List/{requestinfo}", IsModalAction = false, Title = "Back to list" });
-
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "INPUT_FEATURE_UIVIEW_2", OwnerMetaType = "UIVIEW", MetaType = "SAVE", MetaCode = "FL_FUNC_SAVE1", ActionPath = "", IsModalAction = false, Title = "Save", Properties = "AFTERSAVEACTION=REFRESH" });
-            functions.Add(new FunctionItem() { SystemMetaCode = "FEATUREMINE", AppMetaCode = "FEATURES", OwnerMetaCode = "INPUT_FEATURE_UIVIEW_2", OwnerMetaType = "UIVIEW", MetaType = "NAVIGATE", MetaCode = "FL_FUNC_BACK1", ActionPath = "Features/List/{requestinfo}", IsModalAction = false, Title = "Back to list" });
 
             #endregion
 
