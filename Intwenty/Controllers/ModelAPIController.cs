@@ -2032,7 +2032,7 @@ namespace Intwenty.Controllers
                 foreach (var app in apps)
                 {
                    
-                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging = true });
+                    var appdatalist = DataRepository.GetJsonArray(new ClientOperation(User) { ApplicationId = app.Id, SkipPaging = true });
                     var appdata = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(appdatalist.Data).RootElement);
                     foreach (var istat in appdata.SubTables[0].Rows)
                     {
@@ -2044,7 +2044,7 @@ namespace Intwenty.Controllers
                         data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
                         data.Append(",\"ApplicationData\":");
 
-                        var state = new ClientStateInfo(User) { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
+                        var state = new ClientOperation(User) { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
                         var appversiondata = DataRepository.Get(state);
                         data.Append(appversiondata.Data);
                         data.Append("}");
@@ -2127,7 +2127,7 @@ namespace Intwenty.Controllers
 
                                 if (istat.Name == "ApplicationData" && app != null)
                                 {
-                                    var state = ClientStateInfo.CreateFromJSON(istat.Value, User);
+                                    var state = ClientOperation.CreateFromJSON(istat.Value, User);
                                     state.Id = 0;
                                     state.Version = 0;
                                     state.ApplicationId = app.Id;

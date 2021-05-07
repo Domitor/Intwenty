@@ -33,11 +33,11 @@ namespace Intwenty.Model.Dto
     }
     public class DataListResult : IntwentyJSONStringResult
     {
-        public ListFilter ListFilter { get; set; }
+        public ClientOperation CurrentOperation { get; set; }
 
         public DataListResult()
         {
-            ListFilter = new ListFilter();
+            CurrentOperation = new ClientOperation();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
             Data = "[]";
@@ -45,7 +45,7 @@ namespace Intwenty.Model.Dto
 
         public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
-            ListFilter = new ListFilter();
+            CurrentOperation = new ClientOperation();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
             IsSuccess = success;
@@ -88,7 +88,7 @@ namespace Intwenty.Model.Dto
 
         public DataListResult()
         {
-            ListFilter = new ListFilter();
+            CurrentOperation = new ClientOperation();
             Data = new List<T>();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
@@ -96,7 +96,7 @@ namespace Intwenty.Model.Dto
 
         public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
-            ListFilter = new ListFilter();
+            CurrentOperation = new ClientOperation();
             Data = new List<T>();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
@@ -104,17 +104,17 @@ namespace Intwenty.Model.Dto
             AddMessage(messagecode, message);
         }
 
-        public ListFilter ListFilter { get; set; }
+        public ClientOperation CurrentOperation { get; set; }
 
         public List<T> Data { get; set; }
     }
 
-    public class DataListResult<TData,TFilter> : IntwentyResult where TFilter : ListFilter, new()
+    public class DataListResult<TData, TOperation> : IntwentyResult where TOperation : ClientOperation, new()
     {
 
         public DataListResult()
         {
-            ListFilter = new TFilter();
+            CurrentOperation = new TOperation();
             Data = new List<TData>();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
@@ -122,7 +122,7 @@ namespace Intwenty.Model.Dto
 
         public DataListResult(bool success, MessageCode messagecode = MessageCode.RESULT, string message = "")
         {
-            ListFilter = new TFilter();
+            CurrentOperation = new TOperation();
             Data = new List<TData>();
             StartTime = DateTime.Now;
             Messages = new List<OperationMessage>();
@@ -130,7 +130,7 @@ namespace Intwenty.Model.Dto
             AddMessage(messagecode, message);
         }
 
-        public TFilter ListFilter { get; set; }
+        public TOperation CurrentOperation { get; set; }
 
         public List<TData> Data { get; set; }
     }

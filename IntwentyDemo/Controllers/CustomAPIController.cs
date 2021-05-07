@@ -48,7 +48,7 @@ namespace IntwentyDemo.Controllers
         {
 
             var ip = await GetIpAddress();
-            var state = ClientStateInfo.CreateFromJSON(data);
+            var state = ClientOperation.CreateFromJSON(data);
 
             if (!state.HasData)
             {

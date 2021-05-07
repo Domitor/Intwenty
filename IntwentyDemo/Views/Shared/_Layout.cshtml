@@ -17,11 +17,7 @@
 
     var currentpath = Context.Request.Path.ToUriComponent();
     var ishomepath = string.IsNullOrEmpty(currentpath) || currentpath.Length < 5 || currentpath.Contains("Home/Index");
-    var projectlist = new List<Project>();
-    if (User.Identity.IsAuthenticated)
-    {
-        projectlist = ((CustomDataService)DataService).GetProjects(new Intwenty.Model.Dto.ClientStateInfo(User) { ApplicationId = 200 });
-    }
+    
 }
 
 
@@ -46,18 +42,6 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <!--
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="nav-label"><span class="fa fa-table"></span> @Localizer["Manage Features"]</span> <span class="caret"></span></a>
-                            <div class="dropdown-menu">
-                                @foreach (var p in projectlist)
-                                {
-                                    <a class="dropdown-item" href="~/Features/List/@p.UrlEncodedId">@p.Title</a>
-                                }
-
-                            </div>
-                        </li>
-                        -->
                         @await Html.PartialAsync("_IntwentyAppMenu")
 
                         @if (User.IsInRole("SUPERADMIN") || User.IsInRole("SYSTEMADMIN"))

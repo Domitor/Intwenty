@@ -152,10 +152,10 @@ namespace Intwenty.Model.Dto
 
         }
 
-        public ClientStateInfo CreateClientState()
+        public ClientOperation CreateClientState()
         {
             var model = System.Text.Json.JsonDocument.Parse(Data).RootElement;
-            var result = ClientStateInfo.CreateFromJSON(model);
+            var result = ClientOperation.CreateFromJSON(model);
             return result;
         }
 

@@ -485,14 +485,14 @@
                                 context.applist = JSON.parse(response.data);
 
                                 //UPDATE CURRENT PAGE INFO
-                                context.model_pageInfo = response.listFilter;
+                                context.model_pageInfo = response.currentOperation;
                                 if (context.model_pageInfo.filterValues.length === 0)
                                     context.addFilterValue();
                             }
                             else
                             {
                                 context.model[dbtablename] = JSON.parse(response.data);
-                                context[objname] = response.listFilter;
+                                context[objname] = response.currentOperation;
                                 if (context[objname].filterValues.length === 0)
                                     context.addFilterValue(dbtablename);
 

@@ -48,11 +48,11 @@ namespace Intwenty.Controllers
             if (viewmodel != null)
             {
                
-                ClientStateInfo state = null;
+                ClientOperation state = null;
                 if (User.Identity.IsAuthenticated)
-                    state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
+                    state = new ClientOperation(User) { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
                 else
-                    state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
+                    state = new ClientOperation() { Id = id, ApplicationId = applicationid, ApplicationViewId = viewid, ActionMode = ActionModeOptions.MainTable };
 
                 if (!string.IsNullOrEmpty(requestinfo))
                     state.Properties = requestinfo.B64UrlDecode();
@@ -79,11 +79,11 @@ namespace Intwenty.Controllers
             }
             else
             {
-                ClientStateInfo state = null;
+                ClientOperation state = null;
                 if (User.Identity.IsAuthenticated)
-                    state = new ClientStateInfo(User) { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
+                    state = new ClientOperation(User) { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
                 else
-                    state = new ClientStateInfo() { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
+                    state = new ClientOperation() { Id = id, ApplicationId = applicationid, ActionMode = ActionModeOptions.MainTable };
 
                 if (!string.IsNullOrEmpty(requestinfo))
                     state.Properties = requestinfo.B64UrlDecode();
@@ -105,7 +105,7 @@ namespace Intwenty.Controllers
         /// Get a list based on a main application table or a sub table
         /// </summary>
         [HttpPost("/Application/API/GetPagedList")]
-        public virtual async Task<IActionResult> GetPagedList([FromBody] ListFilter model)
+        public virtual async Task<IActionResult> GetPagedList([FromBody] ClientOperation model)
         {
            
 
@@ -158,11 +158,11 @@ namespace Intwenty.Controllers
             if (!domainname.Contains("."))
                 return new List<ValueDomainVm>();
 
-            ClientStateInfo state = null;
+            ClientOperation state = null;
             if (User.Identity.IsAuthenticated)
-                state = new ClientStateInfo(User);
+                state = new ClientOperation(User);
             else
-                state = new ClientStateInfo();
+                state = new ClientOperation();
 
             if (!string.IsNullOrEmpty(requestinfo))
                 state.Properties = requestinfo.B64UrlDecode();
@@ -223,11 +223,11 @@ namespace Intwenty.Controllers
         [HttpGet("/Application/API/CreateNew/{id}/{requestinfo?}")]
         public virtual JsonResult CreateNew(int id, string requestinfo)
         {
-            ClientStateInfo state = null;
+            ClientOperation state = null;
             if (User.Identity.IsAuthenticated)
-                state = new ClientStateInfo(User) { ApplicationId = id };
+                state = new ClientOperation(User) { ApplicationId = id };
             else
-                state = new ClientStateInfo() { ApplicationId = id };
+                state = new ClientOperation() { ApplicationId = id };
 
             if (!string.IsNullOrEmpty(requestinfo))
                 state.Properties = requestinfo.B64UrlDecode();
@@ -242,16 +242,16 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> Save([FromBody] System.Text.Json.JsonElement model)
         {
 
-            ClientStateInfo state = null;
+            ClientOperation state = null;
 
             try
             {
 
 
                 if (User.Identity.IsAuthenticated)
-                    state = ClientStateInfo.CreateFromJSON(model, User);
+                    state = ClientOperation.CreateFromJSON(model, User);
                 else
-                    state = ClientStateInfo.CreateFromJSON(model);
+                    state = ClientOperation.CreateFromJSON(model);
 
                  state.ActionMode = ActionModeOptions.MainTable;
 
@@ -320,7 +320,7 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> SaveSubTableLine([FromBody] System.Text.Json.JsonElement model)
         {
 
-            ClientStateInfo state = null;
+            ClientOperation state = null;
 
             try
             {
@@ -333,9 +333,9 @@ namespace Intwenty.Controllers
 
 
                 if (User.Identity.IsAuthenticated)
-                    state = new ClientStateInfo(User) { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
+                    state = new ClientOperation(User) { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
                 else
-                    state = new ClientStateInfo() { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
+                    state = new ClientOperation() { Id = row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId"), Version = row.Version };
 
                 if (state.Version < 1)
                     state.Version = 1;
@@ -401,14 +401,14 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> Delete([FromBody] System.Text.Json.JsonElement model)
         {
 
-            ClientStateInfo state = null;
+            ClientOperation state = null;
 
             try
             {
                 if (User.Identity.IsAuthenticated)
-                    state = ClientStateInfo.CreateFromJSON(model, User);
+                    state = ClientOperation.CreateFromJSON(model, User);
                 else
-                    state = ClientStateInfo.CreateFromJSON(model);
+                    state = ClientOperation.CreateFromJSON(model);
 
                 if (state == null)
                     return BadRequest();
@@ -476,7 +476,7 @@ namespace Intwenty.Controllers
         public virtual async Task<IActionResult> DeleteSubTableLine([FromBody] System.Text.Json.JsonElement model)
         {
 
-            ClientStateInfo state = null;
+            ClientOperation state = null;
 
             try
             {
@@ -490,9 +490,9 @@ namespace Intwenty.Controllers
                     return BadRequest();
 
                 if (User.Identity.IsAuthenticated)
-                    state = new ClientStateInfo(User) { Id=row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId") };
+                    state = new ClientOperation(User) { Id=row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId") };
                 else
-                    state = new ClientStateInfo() { Id=row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId") };
+                    state = new ClientOperation() { Id=row.ParentId, ApplicationId = row.GetAsInt("ApplicationId"), ApplicationViewId = row.GetAsInt("ApplicationViewId") };
 
 
                 var appmodel = ModelRepository.GetApplicationModel(state.ApplicationId);

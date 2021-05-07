@@ -50,7 +50,7 @@ namespace Intwenty.Controllers
             if (model!= null)
             {
               
-                var state = new ClientStateInfo() { Id = id.Value, ApplicationId = model.Application.Id };
+                var state = new ClientOperation() { Id = id.Value, ApplicationId = model.Application.Id };
                 var data = DataRepository.Get(state);
                 if (!data.IsSuccess)
                     return new JsonResult(data.UserError) { StatusCode = 400 };
@@ -76,7 +76,7 @@ namespace Intwenty.Controllers
        
 
         [HttpPost]
-        public IActionResult List([FromBody] ListFilter model)
+        public IActionResult List([FromBody] ClientOperation model)
         {
             if (!IsAuthenticated())
                 return Unauthorized();
@@ -140,7 +140,7 @@ namespace Intwenty.Controllers
                 return new JsonResult("Invalid request body") { StatusCode = 400 };
 
            
-            var state = ClientStateInfo.CreateFromJSON(data);
+            var state = ClientOperation.CreateFromJSON(data);
             state.ApplicationId = model.Application.Id;
             state.Data.ApplicationId = model.Application.Id;
             var res = DataRepository.Save(state);

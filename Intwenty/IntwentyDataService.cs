@@ -55,7 +55,7 @@ namespace Intwenty
             return CreateNewInternal(model);
         }
 
-        public virtual DataResult New(ClientStateInfo state)
+        public virtual DataResult New(ClientOperation state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return CreateNewInternal(model);
@@ -171,18 +171,18 @@ namespace Intwenty
         #region Save
 
 
-        public ModifyResult Save(ClientStateInfo state, ApplicationModel model)
+        public ModifyResult Save(ClientOperation state, ApplicationModel model)
         {
             return SaveInternal(state, model);
         }
 
-        public ModifyResult Save(ClientStateInfo state)
+        public ModifyResult Save(ClientOperation state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return SaveInternal(state, model);
         }
 
-        private ModifyResult SaveInternal(ClientStateInfo state, ApplicationModel model)
+        private ModifyResult SaveInternal(ClientOperation state, ApplicationModel model)
         {
 
             if (state == null)
@@ -355,7 +355,7 @@ namespace Intwenty
 
         }
 
-        public virtual ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row)
+        public virtual ModifyResult SaveSubTableLine(ClientOperation state, ApplicationModel model, ApplicationTableRow row)
         {
 
          
@@ -460,22 +460,22 @@ namespace Intwenty
             return result;
         }
 
-        protected virtual void BeforeSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected virtual void BeforeSave(ApplicationModel model, ClientOperation state, IDataClient client)
         {
 
         }
 
-        protected virtual void BeforeSaveNew(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected virtual void BeforeSaveNew(ApplicationModel model, ClientOperation state, IDataClient client)
         {
 
         }
 
-        protected virtual void BeforeSaveUpdate(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected virtual void BeforeSaveUpdate(ApplicationModel model, ClientOperation state, IDataClient client)
         {
 
         }
 
-        protected virtual void AfterSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected virtual void AfterSave(ApplicationModel model, ClientOperation state, IDataClient client)
         {
 
         }
@@ -500,7 +500,7 @@ namespace Intwenty
 
         }
 
-        private int GetNewInstanceId(int applicationid, string metatype, string metacode, ClientStateInfo state, IDataClient client)
+        private int GetNewInstanceId(int applicationid, string metatype, string metacode, ClientOperation state, IDataClient client)
         {
             var m = new InstanceId() { ApplicationId = applicationid, GeneratedDate = DateTime.Now, MetaCode = metacode, MetaType = metatype, Properties = state.Properties, ParentId = 0 };
             if (metatype == DatabaseModelItem.MetaTypeDataTable)
@@ -526,7 +526,7 @@ namespace Intwenty
 
         }
 
-        private void InsertMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private void InsertMainTable(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             var valuelist = new List<ApplicationValue>();
 
@@ -591,7 +591,7 @@ namespace Intwenty
 
         }
 
-        private void UpdateMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private void UpdateMainTable(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
@@ -634,7 +634,7 @@ namespace Intwenty
 
         }
 
-        private void InsertAutoIncrementalMainTable(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private void InsertAutoIncrementalMainTable(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             var valuelist = new List<ApplicationValue>();
             var sql_insert = new StringBuilder();
@@ -714,7 +714,7 @@ namespace Intwenty
 
 
 
-        private void HandleSubTables(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private void HandleSubTables(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             foreach (var table in state.Data.SubTables)
             {
@@ -779,7 +779,7 @@ namespace Intwenty
 
 
 
-        private void InsertVersionedTableRow(ApplicationModel model, ApplicationTableRow row, ClientStateInfo state, IDataClient client)
+        private void InsertVersionedTableRow(ApplicationModel model, ApplicationTableRow row, ClientOperation state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
@@ -843,7 +843,7 @@ namespace Intwenty
 
         }
 
-        private void InsertAutoIncrementalTableRow(ApplicationModel model, ApplicationTableRow row, ClientStateInfo state, IDataClient client)
+        private void InsertAutoIncrementalTableRow(ApplicationModel model, ApplicationTableRow row, ClientOperation state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
@@ -909,7 +909,7 @@ namespace Intwenty
 
         }
 
-        private void UpdateTableRow(ApplicationTableRow row, ClientStateInfo state, IDataClient client)
+        private void UpdateTableRow(ApplicationTableRow row, ClientOperation state, IDataClient client)
         {
             var paramlist = new List<ApplicationValue>();
 
@@ -958,7 +958,7 @@ namespace Intwenty
 
         }
 
-        private int CreateVersionRecord(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private int CreateVersionRecord(ApplicationModel model, ClientOperation state, IDataClient client)
         {
 
             int newversion = 0;
@@ -1000,7 +1000,7 @@ namespace Intwenty
             return newversion;
         }
 
-        private bool IdExists(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private bool IdExists(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             string sql = String.Empty;
             sql = "select 1 from sysdata_InformationStatus where id={0} and ApplicationId={1}";
@@ -1015,7 +1015,7 @@ namespace Intwenty
 
         }
 
-        private void InsertInformationStatus(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        private void InsertInformationStatus(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             var m = new Entity.InformationStatus()
             {
@@ -1038,7 +1038,7 @@ namespace Intwenty
 
         }
 
-        private void UpdateInformationStatus(ClientStateInfo state, IDataClient client)
+        private void UpdateInformationStatus(ClientOperation state, IDataClient client)
         {
 
             var getdatecmd = client.GetDbCommandMap().Find(p => p.Key == "GETDATE" && p.DbEngine == Settings.DefaultConnectionDBMS);
@@ -1104,18 +1104,18 @@ namespace Intwenty
 
         #region Delete
 
-        public virtual ModifyResult Delete(ClientStateInfo state)
+        public virtual ModifyResult Delete(ClientOperation state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return DeleteInternal(state, model);
         }
 
-        public virtual ModifyResult Delete(ClientStateInfo state, ApplicationModel model)
+        public virtual ModifyResult Delete(ClientOperation state, ApplicationModel model)
         {
             return DeleteInternal(state, model);
         }
 
-        private ModifyResult DeleteInternal(ClientStateInfo state, ApplicationModel model)
+        private ModifyResult DeleteInternal(ClientOperation state, ApplicationModel model)
         {
             ModifyResult result = null;
 
@@ -1187,7 +1187,7 @@ namespace Intwenty
         }
 
 
-        public ModifyResult DeleteSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row)
+        public ModifyResult DeleteSubTableLine(ClientOperation state, ApplicationModel model, ApplicationTableRow row)
         {
             ModifyResult result = null;
 
@@ -1266,7 +1266,7 @@ namespace Intwenty
 
         #region Lists
 
-        public virtual DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public virtual DataListResult<T> GetEntityList<T>(ClientOperation args, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (args == null)
                 return new DataListResult<T>(false, MessageCode.SYSTEMERROR, "Parameter args was null");
@@ -1358,7 +1358,7 @@ namespace Intwenty
                 }
 
 
-                result.ListFilter = args;
+                result.CurrentOperation = args;
 
                 var parameters = new List<IIntwentySqlParameter>();
                 var sql_list_stmt = new StringBuilder();
@@ -1481,23 +1481,23 @@ namespace Intwenty
 
 
 
-        public virtual DataListResult GetJsonArray(ListFilter args, ApplicationModel model)
+        public virtual DataListResult GetJsonArray(ClientOperation args, ApplicationModel model)
         {
             return GetJsonArrayInternal<DataListResult>(args, model);
         }
 
-        public virtual DataListResult GetJsonArray(ListFilter args)
+        public virtual DataListResult GetJsonArray(ClientOperation args)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == args.ApplicationId);
             return GetJsonArrayInternal<DataListResult>(args, model);
         }
 
-        public virtual TDataListResult GetJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
+        public virtual TDataListResult GetJsonArray<TDataListResult>(ClientOperation args, ApplicationModel model) where TDataListResult : DataListResult, new()
         {
             return GetJsonArrayInternal<TDataListResult>(args, model);
         }
 
-        private TDataListResult GetJsonArrayInternal<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new()
+        private TDataListResult GetJsonArrayInternal<TDataListResult>(ClientOperation args, ApplicationModel model) where TDataListResult : DataListResult, new()
         {
 
             if (args == null)
@@ -1602,7 +1602,7 @@ namespace Intwenty
 
                 }
 
-                result.ListFilter = args;
+                result.CurrentOperation = args;
 
 
                 var sql_list_stmt = new StringBuilder();
@@ -1758,7 +1758,7 @@ namespace Intwenty
 
         #region GetApplication
 
-        public virtual DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
+        public virtual DataResult<T> Get<T>(ClientOperation state, ApplicationModel model) where T : Intwenty.Model.Dto.InformationHeader, new()
         {
             if (state == null)
                 return new DataResult<T>(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
@@ -1848,12 +1848,12 @@ namespace Intwenty
 
         }
 
-        public virtual DataResult Get(ClientStateInfo state, ApplicationModel model)
+        public virtual DataResult Get(ClientOperation state, ApplicationModel model)
         {
             return GetLatestVersionByIdInternal(state, model);
         }
 
-        public virtual DataResult Get(ClientStateInfo state)
+        public virtual DataResult Get(ClientOperation state)
         {
             var model = ModelRepository.GetApplicationModels().Find(p => p.Application.Id == state.ApplicationId);
             return GetLatestVersionByIdInternal(state, model);
@@ -1861,7 +1861,7 @@ namespace Intwenty
 
 
 
-        private DataResult GetLatestVersionByIdInternal(ClientStateInfo state, ApplicationModel model)
+        private DataResult GetLatestVersionByIdInternal(ClientOperation state, ApplicationModel model)
         {
             if (state == null)
                 return new DataResult(false, MessageCode.SYSTEMERROR, "state was null when executing DefaultDbManager.GetLatestVersionById.");
@@ -2068,12 +2068,12 @@ namespace Intwenty
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
 
-        public virtual List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state)
+        public virtual List<ValueDomainModelItem> GetValueDomain(string domainname, ClientOperation state)
         {
             return ModelRepository.GetValueDomains().Where(p => p.DomainName.ToUpper() == domainname.ToUpper()).ToList();
         }
 
-        public virtual List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state)
+        public virtual List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientOperation state)
         {
             return new List<ValueDomainModelItem>();
         }
@@ -2082,7 +2082,7 @@ namespace Intwenty
 
         #region Validation
 
-        public ModifyResult Validate(ClientStateInfo state)
+        public ModifyResult Validate(ClientOperation state)
         {
             if (state == null)
                 throw new InvalidOperationException("Parameter state cannot be null");
@@ -2094,7 +2094,7 @@ namespace Intwenty
             return Validate(model, state);
         }
 
-        protected virtual ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
+        protected virtual ModifyResult Validate(ApplicationModel model, ClientOperation state)
         {
 
             foreach (var v in model.Views)
@@ -2250,53 +2250,41 @@ namespace Intwenty
 
         }
 
-        protected string GetTenantTableName(ApplicationModelItem model, ClientStateInfo state)
+        protected string GetTenantTableName(ApplicationModelItem model, ClientOperation state)
         {
             if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
             {
                 if (string.IsNullOrEmpty(state.User.UserTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
 
-                return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
+                if (string.IsNullOrEmpty(state.DataTableDbName))
+                    return string.Format("{0}_{1}", state.User.UserTablePrefix, model.DbName);
+                else
+                    return string.Format("{0}_{1}", state.User.UserTablePrefix, state.DataTableDbName);
             }
             else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
             {
                 if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
                     throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
 
-                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
+                if (string.IsNullOrEmpty(state.DataTableDbName))
+                    return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, model.DbName);
+                else
+                    return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, state.DataTableDbName);
             }
             else
             {
-                return model.DbName;
+                if (string.IsNullOrEmpty(state.DataTableDbName))
+                    return model.DbName;
+                else
+                    return state.DataTableDbName;
             }
 
         }
 
-        protected string GetTenantTableName(ApplicationModelItem model, ListFilter state)
-        {
-            if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.User)
-            {
-                if (string.IsNullOrEmpty(state.User.UserTablePrefix))
-                    throw new InvalidOperationException("GetTenantTableName() - no user table prefix found.");
+     
 
-                return string.Format("{0}_{1}", state.User.UserTablePrefix, state.DataTableDbName);
-            }
-            else if (model.TenantIsolationMethod == TenantIsolationMethodOptions.ByTables && model.TenantIsolationLevel == TenantIsolationOptions.Organization)
-            {
-                if (string.IsNullOrEmpty(state.User.OrganizationTablePrefix))
-                    throw new InvalidOperationException("GetTenantTableName() - no organization table prefix found.");
-
-                return string.Format("{0}_{1}", state.User.OrganizationTablePrefix, state.DataTableDbName);
-            }
-            else
-            {
-                return state.DataTableDbName;
-            }
-
-        }
-
-        protected string GetTenantTableName(DatabaseModelItem model, ClientStateInfo state)
+        protected string GetTenantTableName(DatabaseModelItem model, ClientOperation state)
         {
             if (!model.IsMetaTypeDataTable)
                 throw new InvalidOperationException("GetTenantTableName() - model is not a table model");
@@ -2324,7 +2312,7 @@ namespace Intwenty
 
         }
 
-        protected string GetTenantTableName(ApplicationModelItem model, string tablename, ClientStateInfo state)
+        protected string GetTenantTableName(ApplicationModelItem model, string tablename, ClientOperation state)
         {
 
 
