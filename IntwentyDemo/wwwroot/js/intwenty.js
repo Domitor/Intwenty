@@ -172,7 +172,7 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
     if (!modelitem)
         return;
 
-    modelitem.currentProperty = {};
+    modelitem.currentProperty = { isBoolType: false, isStringType: false, isNumericType: false, isListType: false };
     if (!modelitem.propertyList)
         modelitem.propertyList = [];
 
@@ -183,6 +183,11 @@ Vue.prototype.initializePropertyUI = function (modelitem) {
 
     this.$forceUpdate();
 
+};
+
+Vue.prototype.propertyChanged = function ()
+{
+    this.$forceUpdate();
 };
 
 Vue.component("searchbox", {

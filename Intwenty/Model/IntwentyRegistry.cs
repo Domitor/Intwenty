@@ -130,6 +130,10 @@ namespace Intwenty.Model
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTextBox);
             _properties.Add(prop);
 
+            prop = new IntwentyProperty("ROWS", "Rows", "NUMERIC");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTextArea);
+            _properties.Add(prop);
+
 
             prop = new IntwentyProperty("TABLEEDITMODE", "Edit Mode", "LIST");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
@@ -160,6 +164,7 @@ namespace Intwenty.Model
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImage);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImageBox);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGLAYOUT", "Layout", "LIST");
