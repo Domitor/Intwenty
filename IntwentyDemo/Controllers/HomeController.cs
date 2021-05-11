@@ -27,7 +27,7 @@ namespace IntwentyDemo.Controllers
         }
 
        
-
+        [Route("/")]
         public IActionResult Index()
         {
           
@@ -36,11 +36,6 @@ namespace IntwentyDemo.Controllers
 
      
 
-        public IActionResult Test()
-        {
-
-            return View();
-        }
 
     }
 

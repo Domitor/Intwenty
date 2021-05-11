@@ -29,6 +29,7 @@ using System.Net.Http;
 using System.Net;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Routing;
 
 namespace Intwenty.WebHostBuilder
 {
@@ -278,7 +279,7 @@ namespace Intwenty.WebHostBuilder
             builder.UseEndpoints(endpoints =>
             {
 
-                endpoints.MapDefaultControllerRoute();
+                //endpoints.MapDefaultControllerRoute();
 
                 //INTWENTY ROUTING
                 
@@ -314,7 +315,6 @@ namespace Intwenty.WebHostBuilder
                             endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicEndpoint" });
                         }
                     }
-                    //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
 
                     var appmodels = modelservice.GetApplicationModels();
                     foreach (var a in appmodels)
@@ -332,10 +332,15 @@ namespace Intwenty.WebHostBuilder
                             if (path[path.Length - 1] != '/')
                                 path = path + "/";
 
+                            //View Paths in the model will never be mapped, so default values will be used
                             endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
                         }
                     }
                 }
+
+                //Applicationpath and viewpath will never be mapped unless someone specifies them in a view path, they will be mapped to emptystring
+                endpoints.MapControllerRoute("runtime_routes", "apps/{applicationpath}/{viewpath}/{id?}/{requestinfo?}", defaults: new { controller = "Application", action = "View"});
+               
 
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
@@ -350,6 +355,7 @@ namespace Intwenty.WebHostBuilder
 
             });
 
+           
         }
 
         private static void ConfigureIntwentyTwoFactorAuth(this IApplicationBuilder builder, IntwentySettings settings)
@@ -512,5 +518,9 @@ namespace Intwenty.WebHostBuilder
             }
 
         }
+
+      
+
+
     }
 }
