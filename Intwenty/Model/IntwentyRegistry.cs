@@ -21,6 +21,7 @@ namespace Intwenty.Model
             get { return GetMetaTypes(); }
         }
 
+
         private static List<IntwentyMetaType> GetMetaTypes()
         {
             if (_metatypes != null)
@@ -159,6 +160,10 @@ namespace Intwenty.Model
 
             prop = new IntwentyProperty("GOTOVIEWPATH", "View path", "STRING");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
+            _properties.Add(prop);
+
+            prop = new IntwentyProperty("RAZORVIEWPATH", "Razor View", "STRING");
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 

@@ -571,6 +571,12 @@
                             context.model.navigateFunctionTitle = f.title;
                             context.model.navigateFunctionPath = f.actionPath;
                         }
+
+                    }
+
+                    for (var i = 0; i < item.propertyList.length; i++)
+                    {
+                        context.model.propertyList.push(item.propertyList[i]);
                     }
 
                     var yesfunc = function ()

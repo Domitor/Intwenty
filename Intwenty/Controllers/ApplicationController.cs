@@ -82,18 +82,20 @@ namespace Intwenty.Controllers
                 current_view = ModelRepository.GetLocalizedViewModelByPath(path);
             }
 
-         
-
             if (current_view == null)
                 return NotFound();
 
             ViewBag.ApplicationId = current_view.ApplicationInfo.Id;
             ViewBag.ApplicationViewId = current_view.Id;
 
+            var viewpath = current_view.GetPropertyValue("RAZORVIEWPATH");
+            if (string.IsNullOrEmpty(viewpath))
+                viewpath = "View";
+
             if (current_view.IsPublic)
-                return View(current_view);
+                return View(viewpath,current_view);
             if (await UserManager.HasAuthorization(User, current_view))
-                return View(current_view);
+                return View(viewpath,current_view);
             else
                 return Forbid();
 
