@@ -30,6 +30,7 @@ using System.Net;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Routing;
+using Intwenty.Helpers;
 
 namespace Intwenty.WebHostBuilder
 {
@@ -304,7 +305,7 @@ namespace Intwenty.WebHostBuilder
                     }
 
                     //INTWENTY EXPLICIT APP ROUTING
-                    if (settings.RoutingMode == RoutingModeOptions.Explicit)
+                    if (settings.StartUpRoutingMode == RoutingModeOptions.Explicit)
                     {                     
                         var appmodels = modelservice.GetApplicationModels();
                         foreach (var a in appmodels)
@@ -320,14 +321,8 @@ namespace Intwenty.WebHostBuilder
                                     path = path + "/";
 
                                 //View Paths in the model will never be mapped, so default values will be used
-                                if (path.Contains("requestinfo"))
-                                {
-                                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
-                                }
-                                else
-                                {
-                                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
-                                }
+                                endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                
                             }
                         }
                     }
@@ -336,7 +331,7 @@ namespace Intwenty.WebHostBuilder
                 }
 
 
-                if (settings.RoutingMode == RoutingModeOptions.TakeAll)
+                if (settings.StartUpRoutingMode == RoutingModeOptions.TakeAll)
                 {
                     //INTWENTY APP ROUTING
                     //Applicationpath and viewpath will (probably) never be mapped, so default values will be used
