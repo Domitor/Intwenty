@@ -39,18 +39,13 @@ namespace Intwenty.Model
             ParentMetaCode = "ROOT";
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
-            ActionPath = entity.ActionPath;
-            if (!string.IsNullOrEmpty(ActionPath))
-            {
-                if (!ActionPath.StartsWith("/"))
-                    ActionPath = "/" + ActionPath;
-            }
+            ActionPath = entity.ActionPath;         
             ActionUserInterfaceMetaCode = entity.ActionUserInterfaceMetaCode;
             OwnerMetaType = entity.OwnerMetaType;
             OwnerMetaCode = entity.OwnerMetaCode;
             IsModalAction = entity.IsModalAction;
             SetEmptyStrings();
-           
+            ConfigurePath();
         }
 
         private void SetEmptyStrings()
@@ -68,6 +63,15 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaType)) OwnerMetaType = string.Empty;
 
+        }
+
+        private void ConfigurePath()
+        {
+            if (!string.IsNullOrEmpty(ActionPath))
+            {
+                if (!ActionPath.StartsWith("/"))
+                    ActionPath = "/" + ActionPath;
+            }
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }

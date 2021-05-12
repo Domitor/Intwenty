@@ -15,6 +15,8 @@ namespace Intwenty.Model
 
     public enum LogVerbosityTypes { Information, Warning, Error };
 
+    public enum RoutingModeOptions { Explicit, TakeAll };
+
 
     public class IntwentySettings
     {
@@ -23,6 +25,7 @@ namespace Intwenty.Model
         public IntwentySettings()
         {
             LogVerbosity = LogVerbosityTypes.Error;
+            RoutingMode = RoutingModeOptions.Explicit;
         }
 
         public LogVerbosityTypes LogVerbosity { get; set; }
@@ -78,6 +81,11 @@ namespace Intwenty.Model
         /// </summary>
         public bool StartUpSeedDemoUserAccounts { get; set; }
 
+        /// <summary>
+        /// If explicit mode is used, only the paths specified on views are mapped to the intwenty application controller.
+        /// If takeall mode is used, view paths will be mapped automaticly which allows for adding routes runtime. 
+        /// </summary>
+        public RoutingModeOptions RoutingMode { get; set; }
         #endregion
 
         #region Demo

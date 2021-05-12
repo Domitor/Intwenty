@@ -27,10 +27,8 @@ namespace IntwentyDemo.Controllers
         }
 
        
-        [Route("/")]
         public IActionResult Index()
         {
-          
             return View();
         }
 

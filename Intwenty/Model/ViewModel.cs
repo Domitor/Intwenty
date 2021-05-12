@@ -46,6 +46,7 @@ namespace Intwenty.Model
             IsPrimary = entity.IsPrimary;
             IsPublic = entity.IsPublic;
             SetEmptyStrings();
+            ConfigurePath();
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
@@ -67,6 +68,19 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Path)) Path = string.Empty;
         }
 
+        private void ConfigurePath()
+        {
+            if (!string.IsNullOrEmpty(Path))
+            {
+
+                if (!Path.StartsWith("/"))
+                    Path = "/" + Path;
+
+         
+            }
+
+        }
+
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
         public string SystemMetaCode { get; set; }
@@ -76,12 +90,15 @@ namespace Intwenty.Model
         public string DescriptionLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }
       
-        public string Path { get; set; }
+      
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
         public string JavaScriptObjectName { get; set; }
+
+        public string Path { get; set; }
+
 
         public override string ModelCode
         {

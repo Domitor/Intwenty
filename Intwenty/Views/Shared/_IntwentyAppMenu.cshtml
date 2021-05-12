@@ -40,7 +40,7 @@
 
                 foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode && !p.Path.Contains("{")))
                 {
-                    <a class="dropdown-item" href="@Url.Content("~/"+view.Path)">@view.LocalizedTitle</a>
+                    <a class="dropdown-item" href="@Url.Content("~"+view.Path)">@view.LocalizedTitle</a>
                 }
 
                 cnt++;

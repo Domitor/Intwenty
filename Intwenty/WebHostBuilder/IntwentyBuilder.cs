@@ -266,7 +266,7 @@ namespace Intwenty.WebHostBuilder
 
             builder.ConfigureEndpoints(settings);
 
-            builder.ConfigureIntwentyAPI(settings);
+            builder.ConfigureSwagger(settings);
             
 
             return builder;
@@ -279,22 +279,9 @@ namespace Intwenty.WebHostBuilder
             builder.UseEndpoints(endpoints =>
             {
 
-                //endpoints.MapDefaultControllerRoute();
+                endpoints.MapDefaultControllerRoute();
 
-                //INTWENTY ROUTING
-                
-                /*
-                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=GetApplication}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=GetPagedList}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_3", "Application/API/{action=GetDomain}/{domainname}/{query}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_4", "Application/API/{action=CreateNew}/{id}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_5", "Application/API/{action=Save}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_6", "Application/API/{action=SaveSubTableLine}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_7", "Application/API/{action=Delete}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_8", "Application/API/{action=DeleteSubTableLine}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_9", "Application/API/{action=UploadImage}", defaults: new { controller = "ApplicationAPI" });
-                */
-
+                //INTWENTY ENDPOINT ROUTING
                 using (var scope = builder.ApplicationServices.CreateScope())
                 {
                     var serviceProvider = scope.ServiceProvider;
@@ -316,31 +303,42 @@ namespace Intwenty.WebHostBuilder
                         }
                     }
 
-                    var appmodels = modelservice.GetApplicationModels();
-                    foreach (var a in appmodels)
-                    {
-
-                        foreach (var view in a.Views)
+                    //INTWENTY EXPLICIT APP ROUTING
+                    if (settings.RoutingMode == RoutingModeOptions.Explicit)
+                    {                     
+                        var appmodels = modelservice.GetApplicationModels();
+                        foreach (var a in appmodels)
                         {
-                            if (string.IsNullOrEmpty(view.Path))
-                                continue;
 
-                            var path = view.Path;
-                            path.Trim();
-                            if (path[0] != '/')
-                                path = "/" + path;
-                            if (path[path.Length - 1] != '/')
-                                path = path + "/";
+                            foreach (var view in a.Views)
+                            {
+                                if (string.IsNullOrEmpty(view.Path))
+                                    continue;
 
-                            //View Paths in the model will never be mapped, so default values will be used
-                            endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                var path = view.Path.Trim();
+                                if (!path.EndsWith("/"))
+                                    path = path + "/";
+
+                                //View Paths in the model will never be mapped, so default values will be used
+                                endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                            }
                         }
                     }
+
+                   
                 }
 
-                //Applicationpath and viewpath will never be mapped unless someone specifies them in a view path, they will be mapped to emptystring
-                endpoints.MapControllerRoute("runtime_routes", "apps/{applicationpath}/{viewpath}/{id?}/{requestinfo?}", defaults: new { controller = "Application", action = "View"});
-               
+
+                if (settings.RoutingMode == RoutingModeOptions.TakeAll)
+                {
+                    //INTWENTY APP ROUTING
+                    //Applicationpath and viewpath will (probably) never be mapped, so default values will be used
+                  
+                    endpoints.MapControllerRoute("runtime_routes",
+                        "{applicationpath}/{viewpath}/{id:int?}/{requestinfo?}",
+                        defaults: new { controller = "Application", action = "View" },
+                        constraints: new { applicationpath = "^(?!model|identity|swagger|api)([a-z0-9]+)$", viewpath = "^(?!iam|api|model)([a-z0-9]+)$" });
+                }
 
                 endpoints.MapRazorPages();
                 endpoints.MapHub<Intwenty.PushData.ServerToClientPush>("/serverhub");
@@ -368,7 +366,7 @@ namespace Intwenty.WebHostBuilder
 
         }
 
-        private static void ConfigureIntwentyAPI(this IApplicationBuilder builder, IntwentySettings settings)
+        private static void ConfigureSwagger(this IApplicationBuilder builder, IntwentySettings settings)
         {
             if (settings.APIEnable)
             {
