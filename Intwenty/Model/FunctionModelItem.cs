@@ -40,7 +40,8 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
             ActionPath = entity.ActionPath;         
-            ActionUserInterfaceMetaCode = entity.ActionUserInterfaceMetaCode;
+            ActionMetaCode = entity.ActionMetaCode;
+            ActionMetaType = entity.ActionMetaType;
             OwnerMetaType = entity.OwnerMetaType;
             OwnerMetaCode = entity.OwnerMetaCode;
             IsModalAction = entity.IsModalAction;
@@ -59,7 +60,8 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(ActionPath)) ActionPath = string.Empty;
-            if (string.IsNullOrEmpty(ActionUserInterfaceMetaCode)) ActionUserInterfaceMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ActionMetaCode)) ActionMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ActionMetaType)) ActionMetaType = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaType)) OwnerMetaType = string.Empty;
 
@@ -81,9 +83,12 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string OwnerMetaType { get; set; }
         public string OwnerMetaCode { get; set; }
-        public string ActionUserInterfaceMetaCode { get; set; }
 
+       
+        public string ActionMetaCode { get; set; }
+        public string ActionMetaType { get; set; }
         public string ActionPath { get; set; }
+        public int ActionViewId { get; set; }
         public bool IsModalAction { get; set; }
 
         public override string ModelCode

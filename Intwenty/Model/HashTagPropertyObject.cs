@@ -14,6 +14,7 @@ namespace Intwenty.Model
 
         public HashTagPropertyObject()
         {
+            Properties = string.Empty;
             PropertyList = new List<PropertyValue>();
         }
 

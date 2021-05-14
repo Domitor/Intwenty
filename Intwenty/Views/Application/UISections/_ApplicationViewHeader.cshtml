@@ -3,6 +3,8 @@
 @{
     var func_navigate_path = "";
     var func_create_path = "";
+    var func_navigate_path_requestinfo = Model.RequestInfo;
+    var func_create_path_request_info = Model.RequestInfo;
     if (Model.HasCreateFunction)
     {
         if (!Model.CreateFunction.IsModalAction)
@@ -10,9 +12,22 @@
             func_create_path = Model.CreateFunction.ActionPath;
             if (func_create_path.Contains("{requestinfo}"))
             {
+                if (Model.CreateFunction.ActionViewId > 0)
+                {
+                    var decoded_create_requestinfo = string.Empty;
+                    var hp = new HashTagPropertyObject();
+                    if (!string.IsNullOrEmpty(func_create_path_request_info))
+                    {
+                        decoded_create_requestinfo = func_create_path_request_info.B64UrlDecode();
+                        hp.Properties = decoded_create_requestinfo;
+                    }
+                    hp.AddUpdateProperty("VIEWID", Convert.ToString(Model.CreateFunction.ActionViewId));
+                    func_create_path_request_info = hp.Properties.B64UrlEncode();
+                }
+
                 if (!string.IsNullOrEmpty(Model.RequestInfo))
                 {
-                    func_create_path = func_create_path.Replace("{requestinfo}", Model.RequestInfo);
+                    func_create_path = func_create_path.Replace("{requestinfo}", func_create_path_request_info);
                 }
                 else
                 {
@@ -31,9 +46,23 @@
         func_navigate_path = Model.NavigateFunction.ActionPath;
         if (func_navigate_path.Contains("{requestinfo}"))
         {
+
+            if (Model.NavigateFunction.ActionViewId > 0)
+            {
+                var decoded_nav_requestinfo = string.Empty;
+                var hp = new HashTagPropertyObject();
+                if (!string.IsNullOrEmpty(func_navigate_path_requestinfo))
+                {
+                    decoded_nav_requestinfo = func_create_path_request_info.B64UrlDecode();
+                    hp.Properties = decoded_nav_requestinfo;
+                }
+                hp.AddUpdateProperty("VIEWID", Convert.ToString(Model.NavigateFunction.ActionViewId));
+                func_navigate_path_requestinfo = hp.Properties.B64UrlEncode();
+            }
+
             if (!string.IsNullOrEmpty(Model.RequestInfo))
             {
-                func_navigate_path = func_navigate_path.Replace("{requestinfo}", Model.RequestInfo);
+                func_navigate_path = func_navigate_path.Replace("{requestinfo}", func_navigate_path_requestinfo);
             }
             else
             {
@@ -61,7 +90,7 @@
                 <li class="nav-item">
                     @if (Model.CreateFunction.IsModalAction)
                     {
-                        <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
+                        <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
                     }
                     else
                     {

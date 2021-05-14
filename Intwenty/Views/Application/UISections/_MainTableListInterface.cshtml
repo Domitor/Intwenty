@@ -3,6 +3,7 @@
 @{
 
     var func_edit_path = "";
+    var func_edit_path_requestinfo = Model.RequestInfo;
     var func_edit_path_use_requestinfo = false;
 
     if (Model.HasEditFunction)
@@ -10,10 +11,22 @@
         if (!Model.EditFunction.IsModalAction)
         {
             func_edit_path = Model.EditFunction.ActionPath;
-            if (func_edit_path.Contains("{requestinfo}") && !string.IsNullOrEmpty(Model.RequestInfo))
+            if (func_edit_path.Contains("{requestinfo}") && !string.IsNullOrEmpty(func_edit_path_requestinfo))
             {
                 func_edit_path_use_requestinfo = true;
                 func_edit_path = func_edit_path.Replace("/{requestinfo}", "");
+                if (Model.EditFunction.ActionViewId > 0)
+                {
+                    var decoded_edit_requestinfo = string.Empty;
+                    var hp = new HashTagPropertyObject();
+                    if (!string.IsNullOrEmpty(func_edit_path_requestinfo))
+                    {
+                        decoded_edit_requestinfo = func_edit_path_requestinfo.B64UrlDecode();
+                        hp.Properties = decoded_edit_requestinfo;
+                    }
+                    hp.AddUpdateProperty("VIEWID", Convert.ToString(Model.EditFunction.ActionViewId));
+                    func_edit_path_requestinfo = hp.Properties.B64UrlEncode();
+                }
             }
             if (func_edit_path.Contains("{id}"))
             {
@@ -27,7 +40,7 @@
                 //
 
             }
-           
+
 
         }
     }
@@ -130,13 +143,13 @@
         {
             @if (Model.EditFunction.IsModalAction)
             {
-                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@Model.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
+                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@Model.EditFunction.ActionMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
             }
             else
             {
                 @if (func_edit_path_use_requestinfo)
                 {
-                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id + '/@Model.RequestInfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id + '/@func_edit_path_requestinfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
                 }
                 else
                 {

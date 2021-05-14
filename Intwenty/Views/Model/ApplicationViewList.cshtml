@@ -134,21 +134,29 @@
                                 </div>
 
                                 <input type="checkbox" v-model="model.isPrimary" /> Is Primary
-                                <br />
                                 <input type="checkbox" v-model="model.isPublic" /> Is Public
                                 <br />
                                 <input type="checkbox" v-model="model.saveFunction" /> Save Function
                                 <div class="form-group" v-if="model.saveFunction">
-                                    <input id="savebtntitle" type="text" class="form-control form-control-sm" v-model="model.saveFunctionTitle" />
+                                    <input id="savebtntitle" type="text" class="form-control form-control-sm" v-model="model.saveFunctionTitle" placeholder="Button Title" />
                                 </div>
+                                <br v-if="!model.saveFunction" />
                                 <input type="checkbox" v-model="model.navigateFunction" /> Navigate Function
                                 <div class="form-group" v-if="model.navigateFunction">
-                                    <input id="navbtntitle" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionTitle" />
-                                </div>
-                                <div class="form-group" v-if="model.navigateFunction">
-                                    <input id="navpath" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionPath" />
+                                    <input id="navbtntitle" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionTitle" placeholder="Button Title" />
                                 </div>
 
+
+                                <div class="form-group" v-if="model.navigateFunction">
+                                    <label class="control-label">Navigation View</label>
+                                    <select class="form-control form-control-sm" v-model="model.navigateFunctionActionMetaCode">
+                                        <option value="NONE">Select</option>
+                                        <option v-for="view in datalist" v-bind:value="view.metaCode">{{view.title}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" v-if="model.navigateFunction && ((!model.navigateFunctionActionMetaCode) || model.navigateFunctionActionMetaCode=='NONE')">
+                                    <input id="navpath" type="text" class="form-control form-control-sm" v-model="model.navigateFunctionPath" placeholder="Navigation Path" />
+                                </div>
                             </div>
                             <div class="tab-pane fade" id="nav-viewproperties" role="tabpanel" aria-labelledby="nav-viewproperties-tab">
                                 @await Html.PartialAsync("_PropertyUI", "model")
@@ -519,10 +527,19 @@
                 {
                     var context = this;
 
-                    context.model = { id: 0, metaType:"UIVIEW", applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false, saveFunction: true, saveFunctionTitle: "Save", navigateFunction: true, navigateFunctionPath: "", navigateFunctionTitle: "", propertyList: [], currentProperty: {} };
+                    context.model = { id: 0, metaType:"UIVIEW", applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false, saveFunction: true, saveFunctionTitle: "Save", navigateFunction: true, navigateFunctionPath: "", navigateFunctionTitle: "", navigateFunctionActionMetaCode:"", propertyList: [], currentProperty: {} };
 
                     var yesfunc = function ()
                     {
+
+                        if (context.model.navigateFunction)
+                        {
+                            if (context.model.navigateFunctionPath == "" && context.model.navigateFunctionActionMetaCode == "")
+                            {
+
+                            }
+
+                        }
 
                        var baseurl = '@Url.Content("~/Model/API/")';
                        var endpointurl = baseurl + "CreateApplicationView";
@@ -570,6 +587,8 @@
                             context.model.navigateFunction = true;
                             context.model.navigateFunctionTitle = f.title;
                             context.model.navigateFunctionPath = f.actionPath;
+                            context.model.navigateFunctionActionMetaCode = f.actionMetaCode;
+                            context.model.navigateFunctionActionMetaType = f.actionMetaType;
                         }
 
                     }

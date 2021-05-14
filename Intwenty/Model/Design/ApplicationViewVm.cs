@@ -16,7 +16,8 @@ namespace Intwenty.Model.Design
         public bool NavigateFunction { get; set; }
         public string NavigateFunctionTitle { get; set; }
         public string NavigateFunctionPath { get; set; }
-        
+        public string NavigateFunctionActionMetaCode { get; set; }
+
 
     }
 }

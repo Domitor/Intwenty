@@ -771,8 +771,9 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "";
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionPath = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;
                     else
@@ -805,7 +806,13 @@ namespace Intwenty.Controllers
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
                     funcentity.ActionPath = model.NavigateFunctionPath;
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        funcentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        funcentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         funcentity.Title = model.NavigateFunctionTitle;
                     else
@@ -920,8 +927,9 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "";
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionPath = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;
                     else
@@ -956,6 +964,13 @@ namespace Intwenty.Controllers
                 else if (navfuncentity != null && model.NavigateFunction)
                 {
                     //UPDATE
+                    navfuncentity.ActionMetaCode = string.Empty;
+                    navfuncentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        navfuncentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        navfuncentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     navfuncentity.ActionPath = model.NavigateFunctionPath;
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         navfuncentity.Title = model.NavigateFunctionTitle;
@@ -976,7 +991,13 @@ namespace Intwenty.Controllers
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
                     funcentity.ActionPath = model.NavigateFunctionPath;
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        funcentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        funcentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         funcentity.Title = model.NavigateFunctionTitle;
                     else
@@ -1281,7 +1302,8 @@ namespace Intwenty.Controllers
                 entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                 entity.MetaType = model.MetaType;
                 entity.ActionPath = model.ActionPath;
-                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
+                entity.ActionMetaCode = model.ActionMetaCode;
+                entity.ActionMetaType = model.ActionMetaType;
                 entity.Title = model.Title;
                 entity.OwnerMetaType = model.OwnerMetaType;
                 entity.OwnerMetaCode = model.OwnerMetaCode;
@@ -1336,7 +1358,8 @@ namespace Intwenty.Controllers
 
                 entity.Title = model.Title;
                 entity.ActionPath = model.ActionPath;
-                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
+                entity.ActionMetaCode = model.ActionMetaCode;
+                entity.ActionMetaType = model.ActionMetaType;
                 entity.Properties = model.CompilePropertyString();
                 entity.IsModalAction = model.IsModalAction;
 
@@ -1477,6 +1500,8 @@ namespace Intwenty.Controllers
                     if (ui.IsDataTableConnected && ui.IsMetaTypeInputInterface && uimodel.DataTableMetaCode == ui.DataTableMetaCode)
                         model.ActionUserInterfaces.Add(ActionUserInterface.Create(ui));
                 }
+
+                model.ActionViews.Add(ActionView.Create(v));
             }
 
             return model;
@@ -1848,7 +1873,8 @@ namespace Intwenty.Controllers
                     functionentity.Properties = function.CompilePropertyString();
                     functionentity.IsModalAction = function.IsModalAction;
                     functionentity.ActionPath = function.ActionPath;
-                    functionentity.ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode;
+                    functionentity.ActionMetaCode = function.ActionMetaCode;
+                    functionentity.ActionMetaType = function.ActionMetaType;
                     client.UpdateEntity(functionentity);
                 }
                 else
@@ -1862,7 +1888,8 @@ namespace Intwenty.Controllers
                         MetaCode = function.MetaCode,
                         IsModalAction = function.IsModalAction,
                         ActionPath = function.ActionPath,
-                        ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode,
+                        ActionMetaCode = function.ActionMetaCode,
+                        ActionMetaType = function.ActionMetaType,
                         OwnerMetaCode = uimodel.MetaCode,
                         OwnerMetaType = UserInterfaceModelItem.MetaTypeListInterface,
                         Properties = function.CompilePropertyString(),

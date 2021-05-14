@@ -86,7 +86,7 @@
     @if (Model.CreateFunction.IsModalAction)
     {
         <br />
-        <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@Model.CreateFunction.ActionUserInterfaceMetaCode','@Model.DataTableDbName')"><span class="fa fa-plus"></span> @Model.CreateFunction.LocalizedTitle</button>
+        <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@Model.CreateFunction.ActionMetaCode','@Model.DataTableDbName')"><span class="fa fa-plus"></span> @Model.CreateFunction.LocalizedTitle</button>
         <br />
     }
 }
@@ -128,7 +128,7 @@
 
             if (Model.EditFunction.IsModalAction)
             {
-                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@Model.EditFunction.ActionUserInterfaceMetaCode','@Model.DataTableDbName')"><span class="fas fa-edit" title="Edit"></span></button></td>
+                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openSubTableModal(item, '@Model.EditFunction.ActionMetaCode','@Model.DataTableDbName')"><span class="fas fa-edit" title="Edit"></span></button></td>
             }
             else
             {

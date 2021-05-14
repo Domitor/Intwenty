@@ -22,7 +22,8 @@ namespace Intwenty.Model.Design
             OwnerMetaCode = model.OwnerMetaCode;
             OwnerMetaType = model.OwnerMetaType;
             ActionPath = model.ActionPath;
-            ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
+            ActionMetaCode = model.ActionMetaCode;
+            ActionMetaType = model.ActionMetaType;
             Properties = model.Properties;
             Title = model.Title;
             IsModalAction = model.IsModalAction;
@@ -44,7 +45,9 @@ namespace Intwenty.Model.Design
 
         public string ActionPath { get; set; }
 
-        public string ActionUserInterfaceMetaCode { get; set; }
+        public string ActionMetaCode { get; set; }
+
+        public string ActionMetaType { get; set; }
 
         public bool IsRemoved { get; set; }
 

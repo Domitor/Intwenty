@@ -190,15 +190,23 @@
 
                                 <div class="form-group" v-if="(functionCanBeModal() && functionsettings.isModalAction)">
                                     <label class="control-label">Function UI<span style="color: red"> *</span></label>
-                                    <select class="form-control form-control-sm" v-model="functionsettings.actionUserInterfaceMetaCode">
+                                    <select class="form-control form-control-sm" v-model="functionsettings.actionMetaCode">
                                         <option v-for="item in model.actionUserInterfaces" v-bind:value="item.metaCode">{{item.title}}</option>
                                     </select>
                                 </div>
 
-                                <div class="form-group" v-if="(functionHasPath() && !functionsettings.isModalAction)">
-                                    <label class="control-label">Path</label>
-                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" :disabled="model.isSubTableUserInterface" />
+                                <div class="form-group" v-if="(functionHasPath() && !functionsettings.isModalAction) ">
+                                    <label class="control-label">Action View</label>
+                                    <select class="form-control form-control-sm" v-model="functionsettings.actionMetaCode">
+                                        <option value="NONE">Select</option>
+                                        <option v-for="view in model.actionViews" v-bind:value="view.metaCode">{{view.title}}</option>
+                                    </select>
                                 </div>
+                                <div class="form-group" v-if="(functionHasPath() && !functionsettings.isModalAction) && ((!functionsettings.actionMetaCode) || functionsettings.actionMetaCode=='NONE')">
+                                    <label class="control-label">Path</label>
+                                    <input id="funcpath" type="text" class="form-control form-control-sm" v-model="functionsettings.actionPath" :disabled="model.isSubTableUserInterface" placeholder="Path" />
+                                </div>
+
 
                             </div>
                             <div class="tab-pane fade" id="nav-properties" role="tabpanel" aria-labelledby="nav-properties-tab">
@@ -416,7 +424,8 @@
                     var metacode = "";
                     var title = "";
                     var actionPath = "";
-                    var actionUserInterfaceMetaCode = "";
+                    var actionMetaCode = "";
+                    var actionMetaType = "";
                     var isModalAction = false;
                     var propertylist = [];
                     if (context.hasFunction(functiontype))
@@ -427,7 +436,8 @@
                         propertylist = func.propertylist;
                         title = func.title;
                         actionPath = func.actionPath;
-                        actionUserInterfaceMetaCode = func.actionUserInterfaceMetaCode;
+                        actionMetaCode = func.actionMetaCode;
+                        actionMetaType = func.actionMetaType;
                         isModalAction = func.isModalAction;
                     }
                    
@@ -444,7 +454,8 @@
                         metaType: functiontype,
                         actionPath: actionPath,
                         isModalAction: isModalAction,
-                        actionUserInterfaceMetaCode: actionUserInterfaceMetaCode,
+                        actionMetaCode: actionMetaCode,
+                        actionMetaType: actionMetaType,
                         title: title,
                         dataTableMetaCode: context.model.dataTable.metaCode,
                         metaCode: metacode,
@@ -468,7 +479,8 @@
                             func.title = context.functionsettings.title;
                             func.actionPath = context.functionsettings.actionPath;
                             func.isModalAction = context.functionsettings.isModalAction;
-                            func.actionUserInterfaceMetaCode = context.functionsettings.actionUserInterfaceMetaCode;        
+                            func.actionMetaCode = context.functionsettings.actionMetaCode;  
+                            func.actionMetaType = context.functionsettings.actionMetaType;  
                             func.propertyList = context.functionsettings.propertylist;
                             func.currentProperty= { };
                         }

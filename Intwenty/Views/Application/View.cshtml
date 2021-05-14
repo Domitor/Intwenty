@@ -8,6 +8,7 @@
     var applicationViewId = (int)ViewBag.ApplicationViewId;
     var instanceid = (int)ViewBag.Id;
     var requestInfo = (string)ViewBag.RequestInfo;
+    var afterSaveRequestInfo = (string)ViewBag.RequestInfo;
     var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
 
@@ -21,6 +22,21 @@
         if (aftersaveaction == "GOTOVIEW")
         {
             aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOVIEWPATH");
+            if (aftersaveactionpath.Contains("{requestinfo}"))
+            {
+                if (Model.SaveFunction.ActionViewId > 0)
+                {
+                    var decoded_after_save_requestinfo = string.Empty;
+                    var hp = new HashTagPropertyObject();
+                    if (!string.IsNullOrEmpty(afterSaveRequestInfo))
+                    {
+                        decoded_after_save_requestinfo = afterSaveRequestInfo.B64UrlDecode();
+                        hp.Properties = decoded_after_save_requestinfo;
+                    }
+                    hp.AddUpdateProperty("VIEWID", Convert.ToString(Model.SaveFunction.ActionViewId));
+                    afterSaveRequestInfo = hp.Properties.B64UrlEncode();
+                }
+            }
         }
     }
 }
@@ -110,6 +126,7 @@
             {
                 baseurl: "@ViewBag.BaseAPIPath"
                 ,requestInfo: "@requestInfo"
+                ,afterSaveRequestInfo: "@afterSaveRequestInfo"
                 ,appMainTable: "@mainDbName"
                 ,appId: @applicationId
                 ,applicationViewId: @applicationViewId
@@ -195,7 +212,8 @@
                         {
                             context.model = JSON.parse(response.data);
 
-                        }).done(function (){
+                        }).done(function ()
+                        {
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                             $('#addEditModal_' + uimetacode).modal();
@@ -262,8 +280,8 @@
                                         {
                                             if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
                                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
-                                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
+                                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.afterSaveRequestInfo != "") {
+                                                    endpointurl = endpointurl.replace("{requestinfo}", context.afterSaveRequestInfo);
                                                 }
                                                 else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
                                                     endpointurl = endpointurl.replace("{requestinfo}", "");
@@ -273,8 +291,7 @@
                                                 }
                                                 window.location.href = endpointurl;
                                             }
-                                            else if (context.aftersaveaction == 'REFRESH')
-                                            {
+                                            else if (context.aftersaveaction == 'REFRESH') {
                                                 context.modelSaved = true;
                                                 context.getApplication();
                                                 setTimeout(function () { context.modelSaved = false; }, 3000);
@@ -408,10 +425,10 @@
 
                             if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
-                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
+                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.afterSaveRequestInfo != "") {
+                                    endpointurl = endpointurl.replace("{requestinfo}", context.afterSaveRequestInfo);
                                 }
-                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
+                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.afterSaveRequestInfo == "") {
                                     endpointurl = endpointurl.replace("{requestinfo}", "");
                                 }
 

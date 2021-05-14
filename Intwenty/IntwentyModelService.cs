@@ -880,6 +880,39 @@ namespace Intwenty
                         function.SystemInfo = app.SystemInfo;
                         function.BuildPropertyList();
                         appview.Functions.Add(function);
+
+                        //SaveFuction, NavigateFunction, etc function owned by the view. Add ActionInfo (Info regarding which view is this function executed in)
+                        if (!string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == ViewModel.MetaTypeUIView)
+                        {
+                            var actionview = application_views.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode);
+                            if (actionview != null)
+                            {
+                                function.ActionViewId = actionview.Id;
+                                function.ActionPath = actionview.Path;
+                            }
+                        }
+
+                        //If no actionpath, assume that this function is executed in the view
+                        if (string.IsNullOrEmpty(function.ActionPath))
+                        {
+                            function.ActionViewId = appview.Id;
+                            function.ActionPath = appview.Path;
+                            function.ActionMetaCode = appview.MetaCode;
+                            function.ActionMetaType = ViewModel.MetaTypeUIView;
+                        }
+
+                        if (function.MetaType == FunctionModelItem.MetaTypeSave && function.HasProperty("GOTOVIEWPATH"))
+                        {
+                            var gtvp = function.GetPropertyValue("GOTOVIEWPATH");
+                            if (gtvp.Contains("{requestinfo}"))
+                            {
+                                var view = application_views.Find(av => av.IsOnPath(gtvp));
+                                if (view != null)
+                                    function.ActionViewId = view.Id;
+                            }
+
+                        }
+
                     }
 
                     foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
@@ -895,13 +928,36 @@ namespace Intwenty
                             function.BuildPropertyList();
                             userinterface.Functions.Add(function);
 
-                            if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionUserInterfaceMetaCode))
+                            //ADD MODAL SUB UI:s to this UI
+                            if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == UserInterfaceModelItem.MetaTypeInputInterface)
                             {
-                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionUserInterfaceMetaCode && p.IsMetaTypeInputInterface);
+                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode && p.IsMetaTypeInputInterface);
                                 if (modalactionui!=null && !userinterface.ModalInterfaces.Exists(p=> p.Id == modalactionui.Id))
                                     userinterface.ModalInterfaces.Add(modalactionui);
                             }
 
+                            if (!function.IsModalAction)
+                            {
+                                //Create, Edit, Delete, Paging etc etc function owned by the UI. Add ActionInfo (Info regarding which view is this function executed in)
+                                if (!string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == ViewModel.MetaTypeUIView)
+                                {
+                                    var actionview = application_views.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode);
+                                    if (actionview != null)
+                                    {
+                                        function.ActionViewId = actionview.Id;
+                                        function.ActionPath = actionview.Path;
+                                    }
+                                }
+
+                                //If no actionpath, assume that this function is executed in the ui
+                                if (string.IsNullOrEmpty(function.ActionPath))
+                                {
+                                    function.ActionViewId = appview.Id;
+                                    function.ActionPath = appview.Path;
+                                    function.ActionMetaCode = userinterface.MetaCode;
+                                    function.ActionMetaType = userinterface.MetaType;
+                                }
+                            }
                         }
 
                       
