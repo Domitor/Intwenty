@@ -1,6 +1,8 @@
 ﻿using Intwenty.Areas.Identity.Models;
 using Intwenty.Entity;
+using Intwenty.Helpers;
 using Intwenty.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -184,6 +186,71 @@ namespace Intwenty.Model
             }
 
         }
+
+        public string BuildRuntimeURI(string requestinfo, int id = 0)
+        {
+            if (IsModalAction)
+                return string.Empty;
+
+            string result = string.Empty;
+            if (IsMetaTypeSave)
+            {
+                var aftersaveaction = GetPropertyValue("AFTERSAVEACTION");
+                if (aftersaveaction == "GOTOVIEW")
+                {
+                    result = GetPropertyValue("GOTOVIEWPATH");
+                }
+            }
+            else
+            {
+                result = ActionPath;
+            }
+
+
+            if (result.Contains("{id}"))
+            {
+                result = result.Replace("{id}", Convert.ToString(id));
+            }
+
+            if (result.Contains("{requestinfo}"))
+            {
+                var updated_requestinfo = BuildRuntimeRequestInfo(requestinfo);
+                result = result.Replace("{requestinfo}", updated_requestinfo);
+            }
+
+            return result;
+
+
+        }
+
+        public string BuildRuntimeRequestInfo(string requestinfo)
+        {
+            
+            string result = string.Empty;
+
+            if (ActionViewId > 0)
+            {
+                var tmp_requestinfo = string.Empty;
+                var hp = new HashTagPropertyObject();
+                if (!string.IsNullOrEmpty(requestinfo))
+                {
+                    tmp_requestinfo = requestinfo.B64UrlDecode();
+                    hp.Properties = tmp_requestinfo;
+                }
+                hp.AddUpdateProperty("VIEWID", Convert.ToString(ActionViewId));
+                result = hp.Properties.B64UrlEncode();
+            }
+            else
+            {
+                result = requestinfo;
+            }
+
+            
+            return result;
+
+        }
+
+
 
     }
 

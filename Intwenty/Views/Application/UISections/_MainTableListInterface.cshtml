@@ -3,7 +3,7 @@
 @{
 
     var func_edit_path = "";
-    var func_edit_path_requestinfo = Model.RequestInfo;
+    var func_edit_path_requestinfo = "";
     var func_edit_path_use_requestinfo = false;
 
     if (Model.HasEditFunction)
@@ -11,22 +11,11 @@
         if (!Model.EditFunction.IsModalAction)
         {
             func_edit_path = Model.EditFunction.ActionPath;
-            if (func_edit_path.Contains("{requestinfo}") && !string.IsNullOrEmpty(func_edit_path_requestinfo))
+            if (func_edit_path.Contains("{requestinfo}"))
             {
                 func_edit_path_use_requestinfo = true;
                 func_edit_path = func_edit_path.Replace("/{requestinfo}", "");
-                if (Model.EditFunction.ActionViewId > 0)
-                {
-                    var decoded_edit_requestinfo = string.Empty;
-                    var hp = new HashTagPropertyObject();
-                    if (!string.IsNullOrEmpty(func_edit_path_requestinfo))
-                    {
-                        decoded_edit_requestinfo = func_edit_path_requestinfo.B64UrlDecode();
-                        hp.Properties = decoded_edit_requestinfo;
-                    }
-                    hp.AddUpdateProperty("VIEWID", Convert.ToString(Model.EditFunction.ActionViewId));
-                    func_edit_path_requestinfo = hp.Properties.B64UrlEncode();
-                }
+                func_edit_path_requestinfo = Model.EditFunction.BuildRuntimeRequestInfo(Model.RuntimeRequestInfo);
             }
             if (func_edit_path.Contains("{id}"))
             {

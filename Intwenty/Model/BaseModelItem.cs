@@ -29,7 +29,7 @@ namespace Intwenty.Model
 
         public abstract string ModelCode { get; }
 
-        public string RequestInfo { set; get; }
+        public string RuntimeRequestInfo { set; get; }
 
 
 
