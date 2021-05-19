@@ -178,7 +178,45 @@ namespace Intwenty.WebHostBuilder
                 services.AddHttpClient<IFrejaClientService, FrejaClientService>();
             }
 
-           
+            if (settings.UseBankIdLogin)
+            {
+               services.AddHttpClient<IBankIDService, BankIDService>()
+              .ConfigurePrimaryHttpMessageHandler(() =>
+              {
+                  HttpClientHandler handler = new HttpClientHandler
+                  {
+                      AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                      ClientCertificateOptions = ClientCertificateOption.Manual,
+                      SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                      ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
+                  };
+
+                  X509Store certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                  certStore.Open(OpenFlags.ReadOnly);
+                  X509Certificate2Collection caCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdCaCertThumbPrint, false);
+                  if (caCertCollection.Count > 0)
+                  {
+                      X509Certificate2 cert = caCertCollection[0];
+                      //handler.ClientCertificates.Add(cert);
+                  }
+
+                  X509Certificate2Collection rpCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdRpCertThumbPrint, false);
+                  if (caCertCollection.Count > 0)
+                  {
+                      X509Certificate2 cert = rpCertCollection[0];
+                      handler.ClientCertificates.Add(cert);
+                  }
+
+                  certStore.Close();
+                  return handler;
+              });
+            }
+            else
+            {
+                services.AddHttpClient<IBankIDService, BankIDService>();
+            }
+
+
 
 
             if (string.IsNullOrEmpty(settings.LocalizationDefaultCulture))

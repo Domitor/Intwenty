@@ -195,7 +195,7 @@ namespace Intwenty.Model
 
 
 
-
+        #region FrejaId
 
 
         /// <summary>
@@ -230,6 +230,26 @@ namespace Intwenty.Model
         /// </summary>
         public string FrejaRequestedAttributes { get; set; }
 
+        #endregion
+
+        #region BankId
+
+        /// <summary>
+        /// Example: https://nnnnn.com
+        /// </summary>
+        public string BankIdBaseAddress { get; set; }
+
+        /// <summary>
+        /// The thumbprint of the cerificate in the store
+        /// </summary>
+        public string BankIdCaCertThumbPrint { get; set; }
+
+        /// <summary>
+        /// The thumbprint of the cerificate in the store
+        /// </summary>
+        public string BankIdRpCertThumbPrint { get; set; }
+
+        #endregion
 
 
         /// <summary>
