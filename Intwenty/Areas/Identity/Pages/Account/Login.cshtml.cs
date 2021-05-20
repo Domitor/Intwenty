@@ -17,6 +17,7 @@ using Intwenty.Areas.Identity.Data;
 using Intwenty.Interface;
 using Intwenty.Areas.Identity.Models;
 using System.Security.Claims;
+using Intwenty.Model.BankId;
 
 namespace Intwenty.Areas.Identity.Pages.Account
 {
@@ -29,13 +30,15 @@ namespace Intwenty.Areas.Identity.Pages.Account
         private readonly IntwentyUserManager _userManager;
         private readonly IOptions<IntwentySettings> _settings;
         private readonly IFrejaClientService _frejaClient;
+        private readonly IBankIDClientService _bankidClient;
 
         public LoginModel(IntwentySignInManager signinmanager, 
                           IIntwentyDataService dataservice, 
                           IOptions<IntwentySettings> settings, 
                           IntwentyUserManager usermanager, 
                           IIntwentyDbLoggerService dblogger,
-                          IFrejaClientService frejaclient)
+                          IFrejaClientService frejaclient,
+                          IBankIDClientService bankIdclient)
         {
             _dataService = dataservice;
             _signInManager = signinmanager;
@@ -43,6 +46,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             _userManager = usermanager;
             _dbloggerService = dblogger;
             _frejaClient = frejaclient;
+            _bankidClient = bankIdclient;
 
 
         }
@@ -77,6 +81,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
                 {
                     this.QRCodeUrl = _frejaClient.GetQRCode(ExternalAuthenticationReference).OriginalString;
+                }
+            }
+
+            if (_settings.Value.UseBankIdLogin)
+            {
+                var request = new BankIDAuthRequest();
+                request.EndUserIp = "62.20.76.122";
+                var externalauthref = await _bankidClient.InitQRAuthentication(request);
+                ExternalAuthenticationReference = externalauthref.AutoStartToken;
+                if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
+                {
+                    this.QRCodeUrl = _bankidClient.GetQRCode(ExternalAuthenticationReference);
                 }
             }
 
@@ -144,6 +160,76 @@ namespace Intwenty.Areas.Identity.Pages.Account
             catch (Exception ex)
             {
                 await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on login.OnGetFrejaLogin: " + ex.Message);
+            }
+
+            model.ResultCode = "UNEXPECTED_ERROR";
+            return new JsonResult(model) { StatusCode = 500 };
+        }
+
+        public async Task<IActionResult> OnGetBankIdLogin()
+        {
+            var model = new IntwentyLoginModel() { AccountType = AccountTypes.FrejaEId, ResultCode = "SUCCESS" };
+
+            try
+            {
+                if (string.IsNullOrEmpty(ExternalAuthenticationReference))
+                {
+                    model.ResultCode = "BANKID_NO_AUTHREF";
+                    return new JsonResult(model) { StatusCode = 503 };
+                }
+
+                var request = new BankIDCollectRequest();
+                request.OrderRef = ExternalAuthenticationReference;
+
+                var authresult = await _bankidClient.Authenticate(request);
+                if (authresult != null)
+                {
+
+                    var client = _userManager.GetIAMDataClient();
+
+                    IntwentyUser attemptinguser = null;
+                    await client.OpenAsync();
+                    var userlist = await client.GetEntitiesAsync<IntwentyUser>();
+                    attemptinguser = userlist.Find(p => p.NormalizedEmail == _settings.Value.DemoAdminUser);
+                    await client.CloseAsync();
+
+                    if (attemptinguser == null)
+                    {
+                        model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+
+                    var result = await _signInManager.SignInBankId(attemptinguser, ExternalAuthenticationReference);
+                    if (result.IsNotAllowed)
+                    {
+                        model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (result.RequiresTwoFactor)
+                    {
+                        model.ResultCode = "REQUIREMFA";
+                        model.RedirectUrl = "./LoginWith2fa";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else
+                    {
+                        model.ReturnUrl = Url.Content("~/");
+                        model.ResultCode = "SUCCESS";
+                        await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} logged in with swedish Bank ID", attemptinguser.UserName), attemptinguser.UserName);
+                        return new JsonResult(model);
+
+                    }
+                }
+                else
+                {
+                    model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                    return new JsonResult(model) { StatusCode = 401 };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on login.OnGetBankIdLogin: " + ex.Message);
             }
 
             model.ResultCode = "UNEXPECTED_ERROR";

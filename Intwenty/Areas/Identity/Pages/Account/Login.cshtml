@@ -103,6 +103,17 @@
 
             }
 
+            @if (Settings.Value.UseBankIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
+            {
+                <div class="alert alert-primary">
+                    To login, open your Bank ID app and scan the QR code below
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <br />
+                <img src="@Model.QRCodeUrl" />
+
+            }
+
 
         </div>
 
@@ -203,6 +214,28 @@
                         var context = this;
                         var baseurl = '@Url.Content("~/Identity/Account/")';
                         var endpointurl = baseurl + "Login?handler=FrejaLogin";
+
+                        $.get(endpointurl, function (response)
+                        {
+                            window.location = response.returnUrl;
+
+                        }).fail(function (response) {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        });
+
+                   </text>
+               }
+
+               @if(Settings.Value.UseBankIdLogin)
+               {
+                   <text>
+
+                        var context = this;
+                        var baseurl = '@Url.Content("~/Identity/Account/")';
+                        var endpointurl = baseurl + "Login?handler=BankIdLogin";
 
                         $.get(endpointurl, function (response)
                         {

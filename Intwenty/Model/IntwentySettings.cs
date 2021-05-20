@@ -194,7 +194,6 @@ namespace Intwenty.Model
         #endregion
 
 
-
         #region FrejaId
 
 
@@ -235,7 +234,7 @@ namespace Intwenty.Model
         #region BankId
 
         /// <summary>
-        /// Example: https://nnnnn.com
+        /// Example: https://aaa.bbb.com
         /// </summary>
         public string BankIdBaseAddress { get; set; }
 
@@ -366,6 +365,9 @@ namespace Intwenty.Model
                 if (AccountsAllowedList == null)
                     return false;
 
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return false;
+
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return true;
               
@@ -381,6 +383,9 @@ namespace Intwenty.Model
             get
             {
                 if (AccountsAllowedList == null)
+                    return false;
+
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return false;
 
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))

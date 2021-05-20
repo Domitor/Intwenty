@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 namespace Intwenty.Interface
 {
-    public interface IBankIDService
+    public interface IBankIDClientService
     {
-        Task<AuthResponse> Auth(AuthRequest authRequest);
-        Task<AuthResponse> Sign(SignRequest signRequest);
-        Task<CollectResponse> Collect(CollectRequest collectRequest);
-        Task<bool> Cancel(CancelRequest signRequest);
-
+        Task<BankIDAuthResponse> InitQRAuthentication(BankIDAuthRequest authRequest);
+        Task<BankIDCollectResponse> Authenticate(BankIDCollectRequest collectRequest);
+        Task<bool> Cancel(BankIDCancelRequest signRequest);
+        Task<BankIDAuthResponse> Sign(BankIDSignRequest signRequest);
+        string GetQRCode(string autoStartToken);
     }
 }

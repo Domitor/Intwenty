@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Intwenty.Model.BankId
 {
-    public class AuthRequest
+    public class BankIDAuthRequest
     {
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Intwenty.Model.BankId
     }
 
 
-    public class SignRequest : AuthRequest
+    public class BankIDSignRequest : BankIDAuthRequest
     {
 
 
@@ -57,7 +57,7 @@ namespace Intwenty.Model.BankId
     }
 
 
-    public class AuthResponse
+    public class BankIDAuthResponse
     {
 
         /// <summary>
@@ -73,13 +73,13 @@ namespace Intwenty.Model.BankId
 
     }
 
-    public class CollectRequest
+    public class BankIDCollectRequest
     {
         public string OrderRef { get; set; }
 
     }
 
-    public class CollectResponse 
+    public class BankIDCollectResponse
     {
 
         /// <summary>
@@ -102,12 +102,12 @@ namespace Intwenty.Model.BankId
         /// <summary>
         /// Only present for complete orders
         /// </summary>
-        public CompletionData CompletionData { get; set; }
+        public BankIDCompletionData CompletionData { get; set; }
 
 
     }
 
-    public class CompletionData
+    public class BankIDCompletionData
     {
        
         /// <summary>
@@ -144,7 +144,7 @@ namespace Intwenty.Model.BankId
        
     }
 
-    public class CancelRequest
+    public class BankIDCancelRequest
     {
         public string OrderRef { get; set; }
     }

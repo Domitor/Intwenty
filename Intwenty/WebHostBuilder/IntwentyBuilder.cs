@@ -180,7 +180,7 @@ namespace Intwenty.WebHostBuilder
 
             if (settings.UseBankIdLogin)
             {
-               services.AddHttpClient<IBankIDService, BankIDService>()
+               services.AddHttpClient<IBankIDClientService, BankIDClientService>()
               .ConfigurePrimaryHttpMessageHandler(() =>
               {
                   HttpClientHandler handler = new HttpClientHandler
@@ -192,19 +192,25 @@ namespace Intwenty.WebHostBuilder
                   };
 
                   X509Store certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-                  certStore.Open(OpenFlags.ReadOnly);
-                  X509Certificate2Collection caCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdCaCertThumbPrint, false);
-                  if (caCertCollection.Count > 0)
+                  if (!string.IsNullOrEmpty(settings.BankIdCaCertThumbPrint))
                   {
-                      X509Certificate2 cert = caCertCollection[0];
-                      //handler.ClientCertificates.Add(cert);
+                      certStore.Open(OpenFlags.ReadOnly);
+                      X509Certificate2Collection caCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdCaCertThumbPrint, false);
+                      if (caCertCollection.Count > 0)
+                      {
+                          X509Certificate2 cert = caCertCollection[0];
+                          //handler.ClientCertificates.Add(cert);
+                      }
                   }
 
-                  X509Certificate2Collection rpCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdRpCertThumbPrint, false);
-                  if (caCertCollection.Count > 0)
+                  if (!string.IsNullOrEmpty(settings.BankIdRpCertThumbPrint))
                   {
-                      X509Certificate2 cert = rpCertCollection[0];
-                      handler.ClientCertificates.Add(cert);
+                      X509Certificate2Collection rpCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdRpCertThumbPrint, false);
+                      if (rpCertCollection.Count > 0)
+                      {
+                          X509Certificate2 cert = rpCertCollection[0];
+                          handler.ClientCertificates.Add(cert);
+                      }
                   }
 
                   certStore.Close();
@@ -213,7 +219,7 @@ namespace Intwenty.WebHostBuilder
             }
             else
             {
-                services.AddHttpClient<IBankIDService, BankIDService>();
+                services.AddHttpClient<IBankIDClientService, BankIDClientService>();
             }
 
 
