@@ -82,9 +82,8 @@ namespace Intwenty.Services
         {
             try
             {
-                var content = BuildContent(request);
-               
-                var timeout = 15000;
+                var content = BuildContent(request);      
+                var timeout = 30000;
 
                 while (true)
                 {
@@ -94,15 +93,22 @@ namespace Intwenty.Services
                         var cancelrequest = new BankIDCancelRequest() { OrderRef = request.OrderRef };
                         var cancelcontent = BuildContent(cancelrequest);
                         await client.PostAsync(settings.BankIdCancelEndPoint, cancelcontent);
+                        return null;
                     }
 
                     var response = await client.PostAsync(settings.BankIdCollectEndPoint, content);
                     if (response.IsSuccessStatusCode == true)
                     {
                         var data = await response.Content.ReadAsStringAsync();
-                        var status_response = JsonSerializer.Deserialize<BankIDCollectResponse>(data);
-                        return status_response;
+                        var status_response = JsonSerializer.Deserialize<BankIDCollectResponse>(data, GetJsonOptions());
+                        if (status_response.CompletionData != null && status_response.CompletionData.User != null && !string.IsNullOrEmpty(status_response.CompletionData.User.PersonalNumber))
+                            return status_response;
 
+                    }
+                    else
+                    {
+                        var data = await response.Content.ReadAsStringAsync();
+                        var z = "";
                     }
 
                     await Task.Delay(2000);
@@ -185,7 +191,8 @@ namespace Intwenty.Services
 
                 using (var qrCode = new Base64QRCode(qrCodeData))
                 {
-                    return qrCode.GetGraphic(320);
+                    var qr = qrCode.GetGraphic(10);
+                    return $"data:image/png;base64, {qr}";
                 }
             }
         }

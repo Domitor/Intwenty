@@ -59,11 +59,26 @@ namespace Intwenty.Areas.Identity.Pages.Account
         public string QRCodeUrl { get; set; }
 
         [TempData]
-        public string ExternalAuthenticationReference { get; set; }
+        public string ExternalAuthReference { get; set; }
+
+
+        private string GetExternalIP() 
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+            if (string.IsNullOrEmpty(ip))
+                return _settings.Value.BankIdClientExternalIP;
+            if (ip.StartsWith(":"))
+                return _settings.Value.BankIdClientExternalIP;
+            if (ip.Length < 9)
+                return _settings.Value.BankIdClientExternalIP;
+
+            return ip;
+
+        }
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            ExternalAuthenticationReference = string.Empty;
+            ExternalAuthReference = string.Empty;
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
@@ -77,22 +92,22 @@ namespace Intwenty.Areas.Identity.Pages.Account
             if (_settings.Value.UseFrejaEIdLogin)
             {
                 var externalauthref = await _frejaClient.InitQRAuthentication();
-                ExternalAuthenticationReference = externalauthref.authRef;
-                if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
+                ExternalAuthReference = externalauthref.authRef;
+                if (!string.IsNullOrEmpty(externalauthref.authRef))
                 {
-                    this.QRCodeUrl = _frejaClient.GetQRCode(ExternalAuthenticationReference).OriginalString;
+                    this.QRCodeUrl = _frejaClient.GetQRCode(externalauthref.authRef).OriginalString;
                 }
             }
 
             if (_settings.Value.UseBankIdLogin)
             {
                 var request = new BankIDAuthRequest();
-                request.EndUserIp = "62.20.76.122";
+                request.EndUserIp = GetExternalIP();
                 var externalauthref = await _bankidClient.InitQRAuthentication(request);
-                ExternalAuthenticationReference = externalauthref.AutoStartToken;
-                if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
+                ExternalAuthReference = string.Format("{0}{1}","BID_", externalauthref.AutoStartToken);
+                if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
                 {
-                    var b64qr = _bankidClient.GetQRCode(ExternalAuthenticationReference);
+                    var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
                     this.QRCodeUrl = b64qr;
                 }
             }
@@ -106,13 +121,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             try
             {
-                if (string.IsNullOrEmpty(ExternalAuthenticationReference))
+          
+                if (string.IsNullOrEmpty(ExternalAuthReference))
                 {
                     model.ResultCode = "FREJA_NO_AUTHREF";
                     return new JsonResult(model) { StatusCode = 503 };
                 }
 
-                var authresult = await _frejaClient.Authenticate(ExternalAuthenticationReference);
+                var authresult = await _frejaClient.Authenticate(ExternalAuthReference);
                 if (authresult != null)
                 {
 
@@ -130,7 +146,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         return new JsonResult(model) { StatusCode = 401 };
                     }
 
-                    var result = await _signInManager.SignInFrejaId(attemptinguser, ExternalAuthenticationReference);
+                    var result = await _signInManager.SignInFrejaId(attemptinguser, ExternalAuthReference);
                     if (result.IsNotAllowed)
                     {
                         model.ResultCode = "INVALID_LOGIN_ATTEMPT";
@@ -173,14 +189,23 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             try
             {
-                if (string.IsNullOrEmpty(ExternalAuthenticationReference))
+                var authref = "";
+                if (!string.IsNullOrEmpty(ExternalAuthReference))
+                {
+                    if (ExternalAuthReference.Contains("BID_"))
+                    {
+                        authref = ExternalAuthReference.Substring(4);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(authref))
                 {
                     model.ResultCode = "BANKID_NO_AUTHREF";
                     return new JsonResult(model) { StatusCode = 503 };
                 }
 
                 var request = new BankIDCollectRequest();
-                request.OrderRef = ExternalAuthenticationReference;
+                request.OrderRef = authref;
 
                 var authresult = await _bankidClient.Authenticate(request);
                 if (authresult != null)
@@ -200,7 +225,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         return new JsonResult(model) { StatusCode = 401 };
                     }
 
-                    var result = await _signInManager.SignInBankId(attemptinguser, ExternalAuthenticationReference);
+                    var result = await _signInManager.SignInBankId(attemptinguser, ExternalAuthReference);
                     if (result.IsNotAllowed)
                     {
                         model.ResultCode = "INVALID_LOGIN_ATTEMPT";

@@ -135,12 +135,13 @@ namespace Intwenty.Model.BankId
         /// Information related to the device
         /// </summary>
         public Device Device { get; set; }
+             */
 
         /// <summary>
         /// Information related to the user
         /// </summary>
-        public User User { get; set; }
-        */
+        public BankIdUser User { get; set; }
+   
        
     }
 
@@ -149,5 +150,30 @@ namespace Intwenty.Model.BankId
         public string OrderRef { get; set; }
     }
 
+    public class BankIdUser 
+    {
+     
+        /// <summary>
+        /// The given name of the user
+        /// </summary>
+        public string GivenName { get; set; }
+
+        /// <summary>
+        ///  The given name and surname of the user
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The personal number (SSN)
+        /// </summary>
+        public string PersonalNumber { get; set; }
+
+        /// <summary>
+        /// The surname of the user
+        /// </summary>
+        public string Surname { get; set; }
+
+      
+    }
 
 }

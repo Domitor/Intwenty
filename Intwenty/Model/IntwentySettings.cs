@@ -237,19 +237,18 @@ namespace Intwenty.Model
         /// Example: https://aaa.bbb.com
         /// </summary>
         public string BankIdBaseAddress { get; set; }
-
+        /// <summary>
+        /// Client external IP, only for dev purpose
+        /// </summary>
+        public string BankIdClientExternalIP { get; set; }
         public string BankIdAuthEndPoint { get; set; }
-
         public string BankIdCancelEndPoint { get; set; }
-
         public string BankIdCollectEndPoint { get; set; }
-
         public string BankIdSignEndPoint { get; set; }
         /// <summary>
         /// The thumbprint of the cerificate in the store
         /// </summary>
         public string BankIdCaCertThumbPrint { get; set; }
-
         /// <summary>
         /// The thumbprint of the cerificate in the store
         /// </summary>
@@ -289,10 +288,10 @@ namespace Intwenty.Model
                     return false;
 
             
-                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook) && !string.IsNullOrEmpty(AccountsFacebookAppId))
                     return true;
 
-                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google) && !string.IsNullOrEmpty(AccountsGoogleClientId))
                     return true;
                 
 
