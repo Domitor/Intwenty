@@ -23,9 +23,29 @@ namespace Intwenty.Services
         {
             this.client = http_client;
             this.settings = options.Value;
-            this.client.BaseAddress = new Uri(this.settings.BankIdBaseAddress);
-            this.client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //this.client.BaseAddress = new Uri(this.settings.BankIdBaseAddress);
+        }
 
+        private JsonSerializerOptions GetJsonOptions() 
+        {
+            var json_options = new JsonSerializerOptions
+            {
+                IgnoreNullValues = true,
+                WriteIndented = false,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            return json_options;
+        }
+
+        private StringContent BuildContent<TRequest>(TRequest request)
+        {
+           
+            var json = JsonSerializer.Serialize(request, GetJsonOptions());
+            var result = new StringContent(json, Encoding.UTF8);
+            result.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return result;
         }
 
         public async Task<BankIDAuthResponse> InitQRAuthentication(BankIDAuthRequest request)
@@ -34,26 +54,12 @@ namespace Intwenty.Services
 
             try
             {
-                // Set serializer options
-                var json_options = new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true,
-                    WriteIndented = false,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-
-                string json = JsonSerializer.Serialize(request, json_options);
-                var content = new StringContent(json, Encoding.UTF8);
-                content.Headers.ContentType.MediaType = "application/json";
-                //content.Headers.ContentType.MediaType.cc = null;
-
-                //content.Headers.ContentType.CharSet = "utf-8";
-
+                var content = BuildContent(request);
                 var response = await client.PostAsync("https://appapi2.test.bankid.com/rp/v5.1/auth", content);
                 if (response.IsSuccessStatusCode == true)
                 {
                     var data = await response.Content.ReadAsStringAsync();
-                    var status_response = JsonSerializer.Deserialize<BankIDAuthResponse>(data);
+                    var status_response = JsonSerializer.Deserialize<BankIDAuthResponse>(data, GetJsonOptions());
                     return status_response;
 
                 }
@@ -221,6 +227,8 @@ namespace Intwenty.Services
                 }
             }
         }
+
+      
 
     }
 }
