@@ -92,7 +92,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 ExternalAuthenticationReference = externalauthref.AutoStartToken;
                 if (!string.IsNullOrEmpty(ExternalAuthenticationReference))
                 {
-                    this.QRCodeUrl = _bankidClient.GetQRCode(ExternalAuthenticationReference);
+                    var b64qr = _bankidClient.GetQRCode(ExternalAuthenticationReference);
+                    this.QRCodeUrl = b64qr;
                 }
             }
 

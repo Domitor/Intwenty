@@ -238,6 +238,13 @@ namespace Intwenty.Model
         /// </summary>
         public string BankIdBaseAddress { get; set; }
 
+        public string BankIdAuthEndPoint { get; set; }
+
+        public string BankIdCancelEndPoint { get; set; }
+
+        public string BankIdCollectEndPoint { get; set; }
+
+        public string BankIdSignEndPoint { get; set; }
         /// <summary>
         /// The thumbprint of the cerificate in the store
         /// </summary>

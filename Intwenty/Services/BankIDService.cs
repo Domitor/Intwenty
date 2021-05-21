@@ -23,7 +23,7 @@ namespace Intwenty.Services
         {
             this.client = http_client;
             this.settings = options.Value;
-            //this.client.BaseAddress = new Uri(this.settings.BankIdBaseAddress);
+            this.client.BaseAddress = new Uri(this.settings.BankIdBaseAddress);
         }
 
         private JsonSerializerOptions GetJsonOptions() 
@@ -55,7 +55,7 @@ namespace Intwenty.Services
             try
             {
                 var content = BuildContent(request);
-                var response = await client.PostAsync("https://appapi2.test.bankid.com/rp/v5.1/auth", content);
+                var response = await client.PostAsync(settings.BankIdAuthEndPoint, content);
                 if (response.IsSuccessStatusCode == true)
                 {
                     var data = await response.Content.ReadAsStringAsync();
@@ -82,19 +82,8 @@ namespace Intwenty.Services
         {
             try
             {
-                // Set serializer options
-                var json_options = new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true,
-                    WriteIndented = false,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-
-                string json = JsonSerializer.Serialize(request, json_options);
-                var content = new StringContent(json);
-                content.Headers.ContentType.MediaType = "application/json";
-                content.Headers.ContentType.CharSet = "utf-8";
-
+                var content = BuildContent(request);
+               
                 var timeout = 15000;
 
                 while (true)
@@ -103,14 +92,11 @@ namespace Intwenty.Services
                     if (timeout <= 0)
                     {
                         var cancelrequest = new BankIDCancelRequest() { OrderRef = request.OrderRef };
-                        string canceljson = JsonSerializer.Serialize(request, json_options);
-                        var cancelcontent = new StringContent(json);
-                        content.Headers.ContentType.MediaType = "application/json";
-                        content.Headers.ContentType.CharSet = "utf-8";
-                        await client.PostAsync("/cancel", cancelcontent);
+                        var cancelcontent = BuildContent(cancelrequest);
+                        await client.PostAsync(settings.BankIdCancelEndPoint, cancelcontent);
                     }
 
-                    var response = await client.PostAsync("/collect", content);
+                    var response = await client.PostAsync(settings.BankIdCollectEndPoint, content);
                     if (response.IsSuccessStatusCode == true)
                     {
                         var data = await response.Content.ReadAsStringAsync();
@@ -142,20 +128,8 @@ namespace Intwenty.Services
         {
             try
             {
-                // Set serializer options
-                var json_options = new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true,
-                    WriteIndented = false,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-
-                string json = JsonSerializer.Serialize(request, json_options);
-                var content = new StringContent(json);
-                content.Headers.ContentType.MediaType = "application/json";
-                content.Headers.ContentType.CharSet = "utf-8";
-
-                var response = await client.PostAsync("/sign", content);
+                var content = BuildContent(request);
+                var response = await client.PostAsync(settings.BankIdSignEndPoint, content);
                 if (response.IsSuccessStatusCode == true)
                 {
                     var data = await response.Content.ReadAsStringAsync();
@@ -185,20 +159,8 @@ namespace Intwenty.Services
         {
             try
             {
-                // Set serializer options
-                var json_options = new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true,
-                    WriteIndented = false,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-
-                string json = JsonSerializer.Serialize(request, json_options);
-                var content = new StringContent(json);
-                content.Headers.ContentType.MediaType = "application/json";
-                content.Headers.ContentType.CharSet = "utf-8";
-
-                var response = await client.PostAsync("/cancel", content);
+                var content = BuildContent(request);
+                var response = await client.PostAsync(settings.BankIdCancelEndPoint, content);
                 if (response.IsSuccessStatusCode == true)
                 {
                     return true;
