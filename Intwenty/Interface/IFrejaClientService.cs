@@ -11,7 +11,7 @@ namespace Intwenty.Interface
 {
     public interface IFrejaClientService
     {
-        Task<FrejaStatusResponse> InitQRAuthentication();
+        Task<FrejaStatusResponse> InitAuthentication();
         Uri GetQRCode(string authref);
         Task<RequestedAttributes> Authenticate(string authref);
         Task<RequestedAttributes> Authenticate(string userInfoType, string userInfo);

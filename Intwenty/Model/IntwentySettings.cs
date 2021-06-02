@@ -26,6 +26,8 @@ namespace Intwenty.Model
         {
             LogVerbosity = LogVerbosityTypes.Error;
             StartUpRoutingMode = RoutingModeOptions.Explicit;
+            FrejaTimeoutInMilliseconds = 90000;
+            BankIdTimeoutInMilliseconds = 90000;
         }
 
         public LogVerbosityTypes LogVerbosity { get; set; }
@@ -241,6 +243,10 @@ namespace Intwenty.Model
         /// Client external IP, only for dev purpose
         /// </summary>
         public string BankIdClientExternalIP { get; set; }
+        /// <summary>
+        /// The time to wait for the user to accept login in the app, 90000
+        /// </summary>
+        public int BankIdTimeoutInMilliseconds { get; set; }
         public string BankIdAuthEndPoint { get; set; }
         public string BankIdCancelEndPoint { get; set; }
         public string BankIdCollectEndPoint { get; set; }

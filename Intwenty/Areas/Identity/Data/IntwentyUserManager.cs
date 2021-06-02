@@ -888,6 +888,23 @@ namespace Intwenty.Areas.Identity.Data
 
         }
 
+        public async Task<IntwentyUser> GetUserWithSettingValue(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+                return null;
+
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.Code.ToUpper() == key.ToUpper() && p.Value.ToUpper()==value.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                var ul = await GetUsersAsync();
+                var t = ul.Find(p => p.Id == usersetting[0].UserId);
+                return t;
+            }
+
+            return null;
+        }
+
         private async Task<List<IntwentyUserSetting>> GetAllUserSettings()
         {
             List<IntwentyUserSetting> res = null;

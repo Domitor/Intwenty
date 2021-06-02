@@ -5,7 +5,7 @@ namespace Intwenty.Interface
 {
     public interface IBankIDClientService
     {
-        Task<BankIDAuthResponse> InitQRAuthentication(BankIDAuthRequest authRequest);
+        Task<BankIDAuthResponse> InitAuthentication(BankIDAuthRequest authRequest);
         Task<BankIDCollectResponse> Authenticate(BankIDCollectRequest collectRequest);
         Task<bool> Cancel(BankIDCancelRequest signRequest);
         Task<BankIDAuthResponse> Sign(BankIDSignRequest signRequest);

@@ -98,8 +98,8 @@
 
             @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
             {
-                <div class="alert alert-primary">
-                    To login, open your Freja e ID app and scan the QR code below
+                <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
+                    @Localizer["FREJA_INSTRUCTION"]
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <br />
@@ -107,15 +107,36 @@
 
             }
 
-            @if (Settings.Value.UseBankIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
+            @if (Settings.Value.UseBankIdLogin)
             {
-                <div class="alert alert-primary">
-                    To login, open your Bank ID app and scan the QR code below
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <br />
-                <img src="@Model.QRCodeUrl" />
+                if (!string.IsNullOrEmpty(Model.QRCodeUrl) && Model.Method == "BID_THIS")
+                {
+                    <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
+                        @Localizer["BANKID_INSTRUCTION"]
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <br />
+                    <img src="@Model.QRCodeUrl" />
+                }
+                else if (Model.Method == "BID_OTHER")
+                {
+                    /*
+                    <div class="form-group">
+                        <label>Ange personnummer (inklusive sekel)</label>
+                        <input id="personalnumber" type="text" v-model="model.personalnumber" class="form-control" />
+                    </div>
 
+                    */
+
+                    <a class="btn btn-primary m-3" href="@Model.StartBankIdUrl" v-on:click="startPollingForSuccesfulBankIdLogin()">Öppna Bank ID</a>
+                }
+                else
+                {
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BID_THIS" class="btn btn-primary m-3">Bank ID på annan enhet</a>
+
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BID_OTHER" class="btn btn-secondary m-3">Bank ID på den här enheten</a>
+
+                }
             }
 
 
@@ -169,8 +190,7 @@
             },
             methods: {
 
-                localLogin: function ()
-                {
+                localLogin: function () {
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
                     var endpointurl = baseurl + "Login?handler=LocalLogin";
@@ -185,19 +205,35 @@
                         {
                             RequestVerificationToken: antiforgerytoken
                         },
-                        success: function (response)
-                        {
+                        success: function (response) {
                             window.location = response.returnUrl;
                         },
-                        error: function (response)
-                        {
+                        error: function (response) {
                             context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA" )
-                            {
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
                                 window.location = context.model.redirectUrl;
                             }
                         }
                     });
+                },
+                startPollingForSuccesfulBankIdLogin: function ()
+                {
+                     var context = this;
+                     var baseurl = '@Url.Content("~/Identity/Account/")';
+                     var endpointurl = baseurl + "Login?handler=BankIdLogin";
+
+                    $.get(endpointurl, function (response)
+                    {
+                        window.location = response.returnUrl;
+
+                    }).fail(function (response)
+                    {
+                        context.model = response.responseJSON;
+                        if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                            window.location = context.model.redirectUrl;
+                        }
+                    });
+
                 }
 
             },
@@ -214,7 +250,6 @@
                @if(Settings.Value.UseFrejaEIdLogin)
                {
                    <text>
-
                         var context = this;
                         var baseurl = '@Url.Content("~/Identity/Account/")';
                         var endpointurl = baseurl + "Login?handler=FrejaLogin";
@@ -229,35 +264,19 @@
                                 window.location = context.model.redirectUrl;
                             }
                         });
-
                    </text>
                }
 
-               @if(Settings.Value.UseBankIdLogin)
+               @if(Settings.Value.UseBankIdLogin && Model.Method=="BID_THIS")
                {
                    <text>
-
-                        var context = this;
-                        var baseurl = '@Url.Content("~/Identity/Account/")';
-                        var endpointurl = baseurl + "Login?handler=BankIdLogin";
-
-                        $.get(endpointurl, function (response)
-                        {
-                            window.location = response.returnUrl;
-
-                        }).fail(function (response) {
-                            context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
-                                window.location = context.model.redirectUrl;
-                            }
-                        });
-
+                         this.startPollingForSuccesfulBankIdLogin();
                    </text>
                }
 
 
 
-            }
-        });
+                   }
+               });
     </script>
 }

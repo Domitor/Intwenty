@@ -58,6 +58,10 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public string QRCodeUrl { get; set; }
 
+        public string StartBankIdUrl { get; set; }
+
+        public string Method { get; set; }
+
         [TempData]
         public string ExternalAuthReference { get; set; }
 
@@ -76,7 +80,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string method="")
         {
             ExternalAuthReference = string.Empty;
 
@@ -91,7 +95,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (_settings.Value.UseFrejaEIdLogin)
             {
-                var externalauthref = await _frejaClient.InitQRAuthentication();
+                var externalauthref = await _frejaClient.InitAuthentication();
                 ExternalAuthReference = externalauthref.authRef;
                 if (!string.IsNullOrEmpty(externalauthref.authRef))
                 {
@@ -101,17 +105,34 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (_settings.Value.UseBankIdLogin)
             {
-                var request = new BankIDAuthRequest();
-                request.EndUserIp = GetExternalIP();
-                var externalauthref = await _bankidClient.InitQRAuthentication(request);
-                ExternalAuthReference = string.Format("{0}{1}","BID_", externalauthref.AutoStartToken);
-                if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
+                if (method == "BID_THIS")
                 {
-                    var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
-                    this.QRCodeUrl = b64qr;
+                    var request = new BankIDAuthRequest();
+                    request.EndUserIp = GetExternalIP();
+                    var externalauthref = await _bankidClient.InitAuthentication(request);
+                    ExternalAuthReference = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
+                    {
+                        var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
+                        this.QRCodeUrl = b64qr;
+                    }
                 }
+                else if (method == "BID_OTHER")
+                {
+                    var request = new BankIDAuthRequest();
+                    request.EndUserIp = GetExternalIP();
+                    var externalauthref = await _bankidClient.InitAuthentication(request);
+                    ExternalAuthReference = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
+                    {
+                        this.StartBankIdUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
+                    }
+                }
+
+
             }
 
+            Method = method;
             ReturnUrl = returnUrl;
         }
 
@@ -216,7 +237,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     IntwentyUser attemptinguser = null;
                     await client.OpenAsync();
                     var userlist = await client.GetEntitiesAsync<IntwentyUser>();
-                    attemptinguser = userlist.Find(p => p.NormalizedEmail == _settings.Value.DemoAdminUser);
+                    attemptinguser = userlist.Find(p => p.NormalizedEmail == _settings.Value.DemoAdminUser.ToUpper());
                     await client.CloseAsync();
 
                     if (attemptinguser == null)

@@ -18,9 +18,11 @@ namespace Intwenty.Services
 
         private readonly HttpClient client;
         private readonly IntwentySettings settings;
+        private readonly IIntwentyDbLoggerService logservice;
 
-        public BankIDClientService(HttpClient http_client, IOptions<IntwentySettings> options)
+        public BankIDClientService(HttpClient http_client, IOptions<IntwentySettings> options, IIntwentyDbLoggerService logger)
         {
+            this.logservice = logger;
             this.client = http_client;
             this.settings = options.Value;
             this.client.BaseAddress = new Uri(this.settings.BankIdBaseAddress);
@@ -48,7 +50,7 @@ namespace Intwenty.Services
             return result;
         }
 
-        public async Task<BankIDAuthResponse> InitQRAuthentication(BankIDAuthRequest request)
+        public async Task<BankIDAuthResponse> InitAuthentication(BankIDAuthRequest request)
         {
 
 
@@ -56,20 +58,24 @@ namespace Intwenty.Services
             {
                 var content = BuildContent(request);
                 var response = await client.PostAsync(settings.BankIdAuthEndPoint, content);
+                var data = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode == true)
-                {
-                    var data = await response.Content.ReadAsStringAsync();
+                {                  
                     var status_response = JsonSerializer.Deserialize<BankIDAuthResponse>(data, GetJsonOptions());
                     return status_response;
 
                 }
+                else
+                { 
+                    throw new InvalidOperationException(string.Format("BankIDClientService.InitAuthentication: {0}", data));
+                }
             }
             catch (Exception ex)
             {
-                var x = "";
+                await logservice.LogErrorAsync(ex.Message);
             }
 
-                return null;
+            return null;
             
        }
 
@@ -82,14 +88,15 @@ namespace Intwenty.Services
         {
             try
             {
-                var content = BuildContent(request);      
-                var timeout = 30000;
+                var content = BuildContent(request);
+                var timeout = settings.BankIdTimeoutInMilliseconds;
 
                 while (true)
                 {
                     // Check for a timeout
                     if (timeout <= 0)
                     {
+                        await logservice.LogWarningAsync("BankIDClientService.Authenticate: Time Out");
                         var cancelrequest = new BankIDCancelRequest() { OrderRef = request.OrderRef };
                         var cancelcontent = BuildContent(cancelrequest);
                         await client.PostAsync(settings.BankIdCancelEndPoint, cancelcontent);
@@ -97,9 +104,9 @@ namespace Intwenty.Services
                     }
 
                     var response = await client.PostAsync(settings.BankIdCollectEndPoint, content);
+                    var data = await response.Content.ReadAsStringAsync();
                     if (response.IsSuccessStatusCode == true)
                     {
-                        var data = await response.Content.ReadAsStringAsync();
                         var status_response = JsonSerializer.Deserialize<BankIDCollectResponse>(data, GetJsonOptions());
                         if (status_response.CompletionData != null && status_response.CompletionData.User != null && !string.IsNullOrEmpty(status_response.CompletionData.User.PersonalNumber))
                             return status_response;
@@ -107,9 +114,9 @@ namespace Intwenty.Services
                     }
                     else
                     {
-                        var data = await response.Content.ReadAsStringAsync();
-                        var z = "";
+                        throw new InvalidOperationException(string.Format("BankIDClientService.Authenticate: {0}", data));
                     }
+                  
 
                     await Task.Delay(2000);
                     timeout -= 2000;
@@ -118,7 +125,7 @@ namespace Intwenty.Services
             }
             catch (Exception ex)
             {
-                var x = "";
+                await logservice.LogErrorAsync(ex.Message);
             }
 
             return null;
@@ -136,17 +143,21 @@ namespace Intwenty.Services
             {
                 var content = BuildContent(request);
                 var response = await client.PostAsync(settings.BankIdSignEndPoint, content);
+                var data = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode == true)
-                {
-                    var data = await response.Content.ReadAsStringAsync();
+                {                 
                     var status_response = JsonSerializer.Deserialize<BankIDAuthResponse>(data);
                     return status_response;
 
                 }
+                else
+                {
+                    throw new InvalidOperationException(string.Format("BankIDClientService.Sign: {0}", data));
+                }
             }
             catch (Exception ex)
             {
-
+                await logservice.LogErrorAsync(ex.Message);
             }
 
             return null;
