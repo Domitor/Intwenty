@@ -218,11 +218,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
                 }
 
-
             }
             catch
             {
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpected error occured, contact support")) { StatusCode = 500 };
+                model.ResultCode = "UNEXPECTED_ERROR";
+                return new JsonResult(model) { StatusCode = 500 };
             }
 
             return new JsonResult(model);
@@ -290,6 +290,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
                             var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
                             await _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
                             await _signInManager.SignInBankId(user, model.AuthServiceOrderRef);
+
+                            model.ReturnUrl = Url.Content("~/");
+                            model.ResultCode = "SUCCESS";
+                            await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} created an account and signed in using swedish Bank ID", user.UserName), user.UserName);
+                            return new JsonResult(model);
 
 
                         }

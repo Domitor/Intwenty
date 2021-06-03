@@ -1,6 +1,16 @@
 ﻿<div class="col-md-6">
 
-    <div v-if="model.resultCode==''">
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='SERVICE_FAILURE')">
+        @Localizer["BANKID_UNAVAILABLE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='UNEXPECTED_ERROR')">
+        Ett oväntat fel har inträffat. Försök igen lite senare
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div v-if="model.resultCode=='INIT'">
 
         @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
         {
@@ -62,10 +72,7 @@
         <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">Öppna Bank ID</a>
     </div>
 
-    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='SERVICE_FAILURE')">
-        @Localizer["BANKID_UNAVAILABLE"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    </div>
+
 
 </div>
 
