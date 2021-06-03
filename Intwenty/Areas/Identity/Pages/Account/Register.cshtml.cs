@@ -265,7 +265,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         if (string.IsNullOrEmpty(user.Culture))
                             user.Culture = _settings.LocalizationDefaultCulture;
 
-                        var result = await _userManager.CreateAsync(user, model.Password);
+                        var result = await _userManager.CreateAsync(user);
                         if (result.Succeeded)
                         {
                             var org = await _organizationManager.FindByNameAsync(_settings.ProductOrganization);

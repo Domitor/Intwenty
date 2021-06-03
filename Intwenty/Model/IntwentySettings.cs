@@ -9,7 +9,7 @@ namespace Intwenty.Model
 
     public enum AccountTypes { Local, Facebook, Google, BankId, FrejaEId };
 
-    public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId,FrejaEId };
+    public enum MfaAuthTypes { Totp,Sms,Email,Fido2 };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
@@ -316,6 +316,12 @@ namespace Intwenty.Model
                 if (AccountsAllowedList == null)
                     return false;
 
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return false;
+
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
+                    return false;
+
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Local))
                     return true;
 
@@ -489,37 +495,8 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseSwedishBankIdMfaAuth
-        {
-
-            get
-            {
-                if (TwoFactorSupportedMethods == null)
-                    return false;
-
-                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.SwedishBankId))
-                    return true;
-
-                return false;
-            }
-
-        }
-
-        public bool UseFrejaEIdMfaAuth
-        {
-
-            get
-            {
-                if (TwoFactorSupportedMethods == null)
-                    return false;
-
-                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.FrejaEId))
-                    return true;
-
-                return false;
-            }
-
-        }
+     
+     
 
 
     }

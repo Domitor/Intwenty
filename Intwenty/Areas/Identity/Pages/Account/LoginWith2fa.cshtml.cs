@@ -70,8 +70,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             var status = await _userManager.GetTwoFactorStatus(user);
 
-            HasFrejaMFA = status.HasFrejaMFA;
-            HasBankIdMFA = status.HasBankIdMFA;
             HasSmsMFA = status.HasSmsMFA;
             HasEmailMFA = status.HasEmailMFA;
             HasFido2MFA = status.HasFido2MFA;

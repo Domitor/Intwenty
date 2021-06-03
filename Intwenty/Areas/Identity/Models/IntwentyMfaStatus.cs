@@ -20,7 +20,7 @@ namespace Intwenty.Areas.Identity.Models
         {
             get
             {
-                if (HasBankIdMFA || HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA || HasFrejaMFA)
+                if (HasSmsMFA || HasEmailMFA || HasFido2MFA || HasTotpMFA)
                     return true;
 
                 return false;
@@ -28,12 +28,11 @@ namespace Intwenty.Areas.Identity.Models
         
         }
 
-        public bool HasBankIdMFA { get; set; }
         public bool HasSmsMFA { get; set; }
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
-        public bool HasFrejaMFA { get; set; }
+
 
 
     }
