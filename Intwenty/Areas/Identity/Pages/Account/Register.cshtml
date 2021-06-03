@@ -29,15 +29,7 @@
 
         @if (Settings.Value.UseBankIdLogin)
         {
-            <div v-if="model.resultCode==''">
-                <partial name="_RegisterBankId" />
-            </div>
-            <div v-if="model.resultCode=='START_BANKID'">
-                <button class="btn btn-primary m-3" v-on:click="startBankId('BID_OTHER')">Bank ID på annan enhet</button>
-
-                <button class="btn btn-secondary m-3" v-on:click="startBankId('BID_THIS')">Bank ID på den här enheten</button>
-            </div>
-
+            <partial name="_RegisterBankId" />
 
         }
         else if (Settings.Value.UseFrejaEIdLogin)
@@ -214,7 +206,7 @@
                     if (!valid)
                         return;
 
-                    context.model.actionCode = "INIT_REG_BANKID";
+                    context.model.actionCode = "BANKID_INIT_REG";
 
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
@@ -266,8 +258,8 @@
                         success: function (response)
                         {
                             context.model = response;
-                            setTimeout(function () { context.AuthenticateBankId(); }, 500);
-                            context.AuthenticateBankId();
+                            if (context.model.resultCode =="BANKID_AUTH_QR")
+                                setTimeout(function () { context.AuthenticateBankId(); }, 500);
                         },
                         error: function (response)
                         {

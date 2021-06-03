@@ -165,15 +165,11 @@ namespace Intwenty.Areas.Identity.Pages.Account
             try
             {
                 if (!_settings.AccountsAllowRegistration)
-                {
                     throw new InvalidOperationException("User registration is closed");
-                }
-
+                
                 if (model.ActionCode != "BANKID_INIT_REG")
-                {
                     throw new InvalidOperationException("Invalid action");
 
-                }
 
                 model.AccountType = AccountTypes.BankId;
                 model.Message = "";
@@ -196,27 +192,28 @@ namespace Intwenty.Areas.Identity.Pages.Account
             {
                 if (_settings.UseBankIdLogin)
                 {
-                    if (model.ActionCode == "BANKID_START_THIS")
+                    if (model.ActionCode == "BANKID_START_OTHER")
                     {
                         var request = new BankIDAuthRequest();
                         request.EndUserIp = GetExternalIP();
                         var externalauthref = await _bankidClient.InitAuthentication(request);
                         model.AuthServiceOrderRef = externalauthref.OrderRef;
+
                         var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
                         model.AuthServiceQRCode = b64qr;
                         if (string.IsNullOrEmpty(model.AuthServiceQRCode))
                             throw new InvalidOperationException("Could not generate bankid QR Code");
 
-                        model.ResultCode = "BANKID_AUTH";
+                        model.ResultCode = "BANKID_AUTH_QR";
                     }
-                    else if (model.ActionCode == "BANKID_START_OTHER")
+                    else if (model.ActionCode == "BANKID_START_THIS")
                     {
                         var request = new BankIDAuthRequest();
                         request.EndUserIp = GetExternalIP();
                         var externalauthref = await _bankidClient.InitAuthentication(request);
                         model.AuthServiceOrderRef = externalauthref.OrderRef;
                         model.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
-                        model.ResultCode = "BANKID_AUTH";
+                        model.ResultCode = "BANKID_AUTH_BUTTON";
                     }
 
                 }
@@ -250,14 +247,10 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     return new JsonResult(model) { StatusCode = 503 };
                 }
 
-                var request = new BankIDCollectRequest();
-                request.OrderRef = model.AuthServiceOrderRef;
-
+                var request = new BankIDCollectRequest() { OrderRef = model.AuthServiceOrderRef };
                 var authresult = await _bankidClient.Authenticate(request);
                 if (authresult != null)
                 {
-
-                    var client = _userManager.GetIAMDataClient();
 
                     var attemptinguser = await _userManager.GetUserWithSettingValue("SWEPNR", authresult.CompletionData.User.PersonalNumber);
                     if (attemptinguser == null)
@@ -302,15 +295,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         }
                         else
                         {
-                            if (result.Errors != null && result.Errors.Count() > 0)
-                            {
-                                var errors = result.Errors.ToList();
-                                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, errors[0].Description)) { StatusCode = 500 };
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("Unexpected error registering user");
-                            }
+                            throw new InvalidOperationException("Unexpected error registering user");
                         }
                     }
                     else

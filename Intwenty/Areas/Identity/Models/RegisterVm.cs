@@ -7,6 +7,24 @@ namespace Intwenty.Areas.Identity.Models
 {
     public class RegisterVm
     {
+
+        public RegisterVm()
+        {
+            UserName = string.Empty;
+            Password = string.Empty;
+            RedirectUrl = string.Empty;
+            ReturnUrl = string.Empty;
+            ResultCode = string.Empty;
+            Language = string.Empty;
+            GroupName = string.Empty;
+            Email = string.Empty;
+            Message = string.Empty;
+            AuthServiceQRCode = string.Empty;
+            AuthServiceUrl = string.Empty;
+            AuthServiceOrderRef = string.Empty;
+            AuthServiceStartToken = string.Empty;
+        }
+
         public string ActionCode { get; set; }
         public string UserName { get; set; }
         public string Language { get; set; }
@@ -18,6 +36,7 @@ namespace Intwenty.Areas.Identity.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string ReturnUrl { get; set; }
+        public string RedirectUrl { get; set; }
         public string Message { get; set; }     
         public string ResultCode { get; set; }
         public string AuthServiceQRCode { get; set; }
