@@ -96,27 +96,27 @@
 
             }
 
-            @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
+            @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.AuthServiceQRCode))
             {
                 <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
                     @Localizer["FREJA_INSTRUCTION"]
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <br />
-                <img src="@Model.QRCodeUrl" />
+                <img src="@Model.AuthServiceQRCode" />
 
             }
 
             @if (Settings.Value.UseBankIdLogin)
             {
-                if (!string.IsNullOrEmpty(Model.QRCodeUrl) && Model.Method == "BID_THIS")
+                if (!string.IsNullOrEmpty(Model.AuthServiceQRCode) && Model.Method == "BID_THIS")
                 {
                     <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
                         @Localizer["BANKID_INSTRUCTION"]
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <br />
-                    <img src="@Model.QRCodeUrl" />
+                    <img src="@Model.AuthServiceQRCode" />
                 }
                 else if (Model.Method == "BID_OTHER")
                 {
@@ -128,7 +128,7 @@
 
                     */
 
-                    <a class="btn btn-primary m-3" href="@Model.StartBankIdUrl" v-on:click="startPollingForSuccesfulBankIdLogin()">Öppna Bank ID</a>
+                    <a class="btn btn-primary m-3" href="@Model.AuthServiceUrl" v-on:click="startPollingForSuccesfulBankIdLogin()">Öppna Bank ID</a>
                 }
                 else
                 {

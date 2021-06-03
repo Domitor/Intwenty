@@ -56,9 +56,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public string ReturnUrl { get; set; }
 
-        public string QRCodeUrl { get; set; }
+        public string AuthServiceQRCode { get; set; }
 
-        public string StartBankIdUrl { get; set; }
+        public string AuthServiceUrl { get; set; }
 
         public string Method { get; set; }
 
@@ -99,7 +99,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 ExternalAuthReference = externalauthref.authRef;
                 if (!string.IsNullOrEmpty(externalauthref.authRef))
                 {
-                    this.QRCodeUrl = _frejaClient.GetQRCode(externalauthref.authRef).OriginalString;
+                    this.AuthServiceQRCode = _frejaClient.GetQRCode(externalauthref.authRef).OriginalString;
                 }
             }
 
@@ -114,7 +114,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
                     {
                         var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
-                        this.QRCodeUrl = b64qr;
+                        this.AuthServiceQRCode = b64qr;
                     }
                 }
                 else if (method == "BID_OTHER")
@@ -125,7 +125,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     ExternalAuthReference = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
                     if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
                     {
-                        this.StartBankIdUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
+                        this.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
                     }
                 }
 
@@ -206,7 +206,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnGetBankIdLogin()
         {
-            var model = new IntwentyLoginModel() { AccountType = AccountTypes.FrejaEId, ResultCode = "SUCCESS" };
+            var model = new IntwentyLoginModel() { AccountType = AccountTypes.BankId, ResultCode = "SUCCESS" };
 
             try
             {
@@ -234,11 +234,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
                     var client = _userManager.GetIAMDataClient();
 
-                    IntwentyUser attemptinguser = null;
-                    await client.OpenAsync();
-                    var userlist = await client.GetEntitiesAsync<IntwentyUser>();
-                    attemptinguser = userlist.Find(p => p.NormalizedEmail == _settings.Value.DemoAdminUser.ToUpper());
-                    await client.CloseAsync();
+                    var attemptinguser = await _userManager.GetUserWithSettingValue("SWEPNR", authresult.CompletionData.User.PersonalNumber);
 
                     if (attemptinguser == null)
                     {
@@ -354,72 +350,6 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
         }
 
-        /*
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
-        {
-            returnUrl = returnUrl ?? Url.Content("~/");
-
-
-            if (ModelState.IsValid)
-            {
-                var client = _userManager.GetIAMDataClient();
-
-                IntwentyUser attemptinguser = null;
-                await client.OpenAsync();
-                var userlist = await client.GetEntitiesAsync<IntwentyUser>();
-                attemptinguser = userlist.Find(p => p.UserName == Input.UserName);
-                await client.CloseAsync();
-
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
-                if (result.Succeeded)
-                {
-                    await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} logged in with password",Input.UserName), Input.UserName);
-                    if (attemptinguser != null)
-                    {
-                        attemptinguser.LastLoginProduct = _settings.Value.ProductId;
-                        attemptinguser.LastLogin = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        await client.OpenAsync();
-                        await client.UpdateEntityAsync(attemptinguser);
-                        await client.CloseAsync();
-                    }
-
-                    return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    if (attemptinguser != null && _settings.Value.RequireConfirmedAccount && !attemptinguser.EmailConfirmed)
-                    {
-                        ErrorMessage = "You must confirm your account by clicking the link in the confirmation email we sent you";
-                        ModelState.AddModelError(string.Empty, ErrorMessage);
-                    }
-                    else
-                    {
-                        ErrorMessage = "No user with that combination";
-                        ModelState.AddModelError(string.Empty, ErrorMessage);
-                    }
-
-                    await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("Failed log in attempt with password, user: {0}", Input.UserName), Input.UserName);
-                   
-                    ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                    ReturnUrl = returnUrl;
-                    return Page();
-                }
-            }
-
-            // If we got this far, something failed, redisplay form
-            return Page();
-        }
-
-        */
+     
     }
 }
