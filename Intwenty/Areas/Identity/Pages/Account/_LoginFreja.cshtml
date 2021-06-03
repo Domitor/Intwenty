@@ -1,0 +1,22 @@
+﻿@model LoginModel
+
+<div class="col-md-6">
+
+    <div class="alert alert-danger" v-if="model.resultCode=='FREJA_NO_AUTHREF'">
+        @Localizer["FREJA_UNAVAILABLE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.AuthServiceQRCode))
+    {
+        <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
+            @Localizer["FREJA_INSTRUCTION"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <br />
+        <img src="@Model.AuthServiceQRCode" />
+
+    }
+
+
+</div>

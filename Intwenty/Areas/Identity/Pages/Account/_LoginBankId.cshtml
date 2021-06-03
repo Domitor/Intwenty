@@ -1,0 +1,40 @@
+﻿@model LoginModel
+
+<div class="col-md-6">
+
+
+    <div class="alert alert-danger" v-if="model.resultCode=='BANKID_NO_AUTHREF'">
+        @Localizer["BANKID_UNAVAILABLE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.AuthServiceQRCode) && Model.Method == "BANKID_START_OTHER")
+    {
+        <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
+            @Localizer["BANKID_INSTRUCTION"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <br />
+        <img src="@Model.AuthServiceQRCode" />
+    }
+    else if (Model.Method == "BANKID_START_THIS")
+    {
+        /*
+        <div class="form-group">
+            <label>Ange personnummer (inklusive sekel)</label>
+            <input id="personalnumber" type="text" v-model="model.personalnumber" class="form-control" />
+        </div>
+
+        */
+
+        <a class="btn btn-primary m-3" href="@Model.AuthServiceUrl" v-on:click="AuthenticateBankId()">Öppna Bank ID</a>
+    }
+    else
+    {
+        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_OTHER" class="btn btn-primary m-3">Bank ID på annan enhet</a>
+
+        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_THIS" class="btn btn-secondary m-3">Bank ID på den här enheten</a>
+
+    }
+
+</div>

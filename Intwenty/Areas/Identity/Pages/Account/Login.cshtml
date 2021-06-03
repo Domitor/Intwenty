@@ -2,17 +2,10 @@
 @model LoginModel
 @using Microsoft.Extensions.Options
 @using Intwenty.Model
-@inject IOptions<IntwentySettings> Settings
+
 
 @{
     ViewData["Title"] = Localizer["Log In"].Value;
-    var demouser = "";
-    var demopwd = "";
-    if (Settings.Value.DemoShowLoginInfo)
-    {
-        demouser = " (" + Settings.Value.DemoAdminUser + ")";
-        demopwd = " (" + Settings.Value.DemoAdminPassword + ")";
-    }
 }
 
 <br />
@@ -21,161 +14,43 @@
 <div class="card">
     <div class="card-header"><h2>@ViewData["Title"]</h2></div>
     <div class="card-body">
-        
+
     </div>
 </div>
 
 <br />
 <br />
 
-<div id="app">
+<div class="row" id="app">
 
-    <div class="row">
+    @if (Settings.Value.UseBankIdLogin)
+    {
+        <partial name="_LoginBankId" model="Model"  />
 
-        <div class="col-md-6">
+    }
+    else if (Settings.Value.UseFrejaEIdLogin)
+    {
 
-            <div class="alert alert-danger" v-if="model.resultCode=='MISSING_USERNAME_OR_PWD'">
-                @Localizer["You must type a user name and a password"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='INVALID_LOGIN_ATTEMPT'">
-                @Localizer["Invalid login attemt"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='REQUIRECONFIRMATION'">
-                @Localizer["LOGIN_REQUIRE_CONF"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='FREJA_NO_AUTHREF'">
-                @Localizer["FREJA_UNAVAILABLE"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='BANKID_NO_AUTHREF'">
-                @Localizer["BANKID_UNAVAILABLE"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            @if (Settings.Value.UseLocalLogins)
-            {
-                <form v-on:submit.prevent="localLogin">
-                    <div class="form-group">
-                        @if (Settings.Value.AccountsUseEmailAsUserName)
-                        {
-                            <label>Email @demouser</label>
-                        }
-                        else
-                        {
-                            <label>@Localizer["User Name"] @demouser</label>
-                        }
-                        <input id="local_email" type="email" v-model="model.userName" class="form-control" />
-                        <span id="local_email_validation" class="text-danger"></span>
-                    </div>
+        <partial name="_LoginFreja" model="Model" />
+    }
+    else
+    {
+
+        @if (Settings.Value.UseLocalLogins)
+        {
+            <partial name="_LoginLocal" model="Model" />
+        }
 
 
-                    <div class="form-group">
-                        <label>@Localizer["Password"] @demopwd</label>
-                        <input id="local_password" type="password" v-model="model.password" class="form-control" />
-                        <span id="local_password_validation" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox">
-                            <label><input type="checkbox" v-model="model.rememberMe" /> @Localizer["Remember Me"] ?</label>
-                        </div>
-                    </div>
-                </form>
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary" v-on:click="localLogin()">@Localizer["Login"]</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">@Localizer["Forgot your password"] ?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register as a new user"]</a>
-                    </p>
-                </div>
+        @if (Settings.Value.UseExternalLogins)
+        {
+            <partial name="_LoginExternal" model="Model" />
+        }
+    }
 
-            }
-
-            @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.AuthServiceQRCode))
-            {
-                <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
-                    @Localizer["FREJA_INSTRUCTION"]
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <br />
-                <img src="@Model.AuthServiceQRCode" />
-
-            }
-
-            @if (Settings.Value.UseBankIdLogin)
-            {
-                if (!string.IsNullOrEmpty(Model.AuthServiceQRCode) && Model.Method == "BANKID_START_OTHER")
-                {
-                    <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
-                        @Localizer["BANKID_INSTRUCTION"]
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <br />
-                    <img src="@Model.AuthServiceQRCode" />
-                }
-                else if (Model.Method == "BANKID_START_THIS")
-                {
-                    /*
-                    <div class="form-group">
-                        <label>Ange personnummer (inklusive sekel)</label>
-                        <input id="personalnumber" type="text" v-model="model.personalnumber" class="form-control" />
-                    </div>
-
-                    */
-
-                    <a class="btn btn-primary m-3" href="@Model.AuthServiceUrl" v-on:click="startPollingForSuccesfulBankIdLogin()">Öppna Bank ID</a>
-                }
-                else
-                {
-                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_OTHER" class="btn btn-primary m-3">Bank ID på annan enhet</a>
-
-                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_THIS" class="btn btn-secondary m-3">Bank ID på den här enheten</a>
-
-                }
-            }
-
-
-        </div>
-
-
-        <div class="col-md-6">
-
-            @if (Settings.Value.UseExternalLogins)
-            {
-
-                <label class="pl-2">@Localizer["Use external accounts"]</label>
-
-                    <div class="d-flex flex-column mb-3">
-
-                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                            @foreach (var provider in Model.ExternalLogins)
-                            {
-                            
-                                    @if (provider.Name.ToUpper().Contains("FACE") && Settings.Value.UseFacebookLogin)
-                                    {
-                                        <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
-
-                                    }
-                                    @if (provider.Name.ToUpper().Contains("GOOGLE") && Settings.Value.UseGoogleLogin)
-                                    {
-                                        <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
-                                    }
-
-                            }
-                        </form>
-
-                    </div>
-
-            }
-        </div>
-
-    </div>
 </div>
+
+
 
 @section Scripts
  {
@@ -216,7 +91,7 @@
                         }
                     });
                 },
-                startPollingForSuccesfulBankIdLogin: function ()
+                AuthenticateBankId: function ()
                 {
                      var context = this;
                      var baseurl = '@Url.Content("~/Identity/Account/")';
@@ -267,16 +142,14 @@
                    </text>
                }
 
-               @if(Settings.Value.UseBankIdLogin && Model.Method=="BID_THIS")
+               @if(Settings.Value.UseBankIdLogin && Model.Method== "BANKID_START_THIS")
                {
                    <text>
-                         this.startPollingForSuccesfulBankIdLogin();
+                        this.AuthenticateBankId();
                    </text>
                }
 
-
-
-                   }
-               });
+         }
+     });
     </script>
 }

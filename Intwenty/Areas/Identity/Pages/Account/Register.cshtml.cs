@@ -309,7 +309,13 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         else if (result.RequiresTwoFactor)
                         {
                             model.ResultCode = "REQUIREMFA";
-                            model.ReturnUrl = "./LoginWith2fa";
+                            model.RedirectUrl = "./LoginWith2fa";
+                            return new JsonResult(model) { StatusCode = 401 };
+                        }
+                        else if (result.IsLockedOut)
+                        {
+                            model.ResultCode = "LOCKEDOUT";
+                            model.RedirectUrl = "./Lockout";
                             return new JsonResult(model) { StatusCode = 401 };
                         }
                         else

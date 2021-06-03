@@ -48,7 +48,7 @@
 
             @if (Settings.Value.UseExternalLogins)
             {
-                <partial name="_RegisterLocal" model="Model" />
+                <partial name="_RegisterExternal" model="Model" />
             }
         }
     </div>
@@ -287,12 +287,15 @@
                         success: function (response)
                         {
                             
-
+                            window.location = response.returnUrl;
 
                         },
                         error: function (response)
                         {
-                            raiseErrorModal(response.responseJSON);
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
                         }
                     });
                 },

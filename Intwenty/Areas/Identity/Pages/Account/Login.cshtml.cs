@@ -254,6 +254,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         model.RedirectUrl = "./LoginWith2fa";
                         return new JsonResult(model) { StatusCode = 401 };
                     }
+                    else if (result.IsLockedOut)
+                    {
+                        model.ResultCode = "LOCKEDOUT";
+                        model.RedirectUrl = "./Lockout";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
                     else
                     {
                         model.ReturnUrl = Url.Content("~/");
