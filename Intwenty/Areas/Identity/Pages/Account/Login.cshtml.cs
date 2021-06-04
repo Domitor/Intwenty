@@ -63,7 +63,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
         public string Method { get; set; }
 
         [TempData]
-        public string ExternalAuthReference { get; set; }
+        public string AuthServiceOrderRef { get; set; }
 
 
         private string GetExternalIP() 
@@ -82,7 +82,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null, string method="")
         {
-            ExternalAuthReference = string.Empty;
+            AuthServiceOrderRef = string.Empty;
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
@@ -96,7 +96,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             if (_settings.Value.UseFrejaEIdLogin)
             {
                 var externalauthref = await _frejaClient.InitAuthentication();
-                ExternalAuthReference = externalauthref.authRef;
+                AuthServiceOrderRef = externalauthref.authRef;
                 if (!string.IsNullOrEmpty(externalauthref.authRef))
                 {
                     this.AuthServiceQRCode = _frejaClient.GetQRCode(externalauthref.authRef).OriginalString;
@@ -105,24 +105,24 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
             if (_settings.Value.UseBankIdLogin)
             {
-                if (method == "BID_THIS")
+                if (method == "BANKID_START_OTHER")
                 {
                     var request = new BankIDAuthRequest();
                     request.EndUserIp = GetExternalIP();
                     var externalauthref = await _bankidClient.InitAuthentication(request);
-                    ExternalAuthReference = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
                     if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
                     {
                         var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
                         this.AuthServiceQRCode = b64qr;
                     }
                 }
-                else if (method == "BID_OTHER")
+                else if (method == "BANKID_START_THIS")
                 {
                     var request = new BankIDAuthRequest();
                     request.EndUserIp = GetExternalIP();
                     var externalauthref = await _bankidClient.InitAuthentication(request);
-                    ExternalAuthReference = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
                     if (!string.IsNullOrEmpty(externalauthref.AutoStartToken))
                     {
                         this.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
@@ -136,20 +136,20 @@ namespace Intwenty.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnGetFrejaLogin()
+        public async Task<IActionResult> OnPostAuthenticateFreja()
         {
             var model = new IntwentyLoginModel() { AccountType = AccountTypes.FrejaEId, ResultCode = "SUCCESS" };
 
             try
             {
           
-                if (string.IsNullOrEmpty(ExternalAuthReference))
+                if (string.IsNullOrEmpty(AuthServiceOrderRef))
                 {
                     model.ResultCode = "FREJA_NO_AUTHREF";
                     return new JsonResult(model) { StatusCode = 503 };
                 }
 
-                var authresult = await _frejaClient.Authenticate(ExternalAuthReference);
+                var authresult = await _frejaClient.Authenticate(AuthServiceOrderRef);
                 if (authresult != null)
                 {
 
@@ -167,7 +167,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         return new JsonResult(model) { StatusCode = 401 };
                     }
 
-                    var result = await _signInManager.SignInFrejaId(attemptinguser, ExternalAuthReference);
+                    var result = await _signInManager.SignInFrejaId(attemptinguser, AuthServiceOrderRef);
                     if (result.IsNotAllowed)
                     {
                         model.ResultCode = "INVALID_LOGIN_ATTEMPT";
@@ -204,20 +204,15 @@ namespace Intwenty.Areas.Identity.Pages.Account
             return new JsonResult(model) { StatusCode = 500 };
         }
 
-        public async Task<IActionResult> OnGetBankIdLogin()
+        public async Task<IActionResult> OnPostAuthenticateBankId()
         {
             var model = new IntwentyLoginModel() { AccountType = AccountTypes.BankId, ResultCode = "SUCCESS" };
 
             try
             {
                 var authref = "";
-                if (!string.IsNullOrEmpty(ExternalAuthReference))
-                {
-                    if (ExternalAuthReference.Contains("BID_"))
-                    {
-                        authref = ExternalAuthReference.Substring(4);
-                    }
-                }
+                if (!string.IsNullOrEmpty(AuthServiceOrderRef))
+                    authref = AuthServiceOrderRef.Substring(4);
 
                 if (string.IsNullOrEmpty(authref))
                 {
@@ -228,9 +223,12 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var request = new BankIDCollectRequest();
                 request.OrderRef = authref;
 
+                //TODO: Handle wrong, code, time out
                 var authresult = await _bankidClient.Authenticate(request);
                 if (authresult != null)
                 {
+                    //TODO: RETURN BANKID_TIMEOUT_FAILURE ?
+                    //TODO: RETURN BANKID_AUTH_FAILURE ?
 
                     var client = _userManager.GetIAMDataClient();
 
@@ -242,7 +240,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                         return new JsonResult(model) { StatusCode = 401 };
                     }
 
-                    var result = await _signInManager.SignInBankId(attemptinguser, ExternalAuthReference);
+                    var result = await _signInManager.SignInBankId(attemptinguser, authref);
                     if (result.IsNotAllowed)
                     {
                         model.ResultCode = "INVALID_LOGIN_ATTEMPT";
@@ -271,14 +269,14 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                    model.ResultCode = "SERVICE_FAILURE";
                     return new JsonResult(model) { StatusCode = 401 };
                 }
 
             }
             catch (Exception ex)
             {
-                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on login.OnGetBankIdLogin: " + ex.Message);
+                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on login.OnPostAuthenticateBankId: " + ex.Message);
             }
 
             model.ResultCode = "UNEXPECTED_ERROR";

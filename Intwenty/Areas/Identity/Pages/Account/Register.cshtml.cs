@@ -58,6 +58,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public string ReturnUrl { get; set; }
 
+        [TempData]
+        public string AuthServiceOrderRef { get; set; }
+
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         private string GetExternalIP()
@@ -76,7 +79,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
         public async Task  OnGetAsync(string returnUrl = null)
         {
-            
+            AuthServiceOrderRef = string.Empty;
             ReturnUrl = returnUrl;
             if (_settings.UseExternalLogins)
                 ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -87,9 +90,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             try
             {
                 if (!_settings.AccountsAllowRegistration)
-                {
-                    throw new InvalidOperationException("User registration is closed");
-                }
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "Sorry, user registration is closed !")) { StatusCode = 500 };
 
                 model.Message = "";
                 model.ReturnUrl = Url.Content("~/");
@@ -101,9 +102,8 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     user.LastName = model.LastName;
                 }
                 if (!_settings.AccountsUseEmailAsUserName)
-                {
                     user.UserName = model.UserName;
-                }
+                
 
                 if (string.IsNullOrEmpty(user.Culture))
                     user.Culture = _settings.LocalizationDefaultCulture;
@@ -164,9 +164,9 @@ namespace Intwenty.Areas.Identity.Pages.Account
         {
             try
             {
-                if (!_settings.AccountsAllowRegistration)
-                    throw new InvalidOperationException("User registration is closed");
-                
+                if (!_settings.UseBankIdLogin)
+                    throw new InvalidOperationException("Bank ID is not active in settings");
+
                 if (model.ActionCode != "BANKID_INIT_REG")
                     throw new InvalidOperationException("Invalid action");
 
@@ -176,13 +176,18 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 model.ReturnUrl = Url.Content("~/");
                 model.ResultCode = "BANKID_START_REG";
 
+                return new JsonResult(model);
+
             }
-            catch
+            catch(Exception ex)
             {
-                return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "An unexpected error occured, contact support")) { StatusCode = 500 };
+                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on Register.OnPostInitBankId: " + ex.Message);
             }
 
-            return new JsonResult(model);
+            model.ResultCode = "ERROR_BANKID_INIT_REG";
+            return new JsonResult(model) { StatusCode = 401 };
+
+         
 
         }
 
@@ -190,43 +195,46 @@ namespace Intwenty.Areas.Identity.Pages.Account
         {
             try
             {
-                if (_settings.UseBankIdLogin)
+
+                if (!_settings.UseBankIdLogin)
+                    throw new InvalidOperationException("Bank ID is not active in settings");
+
+                if (model.ActionCode == "BANKID_START_OTHER")
                 {
-                    if (model.ActionCode == "BANKID_START_OTHER")
-                    {
-                        var request = new BankIDAuthRequest();
-                        request.EndUserIp = GetExternalIP();
-                        var externalauthref = await _bankidClient.InitAuthentication(request);
-                        model.AuthServiceOrderRef = externalauthref.OrderRef;
+                    var request = new BankIDAuthRequest();
+                    request.EndUserIp = GetExternalIP();
+                    var externalauthref = await _bankidClient.InitAuthentication(request);
+                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
+                    model.AuthServiceQRCode = b64qr;
+                    if (string.IsNullOrEmpty(model.AuthServiceQRCode))
+                        throw new InvalidOperationException("Could not generate bankid QR Code");
 
-                        var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
-                        model.AuthServiceQRCode = b64qr;
-                        if (string.IsNullOrEmpty(model.AuthServiceQRCode))
-                            throw new InvalidOperationException("Could not generate bankid QR Code");
-
-                        model.ResultCode = "BANKID_AUTH_QR";
-                    }
-                    else if (model.ActionCode == "BANKID_START_THIS")
-                    {
-                        var request = new BankIDAuthRequest();
-                        request.EndUserIp = GetExternalIP();
-                        var externalauthref = await _bankidClient.InitAuthentication(request);
-                        model.AuthServiceOrderRef = externalauthref.OrderRef;
-                        model.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
-                        model.ResultCode = "BANKID_AUTH_BUTTON";
-                    }
-
+                    model.ResultCode = "BANKID_AUTH_QR";
+                }
+                else if (model.ActionCode == "BANKID_START_THIS")
+                {
+                    var request = new BankIDAuthRequest();
+                    request.EndUserIp = GetExternalIP();
+                    var externalauthref = await _bankidClient.InitAuthentication(request);
+                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                    model.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
+                    model.ResultCode = "BANKID_AUTH_BUTTON";
                 }
 
+                return new JsonResult(model);
+
+                
+
             }
-            catch
+            catch (Exception ex)
             {
-                model.ResultCode = "UNEXPECTED_ERROR";
-                return new JsonResult(model) { StatusCode = 500 };
+                await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on Register.OnPostStartBankId: " + ex.Message);
             }
 
-            return new JsonResult(model);
 
+            model.ResultCode = "ERROR_BANKID_START";
+            return new JsonResult(model) { StatusCode = 500 };
         }
 
         public async Task<IActionResult> OnPostAuthenticateBankId([FromBody] RegisterVm model)
@@ -240,17 +248,26 @@ namespace Intwenty.Areas.Identity.Pages.Account
 
                 model.ResultCode = "SUCCESS";
 
+                var authref = "";
+                if (!string.IsNullOrEmpty(AuthServiceOrderRef))
+                    authref = AuthServiceOrderRef.Substring(4);
 
-                if (string.IsNullOrEmpty(model.AuthServiceOrderRef))
+                if (string.IsNullOrEmpty(authref))
                 {
                     model.ResultCode = "BANKID_NO_AUTHREF";
                     return new JsonResult(model) { StatusCode = 503 };
                 }
 
-                var request = new BankIDCollectRequest() { OrderRef = model.AuthServiceOrderRef };
+
+                var request = new BankIDCollectRequest() { OrderRef = authref };
+
+
+                //TODO: Handle wrong, code, time out
                 var authresult = await _bankidClient.Authenticate(request);
                 if (authresult != null)
                 {
+                    //TODO: RETURN BANKID_TIMEOUT_FAILURE ?
+                    //TODO: RETURN BANKID_AUTH_FAILURE ?
 
                     var attemptinguser = await _userManager.GetUserWithSettingValue("SWEPNR", authresult.CompletionData.User.PersonalNumber);
                     if (attemptinguser == null)
@@ -289,7 +306,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                             var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
                             await _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
-                            await _signInManager.SignInBankId(user, model.AuthServiceOrderRef);
+                            await _signInManager.SignInBankId(user, authref);
 
                             model.ReturnUrl = Url.Content("~/");
                             model.ResultCode = "SUCCESS";
@@ -305,7 +322,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        var result = await _signInManager.SignInBankId(attemptinguser, model.AuthServiceOrderRef);
+                        var result = await _signInManager.SignInBankId(attemptinguser, authref);
                         if (result.IsNotAllowed)
                         {
                             model.ResultCode = "INVALID_LOGIN_ATTEMPT";
@@ -348,7 +365,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on Register.OnPostAuthenticateBankId: " + ex.Message);
             }
 
-            model.ResultCode = "UNEXPECTED_ERROR";
+            model.ResultCode = "ERROR_BANKID_AUTH";
             return new JsonResult(model) { StatusCode = 500 };
 
 

@@ -263,7 +263,7 @@
                         },
                         error: function (response)
                         {
-                            raiseErrorModal(response.responseJSON);
+                            context.model = response.responseJSON;
                         }
                     });
                 },

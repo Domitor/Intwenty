@@ -21,7 +21,6 @@ namespace Intwenty.Areas.Identity.Models
             Message = string.Empty;
             AuthServiceQRCode = string.Empty;
             AuthServiceUrl = string.Empty;
-            AuthServiceOrderRef = string.Empty;
             AuthServiceStartToken = string.Empty;
         }
 
@@ -41,7 +40,6 @@ namespace Intwenty.Areas.Identity.Models
         public string ResultCode { get; set; }
         public string AuthServiceQRCode { get; set; }
         public string AuthServiceUrl { get; set; }
-        public string AuthServiceOrderRef { get; set; }
         public string AuthServiceStartToken { get; set; }
 
 

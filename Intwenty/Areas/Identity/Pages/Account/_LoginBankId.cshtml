@@ -2,13 +2,19 @@
 
 <div class="col-md-6">
 
+    <img class="img  m-3" src="~/images/bankidicon.png" width="48" />
 
-    <div class="alert alert-danger" v-if="model.resultCode=='BANKID_NO_AUTHREF'">
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='ERROR_BANKID_START' || model.resultCode=='UNEXPECTED_ERROR')">
         @Localizer["BANKID_UNAVAILABLE"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.AuthServiceQRCode) && Model.Method == "BANKID_START_OTHER")
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_SERVICEFAILURE')">
+        Autentiseringen misslyckades, fel pinkod ?
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    @if (Model.Method == "BANKID_START_OTHER")
     {
         <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
             @Localizer["BANKID_INSTRUCTION"]
@@ -19,21 +25,13 @@
     }
     else if (Model.Method == "BANKID_START_THIS")
     {
-        /*
-        <div class="form-group">
-            <label>Ange personnummer (inklusive sekel)</label>
-            <input id="personalnumber" type="text" v-model="model.personalnumber" class="form-control" />
-        </div>
-
-        */
-
-        <a class="btn btn-primary m-3" href="@Model.AuthServiceUrl" v-on:click="AuthenticateBankId()">Öppna Bank ID</a>
+        <a class="btn btn-primary m-3" href="@Model.AuthServiceUrl" v-on:click="AuthenticateBankId()">@Localizer["BANKID_OPEN_THIS_DEVICE"]</a>
     }
     else
     {
-        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_OTHER" class="btn btn-primary m-3">Bank ID på annan enhet</a>
+        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_OTHER" class="btn btn-primary m-3">@Localizer["BANKID_USE_OTHER_DEVICE"]</a>
 
-        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_THIS" class="btn btn-secondary m-3">Bank ID på den här enheten</a>
+        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" asp-route-method="BANKID_START_THIS" class="btn btn-secondary m-3">@Localizer["BANKID_USE_THIS_DEVICE"]</a>
 
     }
 

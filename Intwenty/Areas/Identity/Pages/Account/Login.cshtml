@@ -93,23 +93,68 @@
                 },
                 AuthenticateBankId: function ()
                 {
-                     var context = this;
-                     var baseurl = '@Url.Content("~/Identity/Account/")';
-                     var endpointurl = baseurl + "Login?handler=BankIdLogin";
 
-                    $.get(endpointurl, function (response)
-                    {
-                        window.location = response.returnUrl;
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Register?handler=AuthenticateBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
-                    }).fail(function (response)
-                    {
-                        context.model = response.responseJSON;
-                        if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
-                            window.location = context.model.redirectUrl;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
                         }
                     });
+                },
+                AuthenticateFreja: function ()
+                {
 
-                }
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Register?handler=AuthenticateFreja";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        }
+                    });
+                },
 
             },
             computed:
@@ -125,24 +170,11 @@
                @if(Settings.Value.UseFrejaEIdLogin)
                {
                    <text>
-                        var context = this;
-                        var baseurl = '@Url.Content("~/Identity/Account/")';
-                        var endpointurl = baseurl + "Login?handler=FrejaLogin";
-
-                        $.get(endpointurl, function (response)
-                        {
-                            window.location = response.returnUrl;
-
-                        }).fail(function (response) {
-                            context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
-                                window.location = context.model.redirectUrl;
-                            }
-                        });
+                         this.AuthenticateFreja();
                    </text>
                }
 
-               @if(Settings.Value.UseBankIdLogin && Model.Method== "BANKID_START_THIS")
+               @if(Settings.Value.UseBankIdLogin && Model.Method== "BANKID_START_OTHER")
                {
                    <text>
                         this.AuthenticateBankId();

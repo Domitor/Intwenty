@@ -1,7 +1,29 @@
 ﻿<div class="col-md-6">
 
-    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='SERVICE_FAILURE')">
+    <img class="img  m-3" src="~/images/bankidicon.png" width="48" />
+
+    <div class="alert alert-primary" v-if="(model.resultCode=='INIT')">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        @Localizer["BANKID_CREATE_ACCOUNT"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='ERROR_BANKID_START' || model.resultCode=='UNEXPECTED_ERROR')">
         @Localizer["BANKID_UNAVAILABLE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_SERVICEFAILURE')">
+        @Localizer["BANKID_AUTH_FAILURE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_TIMEOUT_FAILURE')">
+        @Localizer["BANKID_TIMEOUT_FAILURE"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='INVALID_LOGIN_ATTEMPT')">
+        @Localizer["BANKID_AUTH_FAILURE"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
 
@@ -54,22 +76,22 @@
     </div>
 
     <div v-if="model.resultCode=='BANKID_START_REG'">
-        <button class="btn btn-primary m-3" v-on:click="startBankId('BANKID_START_OTHER')">Bank ID på annan enhet</button>
+        <button class="btn btn-primary m-3" v-on:click="startBankId('BANKID_START_OTHER')">@Localizer["BANKID_USE_OTHER_DEVICE"]</button>
 
-        <button class="btn btn-secondary m-3" v-on:click="startBankId('BANKID_START_THIS')">Bank ID på den här enheten</button>
+        <button class="btn btn-secondary m-3" v-on:click="startBankId('BANKID_START_THIS')">@Localizer["BANKID_USE_THIS_DEVICE"]</button>
     </div>
 
     <div v-if="(model.resultCode=='BANKID_AUTH_QR')">
         <div class="alert alert-primary">
-            @Localizer["BANKID_INSTRUCTION"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            @Localizer["BANKID_INSTRUCTION"]
         </div>
         <br />
         <img v-bind:src="model.authServiceQRCode" />
     </div>
 
     <div v-if="(model.resultCode=='BANKID_AUTH_BUTTON')">
-        <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">Öppna Bank ID</a>
+        <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">@Localizer["BANKID_OPEN_THIS_DEVICE"]</a>
     </div>
 
 
