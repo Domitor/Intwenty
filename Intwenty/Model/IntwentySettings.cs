@@ -28,6 +28,8 @@ namespace Intwenty.Model
             StartUpRoutingMode = RoutingModeOptions.Explicit;
             FrejaTimeoutInMilliseconds = 90000;
             BankIdTimeoutInMilliseconds = 90000;
+            BankIdQrSize = 7;
+            AccountEmergencyLoginQueryKey = "ISADMINEMERGENCYLOGIN";
         }
 
         public LogVerbosityTypes LogVerbosity { get; set; }
@@ -142,6 +144,7 @@ namespace Intwenty.Model
         public string AccountsFacebookAppSecret { get; set; }
         public string AccountsGoogleClientId { get; set; }
         public string AccountsGoogleClientSecret { get; set; }
+        public string AccountEmergencyLoginQueryKey { get; set; }
         #endregion
 
         #region Localization
@@ -259,6 +262,10 @@ namespace Intwenty.Model
         /// The thumbprint of the cerificate in the store
         /// </summary>
         public string BankIdRpCertThumbPrint { get; set; }
+        /// <summary>
+        /// Qr size, default is 7
+        /// </summary>
+        public int BankIdQrSize{ get; set; }
 
         #endregion
 

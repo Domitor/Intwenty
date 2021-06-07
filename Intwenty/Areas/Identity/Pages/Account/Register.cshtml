@@ -64,7 +64,7 @@
             el: '#app',
             data:
             {
-                model: { resultCode: "INIT"  }
+                model: { resultCode: "INIT" }
 
             },
             methods: {
@@ -230,15 +230,7 @@
                 },
                 startBankId: function (method)
                 {
-                    //1. Post email and additional info, verify and return inputed info, show this device / other device
-                    //2. User post other device / this device
-                    //3. If this device
-                    //   - Start Auth, and present qr
-                    //   - Wait for 1 second and start collect, also pass input data
-                    //4. If other device
-                    //   - Open bankid and the same time start collect, also pass input data
-                    //5. if has account, login otherwise create account and login
-
+                   
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
                     var endpointurl = baseurl + "Register?handler=StartBankId";
@@ -275,6 +267,7 @@
                     var endpointurl = baseurl + "Register?handler=AuthenticateBankId";
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
+                    context.model.actionCode = "WAIT_FOR_BANKID_AUTH";
 
                     $.ajax({
                         url: endpointurl,
@@ -286,13 +279,14 @@
                         },
                         success: function (response)
                         {
-                            
+                            context.model.actionCode = "";
                             window.location = response.returnUrl;
 
                         },
                         error: function (response)
                         {
                             context.model = response.responseJSON;
+                            context.model.actionCode = "";
                             if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
                                 window.location = context.model.redirectUrl;
                             }

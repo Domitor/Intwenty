@@ -2,35 +2,41 @@
 
     <img class="img  m-3" src="~/images/bankidicon.png" width="48" />
 
+    <br />
+
     <div class="alert alert-primary" v-if="(model.resultCode=='INIT')">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         @Localizer["BANKID_CREATE_ACCOUNT"]
     </div>
 
-    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_NO_AUTHREF' || model.resultCode=='ERROR_BANKID_START' || model.resultCode=='UNEXPECTED_ERROR')">
-        @Localizer["BANKID_UNAVAILABLE"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_SERVICE_FAILURE' || model.resultCode=='UNEXPECTED_ERROR')">
+        @Localizer["BANKID_SERVICE_FAILURE"]
     </div>
 
-    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_SERVICEFAILURE')">
-        @Localizer["BANKID_AUTH_FAILURE"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_INTWENTY_TIMEOUT_FAILURE')">
+        @Localizer["BANKID_INTWENTY_TIMEOUT_FAILURE"]
     </div>
 
     <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_TIMEOUT_FAILURE')">
         @Localizer["BANKID_TIMEOUT_FAILURE"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_CANCEL_FAILURE')">
+        @Localizer["BANKID_CANCEL_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_USERCANCEL_FAILURE')">
+        @Localizer["BANKID_USERCANCEL_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_AUTH_FAILURE')">
+        @Localizer["BANKID_AUTH_FAILURE"]
     </div>
 
     <div class="alert alert-danger" v-if="(model.resultCode=='INVALID_LOGIN_ATTEMPT')">
-        @Localizer["BANKID_AUTH_FAILURE"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        @Localizer["Invalid login attemt"]
     </div>
 
-    <div class="alert alert-danger" v-if="(model.resultCode=='UNEXPECTED_ERROR')">
-        Ett oväntat fel har inträffat. Försök igen lite senare
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    </div>
 
     <div v-if="model.resultCode=='INIT'">
 
@@ -83,7 +89,7 @@
 
     <div v-if="(model.resultCode=='BANKID_AUTH_QR')">
         <div class="alert alert-primary">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="model.actionCode == 'WAIT_FOR_BANKID_AUTH'"></span>
             @Localizer["BANKID_INSTRUCTION"]
         </div>
         <br />
@@ -91,9 +97,14 @@
     </div>
 
     <div v-if="(model.resultCode=='BANKID_AUTH_BUTTON')">
-        <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">@Localizer["BANKID_OPEN_THIS_DEVICE"]</a>
+        <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="model.actionCode == 'WAIT_FOR_BANKID_AUTH'"></span>
+            @Localizer["BANKID_OPEN_THIS_DEVICE"]
+        </a>
     </div>
 
+
+  
 
 
 </div>

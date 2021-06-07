@@ -2,21 +2,21 @@
 
 <div class="col-md-6">
 
-    <div class="alert alert-danger" v-if="model.resultCode=='FREJA_NO_AUTHREF'">
-        @Localizer["FREJA_UNAVAILABLE"]
+    <div class="alert alert-danger" v-if="model.resultCode=='FREJA_SERVICE_FAILURE'">
+        @Localizer["FREJA_SERVICE_FAILURE"]
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.AuthServiceQRCode))
-    {
-        <div class="alert alert-primary" v-if="(model.resultCode=='' || model.resultCode=='SUCCESS')">
+    <div v-if="(model.resultCode=='FREJA_AUTH_QR')">
+        <div class="alert alert-primary">
             @Localizer["FREJA_INSTRUCTION"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <br />
-        <img src="@Model.AuthServiceQRCode" />
+        <img v-bind:src="model.authServiceQRCode" />
+    </div>
+        
 
-    }
 
 
 </div>

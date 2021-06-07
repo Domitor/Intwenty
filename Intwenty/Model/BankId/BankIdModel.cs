@@ -104,6 +104,56 @@ namespace Intwenty.Model.BankId
         /// </summary>
         public BankIDCompletionData CompletionData { get; set; }
 
+        public bool IsAuthOk
+        {
+            get { return CompletionData != null && CompletionData.User != null && !string.IsNullOrEmpty(CompletionData.User.PersonalNumber);  }
+        }
+
+        /// <summary>
+        /// RFA8
+        /// SV: BankID-appen svarar inte. Kontrollera att den är startad och att du har internetanslutning.Om du inte har något giltigt BankID kan du hämta ett hos din Bank.Försök sedan igen.
+        /// EN: The BankID app is not responding. Please check that the program is started and that you have internet access.If you don’t have a valid BankID you can get one from your bank. Try again.
+        /// </summary>
+        public bool IsAuthTimeOut
+        {
+            get { return !string.IsNullOrEmpty(HintCode) && (HintCode == "expiredTransaction"); }
+        }
+
+        public bool IsAuthIntwentyTimeOut
+        {
+            get { return !string.IsNullOrEmpty(HintCode) && (HintCode == "timeOut"); }
+        }
+
+        /// <summary>
+        ///RFA16
+        ///SV: Det BankID du försöker använda är för gammalt eller spärrat. Använd ett annat BankID eller hämta ett nytt hos din internetbank.
+        ///EN: The BankID you are trying to use is revoked or too old. Please use another BankID or order a new one from your internet bank.
+        /// </summary>
+        public bool IsAuthFailure
+        {
+            get { return !string.IsNullOrEmpty(HintCode) && HintCode == "certificateErr"; }
+        }
+
+        /// <summary>
+        /// RFA6
+        /// SV: Åtgärden avbruten.
+        /// EN: Action cancelled.
+        /// </summary>
+        public bool IsAuthUserCanceled
+        {
+            get { return !string.IsNullOrEmpty(HintCode) && (HintCode == "userCancel"); }
+        }
+
+        /// <summary>
+        /// RFA3
+        /// SV: Åtgärden avbruten. Försök igen.
+        /// EN: Action cancelled. Please try again. 
+        /// </summary>
+        public bool IsAuthCanceled
+        {
+            get { return !string.IsNullOrEmpty(HintCode) && (HintCode == "cancelled"); }
+        }
+
 
     }
 

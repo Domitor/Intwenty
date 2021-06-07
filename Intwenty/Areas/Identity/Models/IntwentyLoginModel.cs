@@ -21,6 +21,10 @@ namespace Intwenty.Areas.Identity.Models
             RedirectUrl = string.Empty;
             ReturnUrl = string.Empty;
             ResultCode = string.Empty;
+            ActionCode = string.Empty;
+            AuthServiceQRCode = string.Empty;
+            AuthServiceUrl = string.Empty;
+            AuthServiceStartToken = string.Empty;
         }
 
         public AccountTypes AccountType { get; set; }
@@ -30,7 +34,12 @@ namespace Intwenty.Areas.Identity.Models
         public string RedirectUrl { get; set; }
         public string ReturnUrl { get; set; }
         public string ResultCode { get; set; }
-  
+        public string ActionCode { get; set; }
+        public string AuthServiceQRCode { get; set; }
+        public string AuthServiceUrl { get; set; }
+        public string AuthServiceStartToken { get; set; }
+
+
 
 
     }

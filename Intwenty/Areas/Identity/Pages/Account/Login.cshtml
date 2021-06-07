@@ -23,29 +23,39 @@
 
 <div class="row" id="app">
 
-    @if (Settings.Value.UseBankIdLogin)
+    @if (HttpContext.Request.Query.ContainsKey(Settings.Value.AccountEmergencyLoginQueryKey))
     {
-        <partial name="_LoginBankId" model="Model"  />
+        <partial name="_LoginLocal" model="Model" />
 
-    }
-    else if (Settings.Value.UseFrejaEIdLogin)
-    {
-
-        <partial name="_LoginFreja" model="Model" />
     }
     else
     {
 
-        @if (Settings.Value.UseLocalLogins)
+        if (Settings.Value.UseBankIdLogin)
         {
-            <partial name="_LoginLocal" model="Model" />
+            <partial name="_LoginBankId" model="Model" />
+
         }
+        else if (Settings.Value.UseFrejaEIdLogin)
+        {
+
+            <partial name="_LoginFreja" model="Model" />
+        }
+        else
+        {
+
+            if (Settings.Value.UseLocalLogins)
+            {
+                <partial name="_LoginLocal" model="Model" />
+            }
 
 
-        @if (Settings.Value.UseExternalLogins)
-        {
-            <partial name="_LoginExternal" model="Model" />
+            if (Settings.Value.UseExternalLogins)
+            {
+                <partial name="_LoginExternal" model="Model" />
+            }
         }
+
     }
 
 </div>
@@ -61,7 +71,7 @@
             el: '#app',
             data:
             {
-                model: { userName: "", password: "", resultCode: "INIT", returnUrl: "@Model.ReturnUrl" }
+                model: { userName: "", password: "", resultCode: "INIT", returnUrl: "@Model.ReturnUrl", actionCode:"" }
             },
             methods: {
 
@@ -91,12 +101,75 @@
                         }
                     });
                 },
+                startBankId: function (method)
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=StartBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                     context.model.actionCode = method;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model = response;
+                            if (context.model.resultCode =="BANKID_AUTH_QR")
+                                setTimeout(function () { context.AuthenticateBankId(); }, 500);
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                        }
+                    });
+                },
                 AuthenticateBankId: function ()
                 {
 
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
-                    var endpointurl = baseurl + "Register?handler=AuthenticateBankId";
+                    var endpointurl = baseurl + "Login?handler=AuthenticateBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    context.model.actionCode = "WAIT_FOR_BANKID_AUTH";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        }
+                    });
+                },
+                startFreja: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=StartFreja";
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
 
@@ -110,16 +183,12 @@
                         },
                         success: function (response)
                         {
-
-                            window.location = response.returnUrl;
-
+                            context.model = response;
+                            
                         },
                         error: function (response)
                         {
                             context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
-                                window.location = context.model.redirectUrl;
-                            }
                         }
                     });
                 },
@@ -128,7 +197,7 @@
 
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
-                    var endpointurl = baseurl + "Register?handler=AuthenticateFreja";
+                    var endpointurl = baseurl + "Login?handler=AuthenticateFreja";
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
 
@@ -170,16 +239,11 @@
                @if(Settings.Value.UseFrejaEIdLogin)
                {
                    <text>
-                         this.AuthenticateFreja();
+                         this.StartFreja();
                    </text>
                }
 
-               @if(Settings.Value.UseBankIdLogin && Model.Method== "BANKID_START_OTHER")
-               {
-                   <text>
-                        this.AuthenticateBankId();
-                   </text>
-               }
+
 
          }
      });

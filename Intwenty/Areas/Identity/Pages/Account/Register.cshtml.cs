@@ -204,22 +204,38 @@ namespace Intwenty.Areas.Identity.Pages.Account
                     var request = new BankIDAuthRequest();
                     request.EndUserIp = GetExternalIP();
                     var externalauthref = await _bankidClient.InitAuthentication(request);
-                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
-                    var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
-                    model.AuthServiceQRCode = b64qr;
-                    if (string.IsNullOrEmpty(model.AuthServiceQRCode))
-                        throw new InvalidOperationException("Could not generate bankid QR Code");
+                    if (externalauthref != null && !string.IsNullOrEmpty(externalauthref.OrderRef))
+                    {
+                        AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                        var b64qr = _bankidClient.GetQRCode(externalauthref.AutoStartToken);
+                        model.AuthServiceQRCode = b64qr;
+                        if (string.IsNullOrEmpty(model.AuthServiceQRCode))
+                            throw new InvalidOperationException("Could not generate bankid QR Code");
 
-                    model.ResultCode = "BANKID_AUTH_QR";
+                        model.ResultCode = "BANKID_AUTH_QR";
+                    }
+                    else
+                    {
+                        model.ResultCode = "BANKID_SERVICE_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
                 }
                 else if (model.ActionCode == "BANKID_START_THIS")
                 {
                     var request = new BankIDAuthRequest();
                     request.EndUserIp = GetExternalIP();
                     var externalauthref = await _bankidClient.InitAuthentication(request);
-                    AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
-                    model.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
-                    model.ResultCode = "BANKID_AUTH_BUTTON";
+                    if (externalauthref != null && !string.IsNullOrEmpty(externalauthref.OrderRef))
+                    {
+                        AuthServiceOrderRef = string.Format("{0}{1}", "BID_", externalauthref.OrderRef);
+                        model.AuthServiceUrl = string.Format("bankid:///?autostarttoken={0}&redirect=null", externalauthref.AutoStartToken);
+                        model.ResultCode = "BANKID_AUTH_BUTTON";
+                    }
+                    else
+                    {
+                        model.ResultCode = "BANKID_SERVICE_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
                 }
 
                 return new JsonResult(model);
@@ -233,7 +249,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
             }
 
 
-            model.ResultCode = "ERROR_BANKID_START";
+            model.ResultCode = "BANKID_SERVICE_FAILURE";
             return new JsonResult(model) { StatusCode = 500 };
         }
 
@@ -266,106 +282,129 @@ namespace Intwenty.Areas.Identity.Pages.Account
                 var authresult = await _bankidClient.Authenticate(request);
                 if (authresult != null)
                 {
-                    //TODO: RETURN BANKID_TIMEOUT_FAILURE ?
-                    //TODO: RETURN BANKID_AUTH_FAILURE ?
-
-                    var attemptinguser = await _userManager.GetUserWithSettingValue("SWEPNR", authresult.CompletionData.User.PersonalNumber);
-                    if (attemptinguser == null)
+                    if (authresult.IsAuthIntwentyTimeOut)
                     {
-                        var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };                      
-                        user.FirstName = authresult.CompletionData.User.Name;
-                        user.LastName = authresult.CompletionData.User.Surname;
-                        
-                        if (!_settings.AccountsUseEmailAsUserName)
-                            user.UserName = model.UserName;                       
+                        model.ResultCode = "BANKID_INTWENTY_TIMEOUT_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (authresult.IsAuthTimeOut)
+                    {
+                        model.ResultCode = "BANKID_TIMEOUT_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (authresult.IsAuthCanceled)
+                    {
+                        model.ResultCode = "BANKID_CANCEL_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (authresult.IsAuthUserCanceled)
+                    {
+                        model.ResultCode = "BANKID_USERCANCEL_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (authresult.IsAuthFailure)
+                    {
+                        model.ResultCode = "BANKID_AUTH_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (!authresult.IsAuthOk)
+                    {
+                        model.ResultCode = "BANKID_SERVICE_FAILURE";
+                        return new JsonResult(model) { StatusCode = 401 };
+                    }
+                    else if (authresult.IsAuthOk)
+                    {
 
-                        if (string.IsNullOrEmpty(user.Culture))
-                            user.Culture = _settings.LocalizationDefaultCulture;
-
-                        var result = await _userManager.CreateAsync(user);
-                        if (result.Succeeded)
+                        var attemptinguser = await _userManager.GetUserWithSettingValue("SWEPNR", authresult.CompletionData.User.PersonalNumber);
+                        if (attemptinguser == null)
                         {
-                            var org = await _organizationManager.FindByNameAsync(_settings.ProductOrganization);
-                            if (org != null)
+                            var user = new IntwentyUser { UserName = model.Email, Email = model.Email, Culture = model.Language };
+                            user.FirstName = authresult.CompletionData.User.Name;
+                            user.LastName = authresult.CompletionData.User.Surname;
+
+                            if (!_settings.AccountsUseEmailAsUserName)
+                                user.UserName = model.UserName;
+
+                            if (string.IsNullOrEmpty(user.Culture))
+                                user.Culture = _settings.LocalizationDefaultCulture;
+
+                            var result = await _userManager.CreateAsync(user);
+                            if (result.Succeeded)
                             {
-                                if (!string.IsNullOrEmpty(_settings.AccountsRegistrationAssignRoles))
+                                var org = await _organizationManager.FindByNameAsync(_settings.ProductOrganization);
+                                if (org != null)
                                 {
-                                    var roles = _settings.AccountsRegistrationAssignRoles.Split(",".ToCharArray());
-                                    foreach (var r in roles)
+                                    if (!string.IsNullOrEmpty(_settings.AccountsRegistrationAssignRoles))
                                     {
-                                        await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
+                                        var roles = _settings.AccountsRegistrationAssignRoles.Split(",".ToCharArray());
+                                        foreach (var r in roles)
+                                        {
+                                            await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
+                                        }
                                     }
+
+                                    await _organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
                                 }
 
-                                await _organizationManager.AddMemberAsync(new IntwentyOrganizationMember() { OrganizationId = org.Id, UserId = user.Id, UserName = user.UserName });
+                                await _userManager.AddUpdateUserSetting(user, "SWEPNR", authresult.CompletionData.User.PersonalNumber);
+
+                                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                                var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
+                                await _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
+                                await _signInManager.SignInBankId(user, authref);
+
+                                model.ReturnUrl = Url.Content("~/");
+                                model.ResultCode = "SUCCESS";
+                                await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} created an account and signed in using swedish Bank ID", user.UserName), user.UserName);
+                                return new JsonResult(model);
+
+
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("Unexpected error registering user");
+                            }
+                        }
+                        else
+                        {
+                            var result = await _signInManager.SignInBankId(attemptinguser, authref);
+                            if (result.IsNotAllowed)
+                            {
+                                model.ResultCode = "INVALID_LOGIN_ATTEMPT";
+                                return new JsonResult(model) { StatusCode = 401 };
+                            }
+                            else if (result.RequiresTwoFactor)
+                            {
+                                model.ResultCode = "REQUIREMFA";
+                                model.RedirectUrl = "./LoginWith2fa";
+                                return new JsonResult(model) { StatusCode = 401 };
+                            }
+                            else if (result.IsLockedOut)
+                            {
+                                model.ResultCode = "LOCKEDOUT";
+                                model.RedirectUrl = "./Lockout";
+                                return new JsonResult(model) { StatusCode = 401 };
+                            }
+                            else
+                            {
+                                model.ReturnUrl = Url.Content("~/");
+                                model.ResultCode = "SUCCESS";
+                                await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} tried to create account with swedish Bank ID, but it was already present", attemptinguser.UserName), attemptinguser.UserName);
+                                return new JsonResult(model);
+
                             }
 
-                            await _userManager.AddUpdateUserSetting(user, "SWEPNR", authresult.CompletionData.User.PersonalNumber);
-
-                            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                            var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code = code }, protocol: Request.Scheme);
-                            await _eventservice.NewUserCreated(new NewUserCreatedData() { UserName = model.Email, ConfirmCallbackUrl = callbackUrl });
-                            await _signInManager.SignInBankId(user, authref);
-
-                            model.ReturnUrl = Url.Content("~/");
-                            model.ResultCode = "SUCCESS";
-                            await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} created an account and signed in using swedish Bank ID", user.UserName), user.UserName);
-                            return new JsonResult(model);
-
-
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Unexpected error registering user");
                         }
                     }
-                    else
-                    {
-                        var result = await _signInManager.SignInBankId(attemptinguser, authref);
-                        if (result.IsNotAllowed)
-                        {
-                            model.ResultCode = "INVALID_LOGIN_ATTEMPT";
-                            return new JsonResult(model) { StatusCode = 401 };
-                        }
-                        else if (result.RequiresTwoFactor)
-                        {
-                            model.ResultCode = "REQUIREMFA";
-                            model.RedirectUrl = "./LoginWith2fa";
-                            return new JsonResult(model) { StatusCode = 401 };
-                        }
-                        else if (result.IsLockedOut)
-                        {
-                            model.ResultCode = "LOCKEDOUT";
-                            model.RedirectUrl = "./Lockout";
-                            return new JsonResult(model) { StatusCode = 401 };
-                        }
-                        else
-                        {
-                            model.ReturnUrl = Url.Content("~/");
-                            model.ResultCode = "SUCCESS";
-                            await _dbloggerService.LogIdentityActivityAsync("INFO", string.Format("User {0} tried to create account with swedish Bank ID, but it was already present", attemptinguser.UserName), attemptinguser.UserName);
-                            return new JsonResult(model);
-
-                        }
-
-                    }
-
-
                 }
-                else
-                {
-                    model.ResultCode = "SERVICE_FAILURE";
-                    return new JsonResult(model) { StatusCode = 401 };
-                }
-
             }
             catch (Exception ex)
             {
                 await _dbloggerService.LogIdentityActivityAsync("ERROR", "Error on Register.OnPostAuthenticateBankId: " + ex.Message);
             }
 
-            model.ResultCode = "ERROR_BANKID_AUTH";
+            model.ResultCode = "BANKID_SERVICE_FAILURE";
             return new JsonResult(model) { StatusCode = 500 };
 
 

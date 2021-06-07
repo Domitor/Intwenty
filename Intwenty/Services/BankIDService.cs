@@ -100,15 +100,15 @@ namespace Intwenty.Services
                         var cancelrequest = new BankIDCancelRequest() { OrderRef = request.OrderRef };
                         var cancelcontent = BuildContent(cancelrequest);
                         await client.PostAsync(settings.BankIdCancelEndPoint, cancelcontent);
-                        return null;
+                        return new BankIDCollectResponse() { HintCode = "timeOut" };
                     }
 
                     var response = await client.PostAsync(settings.BankIdCollectEndPoint, content);
                     var data = await response.Content.ReadAsStringAsync();
-                    if (response.IsSuccessStatusCode == true)
+                    if (response.IsSuccessStatusCode)
                     {
                         var status_response = JsonSerializer.Deserialize<BankIDCollectResponse>(data, GetJsonOptions());
-                        if (status_response.CompletionData != null && status_response.CompletionData.User != null && !string.IsNullOrEmpty(status_response.CompletionData.User.PersonalNumber))
+                        if (status_response.IsAuthOk || status_response.IsAuthTimeOut || status_response.IsAuthCanceled || status_response.IsAuthFailure || status_response.IsAuthUserCanceled)
                             return status_response;
 
                     }
@@ -202,7 +202,7 @@ namespace Intwenty.Services
 
                 using (var qrCode = new Base64QRCode(qrCodeData))
                 {
-                    var qr = qrCode.GetGraphic(10);
+                    var qr = qrCode.GetGraphic(settings.BankIdQrSize);
                     return $"data:image/png;base64, {qr}";
                 }
             }
