@@ -21,6 +21,7 @@ namespace Intwenty.Model
             get { return GetMetaTypes(); }
         }
 
+
         private static List<IntwentyMetaType> GetMetaTypes()
         {
             if (_metatypes != null)
@@ -130,6 +131,10 @@ namespace Intwenty.Model
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTextBox);
             _properties.Add(prop);
 
+            prop = new IntwentyProperty("ROWS", "Rows", "NUMERIC");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTextArea);
+            _properties.Add(prop);
+
 
             prop = new IntwentyProperty("TABLEEDITMODE", "Edit Mode", "LIST");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
@@ -158,8 +163,13 @@ namespace Intwenty.Model
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 
+            prop = new IntwentyProperty("RAZORVIEWPATH", "Razor View", "STRING");
+            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
+            _properties.Add(prop);
+
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImage);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImageBox);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGLAYOUT", "Layout", "LIST");
@@ -178,6 +188,7 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
+            prop.ValidFor.Add(FunctionModelItem.MetaTypePaging);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("MULTISELECT", "Multi Select", "BOOLEAN");

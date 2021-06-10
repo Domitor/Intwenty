@@ -30,9 +30,12 @@ namespace Intwenty.Entity
         [NotNull]
         public string Title { get; set; }
         public string TitleLocalizationKey { get; set; }
+        
+        
         public bool IsModalAction { get; set; }
+        public string ActionMetaCode { get; set; }
+        public string ActionMetaType { get; set; }
         public string ActionPath { get; set; }
-        public string ActionUserInterfaceMetaCode { get; set; }
         public string Properties { get; set; }
 
 

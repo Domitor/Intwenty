@@ -117,6 +117,7 @@ namespace IntwentyDemo
                         //Services,routing,endpoints,localization,data seeding and more....
                         app.UseIntwenty();
 
+                       
                     });
                 });
 

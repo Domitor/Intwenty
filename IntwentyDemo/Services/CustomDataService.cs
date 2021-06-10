@@ -31,7 +31,7 @@ namespace IntwentyDemo.Services
             
         }
 
-        public List<Project> GetProjects(ClientStateInfo state)
+        public List<Project> GetProjects(ClientOperation state)
         {
             var model = ModelRepository.GetApplicationModel(200);
             if (model == null)
@@ -52,7 +52,7 @@ namespace IntwentyDemo.Services
             return data;
         }
 
-        public override List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state)
+        public override List<ValueDomainModelItem> GetValueDomain(string domainname, ClientOperation state)
         {
           
 
@@ -85,7 +85,7 @@ namespace IntwentyDemo.Services
         /// <summary>
         /// Implement APPDOMAINS
         /// </summary>
-        public override List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state)
+        public override List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientOperation state)
         {
             var client = this.GetDataClient();
 
@@ -128,7 +128,7 @@ namespace IntwentyDemo.Services
         /// EXAMPLE
         /// Set CustomerStatus when a new customer isadded
         /// </summary>
-        protected override void BeforeSaveNew(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected override void BeforeSaveNew(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             if (model.Application.MetaCode == "CUSTOMER")
             {
@@ -143,7 +143,7 @@ namespace IntwentyDemo.Services
         /// EXAMPLE
         /// Change CustomerStatus when order is saved
         /// </summary>
-        protected override void AfterSave(ApplicationModel model, ClientStateInfo state, IDataClient client)
+        protected override void AfterSave(ApplicationModel model, ClientOperation state, IDataClient client)
         {
             try
             {
@@ -204,7 +204,7 @@ namespace IntwentyDemo.Services
         /// Example
         /// Serverside validation
         /// </summary>
-        protected override ModifyResult Validate(ApplicationModel model, ClientStateInfo state)
+        protected override ModifyResult Validate(ApplicationModel model, ClientOperation state)
         {
             if (state.HasProperty("ISIMPORT"))
                 return new ModifyResult(true, MessageCode.RESULT, "Successfully validated", state.Id, state.Version);

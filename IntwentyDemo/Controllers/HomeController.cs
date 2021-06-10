@@ -27,20 +27,13 @@ namespace IntwentyDemo.Controllers
         }
 
        
-
         public IActionResult Index()
         {
-          
             return View();
         }
 
      
 
-        public IActionResult Test()
-        {
-
-            return View();
-        }
 
     }
 

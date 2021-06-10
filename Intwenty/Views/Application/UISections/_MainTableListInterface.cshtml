@@ -3,6 +3,7 @@
 @{
 
     var func_edit_path = "";
+    var func_edit_path_requestinfo = "";
     var func_edit_path_use_requestinfo = false;
 
     if (Model.HasEditFunction)
@@ -10,10 +11,11 @@
         if (!Model.EditFunction.IsModalAction)
         {
             func_edit_path = Model.EditFunction.ActionPath;
-            if (func_edit_path.Contains("{requestinfo}") && !string.IsNullOrEmpty(Model.RequestInfo))
+            if (func_edit_path.Contains("{requestinfo}"))
             {
                 func_edit_path_use_requestinfo = true;
                 func_edit_path = func_edit_path.Replace("/{requestinfo}", "");
+                func_edit_path_requestinfo = Model.EditFunction.BuildRuntimeRequestInfo(Model.RuntimeRequestInfo);
             }
             if (func_edit_path.Contains("{id}"))
             {
@@ -27,7 +29,7 @@
                 //
 
             }
-           
+
 
         }
     }
@@ -130,13 +132,13 @@
         {
             @if (Model.EditFunction.IsModalAction)
             {
-                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@Model.EditFunction.ActionUserInterfaceMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
+                <td style="vertical-align:middle"><button class="btn btn-sm btn-secondary" v-on:click="openApplicationModal(item, '@Model.EditFunction.ActionMetaCode')"><span class="fas fa-edit" title="Edit"></span></button></td>
             }
             else
             {
                 @if (func_edit_path_use_requestinfo)
                 {
-                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id + '/@Model.RequestInfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+                    <td style="vertical-align:middle"><a v-bind:href="'@func_edit_path/' + item.Id + '/@func_edit_path_requestinfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
                 }
                 else
                 {

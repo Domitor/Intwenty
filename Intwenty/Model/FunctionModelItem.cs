@@ -1,6 +1,8 @@
 ﻿using Intwenty.Areas.Identity.Models;
 using Intwenty.Entity;
+using Intwenty.Helpers;
 using Intwenty.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,18 +41,14 @@ namespace Intwenty.Model
             ParentMetaCode = "ROOT";
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
-            ActionPath = entity.ActionPath;
-            if (!string.IsNullOrEmpty(ActionPath))
-            {
-                if (!ActionPath.StartsWith("/"))
-                    ActionPath = "/" + ActionPath;
-            }
-            ActionUserInterfaceMetaCode = entity.ActionUserInterfaceMetaCode;
+            ActionPath = entity.ActionPath;         
+            ActionMetaCode = entity.ActionMetaCode;
+            ActionMetaType = entity.ActionMetaType;
             OwnerMetaType = entity.OwnerMetaType;
             OwnerMetaCode = entity.OwnerMetaCode;
             IsModalAction = entity.IsModalAction;
             SetEmptyStrings();
-           
+            ConfigurePath();
         }
 
         private void SetEmptyStrings()
@@ -64,10 +62,20 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(ActionPath)) ActionPath = string.Empty;
-            if (string.IsNullOrEmpty(ActionUserInterfaceMetaCode)) ActionUserInterfaceMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ActionMetaCode)) ActionMetaCode = string.Empty;
+            if (string.IsNullOrEmpty(ActionMetaType)) ActionMetaType = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaCode)) OwnerMetaCode = string.Empty;
             if (string.IsNullOrEmpty(OwnerMetaType)) OwnerMetaType = string.Empty;
 
+        }
+
+        private void ConfigurePath()
+        {
+            if (!string.IsNullOrEmpty(ActionPath))
+            {
+                if (!ActionPath.StartsWith("/"))
+                    ActionPath = "/" + ActionPath;
+            }
         }
 
         public ApplicationModelItem ApplicationInfo { get; set; }
@@ -77,9 +85,12 @@ namespace Intwenty.Model
         public string AppMetaCode { get; set; }
         public string OwnerMetaType { get; set; }
         public string OwnerMetaCode { get; set; }
-        public string ActionUserInterfaceMetaCode { get; set; }
 
+       
+        public string ActionMetaCode { get; set; }
+        public string ActionMetaType { get; set; }
         public string ActionPath { get; set; }
+        public int ActionViewId { get; set; }
         public bool IsModalAction { get; set; }
 
         public override string ModelCode
@@ -175,6 +186,71 @@ namespace Intwenty.Model
             }
 
         }
+
+        public string BuildRuntimeURI(string requestinfo, int id = 0)
+        {
+            if (IsModalAction)
+                return string.Empty;
+
+            string result = string.Empty;
+            if (IsMetaTypeSave)
+            {
+                var aftersaveaction = GetPropertyValue("AFTERSAVEACTION");
+                if (aftersaveaction == "GOTOVIEW")
+                {
+                    result = GetPropertyValue("GOTOVIEWPATH");
+                }
+            }
+            else
+            {
+                result = ActionPath;
+            }
+
+
+            if (result.Contains("{id}"))
+            {
+                result = result.Replace("{id}", Convert.ToString(id));
+            }
+
+            if (result.Contains("{requestinfo}"))
+            {
+                var updated_requestinfo = BuildRuntimeRequestInfo(requestinfo);
+                result = result.Replace("{requestinfo}", updated_requestinfo);
+            }
+
+            return result;
+
+
+        }
+
+        public string BuildRuntimeRequestInfo(string requestinfo)
+        {
+            
+            string result = string.Empty;
+
+            if (ActionViewId > 0)
+            {
+                var tmp_requestinfo = string.Empty;
+                var hp = new HashTagPropertyObject();
+                if (!string.IsNullOrEmpty(requestinfo))
+                {
+                    tmp_requestinfo = requestinfo.B64UrlDecode();
+                    hp.Properties = tmp_requestinfo;
+                }
+                hp.AddUpdateProperty("VIEWID", Convert.ToString(ActionViewId));
+                result = hp.Properties.B64UrlEncode();
+            }
+            else
+            {
+                result = requestinfo;
+            }
+
+            
+            return result;
+
+        }
+
+
 
     }
 

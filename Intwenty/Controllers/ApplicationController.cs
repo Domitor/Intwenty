@@ -32,18 +32,17 @@ namespace Intwenty.Controllers
 
         public virtual async Task<IActionResult> View(int? id, string requestinfo)
         {
-            ViewBag.ApplicationId=0;
-            ViewBag.ApplicationViewId=0;
+            ViewBag.RequestInfo = "";
             ViewBag.Id = 0;
 
             if (id.HasValue && id.Value > 0)
                 ViewBag.Id = id.Value;
 
-            ViewBag.RequestInfo = "";
+            int viewid = 0;
+            int applicationid = 0;
+
             if (!string.IsNullOrEmpty(requestinfo))
             {
-                ViewBag.RequestInfo = requestinfo;
-
                 var props = new HashTagPropertyObject();
                 props.Properties = requestinfo.B64UrlDecode();
 
@@ -53,11 +52,11 @@ namespace Intwenty.Controllers
 
                 var vid = props.GetAsInt("VIEWID");
                 if (vid > 0)
-                    ViewBag.ApplicationViewId = vid;
+                    viewid = vid;
 
                 var aid = props.GetAsInt("APPLICATIONID");
                 if (aid > 0)
-                    ViewBag.ApplicationId = aid;
+                    applicationid = aid;
             }
             
            
@@ -72,9 +71,9 @@ namespace Intwenty.Controllers
             ViewBag.CreateNewAPIPath = Url.Content("~/Application/API/CreateNew");
 
             ViewModel current_view = null;
-            if (ViewBag.ApplicationViewId > 0)
+            if (viewid > 0)
             {
-                current_view = ModelRepository.GetLocalizedViewModelById(ViewBag.ApplicationViewId);
+                current_view = ModelRepository.GetLocalizedViewModelById(viewid);
             }
             else
             {
@@ -82,18 +81,20 @@ namespace Intwenty.Controllers
                 current_view = ModelRepository.GetLocalizedViewModelByPath(path);
             }
 
-         
-
             if (current_view == null)
                 return NotFound();
 
-            ViewBag.ApplicationId = current_view.ApplicationInfo.Id;
-            ViewBag.ApplicationViewId = current_view.Id;
+            current_view.RuntimeRequestInfo = requestinfo;
+
+
+            var viewpath = current_view.GetPropertyValue("RAZORVIEWPATH");
+            if (string.IsNullOrEmpty(viewpath))
+                viewpath = "View";
 
             if (current_view.IsPublic)
-                return View(current_view);
+                return View(viewpath,current_view);
             if (await UserManager.HasAuthorization(User, current_view))
-                return View(current_view);
+                return View(viewpath,current_view);
             else
                 return Forbid();
 

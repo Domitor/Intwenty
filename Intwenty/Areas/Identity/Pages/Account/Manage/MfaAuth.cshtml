@@ -49,10 +49,7 @@
             {
                 <a id="smsmfa" asp-page="./MfaSms" class="btn btn-outline-secondary m-2" style="min-width:250px">@Localizer["Enable SMS Code 2FA"]</a>
             }
-            if (m.MfaMethod == MfaAuthTypes.SwedishBankId && !Model.HasBankIdMFA)
-            {
-                <a id="bankidmfa" asp-page="./MfaSwedishBankId" class="btn btn-outline-secondary m-2" style="min-width:250px">@Localizer["Enable Bank ID 2FA"]</a>
-            }
+           
             if (m.MfaMethod == MfaAuthTypes.Totp && !Model.HasTotpMFA)
             {
                 <a id="totpmfa" asp-page="./MfaTotp" class="btn btn-outline-secondary m-2" style="min-width:250px">@Localizer["Enable Microsoft Authenticator"]</a>
@@ -74,10 +71,7 @@
             </div>
         }
 
-        if (Model.HasBankIdMFA)
-        {
-            <b>@Localizer["You're using Bank ID 2FA"]</b>
-        }
+      
 
         if (Model.HasEmailMFA)
         {

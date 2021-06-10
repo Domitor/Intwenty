@@ -1,53 +1,5 @@
 ﻿@model Intwenty.Model.ViewModel
 
-@{
-    var func_navigate_path = "";
-    var func_create_path = "";
-    if (Model.HasCreateFunction)
-    {
-        if (!Model.CreateFunction.IsModalAction)
-        {
-            func_create_path = Model.CreateFunction.ActionPath;
-            if (func_create_path.Contains("{requestinfo}"))
-            {
-                if (!string.IsNullOrEmpty(Model.RequestInfo))
-                {
-                    func_create_path = func_create_path.Replace("{requestinfo}", Model.RequestInfo);
-                }
-                else
-                {
-                    func_create_path = func_create_path.Replace("/{requestinfo}","");
-                }
-            }
-            if (func_create_path.Contains("{id}"))
-            {
-                func_create_path = func_create_path.Replace("{id}", "0");
-            }
-        }
-    }
-
-    if (Model.HasNavigateFunction)
-    {
-        func_navigate_path = Model.NavigateFunction.ActionPath;
-        if (func_navigate_path.Contains("{requestinfo}"))
-        {
-            if (!string.IsNullOrEmpty(Model.RequestInfo))
-            {
-                func_navigate_path = func_navigate_path.Replace("{requestinfo}", Model.RequestInfo);
-            }
-            else
-            {
-                func_navigate_path = func_navigate_path.Replace("/{requestinfo}", "");
-            }
-        }
-        if (func_navigate_path.Contains("{id}"))
-        {
-            func_navigate_path = func_navigate_path.Replace("{id}", "0");
-        }
-
-    }
-
-}
 
 <div class="card">
     <div class="card-header"><h2>@Model.LocalizedTitle</h2></div>
@@ -61,11 +13,11 @@
                 <li class="nav-item">
                     @if (Model.CreateFunction.IsModalAction)
                     {
-                        <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionUserInterfaceMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
+                        <button class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px" v-on:click="openApplicationModal(null, '@Model.CreateFunction.ActionMetaCode')"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</button>
                     }
                     else
                     {
-                        <a href="@func_create_path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
+                        <a href="@Model.CreateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
 
                     }
 
@@ -75,7 +27,7 @@
             @if (Model.HasNavigateFunction)
             {
                 <li class="nav-item">
-                    <a href="@func_navigate_path" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                    <a href="@Model.NavigateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
                 </li>
             }
 

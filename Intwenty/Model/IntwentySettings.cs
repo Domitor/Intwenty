@@ -9,11 +9,13 @@ namespace Intwenty.Model
 
     public enum AccountTypes { Local, Facebook, Google, BankId, FrejaEId };
 
-    public enum MfaAuthTypes { Totp,Sms,Email,Fido2,SwedishBankId,FrejaEId };
+    public enum MfaAuthTypes { Totp,Sms,Email,Fido2 };
 
     public enum LocalizationMethods { SiteLocalization, UserLocalization };
 
     public enum LogVerbosityTypes { Information, Warning, Error };
+
+    public enum RoutingModeOptions { Explicit, TakeAll };
 
 
     public class IntwentySettings
@@ -23,6 +25,11 @@ namespace Intwenty.Model
         public IntwentySettings()
         {
             LogVerbosity = LogVerbosityTypes.Error;
+            StartUpRoutingMode = RoutingModeOptions.Explicit;
+            FrejaTimeoutInMilliseconds = 90000;
+            BankIdTimeoutInMilliseconds = 90000;
+            BankIdQrSize = 7;
+            AccountEmergencyLoginQueryKey = "ISADMINEMERGENCYLOGIN";
         }
 
         public LogVerbosityTypes LogVerbosity { get; set; }
@@ -78,6 +85,11 @@ namespace Intwenty.Model
         /// </summary>
         public bool StartUpSeedDemoUserAccounts { get; set; }
 
+        /// <summary>
+        /// If explicit mode is used, only the paths specified on views are mapped to the intwenty application controller.
+        /// If takeall mode is used, view paths will be mapped automaticly which allows for adding routes runtime. 
+        /// </summary>
+        public RoutingModeOptions StartUpRoutingMode { get; set; }
         #endregion
 
         #region Demo
@@ -132,6 +144,7 @@ namespace Intwenty.Model
         public string AccountsFacebookAppSecret { get; set; }
         public string AccountsGoogleClientId { get; set; }
         public string AccountsGoogleClientSecret { get; set; }
+        public string AccountEmergencyLoginQueryKey { get; set; }
         #endregion
 
         #region Localization
@@ -186,8 +199,7 @@ namespace Intwenty.Model
         #endregion
 
 
-
-
+        #region FrejaId
 
 
         /// <summary>
@@ -222,6 +234,40 @@ namespace Intwenty.Model
         /// </summary>
         public string FrejaRequestedAttributes { get; set; }
 
+        #endregion
+
+        #region BankId
+
+        /// <summary>
+        /// Example: https://aaa.bbb.com
+        /// </summary>
+        public string BankIdBaseAddress { get; set; }
+        /// <summary>
+        /// Client external IP, only for dev purpose
+        /// </summary>
+        public string BankIdClientExternalIP { get; set; }
+        /// <summary>
+        /// The time to wait for the user to accept login in the app, 90000
+        /// </summary>
+        public int BankIdTimeoutInMilliseconds { get; set; }
+        public string BankIdAuthEndPoint { get; set; }
+        public string BankIdCancelEndPoint { get; set; }
+        public string BankIdCollectEndPoint { get; set; }
+        public string BankIdSignEndPoint { get; set; }
+        /// <summary>
+        /// The thumbprint of the cerificate in the store
+        /// </summary>
+        public string BankIdCaCertThumbPrint { get; set; }
+        /// <summary>
+        /// The thumbprint of the cerificate in the store
+        /// </summary>
+        public string BankIdRpCertThumbPrint { get; set; }
+        /// <summary>
+        /// Qr size, default is 7
+        /// </summary>
+        public int BankIdQrSize{ get; set; }
+
+        #endregion
 
 
         /// <summary>
@@ -255,10 +301,10 @@ namespace Intwenty.Model
                     return false;
 
             
-                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Facebook) && !string.IsNullOrEmpty(AccountsFacebookAppId))
                     return true;
 
-                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google))
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Google) && !string.IsNullOrEmpty(AccountsGoogleClientId))
                     return true;
                 
 
@@ -275,6 +321,12 @@ namespace Intwenty.Model
             get
             {
                 if (AccountsAllowedList == null)
+                    return false;
+
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return false;
+
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return false;
 
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.Local))
@@ -338,6 +390,9 @@ namespace Intwenty.Model
                 if (AccountsAllowedList == null)
                     return false;
 
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
+                    return false;
+
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return true;
               
@@ -353,6 +408,9 @@ namespace Intwenty.Model
             get
             {
                 if (AccountsAllowedList == null)
+                    return false;
+
+                if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.BankId))
                     return false;
 
                 if (AccountsAllowedList.Exists(p => p.AccountType == AccountTypes.FrejaEId))
@@ -444,37 +502,8 @@ namespace Intwenty.Model
 
         }
 
-        public bool UseSwedishBankIdMfaAuth
-        {
-
-            get
-            {
-                if (TwoFactorSupportedMethods == null)
-                    return false;
-
-                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.SwedishBankId))
-                    return true;
-
-                return false;
-            }
-
-        }
-
-        public bool UseFrejaEIdMfaAuth
-        {
-
-            get
-            {
-                if (TwoFactorSupportedMethods == null)
-                    return false;
-
-                if (TwoFactorSupportedMethods.Exists(p => p.MfaMethod == MfaAuthTypes.FrejaEId))
-                    return true;
-
-                return false;
-            }
-
-        }
+     
+     
 
 
     }

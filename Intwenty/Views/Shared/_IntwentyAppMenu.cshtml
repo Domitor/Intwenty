@@ -38,9 +38,12 @@
                 <div class="dropdown-item"><strong>@sys.Title</strong></div>
                 <div class="dropdown-divider"></div>
 
-                foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode && !p.Path.Contains("{")))
+                foreach (var view in views.Where(p => p.SystemMetaCode == sys.MetaCode && !p.Path.Contains("{id}")))
                 {
-                    <a class="dropdown-item" href="@Url.Content("~/"+view.Path)">@view.LocalizedTitle</a>
+                    var path = view.Path;
+                    var reqinfo = string.Format("VIEWID={0}", view.Id);
+                    path = "~"+path.Replace("{requestinfo}", reqinfo.B64UrlEncode());
+                    <a class="dropdown-item" href="@Url.Content(path)">@view.LocalizedTitle</a>
                 }
 
                 cnt++;

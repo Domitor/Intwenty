@@ -1,0 +1,113 @@
+﻿<div class="col-md-6">
+
+    <img class="img  m-3" src="~/images/bankidicon.png" width="48" />
+
+    <br />
+
+    <div class="alert alert-primary" v-if="(model.resultCode=='INIT')">
+        @Localizer["BANKID_CREATE_ACCOUNT"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_SERVICE_FAILURE' || model.resultCode=='UNEXPECTED_ERROR')">
+        @Localizer["BANKID_SERVICE_FAILURE"]
+    </div>
+
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_INTWENTY_TIMEOUT_FAILURE')">
+        @Localizer["BANKID_INTWENTY_TIMEOUT_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_TIMEOUT_FAILURE')">
+        @Localizer["BANKID_TIMEOUT_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_CANCEL_FAILURE')">
+        @Localizer["BANKID_CANCEL_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_USERCANCEL_FAILURE')">
+        @Localizer["BANKID_USERCANCEL_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='BANKID_AUTH_FAILURE')">
+        @Localizer["BANKID_AUTH_FAILURE"]
+    </div>
+
+    <div class="alert alert-danger" v-if="(model.resultCode=='INVALID_LOGIN_ATTEMPT')">
+        @Localizer["Invalid login attemt"]
+    </div>
+
+
+    <div v-if="model.resultCode=='INIT'">
+
+        @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
+        {
+            <div class="form-group">
+                <label>@Localizer["Language"]</label>
+                <select v-model="model.language" class="form-control" id="lang" v-on:input="onUserInput(event)" data-required="True">
+                    @{
+                        foreach (var t in Settings.Value.LocalizationSupportedLanguages)
+                        {
+                            <option value="@t.Culture">@t.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+        }
+
+        @if (Settings.Value.AccountsUseEmailAsUserName)
+        {
+            <div class="form-group">
+                <label>Email <span style="color: red"> *</span></label>
+                <input type="email" v-model="model.email" class="form-control" id="email" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label>@Localizer["User Name"] <span style="color: red"> *</span></label>
+                <input type="email" v-model="model.userName" class="form-control" id="username" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
+            </div>
+
+            <div class="form-group">
+                <label>Email <span style="color: red"> *</span></label>
+                <input type="email" v-model="model.email" class="form-control" id="email" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
+            </div>
+
+        }
+
+        <button type="button" class="btn btn-primary" v-on:click="registerNewBankIdUser()">@Localizer["Register"]</button>
+
+    </div>
+
+    <div v-if="model.resultCode=='BANKID_START_REG'">
+        <button class="btn btn-primary m-3" v-on:click="startBankId('BANKID_START_OTHER')">@Localizer["BANKID_USE_OTHER_DEVICE"]</button>
+
+        <button class="btn btn-secondary m-3" v-on:click="startBankId('BANKID_START_THIS')">@Localizer["BANKID_USE_THIS_DEVICE"]</button>
+    </div>
+
+    <div v-if="(model.resultCode=='BANKID_AUTH_QR')">
+        <div class="alert alert-primary">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="model.actionCode == 'WAIT_FOR_BANKID_AUTH'"></span>
+            @Localizer["BANKID_INSTRUCTION"]
+        </div>
+        <br />
+        <img v-bind:src="model.authServiceQRCode" />
+    </div>
+
+    <div v-if="(model.resultCode=='BANKID_AUTH_BUTTON')">
+        <a class="btn btn-primary m-3" v-bind:href="model.authServiceUrl" v-on:click="AuthenticateBankId()">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="model.actionCode == 'WAIT_FOR_BANKID_AUTH'"></span>
+            @Localizer["BANKID_OPEN_THIS_DEVICE"]
+        </a>
+    </div>
+
+
+  
+
+
+</div>
+
+<div class="col-md-6"></div>
+

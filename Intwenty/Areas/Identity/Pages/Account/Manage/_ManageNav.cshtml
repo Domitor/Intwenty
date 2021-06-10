@@ -22,7 +22,7 @@
         <li class="nav-item"><a class="nav-link @ManageNavPages.LanguageNavClass(ViewContext)" id="profile" asp-page="./Language">@Localizer["Language"]</a></li>
     }
 
-    @if (!isexternal)
+    @if (!isexternal && !Settings.Value.UseFrejaEIdLogin && !Settings.Value.UseBankIdLogin)
     {
         <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">@Localizer["Password"]</a></li>
     }

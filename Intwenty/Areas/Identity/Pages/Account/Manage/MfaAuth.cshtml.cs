@@ -31,12 +31,11 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
         }
 
         public bool HasAnyMFA { get; set; }
-        public bool HasBankIdMFA{ get; set; }
         public bool HasSmsMFA { get; set; }
         public bool HasEmailMFA { get; set; }
         public bool HasFido2MFA { get; set; }
         public bool HasTotpMFA { get; set; }
-        public bool HasFrejaMFA { get; set; }
+
 
 
 
@@ -45,8 +44,6 @@ namespace Intwenty.Areas.Identity.Pages.Account.Manage
             var user = await UserManager.GetUserAsync(User);
             var status = await UserManager.GetTwoFactorStatus(user);
 
-            HasFrejaMFA = status.HasFrejaMFA;
-            HasBankIdMFA = status.HasBankIdMFA;
             HasSmsMFA = status.HasSmsMFA;
             HasEmailMFA = status.HasEmailMFA;
             HasFido2MFA = status.HasFido2MFA;

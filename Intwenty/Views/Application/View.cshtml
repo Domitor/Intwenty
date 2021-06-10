@@ -3,24 +3,19 @@
 @{
 
     var mainDbName = Model.ApplicationInfo.DbName;
-    var subTableDbNames = new List<string>();
-    var applicationId = (int)ViewBag.ApplicationId;
-    var applicationViewId = (int)ViewBag.ApplicationViewId;
     var instanceid = (int)ViewBag.Id;
-    var requestInfo = (string)ViewBag.RequestInfo;
-    var aftersaveaction = string.Empty;
     var aftersaveactionpath = string.Empty;
+    var maintableconfig = Model.GetMainTableUIConfiguration();
+    var subtableconfig = Model.GetSubTableUIConfigurations();
 
-    //SET REQUESTINFO TO USE WHEN RENDERING INTERFACES
-    Model.RequestInfo = requestInfo;
 
-    //WHAT SHOULD HAPPEN WHEN THIS VIEW IS PERSISTED
+    //WHAT SHOULD HAPPEN WHEN THIS VIEW IS SAVED
     if (Model.HasSaveFunction)
     {
-        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+        var aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
         if (aftersaveaction == "GOTOVIEW")
         {
-            aftersaveactionpath = Model.SaveFunction.GetPropertyValue("GOTOVIEWPATH");
+            aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo, instanceid);
         }
     }
 }
@@ -38,14 +33,6 @@
     <!-- 1. ADD MODALS AND SOME CONFIG -->
     @foreach (var iface in Model.UserInterface)
     {
-        if (iface.IsSubTableUserInterface)
-        {
-            if (!subTableDbNames.Exists(p => p == iface.DataTableDbName))
-            {
-             
-                subTableDbNames.Add(iface.DataTableDbName);
-            }
-        }
         @foreach (var mip in iface.ModalInterfaces)
         {
             @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
@@ -70,7 +57,7 @@
 
     @foreach (var iface in Model.UserInterface)
     {
-        iface.RequestInfo = requestInfo;
+        iface.RuntimeRequestInfo = Model.RuntimeRequestInfo;
 
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
@@ -109,31 +96,30 @@
             data:
             {
                 baseurl: "@ViewBag.BaseAPIPath"
-                ,requestInfo: "@requestInfo"
+                ,requestInfo: "@Model.RuntimeRequestInfo"
                 ,appMainTable: "@mainDbName"
-                ,appId: @applicationId
-                ,applicationViewId: @applicationViewId
+                ,appId: @Model.ApplicationInfo.Id
+                ,applicationViewId: @Model.Id
                 ,instanceId: @instanceid
                 ,version:1
                 ,applist: []
-                ,model: { @mainDbName: {} @foreach (var st in subTableDbNames){<text>,@st:[]</text>}}
+                ,model: { @mainDbName: {} @foreach (var st in subtableconfig){<text>,@st.TableName:[]</text>}}
                 ,validation: {}
-                ,aftersaveaction:'@aftersaveaction'
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false, properties:"" }
-                 @foreach (var s in subTableDbNames)
+                , model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"" }
+                 @foreach (var s in subtableconfig)
                  {
-                     var table = s;
-                     var table_settings = s + "_settings";
-                     var table_pageinfo = s + "_pageInfo";
-                 <text>
-                 ,@table:{}
-                 ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                 ,@table_pageinfo: { applicationId: @applicationId, applicationViewId:@applicationViewId, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false,properties:"" }
-                 </text>
+                     var table = s.TableName;
+                     var table_settings = s.TableName + "_settings";
+                     var table_pageinfo = s.TableName + "_pageInfo";
+                     <text>
+                     ,@table:{}
+                     ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
+                     ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: @s.PageSize, pageNumber: 0, filterValues: [], skipPaging:@s.SkipPaging, properties:"" }
+                     </text>
                  }
             },
             methods:
@@ -195,7 +181,8 @@
                         {
                             context.model = JSON.parse(response.data);
 
-                        }).done(function (){
+                        }).done(function ()
+                        {
                             $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
                             $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
                             $('#addEditModal_' + uimetacode).modal();
@@ -260,21 +247,11 @@
                                         data: JSON.stringify(context[dbtablename]),
                                         success: function (response)
                                         {
-                                            if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
+                                            if (context.aftersaveactionpath != '') {
                                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
-                                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
-                                                }
-                                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
-                                                    endpointurl = endpointurl.replace("{requestinfo}", "");
-                                                }
-                                                if (endpointurl.indexOf("{id}") > 1) {
-                                                    endpointurl = endpointurl.replace("{id}", context.instanceId);
-                                                }
                                                 window.location.href = endpointurl;
                                             }
-                                            else if (context.aftersaveaction == 'REFRESH')
-                                            {
+                                            else if (context.aftersaveaction == 'REFRESH') {
                                                 context.modelSaved = true;
                                                 context.getApplication();
                                                 setTimeout(function () { context.modelSaved = false; }, 3000);
@@ -299,7 +276,7 @@
 
                             context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.instanceId;
-                            context[dbtablename].TableName = dbtablename;
+                            context[dbtablename].TableModelame = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
                             context[dbtablename].ApplicationViewId = context.applicationViewId;
                             context[dbtablename].Properties = context.requestInfo;
@@ -406,19 +383,8 @@
                         success: function (response)
                         {
 
-                            if (context.aftersaveaction == 'GOTOVIEW' && context.aftersaveactionpath != '') {
+                            if (context.aftersaveactionpath != '') {
                                 endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                if (endpointurl.indexOf("{requestinfo}") > 1 && context.requestInfo != "") {
-                                    endpointurl = endpointurl.replace("{requestinfo}", context.requestInfo);
-                                }
-                                else if (context.aftersaveactionpath.indexOf("{requestinfo}") > 1 && context.requestInfo == "") {
-                                    endpointurl = endpointurl.replace("{requestinfo}", "");
-                                }
-
-                                if (endpointurl.indexOf("{id}") > 1) {
-                                    endpointurl = endpointurl.replace("{id}", response.id);
-                                }
-
                                 window.location.href = endpointurl;
                             }
                             else if (context.aftersaveaction == 'REFRESH')
@@ -485,14 +451,14 @@
                                 context.applist = JSON.parse(response.data);
 
                                 //UPDATE CURRENT PAGE INFO
-                                context.model_pageInfo = response.listFilter;
+                                context.model_pageInfo = response.currentOperation;
                                 if (context.model_pageInfo.filterValues.length === 0)
                                     context.addFilterValue();
                             }
                             else
                             {
                                 context.model[dbtablename] = JSON.parse(response.data);
-                                context[objname] = response.listFilter;
+                                context[objname] = response.currentOperation;
                                 if (context[objname].filterValues.length === 0)
                                     context.addFilterValue(dbtablename);
 
@@ -503,7 +469,7 @@
                 exportToExcel: function ()
                 {
                     var context = this;
-                    var args =  { applicationId: @applicationId, applicationViewId: @applicationViewId, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
+                    var args =  { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
                     var endpointurl = "@ViewBag.GetListAPIPath";
 
                     $.ajax({
@@ -563,10 +529,10 @@
 
                     }).done(function () {
 
-                        @foreach (var s in subTableDbNames)
+                        @foreach (var s in subtableconfig)
                         {
                             <text>
-                            context.getPage('@s');
+                            context.getPage('@s.TableName');
                             </text>
                         }
 
@@ -720,13 +686,13 @@
                         return 0;
                     });
                 }
-                @foreach (var s in subTableDbNames)
+                @foreach (var s in subtableconfig)
                 {
                     <text>
-                    ,sorted_@s: function()
+                    ,sorted_@s.TableName: function()
                     {
-                        var dbtablename = "@s";
-                        var lineobjectname = "@s" + "_settings";
+                        var dbtablename = "@s.TableName";
+                        var lineobjectname = "@s.TableName" + "_settings";
                         return this.model[dbtablename].sort((a, b) => {
                             let modifier = 1;
                             if (this.model_settings.currentSortDir === 'desc') modifier = -1;
@@ -735,7 +701,7 @@
                             return 0;
                         });
                     }
-                </text>
+                    </text>
                 }
             },
             mounted: function ()

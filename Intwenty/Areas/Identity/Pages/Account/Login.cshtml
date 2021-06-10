@@ -2,17 +2,10 @@
 @model LoginModel
 @using Microsoft.Extensions.Options
 @using Intwenty.Model
-@inject IOptions<IntwentySettings> Settings
+
 
 @{
     ViewData["Title"] = Localizer["Log In"].Value;
-    var demouser = "";
-    var demopwd = "";
-    if (Settings.Value.DemoShowLoginInfo)
-    {
-        demouser = " (" + Settings.Value.DemoAdminUser + ")";
-        demopwd = " (" + Settings.Value.DemoAdminPassword + ")";
-    }
 }
 
 <br />
@@ -21,125 +14,53 @@
 <div class="card">
     <div class="card-header"><h2>@ViewData["Title"]</h2></div>
     <div class="card-body">
-        
+
     </div>
 </div>
 
 <br />
 <br />
 
-<div id="app">
+<div class="row" id="app">
 
-    <div class="row">
+    @if (HttpContext.Request.Query.ContainsKey(Settings.Value.AccountEmergencyLoginQueryKey))
+    {
+        <partial name="_LoginLocal" model="Model" />
 
-        <div class="col-md-6">
+    }
+    else
+    {
 
-            <div class="alert alert-danger" v-if="model.resultCode=='MISSING_USERNAME_OR_PWD'">
-                @Localizer["You must type a user name and a password"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='INVALID_LOGIN_ATTEMPT'">
-                @Localizer["Invalid login attemt"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='REQUIRECONFIRMATION'">
-                @Localizer["LOGIN_REQUIRE_CONF"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="alert alert-danger" v-if="model.resultCode=='FREJA_NO_AUTHREF'">
-                @Localizer["FREJA_UNAVAILABLE"]
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            @if (Settings.Value.UseLocalLogins)
+        if (Settings.Value.UseBankIdLogin)
+        {
+            <partial name="_LoginBankId" model="Model" />
+
+        }
+        else if (Settings.Value.UseFrejaEIdLogin)
+        {
+
+            <partial name="_LoginFreja" model="Model" />
+        }
+        else
+        {
+
+            if (Settings.Value.UseLocalLogins)
             {
-                <form v-on:submit.prevent="localLogin">
-                    <div class="form-group">
-                        @if (Settings.Value.AccountsUseEmailAsUserName)
-                        {
-                            <label>Email @demouser</label>
-                        }
-                        else
-                        {
-                            <label>@Localizer["User Name"] @demouser</label>
-                        }
-                        <input id="local_email" type="email" v-model="model.userName" class="form-control" />
-                        <span id="local_email_validation" class="text-danger"></span>
-                    </div>
-
-
-                    <div class="form-group">
-                        <label>@Localizer["Password"] @demopwd</label>
-                        <input id="local_password" type="password" v-model="model.password" class="form-control" />
-                        <span id="local_password_validation" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox">
-                            <label><input type="checkbox" v-model="model.rememberMe" /> @Localizer["Remember Me"] ?</label>
-                        </div>
-                    </div>
-                </form>
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary" v-on:click="localLogin()">@Localizer["Login"]</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">@Localizer["Forgot your password"] ?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register as a new user"]</a>
-                    </p>
-                </div>
-
-            }
-
-            @if (Settings.Value.UseFrejaEIdLogin && !string.IsNullOrEmpty(Model.QRCodeUrl))
-            {
-                <div class="alert alert-primary">
-                    To login, open your Freja e ID app and scan the QR code below
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <br />
-                <img src="@Model.QRCodeUrl" />
-
+                <partial name="_LoginLocal" model="Model" />
             }
 
 
-        </div>
-
-
-        <div class="col-md-6">
-
-            @if (Settings.Value.UseExternalLogins)
+            if (Settings.Value.UseExternalLogins)
             {
-
-                <label class="pl-2">@Localizer["Use external accounts"]</label>
-
-                    <div class="d-flex flex-column mb-3">
-
-                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                            @foreach (var provider in Model.ExternalLogins)
-                            {
-                            
-                                    @if (provider.Name.ToUpper().Contains("FACE") && Settings.Value.UseFacebookLogin)
-                                    {
-                                        <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
-
-                                    }
-                                    @if (provider.Name.ToUpper().Contains("GOOGLE") && Settings.Value.UseGoogleLogin)
-                                    {
-                                        <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
-                                    }
-
-                            }
-                        </form>
-
-                    </div>
-
+                <partial name="_LoginExternal" model="Model" />
             }
-        </div>
+        }
 
-    </div>
+    }
+
 </div>
+
+
 
 @section Scripts
  {
@@ -150,12 +71,11 @@
             el: '#app',
             data:
             {
-                model: { userName: "", password: "", resultCode: "", returnUrl: "@Model.ReturnUrl" }
+                model: { userName: "", password: "", resultCode: "INIT", returnUrl: "@Model.ReturnUrl", actionCode:"" }
             },
             methods: {
 
-                localLogin: function ()
-                {
+                localLogin: function () {
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
                     var endpointurl = baseurl + "Login?handler=LocalLogin";
@@ -170,20 +90,140 @@
                         {
                             RequestVerificationToken: antiforgerytoken
                         },
-                        success: function (response)
-                        {
+                        success: function (response) {
                             window.location = response.returnUrl;
                         },
-                        error: function (response)
-                        {
+                        error: function (response) {
                             context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA" )
-                            {
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
                                 window.location = context.model.redirectUrl;
                             }
                         }
                     });
-                }
+                },
+                startBankId: function (method)
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=StartBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                     context.model.actionCode = method;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model = response;
+                            if (context.model.resultCode =="BANKID_AUTH_QR")
+                                setTimeout(function () { context.AuthenticateBankId(); }, 500);
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                        }
+                    });
+                },
+                AuthenticateBankId: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=AuthenticateBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    context.model.actionCode = "WAIT_FOR_BANKID_AUTH";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        }
+                    });
+                },
+                startFreja: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=StartFreja";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model = response;
+                            
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                        }
+                    });
+                },
+                AuthenticateFreja: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Login?handler=AuthenticateFreja";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
+                        }
+                    });
+                },
 
             },
             computed:
@@ -199,28 +239,13 @@
                @if(Settings.Value.UseFrejaEIdLogin)
                {
                    <text>
-
-                        var context = this;
-                        var baseurl = '@Url.Content("~/Identity/Account/")';
-                        var endpointurl = baseurl + "Login?handler=FrejaLogin";
-
-                        $.get(endpointurl, function (response)
-                        {
-                            window.location = response.returnUrl;
-
-                        }).fail(function (response) {
-                            context.model = response.responseJSON;
-                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
-                                window.location = context.model.redirectUrl;
-                            }
-                        });
-
+                         this.StartFreja();
                    </text>
                }
 
 
 
-            }
-        });
+         }
+     });
     </script>
 }

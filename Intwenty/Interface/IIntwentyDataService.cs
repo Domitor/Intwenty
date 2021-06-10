@@ -15,7 +15,7 @@ namespace Intwenty.Interface
         /// Creates a new application including defaultvalues.
         /// </summary>
         /// <returns>An Result including a json object</returns>
-        DataResult New(ClientStateInfo state);
+        DataResult New(ClientOperation state);
         /// <summary>
         /// Creates a new application including defaultvalues.
         /// </summary>
@@ -26,60 +26,60 @@ namespace Intwenty.Interface
         /// Saves application data
         /// </summary>
         /// <returns>A result describing the state of the saved application</returns>
-        ModifyResult Save(ClientStateInfo state);
+        ModifyResult Save(ClientOperation state);
 
         /// <summary>
         /// Saves application data
         /// </summary>
         /// <returns>A result describing the state of the saved application</returns>
-        ModifyResult Save(ClientStateInfo state, ApplicationModel model);
+        ModifyResult Save(ClientOperation state, ApplicationModel model);
 
         /// <summary>
         /// Saves an application sub table row
         /// </summary>
         /// <returns>A result describing the result of the save operation</returns>
-        ModifyResult SaveSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row);
+        ModifyResult SaveSubTableLine(ClientOperation state, ApplicationModel model, ApplicationTableRow row);
 
         /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult Delete(ClientStateInfo state);
+        ModifyResult Delete(ClientOperation state);
 
         /// <summary>
         /// Deletes all application data (maintable and subtables) by id.
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult Delete(ClientStateInfo state, ApplicationModel model);
+        ModifyResult Delete(ClientOperation state, ApplicationModel model);
 
         /// <summary>
         /// Deletes data by row Id
         /// If the application uses versioning, all versions are deleted.
         /// </summary>
         /// <returns>A result describing the deleted  application</returns>
-        ModifyResult DeleteSubTableLine(ClientStateInfo state, ApplicationModel model, ApplicationTableRow row);
+        ModifyResult DeleteSubTableLine(ClientOperation state, ApplicationModel model, ApplicationTableRow row);
 
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult Get(ClientStateInfo state);
+        DataResult Get(ClientOperation state);
 
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application json data</returns>
-        DataResult Get(ClientStateInfo state, ApplicationModel model);
+        DataResult Get(ClientOperation state, ApplicationModel model);
 
         /// <summary>
         /// Get the latest version data for and application based on Id
         /// </summary>
         /// <returns>A result including the application data of type T</returns>
-        DataResult<T> Get<T>(ClientStateInfo state, ApplicationModel model) where T : InformationHeader, new();
+        DataResult<T> Get<T>(ClientOperation state, ApplicationModel model) where T : InformationHeader, new();
 
    
         /// <summary>
@@ -89,7 +89,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetJsonArray(ListFilter args);
+        DataListResult GetJsonArray(ClientOperation args);
 
         /// <summary>
         /// Get a list of (latest version) application data that matches the filter specified in args. 
@@ -98,7 +98,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a string json array</returns>
-        DataListResult GetJsonArray(ListFilter args, ApplicationModel model);
+        DataListResult GetJsonArray(ClientOperation args, ApplicationModel model);
 
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A result object that inhertits DataListResult including a string json array</returns>
-        TDataListResult GetJsonArray<TDataListResult>(ListFilter args, ApplicationModel model) where TDataListResult : DataListResult, new();
+        TDataListResult GetJsonArray<TDataListResult>(ClientOperation args, ApplicationModel model) where TDataListResult : DataListResult, new();
 
 
 
@@ -119,7 +119,7 @@ namespace Intwenty.Interface
         /// If args.OwnerUserId is set only applications owned by that OwnerUserId will be returned
         /// </summary>
         /// <returns>A DataListResult including a list of T and the current paging rownum</returns>
-        DataListResult<T> GetEntityList<T>(ListFilter args, ApplicationModel model) where T : InformationHeader, new();
+        DataListResult<T> GetEntityList<T>(ClientOperation args, ApplicationModel model) where T : InformationHeader, new();
 
 
         /// <summary>
@@ -133,19 +133,19 @@ namespace Intwenty.Interface
         /// </summary>
         /// <returns>A list of ValueDomainModelItem</returns>
         List<ValueDomainModelItem> GetValueDomain(string domainname);
-        List<ValueDomainModelItem> GetValueDomain(string domainname, ClientStateInfo state);
+        List<ValueDomainModelItem> GetValueDomain(string domainname, ClientOperation state);
         /// <summary>
         /// Generate a value domain based on a customized query.
         /// </summary>
         /// <returns>A list of ValueDomainModelItem</returns>
-        List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientStateInfo state);
+        List<ValueDomainModelItem> GetApplicationDomain(string domainname, ClientOperation state);
 
 
         /// <summary>
         /// Validates an application according to validation rules in the model
         /// </summary>
         /// <returns>OperationResult as the result of the validation</returns>
-        ModifyResult Validate(ClientStateInfo state);
+        ModifyResult Validate(ClientOperation state);
 
         IDataClient GetDataClient();
 

@@ -751,6 +751,13 @@ namespace Intwenty.Controllers
                 entity.Title = model.Title;
                 entity.IsPrimary = model.IsPrimary;
                 entity.IsPublic = model.IsPublic;
+                entity.Properties = "";
+
+                var hp = new HashTagPropertyObject();
+                if (model.HasProperty("RAZORVIEWPATH"))
+                    hp.AddUpdateProperty("RAZORVIEWPATH", model.GetPropertyValue("RAZORVIEWPATH"));
+
+                entity.Properties = hp.Properties;
 
                 var client = DataRepository.GetDataClient();
                 client.Open();
@@ -764,8 +771,9 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "";
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionPath = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;
                     else
@@ -773,8 +781,17 @@ namespace Intwenty.Controllers
 
                     funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
                     funcentity.OwnerMetaCode = entity.MetaCode;
-                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.Properties = "";
                     funcentity.IsModalAction = false;
+                    funcentity.Properties = "";
+
+                    hp = new HashTagPropertyObject();
+                    if (model.HasProperty("AFTERSAVEACTION"))
+                        hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
+                    if (model.HasProperty("GOTOVIEWPATH"))
+                        hp.AddUpdateProperty("GOTOVIEWPATH", model.GetPropertyValue("GOTOVIEWPATH"));
+
+                    funcentity.Properties = hp.Properties;
 
                     client.Open();
                     client.InsertEntity(funcentity);
@@ -789,7 +806,13 @@ namespace Intwenty.Controllers
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
                     funcentity.ActionPath = model.NavigateFunctionPath;
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        funcentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        funcentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         funcentity.Title = model.NavigateFunctionTitle;
                     else
@@ -797,7 +820,7 @@ namespace Intwenty.Controllers
 
                     funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
                     funcentity.OwnerMetaCode = entity.MetaCode;
-                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.Properties = "";
                     funcentity.IsModalAction = false;
 
                     client.Open();
@@ -852,6 +875,13 @@ namespace Intwenty.Controllers
                 entity.Title = model.Title;
                 entity.IsPrimary = model.IsPrimary;
                 entity.IsPublic = model.IsPublic;
+                entity.Properties = "";
+
+                var hp = new HashTagPropertyObject();
+                if (model.HasProperty("RAZORVIEWPATH"))
+                    hp.AddUpdateProperty("RAZORVIEWPATH", model.GetPropertyValue("RAZORVIEWPATH"));
+
+                entity.Properties = hp.Properties;
 
                 client.Open();
                 client.UpdateEntity(entity);
@@ -875,7 +905,16 @@ namespace Intwenty.Controllers
                     else
                         savefuncentity.Title = "Save";
 
-                    savefuncentity.Properties = model.CompilePropertyString();
+                    savefuncentity.Properties = "";
+
+                    hp = new HashTagPropertyObject();
+                    if (model.HasProperty("AFTERSAVEACTION"))
+                        hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
+                    if (model.HasProperty("GOTOVIEWPATH"))
+                        hp.AddUpdateProperty("GOTOVIEWPATH", model.GetPropertyValue("GOTOVIEWPATH"));
+
+                    savefuncentity.Properties = hp.Properties;
+
                     client.Open();
                     client.UpdateEntity(savefuncentity);
                     client.Close();
@@ -888,8 +927,9 @@ namespace Intwenty.Controllers
                     funcentity.AppMetaCode = appmodel.Application.MetaCode;
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeSave;
-                    funcentity.ActionPath = "";
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionPath = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
                     if (!string.IsNullOrEmpty(model.SaveFunctionTitle))
                         funcentity.Title = model.SaveFunctionTitle;
                     else
@@ -897,8 +937,17 @@ namespace Intwenty.Controllers
 
                     funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
                     funcentity.OwnerMetaCode = entity.MetaCode;
-                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.Properties = "";
                     funcentity.IsModalAction = false;
+
+
+                    hp = new HashTagPropertyObject();
+                    if (model.HasProperty("AFTERSAVEACTION"))
+                        hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
+                    if (model.HasProperty("GOTOVIEWPATH"))
+                        hp.AddUpdateProperty("GOTOVIEWPATH", model.GetPropertyValue("GOTOVIEWPATH"));
+
+                    funcentity.Properties = hp.Properties;
 
                     client.Open();
                     client.InsertEntity(funcentity);
@@ -915,13 +964,20 @@ namespace Intwenty.Controllers
                 else if (navfuncentity != null && model.NavigateFunction)
                 {
                     //UPDATE
+                    navfuncentity.ActionMetaCode = string.Empty;
+                    navfuncentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        navfuncentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        navfuncentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     navfuncentity.ActionPath = model.NavigateFunctionPath;
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         navfuncentity.Title = model.NavigateFunctionTitle;
                     else
                         navfuncentity.Title = "Back";
 
-                    navfuncentity.Properties = model.CompilePropertyString();
+                    navfuncentity.Properties = "";
                     client.Open();
                     client.UpdateEntity(navfuncentity);
                     client.Close();
@@ -935,7 +991,13 @@ namespace Intwenty.Controllers
                     funcentity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                     funcentity.MetaType = FunctionModelItem.MetaTypeNavigate;
                     funcentity.ActionPath = model.NavigateFunctionPath;
-                    funcentity.ActionUserInterfaceMetaCode = string.Empty;
+                    funcentity.ActionMetaCode = string.Empty;
+                    funcentity.ActionMetaType = string.Empty;
+                    if (!string.IsNullOrEmpty(model.NavigateFunctionActionMetaCode))
+                    {
+                        funcentity.ActionMetaCode = model.NavigateFunctionActionMetaCode;
+                        funcentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                    }
                     if (!string.IsNullOrEmpty(model.NavigateFunctionTitle))
                         funcentity.Title = model.NavigateFunctionTitle;
                     else
@@ -943,7 +1005,7 @@ namespace Intwenty.Controllers
 
                     funcentity.OwnerMetaType = ViewModel.MetaTypeUIView;
                     funcentity.OwnerMetaCode = entity.MetaCode;
-                    funcentity.Properties = model.CompilePropertyString();
+                    funcentity.Properties = "";
                     funcentity.IsModalAction = false;
 
                     client.Open();
@@ -1240,7 +1302,8 @@ namespace Intwenty.Controllers
                 entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                 entity.MetaType = model.MetaType;
                 entity.ActionPath = model.ActionPath;
-                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
+                entity.ActionMetaCode = model.ActionMetaCode;
+                entity.ActionMetaType = model.ActionMetaType;
                 entity.Title = model.Title;
                 entity.OwnerMetaType = model.OwnerMetaType;
                 entity.OwnerMetaCode = model.OwnerMetaCode;
@@ -1295,7 +1358,8 @@ namespace Intwenty.Controllers
 
                 entity.Title = model.Title;
                 entity.ActionPath = model.ActionPath;
-                entity.ActionUserInterfaceMetaCode = model.ActionUserInterfaceMetaCode;
+                entity.ActionMetaCode = model.ActionMetaCode;
+                entity.ActionMetaType = model.ActionMetaType;
                 entity.Properties = model.CompilePropertyString();
                 entity.IsModalAction = model.IsModalAction;
 
@@ -1436,6 +1500,8 @@ namespace Intwenty.Controllers
                     if (ui.IsDataTableConnected && ui.IsMetaTypeInputInterface && uimodel.DataTableMetaCode == ui.DataTableMetaCode)
                         model.ActionUserInterfaces.Add(ActionUserInterface.Create(ui));
                 }
+
+                model.ActionViews.Add(ActionView.Create(v));
             }
 
             return model;
@@ -1807,7 +1873,8 @@ namespace Intwenty.Controllers
                     functionentity.Properties = function.CompilePropertyString();
                     functionentity.IsModalAction = function.IsModalAction;
                     functionentity.ActionPath = function.ActionPath;
-                    functionentity.ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode;
+                    functionentity.ActionMetaCode = function.ActionMetaCode;
+                    functionentity.ActionMetaType = function.ActionMetaType;
                     client.UpdateEntity(functionentity);
                 }
                 else
@@ -1821,7 +1888,8 @@ namespace Intwenty.Controllers
                         MetaCode = function.MetaCode,
                         IsModalAction = function.IsModalAction,
                         ActionPath = function.ActionPath,
-                        ActionUserInterfaceMetaCode = function.ActionUserInterfaceMetaCode,
+                        ActionMetaCode = function.ActionMetaCode,
+                        ActionMetaType = function.ActionMetaType,
                         OwnerMetaCode = uimodel.MetaCode,
                         OwnerMetaType = UserInterfaceModelItem.MetaTypeListInterface,
                         Properties = function.CompilePropertyString(),
@@ -2032,7 +2100,7 @@ namespace Intwenty.Controllers
                 foreach (var app in apps)
                 {
                    
-                    var appdatalist = DataRepository.GetJsonArray(new ListFilter(User) { ApplicationId = app.Id, SkipPaging = true });
+                    var appdatalist = DataRepository.GetJsonArray(new ClientOperation(User) { ApplicationId = app.Id, SkipPaging = true });
                     var appdata = ApplicationData.CreateFromJSON(System.Text.Json.JsonDocument.Parse(appdatalist.Data).RootElement);
                     foreach (var istat in appdata.SubTables[0].Rows)
                     {
@@ -2044,7 +2112,7 @@ namespace Intwenty.Controllers
                         data.Append("," + DBHelpers.GetJSONValue("Version", istat.Version));
                         data.Append(",\"ApplicationData\":");
 
-                        var state = new ClientStateInfo(User) { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
+                        var state = new ClientOperation(User) { ApplicationId = app.Id, Id = istat.Id, Version = istat.Version };
                         var appversiondata = DataRepository.Get(state);
                         data.Append(appversiondata.Data);
                         data.Append("}");
@@ -2127,7 +2195,7 @@ namespace Intwenty.Controllers
 
                                 if (istat.Name == "ApplicationData" && app != null)
                                 {
-                                    var state = ClientStateInfo.CreateFromJSON(istat.Value, User);
+                                    var state = ClientOperation.CreateFromJSON(istat.Value, User);
                                     state.Id = 0;
                                     state.Version = 0;
                                     state.ApplicationId = app.Id;

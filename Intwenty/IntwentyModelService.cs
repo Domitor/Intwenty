@@ -872,6 +872,7 @@ namespace Intwenty
                 {
                     appview.ApplicationInfo = app;
                     appview.SystemInfo = app.SystemInfo;
+                    appview.BuildPropertyList();
 
                     foreach (var function in functions.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.OwnerMetaCode == appview.MetaCode && p.OwnerMetaType == appview.MetaType))
                     {
@@ -879,6 +880,39 @@ namespace Intwenty
                         function.SystemInfo = app.SystemInfo;
                         function.BuildPropertyList();
                         appview.Functions.Add(function);
+
+                        //SaveFuction, NavigateFunction, etc function owned by the view. Add ActionInfo (Info regarding which view is this function executed in)
+                        if (!string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == ViewModel.MetaTypeUIView)
+                        {
+                            var actionview = application_views.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode);
+                            if (actionview != null)
+                            {
+                                function.ActionViewId = actionview.Id;
+                                function.ActionPath = actionview.Path;
+                            }
+                        }
+
+                        //If no actionpath, assume that this function is executed in the view
+                        if (string.IsNullOrEmpty(function.ActionPath))
+                        {
+                            function.ActionViewId = appview.Id;
+                            function.ActionPath = appview.Path;
+                            function.ActionMetaCode = appview.MetaCode;
+                            function.ActionMetaType = ViewModel.MetaTypeUIView;
+                        }
+
+                        if (function.MetaType == FunctionModelItem.MetaTypeSave && function.HasProperty("GOTOVIEWPATH"))
+                        {
+                            var gtvp = function.GetPropertyValue("GOTOVIEWPATH");
+                            if (gtvp.Contains("{requestinfo}"))
+                            {
+                                var view = application_views.Find(av => av.IsOnPath(gtvp));
+                                if (view != null)
+                                    function.ActionViewId = view.Id;
+                            }
+
+                        }
+
                     }
 
                     foreach (var userinterface in userinterfaces.Where(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.ViewMetaCode == appview.MetaCode))
@@ -894,13 +928,36 @@ namespace Intwenty
                             function.BuildPropertyList();
                             userinterface.Functions.Add(function);
 
-                            if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionUserInterfaceMetaCode))
+                            //ADD MODAL SUB UI:s to this UI
+                            if (function.IsModalAction && !string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == UserInterfaceModelItem.MetaTypeInputInterface)
                             {
-                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionUserInterfaceMetaCode && p.IsMetaTypeInputInterface);
+                                var modalactionui = userinterfaces.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode && p.IsMetaTypeInputInterface);
                                 if (modalactionui!=null && !userinterface.ModalInterfaces.Exists(p=> p.Id == modalactionui.Id))
                                     userinterface.ModalInterfaces.Add(modalactionui);
                             }
 
+                            if (!function.IsModalAction)
+                            {
+                                //Create, Edit, Delete, Paging etc etc function owned by the UI. Add ActionInfo (Info regarding which view is this function executed in)
+                                if (!string.IsNullOrEmpty(function.ActionMetaCode) && function.ActionMetaType == ViewModel.MetaTypeUIView)
+                                {
+                                    var actionview = application_views.Find(p => p.SystemMetaCode == app.SystemMetaCode && p.AppMetaCode == app.MetaCode && p.MetaCode == function.ActionMetaCode);
+                                    if (actionview != null)
+                                    {
+                                        function.ActionViewId = actionview.Id;
+                                        function.ActionPath = actionview.Path;
+                                    }
+                                }
+
+                                //If no actionpath, assume that this function is executed in the ui
+                                if (string.IsNullOrEmpty(function.ActionPath))
+                                {
+                                    function.ActionViewId = appview.Id;
+                                    function.ActionPath = appview.Path;
+                                    function.ActionMetaCode = userinterface.MetaCode;
+                                    function.ActionMetaType = userinterface.MetaType;
+                                }
+                            }
                         }
 
                       
@@ -1556,7 +1613,7 @@ namespace Intwenty
                     res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The application: {0} has a non uppercase [MetaCode].", a.Application.Title));
 
                 if (a.DataStructure.Count == 0)
-                    res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.). Or MetaDataItems has wrong [AppMetaCode]", a.Application.Title));
+                    res.AddMessage(MessageCode.WARNING, string.Format("The application {0} has no Database objects (DATVALUE, DATATABLE, etc.)", a.Application.Title));
 
 
                 foreach (var view in a.Views)
@@ -1585,32 +1642,52 @@ namespace Intwenty
                         return res;
                     }
 
+                    if (view.Path.Contains("{id}") && !view.IsApplicationInputView())
+                    {
+                        res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has an id parameter in path, but it is not an input/edit view", view.Title, a.Application.Title));
+                    }
+
+                    if (view.Path.Count(p=> p =='{') > 2)
+                    {
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has more than 2 parameters in the path", view.Title, a.Application.Title));
+                    }
+
                     var count = view.UserInterface.Where(p => p.IsMainApplicationTableInterface && p.IsMetaTypeListInterface).Count();
                     if (count > 1)
                     {
-                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has more than one list ui defined for the main application table.", view.Title, a.Application.Title));
-                        return res;
+                        res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has more than one list ui defined for the main application table.", view.Title, a.Application.Title));
                     }
 
                     count = view.UserInterface.Where(p => p.IsMainApplicationTableInterface).Count();
                     if (count > 1)
                     {
-                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} has more than one ui defined for the main application table.", view.Title, a.Application.Title));
-                        return res;
+                        res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has more than one ui defined for the main application table.", view.Title, a.Application.Title));
                     }
 
                     foreach (var viewfunc in view.Functions)
                     {
-                        if (viewfunc.IsMetaTypeCreate && !viewfunc.IsModalAction && string.IsNullOrEmpty(viewfunc.ActionPath))
+                        if (viewfunc.IsMetaTypeSave && !viewfunc.HasProperty("AFTERSAVEACTION"))
                         {
-                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a non modal create function without [ActionPath] pointing at another view", view.Title, a.Application.Title));
+                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a save function function without the property: AFTERSAVEACTION, specifying what to do after save", view.Title, a.Application.Title));
                         }
 
-                        if (viewfunc.IsMetaTypeEdit && !viewfunc.IsModalAction && string.IsNullOrEmpty(viewfunc.ActionPath))
+                        if (viewfunc.IsMetaTypeNavigate && viewfunc.ActionViewId < 1)
                         {
-                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a non modal edit function without [ActionPath] pointing at another view", view.Title, a.Application.Title));
+                            res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a navigation function that is not mapped to a view (the view to navigate to). [ActionMetaCode]", view.Title, a.Application.Title));
                         }
 
+                    }
+
+                    if (!view.HasSaveFunction && view.UserInterface.Exists(p=> p.IsMetaTypeInputInterface))
+                    {
+                        res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} does not have a save function, but an input userinterface", view.Title, a.Application.Title));
+                    }
+
+                    var rzp = view.GetPropertyValue("RAZORVIEWPATH");
+                    if (!string.IsNullOrEmpty(rzp))
+                    {
+                        if (!rzp.Contains("Views/Application") || rzp.StartsWith("/") || !rzp.Contains(".cshtml"))
+                        res.AddMessage(MessageCode.SYSTEMERROR, string.Format("The view object {0} in application: {1} points to a custom razor file, but the path is invalid, should be: Views/Application/[AppName]/View.cshtml", view.Title, a.Application.Title));
                     }
 
 
@@ -1633,6 +1710,8 @@ namespace Intwenty
                             res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has a list interface with no column definitions.", view.Title, a.Application.Title));
                         }
 
+                        
+
                         foreach (var uifunc in ui.Functions)
                         {
                             if (ui.IsSubTableUserInterface && uifunc.IsMetaTypeCreate && !uifunc.IsModalAction && uifunc.ActionPath != view.Path)
@@ -1640,6 +1719,14 @@ namespace Intwenty
 
                             if (ui.IsSubTableUserInterface && uifunc.IsMetaTypeEdit && !uifunc.IsModalAction && uifunc.ActionPath != view.Path)
                                 res.AddMessage(MessageCode.WARNING, string.Format("The non modal edit function in the ui {0} has a missconfigured path, should be the same as parent view", ui.Title));
+
+                            if (ui.IsMainApplicationTableInterface)
+                            {
+                                if (uifunc.IsMetaTypeCreate && uifunc.ActionViewId < 1 && !uifunc.IsModalAction)
+                                    res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has an interface with a create function not mapped to an input view. [ActionMetaCode]", view.Title, a.Application.Title));
+                                if (uifunc.IsMetaTypeEdit && uifunc.ActionViewId < 1 && !uifunc.IsModalAction)
+                                    res.AddMessage(MessageCode.WARNING, string.Format("The view object {0} in application: {1} has an interface with an edit function not mapped to an input view. [ActionMetaCode]", view.Title, a.Application.Title));
+                            }
 
                         }
 

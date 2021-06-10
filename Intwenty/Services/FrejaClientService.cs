@@ -31,7 +31,7 @@ namespace Intwenty.Services
 
         }
 
-        public async Task<FrejaStatusResponse> InitQRAuthentication()
+        public async Task<FrejaStatusResponse> InitAuthentication()
         {
 
             try

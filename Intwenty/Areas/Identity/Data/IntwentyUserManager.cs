@@ -89,8 +89,7 @@ namespace Intwenty.Areas.Identity.Data
         {
             var result = new IntwentyMfaStatus();
 
-            result.HasFrejaMFA = await HasUserSettingWithValue(user, "FREJAMFA", "TRUE");
-            result.HasBankIdMFA = await HasUserSettingWithValue(user, "BANKIDMFA", "TRUE");
+
             result.HasSmsMFA = await HasUserSettingWithValue(user, "SMSMFA", "TRUE");
             result.HasEmailMFA = await HasUserSettingWithValue(user, "EMAILMFA", "TRUE");
             result.HasFido2MFA = await HasUserSettingWithValue(user, "FIDO2MFA", "TRUE");
@@ -109,12 +108,12 @@ namespace Intwenty.Areas.Identity.Data
         {
             if (!enabled)
             {
-                await RemoveUserSetting(user, "BANKIDMFA");
+  
                 await RemoveUserSetting(user, "SMSMFA");
                 await RemoveUserSetting(user, "EMAILMFA");
                 await RemoveUserSetting(user, "FIDO2MFA");
                 await RemoveUserSetting(user, "TOTPMFA");
-                await RemoveUserSetting(user, "FREJAMFA");
+    
             }
 
             return await base.SetTwoFactorEnabledAsync(user, enabled);
@@ -128,12 +127,8 @@ namespace Intwenty.Areas.Identity.Data
                 await AddUpdateUserSetting(user, "EMAILMFA", "TRUE");
             if (mfatype == MfaAuthTypes.Fido2 && enabled)
                 await AddUpdateUserSetting(user, "FIDO2MFA", "TRUE");
-            if (mfatype == MfaAuthTypes.FrejaEId && enabled)
-                await AddUpdateUserSetting(user, "FREJAMFA", "TRUE");
             if (mfatype == MfaAuthTypes.Sms && enabled)
                 await AddUpdateUserSetting(user, "SMSMFA", "TRUE");
-            if (mfatype == MfaAuthTypes.SwedishBankId && enabled)
-                await AddUpdateUserSetting(user, "BANKIDMFA", "TRUE");
             if (mfatype == MfaAuthTypes.Totp && enabled)
                 await AddUpdateUserSetting(user, "TOTPMFA", "TRUE");
 
@@ -886,6 +881,23 @@ namespace Intwenty.Areas.Identity.Data
 
             return false;
 
+        }
+
+        public async Task<IntwentyUser> GetUserWithSettingValue(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+                return null;
+
+            var settings = await GetAllUserSettings();
+            var usersetting = settings.Where(p => p.Code.ToUpper() == key.ToUpper() && p.Value.ToUpper()==value.ToUpper()).ToList();
+            if (usersetting.Count > 0)
+            {
+                var ul = await GetUsersAsync();
+                var t = ul.Find(p => p.Id == usersetting[0].UserId);
+                return t;
+            }
+
+            return null;
         }
 
         private async Task<List<IntwentyUserSetting>> GetAllUserSettings()

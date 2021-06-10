@@ -449,7 +449,7 @@ namespace Intwenty.Controllers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var state = new ClientStateInfo();
+                    var state = new ClientOperation();
                     state.ApplicationId = 10000;
                     state.User.UserName = "TESTUSER";
 
@@ -505,12 +505,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                var filter = new ListFilter() { ApplicationId = 10000, SkipPaging = true };
+                var filter = new ClientOperation() { ApplicationId = 10000, SkipPaging = true };
                 var getlistresult = _dataservice.GetJsonArray(filter);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(1000) failed: " + getlistresult.SystemError);
 
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                var state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
@@ -518,7 +518,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("Could not get list of intwenty applications, should be at least 5 records");
 
 
-                filter = new ListFilter() { ApplicationId = 10000, PageSize = 10 };
+                filter = new ClientOperation() { ApplicationId = 10000, PageSize = 10 };
                 for (int i = 1; i < 4; i++)
                 {
                     filter.PageNumber = i;
@@ -527,7 +527,7 @@ namespace Intwenty.Controllers
                         throw new InvalidOperationException("GetPagedList - No result");
 
 
-                    if (pageresult.ListFilter.MaxCount == 0)
+                    if (pageresult.CurrentOperation.MaxCount == 0)
                         throw new InvalidOperationException("GetPagedList - ListFilter.MaxCount was 0");
 
                 }
@@ -553,12 +553,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                var f = new ListFilter() { ApplicationId = 10000 };
+                var f = new ClientOperation() { ApplicationId = 10000 };
                 var getlistresult = _dataservice.GetJsonArray(f);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetJsonArray(listfilter) failed: " + getlistresult.SystemError);
 
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                var state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
@@ -586,7 +586,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var filter = new ListFilter();
+                var filter = new ClientOperation();
                 filter.ApplicationId = 10000;
 
                 var getresult = _dataservice.GetJsonArray(filter);
@@ -597,12 +597,12 @@ namespace Intwenty.Controllers
                 var id = getresult.GetAsApplicationData().SubTables[0].Rows[lastindex].Id;
 
 
-                var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                var state = new ClientOperation() { ApplicationId = 10000, Id = id };
                 var getbyidresult = _dataservice.Get(state);
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.Get(state) 1 failed: " + getresult.SystemError);
 
-                state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                state = new ClientOperation() { ApplicationId = 10000, Id = id };
                 state.Data = getbyidresult.GetAsApplicationData();
                 state.User.UserName = "OTHERUSER2";
                 state.Data.SetValue("Description", "Updated test application");
@@ -613,7 +613,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("IntwentyDataService.Save(state) failed when updating application: " + getresult.SystemError);
 
 
-                var newstate = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                var newstate = new ClientOperation() { ApplicationId = 10000, Id = id };
                 getbyidresult = _dataservice.Get(newstate);
                 if (!getbyidresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetById(state) 2 failed: " + getresult.SystemError);
@@ -669,7 +669,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var args = new ListFilter() { ApplicationId = 10000, PageSize = 500 };
+                var args = new ClientOperation() { ApplicationId = 10000, PageSize = 500 };
                 var model = _modelservice.GetApplicationModels().Find(p => p.Application.Id == 10000);
                 if (model == null)
                     throw new InvalidOperationException("Model not found");
@@ -682,7 +682,7 @@ namespace Intwenty.Controllers
                     throw new InvalidOperationException("No data found when using GetPagedList<def_TestApp>()");
 
 
-                var state = new ClientStateInfo() { ApplicationId = 10000, Id = data.Data[0].Id };
+                var state = new ClientOperation() { ApplicationId = 10000, Id = data.Data[0].Id };
                 var data2 = _dataservice.Get<def_TestApp>(state, model);
                 if (!data2.IsSuccess)
                     throw new InvalidOperationException(data2.SystemError);
@@ -712,7 +712,7 @@ namespace Intwenty.Controllers
 
             try
             {
-                var filter = new ListFilter();
+                var filter = new ClientOperation();
                 filter.ApplicationId = 10000;
 
                 var listresult = _dataservice.GetJsonArray(filter);
@@ -723,7 +723,7 @@ namespace Intwenty.Controllers
                 var id = listresult.GetAsApplicationData().SubTables[0].Rows[lastindex].Id;
 
 
-                var state = new ClientStateInfo() { ApplicationId = 10000, Id = id };
+                var state = new ClientOperation() { ApplicationId = 10000, Id = id };
 
 
                 var getresult = _dataservice.Get(state);
@@ -895,7 +895,7 @@ namespace Intwenty.Controllers
             try
             {
 
-                var args = new ListFilter();
+                var args = new ClientOperation();
                 args.ApplicationId = 10000;
                 args.PageSize = 20;
                 args.PageNumber = 0;
@@ -904,7 +904,7 @@ namespace Intwenty.Controllers
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                var state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
@@ -913,14 +913,14 @@ namespace Intwenty.Controllers
 
                 var latestid = state.Data.SubTables[0].Rows.Max(p => p.Id);
 
-                args = getlistresult.ListFilter;
+                args = getlistresult.CurrentOperation;
                 args.PageNumber = 1;
 
                 getlistresult = _dataservice.GetJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(args) failed: " + getlistresult.SystemError);
 
-                state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
@@ -931,13 +931,13 @@ namespace Intwenty.Controllers
                 if (state.Data.SubTables[0].Rows.Count != args.PageSize)
                     throw new InvalidOperationException("The returned amount of records was different from batch size");
 
-                args = new ListFilter() { ApplicationId = 10000, SkipPaging = true };
+                args = new ClientOperation() { ApplicationId = 10000, SkipPaging = true };
                 getlistresult = _dataservice.GetJsonArray(args);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetList(applicationid) failed: " + getlistresult.SystemError);
 
 
-                state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 
@@ -1100,7 +1100,7 @@ namespace Intwenty.Controllers
             {
                 for (int i = 0; i < 200; i++)
                 {
-                    var state = new ClientStateInfo();
+                    var state = new ClientOperation();
                     state.ApplicationId = 20000;
 
                     state.Data.Values.Add(new ApplicationValue() { DbName = "Header", Value = "Test Header " + i });
@@ -1135,12 +1135,12 @@ namespace Intwenty.Controllers
 
             try
             {
-                var filter = new ListFilter() { ApplicationId = 20000, SkipPaging = true };
+                var filter = new ClientOperation() { ApplicationId = 20000, SkipPaging = true };
                 var getlistresult = _dataservice.GetJsonArray(filter);
                 if (!getlistresult.IsSuccess)
                     throw new InvalidOperationException("IntwentyDataService.GetJsonArray(listfilter) failed: " + getlistresult.SystemError);
 
-                var state = ClientStateInfo.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
+                var state = ClientOperation.CreateFromJSON(System.Text.Json.JsonDocument.Parse(getlistresult.Data).RootElement);
                 if (state.Data.SubTables.Count < 1)
                     throw new InvalidOperationException("Could not create ClientStateInfo.SubTable from string json array");
 

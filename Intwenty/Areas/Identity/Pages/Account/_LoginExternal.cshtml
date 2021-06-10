@@ -1,0 +1,29 @@
+﻿@model LoginModel
+
+<div class="col-md-6">
+
+    <label class="pl-2">@Localizer["Use external accounts"]</label>
+
+    <div class="d-flex flex-column mb-3">
+
+        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+            @foreach (var provider in Model.ExternalLogins)
+            {
+
+                @if (provider.Name.ToUpper().Contains("FACE") && Settings.Value.UseFacebookLogin)
+                {
+                    <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
+
+                }
+                @if (provider.Name.ToUpper().Contains("GOOGLE") && Settings.Value.UseGoogleLogin)
+                {
+                    <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
+                }
+
+            }
+        </form>
+
+    </div>
+
+
+</div>

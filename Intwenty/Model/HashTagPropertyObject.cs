@@ -14,11 +14,78 @@ namespace Intwenty.Model
 
         public HashTagPropertyObject()
         {
+            Properties = string.Empty;
             PropertyList = new List<PropertyValue>();
         }
 
+        private string GetPropertyListValue(string propertyname)
+        {
+            try
+            {
 
-       
+                var check = PropertyList.Find(p => p.CodeName.ToUpper() == propertyname.ToUpper());
+                if (check != null)
+                    return check.CodeValue;
+            }
+            catch { }
+
+            return string.Empty;
+        }
+
+        private bool HasPropertyInPropertyList(string propertyname)
+        {
+            try
+            {
+                var check = PropertyList.Find(p => p.CodeName.ToUpper() == propertyname.ToUpper());
+                if (check != null)
+                    return true;
+            }
+            catch { }
+
+            return false;
+        }
+
+        private void AddUpdatePropertyList(string key, string value)
+        {
+            try
+            {
+                var definition = IntwentyRegistry.IntwentyProperties.Find(p => p.CodeName == key.ToUpper());
+                if (definition == null)
+                    return;
+
+                var check = PropertyList.Find(p => p.CodeName.ToUpper() == key.ToUpper());
+                if (check != null)
+                {
+                    check.CodeValue = value;
+                    if (definition.IsListType)
+                    {
+                        var listvalue = definition.ValidValues.Find(p => p.CodeValue == value.ToUpper());
+                        if (listvalue != null)
+                        {
+                            check.DisplayValue = listvalue.DisplayValue;
+                        }
+                    }
+                }
+                else
+                {
+                    var pv = new PropertyValue() { CodeName=key, CodeValue=value };
+                    if (definition.IsListType)
+                    {
+                        var listvalue = definition.ValidValues.Find(p => p.CodeValue == value.ToUpper());
+                        if (listvalue != null)
+                        {
+                            pv.DisplayValue = listvalue.DisplayValue;
+                        }
+                    }
+                    PropertyList.Add(pv);
+
+                }
+            }
+            catch { }
+
+          
+        }
+
         public void BuildPropertyList()
         {
             PropertyList = new List<PropertyValue>();
@@ -126,6 +193,9 @@ namespace Intwenty.Model
                     res += "#" + key + "=" + value;
 
                 Properties = res;
+
+                AddUpdatePropertyList(key, value);
+                
             }
             catch
             { 
@@ -138,8 +208,19 @@ namespace Intwenty.Model
         {
             try
             {
-                var res = GetPropertyValue(propertyname);
-                return Convert.ToInt32(res);
+                var t1 = GetPropertyValue(propertyname);
+                var t2 = string.Empty;
+                if (string.IsNullOrEmpty(t1))
+                {
+                    t2 = GetPropertyListValue(propertyname);
+                }
+                if (string.IsNullOrEmpty(t1) && string.IsNullOrEmpty(t2))
+                    return 0;
+                if (!string.IsNullOrEmpty(t1))
+                    return Convert.ToInt32(t1);
+                if (!string.IsNullOrEmpty(t2))
+                    return Convert.ToInt32(t2);
+
             }
             catch { }
 
@@ -149,28 +230,32 @@ namespace Intwenty.Model
 
         public string GetPropertyValue(string propertyname)
         {
-            if (string.IsNullOrEmpty(Properties))
+            if (string.IsNullOrEmpty(Properties) && PropertyList.Count==0)
                 return string.Empty;
 
             if (string.IsNullOrEmpty(propertyname))
                 return string.Empty;
 
-            var arr = Properties.Split("#".ToCharArray());
-
-            foreach (var pair in arr)
+            if (!string.IsNullOrEmpty(Properties))
             {
-                if (pair != string.Empty)
-                {
-                    var keyval = pair.Split("=".ToCharArray());
-                    if (keyval.Length < 2)
-                        return string.Empty;
+                var arr = Properties.Split("#".ToCharArray());
 
-                    if (keyval[0].ToUpper() == propertyname.ToUpper())
-                        return keyval[1];
+                foreach (var pair in arr)
+                {
+                    if (pair != string.Empty)
+                    {
+                        var keyval = pair.Split("=".ToCharArray());
+                        if (keyval.Length < 2)
+                            return string.Empty;
+
+                        if (keyval[0].ToUpper() == propertyname.ToUpper())
+                            return keyval[1];
+                    }
                 }
             }
 
-            return string.Empty;
+
+            return GetPropertyListValue(propertyname);
         }
 
         public bool HasProperty(string propertyname)
@@ -190,11 +275,16 @@ namespace Intwenty.Model
                             return true;
                     }
                 }
+              
             }
             catch { }
 
-            return false;
+            return HasPropertyInPropertyList(propertyname);
         }
+
+      
+
+       
 
         public bool HasPropertyWithValue(string propertyname, object value)
         {
@@ -240,12 +330,20 @@ namespace Intwenty.Model
                         else
                         {
                             res = true;
-                        }
-                       
+                        }                      
                     }
                 }
+
+                var check = PropertyList.Find(p => p.CodeName.ToUpper() == propertyname.ToUpper());
+                if (check != null)
+                {
+                    res = true;
+                    PropertyList.Remove(check);
+                }
+
             }
-            catch {
+            catch 
+            {
                 this.Properties = temp;
             }
 
@@ -269,6 +367,12 @@ namespace Intwenty.Model
                     res.Add(keyval[0].ToUpper());
                 }
 
+                foreach (var pv in PropertyList)
+                {
+                    if (!res.Exists(p => p == pv.CodeName))
+                        res.Add(pv.CodeName);
+                }
+
             }
             catch { }
 
@@ -277,7 +381,7 @@ namespace Intwenty.Model
 
         public bool HasProperties
         {
-            get { return !string.IsNullOrEmpty(Properties); }
+            get { return !string.IsNullOrEmpty(Properties) || PropertyList.Count > 0; }
         }
 
 

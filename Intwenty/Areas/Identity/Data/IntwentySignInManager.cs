@@ -112,6 +112,30 @@ namespace Intwenty.Areas.Identity.Data
 
         }
 
+        public async Task<SignInResult> SignInBankId(IntwentyUser user, string authref)
+        {
+            var cansignin = await CanSignInAsync(user);
+            if (!cansignin)
+                return SignInResult.NotAllowed;
+
+            var mfastatus = await UserManager.GetTwoFactorStatus(user);
+            if (mfastatus.HasAnyMFA)
+            {
+                var identity = new ClaimsIdentity(IdentityConstants.TwoFactorUserIdScheme);
+                identity.AddClaim(new Claim(ClaimTypes.Name, user.Id));
+                identity.AddClaim(new Claim("BankIdLogin", authref));
+                await Context.SignInAsync(IdentityConstants.TwoFactorUserIdScheme, new ClaimsPrincipal(identity));
+                return SignInResult.TwoFactorRequired;
+            }
+
+            var bankidclaims = new List<Claim>();
+            bankidclaims.Add(new Claim("BankIdLogin", authref));
+            await SignInWithClaimsAsync(user, false, bankidclaims);
+
+            return SignInResult.Success;
+
+        }
+
         public override async Task<bool> CanSignInAsync(IntwentyUser user)
         {
             if (!await OrganizationManager.IsProductUser(Settings.ProductId, user))

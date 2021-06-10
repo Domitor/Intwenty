@@ -18,13 +18,18 @@ namespace Intwenty.Model.Design
         public bool IsSubTableUserInterface { get; set; }
 
         public List<ActionUserInterface> ActionUserInterfaces { get; set; }
+        public List<ActionView> ActionViews { get; set; }
 
         public List<FunctionVm> Functions { get; set; }
 
+        public List<IntwentyProperty> PropertyCollection { get; set; }
+
         public UserInterfaceListDesignVm()
         {
+            PropertyCollection = IntwentyRegistry.IntwentyProperties;
             Functions = new List<FunctionVm>();
             ActionUserInterfaces = new List<ActionUserInterface>();
+            ActionViews = new List<ActionView>();
             Table = new UITable();
             MetaType = UserInterfaceModelItem.MetaTypeListInterface;
             Properties = "";
@@ -44,6 +49,20 @@ namespace Intwenty.Model.Design
         {
             var title = model.Description;
             return new ActionUserInterface() { Id= model.Id, MetaCode = model.MetaCode, Title = title };
+        }
+
+    }
+
+    public class ActionView
+    {
+        public int Id { get; set; }
+        public string MetaCode { get; set; }
+        public string Title { get; set; }
+
+        public static ActionView Create(ViewModel model)
+        {
+            var title = model.Title;
+            return new ActionView() { Id = model.Id, MetaCode = model.MetaCode, Title = title };
         }
 
     }

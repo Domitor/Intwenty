@@ -29,6 +29,8 @@ using System.Net.Http;
 using System.Net;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Routing;
+using Intwenty.Helpers;
 
 namespace Intwenty.WebHostBuilder
 {
@@ -90,6 +92,7 @@ namespace Intwenty.WebHostBuilder
             //Required for Intwenty if Identity is used
             services.AddIdentity<IntwentyUser, IntwentyProductAuthorizationItem>(options =>
             {
+                
                 options.SignIn.RequireConfirmedAccount = settings.AccountsRequireConfirmed;
 
                 options.Password.RequireDigit = false;
@@ -105,6 +108,9 @@ namespace Intwenty.WebHostBuilder
 
                 options.User.RequireUniqueEmail = true;
 
+                
+                
+
             })
              .AddRoles<IntwentyProductAuthorizationItem>()
              .AddUserStore<IntwentyUserStore>()
@@ -114,16 +120,19 @@ namespace Intwenty.WebHostBuilder
              .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>()
              .AddDefaultTokenProviders();
 
+            //If remember me is clicked on sign in, the cookiw will be valid 14 days, otherwise only the session
             services.ConfigureApplicationCookie(options =>
             {
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.Cookie.Name = "IntwentyAuthCookie";
                 options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                 options.LoginPath = "/Identity/Account/Login";
                 options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                 options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(365);
+                
             });
+
 
 
             if (settings.UseExternalLogins && settings.UseFacebookLogin)
@@ -176,7 +185,51 @@ namespace Intwenty.WebHostBuilder
                 services.AddHttpClient<IFrejaClientService, FrejaClientService>();
             }
 
-           
+            if (settings.UseBankIdLogin)
+            {
+               services.AddHttpClient<IBankIDClientService, BankIDClientService>()
+              .ConfigurePrimaryHttpMessageHandler(() =>
+              {
+                  HttpClientHandler handler = new HttpClientHandler
+                  {
+                      AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                      ClientCertificateOptions = ClientCertificateOption.Manual,
+                      SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                      ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
+                  };
+
+                  X509Store certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                  if (!string.IsNullOrEmpty(settings.BankIdCaCertThumbPrint))
+                  {
+                      certStore.Open(OpenFlags.ReadOnly);
+                      X509Certificate2Collection caCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdCaCertThumbPrint, false);
+                      if (caCertCollection.Count > 0)
+                      {
+                          X509Certificate2 cert = caCertCollection[0];
+                          //handler.ClientCertificates.Add(cert);
+                      }
+                  }
+
+                  if (!string.IsNullOrEmpty(settings.BankIdRpCertThumbPrint))
+                  {
+                      X509Certificate2Collection rpCertCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, settings.BankIdRpCertThumbPrint, false);
+                      if (rpCertCollection.Count > 0)
+                      {
+                          X509Certificate2 cert = rpCertCollection[0];
+                          handler.ClientCertificates.Add(cert);
+                      }
+                  }
+
+                  certStore.Close();
+                  return handler;
+              });
+            }
+            else
+            {
+                services.AddHttpClient<IBankIDClientService, BankIDClientService>();
+            }
+
+
 
 
             if (string.IsNullOrEmpty(settings.LocalizationDefaultCulture))
@@ -252,6 +305,7 @@ namespace Intwenty.WebHostBuilder
 
             builder.UseHttpsRedirection();
             builder.UseCookiePolicy();
+
             builder.UseRouting();
 
 
@@ -265,7 +319,7 @@ namespace Intwenty.WebHostBuilder
 
             builder.ConfigureEndpoints(settings);
 
-            builder.ConfigureIntwentyAPI(settings);
+            builder.ConfigureSwagger(settings);
             
 
             return builder;
@@ -280,20 +334,7 @@ namespace Intwenty.WebHostBuilder
 
                 endpoints.MapDefaultControllerRoute();
 
-                //INTWENTY ROUTING
-                
-                /*
-                endpoints.MapControllerRoute("apiroute_1", "Application/API/{action=GetApplication}/{applicationid?}/{viewid?}/{id?}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_2", "Application/API/{action=GetPagedList}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_3", "Application/API/{action=GetDomain}/{domainname}/{query}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_4", "Application/API/{action=CreateNew}/{id}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_5", "Application/API/{action=Save}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_6", "Application/API/{action=SaveSubTableLine}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_7", "Application/API/{action=Delete}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_8", "Application/API/{action=DeleteSubTableLine}", defaults: new { controller = "ApplicationAPI" });
-                endpoints.MapControllerRoute("apiroute_9", "Application/API/{action=UploadImage}", defaults: new { controller = "ApplicationAPI" });
-                */
-
+                //INTWENTY ENDPOINT ROUTING
                 using (var scope = builder.ApplicationServices.CreateScope())
                 {
                     var serviceProvider = scope.ServiceProvider;
@@ -314,27 +355,43 @@ namespace Intwenty.WebHostBuilder
                             endpoints.MapControllerRoute(ep.MetaCode, ep.Path + "{action=" + ep.Action + "}/{id?}", defaults: new { controller = "DynamicEndpoint" });
                         }
                     }
-                    //endpoints.MapDynamicControllerRoute<IntwentyEndpointTransformer>("/cp/{**slug}");
 
-                    var appmodels = modelservice.GetApplicationModels();
-                    foreach (var a in appmodels)
-                    {
-
-                        foreach (var view in a.Views)
+                    //INTWENTY EXPLICIT APP ROUTING
+                    if (settings.StartUpRoutingMode == RoutingModeOptions.Explicit)
+                    {                     
+                        var appmodels = modelservice.GetApplicationModels();
+                        foreach (var a in appmodels)
                         {
-                            if (string.IsNullOrEmpty(view.Path))
-                                continue;
 
-                            var path = view.Path;
-                            path.Trim();
-                            if (path[0] != '/')
-                                path = "/" + path;
-                            if (path[path.Length - 1] != '/')
-                                path = path + "/";
+                            foreach (var view in a.Views)
+                            {
+                                if (string.IsNullOrEmpty(view.Path))
+                                    continue;
 
-                            endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                var path = view.Path.Trim();
+                                if (!path.EndsWith("/"))
+                                    path = path + "/";
+
+                                //View Paths in the model will never be mapped, so default values will be used
+                                endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                
+                            }
                         }
                     }
+
+                   
+                }
+
+
+                if (settings.StartUpRoutingMode == RoutingModeOptions.TakeAll)
+                {
+                    //INTWENTY APP ROUTING
+                    //Applicationpath and viewpath will (probably) never be mapped, so default values will be used
+                  
+                    endpoints.MapControllerRoute("runtime_routes",
+                        "{applicationpath}/{viewpath}/{id:int?}/{requestinfo?}",
+                        defaults: new { controller = "Application", action = "View" },
+                        constraints: new { applicationpath = "^(?!model|identity|swagger|api)([a-z0-9]+)$", viewpath = "^(?!iam|api|model)([a-z0-9]+)$" });
                 }
 
                 endpoints.MapRazorPages();
@@ -350,6 +407,7 @@ namespace Intwenty.WebHostBuilder
 
             });
 
+           
         }
 
         private static void ConfigureIntwentyTwoFactorAuth(this IApplicationBuilder builder, IntwentySettings settings)
@@ -362,7 +420,7 @@ namespace Intwenty.WebHostBuilder
 
         }
 
-        private static void ConfigureIntwentyAPI(this IApplicationBuilder builder, IntwentySettings settings)
+        private static void ConfigureSwagger(this IApplicationBuilder builder, IntwentySettings settings)
         {
             if (settings.APIEnable)
             {
@@ -512,5 +570,9 @@ namespace Intwenty.WebHostBuilder
             }
 
         }
+
+      
+
+
     }
 }

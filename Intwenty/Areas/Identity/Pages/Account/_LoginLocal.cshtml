@@ -1,0 +1,65 @@
+﻿@model LoginModel
+@{
+  
+    var demouser = "";
+    var demopwd = "";
+    if (Settings.Value.DemoShowLoginInfo)
+    {
+        demouser = " (" + Settings.Value.DemoAdminUser + ")";
+        demopwd = " (" + Settings.Value.DemoAdminPassword + ")";
+    }
+}
+
+<div class="col-md-6">
+
+    <div class="alert alert-danger" v-if="model.resultCode=='MISSING_USERNAME_OR_PWD'">
+        @Localizer["You must type a user name and a password"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="alert alert-danger" v-if="model.resultCode=='INVALID_LOGIN_ATTEMPT'">
+        @Localizer["Invalid login attemt"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="alert alert-danger" v-if="model.resultCode=='REQUIRECONFIRMATION'">
+        @Localizer["LOGIN_REQUIRE_CONF"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <form v-on:submit.prevent="localLogin">
+        <div class="form-group">
+            @if (Settings.Value.AccountsUseEmailAsUserName)
+            {
+                <label>Email @demouser</label>
+            }
+            else
+            {
+                <label>@Localizer["User Name"] @demouser</label>
+            }
+            <input id="local_email" type="email" v-model="model.userName" class="form-control" />
+            <span id="local_email_validation" class="text-danger"></span>
+        </div>
+
+
+        <div class="form-group">
+            <label>@Localizer["Password"] @demopwd</label>
+            <input id="local_password" type="password" v-model="model.password" class="form-control" />
+            <span id="local_password_validation" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <div class="checkbox">
+                <label><input type="checkbox" v-model="model.rememberMe" /> @Localizer["Remember Me"] ?</label>
+            </div>
+        </div>
+    </form>
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" v-on:click="localLogin()">@Localizer["Login"]</button>
+    </div>
+    <div class="form-group">
+        <p>
+            <a id="forgot-password" asp-page="./ForgotPassword">@Localizer["Forgot your password"] ?</a>
+        </p>
+        <p>
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register as a new user"]</a>
+        </p>
+    </div>
+</div>

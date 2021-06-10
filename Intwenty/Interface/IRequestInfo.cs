@@ -6,7 +6,7 @@ namespace Intwenty.Interface
 {
     interface IRequestInfo
     {
-        string RequestInfo { get; }
+        string RuntimeRequestInfo { get; }
 
     }
 }

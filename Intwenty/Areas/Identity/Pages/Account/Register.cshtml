@@ -27,116 +27,30 @@
 
     <div class="row" id="app">
 
-        @if (Settings.Value.UseLocalLogins)
+        @if (Settings.Value.UseBankIdLogin)
         {
-            <div class="col-md-6">
+            <partial name="_RegisterBankId" />
 
-                <section>
-
-
-                    @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
-                    {
-                        <div class="form-group">
-                            <label>@Localizer["Language"]</label>
-                            <select v-model="model.language" class="form-control" id="lang" v-on:input="onUserInput(event)" data-required="True">
-                                @{
-                                    foreach (var t in Settings.Value.LocalizationSupportedLanguages)
-                                    {
-                                        <option value="@t.Culture">@t.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    }
-
-                    @if (Settings.Value.AccountsUseEmailAsUserName)
-                    {
-                        <div class="form-group">
-                            <label>Email <span style="color: red"> *</span></label>
-                            <input type="email" v-model="model.email" class="form-control" id="email" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="form-group">
-                            <label>@Localizer["User Name"] <span style="color: red"> *</span></label>
-                            <input type="email" v-model="model.userName" class="form-control" id="username" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Email <span style="color: red"> *</span></label>
-                            <input type="email" v-model="model.email" class="form-control" id="email" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                        </div>
-
-                    }
-
-                    @if (Settings.Value.AccountsRegistrationRequireName)
-                    {
-                        <div class="form-group">
-                            <label>@Localizer["First Name"] <span style="color: red"> *</span></label>
-                            <input type="text" v-model="model.firstName" class="form-control" id="firstname" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>@Localizer["Last Name"] <span style="color: red"> *</span></label>
-                            <input type="text" v-model="model.lastName" class="form-control" id="lastname" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                        </div>
-
-                    }
-
-                    <div class="form-group">
-                        <label>@Localizer["Password"] <span style="color: red"> *</span></label>
-                        <input v-model="model.password" type="password" class="form-control" id="password" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                    </div>
-                    <div class="form-group">
-                        <label>@Localizer["Confirm Password"] <span style="color: red"> *</span></label>
-                        <input v-model="model.confirmPassword" type="password" class="form-control" id="confpassword" v-on:input="onUserInput(event)" data-required="True" autocomplete="nope" />
-                    </div>
-                    <div v-if="!passwordsMatch" class="alert alert-danger">@Localizer["Passwords must match"] !</div>
-                    <button type="button" class="btn btn-primary" v-on:click="registerNewUser()">@Localizer["Register"]</button>
-                </section>
-
-            </div>
         }
-
-
-        @if (Settings.Value.UseExternalLogins)
+        else if (Settings.Value.UseFrejaEIdLogin)
         {
-            <div class="col-md-6">
-                <section>
 
 
-                    @{
-                        <p></p>
-
-                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                            <div class="d-flex flex-wrap">
-
-
-                                @foreach (var provider in Model.ExternalLogins)
-                                {
-                                    <div class="p-2">
-                                        @if (provider.Name.ToUpper().Contains("FACE"))
-                                        {
-                                            <button type="submit" class="btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-facebook"></i> Log in with @provider.DisplayName</button>
-
-                                        }
-                                        @if (provider.Name.ToUpper().Contains("GOOGLE"))
-                                        {
-                                            <button type="submit" class="btn btn-lg btn-danger" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><i class="fab fa-google"></i> Log in with @provider.DisplayName</button>
-                                        }
-                                    </div>
-                                }
-
-                            </div>
-                        </form>
-                    }
-
-                </section>
-
-            </div>
         }
+        else
+        {
 
+            @if (Settings.Value.UseLocalLogins)
+            {
+                <partial name="_RegisterLocal" />
+            }
+
+
+            @if (Settings.Value.UseExternalLogins)
+            {
+                <partial name="_RegisterExternal" model="Model" />
+            }
+        }
     </div>
 
 </div>
@@ -150,18 +64,18 @@
             el: '#app',
             data:
             {
-                model: {  }
+                model: { resultCode: "INIT" }
 
             },
             methods: {
 
-                registerNewUser: function ()
+                registerNewLocalUser: function ()
                 {
 
 
                     var context = this;
                     var baseurl = '@Url.Content("~/Identity/Account/")';
-                    var endpointurl = baseurl + "Register";
+                    var endpointurl = baseurl + "Register?handler=LocalRegistration";
                     var valid = true;
                     @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
                     {
@@ -221,6 +135,8 @@
                     if (!valid)
                         return;
 
+                    context.model.actionCode = "INIT_REG_LOCAL";
+
                     var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
 
                     $.ajax({
@@ -241,6 +157,139 @@
                         },
                         error: function (response) {
                              raiseErrorModal(response.responseJSON);
+                        }
+                    });
+                },
+                registerNewBankIdUser: function ()
+                {
+                    //1. Post email and additional info, verify and return inputed info, show this device / other device
+                    //2. User post other device / this device
+                    //3. If this device
+                    //   - Start Auth, and present qr
+                    //   - Wait for 1 second and start collect, also pass input data
+                    //4. If other device
+                    //   - Open bankid and the same time start collect, also pass input data
+                    //5. if has account, login otherwise create account and login
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Register?handler=InitBankId";
+                    var valid = true;
+                    @if (Settings.Value.LocalizationMethod == LocalizationMethods.UserLocalization)
+                    {
+                        <text>
+                        if (!context.model.language)
+                        {
+                            $("#lang").addClass('requiredNotValid');
+                            valid = false;
+                        }
+                        </text>
+                    }
+
+                     @if (!Settings.Value.AccountsUseEmailAsUserName)
+                    {
+                        <text>
+                        if (!context.model.userName)
+                        {
+                            $("#username").addClass('requiredNotValid');
+                            valid = false;
+                        }
+                        </text>
+                    }
+
+                    if (!context.model.email) {
+                        $("#email").addClass('requiredNotValid');
+                        valid = false;
+                    }
+
+
+                    if (!valid)
+                        return;
+
+                    context.model.actionCode = "BANKID_INIT_REG";
+
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model = response;
+                        },
+                        error: function (response)
+                        {
+                            raiseErrorModal(response.responseJSON);
+                        }
+                    });
+                },
+                startBankId: function (method)
+                {
+                   
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Register?handler=StartBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+
+                     context.model.actionCode = method;
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model = response;
+                            if (context.model.resultCode =="BANKID_AUTH_QR")
+                                setTimeout(function () { context.AuthenticateBankId(); }, 500);
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                        }
+                    });
+                },
+                AuthenticateBankId: function ()
+                {
+
+                    var context = this;
+                    var baseurl = '@Url.Content("~/Identity/Account/")';
+                    var endpointurl = baseurl + "Register?handler=AuthenticateBankId";
+                    var antiforgerytoken = '@AntiForgery.GetAndStoreTokens(HttpContext).RequestToken';
+
+                    context.model.actionCode = "WAIT_FOR_BANKID_AUTH";
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(context.model),
+                        headers: {
+                            RequestVerificationToken: antiforgerytoken
+                        },
+                        success: function (response)
+                        {
+                            context.model.actionCode = "";
+                            window.location = response.returnUrl;
+
+                        },
+                        error: function (response)
+                        {
+                            context.model = response.responseJSON;
+                            context.model.actionCode = "";
+                            if (context.model.resultCode == "LOCKEDOUT" || context.model.resultCode == "REQUIREMFA") {
+                                window.location = context.model.redirectUrl;
+                            }
                         }
                     });
                 },
