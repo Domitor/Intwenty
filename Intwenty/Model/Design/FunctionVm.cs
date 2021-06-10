@@ -27,6 +27,8 @@ namespace Intwenty.Model.Design
             Properties = model.Properties;
             Title = model.Title;
             IsModalAction = model.IsModalAction;
+
+            BuildPropertyList();
         }
 
         public int ApplicationId { get; set; }

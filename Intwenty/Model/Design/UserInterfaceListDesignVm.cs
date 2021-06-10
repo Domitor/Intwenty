@@ -22,8 +22,11 @@ namespace Intwenty.Model.Design
 
         public List<FunctionVm> Functions { get; set; }
 
+        public List<IntwentyProperty> PropertyCollection { get; set; }
+
         public UserInterfaceListDesignVm()
         {
+            PropertyCollection = IntwentyRegistry.IntwentyProperties;
             Functions = new List<FunctionVm>();
             ActionUserInterfaces = new List<ActionUserInterface>();
             ActionViews = new List<ActionView>();

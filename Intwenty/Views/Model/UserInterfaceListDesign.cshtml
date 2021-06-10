@@ -421,19 +421,19 @@
                     var context = this;
 
                     var id = 0;
-                    var metacode = "";
+                    var metaCode = "";
                     var title = "";
                     var actionPath = "";
                     var actionMetaCode = "";
                     var actionMetaType = "";
                     var isModalAction = false;
-                    var propertylist = [];
+                    var propertyList = [];
                     if (context.hasFunction(functiontype))
                     {
                         var func = context.getFunction(functiontype);
                         id = func.id;
-                        metacode = func.metacode;
-                        propertylist = func.propertylist;
+                        metaCode = func.metaCode;
+                        propertyList = func.propertyList;
                         title = func.title;
                         actionPath = func.actionPath;
                         actionMetaCode = func.actionMetaCode;
@@ -458,8 +458,8 @@
                         actionMetaType: actionMetaType,
                         title: title,
                         dataTableMetaCode: context.model.dataTable.metaCode,
-                        metaCode: metacode,
-                        propertyList: propertylist,
+                        metaCode: metaCode,
+                        propertyList: propertyList,
                         currentProperty: {}
                     };
 
@@ -481,7 +481,7 @@
                             func.isModalAction = context.functionsettings.isModalAction;
                             func.actionMetaCode = context.functionsettings.actionMetaCode;  
                             func.actionMetaType = context.functionsettings.actionMetaType;  
-                            func.propertyList = context.functionsettings.propertylist;
+                            func.propertyList = context.functionsettings.propertyList;
                             func.currentProperty= { };
                         }
 
@@ -561,6 +561,7 @@
                 var endpointurl = baseurl + "GetApplicationListUI/@Model.ApplicationInfo.Id/@Model.MetaCode";
                 $.get(endpointurl, function (response) {
                     context.model = response;
+                    context.propertyCollection = response.propertyCollection;
                 });
            
             }

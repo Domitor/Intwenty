@@ -92,6 +92,7 @@ namespace Intwenty.WebHostBuilder
             //Required for Intwenty if Identity is used
             services.AddIdentity<IntwentyUser, IntwentyProductAuthorizationItem>(options =>
             {
+                
                 options.SignIn.RequireConfirmedAccount = settings.AccountsRequireConfirmed;
 
                 options.Password.RequireDigit = false;
@@ -107,6 +108,9 @@ namespace Intwenty.WebHostBuilder
 
                 options.User.RequireUniqueEmail = true;
 
+                
+                
+
             })
              .AddRoles<IntwentyProductAuthorizationItem>()
              .AddUserStore<IntwentyUserStore>()
@@ -116,16 +120,19 @@ namespace Intwenty.WebHostBuilder
              .AddClaimsPrincipalFactory<IntwentyClaimsPricipalFactory>()
              .AddDefaultTokenProviders();
 
+            //If remember me is clicked on sign in, the cookiw will be valid 14 days, otherwise only the session
             services.ConfigureApplicationCookie(options =>
             {
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.Cookie.Name = "IntwentyAuthCookie";
                 options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                 options.LoginPath = "/Identity/Account/Login";
                 options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                 options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(365);
+                
             });
+
 
 
             if (settings.UseExternalLogins && settings.UseFacebookLogin)
@@ -298,6 +305,7 @@ namespace Intwenty.WebHostBuilder
 
             builder.UseHttpsRedirection();
             builder.UseCookiePolicy();
+
             builder.UseRouting();
 
 

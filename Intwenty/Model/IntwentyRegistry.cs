@@ -188,6 +188,7 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
             prop = new IntwentyProperty("PAGESIZE", "Page Size", "NUMERIC");
+            prop.ValidFor.Add(FunctionModelItem.MetaTypePaging);
             _properties.Add(prop);
 
             prop = new IntwentyProperty("MULTISELECT", "Multi Select", "BOOLEAN");

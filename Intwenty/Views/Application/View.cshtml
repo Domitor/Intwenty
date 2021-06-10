@@ -3,9 +3,10 @@
 @{
 
     var mainDbName = Model.ApplicationInfo.DbName;
-    var subTableDbNames = new List<string>();
     var instanceid = (int)ViewBag.Id;
     var aftersaveactionpath = string.Empty;
+    var maintableconfig = Model.GetMainTableUIConfiguration();
+    var subtableconfig = Model.GetSubTableUIConfigurations();
 
 
     //WHAT SHOULD HAPPEN WHEN THIS VIEW IS SAVED
@@ -32,14 +33,6 @@
     <!-- 1. ADD MODALS AND SOME CONFIG -->
     @foreach (var iface in Model.UserInterface)
     {
-        if (iface.IsSubTableUserInterface)
-        {
-            if (!subTableDbNames.Exists(p => p == iface.DataTableDbName))
-            {
-             
-                subTableDbNames.Add(iface.DataTableDbName);
-            }
-        }
         @foreach (var mip in iface.ModalInterfaces)
         {
             @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
@@ -110,23 +103,23 @@
                 ,instanceId: @instanceid
                 ,version:1
                 ,applist: []
-                ,model: { @mainDbName: {} @foreach (var st in subTableDbNames){<text>,@st:[]</text>}}
+                ,model: { @mainDbName: {} @foreach (var st in subtableconfig){<text>,@st.TableName:[]</text>}}
                 ,validation: {}
                 ,aftersaveactionpath: '@aftersaveactionpath'
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false, properties:"" }
-                 @foreach (var s in subTableDbNames)
+                , model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"" }
+                 @foreach (var s in subtableconfig)
                  {
-                     var table = s;
-                     var table_settings = s + "_settings";
-                     var table_pageinfo = s + "_pageInfo";
-                 <text>
-                 ,@table:{}
-                 ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                 ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false,properties:"" }
-                 </text>
+                     var table = s.TableName;
+                     var table_settings = s.TableName + "_settings";
+                     var table_pageinfo = s.TableName + "_pageInfo";
+                     <text>
+                     ,@table:{}
+                     ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
+                     ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: @s.PageSize, pageNumber: 0, filterValues: [], skipPaging:@s.SkipPaging, properties:"" }
+                     </text>
                  }
             },
             methods:
@@ -536,10 +529,10 @@
 
                     }).done(function () {
 
-                        @foreach (var s in subTableDbNames)
+                        @foreach (var s in subtableconfig)
                         {
                             <text>
-                            context.getPage('@s');
+                            context.getPage('@s.TableName');
                             </text>
                         }
 
@@ -693,13 +686,13 @@
                         return 0;
                     });
                 }
-                @foreach (var s in subTableDbNames)
+                @foreach (var s in subtableconfig)
                 {
                     <text>
                     ,sorted_@s: function()
                     {
-                        var dbtablename = "@s";
-                        var lineobjectname = "@s" + "_settings";
+                        var dbtablename = "@s.TableName";
+                        var lineobjectname = "@s.TableName" + "_settings";
                         return this.model[dbtablename].sort((a, b) => {
                             let modifier = 1;
                             if (this.model_settings.currentSortDir === 'desc') modifier = -1;

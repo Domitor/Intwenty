@@ -1,5 +1,6 @@
 ﻿using Intwenty.Entity;
 using Intwenty.Interface;
+using Intwenty.Model.UIRendering;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -355,6 +356,76 @@ namespace Intwenty.Model
                 return true;
 
             return false;
+        }
+
+
+        public UITableConfiguration GetMainTableUIConfiguration()
+        {
+            
+            var t = UITableConfiguration.GetDefaultUITableConfiguration();
+            if (HasApplicationInfo)
+                t.TableName = ApplicationInfo.DbName;
+
+            foreach (var ui in UserInterface)
+            {
+                if (ui.IsMainApplicationTableInterface)
+                {
+                    foreach (var f in ui.Functions)
+                    {
+                        if (f.IsMetaTypePaging)
+                        {
+                            t.SkipPaging = "false";
+                            var pagesize = f.GetAsInt("PAGESIZE");
+                            if (pagesize > 0)
+                                t.PageSize = pagesize;
+
+                        }
+                    }
+
+                }
+
+            }
+
+            return t;
+
+        }
+
+        public List<UITableConfiguration> GetSubTableUIConfigurations()
+        {
+            var res = new List<UITableConfiguration>();
+            foreach (var ui in UserInterface)
+            {
+                if (ui.IsSubTableUserInterface && ui.IsMetaTypeListInterface)
+                {
+                    UITableConfiguration config=null;
+                    if (res.Exists(p => p.TableName == ui.DataTableDbName))
+                    {
+                        config = res.Find(p => p.TableName == ui.DataTableDbName);
+                    }
+                    else
+                    {
+                        config = UITableConfiguration.GetDefaultUITableConfiguration();
+                        config.TableName = ui.DataTableDbName;
+                        res.Add(config);
+                    }
+
+                    foreach (var f in ui.Functions)
+                    {
+                        if (f.IsMetaTypePaging)
+                        {
+                            config.SkipPaging = "false";
+                            var pagesize = f.GetAsInt("PAGESIZE");
+                            if (pagesize > 0)
+                                config.PageSize = pagesize;
+                        }
+                    }
+
+                }
+
+            }
+
+            return res;
+
         }
 
     }
