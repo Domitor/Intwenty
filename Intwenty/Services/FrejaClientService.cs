@@ -77,7 +77,7 @@ namespace Intwenty.Services
 
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
@@ -96,7 +96,7 @@ namespace Intwenty.Services
                 var encoded_schema = WebUtility.UrlEncode(scheme);
                 return new Uri(string.Format(settings.FrejaQRCodeEndpoint, encoded_schema));
             }
-            catch (Exception ex)
+            catch
             {
             
             }
@@ -163,7 +163,7 @@ namespace Intwenty.Services
                 }
               
             }
-            catch (Exception ex)
+            catch
             {
                 
             }
@@ -268,7 +268,7 @@ namespace Intwenty.Services
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 
             }
