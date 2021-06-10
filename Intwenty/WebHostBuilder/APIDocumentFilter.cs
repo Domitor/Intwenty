@@ -168,9 +168,8 @@ namespace Intwenty.WebHostBuilder
             var sb = new StringBuilder();
 
             sb.Append("{");
-            sb.Append(DBHelpers.GetJSONValue("currentRowNum", 0));
-            sb.Append("," + DBHelpers.GetJSONValue("batchSize", 100));
-            sb.Append("," +DBHelpers.GetJSONValue("ownerUserId", ""));
+            sb.Append(DBHelpers.GetJSONValue("pageNumber", 0));
+            sb.Append("," + DBHelpers.GetJSONValue("pageSize", 100));
             sb.Append("}");
 
             return new OpenApiString(sb.ToString());
