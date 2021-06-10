@@ -689,7 +689,7 @@
                 @foreach (var s in subtableconfig)
                 {
                     <text>
-                    ,sorted_@s: function()
+                    ,sorted_@s.TableName: function()
                     {
                         var dbtablename = "@s.TableName";
                         var lineobjectname = "@s.TableName" + "_settings";
@@ -701,7 +701,7 @@
                             return 0;
                         });
                     }
-                </text>
+                    </text>
                 }
             },
             mounted: function ()
