@@ -37,6 +37,7 @@ namespace Intwenty.Model
         public static readonly string MetaTypeComboBox = "COMBOBOX";
         public static readonly string MetaTypeSearchBox = "SEARCHBOX";
         public static readonly string MetaTypeYesNoUnknown = "YESNOUNKNOWN";
+        public static readonly string MetaTypeRadioList = "RADIOLIST";
 
 
         public UserInterfaceStructureModelItem()
@@ -163,7 +164,7 @@ namespace Intwenty.Model
                        IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
                        IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
                        IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeSearchBox ||
-                       IsMetaTypeYesNoUnknown;
+                       IsMetaTypeYesNoUnknown || IsMetaTypeRadioList;
 
             }
 
@@ -313,6 +314,11 @@ namespace Intwenty.Model
         public bool IsMetaTypeYesNoUnknown
         {
             get { return MetaType == MetaTypeYesNoUnknown; }
+        }
+
+        public bool IsMetaTypeRadioList
+        {
+            get { return MetaType == MetaTypeRadioList; }
         }
 
         public bool IsMetaTypeSection

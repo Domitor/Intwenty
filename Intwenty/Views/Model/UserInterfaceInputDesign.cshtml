@@ -169,7 +169,7 @@
                                                             <div v-if="input.metaType==='YESNOUNKNOWN'">
                                                                 <div class="form-group">
                                                                     <div class="form-check form-check-inline">
-                                                                        <input class="form-check-input" type="radio" name="radio_yesnounknown"  value="yes" disabled />
+                                                                        <input class="form-check-input" type="radio" name="radio_yesnounknown" value="yes" disabled />
                                                                         <label class="form-check-label" for="radio_yesnounknown">Yes</label>
                                                                     </div>
                                                                     <div class="form-check form-check-inline">
@@ -179,7 +179,28 @@
                                                                     <div class="form-check form-check-inline">
                                                                         <input class="form-check-input" type="radio" name="radio_yesnounknown" value="unknown" disabled />
                                                                         <label class="form-check-label" for="radio_yesnounknown">Unknown</label>
-                                                                    </div>   
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='RADIOLIST'">
+                                                                <div class="form-group">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="yes" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 1</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="no" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 2</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 3</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option..N</label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
@@ -670,6 +691,8 @@
                 showSettingValueDomain: function ()
                 {
                     if (this.active_setting_input.metaType === "COMBOBOX")
+                        return true;
+                    if (this.active_setting_input.metaType === "RADIOLIST")
                         return true;
                     if (this.active_setting_input.metaType === "SEARCHBOX")
                         return true;
