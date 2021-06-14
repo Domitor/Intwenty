@@ -152,6 +152,12 @@
 
                                 }
 
+                                if (t.IsMetaTypeYesNoUnknown)
+                                {
+                                    @await Html.PartialAsync("UIControls/_YesNoUnknown", t)
+
+                                }
+
                             }  <!--FOR CONTROL -->
 
 

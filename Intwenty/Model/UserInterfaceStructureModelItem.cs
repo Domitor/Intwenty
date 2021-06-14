@@ -36,6 +36,7 @@ namespace Intwenty.Model
         public static readonly string MetaTypeImageBox = "IMAGEBOX";
         public static readonly string MetaTypeComboBox = "COMBOBOX";
         public static readonly string MetaTypeSearchBox = "SEARCHBOX";
+        public static readonly string MetaTypeYesNoUnknown = "YESNOUNKNOWN";
 
 
         public UserInterfaceStructureModelItem()
@@ -104,7 +105,9 @@ namespace Intwenty.Model
         public string DataColumn2MetaCode { get; set; }
         public string DataTableDbName { get; set; }
         public string DataColumnDbName => DataColumn1DbName;
+        public bool IsNewDataColumn1 { get; set; }
         public string DataColumn1DbName { get; set; }
+        public bool IsNewDataColumn2 { get; set; }
         public string DataColumn2DbName { get; set; }
         public int ColumnOrder { get; set; }
         public int RowOrder { get; set; }
@@ -159,7 +162,8 @@ namespace Intwenty.Model
                 return IsMetaTypeCheckBox || IsMetaTypeComboBox || IsMetaTypeDatePicker ||
                        IsMetaTypeEmailBox || IsMetaTypeImage || IsMetaTypeImageBox ||
                        IsMetaTypeLabel || IsMetaTypeNumBox || IsMetaTypePasswordBox ||
-                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeSearchBox;
+                       IsMetaTypeTextArea || IsMetaTypeTextBlock || IsMetaTypeTextBox || IsMetaTypeSearchBox ||
+                       IsMetaTypeYesNoUnknown;
 
             }
 
@@ -306,7 +310,10 @@ namespace Intwenty.Model
             get { return MetaType == MetaTypeDatePicker; }
         }
 
-      
+        public bool IsMetaTypeYesNoUnknown
+        {
+            get { return MetaType == MetaTypeYesNoUnknown; }
+        }
 
         public bool IsMetaTypeSection
         {

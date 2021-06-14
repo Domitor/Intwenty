@@ -706,6 +706,56 @@ namespace Intwenty.Controllers
 
         }
 
+        private static DatabaseItem CreateNewDbColumnFromUIInput(UserInterfaceStructureModelItem input, UserInterfaceModelItem uimodel, ApplicationModel appmodel, string columnname)
+        {
+            
+            var t = new DatabaseItem()
+            {
+                AppMetaCode = appmodel.Application.MetaCode,
+                SystemMetaCode = appmodel.Application.SystemMetaCode,
+                Description = "",
+                MetaCode = BaseModelItem.GetQuiteUniqueString(),
+                MetaType = DatabaseModelItem.MetaTypeDataColumn,
+                ParentMetaCode = BaseModelItem.MetaTypeRoot,
+                DbName = columnname,
+                Properties = ""
+                
+            };
+
+            if (uimodel.DataTableDbName != appmodel.Application.DbName)
+            {
+                var tbl = appmodel.DataStructure.Find(p => p.IsMetaTypeDataTable && p.DbName == uimodel.DataTableDbName);
+                if (tbl != null)
+                    t.ParentMetaCode = tbl.MetaCode;
+            }
+
+            if (input.IsMetaTypeCheckBox)
+            {
+                t.DataType = "BOOLEAN";
+            }
+            else if (input.IsMetaTypeComboBox || input.IsMetaTypeEmailBox || input.IsMetaTypeTextBox || input.IsMetaTypePasswordBox || input.IsMetaTypeYesNoUnknown || input.IsMetaTypeImage || input.IsMetaTypeImageBox || input.IsMetaTypeSearchBox)
+            {
+                t.DataType = "STRING";
+            }
+            else if (input.IsMetaTypeTextArea)
+            {
+                t.DataType = "TEXT";
+            }
+            else if (input.IsMetaTypeDatePicker)
+            {
+                t.DataType = "DATETIME";
+            }
+            else if (input.IsMetaTypeNumBox)
+            {
+                t.DataType = "2DECIMAL";
+            }
+
+            return t;
+
+        }
+
+        
+
 
         #endregion
 
@@ -1635,7 +1685,18 @@ namespace Intwenty.Controllers
                                     {
                                         var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn1DbName && p.TableName == uimodel.DataTableDbName);
                                         if (dmc != null)
+                                        {
                                             input.DataColumn1MetaCode = dmc.MetaCode;
+                                        }
+                                        else
+                                        {
+                                            if (input.IsNewDataColumn1)
+                                            {
+                                                var col = CreateNewDbColumnFromUIInput(input, uimodel, appmodel, input.DataColumn1DbName);
+                                                client.InsertEntity(col);
+                                                input.DataColumn1MetaCode = col.MetaCode;
+                                            }
+                                        }
                                     }
                                     if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox)
                                     {
@@ -1652,7 +1713,19 @@ namespace Intwenty.Controllers
                                     {
                                         var dmc = appmodel.DataStructure.Find(p => p.DbName == input.DataColumn2DbName && p.TableName == uimodel.DataTableDbName);
                                         if (dmc != null)
+                                        {
                                             input.DataColumn2MetaCode = dmc.MetaCode;
+                                        }
+                                        else
+                                        {
+                                            if (input.IsNewDataColumn2)
+                                            {
+                                                var col = CreateNewDbColumnFromUIInput(input, uimodel, appmodel, input.DataColumn2DbName);
+                                                client.InsertEntity(col);
+                                                input.DataColumn2MetaCode = col.MetaCode;
+                                            }
+                                        }
+
                                     }
                                 }
 
