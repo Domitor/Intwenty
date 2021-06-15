@@ -183,7 +183,7 @@ namespace Intwenty.Services
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
 
             }

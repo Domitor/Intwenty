@@ -2085,8 +2085,8 @@ namespace Intwenty.Controllers
         /// <summary>
         /// Create a json file containing the current model
         /// </summary>
-        [HttpGet("/Model/API/ExportModel")]
-        public IActionResult ExportModel()
+        [HttpGet("/Model/API/ExportJsonModel")]
+        public IActionResult ExportJsonModel()
         {
             if (!User.Identity.IsAuthenticated)
                 return Forbid();
@@ -2100,8 +2100,195 @@ namespace Intwenty.Controllers
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "intwentymodel.json");
 
-            //XML
-            /*
+        }
+
+        /// <summary>
+        /// Create a C# file containing the current model
+        /// </summary>
+        [HttpGet("/Model/API/ExportCsharpModel")]
+        public IActionResult ExportCsharpModel()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
+                return Forbid();
+
+            var t = ModelRepository.GetExportModel();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("/// <summary>");
+            sb.AppendLine("/// Generates seeding code for the current model");
+            sb.AppendLine("/// This function should be used in a class that inherits IntwentySeeder and implements IIntwentySeeder");
+            sb.AppendLine("/// </summary>");
+            sb.AppendLine("public override void SeedModel()");
+            sb.AppendLine("{");
+            sb.AppendLine("");
+
+            sb.AppendLine("//Systems");
+            sb.AppendLine("var systems = new List<SystemItem>();");
+            foreach (var m in t.Systems)
+                sb.AppendLine($"systems.Add(new SystemItem() {{ MetaCode = \"{m.MetaCode}\", Title = \"{m.Title}\", DbPrefix = \"{m.DbPrefix}\" }});");
+
+            sb.AppendLine("");
+            sb.AppendLine("//Applications");
+            sb.AppendLine("var applications = new List<ApplicationItem>();");
+            foreach (var m in t.Applications)
+                sb.AppendLine($"applications.Add(new ApplicationItem() {{ Id = {m.Id}, Description = \"{m.Description}\", SystemMetaCode = \"{m.SystemMetaCode}\", MetaCode = \"{m.MetaCode}\", Title = \"{m.Title}\", TitleLocalizationKey = \"{m.TitleLocalizationKey}\", DbName = \"{m.DbName}\", DataMode = {m.DataMode}, UseVersioning = {m.UseVersioning}, TenantIsolationLevel = {m.TenantIsolationLevel}, TenantIsolationMethod = {m.TenantIsolationMethod} }});");
+
+
+            sb.AppendLine("");
+            sb.AppendLine("");
+            sb.AppendLine("var dbitems = new List<DatabaseItem>();");
+            sb.AppendLine("var views = new List<ViewItem>();");
+            sb.AppendLine("var userinterface = new List<UserInterfaceItem>();");          
+            sb.AppendLine("var functions = new List<FunctionItem>();");
+            sb.AppendLine("var userinterfacestructure = new List<UserInterfaceStructureItem>();");
+
+            foreach (var m in t.Applications)
+            {
+                sb.AppendLine("");
+                sb.AppendLine($"//Application - {m.Title}");
+                sb.AppendLine("//Database");
+                foreach (var db in t.DatabaseItems.Where(p=> p.AppMetaCode==m.MetaCode && p.SystemMetaCode == m.SystemMetaCode))
+                    sb.AppendLine($"dbitems.Add(new DatabaseItem() {{ SystemMetaCode = \"{db.SystemMetaCode}\", AppMetaCode = \"{db.AppMetaCode}\", MetaType = \"{db.MetaType}\", MetaCode = \"{db.MetaCode}\", DbName = \"{db.DbName}\", ParentMetaCode = \"{db.ParentMetaCode}\", DataType = \"{db.DataType}\", Properties = \"{db.Properties}\" }});");
+
+                sb.AppendLine("");
+                sb.AppendLine("//Views");
+                foreach (var v in t.ViewItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode))
+                    sb.AppendLine($"views.Add(new ViewItem() {{ SystemMetaCode = \"{v.SystemMetaCode}\", AppMetaCode = \"{v.AppMetaCode}\", MetaCode = \"{v.MetaCode}\", MetaType = \"{v.MetaType}\", Title = \"{v.Title}\", TitleLocalizationKey = \"{v.TitleLocalizationKey}\", Path = \"{v.Path}\", IsPrimary = {v.IsPrimary}, IsPublic = {v.IsPublic} }});");
+
+                sb.AppendLine("");
+                sb.AppendLine("//Userinterface");
+                foreach (var ui in t.UserInterfaceItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o=> o.ViewMetaCode))
+                    sb.AppendLine($"userinterface.Add(new UserInterfaceItem() {{ SystemMetaCode = \"{ui.SystemMetaCode}\", AppMetaCode = \"{ui.AppMetaCode}\", ViewMetaCode = \"{ui.ViewMetaCode}\", MetaCode = \"{ui.MetaCode}\", MetaType = \"{ui.MetaType}\", DataTableMetaCode = \"{ui.DataTableMetaCode}\" }});");
+
+                sb.AppendLine("");
+                sb.AppendLine("//UI Components");
+                foreach (var uistruct in t.UserInterfaceStructureItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o => o.UserInterfaceMetaCode))
+                    sb.AppendLine($"userinterfacestructure.Add(new UserInterfaceStructureItem() {{ SystemMetaCode = \"{uistruct.SystemMetaCode}\",AppMetaCode = \"{uistruct.AppMetaCode}\", UserInterfaceMetaCode = \"{uistruct.UserInterfaceMetaCode}\", MetaType = \"{uistruct.MetaType}\", MetaCode = \"{uistruct.MetaCode}\", Title = \"{uistruct.Title}\", TitleLocalizationKey=\"{uistruct.TitleLocalizationKey}\" ParentMetaCode = \"{uistruct.ParentMetaCode}\", RowOrder = {uistruct.RowOrder}, ColumnOrder = {uistruct.ColumnOrder}, Properties = \"{uistruct.Properties}\" }});");
+
+                sb.AppendLine("");
+                sb.AppendLine("//Functions");
+                foreach (var func in t.FunctionItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o => o.OwnerMetaCode))
+                    sb.AppendLine($"functions.Add(new FunctionItem() {{ SystemMetaCode = \"{func.SystemMetaCode}\",AppMetaCode = \"{func.AppMetaCode}\", OwnerMetaCode = \"{func.OwnerMetaCode}\", OwnerMetaType = \"{func.OwnerMetaType}\", MetaType = \"{func.MetaType}\", MetaCode = \"{func.MetaCode}\", ActionPath = \"{func.ActionPath}\", ActionMetaCode = \"{func.ActionMetaCode}\", ActionMetaType = \"{func.ActionMetaType}\", IsModalAction = {func.IsModalAction}, Title = \"{func.Title}\" }});");
+
+
+
+            }
+
+            sb.AppendLine("");
+            sb.AppendLine("//Domains");
+            sb.AppendLine("var valuedomains = new List<ValueDomainItem>();");
+            foreach (var m in t.ValueDomains)
+                sb.AppendLine($"valuedomains.Add(new ValueDomainItem() {{ DomainName = \"{m.DomainName}\",Code = \"{m.Code}\", Value = \"{m.Value}\" }});");
+
+            sb.AppendLine("");
+            sb.AppendLine("//Endpoints");
+            sb.AppendLine("var endpoints = new List<EndpointItem>();");
+            foreach (var m in t.Endpoints)
+                sb.AppendLine($"endpoints.Add(new EndpointItem() {{ SystemMetaCode = \"{m.SystemMetaCode}\", AppMetaCode = \"{m.AppMetaCode}\", MetaType = \"{m.MetaType}\", MetaCode = \"{m.MetaCode}\", DataMetaCode = \"{m.DataMetaCode}\", Path = \"{m.Path}\", Title = \"{m.Title}\", Description = \"{m.Description}\", ParentMetaCode = \"{m.ParentMetaCode}\" }});");
+
+
+            sb.AppendLine("//Insert models if not existing");
+            sb.AppendLine("var client = new Connection(Settings.DefaultConnectionDBMS, Settings.DefaultConnection);");
+            sb.AppendLine("client.Open();");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_systems = client.GetEntities<SystemItem>();");
+            sb.AppendLine("foreach (var t in systems)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_systems.Exists(p => p.MetaCode == t.MetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_apps = client.GetEntities<ApplicationItem>();");
+            sb.AppendLine("foreach (var t in applications)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_domains = client.GetEntities<ValueDomainItem>();");
+            sb.AppendLine("foreach (var t in valuedomains)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_domains.Exists(p => p.DomainName == t.DomainName))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_views = client.GetEntities<ViewItem>();");
+            sb.AppendLine("foreach (var t in views)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_views.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_userinterface = client.GetEntities<UserInterfaceItem>();");
+            sb.AppendLine("foreach (var t in userinterface)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_userinterface.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_ui_structure = client.GetEntities<UserInterfaceStructureItem>();");
+            sb.AppendLine("foreach (var t in userinterfacestructure)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_ui_structure.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_functions = client.GetEntities<FunctionItem>();");
+            sb.AppendLine("foreach (var t in functions)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_functions.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_db = client.GetEntities<DatabaseItem>();");
+            sb.AppendLine("foreach (var t in dbitems)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_db.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("");
+            sb.AppendLine("var current_endpoints = client.GetEntities<EndpointItem>();");
+            sb.AppendLine("foreach (var t in endpoints)");
+            sb.AppendLine("{");
+            sb.AppendLine(" if (!current_endpoints.Exists(p => p.MetaCode == t.MetaCode && p.AppMetaCode == t.AppMetaCode))");
+            sb.AppendLine("     client.InsertEntity(t);");
+            sb.AppendLine("}");
+
+            sb.AppendLine("client.Close();");
+
+            sb.AppendLine("}");
+
+            //C#
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            return File(bytes, "text/plain", "intwentymodel.cs");
+
+        }
+
+        /// <summary>
+        /// Create an xml file containing the current model
+        /// </summary>
+        [HttpGet("/Model/API/ExportXmlModel")]
+        public IActionResult ExportXmlModel()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
+                return Forbid();
+
+            var t = ModelRepository.GetExportModel();
+
+           
             var xml = "";
             XmlSerializer xsSubmit = new XmlSerializer(typeof(ExportModel));
             using (var sww = new StringWriter())
@@ -2114,7 +2301,7 @@ namespace Intwenty.Controllers
             }
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(xml);
             return File(bytes, "application/xml", "intwentymodel.xml");
-            */
+            
         }
 
         [HttpPost("/Model/API/UploadModel")]
