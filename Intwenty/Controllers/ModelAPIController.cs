@@ -2276,6 +2276,101 @@ namespace Intwenty.Controllers
         }
 
         /// <summary>
+        /// Create a C# file containing the current model
+        /// </summary>
+        [HttpGet("/Model/API/ExportSqlModel")]
+        public IActionResult ExportSqlModel()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Forbid();
+            if (!User.IsInRole(IntwentyRoles.RoleSuperAdmin))
+                return Forbid();
+
+            var t = ModelRepository.GetExportModel();
+
+            var client = DataRepository.GetDataClient();
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("--Create Intwenty System tables");
+            sb.AppendLine(client.GetCreateTableSqlStatement<SystemItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<ApplicationItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<DatabaseItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<ViewItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<UserInterfaceItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<FunctionItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<UserInterfaceStructureItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<ValueDomainItem>());
+            sb.AppendLine(client.GetCreateTableSqlStatement<EndpointItem>());
+
+            sb.AppendLine("");
+            sb.AppendLine("");
+            sb.AppendLine("-- Systems");
+            foreach (var m in t.Systems)
+                sb.AppendLine(client.GetInsertSqlStatement(m));
+
+            sb.AppendLine("");
+            sb.AppendLine("");
+            sb.AppendLine("-- Applications");
+            foreach (var m in t.Applications)
+                sb.AppendLine(client.GetInsertSqlStatement(m));
+
+
+        
+
+            foreach (var m in t.Applications)
+            {
+                sb.AppendLine("");
+                sb.AppendLine("");
+                sb.AppendLine($"-- Application: {m.Title}");
+                sb.AppendLine("-- Database");
+                foreach (var db in t.DatabaseItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode))
+                    sb.AppendLine(client.GetInsertSqlStatement(db));
+
+                sb.AppendLine("");
+                sb.AppendLine("-- Views");
+                foreach (var v in t.ViewItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode))
+                    sb.AppendLine(client.GetInsertSqlStatement(v));
+
+                sb.AppendLine("");
+                sb.AppendLine("-- Userinterface");
+                foreach (var ui in t.UserInterfaceItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o => o.ViewMetaCode))
+                    sb.AppendLine(client.GetInsertSqlStatement(ui));
+
+                sb.AppendLine("");
+                sb.AppendLine("-- UI Components");
+                foreach (var uistruct in t.UserInterfaceStructureItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o => o.UserInterfaceMetaCode))
+                    sb.AppendLine(client.GetInsertSqlStatement(uistruct));
+
+                sb.AppendLine("");
+                sb.AppendLine("-- Functions");
+                foreach (var func in t.FunctionItems.Where(p => p.AppMetaCode == m.MetaCode && p.SystemMetaCode == m.SystemMetaCode).OrderBy(o => o.OwnerMetaCode))
+                    sb.AppendLine(client.GetInsertSqlStatement(func));
+
+             
+
+            }
+
+            sb.AppendLine("");
+            sb.AppendLine("-- Domains");
+            foreach (var m in t.ValueDomains)
+                sb.AppendLine(client.GetInsertSqlStatement(m));
+
+            sb.AppendLine("");
+            sb.AppendLine("-- Endpoints");
+            foreach (var m in t.Endpoints)
+                sb.AppendLine(client.GetInsertSqlStatement(m));
+
+
+         
+
+            //SQL
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            return File(bytes, "text/plain", "intwentymodel.sql");
+
+        }
+
+        /// <summary>
         /// Create an xml file containing the current model
         /// </summary>
         [HttpGet("/Model/API/ExportXmlModel")]
