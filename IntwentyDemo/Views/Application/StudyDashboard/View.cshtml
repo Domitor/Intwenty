@@ -39,7 +39,7 @@
             @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
         }
     }
-    
+
 
     <!-- 2. RENDER THE VIEW HEADER -->
     @await Html.PartialAsync("UISections/_ApplicationViewHeader", Model)
@@ -80,10 +80,33 @@
             @await Html.PartialAsync("UISections/_SubTableListInterface", iface)
         }
 
-
-
     }
 
+    @{
+        var parentrequestinfo = string.Format("STUDYID={0}#FOREIGNKEYID={0}#FOREIGNKEYNAME=StudyId", instanceid);
+        parentrequestinfo = parentrequestinfo.B64UrlEncode();
+    }
+    <br />
+    <br />
+    <a href="/UserForms/Create/@parentrequestinfo" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> New Form</a>
+    <br />
+    <br />
+    <h2>Forms</h2>
+    <table class="table table-responsive-sm">
+        <thead>
+            <tr>
+                <th style="width:5%"></th>
+                <th style="width:5%"></th>
+                <th style="width:25%">Title</th>
+                <th style="width:25%">Type</th>
+            </tr>
+        </thead>
+
+        <tr v-for="item in userForms">
+            <td style="vertical-align:middle"><button class="btn btn-sm btn-danger" v-on:click="deleteApplication(item)"><span class="fas fa-trash" title="Remove"></span></button></td>
+            <td style="vertical-align:middle"><a v-bind:href="'/UserForms/Edit/' + item.Id + '/@parentrequestinfo'" class="btn btn-sm btn-secondary" role="button"><span class="fas fa-edit" title="Edit"></span></a></td>
+        </tr>
+    </table>
 
 </div>
 
@@ -111,7 +134,7 @@
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"", parentId:0, foreignKeyId:0,foreignKeyName:"" }
+                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"" }
                  @foreach (var s in subtableconfig)
                  {
                      var table = s.TableName;
@@ -120,9 +143,10 @@
                      <text>
                      ,@table:{}
                      ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                     ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: @s.PageSize, pageNumber: 0, filterValues: [], skipPaging:@s.SkipPaging, properties: "", parentId: 0, foreignKeyId: 0, foreignKeyName: "" }
+                     ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: @s.PageSize, pageNumber: 0, filterValues: [], skipPaging:@s.SkipPaging, properties:"" }
                      </text>
                  }
+                 ,userForms:[]
             },
             methods:
             {
@@ -249,23 +273,14 @@
                                         data: JSON.stringify(context[dbtablename]),
                                         success: function (response)
                                         {
-                                             if (context.aftersaveaction == 'GOTOREFERER')
-                                            {
-                                                 window.location.href = '@Context.Request.Headers["Referer"].ToString()';
+                                            if (context.aftersaveactionpath != '') {
+                                                endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                                window.location.href = endpointurl;
                                             }
-                                            else if (context.aftersaveaction == 'REFRESH')
-                                            {
+                                            else if (context.aftersaveaction == 'REFRESH') {
                                                 context.modelSaved = true;
                                                 context.getApplication();
                                                 setTimeout(function () { context.modelSaved = false; }, 3000);
-                                            }
-                                            else
-                                            {
-                                                if (context.aftersaveactionpath != '')
-                                                {
-                                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                                    window.location.href = endpointurl;
-                                                }
                                             }
 
                                         },
@@ -393,9 +408,10 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
-                            if (context.aftersaveaction == 'GOTOREFERER')
-                            {
-                                 window.location.href = '@Context.Request.Headers["Referer"].ToString()';
+
+                            if (context.aftersaveactionpath != '') {
+                                endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                window.location.href = endpointurl;
                             }
                             else if (context.aftersaveaction == 'REFRESH')
                             {
@@ -404,14 +420,6 @@
                                 context.modelSaved = true;
                                 context.getApplication();
                                 setTimeout(function () { context.modelSaved = false; }, 3000);
-                            }
-                            else
-                            {
-                                if (context.aftersaveactionpath != '')
-                                {
-                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                    window.location.href = endpointurl;
-                                }
                             }
                         },
                         error: function (response)
@@ -449,11 +457,11 @@
                     if (!ismaintable)
                     {
                         context[objname].dataTableDbName = dbtablename;
-                        context[objname].parentId = context.instanceId;
+                        context[objname].foreignKeyId = context.instanceId;
                     }
                     else
                     {
-                        context[objname].parentId = 0;
+                        context[objname].foreignKeyId = 0;
                     }
 
                     $.ajax({
@@ -461,11 +469,9 @@
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify(context[objname]),
-                        success: function (response)
-                        {
+                        success: function (response) {
                             //DATA
-                            if (ismaintable)
-                            {
+                            if (ismaintable) {
                                 context.applist = JSON.parse(response.data);
 
                                 //UPDATE CURRENT PAGE INFO
@@ -473,8 +479,7 @@
                                 if (context.model_pageInfo.filterValues.length === 0)
                                     context.addFilterValue();
                             }
-                            else
-                            {
+                            else {
                                 context.model[dbtablename] = JSON.parse(response.data);
                                 context[objname] = response.currentOperation;
                                 if (context[objname].filterValues.length === 0)
@@ -690,6 +695,25 @@
 
                         }
                     }
+                },
+                getUserForms: function ()
+                {
+                    var context = this;
+
+                    var endpointurl = "@ViewBag.GetListAPIPath";
+
+                    var clientoperation = {properties:'@parentrequestinfo', applicationId: 210, };
+
+                    $.ajax({
+                        url: endpointurl,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(clientoperation),
+                        success: function (response)
+                        {
+                            context.userForms = JSON.parse(response.data);
+                        }
+                    });
                 }
 
             },
@@ -726,26 +750,8 @@
             {
                 var context = this;
 
-                @if (Model.IsApplicationListView())
-                {
-                    <text>
-                        context.getPage();
-                    </text>
-
-                }
-                else if (Model.IsApplicationInputView() && instanceid > 0)
-                {
-                    <text>
-                        context.getApplication();
-                    </text>
-              }
-              else if (Model.IsApplicationInputView() && instanceid == 0)
-              {
-                    <text>
-                        context.createNewApplication();
-                    </text>
-
-              }
+                context.getApplication();
+                context.getUserForms();
 
             }
         });

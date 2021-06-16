@@ -219,9 +219,20 @@ namespace Intwenty
 
                 Client.Open();
 
+                var maxappid = 0;
+                var apps = Client.GetEntities<ApplicationItem>();
+                foreach (var a in apps)
+                {
+                    if (a.Id > maxappid)
+                        maxappid = a.Id;
+                }
+                var systems = Client.GetEntities<SystemItem>();
+
+
                 if (model.DeleteCurrentModel)
                 {
-                    Client.DeleteEntities(Client.GetEntities<ApplicationItem>());
+                    Client.DeleteEntities(systems);
+                    Client.DeleteEntities(apps);
                     Client.DeleteEntities(Client.GetEntities<DatabaseItem>());
                     Client.DeleteEntities(Client.GetEntities<TranslationItem>());
                     Client.DeleteEntities(Client.GetEntities<ViewItem>());
@@ -229,39 +240,55 @@ namespace Intwenty
                     Client.DeleteEntities(Client.GetEntities<UserInterfaceStructureItem>());
                     Client.DeleteEntities(Client.GetEntities<ValueDomainItem>());
                     Client.DeleteEntities(Client.GetEntities<EndpointItem>());
-                    Client.DeleteEntities(Client.GetEntities<SystemItem>());
                     Client.DeleteEntities(Client.GetEntities<FunctionItem>());
                 }
 
-                foreach (var a in model.Systems)
+                foreach (var a in model.Systems.Where(p => !systems.Exists(x => x.MetaCode == p.MetaCode)))
                     Client.InsertEntity(a);
 
-                foreach (var a in model.Applications)
+                foreach (var a in model.Applications.Where(p => !apps.Exists(x => x.MetaCode == p.MetaCode)))
+                {
+                    a.Id = a.Id + maxappid;
                     Client.InsertEntity(a);
 
-                foreach (var a in model.DatabaseItems)
-                    Client.InsertEntity(a);
+                    foreach (var b in model.DatabaseItems.Where(p=>p.AppMetaCode == a.MetaCode))
+                        Client.InsertEntity(b);
 
-                foreach (var a in model.Translations)
-                    Client.InsertEntity(a);
+                    foreach (var b in model.ViewItems.Where(p => p.AppMetaCode == a.MetaCode))
+                        Client.InsertEntity(b);
 
-                foreach (var a in model.ViewItems)
-                    Client.InsertEntity(a);
+                    foreach (var b in model.UserInterfaceItems.Where(p => p.AppMetaCode == a.MetaCode))
+                        Client.InsertEntity(b);
 
-                foreach (var a in model.UserInterfaceItems)
-                    Client.InsertEntity(a);
+                    foreach (var b in model.FunctionItems.Where(p => p.AppMetaCode == a.MetaCode))
+                        Client.InsertEntity(b);
 
-                foreach (var a in model.FunctionItems)
-                    Client.InsertEntity(a);
+                    foreach (var b in model.UserInterfaceStructureItems.Where(p => p.AppMetaCode == a.MetaCode))
+                        Client.InsertEntity(b);
 
-                foreach (var a in model.UserInterfaceStructureItems)
-                    Client.InsertEntity(a);
+                }
 
-                foreach (var a in model.ValueDomains)
-                    Client.InsertEntity(a);
+                try
+                {
+                    foreach (var b in model.Translations)
+                        Client.InsertEntity(b);
+                }
+                catch { }
 
-                foreach (var a in model.Endpoints)
-                    Client.InsertEntity(a);
+                try
+                {
+                    foreach (var b in model.ValueDomains)
+                        Client.InsertEntity(b);
+                }
+                catch { }
+
+                try
+                {
+                    foreach (var b in model.Endpoints)
+                        Client.InsertEntity(b);
+                }
+                catch { }
+
 
                 result.IsSuccess = true;
                 result.AddMessage(MessageCode.RESULT, "The model was imported successfully. If new or changed views (paths) were included, please restart the application.");

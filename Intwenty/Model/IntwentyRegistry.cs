@@ -156,11 +156,12 @@ namespace Intwenty.Model
             prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOREFERER", DisplayValue = "Go to referer" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOVIEW", DisplayValue = "Go to view" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Refresh saved data" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Ajax Refresh" });
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("GOTOVIEWPATH", "View path", "STRING");
+            prop = new IntwentyProperty("GOTOVIEWPATH", "Go to view path", "STRING");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);

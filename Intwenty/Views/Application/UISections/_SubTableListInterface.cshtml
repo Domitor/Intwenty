@@ -81,15 +81,9 @@
 
 }
 
-@if (Model.HasCreateFunction)
-{
-    @if (Model.CreateFunction.IsModalAction)
-    {
-        <br />
-        <button class="nav-link btn btn-sm btn-outline-secondary" v-on:click="openSubTableModal(null,'@Model.CreateFunction.ActionMetaCode','@Model.DataTableDbName')"><span class="fa fa-plus"></span> @Model.CreateFunction.LocalizedTitle</button>
-        <br />
-    }
-}
+<br />
+    @await Html.PartialAsync("UISections/_ApplicationSubTableHeader", Model)
+<br />
 
 @if (!string.IsNullOrEmpty(tabletitle))
 {

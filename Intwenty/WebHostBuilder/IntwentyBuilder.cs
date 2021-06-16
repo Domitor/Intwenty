@@ -372,8 +372,18 @@ namespace Intwenty.WebHostBuilder
                                 if (!path.EndsWith("/"))
                                     path = path + "/";
 
-                                //View Paths in the model will never be mapped, so default values will be used
-                                endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                var lbc = path.Count(p => p == '{');
+                                var lbr = path.Count(p => p == '}');
+
+                                if (lbc == lbr)
+                                {
+                                    //View Paths in the model will never be mapped, so default values will be used
+                                    endpoints.MapControllerRoute("app_route_" + a.Application.MetaCode + "_" + view.MetaCode, path, defaults: new { controller = "Application", action = "View" });
+                                }
+                                else
+                                {
+                                    //
+                                }
                                 
                             }
                         }

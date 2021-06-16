@@ -26,9 +26,19 @@
 
             @if (Model.HasNavigateFunction)
             {
-                <li class="nav-item">
-                    <a href="@Model.NavigateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
-                </li>
+                if (!string.IsNullOrEmpty(Model.NavigateFunction.ActionPath) && Model.NavigateFunction.ActionPath.ToLower().Contains("referer"))
+                {
+                    var referer = Context.Request.Headers["Referer"].ToString();
+                    <li class="nav-item">
+                        <a href="@referer" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a href="@Model.NavigateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                    </li>
+                }
             }
 
             @if (Model.HasExportFunction)
@@ -44,6 +54,8 @@
                     <button class="nav-link btn btn-sm btn-outline-primary" type="button" v-on:click="saveApplication()" style="margin:10px"><span class="fa fa-save" style="font-size:large"></span> @Model.SaveFunction.LocalizedTitle</button>
                 </li>
             }
+
+            @await Html.PartialAsync("UISections/_ApplicationViewHeaderButtons", Model)
         </ul>
 
     </div>

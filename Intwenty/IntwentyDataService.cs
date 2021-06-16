@@ -1304,7 +1304,7 @@ namespace Intwenty
                 if (args.HasProperty("FOREIGNKEYID") && args.HasProperty("FOREIGNKEYNAME"))
                 {
                     var columnname = args.GetPropertyValue("FOREIGNKEYNAME");
-                    if (!string.IsNullOrEmpty(columnname))
+                    if (!string.IsNullOrEmpty(columnname) && columnname.ToLower()!= "parentid")
                     {
                         var colmodel = model.DataStructure.Find(p => p.DbName.ToLower() == columnname.ToLower() && p.IsMetaTypeDataColumn);
                         if (colmodel != null)
@@ -1322,21 +1322,21 @@ namespace Intwenty
                     if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                     {
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                             maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
 
                     }
                     else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
                     {
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ForeignKeyId));
+                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ParentId));
                     }
                     else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
                     {
                         maxcount_stmt.Append("SELECT COUNT(*) FROM sysdata_InformationStatus t2 ");
                         maxcount_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                         maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ",model.Application.Id));
-                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                             maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
                                  
                     }
@@ -1345,7 +1345,7 @@ namespace Intwenty
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 ", GetTenantTableName(model.Application, args)));
                         maxcount_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                         maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
-                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                     }
                     
 
@@ -1367,7 +1367,7 @@ namespace Intwenty
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                         sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName,args.ForeignKeyId));
 
                 }
@@ -1375,7 +1375,7 @@ namespace Intwenty
                 {
                     sql_list_stmt.Append(string.Format("SELECT '{0}' AS MetaCode, t1.ChangedDate AS PerformDate, t1.ChangedDate AS StartDate, t1.ChangedDate AS EndDate, t1.* ", model.Application.MetaCode));
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
                 {
@@ -1383,7 +1383,7 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("FROM {0} t1", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
-                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
@@ -1393,7 +1393,7 @@ namespace Intwenty
                     sql_list_stmt.Append("FROM sysdata_InformationStatus t2 ");
                     sql_list_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
-                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                         sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
@@ -1542,10 +1542,11 @@ namespace Intwenty
 
             try
             {
+
                 if (args.HasProperty("FOREIGNKEYID") && args.HasProperty("FOREIGNKEYNAME"))
                 {
                     var columnname = args.GetPropertyValue("FOREIGNKEYNAME");
-                    if (!string.IsNullOrEmpty(columnname))
+                    if (!string.IsNullOrEmpty(columnname) && columnname.ToLower() != "parentid")
                     {
                         var colmodel = model.DataStructure.Find(p => p.DbName.ToLower() == columnname.ToLower() && p.IsMetaTypeDataColumn);
                         if (colmodel != null)
@@ -1567,21 +1568,21 @@ namespace Intwenty
                     if (model.Application.DataMode == DataModeOptions.Simple && !IsSubTable)
                     {
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                             maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
 
                     }
                     else if (model.Application.DataMode == DataModeOptions.Simple && IsSubTable)
                     {
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ForeignKeyId));
+                        maxcount_stmt.Append(string.Format("AND t1.ParentId = {0} ", args.ParentId));
                     }
                     else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
                     {
                         maxcount_stmt.Append("SELECT COUNT(*) FROM sysdata_InformationStatus t2 ");
                         maxcount_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                         maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
-                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                        if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                             maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
 
                     }
@@ -1590,7 +1591,7 @@ namespace Intwenty
                         maxcount_stmt.Append(string.Format("SELECT COUNT(*) FROM {0} t1 ", GetTenantTableName(model.Application, args)));
                         maxcount_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                         maxcount_stmt.Append(string.Format("WHERE t2.ApplicationId = {0} ", model.Application.Id));
-                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                        maxcount_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                     }
 
 
@@ -1616,7 +1617,7 @@ namespace Intwenty
                             sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
                     }
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                         sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
 
                 }
@@ -1629,7 +1630,7 @@ namespace Intwenty
                             sql_list_stmt.Append(string.Format(", t1.{0} ", col.DbName));
                     }
                     sql_list_stmt.Append(string.Format("FROM {0} t1 WHERE 1=1 ", GetTenantTableName(model.Application, args)));
-                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && IsSubTable)
                 {
@@ -1646,7 +1647,7 @@ namespace Intwenty
                     sql_list_stmt.Append(string.Format("FROM {0} t1 ", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("JOIN sysdata_InformationStatus t2 on t1.ParentId=t2.Id and t1.Version = t2.Version ");
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
-                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ForeignKeyId));
+                    sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", "ParentId", args.ParentId));
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
                 }
                 else if (model.Application.DataMode == DataModeOptions.Standard && !IsSubTable)
@@ -1663,7 +1664,7 @@ namespace Intwenty
                     sql_list_stmt.Append("FROM sysdata_InformationStatus t2 ");
                     sql_list_stmt.Append(string.Format("JOIN {0} t1 on t1.Id=t2.Id and t1.Version = t2.Version ", GetTenantTableName(model.Application, args)));
                     sql_list_stmt.Append("WHERE t2.ApplicationId = @ApplicationId ");
-                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName) && args.ForeignKeyColumnName.ToLower() != "parentid")
+                    if (args.ForeignKeyId > 0 && !string.IsNullOrEmpty(args.ForeignKeyColumnName))
                         sql_list_stmt.Append(string.Format("AND t1.{0} = {1} ", args.ForeignKeyColumnName, args.ForeignKeyId));
 
                     parameters.Add(new IntwentySqlParameter() { Name = "@ApplicationId", Value = model.Application.Id });
