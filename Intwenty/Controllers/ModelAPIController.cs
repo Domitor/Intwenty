@@ -1948,6 +1948,28 @@ namespace Intwenty.Controllers
                     functionentity.ActionPath = function.ActionPath;
                     functionentity.ActionMetaCode = function.ActionMetaCode;
                     functionentity.ActionMetaType = function.ActionMetaType;
+
+                    if (!string.IsNullOrEmpty(functionentity.ActionMetaCode))
+                    {
+                        var funcview = appmodel.Views.Find(p => p.MetaCode == functionentity.ActionMetaCode);
+                        if (funcview != null)
+                        {
+                            functionentity.ActionPath = funcview.Path;
+                            functionentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                        }
+                        else
+                        {
+                            var funcui = appmodel.GetUserInterface(functionentity.ActionMetaCode);
+                            if (funcui != null)
+                            {
+                                functionentity.ActionPath = "";
+                                functionentity.ActionMetaType = funcui.MetaType;
+                            }
+                         
+                        }
+
+                    }
+
                     client.UpdateEntity(functionentity);
                 }
                 else
@@ -1968,6 +1990,27 @@ namespace Intwenty.Controllers
                         Properties = function.CompilePropertyString(),
                         Title = function.Title
                     };
+
+                    if (!string.IsNullOrEmpty(functionentity.ActionMetaCode))
+                    {
+                        var funcview = appmodel.Views.Find(p => p.MetaCode == functionentity.ActionMetaCode);
+                        if (funcview != null)
+                        {
+                            functionentity.ActionPath = funcview.Path;
+                            functionentity.ActionMetaType = ViewModel.MetaTypeUIView;
+                        }
+                        else
+                        {
+                            var funcui = appmodel.GetUserInterface(functionentity.ActionMetaCode);
+                            if (funcui != null)
+                            {
+                                functionentity.ActionPath = "";
+                                functionentity.ActionMetaType = funcui.MetaType;
+                            }
+
+                        }
+
+                    }
 
                     client.InsertEntity(functionentity);
                 }

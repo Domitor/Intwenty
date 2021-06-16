@@ -481,7 +481,7 @@ namespace IntwentyDemo.Seed
             var current_apps = client.GetEntities<ApplicationItem>();
             foreach (var t in applications)
             {
-                if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode))
+                if (!current_apps.Exists(p => p.MetaCode == t.MetaCode && p.SystemMetaCode == t.SystemMetaCode || (p.Id==t.Id)))
                     client.InsertEntity(t);
             }
 

@@ -5,6 +5,7 @@
     var mainDbName = Model.ApplicationInfo.DbName;
     var instanceid = (int)ViewBag.Id;
     var aftersaveactionpath = string.Empty;
+    var aftersaveaction = string.Empty;
     var maintableconfig = Model.GetMainTableUIConfiguration();
     var subtableconfig = Model.GetSubTableUIConfigurations();
 
@@ -12,7 +13,7 @@
     //WHAT SHOULD HAPPEN WHEN THIS VIEW IS SAVED
     if (Model.HasSaveFunction)
     {
-        var aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
         if (aftersaveaction == "GOTOVIEW")
         {
             aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo, instanceid);
@@ -106,10 +107,11 @@
                 ,model: { @mainDbName: {} @foreach (var st in subtableconfig){<text>,@st.TableName:[]</text>}}
                 ,validation: {}
                 ,aftersaveactionpath: '@aftersaveactionpath'
+                ,aftersaveaction: '@aftersaveaction'
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                , model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"" }
+                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"" }
                  @foreach (var s in subtableconfig)
                  {
                      var table = s.TableName;
@@ -276,7 +278,7 @@
 
                             context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.instanceId;
-                            context[dbtablename].TableModelame = dbtablename;
+                            context[dbtablename].TableName = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
                             context[dbtablename].ApplicationViewId = context.applicationViewId;
                             context[dbtablename].Properties = context.requestInfo;
