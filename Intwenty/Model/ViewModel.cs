@@ -50,6 +50,7 @@ namespace Intwenty.Model
             ConfigurePath();
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
+            HtmlId = "app";
         }
 
         private void SetEmptyStrings()
@@ -90,14 +91,14 @@ namespace Intwenty.Model
         public string Description { get; set; }
         public string DescriptionLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }
-      
-      
+
+        public bool IsChild { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
+        public string HtmlId { get; set; }
         public string JavaScriptObjectName { get; set; }
-
         public string Path { get; set; }
 
 
