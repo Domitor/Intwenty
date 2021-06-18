@@ -2,10 +2,6 @@
 
 @{
 
-    var mainDbName = Model.ApplicationInfo.DbName;
-    var instanceid = 0;
-    if (!Model.IsChild)
-        instanceid = (int)ViewBag.Id;
     var aftersaveactionpath = string.Empty;
     var aftersaveaction = string.Empty;
     var maintableconfig = Model.GetMainTableUIConfiguration();
@@ -18,7 +14,7 @@
         aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
         if (aftersaveaction == "GOTOVIEW")
         {
-            aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo, instanceid);
+            aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo.RequestInfo, Model.RuntimeRequestInfo.Id);
         }
     }
 }
@@ -26,18 +22,18 @@
 <script>
 
         new Vue({
-            el: '#@Model.HtmlId',
+            el: '#@Model.RuntimeRequestInfo.ViewHtmlId',
             data:
             {
-                baseurl: "@ViewBag.BaseAPIPath"
-                ,requestInfo: "@Model.RuntimeRequestInfo"
-                ,appMainTable: "@mainDbName"
+                baseurl: "@Model.RuntimeRequestInfo.EndpointBasePath"
+                ,requestInfo: "@Model.RuntimeRequestInfo.RequestInfo"
+                ,appMainTable: "@Model.ApplicationInfo.DbName"
                 ,appId: @Model.ApplicationInfo.Id
                 ,applicationViewId: @Model.Id
-                ,instanceId: @instanceid
+                ,instanceId: @Model.RuntimeRequestInfo.Id
                 ,version:1
                 ,applist: []
-                ,model: { @mainDbName: {} @foreach (var st in subtableconfig)
+                ,model: { @Model.ApplicationInfo.DbName: {} @foreach (var st in subtableconfig)
                 {<text>,@st.TableName:[]</text>}}
                 ,validation: {}
                 ,aftersaveactionpath: '@aftersaveactionpath'
@@ -68,7 +64,7 @@
 
                     var savefunc = function ()
                     {
-                        var saveendpoint = "@ViewBag.SaveAPIPath";
+                        var saveendpoint = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
                         context.model[context.appMainTable].ApplicationId = context.appId;
                         context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
                         context.model[context.appMainTable].Properties = context.requestInfo;
@@ -102,14 +98,14 @@
                          context.model[context.appMainTable] = {};
                          context.model[context.appMainTable] = item;
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('clicRuntimeRequestInfok', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
 
                     }
                     else
                     {
 
-                        var endpointurl = "@ViewBag.CreateNewAPIPath/" + context.appId;
+                        var endpointurl = "@Model.RuntimeRequestInfo.EndpointCreateNewPath/" + context.appId;
                         if (context.requestInfo != "")
                             endpointurl += "/" + context.requestInfo;
 
@@ -155,7 +151,7 @@
                             if (!context.canSave())
                                 return;
 
-                            var endpointurl = "@ViewBag.SaveAPIPath";
+                            var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
 
                             $.ajax({
                                 url: endpointurl,
@@ -174,7 +170,7 @@
                                     context[dbtablename].ApplicationViewId = context.applicationViewId;
                                     context[dbtablename].Properties = context.requestInfo;
 
-                                    endpointurl = "@ViewBag.SaveLineAPIPath";
+                                    endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveLinePath";
 
                                     $.ajax({
                                         url: endpointurl,
@@ -217,7 +213,7 @@
                         }
                         else
                         {
-                            var endpointurl = "@ViewBag.SaveLineAPIPath";
+                            var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveLinePath";
 
                             context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.instanceId;
@@ -265,7 +261,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.DeleteLineAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointDeleteLinePath";
 
                     var deletelinefunc = function ()
                     {
@@ -311,7 +307,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.SaveAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
                     context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
@@ -363,7 +359,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.GetListAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetPagedListPath";
 
                     var objname = "";
                     var ismaintable = false;
@@ -422,7 +418,7 @@
                 {
                     var context = this;
                     var args =  { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
-                    var endpointurl = "@ViewBag.GetListAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetPagedListPath";
 
                     $.ajax({
                         url: endpointurl,
@@ -442,7 +438,7 @@
                 },
                 deleteApplication: function (item, successcallback) {
                     var context = this;
-                   var endpointurl = "@ViewBag.DeleteApplicationAPIPath";
+                   var endpointurl = "@Model.RuntimeRequestInfo.EndpointDeleteApplicationPath";
 
                     var deleteapp = function ()
                     {
@@ -480,7 +476,7 @@
                 getApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.GetApplicationAPIPath/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetApplicationPath/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     if (context.requestInfo != "")
                         endpointurl += "/" + context.requestInfo;
                     $.get(endpointurl, function (response)
@@ -503,7 +499,7 @@
                 createNewApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.CreateNewAPIPath/" + context.appId;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointCreateNewPath/" + context.appId;
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
@@ -513,7 +509,7 @@
                 getDomain: function (domainname, query, donefunc)
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.GetDomainAPIPath/" + domainname + "/" + query;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetDomainPath/" + domainname + "/" + query;
                     if (context.requestInfo != "")
                         endpointurl += "/" + context.requestInfo;
 
@@ -676,13 +672,13 @@
                     </text>
 
                 }
-                else if (Model.IsApplicationInputView() && instanceid > 0)
+                else if (Model.IsApplicationInputView() && Model.RuntimeRequestInfo.Id > 0)
                 {
                     <text>
                         context.getApplication();
                     </text>
                 }
-                else if (Model.IsApplicationInputView() && instanceid == 0)
+                else if (Model.IsApplicationInputView() && Model.RuntimeRequestInfo.Id == 0)
                 {
                     <text>
                         context.createNewApplication();

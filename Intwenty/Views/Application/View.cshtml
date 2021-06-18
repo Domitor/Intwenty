@@ -1,5 +1,13 @@
 ﻿@model Intwenty.Model.ViewModel
+<!--
+   To override this view for all applications:
+   1. Add this file to the folder Views/Application/View.cshtml in the project that consumes the intwenty RCL Package (Razor Class Library)
 
+
+   To override this view for one application:
+   1. Add this file to the folder Views/Application/[Your app name]/yourviewname.cshtml
+   2. Set the razor view property in the propertylist of the view (view designer) to Views/Application/[Your app name]/yourviewname.cshtml
+-->
 
 <br />
 <br />
@@ -7,7 +15,7 @@
 @await Html.PartialAsync("_Modals")
 
 
-<div id="@Model.HtmlId">
+<div id="@Model.RuntimeRequestInfo.ViewHtmlId">
 
     <!-- 1. ADD MODALS AND SOME CONFIG -->
     @foreach (var iface in Model.UserInterface)
@@ -36,7 +44,6 @@
 
     @foreach (var iface in Model.UserInterface)
     {
-        iface.RuntimeRequestInfo = Model.RuntimeRequestInfo;
 
         iface.CurrentRenderContext = CurrentRenderContextOptions.View;
 
@@ -63,7 +70,22 @@
 
 </div>
 
+<!-- CHILD APPLICATION VIEWS -->
+@foreach (var childview in Model.RuntimeRequestInfo.ChildViews)
+{
+    <div id="@childview.RuntimeRequestInfo.ViewHtmlId">
+        @await Html.PartialAsync("UISections/_ChildApplicationInterface", childview)
+    </div>
+
+}
+
+
 @section Scripts
 {
+    @await Html.PartialAsync("UISections/_ApplicationViewJSPrototypes", Model)
     @await Html.PartialAsync("UISections/_ApplicationViewJS", Model)
+    @foreach (var childview in Model.RuntimeRequestInfo.ChildViews)
+    {
+        @await Html.PartialAsync("UISections/_ApplicationViewJS", childview)
+    }
 }

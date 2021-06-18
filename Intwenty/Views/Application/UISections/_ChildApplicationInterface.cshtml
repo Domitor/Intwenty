@@ -21,7 +21,7 @@
                 }
                 else
                 {
-                    <a href="@Model.CreateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
+                    <a href="@Model.CreateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo.RequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="fa fa-plus" style="font-size:large"></span> @Model.CreateFunction.LocalizedTitle</a>
 
                 }
 
@@ -40,7 +40,7 @@
             else
             {
                 <li class="nav-item">
-                    <a href="@Model.NavigateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
+                    <a href="@Model.NavigateFunction.BuildRuntimeURI(Model.RuntimeRequestInfo.RequestInfo)" role="button" class="nav-link btn btn-sm btn-outline-secondary" style="margin:10px"><span class="far fa-hand-point-left" style="font-size:large"></span> @Model.NavigateFunction.LocalizedTitle</a>
                 </li>
             }
         }

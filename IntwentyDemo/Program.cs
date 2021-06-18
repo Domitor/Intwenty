@@ -63,7 +63,7 @@ namespace IntwentyDemo
                         //****** Required ******
                         //Add intwenty 
                         //Here's where you plug in your own code in intwenty, by overriding esential services.
-                        services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder>(configuration);
+                        services.AddIntwenty<CustomDataService, CustomEventService, DemoSeeder,CustomModelService>(configuration);
                         //Default services
                         //services.AddIntwenty<IntwentyDataService, EventService>(configuration);
 

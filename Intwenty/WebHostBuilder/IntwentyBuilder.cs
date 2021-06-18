@@ -42,8 +42,14 @@ namespace Intwenty.WebHostBuilder
             services.AddIntwenty<TIntwentyDataService, TIntwentyEventService, IntwentySeeder>(configuration);
         }
 
-        public static void AddIntwenty<TIntwentyDataService,TIntwentyEventService,TInwentySeeder>(this IServiceCollection services, IConfiguration configuration) 
-                           where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService where TInwentySeeder : class, IIntwentySeeder
+        public static void AddIntwenty<TIntwentyDataService, TIntwentyEventService, TInwentySeeder>(this IServiceCollection services, IConfiguration configuration)
+                         where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService where TInwentySeeder : class, IIntwentySeeder
+        {
+            services.AddIntwenty<TIntwentyDataService, TIntwentyEventService, TInwentySeeder, IntwentyModelService>(configuration);
+        }
+
+       public static void AddIntwenty<TIntwentyDataService,TIntwentyEventService,TInwentySeeder,TIntwentyModelService>(this IServiceCollection services, IConfiguration configuration) 
+                           where TIntwentyDataService : class, IIntwentyDataService where TIntwentyEventService : class, IIntwentyEventService where TInwentySeeder : class, IIntwentySeeder where TIntwentyModelService : class, IIntwentyModelService
         {
             services.AddSignalR();
 
@@ -72,7 +78,7 @@ namespace Intwenty.WebHostBuilder
             //Required for Intwenty: Services
             services.TryAddTransient<IIntwentyDbLoggerService, DbLoggerService>();
             services.TryAddTransient<IIntwentyDataService, TIntwentyDataService>();
-            services.TryAddTransient<IIntwentyModelService, IntwentyModelService>();
+            services.TryAddTransient<IIntwentyModelService, TIntwentyModelService>();
             services.TryAddTransient<IIntwentyEventService, TIntwentyEventService>();
             services.TryAddTransient<IIntwentyProductManager, IntwentyProductManager>();
             services.TryAddTransient<IIntwentyOrganizationManager, IntwentyOrganizationManager>();

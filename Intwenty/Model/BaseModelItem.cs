@@ -1,4 +1,5 @@
 ﻿using Intwenty.Interface;
+using Intwenty.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -29,7 +30,7 @@ namespace Intwenty.Model
 
         public abstract string ModelCode { get; }
 
-        public string RuntimeRequestInfo { set; get; }
+        public ViewRequestInfo RuntimeRequestInfo { set; get; }
 
 
 

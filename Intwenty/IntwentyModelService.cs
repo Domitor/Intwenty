@@ -18,6 +18,8 @@ using System.Security.Claims;
 using Intwenty.Areas.Identity.Models;
 using Intwenty.Areas.Identity.Data;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Intwenty.Helpers;
 
 namespace Intwenty
 {
@@ -75,6 +77,74 @@ namespace Intwenty
                 else
                     CurrentCulture = Settings.LocalizationDefaultCulture;
             }
+
+        }
+
+        public virtual ViewModel GetViewToRender(int? id, string requestinfo, HttpRequest httprequest)
+        {
+            var info = new ViewRequestInfo();
+
+            int viewid = 0;
+            int instanceid = 0;
+            if (id.HasValue && id.Value > 0)
+                instanceid = id.Value;
+
+            if (!string.IsNullOrEmpty(requestinfo))
+            {
+                var props = new HashTagPropertyObject();
+                props.Properties = requestinfo.B64UrlDecode();
+
+                var pid = props.GetAsInt("ID");
+                if (pid > 0 && instanceid==0)
+                    instanceid = pid;
+
+                var vid = props.GetAsInt("VIEWID");
+                if (vid > 0)
+                    viewid = vid;
+            }
+
+
+            ViewModel viewtorender = null;
+            if (viewid > 0)
+            {
+                viewtorender = GetLocalizedViewModelById(viewid);
+            }
+            else
+            {
+                viewtorender = GetLocalizedViewModelByPath(httprequest.Path.Value);
+            }
+
+            if (viewtorender == null)
+                return null;
+
+            info.Id = instanceid;
+            info.ViewId = viewtorender.Id;
+            if (viewtorender.HasApplicationInfo)
+                info.ApplicationId = viewtorender.ApplicationInfo.Id;
+
+            info.ViewPath = httprequest.Path.Value;
+            if (httprequest.Headers.ContainsKey("Referer"))
+                info.ViewRefererPath = httprequest.Headers["Referer"].ToString();
+
+            var viewfilepath = viewtorender.GetPropertyValue("RAZORVIEWPATH");
+            if (string.IsNullOrEmpty(viewfilepath))
+                viewfilepath = "View";
+
+            info.ViewFilePath = viewfilepath;
+          
+            if (!string.IsNullOrEmpty(requestinfo))
+                info.RequestInfo = requestinfo;
+
+            viewtorender.RuntimeRequestInfo = info;
+            foreach (var ui in viewtorender.UserInterface)
+                ui.RuntimeRequestInfo = info;
+
+            return viewtorender;
+
+        }
+
+        public virtual void AddChildViewsToRender(ViewModel view)
+        {
 
         }
 

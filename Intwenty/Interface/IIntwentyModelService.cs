@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Intwenty.Areas.Identity.Models;
 using System.Threading.Tasks;
 using Intwenty.Areas.Identity.Entity;
+using Microsoft.AspNetCore.Http;
 
 namespace Intwenty.Interface
 {
@@ -16,61 +17,65 @@ namespace Intwenty.Interface
     /// </summary>
     public interface IIntwentyModelService
     {
-        public IntwentySettings Settings { get; }
-        public Task<List<ViewModel>> GetApplicationMenuAsync(ClaimsPrincipal claimprincipal);
-        public Task<List<ViewModel>> GetAuthorizedViewModelsAsync(ClaimsPrincipal claimprincipal);
-        public Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
-        public Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal);
+        IntwentySettings Settings { get; }
+
+        ViewModel GetViewToRender(int? id, string requestinfo, HttpRequest httprequest);
+        void AddChildViewsToRender(ViewModel view);
+
+        Task<List<ViewModel>> GetApplicationMenuAsync(ClaimsPrincipal claimprincipal);
+        Task<List<ViewModel>> GetAuthorizedViewModelsAsync(ClaimsPrincipal claimprincipal);
+        Task<List<ApplicationModelItem>> GetAuthorizedApplicationModelsAsync(ClaimsPrincipal claimprincipal);
+        Task<List<SystemModelItem>> GetAuthorizedSystemModelsAsync(ClaimsPrincipal claimprincipal);
 
 
 
         //APPLICATION
-        public List<ApplicationModelItem> GetApplicationDescriptions();
-        public List<SystemModelItem> GetSystemModels();
-        public List<ApplicationModel> GetApplicationModels();
-        public ApplicationModel GetApplicationModel(int applicationid);
-        public ApplicationModel GetApplicationModel(string metacode);
+        List<ApplicationModelItem> GetApplicationDescriptions();
+        List<SystemModelItem> GetSystemModels();
+        List<ApplicationModel> GetApplicationModels();
+        ApplicationModel GetApplicationModel(int applicationid);
+        ApplicationModel GetApplicationModel(string metacode);
       
 
 
         //DATABASE
-        public List<DatabaseModelItem> GetDatabaseModels();
-        public DatabaseModelItem GetDatabaseColumnModel(ApplicationModel model, string columnname, string tablename="");
+        List<DatabaseModelItem> GetDatabaseModels();
+        DatabaseModelItem GetDatabaseColumnModel(ApplicationModel model, string columnname, string tablename="");
 
 
         //UI
-        public List<ViewModel> GetViewModels();
-        public ViewModel GetLocalizedViewModelById(int id);
-        public ViewModel GetLocalizedViewModelByMetaCode(string metacode);
-        public ViewModel GetLocalizedViewModelByPath(string path);
-        public string GetLocalizedString(string localizationkey);
+        List<ViewModel> GetViewModels();
+        ViewModel GetLocalizedViewModelById(int id);
+        ViewModel GetLocalizedViewModelByMetaCode(string metacode);
+        ViewModel GetLocalizedViewModelByPath(string path);
+        string GetLocalizedString(string localizationkey);
 
 
         //VALUE DOMAINS
-        public List<ValueDomainModelItem> GetValueDomains();
-        public void SaveValueDomains(List<ValueDomainModelItem> model);
-        public void DeleteValueDomain(int id);
+        List<ValueDomainModelItem> GetValueDomains();
+        void SaveValueDomains(List<ValueDomainModelItem> model);
+        void DeleteValueDomain(int id);
 
 
         //TRANSLATIONS
-        public List<TranslationModelItem> GetTranslations();
+        List<TranslationModelItem> GetTranslations();
 
 
 
         //ENDPOINTS
-        public List<EndpointModelItem> GetEndpointModels();
+        List<EndpointModelItem> GetEndpointModels();
 
 
         //MISC
-        public Task<List<OperationResult>> CreateTenantIsolatedTables(IntwentyUser user);
-        public OperationResult ValidateModel();
-        public List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
-        public void ClearCache(string key="ALL");
-        public List<CachedObjectDescription> GetCachedObjectDescriptions();
-        public ExportModel GetExportModel();
-        public OperationResult ImportModel(ExportModel model);
-        public Task<List<OperationResult>> ConfigureDatabase(string tableprefix = "");
-        public Task<OperationResult> ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null, string tableprefix = "");
+        Task<List<OperationResult>> CreateTenantIsolatedTables(IntwentyUser user);
+        OperationResult ValidateModel();
+        List<IntwentyDataColumn> GetDefaultVersioningTableColumns();
+        void ClearCache(string key="ALL");
+        List<CachedObjectDescription> GetCachedObjectDescriptions();
+        ExportModel GetExportModel();
+        OperationResult ImportModel(ExportModel model);
+        Task<List<OperationResult>> ConfigureDatabase(string tableprefix = "");
+        Task<OperationResult> ConfigureDatabase(ApplicationModelItem model, List<DatabaseModelItem> databasemodel = null, string tableprefix = "");
 
 
     }
