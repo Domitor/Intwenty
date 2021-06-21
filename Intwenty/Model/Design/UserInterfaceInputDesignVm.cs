@@ -43,6 +43,7 @@ namespace Intwenty.Model.Design
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeTextBox));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeYesNoUnknown));
             UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeRadioList));
+            UIControls.Add(temp.Find(p => p.Code == UserInterfaceStructureModelItem.MetaTypeCheckList));
 
         }
 

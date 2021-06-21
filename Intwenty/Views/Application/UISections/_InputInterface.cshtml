@@ -158,6 +158,18 @@
 
                                 }
 
+                                if (t.IsMetaTypeRadioList)
+                                {
+                                    @await Html.PartialAsync("UIControls/_RadioList", t)
+
+                                }
+
+                                if (t.IsMetaTypeCheckList)
+                                {
+                                    @await Html.PartialAsync("UIControls/_CheckList", t)
+
+                                }
+
                             }  <!--FOR CONTROL -->
 
 

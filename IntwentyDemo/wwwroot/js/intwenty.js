@@ -287,8 +287,9 @@ Vue.component("searchbox", {
 
         vm.selectizeinstance = element[0].selectize;
     },
-    updated: function () {
-        var t = "";
+    updated: function ()
+    {
+       
     },
     watch:
     {
@@ -311,9 +312,9 @@ Vue.component("searchbox", {
 
 
         },
-        textfield: function (newval, oldval) {
-            var t = "";
-
+        textfield: function (newval, oldval)
+        {
+          
         }
 
 
@@ -403,18 +404,16 @@ Vue.component("combobox", {
 
 
     },
-    updated: function () {
-        var t = "";
-
-
+    updated: function ()
+    {
+       
     },
     watch:
     {
 
-        idfield: function (newval, oldval) {
-            var t = "";
-
-
+        idfield: function (newval, oldval)
+        {
+       
             if (this.selectizeinstance) {
                 this.selectizeinstance.clear(true);
 
@@ -430,15 +429,230 @@ Vue.component("combobox", {
 
 
         },
-        textfield: function (newval, oldval) {
-            var t = "";
-
+        textfield: function (newval, oldval)
+        {
+           
         }
 
 
     },
     destroyed: function () {
         this.selectizeinstance.destroy();
+    }
+});
+
+Vue.component("radiolist", {
+    template: `<div>
+                <template v-for="item in domvalues">
+                 <div class="form-check form-check-inline">
+                     <input class="form-check-input" type="radio" v-bind:name="controlid" v-bind:value="item.code" v-on:change="radiochanged(event)" />
+                     <label class="form-check-label">{{item.value}}</label>
+                </div>
+                </template>
+               </div>`,
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { domvalues: [], controlid:"" };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        var domainname = $(element).data('domain');
+        vm.controlid = $(element).attr('id');
+
+
+        if (vm.$root.getDomain) {
+            vm.$root.getDomain(domainname, 'ALL', function (response) {
+                vm.domvalues = response;
+            });
+        }
+        else {
+            $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
+                vm.domvalues = response;
+            });
+        }
+
+    },
+    methods:
+    {
+        radiochanged: function (event)
+        {
+            var val = event.srcElement.value;
+            var txt = "";
+            for (var i = 0; i < this.domvalues.length; i++)
+            {
+                if (this.domvalues[i].code == val)
+                {
+                    txt = this.domvalues[i].value;
+                    break;
+                }
+
+            }
+
+            this.$emit('update:idfield', val);
+            this.$emit('update:textfield', txt);
+
+        }
+    }
+    ,updated: function ()
+    {
+       
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval)
+        {
+            if (newval)
+            {
+                $("input[name=" + this.controlid + "][value=" + newval + "]").prop('checked', true);
+            }
+          
+        },
+        textfield: function (newval, oldval)
+        {
+           
+        }
+
+
+    },
+    destroyed: function ()
+    {
+       
+    }
+});
+
+Vue.component("checklist", {
+    template: `<div>
+                <template v-for="item in domvalues">
+                 <div class="form-check form-check-inline">
+                     <input class="form-check-input" type="checkbox" v-bind:id="controlid + '_' + item.code" v-bind:data-domainvalue="item.code" v-on:input="checkchanged(event)" true-value="Y" false-value="N" />
+                     <label class="form-check-label">{{item.value}}</label>
+                </div>
+                </template>
+               </div>`,
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { domvalues: [], controlid: "", selecteditems:[] };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        var domainname = $(element).data('domain');
+        vm.controlid = $(element).attr('id');
+
+
+        if (vm.$root.getDomain) {
+            vm.$root.getDomain(domainname, 'ALL', function (response) {
+                vm.domvalues = response;
+            });
+        }
+        else {
+            $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
+                vm.domvalues = response;
+            });
+        }
+
+    },
+    methods:
+    {
+        checkchanged: function (event)
+        {
+            var val = event.srcElement.value;
+            var domainvalue = $(event.srcElement).data('domainvalue');
+
+            if (!val) {
+                for (var i = 0; i < this.selecteditems.length; i++) {
+                    if (this.selecteditems[i].code == domainvalue) {
+                        this.selecteditems.splice(i, 1);
+                    }
+                }
+            }
+            else {
+
+                var itemtoadd = null;
+                for (var i = 0; i < this.domvalues.length; i++)
+                {
+                    if (this.domvalues[i].code == domainvalue)
+                    {
+                        itemtoadd = this.domvalues[i];
+                        break;
+                    }
+
+                }
+
+                if (itemtoadd)
+                { 
+                    var exists = false;
+                    for (var i = 0; i < this.selecteditems.length; i++) {
+                        if (this.selecteditems[i].code == domainvalue) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                        this.selecteditems.push(itemtoadd);
+                }
+            }
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < this.selecteditems.length; i++) {
+                var code = this.selecteditems[i].code;
+                var val = this.selecteditems[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+
+            this.$emit('update:idfield', codestr);
+            this.$emit('update:textfield', valstr);
+
+        }
+    }
+    , updated: function () {
+
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval)
+        {
+            this.selecteditems=[];
+
+            if (newval)
+            {
+                var persisteditems = newval.split(",");
+                for (var i = 0; i < persisteditems.length; i++)
+                {
+                    for (var x = 0; x < this.domvalues.length; x++)
+                    {
+                        if (this.domvalues[x].code == persisteditems[i])
+                        {
+                            this.selecteditems.push(this.domvalues[x]);
+                        }
+
+                    }
+
+                }
+            }
+
+        },
+        textfield: function (newval, oldval) {
+
+        }
+
+
+    },
+    destroyed: function () {
+
     }
 });
 

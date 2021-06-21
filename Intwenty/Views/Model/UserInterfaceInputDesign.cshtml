@@ -204,6 +204,27 @@
                                                                 </div>
                                                             </div>
 
+                                                            <div v-if="input.metaType==='CHECKLIST'">
+                                                                <div class="form-group">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="yes" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 1</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="no" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 2</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 3</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option..N</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
                                                             <div v-if="input.metaType==='SEARCHBOX'">
                                                                 <div class="form-group">
                                                                     <input type="text" class="form-control form-control-sm" placeholder="Input with search and multiselect..." disabled />
@@ -358,7 +379,7 @@
                                 </div>
 
                                 <div class="form-group" v-if="showSettingDbColumn2">
-                                    <label class="control-label">Set database column 2 (opt.)</label>
+                                    <label class="control-label">Set database column 2 (opt.)</label><br />
                                     <input type="checkbox" v-model="active_setting_input.isNewDataColumn2" /> Add new column
                                     <input type="text" v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm" v-if="active_setting_input.isNewDataColumn2" />
                                     <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm" v-if="!active_setting_input.isNewDataColumn2">
@@ -682,8 +703,11 @@
 
                     if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
-
+                    if (this.active_setting_input.metaType === "RADIOLIST")
+                        return true;
                     if (this.active_setting_input.metaType === "SEARCHBOX")
+                        return true;
+                    if (this.active_setting_input.metaType === "CHECKLIST")
                         return true;
 
                     return false;
@@ -695,6 +719,8 @@
                     if (this.active_setting_input.metaType === "RADIOLIST")
                         return true;
                     if (this.active_setting_input.metaType === "SEARCHBOX")
+                        return true;
+                    if (this.active_setting_input.metaType === "CHECKLIST")
                         return true;
 
 

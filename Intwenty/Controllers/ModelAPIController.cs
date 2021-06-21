@@ -733,11 +733,11 @@ namespace Intwenty.Controllers
             {
                 t.DataType = "BOOLEAN";
             }
-            else if (input.IsMetaTypeComboBox || input.IsMetaTypeEmailBox || input.IsMetaTypeTextBox || input.IsMetaTypePasswordBox || input.IsMetaTypeYesNoUnknown || input.IsMetaTypeImage || input.IsMetaTypeImageBox || input.IsMetaTypeSearchBox)
+            else if (input.IsMetaTypeComboBox || input.IsMetaTypeEmailBox || input.IsMetaTypeTextBox || input.IsMetaTypePasswordBox || input.IsMetaTypeYesNoUnknown || input.IsMetaTypeImage || input.IsMetaTypeImageBox)
             {
                 t.DataType = "STRING";
             }
-            else if (input.IsMetaTypeTextArea)
+            else if (input.IsMetaTypeTextArea || input.IsMetaTypeSearchBox || input.IsMetaTypeRadioList || input.IsMetaTypeCheckList)
             {
                 t.DataType = "TEXT";
             }
@@ -748,6 +748,10 @@ namespace Intwenty.Controllers
             else if (input.IsMetaTypeNumBox)
             {
                 t.DataType = "2DECIMAL";
+            }
+            else
+            {
+                t.DataType = "STRING";
             }
 
             return t;
@@ -1698,7 +1702,7 @@ namespace Intwenty.Controllers
                                             }
                                         }
                                     }
-                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox)
+                                    if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox || input.IsMetaTypeRadioList)
                                     {
                                         if (!string.IsNullOrEmpty(input.Domain))
                                         {
@@ -1707,7 +1711,7 @@ namespace Intwenty.Controllers
                                     }
                                 }
 
-                                if (input.IsMetaTypeSearchBox)
+                                if (input.IsMetaTypeComboBox || input.IsMetaTypeSearchBox || input.IsMetaTypeRadioList || input.IsMetaTypeCheckList)
                                 {
                                     if (!string.IsNullOrEmpty(input.DataColumn2DbName))
                                     {

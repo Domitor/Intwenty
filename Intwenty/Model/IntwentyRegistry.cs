@@ -52,6 +52,7 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeYesNoUnknown, Title = "Yes No Unknown", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeRadioList, Title = "Radiolist", ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckList, Title = "Checklist", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get (GET)", ModelCode = "ENDPOINTMODEL" });
@@ -138,19 +139,11 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
 
-            prop = new IntwentyProperty("TABLEEDITMODE", "Edit Mode", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CELL", DisplayValue = "Line" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
-            _properties.Add(prop);
-
-
-
-            prop = new IntwentyProperty("TABLELAYOUT", "Layout", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GRID", DisplayValue = "Grid" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
+            prop = new IntwentyProperty("ORIENTATION", "Orientation", "LIST");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeRadioList);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeCheckList);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "VERTICAL", DisplayValue = "Vertical" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "HORIZONTAL", DisplayValue = "Horizontal" });
             _properties.Add(prop);
 
             prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
