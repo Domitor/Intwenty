@@ -422,19 +422,13 @@ Vue.component("combobox", {
                     for (var i = 0; i < persisteditems.length; i++) {
                         //ADD ITEM BUT DONT TRIGGER CHANGE
                         this.selectizeinstance.addItem(persisteditems[i], true);
-
                     }
                 }
             }
-
-
         },
         textfield: function (newval, oldval)
         {
-           
         }
-
-
     },
     destroyed: function () {
         this.selectizeinstance.destroy();
@@ -444,55 +438,64 @@ Vue.component("combobox", {
 Vue.component("radiolist", {
     template: `<div>
                 <template v-for="item in domvalues">
-                 <div class="form-check form-check-inline">
-                     <input class="form-check-input" type="radio" v-bind:name="controlid" v-bind:value="item.code" v-on:change="radiochanged(event)" />
+                 <div v-bind:id="controlid + '_' + item.code + '_parent'" v-bind:class="checkBoxClass">
+                     <input class="form-check-input" type="radio" v-bind:id="controlid + '_' + item.code" v-bind:name="controlid" v-bind:value="item.code" v-on:change="radiochanged(event)" />
                      <label class="form-check-label">{{item.value}}</label>
                 </div>
                 </template>
                </div>`,
     props: ['idfield', 'textfield'],
     data: function () {
-        return { domvalues: [], controlid:"" };
+        return { domvalues: [], controlid: "", orientation: "HORIZONTAL", domainname: "" };
 
     },
     mounted: function () {
         var vm = this;
         var element = $(this.$el);
 
-        var domainname = $(element).data('domain');
+        vm.domainname = $(element).data('domain');
+        vm.orientation = $(element).data('orientation');
         vm.controlid = $(element).attr('id');
 
-
-        if (vm.$root.getDomain) {
-            vm.$root.getDomain(domainname, 'ALL', function (response) {
-                vm.domvalues = response;
-            });
+        if (vm.domainname) {
+            if (vm.$root.getDomain) {
+                vm.$root.getDomain(vm.domainname, 'ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+            else {
+                $.get('/Application/API/GetDomain/' + vm.domainname + '/ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
         }
-        else {
-            $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
-                vm.domvalues = response;
-            });
-        }
-
     },
     methods:
     {
         radiochanged: function (event)
         {
-            var val = event.srcElement.value;
-            var txt = "";
+            if (!event)
+                return;
+            if (!event.srcElement)
+                return;
+            if (!event.srcElement.value)
+                return;
+
+            var domainvalue = null;
             for (var i = 0; i < this.domvalues.length; i++)
             {
-                if (this.domvalues[i].code == val)
+                if (this.domvalues[i].code == event.srcElement.value)
                 {
-                    txt = this.domvalues[i].value;
+                    domainvalue = this.domvalues[i];
                     break;
                 }
 
             }
 
-            this.$emit('update:idfield', val);
-            this.$emit('update:textfield', txt);
+            if (domainvalue) {
+                this.$emit('update:idfield', domainvalue.code);
+                this.$emit('update:textfield', domainvalue.value);
+            }
 
         }
     }
@@ -513,59 +516,67 @@ Vue.component("radiolist", {
         },
         textfield: function (newval, oldval)
         {
-           
         }
-
-
     },
     destroyed: function ()
     {
-       
+    },
+    computed:
+    {
+        checkBoxClass: function () {
+            return {
+                'form-check form-check-inline': this.orientation === 'HORIZONTAL'
+                , 'form-check': this.orientation === 'VERTICAL'
+            }
+        }
     }
 });
 
 Vue.component("checklist", {
     template: `<div>
                 <template v-for="item in domvalues">
-                 <div class="form-check form-check-inline">
-                     <input class="form-check-input" type="checkbox" v-bind:id="controlid + '_' + item.code" v-bind:data-domainvalue="item.code" v-on:input="checkchanged(event)" true-value="Y" false-value="N" />
+                 <div v-bind:id="controlid + '_' + item.code + '_parent'" v-bind:class="checkBoxClass">
+                     <input class="form-check-input" type="checkbox" v-bind:id="controlid + '_' + item.code" v-bind:data-domainvalue="item.code" v-on:input="checkchanged(event)" />
                      <label class="form-check-label">{{item.value}}</label>
                 </div>
                 </template>
                </div>`,
     props: ['idfield', 'textfield'],
     data: function () {
-        return { domvalues: [], controlid: "", selecteditems:[] };
+        return { domvalues: [], controlid: "", selecteditems:[], orientation:"HORIZONTAL", domainname:"" };
 
     },
     mounted: function () {
         var vm = this;
         var element = $(this.$el);
 
-        var domainname = $(element).data('domain');
+        vm.domainname = $(element).data('domain');
+        vm.orientation = $(element).data('orientation');
         vm.controlid = $(element).attr('id');
 
-
-        if (vm.$root.getDomain) {
-            vm.$root.getDomain(domainname, 'ALL', function (response) {
-                vm.domvalues = response;
-            });
+        if (vm.domainname)
+        { 
+            if (vm.$root.getDomain) {
+                vm.$root.getDomain(vm.domainname, 'ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+            else {
+                $.get('/Application/API/GetDomain/' + vm.domainname + '/ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
         }
-        else {
-            $.get('/Application/API/GetDomain/' + domainname + '/ALL', function (response) {
-                vm.domvalues = response;
-            });
-        }
-
     },
     methods:
     {
         checkchanged: function (event)
         {
-            var val = event.srcElement.value;
+            var ischecked = $(event.srcElement).is(':checked');
             var domainvalue = $(event.srcElement).data('domainvalue');
+           
 
-            if (!val) {
+            if (!ischecked) {
                 for (var i = 0; i < this.selecteditems.length; i++) {
                     if (this.selecteditems[i].code == domainvalue) {
                         this.selecteditems.splice(i, 1);
@@ -582,7 +593,6 @@ Vue.component("checklist", {
                         itemtoadd = this.domvalues[i];
                         break;
                     }
-
                 }
 
                 if (itemtoadd)
@@ -625,6 +635,9 @@ Vue.component("checklist", {
 
         idfield: function (newval, oldval)
         {
+            var element = $(this.$el);
+            var controlid = $(element).attr('id');
+
             this.selecteditems=[];
 
             if (newval)
@@ -637,6 +650,7 @@ Vue.component("checklist", {
                         if (this.domvalues[x].code == persisteditems[i])
                         {
                             this.selecteditems.push(this.domvalues[x]);
+                            $("#" + controlid + "_" + this.domvalues[x].code).prop('checked', true);
                         }
 
                     }
@@ -653,6 +667,15 @@ Vue.component("checklist", {
     },
     destroyed: function () {
 
+    },
+    computed:
+    {
+        checkBoxClass: function () {
+            return {
+                'form-check form-check-inline': this.orientation === 'HORIZONTAL'
+                ,'form-check': this.orientation === 'VERTICAL'
+            }
+        }
     }
 });
 

@@ -11,6 +11,12 @@
     {
         DataColumn2 = Model.DataColumnDbName;
     }
+
+    var orientation = "HORIZONTAL";
+    if (Model.HasPropertyWithValue("ORIENTATION", "VERTICAL"))
+    {
+        orientation = "VERTICAL";
+    }
 }
 
 <div class="form-group">
@@ -31,7 +37,8 @@
               data-dbfield="@Model.DataColumnDbName"
               @if (!string.IsNullOrEmpty(Model.DataColumn2DbName)) { <text> data-dbfield2="@Model.DataColumn2DbName" </text> }
               data-required="@Model.Mandatory"
-              data-domain="@Model.DomainName">
+              data-domain="@Model.DomainName"
+              data-orientation="@orientation">
     </radiolist>
     <span id="invalidtxt_@Model.UIId" class="invalidInput" v-if="isRequiredNotValid('@Model.UIId')">@requiredmsg</span>
 </div>
