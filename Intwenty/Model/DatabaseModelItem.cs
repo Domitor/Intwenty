@@ -25,13 +25,13 @@ namespace Intwenty.Model
 
         public DatabaseModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public DatabaseModelItem(string metatype)
         {
             MetaType = metatype;
-            SetEmptyStrings();
+            SetDefaults();
 
         }
 
@@ -54,7 +54,7 @@ namespace Intwenty.Model
                 ColumnName = DbName;
 
 
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public static DatabaseModelItem CreateFrameworkColumn(int id, ApplicationModelItem app, string tablename, string dbname, string datatype, string parentmetacode="ROOT")
@@ -81,7 +81,7 @@ namespace Intwenty.Model
             return res;
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;

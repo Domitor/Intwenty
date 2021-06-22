@@ -14,7 +14,7 @@ namespace Intwenty.Model
         {
             MetaType = MetaTypeSystem;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public SystemModelItem(SystemItem entity)
@@ -28,10 +28,10 @@ namespace Intwenty.Model
             DbPrefix = entity.DbPrefix;
             MetaType = MetaTypeSystem;
             ParentMetaCode = BaseModelItem.MetaTypeRoot;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;

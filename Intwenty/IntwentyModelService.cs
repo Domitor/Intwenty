@@ -126,11 +126,12 @@ namespace Intwenty
             if (httprequest.Headers.ContainsKey("Referer"))
                 info.ViewRefererPath = httprequest.Headers["Referer"].ToString();
 
-            var viewfilepath = viewtorender.GetPropertyValue("RAZORVIEWPATH");
-            if (string.IsNullOrEmpty(viewfilepath))
-                viewfilepath = "View";
+            if (viewtorender.HasDefaultFilePath)
+                info.ViewFilePath = "View";
+            else
+                info.ViewFilePath = viewtorender.FilePath;
 
-            info.ViewFilePath = viewfilepath;
+           
           
             if (!string.IsNullOrEmpty(requestinfo))
                 info.RequestInfo = requestinfo;

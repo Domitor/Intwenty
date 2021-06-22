@@ -48,10 +48,10 @@
                 <td>
 
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <b>{{item.title}}</b> (Path: {{item.path}})
                         </div>
-                        <div class="col-md-6"></div>
+                        <div class="col-md-4"></div>
                         <div class="col-md-1">
                             <a href="#" role="button" class="btn btn-sm btn-danger" v-on:click="deleteView(item)"><i class="fa fa-trash"></i></a>
                         </div>
@@ -103,7 +103,7 @@
 
 
     <div class="modal" id="create_app_view_modal" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 id="yesno_dlg_modal_hdr" class="modal-title">Application View</h5>
@@ -131,6 +131,12 @@
                                 <div class="form-group">
                                     <label class="control-label">Path<span style="color: red"> *</span></label>
                                     <input id="viewpath" type="text" class="form-control form-control-sm" v-model="model.path" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">File Path<span style="color: red"> *</span></label>
+                                    <br /><i style="font-size:x-small">To override the default view use: Views/Application/[App Name]/ViewName.cshtml</i><br />
+                                    <input id="viewfilepath" type="text" class="form-control form-control-sm" v-model="model.filePath" />
                                 </div>
 
                                 <input type="checkbox" v-model="model.isPrimary" /> Is Primary
@@ -527,7 +533,7 @@
                 {
                     var context = this;
 
-                    context.model = { id: 0, metaType:"UIVIEW", applicationId:@Model.Application.Id, metaCode: "", path: "", title: "", isPublic: false, isPrimary: false, saveFunction: false, saveFunctionTitle: "Save", navigateFunction: true, navigateFunctionPath: "Referer", navigateFunctionTitle: "", navigateFunctionActionMetaCode:"", propertyList: [], currentProperty: {} };
+                    context.model = { id: 0, metaType: "UIVIEW", applicationId:@Model.Application.Id, metaCode: "", path: "", filePath: "", title: "", isPublic: false, isPrimary: false, saveFunction: false, saveFunctionTitle: "Save", navigateFunction: false, navigateFunctionPath: "Referer", navigateFunctionTitle: "", navigateFunctionActionMetaCode:"", propertyList: [], currentProperty: {} };
 
                     var yesfunc = function ()
                     {
@@ -572,7 +578,7 @@
                 {
                     var context = this;
 
-                    context.model = { id: item.id, metaType: "UIVIEW", applicationId:@Model.Application.Id, metaCode: item.metaCode, path: item.path, title: item.title, isPublic: item.isPublic, isPrimary: item.isPrimary, propertyList: [], currentProperty: {} };
+                    context.model = { id: item.id, metaType: "UIVIEW", applicationId:@Model.Application.Id, metaCode: item.metaCode, path: item.path, filePath: item.filePath, title: item.title, isPublic: item.isPublic, isPrimary: item.isPrimary, propertyList: [], currentProperty: {} };
                     for (var i = 0; i < item.functions.length; i++)
                     {
                         var f = item.functions[i];

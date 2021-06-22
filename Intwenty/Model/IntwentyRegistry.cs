@@ -159,9 +159,6 @@ namespace Intwenty.Model
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("RAZORVIEWPATH", "Razor View", "STRING");
-            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
-            _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImage);

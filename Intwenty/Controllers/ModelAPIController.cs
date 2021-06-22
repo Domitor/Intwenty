@@ -802,16 +802,12 @@ namespace Intwenty.Controllers
                 entity.MetaCode = BaseModelItem.GetQuiteUniqueString();
                 entity.MetaType = ViewModel.MetaTypeUIView;
                 entity.Path = model.Path;
+                entity.FilePath = model.FilePath;
                 entity.Title = model.Title;
                 entity.IsPrimary = model.IsPrimary;
                 entity.IsPublic = model.IsPublic;
                 entity.Properties = "";
 
-                var hp = new HashTagPropertyObject();
-                if (model.HasProperty("RAZORVIEWPATH"))
-                    hp.AddUpdateProperty("RAZORVIEWPATH", model.GetPropertyValue("RAZORVIEWPATH"));
-
-                entity.Properties = hp.Properties;
 
                 var client = DataRepository.GetDataClient();
                 client.Open();
@@ -839,7 +835,7 @@ namespace Intwenty.Controllers
                     funcentity.IsModalAction = false;
                     funcentity.Properties = "";
 
-                    hp = new HashTagPropertyObject();
+                    var hp = new HashTagPropertyObject();
                     if (model.HasProperty("AFTERSAVEACTION"))
                         hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
                     if (model.HasProperty("GOTOVIEWPATH"))
@@ -926,17 +922,13 @@ namespace Intwenty.Controllers
                     return BadRequest();
 
                 entity.Path = model.Path;
+                entity.FilePath = model.FilePath;
                 entity.Title = model.Title;
                 entity.IsPrimary = model.IsPrimary;
                 entity.IsPublic = model.IsPublic;
                 entity.Properties = "";
 
-                var hp = new HashTagPropertyObject();
-                if (model.HasProperty("RAZORVIEWPATH"))
-                    hp.AddUpdateProperty("RAZORVIEWPATH", model.GetPropertyValue("RAZORVIEWPATH"));
-
-                entity.Properties = hp.Properties;
-
+              
                 client.Open();
                 client.UpdateEntity(entity);
                 client.Close();
@@ -961,7 +953,7 @@ namespace Intwenty.Controllers
 
                     savefuncentity.Properties = "";
 
-                    hp = new HashTagPropertyObject();
+                    var hp = new HashTagPropertyObject();
                     if (model.HasProperty("AFTERSAVEACTION"))
                         hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
                     if (model.HasProperty("GOTOVIEWPATH"))
@@ -995,7 +987,7 @@ namespace Intwenty.Controllers
                     funcentity.IsModalAction = false;
 
 
-                    hp = new HashTagPropertyObject();
+                    var hp = new HashTagPropertyObject();
                     if (model.HasProperty("AFTERSAVEACTION"))
                         hp.AddUpdateProperty("AFTERSAVEACTION", model.GetPropertyValue("AFTERSAVEACTION"));
                     if (model.HasProperty("GOTOVIEWPATH"))

@@ -44,7 +44,7 @@ namespace Intwenty.Model
         public UserInterfaceStructureModelItem()
         {
             CurrentRenderContext = CurrentRenderContextOptions.View;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
     
@@ -70,11 +70,11 @@ namespace Intwenty.Model
             RawHTML = entity.RawHTML;
             SystemMetaCode = entity.SystemMetaCode;
             CurrentRenderContext = CurrentRenderContextOptions.View;
-            SetEmptyStrings();
+            SetDefaults();
 
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;

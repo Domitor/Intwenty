@@ -131,7 +131,7 @@ namespace Intwenty.Areas.Identity.Pages.Account
                             var roles = _settings.AccountsRegistrationAssignRoles.Split(",".ToCharArray());
                             foreach (var r in roles)
                             {
-                                await _userManager.AddUpdateUserRoleAuthorizationAsync(r, user.Id, org.Id, _settings.ProductId);
+                                await _userManager.AddUpdateUserRoleAuthorizationAsync(r.ToUpper(), user.Id, org.Id, _settings.ProductId);
                             }
                         }
 

@@ -19,7 +19,7 @@ namespace Intwenty.Model
 
         public UserInterfaceModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
             Table = new UITable();
@@ -39,7 +39,7 @@ namespace Intwenty.Model
             MetaType = entity.MetaType;
             ParentMetaCode = "ROOT";
             DataTableMetaCode = entity.DataTableMetaCode;
-            SetEmptyStrings();
+            SetDefaults();
             UIStructure = new List<UserInterfaceStructureModelItem>();
             Sections = new List<UISection>();
             Table = new UITable();
@@ -48,7 +48,7 @@ namespace Intwenty.Model
             ModalInterfaces = new List<UserInterfaceModelItem>();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(ParentMetaCode)) ParentMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;

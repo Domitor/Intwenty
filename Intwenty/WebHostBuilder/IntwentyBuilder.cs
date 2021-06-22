@@ -515,20 +515,20 @@ namespace Intwenty.WebHostBuilder
             try
             {
                 client.Open();
-                client.CreateTable<SystemItem>();
-                client.CreateTable<ApplicationItem>();
-                client.CreateTable<DatabaseItem>();
-                client.CreateTable<EventLog>();
-                client.CreateTable<InformationStatus>();
-                client.CreateTable<InstanceId>();
-                client.CreateTable<ViewItem>();
-                client.CreateTable<UserInterfaceStructureItem>();
-                client.CreateTable<UserInterfaceItem>();
-                client.CreateTable<FunctionItem>();
-                client.CreateTable<ValueDomainItem>();
-                client.CreateTable<DefaultValue>();
-                client.CreateTable<TranslationItem>();
-                client.CreateTable<EndpointItem>();
+                client.ModifyTable<SystemItem>();
+                client.ModifyTable<ApplicationItem>();
+                client.ModifyTable<DatabaseItem>();
+                client.ModifyTable<EventLog>();
+                client.ModifyTable<InformationStatus>();
+                client.ModifyTable<InstanceId>();
+                client.ModifyTable<ViewItem>();
+                client.ModifyTable<UserInterfaceStructureItem>();
+                client.ModifyTable<UserInterfaceItem>();
+                client.ModifyTable<FunctionItem>();
+                client.ModifyTable<ValueDomainItem>();
+                client.ModifyTable<DefaultValue>();
+                client.ModifyTable<TranslationItem>();
+                client.ModifyTable<EndpointItem>();
                 client.Close();
 
             }
@@ -558,19 +558,19 @@ namespace Intwenty.WebHostBuilder
 
 
                 client.Open();
-                client.CreateTable<IntwentyAuthorization>(); //security_Authorization
-                client.CreateTable<IntwentyUser>(); //security_User
-                client.CreateTable<IntwentyOrganization>(); //security_Organization
-                client.CreateTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
-                client.CreateTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
-                client.CreateTable<IntwentyProduct>(); //security_Product
-                client.CreateTable<IntwentyProductAuthorizationItem>(); //security_ProductAuthorizationItem
-                client.CreateTable<IntwentyProductGroup>(); //security_ProductGroup
-                client.CreateTable<IntwentyUserProductGroup>(); //security_UserProductGroup
-                client.CreateTable<IntwentyUserProductClaim>(); //security_UserProductClaim
-                client.CreateTable<IntwentyUserProductLogin>(); //security_UserProductLogin
-                client.CreateTable<IntwentyUserSetting>(); //security_UserSetting
-                client.CreateTable<EventLog>();
+                client.ModifyTable<IntwentyAuthorization>(); //security_Authorization
+                client.ModifyTable<IntwentyUser>(); //security_User
+                client.ModifyTable<IntwentyOrganization>(); //security_Organization
+                client.ModifyTable<IntwentyOrganizationMember>(); //security_OrganizationMembers
+                client.ModifyTable<IntwentyOrganizationProduct>(); //security_OrganizationProducts
+                client.ModifyTable<IntwentyProduct>(); //security_Product
+                client.ModifyTable<IntwentyProductAuthorizationItem>(); //security_ProductAuthorizationItem
+                client.ModifyTable<IntwentyProductGroup>(); //security_ProductGroup
+                client.ModifyTable<IntwentyUserProductGroup>(); //security_UserProductGroup
+                client.ModifyTable<IntwentyUserProductClaim>(); //security_UserProductClaim
+                client.ModifyTable<IntwentyUserProductLogin>(); //security_UserProductLogin
+                client.ModifyTable<IntwentyUserSetting>(); //security_UserSetting
+                client.ModifyTable<EventLog>();
                 //client.CreateTable<IntwentyProductRoleClaim>(true, true); //security_RoleClaims
                 //client.CreateTable<IntwentyUserProductToken>(true, true); //security_UserTokens
                 client.Close();
