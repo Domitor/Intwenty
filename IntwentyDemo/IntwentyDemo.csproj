@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Application\Blog\" />
     <Folder Include="Views\Application\StudyDashboard\" />
     <Folder Include="wwwroot\sqlite\" />
     <Folder Include="wwwroot\USERDOC\" />

@@ -37,9 +37,8 @@ namespace Intwenty.Entity
         public string Path { get; set; }
 
         /// <summary>
-        /// The razor file rendering this view, default will be: ~/Views/Application/View.cshtml
+        /// The razor file rendering this view, default will be: Views/Application/View.cshtml
         /// </summary>
-        [NotNull]
         public string FilePath { get; set; }
 
         /// <summary>
