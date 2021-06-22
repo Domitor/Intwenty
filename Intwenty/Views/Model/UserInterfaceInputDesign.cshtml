@@ -166,6 +166,65 @@
                                                             <span class="fa fa-cog" v-on:click="openSettingsDlg(input)" style="margin:5px; cursor:pointer" title="Settings"></span>
                                                             <label class="control-label"><i>{{input.title}}</i></label>
 
+                                                            <div v-if="input.metaType==='YESNOUNKNOWN'">
+                                                                <div class="form-group">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_yesnounknown" value="yes" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Yes</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_yesnounknown" value="no" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">No</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_yesnounknown" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Unknown</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='RADIOLIST'">
+                                                                <div class="form-group">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="yes" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 1</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="no" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 2</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option 3</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" name="radio_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="radio_yesnounknown">Option..N</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div v-if="input.metaType==='CHECKLIST'">
+                                                                <div class="form-group">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="yes" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 1</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="no" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 2</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option 3</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox" name="check_list" value="unknown" disabled />
+                                                                        <label class="form-check-label" for="check_list">Option..N</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
                                                             <div v-if="input.metaType==='SEARCHBOX'">
                                                                 <div class="form-group">
                                                                     <input type="text" class="form-control form-control-sm" placeholder="Input with search and multiselect..." disabled />
@@ -243,7 +302,7 @@
                                                                 </div>
                                                             </div>
 
-                                                           
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -311,15 +370,19 @@
                                 </div>
 
                                 <div class="form-group" v-if="showSettingDbColumn">
-                                    <label class="control-label">Set database column</label>
-                                    <select v-model="active_setting_input.dataColumn1DbName" class="form-control form-control-sm">
+                                    <label class="control-label">Set database column</label><br />
+                                    <input type="checkbox" v-model="active_setting_input.isNewDataColumn1" /> Add new column
+                                    <input type="text" v-model="active_setting_input.dataColumn1DbName"  class="form-control form-control-sm" v-if="active_setting_input.isNewDataColumn1" />
+                                    <select v-model="active_setting_input.dataColumn1DbName" class="form-control form-control-sm" v-if="!active_setting_input.isNewDataColumn1">
                                         <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group" v-if="showSettingDbColumn2">
-                                    <label class="control-label">Set database column 2 (opt.)</label>
-                                    <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm">
+                                    <label class="control-label">Set database column 2 (opt.)</label><br />
+                                    <input type="checkbox" v-model="active_setting_input.isNewDataColumn2" /> Add new column
+                                    <input type="text" v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm" v-if="active_setting_input.isNewDataColumn2" />
+                                    <select v-model="active_setting_input.dataColumn2DbName" class="form-control form-control-sm" v-if="!active_setting_input.isNewDataColumn2">
                                         <option v-for="col in dbColumns(active_setting_input.dataTableDbName)" v-bind:value="col.dbName">{{col.dbName}}</option>
                                     </select>
                                 </div>
@@ -640,8 +703,11 @@
 
                     if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
-
+                    if (this.active_setting_input.metaType === "RADIOLIST")
+                        return true;
                     if (this.active_setting_input.metaType === "SEARCHBOX")
+                        return true;
+                    if (this.active_setting_input.metaType === "CHECKLIST")
                         return true;
 
                     return false;
@@ -650,7 +716,11 @@
                 {
                     if (this.active_setting_input.metaType === "COMBOBOX")
                         return true;
+                    if (this.active_setting_input.metaType === "RADIOLIST")
+                        return true;
                     if (this.active_setting_input.metaType === "SEARCHBOX")
+                        return true;
+                    if (this.active_setting_input.metaType === "CHECKLIST")
                         return true;
 
 

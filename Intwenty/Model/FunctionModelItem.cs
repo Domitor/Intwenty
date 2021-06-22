@@ -25,7 +25,7 @@ namespace Intwenty.Model
 
         public FunctionModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public FunctionModelItem(FunctionItem entity)
@@ -47,11 +47,11 @@ namespace Intwenty.Model
             OwnerMetaType = entity.OwnerMetaType;
             OwnerMetaCode = entity.OwnerMetaCode;
             IsModalAction = entity.IsModalAction;
-            SetEmptyStrings();
+            SetDefaults();
             ConfigurePath();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;

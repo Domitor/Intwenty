@@ -9,6 +9,7 @@ namespace Intwenty.Model.Design
         public int ApplicationId { get; set; }
         public string Title { get; set; }
         public string Path { get; set; }
+        public string FilePath { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
         public bool SaveFunction { get; set; }

@@ -287,8 +287,9 @@ Vue.component("searchbox", {
 
         vm.selectizeinstance = element[0].selectize;
     },
-    updated: function () {
-        var t = "";
+    updated: function ()
+    {
+       
     },
     watch:
     {
@@ -311,9 +312,9 @@ Vue.component("searchbox", {
 
 
         },
-        textfield: function (newval, oldval) {
-            var t = "";
-
+        textfield: function (newval, oldval)
+        {
+          
         }
 
 
@@ -403,18 +404,16 @@ Vue.component("combobox", {
 
 
     },
-    updated: function () {
-        var t = "";
-
-
+    updated: function ()
+    {
+       
     },
     watch:
     {
 
-        idfield: function (newval, oldval) {
-            var t = "";
-
-
+        idfield: function (newval, oldval)
+        {
+       
             if (this.selectizeinstance) {
                 this.selectizeinstance.clear(true);
 
@@ -423,22 +422,260 @@ Vue.component("combobox", {
                     for (var i = 0; i < persisteditems.length; i++) {
                         //ADD ITEM BUT DONT TRIGGER CHANGE
                         this.selectizeinstance.addItem(persisteditems[i], true);
-
                     }
                 }
             }
+        },
+        textfield: function (newval, oldval)
+        {
+        }
+    },
+    destroyed: function () {
+        this.selectizeinstance.destroy();
+    }
+});
 
+Vue.component("radiolist", {
+    template: `<div>
+                <template v-for="item in domvalues">
+                 <div v-bind:id="controlid + '_' + item.code + '_parent'" v-bind:class="checkBoxClass">
+                     <input class="form-check-input" type="radio" v-bind:id="controlid + '_' + item.code" v-bind:name="controlid" v-bind:value="item.code" v-on:change="radiochanged(event)" />
+                     <label class="form-check-label">{{item.value}}</label>
+                </div>
+                </template>
+               </div>`,
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { domvalues: [], controlid: "", orientation: "HORIZONTAL", domainname: "" };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        vm.domainname = $(element).data('domain');
+        vm.orientation = $(element).data('orientation');
+        vm.controlid = $(element).attr('id');
+
+        if (vm.domainname) {
+            if (vm.$root.getDomain) {
+                vm.$root.getDomain(vm.domainname, 'ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+            else {
+                $.get('/Application/API/GetDomain/' + vm.domainname + '/ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+        }
+    },
+    methods:
+    {
+        radiochanged: function (event)
+        {
+            if (!event)
+                return;
+            if (!event.srcElement)
+                return;
+            if (!event.srcElement.value)
+                return;
+
+            var domainvalue = null;
+            for (var i = 0; i < this.domvalues.length; i++)
+            {
+                if (this.domvalues[i].code == event.srcElement.value)
+                {
+                    domainvalue = this.domvalues[i];
+                    break;
+                }
+
+            }
+
+            if (domainvalue) {
+                this.$emit('update:idfield', domainvalue.code);
+                this.$emit('update:textfield', domainvalue.value);
+            }
+
+        }
+    }
+    ,updated: function ()
+    {
+       
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval)
+        {
+            if (newval)
+            {
+                $("input[name=" + this.controlid + "][value=" + newval + "]").prop('checked', true);
+            }
+          
+        },
+        textfield: function (newval, oldval)
+        {
+        }
+    },
+    destroyed: function ()
+    {
+    },
+    computed:
+    {
+        checkBoxClass: function () {
+            return {
+                'form-check form-check-inline': this.orientation === 'HORIZONTAL'
+                , 'form-check': this.orientation === 'VERTICAL'
+            }
+        }
+    }
+});
+
+Vue.component("checklist", {
+    template: `<div>
+                <template v-for="item in domvalues">
+                 <div v-bind:id="controlid + '_' + item.code + '_parent'" v-bind:class="checkBoxClass">
+                     <input class="form-check-input" type="checkbox" v-bind:id="controlid + '_' + item.code" v-bind:data-domainvalue="item.code" v-on:input="checkchanged(event)" />
+                     <label class="form-check-label">{{item.value}}</label>
+                </div>
+                </template>
+               </div>`,
+    props: ['idfield', 'textfield'],
+    data: function () {
+        return { domvalues: [], controlid: "", selecteditems:[], orientation:"HORIZONTAL", domainname:"" };
+
+    },
+    mounted: function () {
+        var vm = this;
+        var element = $(this.$el);
+
+        vm.domainname = $(element).data('domain');
+        vm.orientation = $(element).data('orientation');
+        vm.controlid = $(element).attr('id');
+
+        if (vm.domainname)
+        { 
+            if (vm.$root.getDomain) {
+                vm.$root.getDomain(vm.domainname, 'ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+            else {
+                $.get('/Application/API/GetDomain/' + vm.domainname + '/ALL', function (response) {
+                    vm.domvalues = response;
+                });
+            }
+        }
+    },
+    methods:
+    {
+        checkchanged: function (event)
+        {
+            var ischecked = $(event.srcElement).is(':checked');
+            var domainvalue = $(event.srcElement).data('domainvalue');
+           
+
+            if (!ischecked) {
+                for (var i = 0; i < this.selecteditems.length; i++) {
+                    if (this.selecteditems[i].code == domainvalue) {
+                        this.selecteditems.splice(i, 1);
+                    }
+                }
+            }
+            else {
+
+                var itemtoadd = null;
+                for (var i = 0; i < this.domvalues.length; i++)
+                {
+                    if (this.domvalues[i].code == domainvalue)
+                    {
+                        itemtoadd = this.domvalues[i];
+                        break;
+                    }
+                }
+
+                if (itemtoadd)
+                { 
+                    var exists = false;
+                    for (var i = 0; i < this.selecteditems.length; i++) {
+                        if (this.selecteditems[i].code == domainvalue) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                        this.selecteditems.push(itemtoadd);
+                }
+            }
+
+            var codestr = "";
+            var valstr = "";
+            var delim = "";
+            for (var i = 0; i < this.selecteditems.length; i++) {
+                var code = this.selecteditems[i].code;
+                var val = this.selecteditems[i].value;
+                codestr += delim + code;
+                valstr += delim + val;
+                delim = ",";
+
+            }
+
+            this.$emit('update:idfield', codestr);
+            this.$emit('update:textfield', valstr);
+
+        }
+    }
+    , updated: function () {
+
+    },
+    watch:
+    {
+
+        idfield: function (newval, oldval)
+        {
+            var element = $(this.$el);
+            var controlid = $(element).attr('id');
+
+            this.selecteditems=[];
+
+            if (newval)
+            {
+                var persisteditems = newval.split(",");
+                for (var i = 0; i < persisteditems.length; i++)
+                {
+                    for (var x = 0; x < this.domvalues.length; x++)
+                    {
+                        if (this.domvalues[x].code == persisteditems[i])
+                        {
+                            this.selecteditems.push(this.domvalues[x]);
+                            $("#" + controlid + "_" + this.domvalues[x].code).prop('checked', true);
+                        }
+
+                    }
+
+                }
+            }
 
         },
         textfield: function (newval, oldval) {
-            var t = "";
 
         }
 
 
     },
     destroyed: function () {
-        this.selectizeinstance.destroy();
+
+    },
+    computed:
+    {
+        checkBoxClass: function () {
+            return {
+                'form-check form-check-inline': this.orientation === 'HORIZONTAL'
+                ,'form-check': this.orientation === 'VERTICAL'
+            }
+        }
     }
 });
 

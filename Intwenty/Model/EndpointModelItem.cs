@@ -18,13 +18,13 @@ namespace Intwenty.Model
 
         public EndpointModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public EndpointModelItem(string metatype)
         {
             MetaType = metatype;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public EndpointModelItem(EndpointItem entity)
@@ -42,10 +42,10 @@ namespace Intwenty.Model
             Title = entity.Title;
             SystemMetaCode = entity.SystemMetaCode;
 
-            SetEmptyStrings();
+            SetDefaults();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(AppMetaCode)) AppMetaCode = string.Empty;

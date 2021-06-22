@@ -1,5 +1,6 @@
 ﻿@using IntwentyDemo.Models
 @using Intwenty.Model
+@using Intwenty.Helpers
 @using IntwentyDemo.Services
 @using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Mvc.Localization
@@ -9,6 +10,7 @@
 @inject IViewLocalizer Localizer
 @inject Microsoft.Extensions.Options.IOptions<Intwenty.Model.IntwentySettings> Settings
 @inject IIntwentyDataService DataService
+@inject Intwenty.Interface.IIntwentyModelService ModelRepository
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 

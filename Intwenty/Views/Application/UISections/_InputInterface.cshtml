@@ -59,7 +59,7 @@
                             {
                                 @:<fieldset class="intwentypanel">
                                     @:<legend>@pl.LocalizedTitle</legend>
-                                }
+                            }
 
                             @foreach (var t in pl.Controls)
                             {
@@ -152,6 +152,24 @@
 
                                 }
 
+                                if (t.IsMetaTypeYesNoUnknown)
+                                {
+                                    @await Html.PartialAsync("UIControls/_YesNoUnknown", t)
+
+                                }
+
+                                if (t.IsMetaTypeRadioList)
+                                {
+                                    @await Html.PartialAsync("UIControls/_RadioList", t)
+
+                                }
+
+                                if (t.IsMetaTypeCheckList)
+                                {
+                                    @await Html.PartialAsync("UIControls/_CheckList", t)
+
+                                }
+
                             }  <!--FOR CONTROL -->
 
 
@@ -169,4 +187,5 @@
             </div><!--COLAPSE -->
         </div>  <!--CARD -->
     </div><!--ACCORDION -->
+    <br />
 } <!--SECTION-->

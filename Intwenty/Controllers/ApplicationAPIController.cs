@@ -118,33 +118,41 @@ namespace Intwenty.Controllers
             if (appmodel == null)
                 return BadRequest();
 
-            var viewmodel = appmodel.Views.Find(p => p.Id == model.ApplicationViewId);
-            if (viewmodel == null)
-                return BadRequest();
-
             if (User.Identity.IsAuthenticated)
                 model.SetUser(User);
 
             if (!string.IsNullOrEmpty(model.Properties))
                 model.Properties = model.Properties.B64UrlDecode();
 
-            if (viewmodel.IsPublic)
+            if (model.ApplicationViewId > 0)
             {
-                var listdata = DataRepository.GetJsonArray(model, appmodel);
-                return new JsonResult(listdata);
+                var viewmodel = appmodel.Views.Find(p => p.Id == model.ApplicationViewId);
+                if (viewmodel == null)
+                    return BadRequest();
+
+                if (!viewmodel.IsPublic)
+                {
+                    if (!User.Identity.IsAuthenticated)
+                        return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
+                    if (!await UserManager.HasAuthorization(User, viewmodel))
+                        return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
+
+                }
+
             }
             else
             {
                 if (!User.Identity.IsAuthenticated)
                     return new JsonResult(new OperationResult(false, MessageCode.USERERROR, "You do not have access to this resource"));
-                if (!await UserManager.HasAuthorization(User, viewmodel))
-                   return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
+                if (!await UserManager.HasAuthorization(User, appmodel.Application))
+                    return new JsonResult(new OperationResult(false, MessageCode.USERERROR, string.Format("You do not have access to this resource, apply for read permission for application {0}", appmodel.Application.Title)));
 
-                var listdata = DataRepository.GetJsonArray(model, appmodel);
-                return new JsonResult(listdata);
-
+               
             }
+
+            var listdata = DataRepository.GetJsonArray(model, appmodel);
+            return new JsonResult(listdata);
 
            
         }

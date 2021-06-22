@@ -1,132 +1,57 @@
-﻿@model Intwenty.Model.ViewModel
+﻿@model ViewModel
 
 @{
 
-    var mainDbName = Model.ApplicationInfo.DbName;
-    var subTableDbNames = new List<string>();
-    var instanceid = (int)ViewBag.Id;
     var aftersaveactionpath = string.Empty;
+    var aftersaveaction = string.Empty;
+    var maintableconfig = Model.GetMainTableUIConfiguration();
+    var subtableconfig = Model.GetSubTableUIConfigurations();
 
 
     //WHAT SHOULD HAPPEN WHEN THIS VIEW IS SAVED
     if (Model.HasSaveFunction)
     {
-        var aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
+        aftersaveaction = Model.SaveFunction.GetPropertyValue("AFTERSAVEACTION");
         if (aftersaveaction == "GOTOVIEW")
         {
-            aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo, instanceid);
+            aftersaveactionpath = Model.SaveFunction.BuildRuntimeURI(Model.RuntimeRequestInfo.RequestInfo, Model.RuntimeRequestInfo.Id);
         }
     }
 }
 
+<script>
 
-
-<br />
-<br />
-
-@await Html.PartialAsync("_Modals")
-
-
-<div id="app">
-
-    <!-- 1. ADD MODALS AND SOME CONFIG -->
-    @foreach (var iface in Model.UserInterface)
-    {
-        if (iface.IsSubTableUserInterface)
-        {
-            if (!subTableDbNames.Exists(p => p == iface.DataTableDbName))
-            {
-             
-                subTableDbNames.Add(iface.DataTableDbName);
-            }
-        }
-        @foreach (var mip in iface.ModalInterfaces)
-        {
-            @await Html.PartialAsync("UISections/_ModalInputInterface", mip)
-        }
-    }
-    
-
-    <!-- 2. RENDER THE VIEW HEADER -->
-    @await Html.PartialAsync("UISections/_ApplicationViewHeader", Model)
-
-
-    <br />
-
-    <!-- 3. AFTER SAVE MESSAGE -->
-    <div class="alert alert-success alert-dismissible fade show" role="alert" id="savealert" v-if="modelSaved">
-        <strong>@Localizer["Changes Saved"] !</strong><br />
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-
-
-    @foreach (var iface in Model.UserInterface)
-    {
-        iface.RuntimeRequestInfo = Model.RuntimeRequestInfo;
-
-        iface.CurrentRenderContext = CurrentRenderContextOptions.View;
-
-        <!-- 4. RENDER APPLICATION LISTVIEW -->
-        if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsMainApplicationTableInterface && Model.IsApplicationListView())
-        {
-            @await Html.PartialAsync("UISections/_MainTableListInterface", iface)
-        }
-
-        <!-- 5. RENDER APPLICATION ONPAGE INPUT INTERFACES -->
-        if (iface.IsMetaTypeInputInterface && iface.IsMainApplicationTableInterface && Model.IsApplicationInputView())
-        {
-            @await Html.PartialAsync("UISections/_InputInterface", iface)
-        }
-
-        <!-- 6. RENDER APPLICATION ONPAGE SUBTABLE INTERFACES -->
-        if (iface.IsMetaTypeListInterface && iface.Table.Id > 0 && iface.IsSubTableUserInterface && Model.IsApplicationInputView())
-        {
-            @await Html.PartialAsync("UISections/_SubTableListInterface", iface)
-        }
-
-
-
-    }
-
-
-</div>
-
-@section Scripts
-{
-
-    <script>
-
-        var app = new Vue({
-            el: '#app',
+        new Vue({
+            el: '#@Model.RuntimeRequestInfo.ViewHtmlId',
             data:
             {
-                baseurl: "@ViewBag.BaseAPIPath"
-                ,requestInfo: "@Model.RuntimeRequestInfo"
-                ,appMainTable: "@mainDbName"
+                baseurl: "@Model.RuntimeRequestInfo.EndpointBasePath"
+                ,requestInfo: "@Model.RuntimeRequestInfo.RequestInfo"
+                ,appMainTable: "@Model.ApplicationInfo.DbName"
                 ,appId: @Model.ApplicationInfo.Id
                 ,applicationViewId: @Model.Id
-                ,instanceId: @instanceid
+                ,instanceId: @Model.RuntimeRequestInfo.Id
                 ,version:1
                 ,applist: []
-                ,model: { @mainDbName: {} @foreach (var st in subTableDbNames){<text>,@st:[]</text>}}
+                ,model: { @Model.ApplicationInfo.DbName: {} @foreach (var st in subtableconfig)
+                {<text>,@st.TableName:[]</text>}}
                 ,validation: {}
                 ,aftersaveactionpath: '@aftersaveactionpath'
+                ,aftersaveaction: '@aftersaveaction'
                 ,modelSaved: false
                 ,idgen: -1
                 ,model_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false, properties:"" }
-                 @foreach (var s in subTableDbNames)
+                ,model_pageInfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: @maintableconfig.PageSize , pageNumber: 0, filterValues: [],skipPaging:@maintableconfig.SkipPaging, properties:"", parentId:0, foreignKeyId:0,foreignKeyName:"" }
+                 @foreach (var s in subtableconfig)
                  {
-                     var table = s;
-                     var table_settings = s + "_settings";
-                     var table_pageinfo = s + "_pageInfo";
-                 <text>
-                 ,@table:{}
-                 ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
-                 ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: 20, pageNumber: 0, filterValues: [],skipPaging:false,properties:"" }
-                 </text>
+                     var table = s.TableName;
+                     var table_settings = s.TableName + "_settings";
+                     var table_pageinfo = s.TableName + "_pageInfo";
+                     <text>
+                     ,@table:{}
+                     ,@table_settings: { showFilter: false, currentSort: "", currentSortDir: "" }
+                     ,@table_pageinfo: { applicationId: @Model.ApplicationInfo.Id, applicationViewId:@Model.Id, maxCount: 0, pageSize: @s.PageSize, pageNumber: 0, filterValues: [], skipPaging:@s.SkipPaging, properties: "", parentId: 0, foreignKeyId: 0, foreignKeyName: "" }
+                     </text>
                  }
             },
             methods:
@@ -139,7 +64,7 @@
 
                     var savefunc = function ()
                     {
-                        var saveendpoint = "@ViewBag.SaveAPIPath";
+                        var saveendpoint = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
                         context.model[context.appMainTable].ApplicationId = context.appId;
                         context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
                         context.model[context.appMainTable].Properties = context.requestInfo;
@@ -173,14 +98,14 @@
                          context.model[context.appMainTable] = {};
                          context.model[context.appMainTable] = item;
                         $('#addEditModalSaveBtn_' + uimetacode).off('click', savefunc);
-                        $('#addEditModalSaveBtn_' + uimetacode).off().on('click', savefunc);
+                        $('#addEditModalSaveBtn_' + uimetacode).off().on('clicRuntimeRequestInfok', savefunc);
                         $('#addEditModal_' + uimetacode).modal();
 
                     }
                     else
                     {
 
-                        var endpointurl = "@ViewBag.CreateNewAPIPath/" + context.appId;
+                        var endpointurl = "@Model.RuntimeRequestInfo.EndpointCreateNewPath/" + context.appId;
                         if (context.requestInfo != "")
                             endpointurl += "/" + context.requestInfo;
 
@@ -226,7 +151,7 @@
                             if (!context.canSave())
                                 return;
 
-                            var endpointurl = "@ViewBag.SaveAPIPath";
+                            var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
 
                             $.ajax({
                                 url: endpointurl,
@@ -245,7 +170,7 @@
                                     context[dbtablename].ApplicationViewId = context.applicationViewId;
                                     context[dbtablename].Properties = context.requestInfo;
 
-                                    endpointurl = "@ViewBag.SaveLineAPIPath";
+                                    endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveLinePath";
 
                                     $.ajax({
                                         url: endpointurl,
@@ -254,14 +179,23 @@
                                         data: JSON.stringify(context[dbtablename]),
                                         success: function (response)
                                         {
-                                            if (context.aftersaveactionpath != '') {
-                                                endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                                window.location.href = endpointurl;
+                                             if (context.aftersaveaction == 'GOTOREFERER')
+                                            {
+                                                 window.location.href = '@Context.Request.Headers["Referer"].ToString()';
                                             }
-                                            else if (context.aftersaveaction == 'REFRESH') {
+                                            else if (context.aftersaveaction == 'REFRESH')
+                                            {
                                                 context.modelSaved = true;
                                                 context.getApplication();
                                                 setTimeout(function () { context.modelSaved = false; }, 3000);
+                                            }
+                                            else
+                                            {
+                                                if (context.aftersaveactionpath != '')
+                                                {
+                                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                                    window.location.href = endpointurl;
+                                                }
                                             }
 
                                         },
@@ -279,11 +213,11 @@
                         }
                         else
                         {
-                            var endpointurl = "@ViewBag.SaveLineAPIPath";
+                            var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveLinePath";
 
                             context[dbtablename].Version = context.version;
                             context[dbtablename].ParentId = context.instanceId;
-                            context[dbtablename].TableModelame = dbtablename;
+                            context[dbtablename].TableName = dbtablename;
                             context[dbtablename].ApplicationId = context.appId;
                             context[dbtablename].ApplicationViewId = context.applicationViewId;
                             context[dbtablename].Properties = context.requestInfo;
@@ -327,7 +261,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.DeleteLineAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointDeleteLinePath";
 
                     var deletelinefunc = function ()
                     {
@@ -373,7 +307,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.SaveAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointSaveApplicationPath";
 
                     context.model[context.appMainTable].ApplicationId = context.appId;
                     context.model[context.appMainTable].ApplicationViewId = context.applicationViewId;
@@ -389,10 +323,9 @@
                         data: JSON.stringify(this.model),
                         success: function (response)
                         {
-
-                            if (context.aftersaveactionpath != '') {
-                                endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
-                                window.location.href = endpointurl;
+                            if (context.aftersaveaction == 'GOTOREFERER')
+                            {
+                                 window.location.href = '@Context.Request.Headers["Referer"].ToString()';
                             }
                             else if (context.aftersaveaction == 'REFRESH')
                             {
@@ -401,6 +334,14 @@
                                 context.modelSaved = true;
                                 context.getApplication();
                                 setTimeout(function () { context.modelSaved = false; }, 3000);
+                            }
+                            else
+                            {
+                                if (context.aftersaveactionpath != '')
+                                {
+                                    endpointurl = '@Url.Content("~/" + aftersaveactionpath)';
+                                    window.location.href = endpointurl;
+                                }
                             }
                         },
                         error: function (response)
@@ -418,7 +359,7 @@
                 {
                     var context = this;
 
-                    var endpointurl = "@ViewBag.GetListAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetPagedListPath";
 
                     var objname = "";
                     var ismaintable = false;
@@ -438,11 +379,11 @@
                     if (!ismaintable)
                     {
                         context[objname].dataTableDbName = dbtablename;
-                        context[objname].foreignKeyId = context.instanceId;
+                        context[objname].parentId = context.instanceId;
                     }
                     else
                     {
-                        context[objname].foreignKeyId = 0;
+                        context[objname].parentId = 0;
                     }
 
                     $.ajax({
@@ -477,7 +418,7 @@
                 {
                     var context = this;
                     var args =  { applicationId: @Model.ApplicationInfo.Id, applicationViewId: @Model.Id, maxCount: 0, pageSize: 20000, pageNumber: 0, filterValues: [], skipPaging:true }
-                    var endpointurl = "@ViewBag.GetListAPIPath";
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetPagedListPath";
 
                     $.ajax({
                         url: endpointurl,
@@ -495,14 +436,20 @@
                         }
                     });
                 },
-                deleteApplication: function (item) {
+                deleteApplication: function (item, successcallback) {
                     var context = this;
-                   var endpointurl = "@ViewBag.DeleteApplicationAPIPath";
+                   var endpointurl = "@Model.RuntimeRequestInfo.EndpointDeleteApplicationPath";
 
                     var deleteapp = function ()
                     {
-                        item.ApplicationId = context.appId;
-                        item.ApplicationViewId = context.applicationViewId;
+                        if (!item.ApplicationId)
+                            item.ApplicationId = context.appId;
+
+                        //If the line comes from a child application, don't set the view id
+                        //The server will authorize athorize on application level instead.
+                        if (item.ApplicationId === context.appId)
+                            item.ApplicationViewId = context.applicationViewId;
+
                         item.Properties = context.requestInfo;
 
                         $.ajax({
@@ -512,7 +459,10 @@
                             data: JSON.stringify(item),
                             success: function (response)
                             {
-                                context.getPage();
+                                if (successcallback)
+                                    successcallback();
+                                else
+                                    context.getPage();
                             },
                             error: function (response)
                             {
@@ -526,7 +476,7 @@
                 getApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.GetApplicationAPIPath/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetApplicationPath/" + context.appId + "/" + context.applicationViewId + "/" + context.instanceId;
                     if (context.requestInfo != "")
                         endpointurl += "/" + context.requestInfo;
                     $.get(endpointurl, function (response)
@@ -536,10 +486,10 @@
 
                     }).done(function () {
 
-                        @foreach (var s in subTableDbNames)
+                        @foreach (var s in subtableconfig)
                         {
                             <text>
-                            context.getPage('@s');
+                            context.getPage('@s.TableName');
                             </text>
                         }
 
@@ -549,7 +499,7 @@
                 createNewApplication: function ()
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.CreateNewAPIPath/" + context.appId;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointCreateNewPath/" + context.appId;
                     $.get(endpointurl, function (response) {
                         context.model = JSON.parse(response.data);
                     }).done(function () {
@@ -559,7 +509,7 @@
                 getDomain: function (domainname, query, donefunc)
                 {
                     var context = this;
-                    var endpointurl = "@ViewBag.GetDomainAPIPath/" + domainname + "/" + query;
+                    var endpointurl = "@Model.RuntimeRequestInfo.EndpointGetDomainPath/" + domainname + "/" + query;
                     if (context.requestInfo != "")
                         endpointurl += "/" + context.requestInfo;
 
@@ -693,13 +643,13 @@
                         return 0;
                     });
                 }
-                @foreach (var s in subTableDbNames)
+                @foreach (var s in subtableconfig)
                 {
                     <text>
-                    ,sorted_@s: function()
+                    ,sorted_@s.TableName: function()
                     {
-                        var dbtablename = "@s";
-                        var lineobjectname = "@s" + "_settings";
+                        var dbtablename = "@s.TableName";
+                        var lineobjectname = "@s.TableName" + "_settings";
                         return this.model[dbtablename].sort((a, b) => {
                             let modifier = 1;
                             if (this.model_settings.currentSortDir === 'desc') modifier = -1;
@@ -708,7 +658,7 @@
                             return 0;
                         });
                     }
-                </text>
+                    </text>
                 }
             },
             mounted: function ()
@@ -722,24 +672,23 @@
                     </text>
 
                 }
-                else if (Model.IsApplicationInputView() && instanceid > 0)
+                else if (Model.IsApplicationInputView() && Model.RuntimeRequestInfo.Id > 0)
                 {
                     <text>
                         context.getApplication();
                     </text>
-              }
-              else if (Model.IsApplicationInputView() && instanceid == 0)
-              {
+                }
+                else if (Model.IsApplicationInputView() && Model.RuntimeRequestInfo.Id == 0)
+                {
                     <text>
                         context.createNewApplication();
                     </text>
 
-              }
+                }
 
             }
         });
 
 
-    </script>
+</script>
 
-}

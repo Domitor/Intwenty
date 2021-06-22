@@ -50,6 +50,9 @@ namespace Intwenty.Model
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextArea, Title = "Text Area" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBlock, Title = "Text Block" , ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeTextBox, Title = "Textbox" , ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeYesNoUnknown, Title = "Yes No Unknown", ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeRadioList, Title = "Radiolist", ModelCode = "UISTRUCTUREMODEL" });
+            _metatypes.Add(new IntwentyMetaType() { Code = UserInterfaceStructureModelItem.MetaTypeCheckList, Title = "Checklist", ModelCode = "UISTRUCTUREMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataColumn, Title = "Column", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = DatabaseModelItem.MetaTypeDataTable, Title = "Table", ModelCode = "DATAMODEL" });
             _metatypes.Add(new IntwentyMetaType() { Code = EndpointModelItem.MetaTypeTableGet, Title = "Get (GET)", ModelCode = "ENDPOINTMODEL" });
@@ -136,36 +139,26 @@ namespace Intwenty.Model
             _properties.Add(prop);
 
 
-            prop = new IntwentyProperty("TABLEEDITMODE", "Edit Mode", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CELL", DisplayValue = "Line" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "MODAL", DisplayValue = "Modal" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "EXPANDER", DisplayValue = "Expander" });
-            _properties.Add(prop);
-
-
-
-            prop = new IntwentyProperty("TABLELAYOUT", "Layout", "LIST");
-            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeTable);
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GRID", DisplayValue = "Grid" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "CARD", DisplayValue = "Card" });
+            prop = new IntwentyProperty("ORIENTATION", "Orientation", "LIST");
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeRadioList);
+            prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeCheckList);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "VERTICAL", DisplayValue = "Vertical" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "HORIZONTAL", DisplayValue = "Horizontal" });
             _properties.Add(prop);
 
             prop = new IntwentyProperty("AFTERSAVEACTION", "After Save Action", "LIST");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOREFERER", DisplayValue = "Go to referer" });
             prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "GOTOVIEW", DisplayValue = "Go to view" });
-            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Refresh saved data" });
+            prop.ValidValues.Add(new SelectablePropertyValue() { CodeValue = "REFRESH", DisplayValue = "Ajax Refresh" });
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("GOTOVIEWPATH", "View path", "STRING");
+            prop = new IntwentyProperty("GOTOVIEWPATH", "Go to view path", "STRING");
             prop.ValidFor.Add(FunctionModelItem.MetaTypeSave);
             prop.ValidFor.Add(ViewModel.MetaTypeUIView);
             _properties.Add(prop);
 
-            prop = new IntwentyProperty("RAZORVIEWPATH", "Razor View", "STRING");
-            prop.ValidFor.Add(ViewModel.MetaTypeUIView);
-            _properties.Add(prop);
 
             prop = new IntwentyProperty("IMGWIDTH", "Width", "NUMERIC");
             prop.ValidFor.Add(UserInterfaceStructureModelItem.MetaTypeImage);

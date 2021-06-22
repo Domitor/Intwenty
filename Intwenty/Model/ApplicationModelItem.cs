@@ -35,7 +35,7 @@ namespace Intwenty.Model
 
         public ApplicationModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public ApplicationModelItem(ApplicationItem entity)
@@ -54,10 +54,10 @@ namespace Intwenty.Model
             DataMode = (DataModeOptions)entity.DataMode;
             TenantIsolationLevel = (TenantIsolationOptions)entity.TenantIsolationLevel;
             TenantIsolationMethod = (TenantIsolationMethodOptions)entity.TenantIsolationMethod;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
             if (string.IsNullOrEmpty(MetaCode)) MetaCode = string.Empty;

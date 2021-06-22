@@ -62,6 +62,8 @@ namespace Intwenty.Model.Dto
 
         public int ForeignKeyId { get; set; }
 
+        public int ParentId { get; set; }
+
         public bool HasFilter
         {
             get

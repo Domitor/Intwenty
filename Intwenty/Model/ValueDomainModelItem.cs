@@ -10,7 +10,7 @@ namespace Intwenty.Model
 
         public ValueDomainModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public ValueDomainModelItem(ValueDomainItem entity)
@@ -23,10 +23,10 @@ namespace Intwenty.Model
             LocalizedTitle = entity.Value;
             TitleLocalizationKey = entity.ValueLocalizationKey;
             Properties = entity.Properties;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(DomainName)) DomainName = string.Empty;
             if (string.IsNullOrEmpty(Code)) Code = string.Empty;

@@ -14,7 +14,8 @@ namespace Intwenty.Model
 
         public ViewModel()
         {
-            SetEmptyStrings();
+            SetDefaults();
+
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
@@ -22,7 +23,8 @@ namespace Intwenty.Model
         public ViewModel(string metatype)
         {
             MetaType = metatype;
-            SetEmptyStrings();
+            SetDefaults();
+
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
@@ -44,15 +46,16 @@ namespace Intwenty.Model
             Properties = entity.Properties;
             SystemMetaCode = entity.SystemMetaCode;
             Path = entity.Path;
+            FilePath = entity.FilePath;
             IsPrimary = entity.IsPrimary;
             IsPublic = entity.IsPublic;
-            SetEmptyStrings();
-            ConfigurePath();
+            SetDefaults();
+
             UserInterface = new List<UserInterfaceModelItem>();
             Functions = new List<FunctionModelItem>();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(MetaType)) MetaType = string.Empty;
             if (string.IsNullOrEmpty(Description)) Description = string.Empty;
@@ -62,25 +65,19 @@ namespace Intwenty.Model
             if (string.IsNullOrEmpty(Properties)) Properties = string.Empty;
             if (string.IsNullOrEmpty(Title)) Title = string.Empty;
             if (string.IsNullOrEmpty(LocalizedTitle)) LocalizedTitle = string.Empty;
-            if (string.IsNullOrEmpty(JavaScriptObjectName)) JavaScriptObjectName = string.Empty;
             if (string.IsNullOrEmpty(TitleLocalizationKey)) TitleLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(SystemMetaCode)) SystemMetaCode = string.Empty;
             if (string.IsNullOrEmpty(DescriptionLocalizationKey)) DescriptionLocalizationKey = string.Empty;
             if (string.IsNullOrEmpty(Path)) Path = string.Empty;
-        }
+            if (string.IsNullOrEmpty(FilePath)) FilePath = "Views/Application/View";
 
-        private void ConfigurePath()
-        {
             if (!string.IsNullOrEmpty(Path))
             {
-
                 if (!Path.StartsWith("/"))
                     Path = "/" + Path;
-
-         
             }
-
         }
+
 
         public ApplicationModelItem ApplicationInfo { get; set; }
         public SystemModelItem SystemInfo { get; set; }
@@ -90,20 +87,30 @@ namespace Intwenty.Model
         public string Description { get; set; }
         public string DescriptionLocalizationKey { get; set; }
         public string AppMetaCode { get; set; }
-      
-      
+
         public bool IsPrimary { get; set; }
         public bool IsPublic { get; set; }
         public List<UserInterfaceModelItem> UserInterface { get; set; }
         public List<FunctionModelItem> Functions { get; set; }
-        public string JavaScriptObjectName { get; set; }
-
         public string Path { get; set; }
-
+        public string FilePath { get; set; }
 
         public override string ModelCode
         {
             get { return "UIVIEWMODEL"; }
+        }
+
+        public bool HasDefaultFilePath
+        {
+            get {
+                if (string.IsNullOrEmpty(FilePath))
+                    return true;
+
+                if (FilePath=="Views/Application/View")
+                    return true;
+
+                return false;
+            }
         }
 
 

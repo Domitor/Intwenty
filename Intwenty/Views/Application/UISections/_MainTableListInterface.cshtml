@@ -15,7 +15,7 @@
             {
                 func_edit_path_use_requestinfo = true;
                 func_edit_path = func_edit_path.Replace("/{requestinfo}", "");
-                func_edit_path_requestinfo = Model.EditFunction.BuildRuntimeRequestInfo(Model.RuntimeRequestInfo);
+                func_edit_path_requestinfo = Model.EditFunction.BuildRuntimeRequestInfo(Model.RuntimeRequestInfo.RequestInfo);
             }
             if (func_edit_path.Contains("{id}"))
             {

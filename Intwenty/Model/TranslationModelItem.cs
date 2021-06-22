@@ -19,7 +19,7 @@ namespace Intwenty.Model
 
         public TranslationModelItem()
         {
-            SetEmptyStrings();
+            SetDefaults();
         }
 
         public TranslationModelItem(TranslationItem entity)
@@ -28,10 +28,10 @@ namespace Intwenty.Model
             Culture = entity.Culture;
             Key = entity.TransKey;
             Text = entity.Text;
-            SetEmptyStrings();
+            SetDefaults();
         }
 
-        private void SetEmptyStrings()
+        private void SetDefaults()
         {
             if (string.IsNullOrEmpty(Culture)) Culture = string.Empty;
             if (string.IsNullOrEmpty(Key)) Key = string.Empty;
